@@ -49,6 +49,7 @@
 #import <WebCore/RenderLayerCompositor.h>
 #import <WebCore/RenderView.h>
 #import <WebCore/Settings.h>
+#import <WebCore/ScrollView.h>
 #import <WebCore/TiledBacking.h>
 #import <pal/spi/cocoa/QuartzCoreSPI.h>
 #import <wtf/SetForScope.h>
@@ -190,6 +191,11 @@ void RemoteLayerTreeDrawingArea::setDeviceScaleFactor(float deviceScaleFactor)
     m_webPage.setDeviceScaleFactor(deviceScaleFactor);
 }
 #endif
+
+DelegatedScrollingMode RemoteLayerTreeDrawingArea::delegatedScrollingMode() const
+{
+    return DelegatedScrollingMode::DelegatedToNativeScrollView;
+}
 
 void RemoteLayerTreeDrawingArea::setLayerTreeStateIsFrozen(bool isFrozen)
 {
