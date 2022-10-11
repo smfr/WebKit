@@ -72,7 +72,6 @@ public:
 
     void currentSnapPointIndicesDidChange(WebCore::ScrollingNodeID, std::optional<unsigned> horizontal, std::optional<unsigned> vertical);
 
-    // FIXME: expose the tree and pass this to that?
     bool handleWheelEvent(const WebCore::PlatformWheelEvent&);
     void handleMouseEvent(const WebCore::PlatformMouseEvent&);
 
@@ -117,9 +116,14 @@ public:
     const HashSet<WebCore::GraphicsLayer::PlatformLayerID>& fixedScrollingNodeLayerIDs() const { return m_fixedScrollingNodeLayerIDs; }
 #endif
 
+protected:
+    RemoteScrollingTree* scrollingTree() const { return m_scrollingTree.get(); }
+
 private:
     void connectStateNodeLayers(WebCore::ScrollingStateTree&, const RemoteLayerTreeHost&);
     void establishLayerTreeScrollingRelations(const RemoteLayerTreeHost&);
+
+    virtual void didReceiveWheelEvent(bool /* wasHandled */) { }
 
     bool shouldSnapForMainFrameScrolling(WebCore::ScrollEventAxis) const;
     std::pair<float, std::optional<unsigned>> closestSnapOffsetForMainFrameScrolling(WebCore::ScrollEventAxis, float currentScrollOffset, WebCore::FloatPoint scrollDestination, float velocity) const;
