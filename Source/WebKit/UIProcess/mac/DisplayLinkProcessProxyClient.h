@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Apple Inc. All rights reserved.
+ * Copyright (C) 2022 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,14 +25,33 @@
 
 #pragma once
 
-#include <wtf/ObjectIdentifier.h>
+#include "DisplayLink.h"
+
+#if HAVE(CVDISPLAYLINK)
+
+#include "Connection.h"
+#include <wtf/Lock.h>
 
 namespace WebKit {
 
-enum DisplayLinkObserverIDType { };
-using DisplayLinkObserverID = ObjectIdentifier<DisplayLinkObserverIDType>;
+class WebProcessProxy;
 
-enum DisplayLinkObserverCollectionIDType { };
-using DisplayLinkObserverCollectionID = ObjectIdentifier<DisplayLinkObserverCollectionIDType>;
+class DisplayLinkProcessProxyClient final : public DisplayLink::Client {
+public:
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    DisplayLinkProcessProxyClient() = default;
+    ~DisplayLinkProcessProxyClient() = default;
+    
+    void setConnectionID(IPC::Connection::UniqueID);
 
-} // namespace WebKit
+private:
+    void displayLinkFired(WebCore::PlatformDisplayID, WebCore::DisplayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback) override;
+
+    Lock m_connectionIDLock;
+    IPC::Connection::UniqueID m_connectionID WTF_GUARDED_BY_LOCK(m_connectionIDLock);
+};
+
+}
+
+#endif // HAVE(CVDISPLAYLINK)

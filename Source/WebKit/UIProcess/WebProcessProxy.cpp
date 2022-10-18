@@ -305,7 +305,7 @@ WebProcessProxy::~WebProcessProxy()
 
 #if HAVE(CVDISPLAYLINK)
     if (state() == State::Running)
-        processPool().stopDisplayLinks(*connection());
+        processPool().stopDisplayLinks(*this);
 #endif
 
     auto isResponsiveCallbacks = WTFMove(m_isResponsiveCallbacks);
@@ -490,6 +490,10 @@ void WebProcessProxy::connectionWillOpen(IPC::Connection& connection)
 #if ENABLE(SEC_ITEM_SHIM)
     SecItemShimProxy::singleton().initializeConnection(connection);
 #endif
+
+#if HAVE(CVDISPLAYLINK)
+    m_displayLinkClient.setConnectionID(connection.uniqueID());
+#endif
 }
 
 void WebProcessProxy::processWillShutDown(IPC::Connection& connection)
@@ -498,7 +502,9 @@ void WebProcessProxy::processWillShutDown(IPC::Connection& connection)
     ASSERT_UNUSED(connection, this->connection() == &connection);
 
 #if HAVE(CVDISPLAYLINK)
-    processPool().stopDisplayLinks(connection);
+    // FIXME: Does this run on crash?
+    m_displayLinkClient.setConnectionID({ });
+    processPool().stopDisplayLinks(*this);
 #endif
 }
 

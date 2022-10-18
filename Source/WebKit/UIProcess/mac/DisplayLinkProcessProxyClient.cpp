@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Apple Inc. All rights reserved.
+ * Copyright (C) 2022 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,14 +25,40 @@
 
 #pragma once
 
-#include <wtf/ObjectIdentifier.h>
+#include "config.h"
+#include "DisplayLinkProcessProxyClient.h"
+
+#if HAVE(CVDISPLAYLINK)
+
+#include "EventDispatcherMessages.h"
+#include "WebProcessMessages.h"
 
 namespace WebKit {
 
-enum DisplayLinkObserverIDType { };
-using DisplayLinkObserverID = ObjectIdentifier<DisplayLinkObserverIDType>;
+void DisplayLinkProcessProxyClient::setConnectionID(IPC::Connection::UniqueID connectionID)
+{
+    Locker locker { m_connectionIDLock };
+    m_connectionID = connectionID;
+}
 
-enum DisplayLinkObserverCollectionIDType { };
-using DisplayLinkObserverCollectionID = ObjectIdentifier<DisplayLinkObserverCollectionIDType>;
+// This is called off the main thread.
+void DisplayLinkProcessProxyClient::displayLinkFired(WebCore::PlatformDisplayID displayID, WebCore::DisplayUpdate displayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback)
+{
+    IPC::Connection::UniqueID connectionID;
+    {
+        Locker locker { m_connectionIDLock };
+        connectionID = m_connectionID;
+    }
 
-} // namespace WebKit
+    if (!connectionID)
+        return;
+
+    if (wantsFullSpeedUpdates)
+        IPC::Connection::send(connectionID, Messages::EventDispatcher::DisplayWasRefreshed(displayID, displayUpdate, anyObserverWantsCallback), 0, { }, Thread::QOS::UserInteractive);
+    else if (anyObserverWantsCallback)
+        IPC::Connection::send(connectionID, Messages::WebProcess::DisplayWasRefreshed(displayID, displayUpdate), 0, { }, Thread::QOS::UserInteractive);
+}
+
+}
+
+#endif // HAVE(CVDISPLAYLINK)
