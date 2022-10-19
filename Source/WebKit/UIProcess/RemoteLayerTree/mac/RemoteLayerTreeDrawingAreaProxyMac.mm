@@ -39,7 +39,7 @@ using namespace WebCore;
 
 RemoteLayerTreeDrawingAreaProxyMac::RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy& pageProxy, WebProcessProxy& processProxy)
     : RemoteLayerTreeDrawingAreaProxy(pageProxy, processProxy)
-    , m_observerID(DisplayLinkObserverID::generate())
+    , m_displayLinkObserverID(DisplayLinkObserverID::generate())
     , m_displayLinkClient(*this)
 {
 }
@@ -48,10 +48,10 @@ RemoteLayerTreeDrawingAreaProxyMac::~RemoteLayerTreeDrawingAreaProxyMac()
 {
     auto displayID = page().displayID();
     // FIXME: Too late?
-    if (displayID) {
+    if (displayID && m_registeredWithDisplayLink) {
         auto& displayLinks = process().processPool().displayLinks();
         if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
-            displayLink->removeObserver(m_displayLinkClient, m_observerID);
+            displayLink->removeObserver(m_displayLinkClient, m_displayLinkObserverID);
     }
 }
 
@@ -67,7 +67,13 @@ std::unique_ptr<RemoteScrollingCoordinatorProxy> RemoteLayerTreeDrawingAreaProxy
 
 void RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink()
 {
+    if (m_registeredWithDisplayLink)
+        return;
+
     auto displayID = page().displayID();
+
+    LOG_WITH_STREAM(DisplayLink, stream << "[UI ] RemoteLayerTreeDrawingAreaProxyMac " << this << " scheduleDisplayLink for display " << displayID);
+
     if (!displayID) {
         WTFLogAlways("RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink(): page has no displayID");
         return;
@@ -77,27 +83,36 @@ void RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink()
     auto preferredFramesPerSecond = FullSpeedFramesPerSecond;
 
     auto& displayLinks = process().processPool().displayLinks();
-    if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID)) {
-        displayLink->addObserver(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
-        return;
+    auto* displayLink = displayLinks.displayLinkForDisplay(*displayID);
+    if (!displayLink) {
+        auto newDisplayLink = makeUnique<DisplayLink>(*displayID);
+        displayLink = newDisplayLink.get();
+        displayLinks.add(WTFMove(newDisplayLink));
     }
 
-    auto displayLink = makeUnique<DisplayLink>(*displayID);
-    displayLink->addObserver(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
-    displayLinks.add(WTFMove(displayLink));
+    displayLink->addObserver(m_displayLinkClient, m_displayLinkObserverID, preferredFramesPerSecond);
+    m_registeredWithDisplayLink = true;
 }
 
 void RemoteLayerTreeDrawingAreaProxyMac::pauseDisplayLink()
 {
+    if (!m_registeredWithDisplayLink)
+        return;
+    
     auto displayID = page().displayID();
+    
+    LOG_WITH_STREAM(DisplayLink, stream << "[UI ] RemoteLayerTreeDrawingAreaProxyMac " << this << " pauseDisplayLink for display " << displayID);
+    
     if (!displayID) {
         WTFLogAlways("RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink(): page has no displayID");
         return;
     }
-
+    
     auto& displayLinks = process().processPool().displayLinks();
     if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
-        displayLink->removeObserver(m_displayLinkClient, m_observerID);
+        displayLink->removeObserver(m_displayLinkClient, m_displayLinkObserverID);
+
+    m_registeredWithDisplayLink = false;
 }
 
 void RemoteLayerTreeDrawingAreaProxyMac::setPreferredFramesPerSecond(WebCore::FramesPerSecond preferredFramesPerSecond)
@@ -108,9 +123,10 @@ void RemoteLayerTreeDrawingAreaProxyMac::setPreferredFramesPerSecond(WebCore::Fr
         return;
     }
 
+    // FIXME: Need to store preferredFramesPerSecond since we might not be registered.
     auto& displayLinks = process().processPool().displayLinks();
     if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
-        displayLink->setObserverPreferredFramesPerSecond(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
+        displayLink->setObserverPreferredFramesPerSecond(m_displayLinkClient, m_displayLinkObserverID, preferredFramesPerSecond);
 }
 
 // FIXME: Handle windowScreenDidChange?

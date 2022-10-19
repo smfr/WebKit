@@ -55,8 +55,9 @@ private:
 
     void displayLinkTimerFired();
 
-    DisplayLinkObserverID m_observerID;
+    DisplayLinkObserverID m_displayLinkObserverID;
     RemoteLayerTreeDisplayLinkClient m_displayLinkClient;
+    bool m_registeredWithDisplayLink { false };
 };
 
 } // namespace WebKit
