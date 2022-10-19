@@ -31,6 +31,7 @@
 
 #include "DisplayLinkObserverID.h"
 #include "RemoteLayerTreeDisplayLinkClient.h"
+#include <WebCore/AnimationFrameRate.h>
 
 namespace WebKit {
 
@@ -50,10 +51,18 @@ private:
     void scheduleDisplayLink() override;
     void pauseDisplayLink() override;
     void setPreferredFramesPerSecond(WebCore::FramesPerSecond) override;
+    void windowScreenDidChange(WebCore::PlatformDisplayID, std::optional<WebCore::FramesPerSecond>) override;
 
     void didChangeViewExposedRect() override;
 
     void displayLinkTimerFired();
+    
+    DisplayLink* exisingDisplayLink();
+    DisplayLink& ensureDisplayLink();
+
+    std::optional<WebCore::PlatformDisplayID> m_displayID; // Would be nice to make this non-optional, and ensure we always get one on creation.
+    std::optional<WebCore::FramesPerSecond> m_displayNominalFramesPerSecond;
+    WebCore::FramesPerSecond m_clientPreferredFramesPerSecond { WebCore::FullSpeedFramesPerSecond };
 
     DisplayLinkObserverID m_displayLinkObserverID;
     RemoteLayerTreeDisplayLinkClient m_displayLinkClient;

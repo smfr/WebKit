@@ -4098,7 +4098,7 @@ void WebPageProxy::setIntrinsicDeviceScaleFactor(float scaleFactor)
         m_drawingArea->deviceScaleFactorDidChange();
 }
 
-void WebPageProxy::windowScreenDidChange(PlatformDisplayID displayID, std::optional<unsigned> nominalFramesPerSecond)
+void WebPageProxy::windowScreenDidChange(PlatformDisplayID displayID, std::optional<FramesPerSecond> nominalFramesPerSecond)
 {
 #if HAVE(CVDISPLAYLINK)
     if (hasRunningProcess() && m_displayID && m_registeredForFullSpeedUpdates)
@@ -4108,6 +4108,8 @@ void WebPageProxy::windowScreenDidChange(PlatformDisplayID displayID, std::optio
 #endif
 
     m_displayID = displayID;
+    if (m_drawingArea)
+        m_drawingArea->windowScreenDidChange(displayID, nominalFramesPerSecond);
 
     if (!hasRunningProcess())
         return;
