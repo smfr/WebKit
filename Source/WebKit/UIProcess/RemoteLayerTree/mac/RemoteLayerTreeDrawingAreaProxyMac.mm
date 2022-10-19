@@ -29,17 +29,30 @@
 #if PLATFORM(MAC)
 
 #import "RemoteScrollingCoordinatorProxyMac.h"
+#import "WebPageProxy.h"
+#import "WebProcessProxy.h"
+#import "WebProcessPool.h"
 #import <WebCore/ScrollView.h>
 
 namespace WebKit {
 using namespace WebCore;
 
-static const Seconds displayLinkTimerInterval { 1_s / 60 };
-
 RemoteLayerTreeDrawingAreaProxyMac::RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy& pageProxy, WebProcessProxy& processProxy)
     : RemoteLayerTreeDrawingAreaProxy(pageProxy, processProxy)
-    , m_displayLinkTimer(RunLoop::main(), this, &RemoteLayerTreeDrawingAreaProxyMac::displayLinkTimerFired)
+    , m_observerID(DisplayLinkObserverID::generate())
+    , m_displayLinkClient(*this)
 {
+}
+
+RemoteLayerTreeDrawingAreaProxyMac::~RemoteLayerTreeDrawingAreaProxyMac()
+{
+    auto displayID = page().displayID();
+    // FIXME: Too late?
+    if (displayID) {
+        auto& displayLinks = process().processPool().displayLinks();
+        if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
+            displayLink->removeObserver(m_displayLinkClient, m_observerID);
+    }
 }
 
 DelegatedScrollingMode RemoteLayerTreeDrawingAreaProxyMac::delegatedScrollingMode() const
@@ -54,21 +67,53 @@ std::unique_ptr<RemoteScrollingCoordinatorProxy> RemoteLayerTreeDrawingAreaProxy
 
 void RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink()
 {
-    if (m_displayLinkTimer.isActive())
+    auto displayID = page().displayID();
+    if (!displayID) {
+        WTFLogAlways("RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink(): page has no displayID");
         return;
-    
-    m_displayLinkTimer.startOneShot(displayLinkTimerInterval);
+    }
+
+    // FIXME: Get the correct frame rate.
+    auto preferredFramesPerSecond = FullSpeedFramesPerSecond;
+
+    auto& displayLinks = process().processPool().displayLinks();
+    if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID)) {
+        displayLink->addObserver(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
+        return;
+    }
+
+    auto displayLink = makeUnique<DisplayLink>(*displayID);
+    displayLink->addObserver(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
+    displayLinks.add(WTFMove(displayLink));
 }
 
 void RemoteLayerTreeDrawingAreaProxyMac::pauseDisplayLink()
 {
-    m_displayLinkTimer.stop();
+    auto displayID = page().displayID();
+    if (!displayID) {
+        WTFLogAlways("RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink(): page has no displayID");
+        return;
+    }
+
+    auto& displayLinks = process().processPool().displayLinks();
+    if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
+        displayLink->removeObserver(m_displayLinkClient, m_observerID);
 }
 
-void RemoteLayerTreeDrawingAreaProxyMac::displayLinkTimerFired()
+void RemoteLayerTreeDrawingAreaProxyMac::setPreferredFramesPerSecond(WebCore::FramesPerSecond preferredFramesPerSecond)
 {
-    didRefreshDisplay();
+    auto displayID = page().displayID();
+    if (!displayID) {
+        WTFLogAlways("RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayLink(): page has no displayID");
+        return;
+    }
+
+    auto& displayLinks = process().processPool().displayLinks();
+    if (auto* displayLink = displayLinks.displayLinkForDisplay(*displayID))
+        displayLink->setObserverPreferredFramesPerSecond(m_displayLinkClient, m_observerID, preferredFramesPerSecond);
 }
+
+// FIXME: Handle windowScreenDidChange?
 
 void RemoteLayerTreeDrawingAreaProxyMac::didChangeViewExposedRect()
 {

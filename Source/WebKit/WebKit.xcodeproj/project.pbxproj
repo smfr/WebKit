@@ -3018,6 +3018,8 @@
 		0F45A33C239D8CC400294ABF /* WKWebViewTesting.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = WKWebViewTesting.mm; sourceTree = "<group>"; };
 		0F49294628FF0F4B00AF8509 /* DisplayLinkProcessProxyClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DisplayLinkProcessProxyClient.h; sourceTree = "<group>"; };
 		0F49294728FF0F4B00AF8509 /* DisplayLinkProcessProxyClient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DisplayLinkProcessProxyClient.cpp; sourceTree = "<group>"; };
+		0F49294828FFA0E400AF8509 /* RemoteLayerTreeDisplayLinkClient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RemoteLayerTreeDisplayLinkClient.cpp; sourceTree = "<group>"; };
+		0F49294928FFA0E500AF8509 /* RemoteLayerTreeDisplayLinkClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RemoteLayerTreeDisplayLinkClient.h; sourceTree = "<group>"; };
 		0F4A438428F0968400D6161C /* RemoteLayerTreeDrawingAreaMac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RemoteLayerTreeDrawingAreaMac.mm; sourceTree = "<group>"; };
 		0F4A438528F0968400D6161C /* RemoteLayerTreeDrawingAreaMac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RemoteLayerTreeDrawingAreaMac.h; sourceTree = "<group>"; };
 		0F5403002531006E00082BB9 /* WebWheelEventCoalescer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WebWheelEventCoalescer.cpp; sourceTree = "<group>"; };
@@ -14025,6 +14027,8 @@
 		E404906F21DE65D70037F0DB /* mac */ = {
 			isa = PBXGroup;
 			children = (
+				0F49294828FFA0E400AF8509 /* RemoteLayerTreeDisplayLinkClient.cpp */,
+				0F49294928FFA0E500AF8509 /* RemoteLayerTreeDisplayLinkClient.h */,
 				0F2E0DF928F0D04E006B9079 /* RemoteLayerTreeDrawingAreaProxyMac.h */,
 				0F2E0DF828F0D04D006B9079 /* RemoteLayerTreeDrawingAreaProxyMac.mm */,
 				0F2E0DF728F0CD35006B9079 /* RemoteScrollingCoordinatorProxyMac.h */,

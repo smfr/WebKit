@@ -25,41 +25,27 @@
 
 #pragma once
 
-#include "RemoteLayerTreeDrawingAreaProxy.h"
+#include "DisplayLink.h"
 
-#if PLATFORM(MAC)
-
-#include "DisplayLinkObserverID.h"
-#include "RemoteLayerTreeDisplayLinkClient.h"
+#if PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)
 
 namespace WebKit {
 
-class RemoteScrollingCoordinatorProxy;
-class RemoteLayerTreeTransaction;
-class RemoteScrollingCoordinatorTransaction;
+class RemoteLayerTreeDrawingAreaProxyMac;
 
-class RemoteLayerTreeDrawingAreaProxyMac final : public RemoteLayerTreeDrawingAreaProxy {
+class RemoteLayerTreeDisplayLinkClient final : public DisplayLink::Client {
 public:
-    RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy&, WebProcessProxy&);
-    ~RemoteLayerTreeDrawingAreaProxyMac();
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    explicit RemoteLayerTreeDisplayLinkClient(RemoteLayerTreeDrawingAreaProxyMac&);
+    ~RemoteLayerTreeDisplayLinkClient() = default;
 
 private:
-    WebCore::DelegatedScrollingMode delegatedScrollingMode() const override;
-    std::unique_ptr<RemoteScrollingCoordinatorProxy> createScrollingCoordinatorProxy() const override;
+    void displayLinkFired(WebCore::PlatformDisplayID, WebCore::DisplayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback) override;
 
-    void scheduleDisplayLink() override;
-    void pauseDisplayLink() override;
-    void setPreferredFramesPerSecond(WebCore::FramesPerSecond) override;
-
-    void didChangeViewExposedRect() override;
-
-    void displayLinkTimerFired();
-
-    DisplayLinkObserverID m_observerID;
-    RemoteLayerTreeDisplayLinkClient m_displayLinkClient;
+    RemoteLayerTreeDrawingAreaProxyMac& m_drawingAreaProxy;
 };
 
-} // namespace WebKit
+}
 
-#endif // #if PLATFORM(MAC)
-
+#endif // PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)

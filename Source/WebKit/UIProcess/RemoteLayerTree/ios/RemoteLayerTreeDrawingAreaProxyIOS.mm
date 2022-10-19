@@ -80,7 +80,7 @@
             if (page.preferences().webAnimationsCustomFrameRateEnabled() || !page.preferences().preferPageRenderingUpdatesNear60FPSEnabled()) {
                 auto minimumRefreshInterval = _displayLink.maximumRefreshRate;
                 if (minimumRefreshInterval > 0) {
-                    if (auto displayId = page.displayId()) {
+                    if (auto displayId = page.displayID()) {
                         WebCore::FramesPerSecond frameRate = std::round(1.0 / minimumRefreshInterval);
                         page.windowScreenDidChange(*displayId, frameRate);
                     }

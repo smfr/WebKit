@@ -25,41 +25,35 @@
 
 #pragma once
 
-#include "RemoteLayerTreeDrawingAreaProxy.h"
-
-#if PLATFORM(MAC)
-
-#include "DisplayLinkObserverID.h"
+#include "config.h"
 #include "RemoteLayerTreeDisplayLinkClient.h"
+
+#if PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)
+
+#include "RemoteLayerTreeDrawingAreaProxyMac.h"
+#include <wtf/RunLoop.h>
 
 namespace WebKit {
 
-class RemoteScrollingCoordinatorProxy;
-class RemoteLayerTreeTransaction;
-class RemoteScrollingCoordinatorTransaction;
+RemoteLayerTreeDisplayLinkClient::RemoteLayerTreeDisplayLinkClient(RemoteLayerTreeDrawingAreaProxyMac& drawingAreaProxy)
+    : m_drawingAreaProxy(drawingAreaProxy)
+{
+}
 
-class RemoteLayerTreeDrawingAreaProxyMac final : public RemoteLayerTreeDrawingAreaProxy {
-public:
-    RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy&, WebProcessProxy&);
-    ~RemoteLayerTreeDrawingAreaProxyMac();
+// This is called off the main thread.
+void RemoteLayerTreeDisplayLinkClient::displayLinkFired(WebCore::PlatformDisplayID /* displayID */, WebCore::DisplayUpdate /* displayUpdate */, bool /* wantsFullSpeedUpdates */, bool /* anyObserverWantsCallback */)
+{
+    // Notify the scrolling tree.
+//    scrollingTree->displayDidRefresh(displayID);
 
-private:
-    WebCore::DelegatedScrollingMode delegatedScrollingMode() const override;
-    std::unique_ptr<RemoteScrollingCoordinatorProxy> createScrollingCoordinatorProxy() const override;
+    RunLoop::main().dispatch([weakDrawingAreaProxy = WeakPtr { m_drawingAreaProxy }]() {
+        if (!weakDrawingAreaProxy)
+            return;
 
-    void scheduleDisplayLink() override;
-    void pauseDisplayLink() override;
-    void setPreferredFramesPerSecond(WebCore::FramesPerSecond) override;
+        weakDrawingAreaProxy->didRefreshDisplay();
+    });
+}
 
-    void didChangeViewExposedRect() override;
+}
 
-    void displayLinkTimerFired();
-
-    DisplayLinkObserverID m_observerID;
-    RemoteLayerTreeDisplayLinkClient m_displayLinkClient;
-};
-
-} // namespace WebKit
-
-#endif // #if PLATFORM(MAC)
-
+#endif // PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)
