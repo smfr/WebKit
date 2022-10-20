@@ -56,7 +56,7 @@ public:
     TransactionID nextLayerTreeTransactionID() const { return m_pendingLayerTreeTransactionID.next(); }
     TransactionID lastCommittedLayerTreeTransactionID() const { return m_transactionIDForPendingCACommit; }
 
-    void didRefreshDisplay();
+    virtual void didRefreshDisplay();
     
     bool hasDebugIndicator() const { return !!m_debugIndicatorLayerTreeHost; }
 

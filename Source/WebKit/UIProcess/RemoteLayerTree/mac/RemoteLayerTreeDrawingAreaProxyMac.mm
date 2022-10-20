@@ -139,6 +139,14 @@ void RemoteLayerTreeDrawingAreaProxyMac::windowScreenDidChange(PlatformDisplayID
     m_displayNominalFramesPerSecond = nominalFramesPerSecond;
 
     scheduleDisplayLink();
+    
+    // Call ScrollingTree::windowScreenDidChange()?
+}
+
+void RemoteLayerTreeDrawingAreaProxyMac::didRefreshDisplay()
+{
+    m_webPageProxy.scrollingCoordinatorProxy()->displayDidRefresh(m_displayID.value_or(0));
+    RemoteLayerTreeDrawingAreaProxy::didRefreshDisplay(); // FIXME Naming.
 }
 
 void RemoteLayerTreeDrawingAreaProxyMac::didChangeViewExposedRect()

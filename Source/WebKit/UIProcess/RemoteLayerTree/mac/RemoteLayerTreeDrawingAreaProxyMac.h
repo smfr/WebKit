@@ -44,6 +44,8 @@ public:
     RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy&, WebProcessProxy&);
     ~RemoteLayerTreeDrawingAreaProxyMac();
 
+    void didRefreshDisplay() override;
+
 private:
     WebCore::DelegatedScrollingMode delegatedScrollingMode() const override;
     std::unique_ptr<RemoteScrollingCoordinatorProxy> createScrollingCoordinatorProxy() const override;

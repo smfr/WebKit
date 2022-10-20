@@ -112,6 +112,8 @@ public:
     void resetStateAfterProcessExited();
     WebCore::ScrollingTreeScrollingNode* rootNode() const;
 
+    void displayDidRefresh(WebCore::PlatformDisplayID);
+
 #if ENABLE(OVERLAY_REGIONS_IN_EVENT_REGION)
     void removeFixedScrollingNodeLayerIDs(const Vector<WebCore::GraphicsLayer::PlatformLayerID>&);
     const HashSet<WebCore::GraphicsLayer::PlatformLayerID>& fixedScrollingNodeLayerIDs() const { return m_fixedScrollingNodeLayerIDs; }

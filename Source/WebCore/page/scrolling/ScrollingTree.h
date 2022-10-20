@@ -229,7 +229,8 @@ public:
 
     void windowScreenDidChange(PlatformDisplayID, std::optional<FramesPerSecond> nominalFramesPerSecond);
     PlatformDisplayID displayID();
-    
+    WEBCORE_EXPORT virtual void displayDidRefresh(PlatformDisplayID) { }
+
     WEBCORE_EXPORT void willProcessWheelEvent();
 
     WEBCORE_EXPORT void addPendingScrollUpdate(ScrollUpdate&&);

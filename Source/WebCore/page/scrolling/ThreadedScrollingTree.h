@@ -56,7 +56,7 @@ public:
 
     void invalidate() override;
 
-    WEBCORE_EXPORT void displayDidRefresh(PlatformDisplayID);
+    void displayDidRefresh(PlatformDisplayID) override;
 
     void didScheduleRenderingUpdate();
     void willStartRenderingUpdate();
