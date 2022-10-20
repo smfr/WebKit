@@ -53,6 +53,13 @@ void RemoteScrollingTreeMac::handleWheelEventPhase(ScrollingNodeID, PlatformWhee
     // FIXME: Is this needed?
 }
 
+void RemoteScrollingTreeMac::displayDidRefresh(PlatformDisplayID displayID)
+{
+    // FIXME: Check against displayID?
+    Locker locker { m_treeLock };
+    serviceScrollAnimations(MonotonicTime::now()); // FIXME: Share timestamp with the rest of the update.
+}
+
 Ref<ScrollingTreeNode> RemoteScrollingTreeMac::createScrollingTreeNode(ScrollingNodeType nodeType, ScrollingNodeID nodeID)
 {
     switch (nodeType) {

@@ -41,6 +41,11 @@ void RemoteScrollingCoordinatorProxyMac::didReceiveWheelEvent(bool /* wasHandled
     scrollingTree()->applyLayerPositions();
 }
 
+void RemoteScrollingCoordinatorProxyMac::hasNodeWithAnimatedScrollChanged(bool)
+{
+    // Need to register for display callbacks
+}
+
 } // namespace WebKit
 
 #endif // PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)

@@ -103,6 +103,8 @@ public:
     void setRootNodeIsInUserScroll(bool);
 #endif
 
+    virtual void hasNodeWithAnimatedScrollChanged(bool) { }
+
     String scrollingTreeAsText() const;
 
     OptionSet<WebCore::TouchAction> activeTouchActionsForTouchIdentifier(unsigned touchIdentifier) const;

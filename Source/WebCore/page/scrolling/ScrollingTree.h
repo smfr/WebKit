@@ -258,6 +258,7 @@ protected:
     bool hasProcessedWheelEventsRecently();
 
     HashSet<ScrollingNodeID> nodesWithActiveScrollAnimations();
+    WEBCORE_EXPORT void serviceScrollAnimations(MonotonicTime) WTF_REQUIRES_LOCK(m_treeLock);
 
     Lock m_treeLock; // Protects the scrolling tree.
 

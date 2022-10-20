@@ -111,8 +111,6 @@ private:
     
     bool isScrollingSynchronizedWithMainThread() final WTF_REQUIRES_LOCK(m_treeLock);
 
-    void serviceScrollAnimations(MonotonicTime) WTF_REQUIRES_LOCK(m_treeLock);
-
     Seconds frameDuration();
     Seconds maxAllowableRenderingUpdateDurationForSynchronization();
     

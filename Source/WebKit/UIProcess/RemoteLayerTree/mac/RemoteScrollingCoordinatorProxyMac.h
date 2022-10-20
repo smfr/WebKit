@@ -37,6 +37,7 @@ public:
 
 private:
     void didReceiveWheelEvent(bool) override;
+    void hasNodeWithAnimatedScrollChanged(bool) override;
 };
 
 } // namespace WebKit
