@@ -655,11 +655,15 @@ FloatPoint ViewGestureController::scaledMagnificationOrigin(FloatPoint origin, d
     float magnificationOriginScale = 1 - (scale / m_initialMagnification);
     scaledMagnificationOrigin.scale(magnificationOriginScale);
     scaledMagnificationOrigin.move(origin - m_initialMagnificationOrigin);
+
+    LOG_WITH_STREAM(ViewGestures, stream << "ViewGestureController::scaledMagnificationOrigin " << origin << " scale " << scale << " initial origin " << m_initialMagnificationOrigin << " visible content rect " << m_visibleContentRect << " mapped to " << scaledMagnificationOrigin);
     return scaledMagnificationOrigin;
 }
 
 void ViewGestureController::didCollectGeometryForMagnificationGesture(FloatRect visibleContentRect, bool frameHandlesMagnificationGesture)
 {
+    LOG_WITH_STREAM(ViewGestures, stream << "ViewGestureController::didCollectGeometryForMagnificationGesture - visibleContentRect " << visibleContentRect);
+
     willBeginGesture(ViewGestureType::Magnification);
     m_visibleContentRect = visibleContentRect;
     m_visibleContentRectIsValid = true;

@@ -1025,6 +1025,20 @@ GraphicsLayer* FrameView::graphicsLayerForPlatformWidget(PlatformWidget platform
     return widgetLayer->backing()->parentForSublayers();
 }
 
+GraphicsLayer* FrameView::graphicsLayerForRenderView()
+{
+    auto* renderView = this->renderView();
+    if (!renderView)
+        return nullptr;
+
+    if (!renderView->hasLayer() || !renderView->layer()->isComposited())
+        return nullptr;
+
+    // FIXME: Get the contentsContainmentLayer if it exists.
+    // FIXME: Share with TiledCoreAnimationDrawingArea::layerForTransientZoom
+    return renderView->layer()->backing()->graphicsLayer();
+}
+
 LayoutRect FrameView::fixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect& uninflatedBounds) const
 {
     LayoutPoint scrollPosition;

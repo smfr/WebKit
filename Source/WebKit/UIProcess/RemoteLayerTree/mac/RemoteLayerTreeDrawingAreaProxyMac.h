@@ -43,6 +43,14 @@ private:
     WebCore::DelegatedScrollingMode delegatedScrollingMode() const override;
     std::unique_ptr<RemoteScrollingCoordinatorProxy> createScrollingCoordinatorProxy() const override;
 
+    void didCommitLayerTree(const RemoteLayerTreeTransaction&, const RemoteScrollingCoordinatorTransaction&) override;
+
+    void adjustTransientZoom(double, WebCore::FloatPoint) override;
+    void commitTransientZoom(double, WebCore::FloatPoint) override;
+    
+    void applyTransientZoomToLayer();
+    void removeTransientZoomFromLayer();
+
     void scheduleDisplayRefreshCallbacks() override;
     void pauseDisplayRefreshCallbacks() override;
 
@@ -52,6 +60,12 @@ private:
 
     // Temporary, until we hook up the DisplayLink
     RunLoop::Timer<RemoteLayerTreeDrawingAreaProxyMac> m_displayLinkTimer;
+
+    WebCore::GraphicsLayer::PlatformLayerID m_pageScalingLayerID;
+
+    std::optional<double> m_transientZoomScale;
+    std::optional<WebCore::FloatPoint> m_transientZoomOrigin;
+
 };
 
 } // namespace WebKit

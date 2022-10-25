@@ -2243,6 +2243,8 @@ void WebPage::windowScreenDidChange(PlatformDisplayID displayID, std::optional<u
 
 void WebPage::scalePage(double scale, const IntPoint& origin)
 {
+    LOG_WITH_STREAM(ViewGestures, stream << "WebPage::scalePage - scale " << scale << " origin " << origin);
+
     double totalScale = scale * viewScaleFactor();
     bool willChangeScaleFactor = totalScale != totalScaleFactor();
 

@@ -724,6 +724,7 @@ bool TiledCoreAnimationDrawingArea::shouldUseTiledBackingForFrameView(const Fram
 
 PlatformCALayer* TiledCoreAnimationDrawingArea::layerForTransientZoom() const
 {
+    // FIXME: factor this code.
     RenderLayerBacking* renderViewBacking = m_webPage.mainFrameView()->renderView()->layer()->backing();
 
     if (GraphicsLayer* contentsContainmentLayer = renderViewBacking->contentsContainmentLayer())

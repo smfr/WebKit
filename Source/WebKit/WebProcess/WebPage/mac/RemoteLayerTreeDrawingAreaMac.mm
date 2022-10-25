@@ -28,7 +28,13 @@
 
 #if PLATFORM(MAC)
 
-#import <WebCore/ScrollView.h>
+#import "WebPage.h"
+#import <WebCore/FrameView.h>
+#import <WebCore/GraphicsLayer.h>
+#import <WebCore/RenderLayerBacking.h>
+#import <WebCore/RenderLayer.h>
+#import <WebCore/RenderView.h>
+#import <WebCore/TiledBacking.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -44,6 +50,71 @@ DelegatedScrollingMode RemoteLayerTreeDrawingAreaMac::delegatedScrollingMode() c
 {
     return DelegatedScrollingMode::DelegatedToWebKit;
 }
+
+void RemoteLayerTreeDrawingAreaMac::applyTransientZoomToPage(double scale, FloatPoint origin)
+{
+    // If the page scale is already the target scale, setPageScaleFactor() will short-circuit
+    // and not apply the transform, so we can't depend on it to do so.
+
+    auto& frameView = *m_webPage.mainFrameView();
+
+    auto unscrolledOrigin = origin;
+    FloatRect unobscuredContentRect = frameView.unobscuredContentRectIncludingScrollbars();
+    unscrolledOrigin.moveBy(-unobscuredContentRect.location());
+    m_webPage.scalePage(scale / m_webPage.viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
+    updateRendering();
+}
+
+void RemoteLayerTreeDrawingAreaMac::adjustTransientZoom(double scale, WebCore::FloatPoint origin)
+{
+    LOG_WITH_STREAM(ViewGestures, stream << "RemoteLayerTreeDrawingAreaMac::adjustTransientZoom - scale " << scale << " origin " << origin);
+
+    // FIXME: Get these from WebPage.
+    const double minScaleFactor = 1;
+    const double maxScaleFactor = 3;
+    scale = clampTo(scale, minScaleFactor, maxScaleFactor);
+
+    auto totalScale = scale * m_webPage.viewScaleFactor();
+
+    double currentTotalScale = m_webPage.totalScaleFactor();
+//    if (totalScale > currentTotalScale)
+//        return;
+
+//    m_webPage.scalePage(scale / m_webPage.viewScaleFactor(), roundedIntPoint(-origin));
+
+    // FIXME: Share this code with TiledCoreAnimationDrawingArea.
+    auto* frameView = m_webPage.mainFrameView();
+    FloatRect tileCoverageRect = frameView->visibleContentRectIncludingScrollbars();
+    tileCoverageRect.moveBy(-origin);
+    tileCoverageRect.scale(currentTotalScale / totalScale);
+    frameView->renderView()->layer()->backing()->tiledBacking()->prepopulateRect(tileCoverageRect);
+}
+
+void RemoteLayerTreeDrawingAreaMac::commitTransientZoom(double scale, WebCore::FloatPoint origin)
+{
+    LOG_WITH_STREAM(ViewGestures, stream << "RemoteLayerTreeDrawingAreaMac::commitTransientZoom - scale " << scale << " origin " << origin);
+
+    scale *= m_webPage.viewScaleFactor();
+    
+    // FIXME: Constrain scale and origin
+    applyTransientZoomToPage(scale, origin);
+}
+
+void RemoteLayerTreeDrawingAreaMac::willCommitLayerTree(RemoteLayerTreeTransaction& transaction)
+{
+    // FIXME: Probably need something here for PDF.
+    auto* frameView = m_webPage.mainFrameView();
+    if (!frameView)
+        return;
+
+    // With non-delegated zooming, the RenderView's layer applies the page scale (see resolveForDocument()).
+    auto* renderViewGraphicsLayer = frameView->graphicsLayerForRenderView();
+    if (!renderViewGraphicsLayer)
+        return;
+
+    transaction.setPageScalingLayerID(renderViewGraphicsLayer->primaryLayerID());
+}
+
 
 } // namespace WebKit
 
