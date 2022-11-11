@@ -70,6 +70,9 @@ private:
     void triggerRenderingUpdate() override;
     void attachViewOverlayGraphicsLayer(WebCore::GraphicsLayer*) override;
 
+    void setColorSpace(std::optional<WebCore::DestinationColorSpace>) override;
+    std::optional<WebCore::DestinationColorSpace> displayColorSpace() const override;
+
     void addTransactionCallbackID(CallbackID) override;
 
     RefPtr<WebCore::DisplayRefreshMonitor> createDisplayRefreshMonitor(WebCore::PlatformDisplayID) final;
@@ -163,6 +166,8 @@ private:
 
     HashSet<RemoteLayerTreeDisplayRefreshMonitor*> m_displayRefreshMonitors;
     HashSet<RemoteLayerTreeDisplayRefreshMonitor*>* m_displayRefreshMonitorsToNotify { nullptr };
+    
+    std::optional<WebCore::DestinationColorSpace> m_displayColorSpace;
 
     TransactionID m_currentTransactionID;
     Vector<RemoteLayerTreeTransaction::TransactionCallbackID> m_pendingCallbackIDs;

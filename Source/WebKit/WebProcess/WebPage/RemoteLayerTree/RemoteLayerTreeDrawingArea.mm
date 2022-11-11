@@ -67,6 +67,8 @@ RemoteLayerTreeDrawingArea::RemoteLayerTreeDrawingArea(WebPage& webPage, const W
     webPage.corePage()->settings().setForceCompositingMode(true);
     m_rootLayer->setName(MAKE_STATIC_STRING_IMPL("drawing area root"));
 
+    setColorSpace(parameters.colorSpace);
+
     m_commitQueue = adoptOSObject(dispatch_queue_create("com.apple.WebKit.WebContent.RemoteLayerTreeDrawingArea.CommitQueue", nullptr));
 
     if (auto viewExposedRect = parameters.viewExposedRect)
@@ -116,6 +118,16 @@ void RemoteLayerTreeDrawingArea::adoptDisplayRefreshMonitorsFromDrawingArea(Draw
         for (auto* monitor : m_displayRefreshMonitors)
             monitor->updateDrawingArea(*this);
     }
+}
+
+void RemoteLayerTreeDrawingArea::setColorSpace(std::optional<WebCore::DestinationColorSpace> colorSpace)
+{
+    m_displayColorSpace = colorSpace;
+}
+
+std::optional<WebCore::DestinationColorSpace> RemoteLayerTreeDrawingArea::displayColorSpace() const
+{
+    return m_displayColorSpace;
 }
 
 void RemoteLayerTreeDrawingArea::setPreferredFramesPerSecond(FramesPerSecond preferredFramesPerSecond)

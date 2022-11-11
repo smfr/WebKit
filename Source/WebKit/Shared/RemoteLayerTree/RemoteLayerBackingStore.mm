@@ -566,6 +566,7 @@ void RemoteLayerBackingStore::applyBackingStoreToLayer(CALayer *layer, LayerCont
                 ASSERT(m_parameters.type == Type::IOSurface);
                 switch (contentsType) {
                 case RemoteLayerBackingStore::LayerContentsType::IOSurface: {
+                    // The IOSurface has a colorspace in metadata already. The colorspace argument is unused (unless someone draws into this context in this process).
                     auto surface = WebCore::IOSurface::createFromSendRight(WTFMove(machSendRight), DestinationColorSpace::SRGB());
                     contents = surface ? surface->asLayerContents() : nil;
                     break;

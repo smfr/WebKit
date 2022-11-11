@@ -130,6 +130,8 @@ public:
 
     virtual void setShouldScaleViewToFitDocument(bool) { }
 
+    virtual std::optional<WebCore::DestinationColorSpace> displayColorSpace() const { return { }; }
+
     virtual bool addMilestonesToDispatch(OptionSet<WebCore::LayoutMilestone>) { return false; }
 
 #if PLATFORM(COCOA)
@@ -184,7 +186,6 @@ private:
     RefPtr<WebCore::DisplayRefreshMonitor> createDisplayRefreshMonitor(WebCore::PlatformDisplayID) override;
 
 #if PLATFORM(COCOA)
-    // Used by TiledCoreAnimationDrawingArea.
     virtual void setDeviceScaleFactor(float) { }
     virtual void setColorSpace(std::optional<WebCore::DestinationColorSpace>) { }
 

@@ -89,6 +89,11 @@ void RemoteLayerTreeDrawingAreaProxy::deviceScaleFactorDidChange()
     send(Messages::DrawingArea::SetDeviceScaleFactor(m_webPageProxy.deviceScaleFactor()));
 }
 
+void RemoteLayerTreeDrawingAreaProxy::colorSpaceDidChange()
+{
+    send(Messages::DrawingArea::SetColorSpace(m_webPageProxy.colorSpace()));
+}
+
 void RemoteLayerTreeDrawingAreaProxy::didUpdateGeometry()
 {
     ASSERT(m_isWaitingForDidUpdateGeometry);

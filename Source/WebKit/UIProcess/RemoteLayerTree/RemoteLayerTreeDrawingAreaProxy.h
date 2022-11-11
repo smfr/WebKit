@@ -75,6 +75,7 @@ protected:
 private:
     void sizeDidChange() final;
     void deviceScaleFactorDidChange() final;
+    void colorSpaceDidChange() final;
     void windowKindDidChange() final;
     void didUpdateGeometry() final;
     

@@ -337,6 +337,7 @@ static void recursivelyMapIOSurfaceBackingStore(CALayer *layer)
 {
     if (layer.contents && CFGetTypeID((__bridge CFTypeRef)layer.contents) == CAMachPortGetTypeID()) {
         MachSendRight port = MachSendRight::create(CAMachPortGetPort((__bridge CAMachPortRef)layer.contents));
+        // The IOSurface has a colorspace in metadata already. The colorspace argument is unused (unless someone draws into this context in this process).
         auto surface = WebCore::IOSurface::createFromSendRight(WTFMove(port), WebCore::DestinationColorSpace::SRGB());
         layer.contents = surface ? surface->asLayerContents() : nil;
     }
