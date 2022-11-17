@@ -2509,6 +2509,8 @@ void WebPage::disabledAdaptationsDidChange(const OptionSet<DisabledAdaptations>&
 
 void WebPage::viewportPropertiesDidChange(const ViewportArguments& viewportArguments)
 {
+    LOG_WITH_STREAM(VisibleRects, stream << "WebPage " << m_identifier << " viewportPropertiesDidChange " << viewportArguments);
+
 #if PLATFORM(IOS_FAMILY)
     if (m_viewportConfiguration.setViewportArguments(viewportArguments))
         viewportConfigurationChanged();

@@ -75,6 +75,7 @@ void RemoteScrollingCoordinatorProxyMac::hasNodeWithAnimatedScrollChanged(bool h
 
 void RemoteScrollingCoordinatorProxyMac::connectStateNodeLayers(ScrollingStateTree& stateTree, const RemoteLayerTreeHost& layerTreeHost)
 {
+    // FIXME: Share more with iOS.
     using PlatformLayerID = GraphicsLayer::PlatformLayerID;
 
     for (auto& currNode : stateTree.nodeMap().values()) {
