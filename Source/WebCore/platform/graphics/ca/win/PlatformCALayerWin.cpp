@@ -621,9 +621,9 @@ void PlatformCALayerWin::setTimeOffset(CFTimeInterval value)
     setNeedsCommit();
 }
 
-void PlatformCALayerWin::setEdgeAntialiasingMask(unsigned mask)
+void PlatformCALayerWin::setAntialiasesEdges(bool antialiasesEdges)
 {
-    CACFLayerSetEdgeAntialiasingMask(m_layer.get(), mask);
+    CACFLayerSetEdgeAntialiasingMask(m_layer.get(), antialiasesEdges ? (kCALayerLeftEdge | kCALayerRightEdge | kCALayerBottomEdge | kCALayerTopEdge) : 0);
     setNeedsCommit();
 }
 
