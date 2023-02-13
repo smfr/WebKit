@@ -37,6 +37,7 @@
 #include <WebCore/PerformanceLoggingClient.h>
 #include <WebCore/RuntimeApplicationChecks.h>
 #include <WebCore/ScrollingStateTree.h>
+#include <WebCore/ScrollingThread.h>
 #include <WebCore/ScrollingTreeFrameScrollingNode.h>
 #include <wtf/cocoa/RuntimeApplicationChecksCocoa.h>
 
