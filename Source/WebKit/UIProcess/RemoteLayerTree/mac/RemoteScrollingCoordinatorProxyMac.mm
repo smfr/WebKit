@@ -49,12 +49,17 @@ using namespace WebCore;
 RemoteScrollingCoordinatorProxyMac::RemoteScrollingCoordinatorProxyMac(WebPageProxy& webPageProxy)
     : RemoteScrollingCoordinatorProxy(webPageProxy)
     , m_recentWheelEventDeltaFilter(WheelEventDeltaFilter::create())
-    , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create())
+    , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create(*this))
 {
     m_wheelEventDispatcher->setScrollingTree(scrollingTree());
 }
 
-RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac() = default;
+RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac()
+{
+#if ENABLE(SCROLLING_THREAD)
+    m_wheelEventDispatcher->invalidate();
+#endif
+}
 
 WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent)
 {
@@ -87,7 +92,6 @@ void RemoteScrollingCoordinatorProxyMac::didReceiveWheelEvent(bool /* wasHandled
     scrollingTree()->applyLayerPositions();
 }
 
-// FIXME: We need to call RemoteScrollingCoordinatorProxyMac::displayDidRefresh() directly from the CVDisplayLink callback, instead of hitting the main thread.
 void RemoteScrollingCoordinatorProxyMac::displayDidRefresh(PlatformDisplayID displayID)
 {
     RefPtr<ScrollingTree> scrollingTree = this->scrollingTree();
@@ -108,6 +112,7 @@ bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(Scrolli
 
 void RemoteScrollingCoordinatorProxyMac::hasNodeWithAnimatedScrollChanged(bool hasAnimatedScrolls)
 {
+    // FIXME: Needs to go to the other display link.
     auto* drawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(webPageProxy().drawingArea());
     if (!drawingArea)
         return;

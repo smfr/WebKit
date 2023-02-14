@@ -37,13 +37,50 @@
 namespace WebKit {
 using namespace WebCore;
 
-Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create()
+
+class RemoteLayerTreeEventDispatcherDisplayLinkClient final : public DisplayLink::Client {
+public:
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    explicit RemoteLayerTreeEventDispatcherDisplayLinkClient(RemoteLayerTreeEventDispatcher& eventDispatcher)
+        : m_eventDispatcher(&eventDispatcher)
+    {
+    }
+
+private:
+    // This is called on the display link callback thread.
+    void displayLinkFired(PlatformDisplayID displayID, DisplayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback) override
+    {
+        if (!m_eventDispatcher)
+            return;
+
+        ScrollingThread::dispatch([dispatcher = Ref { *m_eventDispatcher }, displayID] {
+            dispatcher->didRefreshDisplay(displayID);
+        });
+    }
+    
+    RefPtr<RemoteLayerTreeEventDispatcher> m_eventDispatcher;
+};
+
+
+Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
 {
-    return adoptRef(*new RemoteLayerTreeEventDispatcher());
+    return adoptRef(*new RemoteLayerTreeEventDispatcher(scrollingCoordinator));
 }
 
-RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher() = default;
+RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
+    : m_scrollingCoordinator(WeakPtr { scrollingCoordinator })
+    , m_displayLinkClient(makeUnique<RemoteLayerTreeEventDispatcherDisplayLinkClient>(*this))
+{
+}
+
 RemoteLayerTreeEventDispatcher::~RemoteLayerTreeEventDispatcher() = default;
+
+// This must be called to break the cycle between RemoteLayerTreeEventDispatcherDisplayLinkClient and this.
+void RemoteLayerTreeEventDispatcher::invalidate()
+{
+    m_displayLinkClient = nullptr;
+}
 
 // Maybe take this in the constructor.
 void RemoteLayerTreeEventDispatcher::setScrollingTree(RefPtr<RemoteScrollingTree>&& scrollingTree)
@@ -92,6 +129,23 @@ PlatformWheelEvent RemoteLayerTreeEventDispatcher::filteredWheelEvent(const Plat
     // FIXME
     return wheelEvent;
 }
+
+void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID displayID)
+{
+    ASSERT(ScrollingThread::isCurrentThread());
+
+    RefPtr<RemoteScrollingTree> scrollingTree;
+    {
+        Locker locker { m_scrollingTreeLock };
+        scrollingTree = m_scrollingTree;
+    }
+
+    if (!scrollingTree)
+        return;
+
+    scrollingTree->didRefreshDisplay(displayID);
+}
+
 
 } // namespace WebKit
 

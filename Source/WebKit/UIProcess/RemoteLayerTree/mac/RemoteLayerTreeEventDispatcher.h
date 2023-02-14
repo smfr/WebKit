@@ -37,15 +37,20 @@ struct WheelEventHandlingResult;
 
 namespace WebKit {
 
+class RemoteScrollingCoordinatorProxyMac;
 class RemoteScrollingTree;
+class RemoteLayerTreeEventDispatcherDisplayLinkClient;
 
 class RemoteLayerTreeEventDispatcher : public ThreadSafeRefCounted<RemoteLayerTreeEventDispatcher> {
     WTF_MAKE_FAST_ALLOCATED();
+    friend class RemoteLayerTreeEventDispatcherDisplayLinkClient;
 public:
-    static Ref<RemoteLayerTreeEventDispatcher> create();
+    static Ref<RemoteLayerTreeEventDispatcher> create(RemoteScrollingCoordinatorProxyMac&);
 
-    RemoteLayerTreeEventDispatcher();
+    explicit RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac&);
     ~RemoteLayerTreeEventDispatcher();
+    
+    void invalidate();
 
     WebCore::WheelEventHandlingResult handleWheelEvent(const PlatformWheelEvent&, RectEdges<bool> rubberBandableEdges);
 
@@ -55,8 +60,13 @@ private:
     WebCore::WheelEventHandlingResult scrollingTreeHandleWheelEvent(RemoteScrollingTree&, const PlatformWheelEvent&);
     PlatformWheelEvent filteredWheelEvent(const PlatformWheelEvent&);
 
+    void didRefreshDisplay(PlatformDisplayID);
+
     Lock m_scrollingTreeLock;
     RefPtr<RemoteScrollingTree> m_scrollingTree WTF_GUARDED_BY_LOCK(m_scrollingTreeLock);
+
+    WeakPtr<RemoteScrollingCoordinatorProxyMac> m_scrollingCoordinator;
+    std::unique_ptr<RemoteLayerTreeEventDispatcherDisplayLinkClient> m_displayLinkClient;
 };
 
 } // namespace WebKit
