@@ -149,6 +149,8 @@ void RemoteScrollingCoordinatorProxy::currentSnapPointIndicesDidChange(WebCore::
 // This comes from the scrolling tree.
 void RemoteScrollingCoordinatorProxy::scrollingTreeNodeDidScroll(ScrollingNodeID scrolledNodeID, const FloatPoint& newScrollPosition, const std::optional<FloatPoint>& layoutViewportOrigin, ScrollingLayerPositionAction scrollingLayerPositionAction)
 {
+    ASSERT(isMainThread());
+
     // Scroll updates for the main frame are sent via WebPageProxy::updateVisibleContentRects()
     // so don't send them here.
     if (!propagatesMainFrameScrolls() && scrolledNodeID == rootScrollingNodeID())
@@ -216,6 +218,7 @@ void RemoteScrollingCoordinatorProxy::receivedLastScrollingTreeNodeDidScrollRepl
 
 void RemoteScrollingCoordinatorProxy::scrollingTreeNodeDidStopAnimatedScroll(ScrollingNodeID scrolledNodeID)
 {
+    ASSERT(isMainThread());
     m_webPageProxy.send(Messages::RemoteScrollingCoordinator::AnimatedScrollDidEndForNode(scrolledNodeID));
 }
 
@@ -250,6 +253,7 @@ ScrollingTreeScrollingNode* RemoteScrollingCoordinatorProxy::rootNode() const
 
 void RemoteScrollingCoordinatorProxy::displayDidRefresh(PlatformDisplayID displayID)
 {
+    ASSERT(isMainThread());
     m_scrollingTree->displayDidRefresh(displayID);
 }
 

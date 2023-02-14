@@ -45,6 +45,7 @@ Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create()
 RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher() = default;
 RemoteLayerTreeEventDispatcher::~RemoteLayerTreeEventDispatcher() = default;
 
+// Maybe take this in the constructor.
 void RemoteLayerTreeEventDispatcher::setScrollingTree(RefPtr<RemoteScrollingTree>&& scrollingTree)
 {
     ASSERT(isMainThread());

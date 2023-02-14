@@ -48,17 +48,17 @@ RemoteScrollingTreeIOS::~RemoteScrollingTreeIOS() = default;
 
 void RemoteScrollingTreeIOS::scrollingTreeNodeWillStartPanGesture(ScrollingNodeID nodeID)
 {
-    m_scrollingCoordinatorProxy.scrollingTreeNodeWillStartPanGesture(nodeID);
+    m_scrollingCoordinatorProxy->scrollingTreeNodeWillStartPanGesture(nodeID);
 }
 
 void RemoteScrollingTreeIOS::scrollingTreeNodeWillStartScroll(ScrollingNodeID nodeID)
 {
-    m_scrollingCoordinatorProxy.scrollingTreeNodeWillStartScroll(nodeID);
+    m_scrollingCoordinatorProxy->scrollingTreeNodeWillStartScroll(nodeID);
 }
 
 void RemoteScrollingTreeIOS::scrollingTreeNodeDidEndScroll(ScrollingNodeID nodeID)
 {
-    m_scrollingCoordinatorProxy.scrollingTreeNodeDidEndScroll(nodeID);
+    m_scrollingCoordinatorProxy->scrollingTreeNodeDidEndScroll(nodeID);
 }
 
 Ref<ScrollingTreeNode> RemoteScrollingTreeIOS::createScrollingTreeNode(ScrollingNodeType nodeType, ScrollingNodeID nodeID)

@@ -55,6 +55,9 @@ private:
     OptionSet<WebCore::EventListenerRegionType> eventListenerRegionTypesForPoint(WebCore::FloatPoint) const final;
 #endif
 
+    void scrollingTreeNodeDidScroll(WebCore::ScrollingTreeScrollingNode&, WebCore::ScrollingLayerPositionAction = WebCore::ScrollingLayerPositionAction::Sync) override;
+    void scrollingTreeNodeDidStopAnimatedScroll(WebCore::ScrollingTreeScrollingNode&) override;
+
     void hasNodeWithAnimatedScrollChanged(bool) final;
     void displayDidRefresh(WebCore::PlatformDisplayID) final;
 

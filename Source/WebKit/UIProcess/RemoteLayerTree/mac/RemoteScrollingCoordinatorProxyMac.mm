@@ -29,7 +29,9 @@
 #if PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)
 
 #import "RemoteLayerTreeDrawingAreaProxy.h"
+#import "RemoteLayerTreeEventDispatcher.h"
 #import "WebPageProxy.h"
+#import <WebCore/ScrollingThread.h>
 #import <WebCore/ScrollingStateFrameScrollingNode.h>
 #import <WebCore/ScrollingStateOverflowScrollProxyNode.h>
 #import <WebCore/ScrollingStateOverflowScrollingNode.h>
@@ -47,10 +49,27 @@ using namespace WebCore;
 RemoteScrollingCoordinatorProxyMac::RemoteScrollingCoordinatorProxyMac(WebPageProxy& webPageProxy)
     : RemoteScrollingCoordinatorProxy(webPageProxy)
     , m_recentWheelEventDeltaFilter(WheelEventDeltaFilter::create())
+    , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create())
 {
+    m_wheelEventDispatcher->setScrollingTree(scrollingTree());
 }
 
-PlatformWheelEvent RemoteScrollingCoordinatorProxyMac::filteredWheelEvent(const WebCore::PlatformWheelEvent& wheelEvent)
+RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac() = default;
+
+WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent)
+{
+    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent] {
+
+        auto handlingResult = dispatcher->handleWheelEvent(platformWheelEvent);
+        if (!handlingResult.needsMainThreadProcessing())
+            return;
+
+    });
+    
+    return { };
+}
+
+PlatformWheelEvent RemoteScrollingCoordinatorProxyMac::filteredWheelEvent(const PlatformWheelEvent& wheelEvent)
 {
     m_recentWheelEventDeltaFilter->updateFromEvent(wheelEvent);
 
@@ -68,13 +87,20 @@ void RemoteScrollingCoordinatorProxyMac::didReceiveWheelEvent(bool /* wasHandled
     scrollingTree()->applyLayerPositions();
 }
 
+// FIXME: We need to call RemoteScrollingCoordinatorProxyMac::displayDidRefresh() directly from the CVDisplayLink callback, instead of hitting the main thread.
 void RemoteScrollingCoordinatorProxyMac::displayDidRefresh(PlatformDisplayID displayID)
 {
-    RemoteScrollingCoordinatorProxy::displayDidRefresh(displayID);
-    scrollingTree()->applyLayerPositions();
+    RefPtr<ScrollingTree> scrollingTree = this->scrollingTree();
+    if (!scrollingTree)
+        return;
+
+    ScrollingThread::dispatch([scrollingTree, displayID] {
+        scrollingTree->displayDidRefresh(displayID);
+        scrollingTree->applyLayerPositions();
+    });
 }
 
-bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(WebCore::ScrollingNodeID, const WebCore::RequestedScrollData&)
+bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID, const RequestedScrollData&)
 {
     // Unlike iOS, we handle scrolling requests for the main frame in the same way we handle them for subscrollers.
     return false;

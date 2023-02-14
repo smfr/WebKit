@@ -61,11 +61,18 @@ void RemoteScrollingTreeMac::handleWheelEventPhase(ScrollingNodeID, PlatformWhee
 
 void RemoteScrollingTreeMac::hasNodeWithAnimatedScrollChanged(bool hasNodeWithAnimatedScroll)
 {
-    m_scrollingCoordinatorProxy.hasNodeWithAnimatedScrollChanged(hasNodeWithAnimatedScroll);
+    ASSERT(ScrollingThread::isCurrentThread());
+
+    RunLoop::main().dispatch([strongThis = Ref { *this }, hasNodeWithAnimatedScroll] {
+        if (auto* scrollingCoordinatorProxy = strongThis->scrollingCoordinatorProxy())
+            scrollingCoordinatorProxy->hasNodeWithAnimatedScrollChanged(hasNodeWithAnimatedScroll);
+    });
 }
 
 void RemoteScrollingTreeMac::displayDidRefresh(PlatformDisplayID)
 {
+    ASSERT(ScrollingThread::isCurrentThread());
+
     Locker locker { m_treeLock };
     serviceScrollAnimations(MonotonicTime::now()); // FIXME: Share timestamp with the rest of the update.
 }
@@ -91,11 +98,45 @@ Ref<ScrollingTreeNode> RemoteScrollingTreeMac::createScrollingTreeNode(Scrolling
     return ScrollingTreeFixedNodeCocoa::create(*this, nodeID);
 }
 
-void RemoteScrollingTreeMac::handleMouseEvent(const WebCore::PlatformMouseEvent& event)
+void RemoteScrollingTreeMac::handleMouseEvent(const PlatformMouseEvent& event)
 {
     if (!rootNode())
         return;
     static_cast<ScrollingTreeFrameScrollingNodeRemoteMac&>(*rootNode()).handleMouseEvent(event);
+}
+
+void RemoteScrollingTreeMac::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNode& node, ScrollingLayerPositionAction action)
+{
+    ASSERT(ScrollingThread::isCurrentThread());
+
+    std::optional<FloatPoint> layoutViewportOrigin;
+    if (is<ScrollingTreeFrameScrollingNode>(node))
+        layoutViewportOrigin = downcast<ScrollingTreeFrameScrollingNode>(node).layoutViewport().location();
+
+    auto nodeID = node.scrollingNodeID();
+    auto scrollPosition = node.currentScrollPosition();
+
+    // Happens when the didScroll happens as a result of the scrolling tree commmit.
+    if (RunLoop::isMain()) {
+        if (auto* scrollingCoordinatorProxy = this->scrollingCoordinatorProxy())
+            scrollingCoordinatorProxy->scrollingTreeNodeDidScroll(nodeID, scrollPosition, layoutViewportOrigin, action);
+        return;
+    }
+
+    RunLoop::main().dispatch([strongThis = Ref { *this }, nodeID, scrollPosition, layoutViewportOrigin, action] {
+        if (auto* scrollingCoordinatorProxy = strongThis->scrollingCoordinatorProxy())
+            scrollingCoordinatorProxy->scrollingTreeNodeDidScroll(nodeID, scrollPosition, layoutViewportOrigin, action);
+    });
+}
+
+void RemoteScrollingTreeMac::scrollingTreeNodeDidStopAnimatedScroll(ScrollingTreeScrollingNode& node)
+{
+    ASSERT(ScrollingThread::isCurrentThread());
+
+    RunLoop::main().dispatch([strongThis = Ref { *this }, nodeID = node.scrollingNodeID()] {
+        if (auto* scrollingCoordinatorProxy = strongThis->scrollingCoordinatorProxy())
+            scrollingCoordinatorProxy->scrollingTreeNodeDidStopAnimatedScroll(nodeID);
+    });
 }
 
 static ScrollingNodeID scrollingNodeIDForLayer(CALayer *layer)
