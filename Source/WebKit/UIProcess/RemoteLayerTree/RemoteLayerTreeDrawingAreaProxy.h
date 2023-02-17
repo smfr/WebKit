@@ -44,6 +44,8 @@ class RemoteLayerTreeDrawingAreaProxy : public DrawingAreaProxy {
 public:
     RemoteLayerTreeDrawingAreaProxy(WebPageProxy&, WebProcessProxy&);
     virtual ~RemoteLayerTreeDrawingAreaProxy();
+    
+    virtual bool isRemoteLayerTreeDrawingAreaProxyMac() const { return false; }
 
     const RemoteLayerTreeHost& remoteLayerTreeHost() const { return *m_remoteLayerTreeHost; }
     std::unique_ptr<RemoteLayerTreeHost> detachRemoteLayerTreeHost();

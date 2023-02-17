@@ -40,7 +40,7 @@ public:
     ~RemoteScrollingCoordinatorProxyMac();
 
 private:
-    WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&) override;
+    WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges) override;
 
     void didReceiveWheelEvent(bool) override;
     bool scrollingTreeNodeRequestsScroll(WebCore::ScrollingNodeID, const WebCore::RequestedScrollData&) override;

@@ -23,16 +23,18 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "config.h"
-#import "RemoteLayerTreeEventDispatcher.h"
+#include "config.h"
+#include "RemoteLayerTreeEventDispatcher.h"
 
 #if PLATFORM(MAC) && ENABLE(SCROLLING_THREAD)
 
-#import "Logging.h"
-#import "RemoteScrollingTree.h"
-#import <WebCore/PlatformWheelEvent.h>
-#import <WebCore/ScrollingCoordinatorTypes.h>
-#import <WebCore/ScrollingThread.h>
+#include "Logging.h"
+#include "RemoteLayerTreeDrawingAreaProxyMac.h"
+#include "RemoteScrollingCoordinatorProxyMac.h"
+#include "RemoteScrollingTree.h"
+#include <WebCore/PlatformWheelEvent.h>
+#include <WebCore/ScrollingCoordinatorTypes.h>
+#include <WebCore/ScrollingThread.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -51,6 +53,7 @@ private:
     // This is called on the display link callback thread.
     void displayLinkFired(PlatformDisplayID displayID, DisplayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback) override
     {
+        // FIXME: Thread safety.
         if (!m_eventDispatcher)
             return;
 
@@ -72,6 +75,8 @@ RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCo
     : m_scrollingCoordinator(WeakPtr { scrollingCoordinator })
     , m_displayLinkClient(makeUnique<RemoteLayerTreeEventDispatcherDisplayLinkClient>(*this))
 {
+
+
 }
 
 RemoteLayerTreeEventDispatcher::~RemoteLayerTreeEventDispatcher() = default;
@@ -130,6 +135,32 @@ PlatformWheelEvent RemoteLayerTreeEventDispatcher::filteredWheelEvent(const Plat
     return wheelEvent;
 }
 
+void RemoteLayerTreeEventDispatcher::startDisplayLinkObserver()
+{
+    ASSERT(isMainThread());
+    
+    if (!m_scrollingCoordinator)
+        return;
+
+    auto* drawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(webPageProxy().drawingArea());
+    ASSERT(drawingArea->isRemoteLayerTreeDrawingAreaProxyMac());
+    auto* drawingAreaMac = static_cast<RemoteLayerTreeDrawingAreaProxyMac>(drawingArea);
+    
+    drawingAreaMac->
+    
+
+}
+
+void RemoteLayerTreeEventDispatcher::stopDisplayLinkObserver()
+{
+    ASSERT(isMainThread());
+
+    if (!m_scrollingCoordinator)
+        return;
+
+
+}
+
 void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID displayID)
 {
     ASSERT(ScrollingThread::isCurrentThread());
@@ -143,7 +174,7 @@ void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID display
     if (!scrollingTree)
         return;
 
-    scrollingTree->didRefreshDisplay(displayID);
+    scrollingTree->displayDidRefresh(displayID);
 }
 
 

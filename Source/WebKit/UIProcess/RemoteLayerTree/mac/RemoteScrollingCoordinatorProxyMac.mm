@@ -61,11 +61,11 @@ RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac()
 #endif
 }
 
-WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent)
+WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent, RectEdges<bool> rubberBandableEdges)
 {
-    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent] {
+    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent, rubberBandableEdges] {
 
-        auto handlingResult = dispatcher->handleWheelEvent(platformWheelEvent);
+        auto handlingResult = dispatcher->handleWheelEvent(platformWheelEvent, rubberBandableEdges);
         if (!handlingResult.needsMainThreadProcessing())
             return;
 

@@ -282,6 +282,7 @@ void RemoteLayerTreeDrawingAreaProxyMac::setDisplayLinkWantsFullSpeedUpdates(boo
 
     auto& displayLink = ensureDisplayLink();
 
+    // FIXME: Move to RemoteLayerTreeEventDispatcher.
     // Use a second observer for full-speed updates (used to drive scroll animations).
     if (wantsFullSpeedUpdates) {
         if (m_fullSpeedUpdateObserverID)

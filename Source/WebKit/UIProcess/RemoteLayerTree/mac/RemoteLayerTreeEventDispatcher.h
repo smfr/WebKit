@@ -60,6 +60,8 @@ private:
     WebCore::WheelEventHandlingResult scrollingTreeHandleWheelEvent(RemoteScrollingTree&, const PlatformWheelEvent&);
     PlatformWheelEvent filteredWheelEvent(const PlatformWheelEvent&);
 
+    void startDisplayLinkObserver();
+    void stopDisplayLinkObserver();
     void didRefreshDisplay(PlatformDisplayID);
 
     Lock m_scrollingTreeLock;
@@ -67,6 +69,7 @@ private:
 
     WeakPtr<RemoteScrollingCoordinatorProxyMac> m_scrollingCoordinator;
     std::unique_ptr<RemoteLayerTreeEventDispatcherDisplayLinkClient> m_displayLinkClient;
+    std::optional<DisplayLinkObserverID> m_displayRefreshObserverID;
 };
 
 } // namespace WebKit
