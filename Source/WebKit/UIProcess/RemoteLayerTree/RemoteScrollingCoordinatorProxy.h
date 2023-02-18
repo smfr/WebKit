@@ -122,7 +122,6 @@ public:
     void resetStateAfterProcessExited();
     WebCore::ScrollingTreeScrollingNode* rootNode() const;
 
-    virtual void displayDidRefresh(WebCore::PlatformDisplayID);
     void reportExposedUnfilledArea(MonotonicTime, unsigned unfilledArea);
     void reportSynchronousScrollingReasonsChanged(MonotonicTime, OptionSet<WebCore::SynchronousScrollingReason>);
 

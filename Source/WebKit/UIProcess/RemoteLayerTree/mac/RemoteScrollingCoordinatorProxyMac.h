@@ -42,10 +42,8 @@ public:
 private:
     WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges) override;
 
-    void didReceiveWheelEvent(bool) override;
     bool scrollingTreeNodeRequestsScroll(WebCore::ScrollingNodeID, const WebCore::RequestedScrollData&) override;
     void hasNodeWithAnimatedScrollChanged(bool) override;
-    void displayDidRefresh(WebCore::PlatformDisplayID) override;
 
     void connectStateNodeLayers(WebCore::ScrollingStateTree&, const RemoteLayerTreeHost&) override;
     void establishLayerTreeScrollingRelations(const RemoteLayerTreeHost&) override;

@@ -25,6 +25,7 @@
 
 #if PLATFORM(MAC) && ENABLE(SCROLLING_THREAD)
 
+#include <pal/HysteresisActivity.h>
 #include <wtf/FastMalloc.h>
 #include <wtf/HashMap.h>
 #include <wtf/Lock.h>
@@ -52,17 +53,25 @@ public:
     
     void invalidate();
 
+    void willHandleWheelEvent();
     WebCore::WheelEventHandlingResult handleWheelEvent(const PlatformWheelEvent&, RectEdges<bool> rubberBandableEdges);
 
+    void hasNodeWithAnimatedScrollChanged(bool hasAnimatedScrolls);
     void setScrollingTree(RefPtr<RemoteScrollingTree>&&);
 
 private:
     WebCore::WheelEventHandlingResult scrollingTreeHandleWheelEvent(RemoteScrollingTree&, const PlatformWheelEvent&);
     PlatformWheelEvent filteredWheelEvent(const PlatformWheelEvent&);
 
+    void wheelEventHysteresisUpdated(PAL::HysteresisState);
+
+    DisplayLink* displayLink() const;
+
     void startDisplayLinkObserver();
     void stopDisplayLinkObserver();
     void didRefreshDisplay(PlatformDisplayID);
+
+    void startOrStopDisplayLink();
 
     Lock m_scrollingTreeLock;
     RefPtr<RemoteScrollingTree> m_scrollingTree WTF_GUARDED_BY_LOCK(m_scrollingTreeLock);
@@ -70,6 +79,7 @@ private:
     WeakPtr<RemoteScrollingCoordinatorProxyMac> m_scrollingCoordinator;
     std::unique_ptr<RemoteLayerTreeEventDispatcherDisplayLinkClient> m_displayLinkClient;
     std::optional<DisplayLinkObserverID> m_displayRefreshObserverID;
+    PAL::HysteresisActivity m_wheelEventActivityHysteresis;
 };
 
 } // namespace WebKit

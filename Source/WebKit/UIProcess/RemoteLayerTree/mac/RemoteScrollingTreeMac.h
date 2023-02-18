@@ -55,8 +55,15 @@ private:
     OptionSet<WebCore::EventListenerRegionType> eventListenerRegionTypesForPoint(WebCore::FloatPoint) const final;
 #endif
 
-    void scrollingTreeNodeDidScroll(WebCore::ScrollingTreeScrollingNode&, WebCore::ScrollingLayerPositionAction = WebCore::ScrollingLayerPositionAction::Sync) override;
+    void scrollingTreeNodeDidScroll(WebCore::ScrollingTreeScrollingNode&, WebCore::ScrollingLayerPositionAction) override;
     void scrollingTreeNodeDidStopAnimatedScroll(WebCore::ScrollingTreeScrollingNode&) override;
+    bool scrollingTreeNodeRequestsScroll(WebCore::ScrollingNodeID, const WebCore::RequestedScrollData&) override;
+    void currentSnapPointIndicesDidChange(WebCore::ScrollingNodeID, std::optional<unsigned> horizontal, std::optional<unsigned> vertical) override;
+    void reportExposedUnfilledArea(MonotonicTime, unsigned unfilledArea) override;
+    void reportSynchronousScrollingReasonsChanged(MonotonicTime, OptionSet<WebCore::SynchronousScrollingReason>) override;
+    void receivedWheelEventWithPhases(WebCore::PlatformWheelEventPhase, WebCore::PlatformWheelEventPhase momentumPhase) override;
+    void deferWheelEventTestCompletionForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason) override;
+    void removeWheelEventTestCompletionDeferralForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason) override;
 
     void hasNodeWithAnimatedScrollChanged(bool) final;
     void displayDidRefresh(WebCore::PlatformDisplayID) final;

@@ -98,27 +98,10 @@ std::optional<RequestedScrollData> RemoteScrollingCoordinatorProxy::commitScroll
     return std::exchange(m_requestedScroll, { });
 }
 
-WheelEventHandlingResult RemoteScrollingCoordinatorProxy::handleWheelEvent(const PlatformWheelEvent& wheelEvent, RectEdges<bool> rubberBandableEdges)
+WheelEventHandlingResult RemoteScrollingCoordinatorProxy::handleWheelEvent(const PlatformWheelEvent&, RectEdges<bool>)
 {
-    if (!m_scrollingTree)
-        return WheelEventHandlingResult::unhandled();
-
-    // Replicate the hack in EventDispatcher::internalWheelEvent(). We could pass rubberBandableEdges all the way through the
-    // WebProcess and back via the ScrollingTree, but we only ever need to consult it here.
-    if (wheelEvent.phase() == PlatformWheelEventPhase::Began)
-        m_scrollingTree->setMainFrameCanRubberBand(rubberBandableEdges);
-
-    auto processingSteps = m_scrollingTree->determineWheelEventProcessing(wheelEvent);
-    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::handleWheelEvent " << wheelEvent << " - steps " << processingSteps);
-    if (!processingSteps.contains(WheelEventProcessingSteps::ScrollingThread))
-        return WheelEventHandlingResult::unhandled(processingSteps);
-
-    m_scrollingTree->willProcessWheelEvent();
-
-    auto filteredEvent = filteredWheelEvent(wheelEvent);
-    auto result = m_scrollingTree->handleWheelEvent(filteredEvent, processingSteps);
-    didReceiveWheelEvent(result.wasHandled);
-    return result;
+    // Only used by macOS.
+    return WheelEventHandlingResult::unhandled();
 }
 
 void RemoteScrollingCoordinatorProxy::handleMouseEvent(const WebCore::PlatformMouseEvent& event)
@@ -249,12 +232,6 @@ bool RemoteScrollingCoordinatorProxy::hasScrollableMainFrame() const
 ScrollingTreeScrollingNode* RemoteScrollingCoordinatorProxy::rootNode() const
 {
     return m_scrollingTree->rootNode();
-}
-
-void RemoteScrollingCoordinatorProxy::displayDidRefresh(PlatformDisplayID displayID)
-{
-    ASSERT(isMainThread());
-    m_scrollingTree->displayDidRefresh(displayID);
 }
 
 bool RemoteScrollingCoordinatorProxy::hasScrollableOrZoomedMainFrame() const

@@ -120,6 +120,8 @@ Ref<ScrollingTreeNode> RemoteScrollingTree::createScrollingTreeNode(ScrollingNod
 
 void RemoteScrollingTree::currentSnapPointIndicesDidChange(ScrollingNodeID nodeID, std::optional<unsigned> horizontal, std::optional<unsigned> vertical)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 
@@ -128,6 +130,8 @@ void RemoteScrollingTree::currentSnapPointIndicesDidChange(ScrollingNodeID nodeI
 
 void RemoteScrollingTree::reportExposedUnfilledArea(MonotonicTime time, unsigned unfilledArea)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 
@@ -136,6 +140,8 @@ void RemoteScrollingTree::reportExposedUnfilledArea(MonotonicTime time, unsigned
 
 void RemoteScrollingTree::reportSynchronousScrollingReasonsChanged(MonotonicTime timestamp, OptionSet<SynchronousScrollingReason> reasons)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 
@@ -144,6 +150,8 @@ void RemoteScrollingTree::reportSynchronousScrollingReasonsChanged(MonotonicTime
 
 void RemoteScrollingTree::receivedWheelEventWithPhases(PlatformWheelEventPhase phase, PlatformWheelEventPhase momentumPhase)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 
@@ -152,6 +160,8 @@ void RemoteScrollingTree::receivedWheelEventWithPhases(PlatformWheelEventPhase p
 
 void RemoteScrollingTree::deferWheelEventTestCompletionForReason(ScrollingNodeID nodeID, WheelEventTestMonitor::DeferReason reason)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 
@@ -160,6 +170,8 @@ void RemoteScrollingTree::deferWheelEventTestCompletionForReason(ScrollingNodeID
 
 void RemoteScrollingTree::removeWheelEventTestCompletionDeferralForReason(ScrollingNodeID nodeID, WheelEventTestMonitor::DeferReason reason)
 {
+    ASSERT(isMainThread());
+
     if (!m_scrollingCoordinatorProxy)
         return;
 

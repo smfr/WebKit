@@ -59,7 +59,6 @@ public:
     TransactionID lastCommittedLayerTreeTransactionID() const { return m_transactionIDForPendingCACommit; }
 
     virtual void didRefreshDisplay();
-    virtual void setDisplayLinkWantsFullSpeedUpdates(bool) { }
     
     bool hasDebugIndicator() const { return !!m_debugIndicatorLayerTreeHost; }
 

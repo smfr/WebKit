@@ -82,8 +82,6 @@ RemoteLayerTreeDrawingAreaProxyMac::RemoteLayerTreeDrawingAreaProxyMac(WebPagePr
 RemoteLayerTreeDrawingAreaProxyMac::~RemoteLayerTreeDrawingAreaProxyMac()
 {
     if (auto* displayLink = exisingDisplayLink()) {
-        if (m_fullSpeedUpdateObserverID)
-            displayLink->removeObserver(*m_displayLinkClient, *m_fullSpeedUpdateObserverID);
         if (m_displayRefreshObserverID)
             displayLink->removeObserver(*m_displayLinkClient, *m_displayRefreshObserverID);
     }
@@ -107,7 +105,7 @@ DisplayLink* RemoteLayerTreeDrawingAreaProxyMac::exisingDisplayLink()
     return m_webPageProxy.process().processPool().displayLinks().existingDisplayLinkForDisplay(*m_displayID);
 }
 
-DisplayLink& RemoteLayerTreeDrawingAreaProxyMac::ensureDisplayLink()
+DisplayLink& RemoteLayerTreeDrawingAreaProxyMac::displayLink()
 {
     ASSERT(m_displayID);
 
@@ -250,7 +248,7 @@ void RemoteLayerTreeDrawingAreaProxyMac::scheduleDisplayRefreshCallbacks()
         return;
     }
 
-    auto& displayLink = ensureDisplayLink();
+    auto& displayLink = this->displayLink();
     m_displayRefreshObserverID = DisplayLinkObserverID::generate();
     displayLink.addObserver(*m_displayLinkClient, *m_displayRefreshObserverID, m_clientPreferredFramesPerSecond);
 }
@@ -275,33 +273,10 @@ void RemoteLayerTreeDrawingAreaProxyMac::setPreferredFramesPerSecond(WebCore::Fr
         displayLink->setObserverPreferredFramesPerSecond(*m_displayLinkClient, *m_displayRefreshObserverID, preferredFramesPerSecond);
 }
 
-void RemoteLayerTreeDrawingAreaProxyMac::setDisplayLinkWantsFullSpeedUpdates(bool wantsFullSpeedUpdates)
-{
-    if (!m_displayID)
-        return;
-
-    auto& displayLink = ensureDisplayLink();
-
-    // FIXME: Move to RemoteLayerTreeEventDispatcher.
-    // Use a second observer for full-speed updates (used to drive scroll animations).
-    if (wantsFullSpeedUpdates) {
-        if (m_fullSpeedUpdateObserverID)
-            return;
-
-        m_fullSpeedUpdateObserverID = DisplayLinkObserverID::generate();
-        displayLink.addObserver(*m_displayLinkClient, *m_fullSpeedUpdateObserverID, displayLink.nominalFramesPerSecond());
-    } else if (m_fullSpeedUpdateObserverID)
-        removeObserver(m_fullSpeedUpdateObserverID);
-}
-
 void RemoteLayerTreeDrawingAreaProxyMac::windowScreenDidChange(PlatformDisplayID displayID, std::optional<FramesPerSecond> nominalFramesPerSecond)
 {
     if (displayID == m_displayID && m_displayNominalFramesPerSecond == nominalFramesPerSecond)
         return;
-
-    bool hadFullSpeedOberver = m_fullSpeedUpdateObserverID.has_value();
-    if (hadFullSpeedOberver)
-        removeObserver(m_fullSpeedUpdateObserverID);
 
     pauseDisplayRefreshCallbacks();
 
@@ -309,18 +284,6 @@ void RemoteLayerTreeDrawingAreaProxyMac::windowScreenDidChange(PlatformDisplayID
     m_displayNominalFramesPerSecond = nominalFramesPerSecond;
 
     scheduleDisplayRefreshCallbacks();
-    if (hadFullSpeedOberver) {
-        m_fullSpeedUpdateObserverID = DisplayLinkObserverID::generate();
-        if (auto* displayLink = exisingDisplayLink())
-            displayLink->addObserver(*m_displayLinkClient, *m_fullSpeedUpdateObserverID, displayLink->nominalFramesPerSecond());
-    }
-}
-
-void RemoteLayerTreeDrawingAreaProxyMac::didRefreshDisplay()
-{
-    // FIXME: Need to pass WebCore::DisplayUpdate here and filter out non-relevant displays.
-    m_webPageProxy.scrollingCoordinatorProxy()->displayDidRefresh(m_displayID.value_or(0));
-    RemoteLayerTreeDrawingAreaProxy::didRefreshDisplay();
 }
 
 void RemoteLayerTreeDrawingAreaProxyMac::didChangeViewExposedRect()

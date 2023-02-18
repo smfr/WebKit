@@ -46,10 +46,10 @@ public:
     RemoteLayerTreeDrawingAreaProxyMac(WebPageProxy&, WebProcessProxy&);
     ~RemoteLayerTreeDrawingAreaProxyMac();
 
-    void didRefreshDisplay() override;
+    DisplayLink& displayLink();
 
 private:
-    bool isRemoteLayerTreeDrawingAreaProxyMac() const { return true; }
+    bool isRemoteLayerTreeDrawingAreaProxyMac() const override { return true; }
 
     WebCore::DelegatedScrollingMode delegatedScrollingMode() const override;
     std::unique_ptr<RemoteScrollingCoordinatorProxy> createScrollingCoordinatorProxy() const override;
@@ -70,19 +70,15 @@ private:
 
     void didChangeViewExposedRect() override;
 
-    void setDisplayLinkWantsFullSpeedUpdates(bool) override;
-
     void removeObserver(std::optional<DisplayLinkObserverID>&);
 
     DisplayLink* exisingDisplayLink();
-    DisplayLink& ensureDisplayLink();
 
     std::optional<WebCore::PlatformDisplayID> m_displayID; // Would be nice to make this non-optional, and ensure we always get one on creation.
     std::optional<WebCore::FramesPerSecond> m_displayNominalFramesPerSecond;
     WebCore::FramesPerSecond m_clientPreferredFramesPerSecond { WebCore::FullSpeedFramesPerSecond };
 
     std::optional<DisplayLinkObserverID> m_displayRefreshObserverID;
-    std::optional<DisplayLinkObserverID> m_fullSpeedUpdateObserverID;
     std::unique_ptr<RemoteLayerTreeDisplayLinkClient> m_displayLinkClient;
     WebCore::GraphicsLayer::PlatformLayerID m_pageScalingLayerID;
 

@@ -28,17 +28,18 @@
 
 #if PLATFORM(MAC) && ENABLE(SCROLLING_THREAD)
 
+#include "DisplayLink.h"
 #include "Logging.h"
 #include "RemoteLayerTreeDrawingAreaProxyMac.h"
 #include "RemoteScrollingCoordinatorProxyMac.h"
 #include "RemoteScrollingTree.h"
+#include "WebPageProxy.h"
 #include <WebCore/PlatformWheelEvent.h>
 #include <WebCore/ScrollingCoordinatorTypes.h>
 #include <WebCore/ScrollingThread.h>
 
 namespace WebKit {
 using namespace WebCore;
-
 
 class RemoteLayerTreeEventDispatcherDisplayLinkClient final : public DisplayLink::Client {
 public:
@@ -71,12 +72,13 @@ Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create(Remot
     return adoptRef(*new RemoteLayerTreeEventDispatcher(scrollingCoordinator));
 }
 
+static const Seconds wheelEventHysteresisDuration { 1_s };
+
 RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
     : m_scrollingCoordinator(WeakPtr { scrollingCoordinator })
     , m_displayLinkClient(makeUnique<RemoteLayerTreeEventDispatcherDisplayLinkClient>(*this))
+    , m_wheelEventActivityHysteresis([this](PAL::HysteresisState state) { wheelEventHysteresisUpdated(state); }, wheelEventHysteresisDuration)
 {
-
-
 }
 
 RemoteLayerTreeEventDispatcher::~RemoteLayerTreeEventDispatcher() = default;
@@ -95,7 +97,25 @@ void RemoteLayerTreeEventDispatcher::setScrollingTree(RefPtr<RemoteScrollingTree
     Locker locker { m_scrollingTreeLock };
     m_scrollingTree = WTFMove(scrollingTree);
 }
-    
+
+void RemoteLayerTreeEventDispatcher::willHandleWheelEvent()
+{
+    ASSERT(isMainThread());
+    m_wheelEventActivityHysteresis.impulse();
+}
+
+void RemoteLayerTreeEventDispatcher::wheelEventHysteresisUpdated(PAL::HysteresisState state)
+{
+    ASSERT(isMainThread());
+    startOrStopDisplayLink();
+}
+
+void RemoteLayerTreeEventDispatcher::hasNodeWithAnimatedScrollChanged(bool hasAnimatedScrolls)
+{
+    ASSERT(isMainThread());
+    startOrStopDisplayLink();
+}
+
 WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const PlatformWheelEvent& wheelEvent, RectEdges<bool> rubberBandableEdges)
 {
     ASSERT(ScrollingThread::isCurrentThread());
@@ -115,7 +135,7 @@ WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const 
         scrollingTree->setMainFrameCanRubberBand(rubberBandableEdges);
 
     auto processingSteps = scrollingTree->determineWheelEventProcessing(wheelEvent);
-    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::handleWheelEvent " << wheelEvent << " - steps " << processingSteps);
+    LOG_WITH_STREAM(Scrolling, stream << "RemoteLayerTreeEventDispatcher::handleWheelEvent " << wheelEvent << " - steps " << processingSteps);
     if (!processingSteps.contains(WheelEventProcessingSteps::ScrollingThread))
         return WheelEventHandlingResult::unhandled(processingSteps);
 
@@ -126,6 +146,9 @@ WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const 
 
     auto filteredEvent = filteredWheelEvent(wheelEvent);
     auto result = scrollingTree->handleWheelEvent(filteredEvent, processingSteps);
+
+    scrollingTree->applyLayerPositions();
+
     return result;
 }
 
@@ -135,30 +158,69 @@ PlatformWheelEvent RemoteLayerTreeEventDispatcher::filteredWheelEvent(const Plat
     return wheelEvent;
 }
 
-void RemoteLayerTreeEventDispatcher::startDisplayLinkObserver()
+DisplayLink* RemoteLayerTreeEventDispatcher::displayLink() const
 {
     ASSERT(isMainThread());
     
     if (!m_scrollingCoordinator)
+        return nullptr;
+
+    auto* drawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(m_scrollingCoordinator->webPageProxy().drawingArea());
+    ASSERT(drawingArea && drawingArea->isRemoteLayerTreeDrawingAreaProxyMac());
+    auto* drawingAreaMac = static_cast<RemoteLayerTreeDrawingAreaProxyMac*>(drawingArea);
+
+    return &drawingAreaMac->displayLink();
+}
+
+void RemoteLayerTreeEventDispatcher::startOrStopDisplayLink()
+{
+    auto needsDisplayLink = [&]() {
+        if (m_wheelEventActivityHysteresis.state() == PAL::HysteresisState::Started)
+            return true;
+
+        RefPtr<RemoteScrollingTree> scrollingTree;
+        {
+            Locker locker { m_scrollingTreeLock };
+            scrollingTree = m_scrollingTree;
+        }
+
+        return scrollingTree && scrollingTree->hasNodeWithActiveScrollAnimations();
+    }();
+
+    if (needsDisplayLink)
+        startDisplayLinkObserver();
+    else
+        stopDisplayLinkObserver();
+}
+
+void RemoteLayerTreeEventDispatcher::startDisplayLinkObserver()
+{
+    if (m_displayRefreshObserverID)
         return;
 
-    auto* drawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(webPageProxy().drawingArea());
-    ASSERT(drawingArea->isRemoteLayerTreeDrawingAreaProxyMac());
-    auto* drawingAreaMac = static_cast<RemoteLayerTreeDrawingAreaProxyMac>(drawingArea);
-    
-    drawingAreaMac->
-    
+    auto* displayLink = this->displayLink();
+    if (!displayLink)
+        return;
 
+    LOG_WITH_STREAM(DisplayLink, stream << "[UI ] RemoteLayerTreeEventDispatcher::startDisplayLinkObserver");
+
+    m_displayRefreshObserverID = DisplayLinkObserverID::generate();
+    displayLink->addObserver(*m_displayLinkClient, *m_displayRefreshObserverID, displayLink->nominalFramesPerSecond());
 }
 
 void RemoteLayerTreeEventDispatcher::stopDisplayLinkObserver()
 {
-    ASSERT(isMainThread());
-
-    if (!m_scrollingCoordinator)
+    if (!m_displayRefreshObserverID)
         return;
 
+    auto* displayLink = this->displayLink();
+    if (!displayLink)
+        return;
 
+    LOG_WITH_STREAM(DisplayLink, stream << "[UI ] RemoteLayerTreeEventDispatcher::stopDisplayLinkObserver");
+
+    displayLink->removeObserver(*m_displayLinkClient, *m_displayRefreshObserverID);
+    m_displayRefreshObserverID = { };
 }
 
 void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID displayID)

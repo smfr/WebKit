@@ -63,12 +63,12 @@ RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac()
 
 WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent, RectEdges<bool> rubberBandableEdges)
 {
-    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent, rubberBandableEdges] {
+    m_wheelEventDispatcher->willHandleWheelEvent();
 
+    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent, rubberBandableEdges] {
         auto handlingResult = dispatcher->handleWheelEvent(platformWheelEvent, rubberBandableEdges);
         if (!handlingResult.needsMainThreadProcessing())
             return;
-
     });
     
     return { };
@@ -87,23 +87,6 @@ PlatformWheelEvent RemoteScrollingCoordinatorProxyMac::filteredWheelEvent(const 
     return filteredEvent;
 }
 
-void RemoteScrollingCoordinatorProxyMac::didReceiveWheelEvent(bool /* wasHandled */)
-{
-    scrollingTree()->applyLayerPositions();
-}
-
-void RemoteScrollingCoordinatorProxyMac::displayDidRefresh(PlatformDisplayID displayID)
-{
-    RefPtr<ScrollingTree> scrollingTree = this->scrollingTree();
-    if (!scrollingTree)
-        return;
-
-    ScrollingThread::dispatch([scrollingTree, displayID] {
-        scrollingTree->displayDidRefresh(displayID);
-        scrollingTree->applyLayerPositions();
-    });
-}
-
 bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID, const RequestedScrollData&)
 {
     // Unlike iOS, we handle scrolling requests for the main frame in the same way we handle them for subscrollers.
@@ -112,12 +95,7 @@ bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(Scrolli
 
 void RemoteScrollingCoordinatorProxyMac::hasNodeWithAnimatedScrollChanged(bool hasAnimatedScrolls)
 {
-    // FIXME: Needs to go to the other display link.
-    auto* drawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(webPageProxy().drawingArea());
-    if (!drawingArea)
-        return;
-
-    drawingArea->setDisplayLinkWantsFullSpeedUpdates(hasAnimatedScrolls);
+    m_wheelEventDispatcher->hasNodeWithAnimatedScrollChanged(hasAnimatedScrolls);
 }
 
 void RemoteScrollingCoordinatorProxyMac::connectStateNodeLayers(ScrollingStateTree& stateTree, const RemoteLayerTreeHost& layerTreeHost)
