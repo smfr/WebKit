@@ -48,10 +48,6 @@ private:
     void connectStateNodeLayers(WebCore::ScrollingStateTree&, const RemoteLayerTreeHost&) override;
     void establishLayerTreeScrollingRelations(const RemoteLayerTreeHost&) override;
 
-    WebCore::PlatformWheelEvent filteredWheelEvent(const WebCore::PlatformWheelEvent&) override;
-
-    std::unique_ptr<WebCore::WheelEventDeltaFilter> m_recentWheelEventDeltaFilter;
-
 #if ENABLE(SCROLLING_THREAD)
     RefPtr<RemoteLayerTreeEventDispatcher> m_wheelEventDispatcher;
 #endif

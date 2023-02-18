@@ -95,8 +95,6 @@ public:
 
     virtual WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges);
     void handleMouseEvent(const WebCore::PlatformMouseEvent&);
-    
-    virtual WebCore::PlatformWheelEvent filteredWheelEvent(const WebCore::PlatformWheelEvent& wheelEvent) { return wheelEvent; }
 
     WebCore::ScrollingNodeID rootScrollingNodeID() const;
 

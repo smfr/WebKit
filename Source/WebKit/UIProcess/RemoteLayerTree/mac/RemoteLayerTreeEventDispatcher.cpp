@@ -37,6 +37,7 @@
 #include <WebCore/PlatformWheelEvent.h>
 #include <WebCore/ScrollingCoordinatorTypes.h>
 #include <WebCore/ScrollingThread.h>
+#include <WebCore/WheelEventDeltaFilter.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -76,6 +77,7 @@ static const Seconds wheelEventHysteresisDuration { 1_s };
 
 RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
     : m_scrollingCoordinator(WeakPtr { scrollingCoordinator })
+    , m_wheelEventDeltaFilter(WheelEventDeltaFilter::create())
     , m_displayLinkClient(makeUnique<RemoteLayerTreeEventDispatcherDisplayLinkClient>(*this))
     , m_wheelEventActivityHysteresis([this](PAL::HysteresisState state) { wheelEventHysteresisUpdated(state); }, wheelEventHysteresisDuration)
 {
@@ -154,8 +156,15 @@ WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const 
 
 PlatformWheelEvent RemoteLayerTreeEventDispatcher::filteredWheelEvent(const PlatformWheelEvent& wheelEvent)
 {
-    // FIXME
-    return wheelEvent;
+    m_wheelEventDeltaFilter->updateFromEvent(wheelEvent);
+
+    auto filteredEvent = wheelEvent;
+    if (WheelEventDeltaFilter::shouldApplyFilteringForEvent(wheelEvent))
+        filteredEvent = m_wheelEventDeltaFilter->eventCopyWithFilteredDeltas(wheelEvent);
+    else if (WheelEventDeltaFilter::shouldIncludeVelocityForEvent(wheelEvent))
+        filteredEvent = m_wheelEventDeltaFilter->eventCopyWithVelocity(wheelEvent);
+
+    return filteredEvent;
 }
 
 DisplayLink* RemoteLayerTreeEventDispatcher::displayLink() const

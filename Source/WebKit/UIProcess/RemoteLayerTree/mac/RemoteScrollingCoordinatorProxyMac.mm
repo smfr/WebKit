@@ -48,7 +48,6 @@ using namespace WebCore;
 
 RemoteScrollingCoordinatorProxyMac::RemoteScrollingCoordinatorProxyMac(WebPageProxy& webPageProxy)
     : RemoteScrollingCoordinatorProxy(webPageProxy)
-    , m_recentWheelEventDeltaFilter(WheelEventDeltaFilter::create())
     , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create(*this))
 {
     m_wheelEventDispatcher->setScrollingTree(scrollingTree());
@@ -72,19 +71,6 @@ WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(co
     });
     
     return { };
-}
-
-PlatformWheelEvent RemoteScrollingCoordinatorProxyMac::filteredWheelEvent(const PlatformWheelEvent& wheelEvent)
-{
-    m_recentWheelEventDeltaFilter->updateFromEvent(wheelEvent);
-
-    auto filteredEvent = wheelEvent;
-    if (WheelEventDeltaFilter::shouldApplyFilteringForEvent(wheelEvent))
-        filteredEvent = m_recentWheelEventDeltaFilter->eventCopyWithFilteredDeltas(wheelEvent);
-    else if (WheelEventDeltaFilter::shouldIncludeVelocityForEvent(wheelEvent))
-        filteredEvent = m_recentWheelEventDeltaFilter->eventCopyWithVelocity(wheelEvent);
-
-    return filteredEvent;
 }
 
 bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID, const RequestedScrollData&)

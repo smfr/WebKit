@@ -33,6 +33,7 @@
 
 namespace WebCore {
 class PlatformWheelEvent;
+class WheelEventDeltaFilter;
 struct WheelEventHandlingResult;
 };
 
@@ -77,6 +78,8 @@ private:
     RefPtr<RemoteScrollingTree> m_scrollingTree WTF_GUARDED_BY_LOCK(m_scrollingTreeLock);
 
     WeakPtr<RemoteScrollingCoordinatorProxyMac> m_scrollingCoordinator;
+
+    std::unique_ptr<WebCore::WheelEventDeltaFilter> m_wheelEventDeltaFilter;
     std::unique_ptr<RemoteLayerTreeEventDispatcherDisplayLinkClient> m_displayLinkClient;
     std::optional<DisplayLinkObserverID> m_displayRefreshObserverID;
     PAL::HysteresisActivity m_wheelEventActivityHysteresis;
