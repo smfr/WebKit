@@ -43,6 +43,8 @@ class RemoteScrollingCoordinatorProxyMac;
 class RemoteScrollingTree;
 class RemoteLayerTreeEventDispatcherDisplayLinkClient;
 
+// This class exists to act as a threadsafe DisplayLink::Client client, allowing RemoteScrollingCoordinatorProxyMac to
+// be main-thread only. It's the UI-process analogue of WebPage/EventDispatcher.
 class RemoteLayerTreeEventDispatcher : public ThreadSafeRefCounted<RemoteLayerTreeEventDispatcher> {
     WTF_MAKE_FAST_ALLOCATED();
     friend class RemoteLayerTreeEventDispatcherDisplayLinkClient;
@@ -73,6 +75,8 @@ private:
     void didRefreshDisplay(PlatformDisplayID);
 
     void startOrStopDisplayLink();
+    
+    RefPtr<RemoteScrollingTree> scrollingTree();
 
     Lock m_scrollingTreeLock;
     RefPtr<RemoteScrollingTree> m_scrollingTree WTF_GUARDED_BY_LOCK(m_scrollingTreeLock);

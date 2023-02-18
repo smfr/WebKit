@@ -55,11 +55,11 @@ private:
     // This is called on the display link callback thread.
     void displayLinkFired(PlatformDisplayID displayID, DisplayUpdate, bool wantsFullSpeedUpdates, bool anyObserverWantsCallback) override
     {
-        // FIXME: Thread safety.
-        if (!m_eventDispatcher)
+        auto eventDispatcher = m_eventDispatcher;
+        if (!eventDispatcher)
             return;
 
-        ScrollingThread::dispatch([dispatcher = Ref { *m_eventDispatcher }, displayID] {
+        ScrollingThread::dispatch([dispatcher = Ref { *eventDispatcher }, displayID] {
             dispatcher->didRefreshDisplay(displayID);
         });
     }
@@ -100,6 +100,17 @@ void RemoteLayerTreeEventDispatcher::setScrollingTree(RefPtr<RemoteScrollingTree
     m_scrollingTree = WTFMove(scrollingTree);
 }
 
+RefPtr<RemoteScrollingTree> RemoteLayerTreeEventDispatcher::scrollingTree()
+{
+    RefPtr<RemoteScrollingTree> result;
+    {
+        Locker locker { m_scrollingTreeLock };
+        result = m_scrollingTree;
+    }
+    
+    return result;
+}
+
 void RemoteLayerTreeEventDispatcher::willHandleWheelEvent()
 {
     ASSERT(isMainThread());
@@ -122,12 +133,7 @@ WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const 
 {
     ASSERT(ScrollingThread::isCurrentThread());
 
-    RefPtr<RemoteScrollingTree> scrollingTree;
-    {
-        Locker locker { m_scrollingTreeLock };
-        scrollingTree = m_scrollingTree;
-    }
-
+    auto scrollingTree = this->scrollingTree();
     if (!scrollingTree)
         return WheelEventHandlingResult::unhandled();
 
@@ -140,9 +146,6 @@ WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const 
     LOG_WITH_STREAM(Scrolling, stream << "RemoteLayerTreeEventDispatcher::handleWheelEvent " << wheelEvent << " - steps " << processingSteps);
     if (!processingSteps.contains(WheelEventProcessingSteps::ScrollingThread))
         return WheelEventHandlingResult::unhandled(processingSteps);
-
-    if (scrollingTree->willWheelEventStartSwipeGesture(wheelEvent))
-        return WheelEventHandlingResult::unhandled();
 
     scrollingTree->willProcessWheelEvent();
 
@@ -187,12 +190,7 @@ void RemoteLayerTreeEventDispatcher::startOrStopDisplayLink()
         if (m_wheelEventActivityHysteresis.state() == PAL::HysteresisState::Started)
             return true;
 
-        RefPtr<RemoteScrollingTree> scrollingTree;
-        {
-            Locker locker { m_scrollingTreeLock };
-            scrollingTree = m_scrollingTree;
-        }
-
+        auto scrollingTree = this->scrollingTree();
         return scrollingTree && scrollingTree->hasNodeWithActiveScrollAnimations();
     }();
 
@@ -214,6 +212,7 @@ void RemoteLayerTreeEventDispatcher::startDisplayLinkObserver()
     LOG_WITH_STREAM(DisplayLink, stream << "[UI ] RemoteLayerTreeEventDispatcher::startDisplayLinkObserver");
 
     m_displayRefreshObserverID = DisplayLinkObserverID::generate();
+    // This display link always runs at the display update frequency (e.g. 120Hz).
     displayLink->addObserver(*m_displayLinkClient, *m_displayRefreshObserverID, displayLink->nominalFramesPerSecond());
 }
 
@@ -236,12 +235,7 @@ void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID display
 {
     ASSERT(ScrollingThread::isCurrentThread());
 
-    RefPtr<RemoteScrollingTree> scrollingTree;
-    {
-        Locker locker { m_scrollingTreeLock };
-        scrollingTree = m_scrollingTree;
-    }
-
+    auto scrollingTree = this->scrollingTree();
     if (!scrollingTree)
         return;
 
