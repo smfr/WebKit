@@ -32,6 +32,7 @@
 
 namespace WebKit {
 
+class NativeWebWheelEvent;
 class RemoteLayerTreeEventDispatcher;
 
 class RemoteScrollingCoordinatorProxyMac final : public RemoteScrollingCoordinatorProxy {
@@ -40,13 +41,15 @@ public:
     ~RemoteScrollingCoordinatorProxyMac();
 
 private:
-    WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges) override;
+    WebCore::WheelEventHandlingResult handleWheelEvent(const NativeWebWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges) override;
 
     bool scrollingTreeNodeRequestsScroll(WebCore::ScrollingNodeID, const WebCore::RequestedScrollData&) override;
     void hasNodeWithAnimatedScrollChanged(bool) override;
 
     void connectStateNodeLayers(WebCore::ScrollingStateTree&, const RemoteLayerTreeHost&) override;
     void establishLayerTreeScrollingRelations(const RemoteLayerTreeHost&) override;
+
+    void windowScreenDidChange(WebCore::PlatformDisplayID, std::optional<WebCore::FramesPerSecond>) override;
 
 #if ENABLE(SCROLLING_THREAD)
     RefPtr<RemoteLayerTreeEventDispatcher> m_wheelEventDispatcher;

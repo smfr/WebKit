@@ -42,7 +42,6 @@ OBJC_CLASS UIScrollView;
 
 namespace WebCore {
 class FloatPoint;
-class PlatformWheelEvent;
 }
 
 namespace WebKit {
@@ -51,6 +50,7 @@ class RemoteLayerTreeHost;
 class RemoteScrollingCoordinatorTransaction;
 class RemoteScrollingTree;
 class WebPageProxy;
+class WebWheelEvent;
 
 class RemoteScrollingCoordinatorProxy : public CanMakeWeakPtr<RemoteScrollingCoordinatorProxy> {
     WTF_MAKE_FAST_ALLOCATED;
@@ -93,7 +93,9 @@ public:
 
     void currentSnapPointIndicesDidChange(WebCore::ScrollingNodeID, std::optional<unsigned> horizontal, std::optional<unsigned> vertical);
 
-    virtual WebCore::WheelEventHandlingResult handleWheelEvent(const WebCore::PlatformWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges);
+#if PLATFORM(MAC)
+    virtual WebCore::WheelEventHandlingResult handleWheelEvent(const NativeWebWheelEvent&, WebCore::RectEdges<bool> rubberBandableEdges);
+#endif
     void handleMouseEvent(const WebCore::PlatformMouseEvent&);
 
     WebCore::ScrollingNodeID rootScrollingNodeID() const;
@@ -126,6 +128,8 @@ public:
     void receivedWheelEventWithPhases(WebCore::PlatformWheelEventPhase phase, WebCore::PlatformWheelEventPhase momentumPhase);
     void deferWheelEventTestCompletionForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason);
     void removeWheelEventTestCompletionDeferralForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason);
+
+    virtual void windowScreenDidChange(WebCore::PlatformDisplayID, std::optional<WebCore::FramesPerSecond>) { }
 
 protected:
     virtual void connectStateNodeLayers(WebCore::ScrollingStateTree&, const RemoteLayerTreeHost&) = 0;

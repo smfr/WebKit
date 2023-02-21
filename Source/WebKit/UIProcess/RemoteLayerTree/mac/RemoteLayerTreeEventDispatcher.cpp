@@ -30,9 +30,11 @@
 
 #include "DisplayLink.h"
 #include "Logging.h"
+#include "NativeWebWheelEvent.h"
 #include "RemoteLayerTreeDrawingAreaProxyMac.h"
 #include "RemoteScrollingCoordinatorProxyMac.h"
 #include "RemoteScrollingTree.h"
+#include "WebEventConversion.h"
 #include "WebPageProxy.h"
 #include <WebCore/PlatformWheelEvent.h>
 #include <WebCore/ScrollingCoordinatorTypes.h>
@@ -68,18 +70,22 @@ private:
 };
 
 
-Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
+Ref<RemoteLayerTreeEventDispatcher> RemoteLayerTreeEventDispatcher::create(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator, WebCore::PageIdentifier pageIdentifier)
 {
-    return adoptRef(*new RemoteLayerTreeEventDispatcher(scrollingCoordinator));
+    return adoptRef(*new RemoteLayerTreeEventDispatcher(scrollingCoordinator, pageIdentifier));
 }
 
 static const Seconds wheelEventHysteresisDuration { 1_s };
 
-RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator)
+RemoteLayerTreeEventDispatcher::RemoteLayerTreeEventDispatcher(RemoteScrollingCoordinatorProxyMac& scrollingCoordinator, WebCore::PageIdentifier pageIdentifier)
     : m_scrollingCoordinator(WeakPtr { scrollingCoordinator })
+    , m_pageIdentifier(pageIdentifier)
     , m_wheelEventDeltaFilter(WheelEventDeltaFilter::create())
     , m_displayLinkClient(makeUnique<RemoteLayerTreeEventDispatcherDisplayLinkClient>(*this))
     , m_wheelEventActivityHysteresis([this](PAL::HysteresisState state) { wheelEventHysteresisUpdated(state); }, wheelEventHysteresisDuration)
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+    , m_momentumEventDispatcher(WTF::makeUnique<MomentumEventDispatcher>(*this))
+#endif
 {
 }
 
@@ -111,10 +117,19 @@ RefPtr<RemoteScrollingTree> RemoteLayerTreeEventDispatcher::scrollingTree()
     return result;
 }
 
-void RemoteLayerTreeEventDispatcher::willHandleWheelEvent()
+void RemoteLayerTreeEventDispatcher::willHandleWheelEvent(const NativeWebWheelEvent& nativeWheelEvent)
 {
     ASSERT(isMainThread());
     m_wheelEventActivityHysteresis.impulse();
+
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+    if (nativeWheelEvent.momentumPhase() == WebWheelEvent::PhaseBegan) {
+        auto curve = ScrollingAccelerationCurve::fromNativeWheelEvent(nativeWheelEvent);
+        m_momentumEventDispatcher->setScrollingAccelerationCurve(m_pageIdentifier, curve);
+    }
+#else
+    UNUSED_PARAM(nativeWheelEvent);
+#endif
 }
 
 void RemoteLayerTreeEventDispatcher::wheelEventHysteresisUpdated(PAL::HysteresisState state)
@@ -129,7 +144,23 @@ void RemoteLayerTreeEventDispatcher::hasNodeWithAnimatedScrollChanged(bool hasAn
     startOrStopDisplayLink();
 }
 
-WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const PlatformWheelEvent& wheelEvent, RectEdges<bool> rubberBandableEdges)
+
+WheelEventHandlingResult RemoteLayerTreeEventDispatcher::handleWheelEvent(const WebWheelEvent& wheelEvent, RectEdges<bool> rubberBandableEdges)
+{
+    ASSERT(ScrollingThread::isCurrentThread());
+
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+    if (m_momentumEventDispatcher->handleWheelEvent(m_pageIdentifier, wheelEvent, rubberBandableEdges)) {
+        // sendDidReceiveEvent(pageID, wheelEvent.type(), true);
+        return { };
+    }
+#endif
+
+    // FIXME: Remove return value.
+    return internalHandleWheelEvent(platform(wheelEvent), rubberBandableEdges);
+}
+
+WheelEventHandlingResult RemoteLayerTreeEventDispatcher::internalHandleWheelEvent(const PlatformWheelEvent& wheelEvent, RectEdges<bool> rubberBandableEdges)
 {
     ASSERT(ScrollingThread::isCurrentThread());
 
@@ -187,6 +218,10 @@ DisplayLink* RemoteLayerTreeEventDispatcher::displayLink() const
 void RemoteLayerTreeEventDispatcher::startOrStopDisplayLink()
 {
     auto needsDisplayLink = [&]() {
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+        if (m_momentumEventDispatcherNeedsDisplayLink)
+            return true;
+#endif
         if (m_wheelEventActivityHysteresis.state() == PAL::HysteresisState::Started)
             return true;
 
@@ -235,6 +270,11 @@ void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID display
 {
     ASSERT(ScrollingThread::isCurrentThread());
 
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+    // Consistent naming would be nice!
+    m_momentumEventDispatcher->displayWasRefreshed(displayID);
+#endif
+
     auto scrollingTree = this->scrollingTree();
     if (!scrollingTree)
         return;
@@ -242,6 +282,44 @@ void RemoteLayerTreeEventDispatcher::didRefreshDisplay(PlatformDisplayID display
     scrollingTree->displayDidRefresh(displayID);
 }
 
+void RemoteLayerTreeEventDispatcher::windowScreenDidChange(WebCore::PlatformDisplayID displayID, std::optional<WebCore::FramesPerSecond> nominalFramesPerSecond)
+{
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+    m_momentumEventDispatcher->pageScreenDidChange(m_pageIdentifier, displayID, nominalFramesPerSecond);
+#endif
+}
+
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER)
+void RemoteLayerTreeEventDispatcher::handleSyntheticWheelEvent(WebCore::PageIdentifier pageID, const WebWheelEvent& event, WebCore::RectEdges<bool> rubberBandableEdges)
+{
+    ASSERT_UNUSED(pageID, m_pageIdentifier == pageID);
+    internalHandleWheelEvent(platform(event), rubberBandableEdges);
+}
+
+void RemoteLayerTreeEventDispatcher::startDisplayWasRefreshedCallbacks(WebCore::PlatformDisplayID)
+{
+    ASSERT(!m_momentumEventDispatcherNeedsDisplayLink);
+    m_momentumEventDispatcherNeedsDisplayLink = true;
+    startOrStopDisplayLink();
+}
+
+void RemoteLayerTreeEventDispatcher::stopDisplayWasRefreshedCallbacks(WebCore::PlatformDisplayID)
+{
+    ASSERT(m_momentumEventDispatcherNeedsDisplayLink);
+    m_momentumEventDispatcherNeedsDisplayLink = false;
+    startOrStopDisplayLink();
+}
+
+#if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
+void RemoteLayerTreeEventDispatcher::flushMomentumEventLoggingSoon()
+{
+    RunLoop::current().dispatchAfter(1_s, [strongThis = Ref { *this }] {
+        strongThis->m_momentumEventDispatcher->flushLog();
+    });
+}
+#endif
+
+#endif
 
 } // namespace WebKit
 

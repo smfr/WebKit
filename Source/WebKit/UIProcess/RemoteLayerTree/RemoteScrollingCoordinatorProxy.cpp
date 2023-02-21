@@ -98,11 +98,13 @@ std::optional<RequestedScrollData> RemoteScrollingCoordinatorProxy::commitScroll
     return std::exchange(m_requestedScroll, { });
 }
 
-WheelEventHandlingResult RemoteScrollingCoordinatorProxy::handleWheelEvent(const PlatformWheelEvent&, RectEdges<bool>)
+#if PLATFORM(MAC)
+WheelEventHandlingResult RemoteScrollingCoordinatorProxy::handleWheelEvent(const NativeWebWheelEvent&, RectEdges<bool>)
 {
     // Only used by macOS.
     return WheelEventHandlingResult::unhandled();
 }
+#endif
 
 void RemoteScrollingCoordinatorProxy::handleMouseEvent(const WebCore::PlatformMouseEvent& event)
 {

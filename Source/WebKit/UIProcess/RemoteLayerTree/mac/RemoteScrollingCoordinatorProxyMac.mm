@@ -28,6 +28,7 @@
 
 #if PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)
 
+#import "NativeWebWheelEvent.h"
 #import "RemoteLayerTreeDrawingAreaProxy.h"
 #import "RemoteLayerTreeEventDispatcher.h"
 #import "WebPageProxy.h"
@@ -48,7 +49,7 @@ using namespace WebCore;
 
 RemoteScrollingCoordinatorProxyMac::RemoteScrollingCoordinatorProxyMac(WebPageProxy& webPageProxy)
     : RemoteScrollingCoordinatorProxy(webPageProxy)
-    , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create(*this))
+    , m_wheelEventDispatcher(RemoteLayerTreeEventDispatcher::create(*this, webPageProxy.webPageID()))
 {
     m_wheelEventDispatcher->setScrollingTree(scrollingTree());
 }
@@ -60,12 +61,13 @@ RemoteScrollingCoordinatorProxyMac::~RemoteScrollingCoordinatorProxyMac()
 #endif
 }
 
-WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const PlatformWheelEvent& platformWheelEvent, RectEdges<bool> rubberBandableEdges)
+WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const NativeWebWheelEvent& nativeWheelEvent, RectEdges<bool> rubberBandableEdges)
 {
-    m_wheelEventDispatcher->willHandleWheelEvent();
+    m_wheelEventDispatcher->willHandleWheelEvent(nativeWheelEvent);
 
-    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, platformWheelEvent, rubberBandableEdges] {
-        auto handlingResult = dispatcher->handleWheelEvent(platformWheelEvent, rubberBandableEdges);
+    // FIXME: wheelEvent isolated copy?
+    ScrollingThread::dispatch([dispatcher = Ref { *m_wheelEventDispatcher }, wheelEvent = WebWheelEvent { nativeWheelEvent }, rubberBandableEdges] {
+        auto handlingResult = dispatcher->handleWheelEvent(wheelEvent, rubberBandableEdges);
         if (!handlingResult.needsMainThreadProcessing())
             return;
     });
@@ -156,6 +158,14 @@ void RemoteScrollingCoordinatorProxyMac::connectStateNodeLayers(ScrollingStateTr
 
 void RemoteScrollingCoordinatorProxyMac::establishLayerTreeScrollingRelations(const RemoteLayerTreeHost&)
 {
+}
+
+
+void RemoteScrollingCoordinatorProxyMac::windowScreenDidChange(WebCore::PlatformDisplayID displayID, std::optional<WebCore::FramesPerSecond> nominalFramesPerSecond)
+{
+#if ENABLE(SCROLLING_THREAD)
+    m_wheelEventDispatcher->windowScreenDidChange(displayID, nominalFramesPerSecond);
+#endif
 }
 
 } // namespace WebKit

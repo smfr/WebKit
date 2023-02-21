@@ -283,6 +283,8 @@ void RemoteLayerTreeDrawingAreaProxyMac::windowScreenDidChange(PlatformDisplayID
     m_displayID = displayID;
     m_displayNominalFramesPerSecond = nominalFramesPerSecond;
 
+    m_webPageProxy.scrollingCoordinatorProxy()->windowScreenDidChange(displayID, nominalFramesPerSecond);
+
     scheduleDisplayRefreshCallbacks();
 }
 

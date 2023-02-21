@@ -54,14 +54,14 @@ bool MomentumEventDispatcher::eventShouldStartSyntheticMomentumPhase(WebCore::Pa
     if (event.momentumPhase() != WebWheelEvent::PhaseBegan)
         return false;
 
-    auto curveIterator = m_accelerationCurves.find(pageIdentifier);
-    if (curveIterator == m_accelerationCurves.end() || !curveIterator->value) {
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher not using synthetic momentum phase: no acceleration curve");
+    auto curveIterator = scrollingAccelerationCurveForPage(pageIdentifier);
+    if (!curveIterator) {
+        LOG(ScrollAnimations, "MomentumEventDispatcher not using synthetic momentum phase: no acceleration curve");
         return false;
     }
 
     if (!event.rawPlatformDelta()) {
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher not using synthetic momentum phase: no raw platform delta on start event");
+        LOG(ScrollAnimations, "MomentumEventDispatcher not using synthetic momentum phase: no raw platform delta on start event");
         return false;
     }
 
@@ -85,7 +85,7 @@ bool MomentumEventDispatcher::handleWheelEvent(WebCore::PageIdentifier pageIdent
 
         if (event.momentumPhase() == WebWheelEvent::PhaseEnded) {
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-            RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher saw momentum ended phase, interrupted=%d", static_cast<int>(event.momentumEndType()));
+            LOG(ScrollAnimations, "MomentumEventDispatcher saw momentum ended phase, interrupted=%d", static_cast<int>(event.momentumEndType()));
 #endif
 
             // Ignore momentumPhase == PhaseEnded if it was due to the natural
@@ -97,7 +97,7 @@ bool MomentumEventDispatcher::handleWheelEvent(WebCore::PageIdentifier pageIdent
         }
 
         if (pageIdentifierChanged || eventShouldInterruptGesture) {
-            RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher interrupting synthetic momentum phase");
+            LOG(ScrollAnimations, "MomentumEventDispatcher interrupting synthetic momentum phase");
             didEndMomentumPhase();
         }
     }
@@ -200,8 +200,10 @@ void MomentumEventDispatcher::dispatchSyntheticMomentumEvent(WebWheelEvent::Phas
 void MomentumEventDispatcher::didStartMomentumPhase(WebCore::PageIdentifier pageIdentifier, const WebWheelEvent& event)
 {
     auto displayProperties = this->displayProperties(pageIdentifier);
-    if (!displayProperties)
+    if (!displayProperties) {
+        LOG(ScrollAnimations, "MomentumEventDispatcher::didStartMomentumPhase - no display properties for page %llu", pageIdentifier.toUInt64());
         return;
+    }
 
     tracePoint(SyntheticMomentumStart);
 
@@ -211,12 +213,7 @@ void MomentumEventDispatcher::didStartMomentumPhase(WebCore::PageIdentifier page
     m_currentGesture.currentOffset = { };
     m_currentGesture.startTime = MonotonicTime::now();
     m_currentGesture.displayNominalFrameRate = displayProperties->nominalFrameRate;
-    m_currentGesture.accelerationCurve = [&] () -> std::optional<ScrollingAccelerationCurve> {
-        auto curveIterator = m_accelerationCurves.find(m_currentGesture.pageIdentifier);
-        if (curveIterator == m_accelerationCurves.end())
-            return { };
-        return curveIterator->value;
-    }();
+    m_currentGesture.accelerationCurve = scrollingAccelerationCurveForPage(m_currentGesture.pageIdentifier);
 
     startDisplayLink();
 
@@ -241,7 +238,7 @@ void MomentumEventDispatcher::didEndMomentumPhase()
     dispatchSyntheticMomentumEvent(WebWheelEvent::PhaseEnded, { });
 
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher ending synthetic momentum phase with total offset %.1f %.1f, duration %f (event offset would have been %.1f %.1f) (tail index %d of %zu)", m_currentGesture.currentOffset.width(), m_currentGesture.currentOffset.height(), (MonotonicTime::now() - m_currentGesture.startTime).seconds(), m_currentGesture.accumulatedEventOffset.width(), m_currentGesture.accumulatedEventOffset.height(), m_currentGesture.currentTailDeltaIndex, m_currentGesture.tailDeltaTable.size());
+    LOG(ScrollAnimations, "MomentumEventDispatcher ending synthetic momentum phase with total offset %.1f %.1f, duration %f (event offset would have been %.1f %.1f) (tail index %d of %zu)", m_currentGesture.currentOffset.width(), m_currentGesture.currentOffset.height(), (MonotonicTime::now() - m_currentGesture.startTime).seconds(), m_currentGesture.accumulatedEventOffset.width(), m_currentGesture.accumulatedEventOffset.height(), m_currentGesture.currentTailDeltaIndex, m_currentGesture.tailDeltaTable.size());
     m_client.flushMomentumEventLoggingSoon();
 #endif
 
@@ -253,13 +250,24 @@ void MomentumEventDispatcher::didEndMomentumPhase()
 
 void MomentumEventDispatcher::setScrollingAccelerationCurve(WebCore::PageIdentifier pageIdentifier, std::optional<ScrollingAccelerationCurve> curve)
 {
+    Locker locker { m_accelerationCurvesLock };
     m_accelerationCurves.set(pageIdentifier, curve);
 
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
     WTF::TextStream stream(WTF::TextStream::LineMode::SingleLine);
     stream << curve;
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher set curve %" PUBLIC_LOG_STRING, stream.release().utf8().data());
+    LOG(ScrollAnimations, "MomentumEventDispatcher set curve %s", stream.release().utf8().data());
 #endif
+}
+
+std::optional<ScrollingAccelerationCurve> MomentumEventDispatcher::scrollingAccelerationCurveForPage(WebCore::PageIdentifier pageIdentifier) const
+{
+    Locker locker { m_accelerationCurvesLock };
+
+    auto curveIterator = m_accelerationCurves.find(pageIdentifier);
+    if (curveIterator == m_accelerationCurves.end())
+        return { };
+    return curveIterator->value;
 }
 
 std::optional<MomentumEventDispatcher::DisplayProperties> MomentumEventDispatcher::displayProperties(WebCore::PageIdentifier pageIdentifier) const
@@ -275,14 +283,14 @@ void MomentumEventDispatcher::startDisplayLink()
 {
     auto displayProperties = this->displayProperties(m_currentGesture.pageIdentifier);
     if (!displayProperties) {
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher failed to start display link");
+        LOG(ScrollAnimations, "MomentumEventDispatcher failed to start display link");
         return;
     }
 
     // FIXME: Switch down to lower-than-full-speed frame rates for the tail end of the curve.
     m_client.startDisplayWasRefreshedCallbacks(displayProperties->displayID);
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher starting display link for display %d", displayProperties->displayID);
+    LOG(ScrollAnimations, "MomentumEventDispatcher starting display link for display %d", displayProperties->displayID);
 #endif
 }
 
@@ -290,13 +298,13 @@ void MomentumEventDispatcher::stopDisplayLink()
 {
     auto displayProperties = this->displayProperties(m_currentGesture.pageIdentifier);
     if (!displayProperties) {
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher failed to stop display link");
+        LOG(ScrollAnimations, "MomentumEventDispatcher failed to stop display link");
         return;
     }
 
     m_client.stopDisplayWasRefreshedCallbacks(displayProperties->displayID);
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher stopping display link for display %d", displayProperties->displayID);
+    LOG(ScrollAnimations, "MomentumEventDispatcher stopping display link for display %d", displayProperties->displayID);
 #endif
 }
 
@@ -338,7 +346,7 @@ std::optional<WebCore::FloatSize> MomentumEventDispatcher::consumeDeltaForCurren
     return delta;
 }
 
-void MomentumEventDispatcher::displayWasRefreshed(WebCore::PlatformDisplayID displayID, const WebCore::DisplayUpdate&)
+void MomentumEventDispatcher::displayWasRefreshed(WebCore::PlatformDisplayID displayID)
 {
     if (!m_currentGesture.active)
         return;
@@ -350,7 +358,7 @@ void MomentumEventDispatcher::displayWasRefreshed(WebCore::PlatformDisplayID dis
     auto delta = consumeDeltaForCurrentTime();
     if (!delta) {
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher completed synthetic momentum phase");
+        LOG(ScrollAnimations, "MomentumEventDispatcher completed synthetic momentum phase");
 #endif
         didEndMomentumPhase();
         return;
@@ -436,7 +444,7 @@ void MomentumEventDispatcher::buildOffsetTableWithInitialDelta(WebCore::FloatSiz
     equalizeTailGaps();
 
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher built table with %ld frames, %.1f seconds (%ld tail frames, %.1f seconds, starting at %.1f), initial delta %.1f %.1f, distance %.1f %.1f (initial delta from last changed event %.1f %.1f)", m_currentGesture.offsetTable.size(), idealCurveFrameInterval.seconds() * m_currentGesture.offsetTable.size(), m_currentGesture.tailDeltaTable.size(), m_currentGesture.tailDeltaTable.size() * (1.f / m_currentGesture.accelerationCurve->frameRate()), m_currentGesture.tailStartDelay.seconds(), initialUnacceleratedDelta.width(), initialUnacceleratedDelta.height(), accumulatedOffset.width(), accumulatedOffset.height(), m_lastActivePhaseDelta.width(), m_lastActivePhaseDelta.height());
+    LOG(ScrollAnimations, "MomentumEventDispatcher built table with %ld frames, %.1f seconds (%ld tail frames, %.1f seconds, starting at %.1f), initial delta %.1f %.1f, distance %.1f %.1f (initial delta from last changed event %.1f %.1f)", m_currentGesture.offsetTable.size(), idealCurveFrameInterval.seconds() * m_currentGesture.offsetTable.size(), m_currentGesture.tailDeltaTable.size(), m_currentGesture.tailDeltaTable.size() * (1.f / m_currentGesture.accelerationCurve->frameRate()), m_currentGesture.tailStartDelay.seconds(), initialUnacceleratedDelta.width(), initialUnacceleratedDelta.height(), accumulatedOffset.width(), accumulatedOffset.height(), m_lastActivePhaseDelta.width(), m_lastActivePhaseDelta.height());
 #endif
 }
 
@@ -609,7 +617,7 @@ std::pair<WebCore::FloatSize, WebCore::FloatSize> MomentumEventDispatcher::compu
 
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING)
         if (!m_currentGesture.didLogInitialQueueState)
-            RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher initial historical deltas: average delta %f, average time %fms, event count %d", averageDelta, averageFrameIntervalMS, count);
+            LOG(ScrollAnimations, "MomentumEventDispatcher initial historical deltas: average delta %f, average time %fms, event count %d", averageDelta, averageFrameIntervalMS, count);
 #endif
 
         constexpr float velocityGainA = fromFixedPoint(2.f);
@@ -656,9 +664,9 @@ void MomentumEventDispatcher::flushLog()
         return;
 
     auto startTime = m_log[0].time;
-    RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher event log: time,generatedOffset,generatedPhase,eventOffset,eventPhase");
+    LOG(ScrollAnimations, "MomentumEventDispatcher event log: time,generatedOffset,generatedPhase,eventOffset,eventPhase");
     for (const auto& entry : m_log)
-        RELEASE_LOG(ScrollAnimations, "MomentumEventDispatcher event log: %f,%f,%d,%f,%d", (entry.time - startTime).seconds(), entry.totalGeneratedOffset, entry.generatedPhase, entry.totalEventOffset, entry.eventPhase);
+        LOG(ScrollAnimations, "MomentumEventDispatcher event log: %f,%f,%d,%f,%d", (entry.time - startTime).seconds(), entry.totalGeneratedOffset, entry.generatedPhase, entry.totalEventOffset, entry.eventPhase);
 
     m_log.clear();
     m_currentLogState = { };

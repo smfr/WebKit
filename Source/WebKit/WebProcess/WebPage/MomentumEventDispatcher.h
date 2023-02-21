@@ -27,7 +27,7 @@
 
 #if ENABLE(MOMENTUM_EVENT_DISPATCHER)
 
-#define ENABLE_MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING 0
+#define ENABLE_MOMENTUM_EVENT_DISPATCHER_TEMPORARY_LOGGING 1
 
 #include "ScrollingAccelerationCurve.h"
 #include "WebWheelEvent.h"
@@ -36,6 +36,7 @@
 #include <WebCore/RectEdges.h>
 #include <memory>
 #include <wtf/Deque.h>
+#include <wtf/Lock.h>
 #include <wtf/MonotonicTime.h>
 #include <wtf/Noncopyable.h>
 
@@ -74,7 +75,7 @@ public:
 
     void setScrollingAccelerationCurve(WebCore::PageIdentifier, std::optional<ScrollingAccelerationCurve>);
 
-    void displayWasRefreshed(WebCore::PlatformDisplayID, const WebCore::DisplayUpdate&);
+    void displayWasRefreshed(WebCore::PlatformDisplayID);
 
     void pageScreenDidChange(WebCore::PageIdentifier, WebCore::PlatformDisplayID, std::optional<unsigned> nominalFramesPerSecond);
 
@@ -87,6 +88,8 @@ private:
     void didEndMomentumPhase();
 
     bool eventShouldStartSyntheticMomentumPhase(WebCore::PageIdentifier, const WebWheelEvent&) const;
+
+    std::optional<ScrollingAccelerationCurve> scrollingAccelerationCurveForPage(WebCore::PageIdentifier) const;
 
     void startDisplayLink();
     void stopDisplayLink();
@@ -171,6 +174,8 @@ private:
     } m_currentGesture;
 
     HashMap<WebCore::PageIdentifier, DisplayProperties> m_displayProperties;
+
+    mutable Lock m_accelerationCurvesLock;
     HashMap<WebCore::PageIdentifier, std::optional<ScrollingAccelerationCurve>> m_accelerationCurves;
     Client& m_client;
 };

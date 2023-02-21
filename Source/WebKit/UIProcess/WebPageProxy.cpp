@@ -3049,9 +3049,10 @@ void WebPageProxy::handleWheelEvent(const NativeWebWheelEvent& event)
 
     auto rubberBandableEdges = rubberBandableEdgesRespectingHistorySwipe();
 
-#if ENABLE(ASYNC_SCROLLING) && PLATFORM(COCOA)
+#if ENABLE(ASYNC_SCROLLING) && PLATFORM(MAC)
     if (m_scrollingCoordinatorProxy) {
-        handlingResult = m_scrollingCoordinatorProxy->handleWheelEvent(platform(event), rubberBandableEdges);
+        // FIXME: Response needs to by async.
+        handlingResult = m_scrollingCoordinatorProxy->handleWheelEvent(event, rubberBandableEdges);
         if (!handlingResult.needsMainThreadProcessing()) {
             if (!handlingResult.wasHandled)
                 wheelEventWasNotHandled(event);
