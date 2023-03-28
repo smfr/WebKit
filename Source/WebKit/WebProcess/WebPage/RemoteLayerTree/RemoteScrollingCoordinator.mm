@@ -174,6 +174,22 @@ void RemoteScrollingCoordinator::stopDeferringScrollingTestCompletionForNode(Web
         monitor->removeDeferralForReason(reinterpret_cast<WheelEventTestMonitor::ScrollableAreaIdentifier>(nodeID), reason);
 }
 
+WheelEventHandlingResult RemoteScrollingCoordinator::handleWheelEventForScrolling(const PlatformWheelEvent& wheelEvent, ScrollingNodeID targetNodeID, std::optional<WheelScrollGestureState> gestureState)
+{
+    // FIXME: Check for swipe
+//    if (scrollingTree()->willWheelEventStartSwipeGesture(wheelEvent))
+//        return WheelEventHandlingResult::unhandled();
+
+    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinator::handleWheelEventForScrolling " << wheelEvent << " - node " << targetNodeID << " gestureState " << gestureState);
+    m_currentWheelGestureInfo = NodeAndGestureState { targetNodeID, gestureState };
+
+    return WheelEventHandlingResult::handled();
+}
+
+void RemoteScrollingCoordinator::wheelEventWasProcessedByMainThread(const PlatformWheelEvent& wheelEvent, std::optional<WheelScrollGestureState> gestureState)
+{
+}
+
 } // namespace WebKit
 
 #endif // ENABLE(ASYNC_SCROLLING)

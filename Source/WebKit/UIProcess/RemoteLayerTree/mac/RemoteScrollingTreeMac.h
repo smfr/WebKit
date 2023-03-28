@@ -65,6 +65,14 @@ private:
     void reportExposedUnfilledArea(MonotonicTime, unsigned unfilledArea) override;
     void reportSynchronousScrollingReasonsChanged(MonotonicTime, OptionSet<WebCore::SynchronousScrollingReason>) override;
     void receivedWheelEventWithPhases(WebCore::PlatformWheelEventPhase, WebCore::PlatformWheelEventPhase momentumPhase) override;
+
+    // "Default handling" here refers to sending the event to the web process for synchronous scrolling, and DOM event handling.
+    void willSendEventForDefaultHandling(const WebCore::PlatformWheelEvent&) override;
+    void waitForEventDefaultHandlingCompletion(const WebCore::PlatformWheelEvent&) override;
+    void wheelEventDefaultHandlingCompleted(const WebCore::PlatformWheelEvent&, WebCore::ScrollingNodeID, std::optional<WebCore::WheelScrollGestureState>) override;
+
+    void handleWheelEventAfterDOMEventHandling(const WebCore::PlatformWheelEvent&, ScrollingNodeID, std::optional<WheelScrollGestureState>);
+
     void deferWheelEventTestCompletionForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason) override;
     void removeWheelEventTestCompletionDeferralForReason(WebCore::ScrollingNodeID, WebCore::WheelEventTestMonitor::DeferReason) override;
 
@@ -85,6 +93,9 @@ private:
     HashMap<WebCore::ScrollingNodeID, WebCore::RequestedKeyboardScrollData> m_nodesWithPendingKeyboardScrollAnimations; // Guarded by m_treeLock but used via call chains that can't be annotated.
 
     mutable Lock m_layerHitTestMutex;
+
+    Condition m_waitingForBeganEventCondition;
+    bool m_receivedBeganEventFromMainThread WTF_GUARDED_BY_LOCK(m_treeLock) { false };
 };
 
 } // namespace WebKit

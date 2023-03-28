@@ -3091,8 +3091,17 @@ void WebPageProxy::sendWheelEvent(const WebWheelEvent& event, OptionSet<WebCore:
     if (drawingArea()->shouldSendWheelEventsToEventDispatcher()) {
         sendWheelEventScrollingAccelerationCurveIfNecessary(event);
         connection->send(Messages::EventDispatcher::WheelEvent(m_webPageID, event, rubberBandableEdges), 0, { }, Thread::QOS::UserInteractive);
-    } else
-        send(Messages::WebPage::HandleWheelEvent(event, processingSteps));
+    } else {
+        sendWithAsyncReply(Messages::WebPage::HandleWheelEvent(event, processingSteps), [weakThis = WeakPtr { *this }, platformWheelEvent = platform(event)](ScrollingNodeID nodeID, std::optional<WheelScrollGestureState> gestureState) {
+            RefPtr protectedThis = weakThis.get();
+            if (!protectedThis)
+                return;
+
+            // FIXME: Maybe we can early return for non-gesture start events.
+            if (auto* scrollingCoordinatorProxy = protectedThis->scrollingCoordinatorProxy())
+                scrollingCoordinatorProxy->wheelEventHandlingCompleted(platformWheelEvent, nodeID, gestureState);
+        });
+    }
 
     // Manually ping the web process to check for responsiveness since our wheel
     // event will dispatch to a non-main thread, which always responds.

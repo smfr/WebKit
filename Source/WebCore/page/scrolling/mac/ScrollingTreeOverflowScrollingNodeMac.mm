@@ -76,6 +76,10 @@ WheelEventHandlingResult ScrollingTreeOverflowScrollingNodeMac::handleWheelEvent
 
     if (!canHandleWheelEvent(wheelEvent, eventTargeting))
         return WheelEventHandlingResult::unhandled();
+        
+    
+    if (wheelEvent.deltaY() == 120.0f)
+        WTFLogAlways("Here");
 
     return WheelEventHandlingResult::result(delegate().handleWheelEvent(wheelEvent));
 }

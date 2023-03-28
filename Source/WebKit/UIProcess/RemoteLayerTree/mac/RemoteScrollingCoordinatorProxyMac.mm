@@ -80,6 +80,16 @@ void RemoteScrollingCoordinatorProxyMac::handleWheelEvent(const WebWheelEvent& w
 #endif
 }
 
+void RemoteScrollingCoordinatorProxyMac::wheelEventHandlingCompleted(const PlatformWheelEvent& wheelEvent, ScrollingNodeID scrollingNodeID, std::optional<WheelScrollGestureState> gestureState)
+{
+#if ENABLE(SCROLLING_THREAD)
+    m_wheelEventDispatcher->wheelEventHandlingCompleted(wheelEvent, scrollingNodeID, gestureState);
+#else
+    UNUSED_PARAM(wheelEvent);
+    UNUSED_PARAM(gestureState);
+#endif
+}
+
 bool RemoteScrollingCoordinatorProxyMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID, const RequestedScrollData&)
 {
     // Unlike iOS, we handle scrolling requests for the main frame in the same way we handle them for subscrollers.
@@ -204,6 +214,25 @@ void RemoteScrollingCoordinatorProxyMac::windowScreenDidChange(PlatformDisplayID
     m_wheelEventDispatcher->windowScreenDidChange(displayID, nominalFramesPerSecond);
 #endif
 }
+
+/*
+WheelEventHandlingResult RemoteScrollingCoordinatorProxyMac::handleWheelEventForScrolling(const PlatformWheelEvent& wheelEvent, ScrollingNodeID targetNodeID, std::optional<WheelScrollGestureState> gestureState)
+{
+    ASSERT(isMainThread());
+    ASSERT(scrollingTree());
+
+    if (scrollingTree()->willWheelEventStartSwipeGesture(wheelEvent))
+        return WheelEventHandlingResult::unhandled();
+
+    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxyMac::handleWheelEventForScrolling " << wheelEvent << " - sending event to scrolling thread, node " << targetNodeID << " gestureState " << gestureState);
+
+    RefPtr<ThreadedScrollingTree> threadedScrollingTree = downcast<ThreadedScrollingTree>(scrollingTree());
+    ScrollingThread::dispatch([threadedScrollingTree, wheelEvent, targetNodeID, gestureState, deferrer = WTFMove(deferrer)] {
+        threadedScrollingTree->handleWheelEventAfterMainThread(wheelEvent, targetNodeID, gestureState);
+    });
+    return WheelEventHandlingResult::handled();
+}
+*/
 
 void RemoteScrollingCoordinatorProxyMac::willCommitLayerAndScrollingTrees()
 {

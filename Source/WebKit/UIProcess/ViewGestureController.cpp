@@ -498,8 +498,10 @@ bool ViewGestureController::PendingSwipeTracker::tryToStartSwipe(PlatformScrollE
 
     if (std::abs(m_cumulativeDelta.width()) >= minimumHorizontalSwipeDistance)
         m_viewGestureController.startSwipeGesture(event, m_direction);
-    else
+    else {
         m_state = State::InsufficientMagnitude;
+        LOG(ViewGestures, "Swipe Start Hysteresis - InsufficientMagnitude");
+    }
 
     return true;
 }
