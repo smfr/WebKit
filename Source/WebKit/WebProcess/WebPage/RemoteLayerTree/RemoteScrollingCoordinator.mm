@@ -176,11 +176,11 @@ void RemoteScrollingCoordinator::stopDeferringScrollingTestCompletionForNode(Web
 
 WheelEventHandlingResult RemoteScrollingCoordinator::handleWheelEventForScrolling(const PlatformWheelEvent& wheelEvent, ScrollingNodeID targetNodeID, std::optional<WheelScrollGestureState> gestureState)
 {
-    // FIXME: Check for swipe
-//    if (scrollingTree()->willWheelEventStartSwipeGesture(wheelEvent))
-//        return WheelEventHandlingResult::unhandled();
+    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinator::handleWheelEventForScrolling " << wheelEvent << " - node " << targetNodeID << " gestureState " << gestureState << " will start swipe " << (m_currentWheelEventWillStartSwipe && *m_currentWheelEventWillStartSwipe));
 
-    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinator::handleWheelEventForScrolling " << wheelEvent << " - node " << targetNodeID << " gestureState " << gestureState);
+    if (m_currentWheelEventWillStartSwipe && *m_currentWheelEventWillStartSwipe)
+        return WheelEventHandlingResult::unhandled();
+
     m_currentWheelGestureInfo = NodeAndGestureState { targetNodeID, gestureState };
 
     return WheelEventHandlingResult::handled();
