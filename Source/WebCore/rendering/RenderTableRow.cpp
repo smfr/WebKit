@@ -172,22 +172,24 @@ void RenderTableRow::layout()
     clearNeedsLayout();
 }
 
-LayoutRect RenderTableRow::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto RenderTableRow::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     ASSERT(parent());
     // Rows and cells are in the same coordinate space. We need to both compute our overflow rect (which
     // will accommodate a row outline and any visual effects on the row itself), but we also need to add in
     // the repaint rects of cells.
-    LayoutRect result = RenderBox::clippedOverflowRect(repaintContainer, context);
-    for (RenderTableCell* cell = firstCell(); cell; cell = cell->nextCell()) {
+    auto result = RenderBox::clippedOverflowRect(repaintContainer, context);
+    for (auto* cell = firstCell(); cell; cell = cell->nextCell()) {
         // Even if a cell is a repaint container, it's the row that paints the background behind it.
         // So we don't care if a cell is a repaintContainer here.
-        result.uniteIfNonZero(cell->clippedOverflowRect(repaintContainer, context));
+        auto cellRects = cell->clippedOverflowRect(repaintContainer, context);
+        result.localVisualOverflowRect.uniteIfNonZero(cellRects.localVisualOverflowRect);
+        result.mappedRects.clippedRect.uniteIfNonZero(cellRects.mappedRects.clippedRect);
+        result.mappedRects.unclippedRect.uniteIfNonZero(cellRects.mappedRects.unclippedRect);
     }
     return result;
 }
 
-// Hit Testing
 bool RenderTableRow::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction action)
 {
     // Table rows cannot ever be hit tested.  Effectively they do not exist.

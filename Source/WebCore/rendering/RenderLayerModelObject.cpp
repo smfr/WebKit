@@ -322,23 +322,23 @@ bool RenderLayerModelObject::shouldPaintSVGRenderer(const PaintInfo& paintInfo, 
     return true;
 }
 
-std::optional<LayoutRect> RenderLayerModelObject::computeVisibleRectInSVGContainer(const LayoutRect& rect, const RenderLayerModelObject* container, RenderObject::VisibleRectContext context) const
+auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const MappedRects& rects, const RenderLayerModelObject* container, RenderObject::VisibleRectContext context) const -> std::optional<MappedRects>
 {
     ASSERT(is<RenderSVGModelObject>(this) || is<RenderSVGBlock>(this));
     ASSERT(!style().hasInFlowPosition());
     ASSERT(!view().frameView().layoutContext().isPaintOffsetCacheEnabled());
 
     if (container == this)
-        return rect;
+        return rects;
 
     bool containerIsSkipped;
     auto* localContainer = this->container(container, containerIsSkipped);
     if (!localContainer)
-        return rect;
+        return rects;
 
     ASSERT_UNUSED(containerIsSkipped, !containerIsSkipped);
 
-    LayoutRect adjustedRect = rect;
+    MappedRects adjustedRects = rects;
 
     LayoutSize locationOffset;
     if (is<RenderSVGModelObject>(this))
@@ -346,30 +346,45 @@ std::optional<LayoutRect> RenderLayerModelObject::computeVisibleRectInSVGContain
     else if (is<RenderSVGBlock>(this))
         locationOffset = downcast<RenderSVGBlock>(*this).locationOffset();
 
-    LayoutPoint topLeft = adjustedRect.location();
-    topLeft.move(locationOffset);
+    // FIXME: Clean up this confusing logic.
+    auto clippedTopLeft = adjustedRects.clippedRect.location();
+    auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+    clippedTopLeft.move(locationOffset);
+    unclippedTopLeft.move(locationOffset);
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
     if (hasLayer() && layer()->transform()) {
-        adjustedRect = layer()->transform()->mapRect(adjustedRect);
-        topLeft = adjustedRect.location();
-        topLeft.move(locationOffset);
+        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
+            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.unclippedRect = transformedRect;
+            adjustedRects.clippedRect = transformedRect;
+        } else {
+            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
+        }
+
+        auto clippedTopLeft = adjustedRects.clippedRect.location();
+        auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+        clippedTopLeft.move(locationOffset);
+        unclippedTopLeft.move(locationOffset);
     }
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    adjustedRect.setLocation(topLeft);
+    adjustedRects.clippedRect.setLocation(clippedTopLeft);
+    adjustedRects.unclippedRect.setLocation(unclippedTopLeft);
+
     if (localContainer->hasNonVisibleOverflow()) {
-        bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRect, container, context);
+        bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);
         if (isEmpty) {
             if (context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
                 return std::nullopt;
-            return adjustedRect;
+            return adjustedRects;
         }
     }
 
-    return localContainer->computeVisibleRectInContainer(adjustedRect, container, context);
+    return localContainer->computeVisibleRectInContainer(adjustedRects, container, context);
 }
 
 void RenderLayerModelObject::mapLocalToSVGContainer(const RenderLayerModelObject* ancestorContainer, TransformState& transformState, OptionSet<MapCoordinatesMode> mode, bool* wasFixed) const

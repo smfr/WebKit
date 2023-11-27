@@ -2770,10 +2770,13 @@ void RenderBlock::absoluteQuadsIgnoringContinuation(const FloatRect& logicalRect
 
 LayoutRect RenderBlock::rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const
 {
-    LayoutRect r(RenderBox::rectWithOutlineForRepaint(repaintContainer, outlineWidth));
-    if (isContinuation())
-        r.inflateY(collapsedMarginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
-    return r;
+    auto outlineBounds = RenderBox::rectWithOutlineForRepaint(repaintContainer, outlineWidth);
+    if (isContinuation()) {
+        auto marginBefore = collapsedMarginBefore(); // FIXME: This is wrong for block-flows that are horizontal.
+        // This is wrong; it makes no sense to inflate rects that may have been partially clipped, or scaled by some ancestor transform.
+        outlineBounds.inflateY(marginBefore);
+    }
+    return outlineBounds;
 }
 
 const RenderStyle& RenderBlock::outlineStyleForRepaint() const

@@ -824,30 +824,56 @@ public:
         OptionSet<VisibleRectContextOption> options;
     };
 
+    struct MappedRects {
+        LayoutRect unclippedRect; // The result of mapping localVisualOverflowRect through ancestor positions, without applying clipping.
+        LayoutRect clippedRect; // The result of mapping localVisualOverflowRect through ancestor positions and clipping up to the repaint container.
+        bool operator==(const MappedRects&) const = default;
+
+        void move(LayoutSize size)
+        {
+            unclippedRect.move(size);
+            clippedRect.move(size);
+        }
+
+        void moveBy(LayoutPoint size)
+        {
+            unclippedRect.moveBy(size);
+            clippedRect.moveBy(size);
+        }
+    };
+
+    struct RepaintRects {
+        LayoutRect localVisualOverflowRect; // The starting localVisualOverflowRect. Comparing with mappedRects.unclippedRect allows us to tell whether that was affected by a transform.
+        MappedRects mappedRects;
+        bool operator==(const RepaintRects&) const = default;
+    };
+
     // Returns the rect that should be repainted whenever this object changes. The rect is in the view's
     // coordinate space. This method deals with outlines and overflow.
-    LayoutRect absoluteClippedOverflowRectForRepaint() const { return clippedOverflowRect(nullptr, visibleRectContextForRepaint()); }
-    LayoutRect absoluteClippedOverflowRectForSpatialNavigation() const { return clippedOverflowRect(nullptr, visibleRectContextForSpatialNavigation()); }
-    LayoutRect absoluteClippedOverflowRectForRenderTreeAsText() const { return clippedOverflowRect(nullptr, visibleRectContextForRenderTreeAsText()); }
+    LayoutRect absoluteClippedOverflowRectForRepaint() const { return clippedOverflowRect(nullptr, visibleRectContextForRepaint()).mappedRects.clippedRect; }
+    LayoutRect absoluteClippedOverflowRectForSpatialNavigation() const { return clippedOverflowRect(nullptr, visibleRectContextForSpatialNavigation()).mappedRects.clippedRect; }
+    LayoutRect absoluteClippedOverflowRectForRenderTreeAsText() const { return clippedOverflowRect(nullptr, visibleRectContextForRenderTreeAsText()).mappedRects.clippedRect; }
     WEBCORE_EXPORT IntRect pixelSnappedAbsoluteClippedOverflowRect() const;
-    virtual LayoutRect clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
-    LayoutRect clippedOverflowRectForRepaint(const RenderLayerModelObject* repaintContainer) const { return clippedOverflowRect(repaintContainer, visibleRectContextForRepaint()); }
-    virtual LayoutRect rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const;
-    virtual LayoutRect outlineBoundsForRepaint(const RenderLayerModelObject* /*repaintContainer*/, const RenderGeometryMap* = nullptr) const { return LayoutRect(); }
 
-    // Given a rect in the object's coordinate space, compute a rect suitable for repainting
-    // that rect in view coordinates.
-    LayoutRect computeAbsoluteRepaintRect(const LayoutRect& rect) const { return computeRect(rect, nullptr, visibleRectContextForRepaint()); }
-    // Given a rect in the object's coordinate space, compute a rect  in the coordinate space
+    virtual RepaintRects clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+    RepaintRects clippedOverflowRectForRepaint(const RenderLayerModelObject* repaintContainer) const { return clippedOverflowRect(repaintContainer, visibleRectContextForRepaint()); }
+
+    // FIXME: These need to be re-visited.
+    virtual LayoutRect rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const;
+    virtual LayoutRect outlineBoundsForRepaint(const RenderLayerModelObject* /*repaintContainer*/, const RenderGeometryMap* = nullptr) const { return { }; }
+
+    // Given a rect in the object's coordinate space, compute a rect in the coordinate space
     // of repaintContainer suitable for the given VisibleRectContext.
-    LayoutRect computeRect(const LayoutRect&, const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
-    virtual LayoutRect computeRectForRepaint(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer) const { return computeRect(rect, repaintContainer, visibleRectContextForRepaint()); }
+    MappedRects computeRect(const LayoutRect&, const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+
+    virtual MappedRects computeRectForRepaint(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer) const { return computeRect(rect, repaintContainer, visibleRectContextForRepaint()); }
     FloatRect computeFloatRectForRepaint(const FloatRect&, const RenderLayerModelObject* repaintContainer) const;
 
     // Given a rect in the object's coordinate space, compute the location in container space where this rect is visible,
     // when clipping and scrolling as specified by the context. When using edge-inclusive intersection, return std::nullopt
     // rather than an empty rect if the rect is completely clipped out in container space.
-    virtual std::optional<LayoutRect> computeVisibleRectInContainer(const LayoutRect&, const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+    virtual std::optional<MappedRects> computeVisibleRectInContainer(const MappedRects&, const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+    // FIXME: This needs to get merged with computeVisibleRectInContainer().
     virtual std::optional<FloatRect> computeFloatVisibleRectInContainer(const FloatRect&, const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
 
     WEBCORE_EXPORT bool hasNonEmptyVisibleRectRespectingParentFrames() const;

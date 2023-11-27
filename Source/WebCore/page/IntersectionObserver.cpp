@@ -294,11 +294,15 @@ static void expandRootBoundsWithRootMargin(FloatRect& rootBounds, const LengthBo
 static std::optional<LayoutRect> computeClippedRectInRootContentsSpace(const LayoutRect& rect, const RenderElement* renderer)
 {
     OptionSet<RenderObject::VisibleRectContextOption> visibleRectOptions = { RenderObject::VisibleRectContextOption::UseEdgeInclusiveIntersection, RenderObject::VisibleRectContextOption::ApplyCompositedClips, RenderObject::VisibleRectContextOption::ApplyCompositedContainerScrolls };
-    std::optional<LayoutRect> rectInFrameAbsoluteSpace = renderer->computeVisibleRectInContainer(rect, &renderer->view(), { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
-    if (!rectInFrameAbsoluteSpace || renderer->frame().isMainFrame())
-        return rectInFrameAbsoluteSpace;
+    auto mappedRects = renderer->computeVisibleRectInContainer({ rect, rect }, &renderer->view(), { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
+    if (!mappedRects)
+        return std::nullopt;
 
-    bool intersects = rectInFrameAbsoluteSpace->edgeInclusiveIntersect(renderer->view().frameView().layoutViewportRect());
+    auto absoluteClippedRect = mappedRects->clippedRect;
+    if (renderer->frame().isMainFrame())
+        return absoluteClippedRect;
+
+    bool intersects = absoluteClippedRect.edgeInclusiveIntersect(renderer->view().frameView().layoutViewportRect());
     if (!intersects)
         return std::nullopt;
 
@@ -306,7 +310,7 @@ static std::optional<LayoutRect> computeClippedRectInRootContentsSpace(const Lay
     if (!ownerRenderer)
         return std::nullopt;
 
-    LayoutRect rectInFrameViewSpace { renderer->view().frameView().contentsToView(*rectInFrameAbsoluteSpace) };
+    LayoutRect rectInFrameViewSpace { renderer->view().frameView().contentsToView(absoluteClippedRect) };
 
     rectInFrameViewSpace.moveBy(ownerRenderer->contentBoxLocation());
     return computeClippedRectInRootContentsSpace(rectInFrameViewSpace, ownerRenderer);
@@ -392,7 +396,10 @@ auto IntersectionObserver::computeIntersectionState(const IntersectionObserverRe
                 RenderObject::VisibleRectContextOption::UseEdgeInclusiveIntersection,
                 RenderObject::VisibleRectContextOption::ApplyCompositedClips,
                 RenderObject::VisibleRectContextOption::ApplyCompositedContainerScrolls };
-            return targetRenderer->computeVisibleRectInContainer(localTargetBounds, rootRenderer, { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
+            auto mappedRects = targetRenderer->computeVisibleRectInContainer({ localTargetBounds, localTargetBounds }, rootRenderer, { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
+            if (!mappedRects)
+                return std::nullopt;
+            return mappedRects->clippedRect;
         }
 
         return computeClippedRectInRootContentsSpace(localTargetBounds, targetRenderer);

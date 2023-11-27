@@ -46,7 +46,7 @@ class SVGElement;
 class LegacyRenderSVGModelObject : public RenderElement {
     WTF_MAKE_ISO_ALLOCATED(LegacyRenderSVGModelObject);
 public:
-    LayoutRect clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const override;
+    RepaintRects clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const override;
     std::optional<FloatRect> computeFloatVisibleRectInContainer(const FloatRect&, const RenderLayerModelObject* container, VisibleRectContext) const final;
     LayoutRect outlineBoundsForRepaint(const RenderLayerModelObject* repaintContainer, const RenderGeometryMap*) const final;
 

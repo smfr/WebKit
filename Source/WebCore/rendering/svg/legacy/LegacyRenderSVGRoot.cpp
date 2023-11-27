@@ -357,7 +357,7 @@ const AffineTransform& LegacyRenderSVGRoot::localToParentTransform() const
     return m_localToParentTransform;
 }
 
-LayoutRect LegacyRenderSVGRoot::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto LegacyRenderSVGRoot::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     if (isInsideEntirelyHiddenLayer())
         return { };
@@ -365,11 +365,14 @@ LayoutRect LegacyRenderSVGRoot::clippedOverflowRect(const RenderLayerModelObject
     auto contentRepaintRect = m_localToBorderBoxTransform.mapRect(repaintRectInLocalCoordinates(context.repaintRectCalculation()));
     contentRepaintRect.intersect(snappedIntRect(borderBoxRect()));
 
-    LayoutRect repaintRect = enclosingLayoutRect(contentRepaintRect);
+    auto repaintRect = enclosingLayoutRect(contentRepaintRect);
     if (m_hasBoxDecorations || hasRenderOverflow())
         repaintRect.unite(unionRect(localSelectionRect(false), visualOverflowRect()));
 
-    return RenderReplaced::computeRect(enclosingIntRect(repaintRect), repaintContainer, context);
+    auto repaintIntRect = enclosingIntRect(repaintRect);
+    auto result = RenderReplaced::computeRect(repaintIntRect, repaintContainer, context);
+
+    return { repaintIntRect, result };
 }
 
 std::optional<FloatRect> LegacyRenderSVGRoot::computeFloatVisibleRectInContainer(const FloatRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
@@ -394,9 +397,12 @@ std::optional<FloatRect> LegacyRenderSVGRoot::computeFloatVisibleRectInContainer
         adjustedRect.unite(decoratedRepaintRect);
     }
 
-    if (std::optional<LayoutRect> rectInContainer = RenderReplaced::computeVisibleRectInContainer(enclosingIntRect(adjustedRect), container, context))
-        return FloatRect(*rectInContainer);
-    return std::nullopt;
+    auto expandedRect = enclosingIntRect(adjustedRect);
+    auto mappedRects = RenderReplaced::computeVisibleRectInContainer({ expandedRect, expandedRect }, container, context);
+    if (!mappedRects)
+        return std::nullopt;
+
+    return mappedRects->clippedRect;
 }
 
 // This method expects local CSS box coordinates.

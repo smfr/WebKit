@@ -990,11 +990,11 @@ void RenderLayer::updateLayerPositionsAfterLayout(bool isRelayoutingSubtree, boo
     LOG(Compositing, "RenderLayer %p updateLayerPositionsAfterLayout", this);
     willUpdateLayerPositions();
 
-    RenderGeometryMap geometryMap(UseTransforms, renderer().settings().css3DTransformInteroperabilityEnabled());
-    if (!isRenderViewLayer())
-        geometryMap.pushMappingsToAncestor(parent(), nullptr);
+//    RenderGeometryMap geometryMap(UseTransforms, renderer().settings().css3DTransformInteroperabilityEnabled());
+//    if (!isRenderViewLayer())
+//        geometryMap.pushMappingsToAncestor(parent(), nullptr);
 
-    recursiveUpdateLayerPositions(&geometryMap, updateLayerPositionFlags(isRelayoutingSubtree, didFullRepaint));
+    recursiveUpdateLayerPositions(nullptr, updateLayerPositionFlags(isRelayoutingSubtree, didFullRepaint));
 }
 
 void RenderLayer::recursiveUpdateLayerPositions(RenderGeometryMap* geometryMap, OptionSet<UpdateLayerPositionsFlag> flags)
@@ -1048,7 +1048,7 @@ void RenderLayer::recursiveUpdateLayerPositions(RenderGeometryMap* geometryMap, 
         if (checkForRepaint && shouldRepaintAfterLayout() && newRects) {
             auto needsFullRepaint = m_repaintStatus == RepaintStatus::NeedsFullRepaint ? RenderElement::RequiresFullRepaint::Yes : RenderElement::RequiresFullRepaint::No;
             auto resolvedOldRects = valueOrDefault(oldRects);
-            renderer().repaintAfterLayoutIfNeeded(repaintContainer.get(), needsFullRepaint, resolvedOldRects.clippedOverflowRect, resolvedOldRects.outlineBoundsRect, &newRects->clippedOverflowRect, &newRects->outlineBoundsRect);
+            renderer().repaintAfterLayoutIfNeeded(repaintContainer.get(), needsFullRepaint, resolvedOldRects, &(*newRects), { });
         }
     };
 
@@ -1125,8 +1125,9 @@ LayoutRect RenderLayer::repaintRectIncludingNonCompositingDescendants() const
 {
     LayoutRect repaintRect;
     if (m_repaintRectsValid)
-        repaintRect = m_repaintRects.clippedOverflowRect;
-    for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
+        repaintRect = m_repaintRects.mappedRects.clippedRect;
+
+    for (auto* child = firstChild(); child; child = child->nextSibling()) {
         // Don't include repaint rects for composited child layers; they will paint themselves and have a different origin.
         if (child->isComposited())
             continue;
@@ -1170,20 +1171,18 @@ std::optional<LayoutRect> RenderLayer::cachedClippedOverflowRect() const
     if (!m_repaintRectsValid)
         return std::nullopt;
 
-    return m_repaintRects.clippedOverflowRect;
+    return m_repaintRects.mappedRects.clippedRect;
 }
 
-void RenderLayer::computeRepaintRects(const RenderLayerModelObject* repaintContainer, const RenderGeometryMap* geometryMap)
+void RenderLayer::computeRepaintRects(const RenderLayerModelObject* repaintContainer, const RenderGeometryMap*)
 {
     ASSERT(!m_visibleContentStatusDirty);
 
     if (!isSelfPaintingLayer())
         clearRepaintRects();
     else {
-        setRepaintRects({
-            renderer().clippedOverflowRectForRepaint(repaintContainer),
-            renderer().outlineBoundsForRepaint(repaintContainer, geometryMap)
-        });
+        auto rects = renderer().clippedOverflowRectForRepaint(repaintContainer);
+        setRepaintRects(WTFMove(rects));
     }
 }
 
@@ -1194,13 +1193,13 @@ void RenderLayer::computeRepaintRectsIncludingDescendants()
     // FIXME: it's wrong to call this when layout is not up-to-date, which we do.
     computeRepaintRects(renderer().containerForRepaint().renderer.get());
 
-    for (RenderLayer* layer = firstChild(); layer; layer = layer->nextSibling())
+    for (auto* layer = firstChild(); layer; layer = layer->nextSibling())
         layer->computeRepaintRectsIncludingDescendants();
 }
 
-void RenderLayer::setRepaintRects(const RepaintRects& rects)
+void RenderLayer::setRepaintRects(RenderObject::RepaintRects&& rects)
 {
-    m_repaintRects = rects;
+    m_repaintRects = WTFMove(rects);
     m_repaintRectsValid = true;
 }
 
@@ -1274,8 +1273,7 @@ void RenderLayer::recursiveUpdateLayerPositionsAfterScroll(RenderGeometryMap* ge
         // When ScrollView's m_paintsEntireContents flag flips due to layer backing changes, the repaint area transitions from
         // visual to layout overflow. When this happens the cached repaint rects become invalid and they need to be recomputed (see webkit.org/b/188121).
         // Check that our cached rects are correct.
-        ASSERT_IMPLIES(m_repaintRectsValid, m_repaintRects.clippedOverflowRect == renderer().clippedOverflowRectForRepaint(renderer().containerForRepaint().renderer.get()));
-        ASSERT_IMPLIES(m_repaintRectsValid, m_repaintRects.outlineBoundsRect == renderer().outlineBoundsForRepaint(renderer().containerForRepaint().renderer.get()));
+        ASSERT_IMPLIES(m_repaintRectsValid, m_repaintRects.mappedRects.clippedRect == renderer().clippedOverflowRectForRepaint(renderer().containerForRepaint().renderer.get()).mappedRects.clippedRect);
     }
     
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
@@ -5397,10 +5395,10 @@ void RenderLayer::setBackingNeedsRepaintInRect(const LayoutRect& r, GraphicsLaye
 // Since we're only painting non-composited layers, we know that they all share the same repaintContainer.
 void RenderLayer::repaintIncludingNonCompositingDescendants(const RenderLayerModelObject* repaintContainer)
 {
-    auto clippedOverflowRect = m_repaintRectsValid ? m_repaintRects.clippedOverflowRect : renderer().clippedOverflowRectForRepaint(repaintContainer);
+    auto clippedOverflowRect = valueOrCompute(cachedClippedOverflowRect(), [&] { return renderer().clippedOverflowRectForRepaint(repaintContainer).mappedRects.clippedRect; });
     renderer().repaintUsingContainer(repaintContainer, clippedOverflowRect);
 
-    for (RenderLayer* curr = firstChild(); curr; curr = curr->nextSibling()) {
+    for (auto* curr = firstChild(); curr; curr = curr->nextSibling()) {
         if (!curr->isComposited())
             curr->repaintIncludingNonCompositingDescendants(repaintContainer);
     }

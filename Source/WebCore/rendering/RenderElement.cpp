@@ -1237,50 +1237,74 @@ static bool mustRepaintFillLayers(const RenderElement& renderer, const FillLayer
     return false;
 }
 
-static bool mustRepaintBackgroundOrBorder(const RenderElement& renderer)
-{
-    if (renderer.hasMask() && mustRepaintFillLayers(renderer, renderer.style().maskLayers()))
-        return true;
-
-    // If we don't have a background/border/mask, then nothing to do.
-    if (!renderer.hasVisibleBoxDecorations())
-        return false;
-
-    if (mustRepaintFillLayers(renderer, renderer.style().backgroundLayers()))
-        return true;
-
-    // Our fill layers are ok. Let's check border.
-    if (renderer.style().hasBorder() && renderer.borderImageIsLoadedAndCanBeRendered())
-        return true;
-
-    return false;
-}
-
-bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* repaintContainer, RequiresFullRepaint requiresFullRepaint, const LayoutRect& oldClippedOverflowRect, const LayoutRect& oldOutlineAndBoxShadowBox, const LayoutRect* newClippedOverflowRectPtr, const LayoutRect* newOutlineAndBoxShadowBoxRectPtr)
+bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* repaintContainer, RequiresFullRepaint requiresFullRepaint, const RepaintRects& oldClippedOverflowRects, const RepaintRects* newClippedOverflowRectsPtr, LayoutRect oldOutlineBounds)
 {
     if (view().printing())
-        return false; // Don't repaint if we're printing.
+        return false;
 
-    // This ASSERT fails due to animations. See https://bugs.webkit.org/show_bug.cgi?id=37048
-    // ASSERT(!newClippedOverflowRectPtr || *newClippedOverflowRectPtr == clippedOverflowRectForRepaint(repaintContainer));
-    LayoutRect newClippedOverflowRect = newClippedOverflowRectPtr ? *newClippedOverflowRectPtr : clippedOverflowRectForRepaint(repaintContainer);
-    LayoutRect newOutlineAndBoxShadowBox;
+    auto newClippedOverflowRects = newClippedOverflowRectsPtr ? *newClippedOverflowRectsPtr : clippedOverflowRectForRepaint(repaintContainer);
 
-    bool fullRepaint = requiresFullRepaint == RequiresFullRepaint::Yes;
+    auto oldClippedOverflowRect = oldClippedOverflowRects.mappedRects.clippedRect;
+    auto newClippedOverflowRect = newClippedOverflowRects.mappedRects.clippedRect;
 
-    if (!fullRepaint && oldClippedOverflowRect != newClippedOverflowRect && style().hasBorderRadius()) {
-        auto oldRadius = style().getRoundedBorderFor(oldClippedOverflowRect).radii();
-        auto newRadius = style().getRoundedBorderFor(newClippedOverflowRect).radii();
+    auto oldUnclippedRect = oldClippedOverflowRects.mappedRects.unclippedRect;
+    auto newUnclippedRect = newClippedOverflowRects.mappedRects.unclippedRect;
 
-        fullRepaint = oldRadius != newRadius;
-    }
+    ALWAYS_LOG_WITH_STREAM(stream << "RenderElement " << this << " repaintAfterLayoutIfNeeded - clippedOverflowRect changed from " << oldClippedOverflowRect << " to " << newClippedOverflowRect);
+    ALWAYS_LOG_WITH_STREAM(stream << " unclippedRect changed from " << oldUnclippedRect << " to " << newUnclippedRect);
 
-    if (!fullRepaint) {
-        // This ASSERT fails due to animations. See https://bugs.webkit.org/show_bug.cgi?id=37048
-        // ASSERT(!newOutlineBoxRectPtr || *newOutlineBoxRectPtr == outlineBoundsForRepaint(repaintContainer));
-        newOutlineAndBoxShadowBox = newOutlineAndBoxShadowBoxRectPtr ? *newOutlineAndBoxShadowBoxRectPtr : outlineBoundsForRepaint(repaintContainer);
-        fullRepaint = (newOutlineAndBoxShadowBox.location() != oldOutlineAndBoxShadowBox.location() || (mustRepaintBackgroundOrBorder(*this) && (newClippedOverflowRect != oldClippedOverflowRect || newOutlineAndBoxShadowBox != oldOutlineAndBoxShadowBox)));
-    }
+    auto newOutlineBounds = outlineBoundsForRepaint(repaintContainer);
+    ALWAYS_LOG_WITH_STREAM(stream << " outlineBounds changed from " << oldOutlineBounds << " to " << newOutlineBounds);
+
+    if (oldClippedOverflowRect.isEmpty() && newClippedOverflowRect.isEmpty())
+        return true;
+
+    auto mustRepaintBackgroundOrBorderOnSizeChange = [&](LayoutRect oldBounds, LayoutRect newBounds) {
+        if (hasMask() && mustRepaintFillLayers(*this, style().maskLayers()))
+            return true;
+
+        if (style().hasBorderRadius()) {
+            // If the border radius changed, repaints at style change time will take care of that.
+            // This code is attempting to detect whether border-radius constraining based on box size
+            // affects the radii, using the unclipped repaint rect as a proxy for the border box.
+            auto oldRadii = style().getRoundedBorderFor(oldBounds).radii();
+            auto newRadii = style().getRoundedBorderFor(newBounds).radii();
+            if (oldRadii != newRadii)
+                return true;
+        }
+
+        // If we don't have a background/border/mask, then nothing to do.
+        if (!hasVisibleBoxDecorations())
+            return false;
+
+        if (mustRepaintFillLayers(*this, style().backgroundLayers()))
+            return true;
+
+        // Our fill layers are ok. Let's check border.
+        if (style().hasBorder() && borderImageIsLoadedAndCanBeRendered())
+            return true;
+
+        return false;
+    };
+
+    auto fullRepaint = [&]() {
+        if (requiresFullRepaint == RequiresFullRepaint::Yes)
+            return true;
+
+        if (oldClippedOverflowRect.isEmpty() || newClippedOverflowRect.isEmpty())
+            return true;
+
+        // If our visual overflow rect moved, we have to repaint everything.
+        if (oldUnclippedRect.location() != newUnclippedRect.location())
+            return true;
+
+        // If our visual overflow rect resized (as a proxy for a border box resize),
+        // we have to repaint if we paint content that scales with the size.
+        if (oldUnclippedRect.size() != newUnclippedRect.size() && mustRepaintBackgroundOrBorderOnSizeChange(oldUnclippedRect, newUnclippedRect))
+            return true;
+
+        return false;
+    }();
 
     if (!repaintContainer)
         repaintContainer = &view();
@@ -1297,50 +1321,46 @@ bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* rep
         return true;
     }
 
-    if (newClippedOverflowRect == oldClippedOverflowRect && newOutlineAndBoxShadowBox == oldOutlineAndBoxShadowBox)
+    if (oldClippedOverflowRects == newClippedOverflowRects)
         return false;
 
-    if (newClippedOverflowRect.isEmpty() && !oldClippedOverflowRect.isEmpty())
-        repaintUsingContainer(repaintContainer, oldClippedOverflowRect);
-    else if (!newClippedOverflowRect.isEmpty() && oldClippedOverflowRect.isEmpty())
-        repaintUsingContainer(repaintContainer, newClippedOverflowRect);
-    else {
-        LayoutUnit deltaLeft = newClippedOverflowRect.x() - oldClippedOverflowRect.x();
-        if (deltaLeft > 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), oldClippedOverflowRect.y(), deltaLeft, oldClippedOverflowRect.height()));
-        else if (deltaLeft < 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), newClippedOverflowRect.y(), -deltaLeft, newClippedOverflowRect.height()));
+    // Repaint the delta between the old and new clipped overflow rects.
+    LayoutUnit deltaLeft = newClippedOverflowRect.x() - oldClippedOverflowRect.x();
+    if (deltaLeft > 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), oldClippedOverflowRect.y(), deltaLeft, oldClippedOverflowRect.height()));
+    else if (deltaLeft < 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), newClippedOverflowRect.y(), -deltaLeft, newClippedOverflowRect.height()));
 
-        LayoutUnit deltaRight = newClippedOverflowRect.maxX() - oldClippedOverflowRect.maxX();
-        if (deltaRight > 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.maxX(), newClippedOverflowRect.y(), deltaRight, newClippedOverflowRect.height()));
-        else if (deltaRight < 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.maxX(), oldClippedOverflowRect.y(), -deltaRight, oldClippedOverflowRect.height()));
+    LayoutUnit deltaRight = newClippedOverflowRect.maxX() - oldClippedOverflowRect.maxX();
+    if (deltaRight > 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.maxX(), newClippedOverflowRect.y(), deltaRight, newClippedOverflowRect.height()));
+    else if (deltaRight < 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.maxX(), oldClippedOverflowRect.y(), -deltaRight, oldClippedOverflowRect.height()));
 
-        LayoutUnit deltaTop = newClippedOverflowRect.y() - oldClippedOverflowRect.y();
-        if (deltaTop > 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), oldClippedOverflowRect.y(), oldClippedOverflowRect.width(), deltaTop));
-        else if (deltaTop < 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), newClippedOverflowRect.y(), newClippedOverflowRect.width(), -deltaTop));
+    LayoutUnit deltaTop = newClippedOverflowRect.y() - oldClippedOverflowRect.y();
+    if (deltaTop > 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), oldClippedOverflowRect.y(), oldClippedOverflowRect.width(), deltaTop));
+    else if (deltaTop < 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), newClippedOverflowRect.y(), newClippedOverflowRect.width(), -deltaTop));
 
-        LayoutUnit deltaBottom = newClippedOverflowRect.maxY() - oldClippedOverflowRect.maxY();
-        if (deltaBottom > 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), oldClippedOverflowRect.maxY(), newClippedOverflowRect.width(), deltaBottom));
-        else if (deltaBottom < 0)
-            repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), newClippedOverflowRect.maxY(), oldClippedOverflowRect.width(), -deltaBottom));
-    }
+    LayoutUnit deltaBottom = newClippedOverflowRect.maxY() - oldClippedOverflowRect.maxY();
+    if (deltaBottom > 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(newClippedOverflowRect.x(), oldClippedOverflowRect.maxY(), newClippedOverflowRect.width(), deltaBottom));
+    else if (deltaBottom < 0)
+        repaintUsingContainer(repaintContainer, LayoutRect(oldClippedOverflowRect.x(), newClippedOverflowRect.maxY(), oldClippedOverflowRect.width(), -deltaBottom));
 
-    if (newOutlineAndBoxShadowBox == oldOutlineAndBoxShadowBox)
+    if (oldUnclippedRect == newUnclippedRect)
         return false;
 
-    // Let's figure out how much we need to repaint within the new bounds.
-    // e.g. when renderer shrinks vertically it's not sufficient to repaint the "shrunk area" (to clear old content, see above) we need to take care of the area within the new bounds to make sure
-    // decorations like border, outline etc get repainted as well (they are enclosed by old/new bounds).
+    // Repainting the delta of the old and new clipped overflow rects is not sufficient when the box has outlines border and shadows,
+    // because a size change has to repaint those areas affected by such decorations.
+    // It's not really correct to do math here with oldUnclippedRect/newUnclippedRect and local shadow/radius values, since
+    // oldUnclippedRect/newUnclippedRect are in the coordinate space of the repaint container, and have been mapped through ancestor transforms.
     const RenderStyle& outlineStyle = outlineStyleForRepaint();
     auto& style = this->style();
     auto outlineWidth = LayoutUnit { outlineStyle.outlineSize() };
     auto insetShadowExtent = style.boxShadowInsetExtent();
-    auto sizeDelta = LayoutSize { absoluteValue(newOutlineAndBoxShadowBox.width() - oldOutlineAndBoxShadowBox.width()), absoluteValue(newOutlineAndBoxShadowBox.height() - oldOutlineAndBoxShadowBox.height()) };
+    auto sizeDelta = LayoutSize { absoluteValue(newUnclippedRect.width() - oldUnclippedRect.width()), absoluteValue(newUnclippedRect.height() - oldUnclippedRect.height()) };
     if (sizeDelta.width()) {
         auto shadowLeft = LayoutUnit { };
         auto shadowRight = LayoutUnit { };
@@ -1374,12 +1394,12 @@ bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* rep
         };
         auto decorationRightExtent = insetExtent() + outsetExtent();
         // Both inset and outset "decorations" are within the "outline and box shadow" box.
-        auto decorationLeft = newOutlineAndBoxShadowBox.x() + std::min(newOutlineAndBoxShadowBox.width(), oldOutlineAndBoxShadowBox.width()) - decorationRightExtent;
+        auto decorationLeft = newUnclippedRect.x() + std::min(newUnclippedRect.width(), oldUnclippedRect.width()) - decorationRightExtent;
         auto clippedBoundsRight = std::min(newClippedOverflowRect.maxX(), oldClippedOverflowRect.maxX());
         auto damageExtentWithinClippedOverflow = clippedBoundsRight - decorationLeft;
         if (damageExtentWithinClippedOverflow > 0) {
             damageExtentWithinClippedOverflow = std::min(sizeDelta.width() + decorationRightExtent, damageExtentWithinClippedOverflow);
-            auto damagedRect = LayoutRect { decorationLeft, newOutlineAndBoxShadowBox.y(), damageExtentWithinClippedOverflow, std::max(newOutlineAndBoxShadowBox.height(), oldOutlineAndBoxShadowBox.height()) };
+            auto damagedRect = LayoutRect { decorationLeft, newUnclippedRect.y(), damageExtentWithinClippedOverflow, std::max(newUnclippedRect.height(), oldUnclippedRect.height()) };
             repaintUsingContainer(repaintContainer, damagedRect);
         }
     }
@@ -1416,12 +1436,12 @@ bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* rep
         };
         auto decorationBottomExtent = insetExtent() + outsetExtent();
         // Both inset and outset "decorations" are within the "outline and box shadow" box.
-        auto decorationTop = std::min(newOutlineAndBoxShadowBox.maxY(), oldOutlineAndBoxShadowBox.maxY()) - decorationBottomExtent;
+        auto decorationTop = std::min(newUnclippedRect.maxY(), oldUnclippedRect.maxY()) - decorationBottomExtent;
         auto clippedBoundsBottom = std::min(newClippedOverflowRect.maxY(), oldClippedOverflowRect.maxY());
         auto damageExtentWithinClippedOverflow = clippedBoundsBottom - decorationTop;
         if (damageExtentWithinClippedOverflow > 0) {
             damageExtentWithinClippedOverflow = std::min(sizeDelta.height() + decorationBottomExtent, damageExtentWithinClippedOverflow);
-            auto damagedRect = LayoutRect { newOutlineAndBoxShadowBox.x(), decorationTop, std::max(newOutlineAndBoxShadowBox.width(), oldOutlineAndBoxShadowBox.width()), damageExtentWithinClippedOverflow };
+            auto damagedRect = LayoutRect { newUnclippedRect.x(), decorationTop, std::max(newUnclippedRect.width(), oldUnclippedRect.width()), damageExtentWithinClippedOverflow };
             repaintUsingContainer(repaintContainer, damagedRect);
         }
     }

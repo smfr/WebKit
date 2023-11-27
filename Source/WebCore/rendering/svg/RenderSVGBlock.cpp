@@ -143,7 +143,7 @@ void RenderSVGBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool recompu
     addVisualOverflow(snappedIntRect(borderRect));
 }
 
-LayoutRect RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
     if (document().settings().layerBasedSVGEngineEnabled()) {
@@ -151,7 +151,9 @@ LayoutRect RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* rep
             return { };
 
         ASSERT(!view().frameView().layoutContext().isPaintOffsetCacheEnabled());
-        return computeRect(visualOverflowRect(), repaintContainer, context);
+        auto overflowRect = visualOverflowRect();
+        auto result = computeRect(overflowRect, repaintContainer, context);
+        return { overflowRect, result };
     }
 #else
     UNUSED_PARAM(context);
@@ -160,16 +162,19 @@ LayoutRect RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* rep
     return SVGRenderSupport::clippedOverflowRectForRepaint(*this, repaintContainer, context);
 }
 
-std::optional<LayoutRect> RenderSVGBlock::computeVisibleRectInContainer(const LayoutRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
+auto RenderSVGBlock::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
 {
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
     if (document().settings().layerBasedSVGEngineEnabled())
-        return computeVisibleRectInSVGContainer(rect, container, context);
+        return computeVisibleRectInSVGContainer(rects, container, context);
 #endif
 
-    std::optional<FloatRect> adjustedRect = computeFloatVisibleRectInContainer(rect, container, context);
-    if (adjustedRect)
-        return enclosingLayoutRect(*adjustedRect);
+    // FIXME: computeFloatVisibleRectInContainer needs to go away. It can't handle MappedRects.
+    std::optional<FloatRect> adjustedRect = computeFloatVisibleRectInContainer(rects.clippedRect, container, context);
+    if (adjustedRect) {
+        auto expandedRect = enclosingLayoutRect(*adjustedRect);
+        return MappedRects { expandedRect, expandedRect };
+    }
     return std::nullopt;
 }
 

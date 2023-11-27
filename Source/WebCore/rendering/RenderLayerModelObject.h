@@ -56,7 +56,7 @@ public:
 
     // Returns false if the rect has no intersection with the applied clip rect. When the context specifies edge-inclusive
     // intersection, this return value allows distinguishing between no intersection and zero-area intersection.
-    virtual bool applyCachedClipAndScrollPosition(LayoutRect&, const RenderLayerModelObject*, VisibleRectContext) const { return false; }
+    virtual bool applyCachedClipAndScrollPosition(MappedRects&, const RenderLayerModelObject*, VisibleRectContext) const { return false; }
 
     virtual bool isScrollableOrRubberbandableBox() const { return false; }
 
@@ -78,7 +78,7 @@ public:
 
     // Provides the SVG implementation for computeVisibleRectInContainer().
     // This lives in RenderLayerModelObject, which is the common base-class for all SVG renderers.
-    std::optional<LayoutRect> computeVisibleRectInSVGContainer(const LayoutRect&, const RenderLayerModelObject* container, VisibleRectContext) const;
+    std::optional<MappedRects> computeVisibleRectInSVGContainer(const MappedRects&, const RenderLayerModelObject* container, VisibleRectContext) const;
 
     // Provides the SVG implementation for mapLocalToContainer().
     // This lives in RenderLayerModelObject, which is the common base-class for all SVG renderers.

@@ -44,8 +44,8 @@ private:
 
     void paint(PaintInfo&, const LayoutPoint&) final { }
 
-    LayoutRect clippedOverflowRect(const RenderLayerModelObject*, VisibleRectContext) const final { return { }; }
-    std::optional<LayoutRect> computeVisibleRectInContainer(const LayoutRect& rect, const RenderLayerModelObject*, VisibleRectContext) const final { return std::make_optional(rect); }
+    RepaintRects clippedOverflowRect(const RenderLayerModelObject*, VisibleRectContext) const final { return { }; }
+    std::optional<MappedRects> computeVisibleRectInContainer(const MappedRects& rect, const RenderLayerModelObject*, VisibleRectContext) const final { return std::make_optional(rect); }
 
     void boundingRects(Vector<LayoutRect>&, const LayoutPoint&) const final { }
     void absoluteQuads(Vector<FloatQuad>&, bool*) const final { }

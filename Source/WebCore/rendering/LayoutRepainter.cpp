@@ -31,19 +31,17 @@
 
 namespace WebCore {
 
-LayoutRepainter::LayoutRepainter(RenderElement& renderer, bool checkForRepaint, RepaintOutlineBounds repaintOutlineBounds)
+LayoutRepainter::LayoutRepainter(RenderElement& renderer, bool checkForRepaint)
     : m_renderer(renderer)
     , m_checkForRepaint(checkForRepaint)
-    , m_repaintOutlineBounds(repaintOutlineBounds == RepaintOutlineBounds::Yes)
 {
     if (!m_checkForRepaint)
         return;
 
     m_repaintContainer = m_renderer.containerForRepaint().renderer.get();
-    m_oldBounds = m_renderer.clippedOverflowRectForRepaint(m_repaintContainer);
+    m_oldRect = m_renderer.clippedOverflowRectForRepaint(m_repaintContainer);
 
-    if (m_repaintOutlineBounds)
-        m_oldOutlineBounds = m_renderer.outlineBoundsForRepaint(m_repaintContainer);
+    m_oldOutlineBounds = m_renderer.outlineBoundsForRepaint(m_repaintContainer);
 }
 
 bool LayoutRepainter::repaintAfterLayout()
@@ -51,10 +49,8 @@ bool LayoutRepainter::repaintAfterLayout()
     if (!m_checkForRepaint)
         return false;
 
-    auto newBounds = m_renderer.clippedOverflowRectForRepaint(m_repaintContainer);
-    auto newOutlineBounds = m_repaintOutlineBounds ? nullptr : &m_oldOutlineBounds;
-
-    return m_renderer.repaintAfterLayoutIfNeeded(m_repaintContainer, m_renderer.selfNeedsLayout() ? RenderElement::RequiresFullRepaint::Yes : RenderElement::RequiresFullRepaint::No, m_oldBounds, m_oldOutlineBounds, &newBounds, newOutlineBounds);
+    auto newRect = m_renderer.clippedOverflowRectForRepaint(m_repaintContainer);
+    return m_renderer.repaintAfterLayoutIfNeeded(m_repaintContainer, m_renderer.selfNeedsLayout() ? RenderElement::RequiresFullRepaint::Yes : RenderElement::RequiresFullRepaint::No, m_oldRect, &newRect, m_oldOutlineBounds);
 }
 
 } // namespace WebCore

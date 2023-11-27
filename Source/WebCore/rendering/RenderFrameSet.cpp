@@ -441,7 +441,7 @@ void RenderFrameSet::layout()
     CheckedPtr<const RenderLayerModelObject> repaintContainer;
     if (doFullRepaint) {
         repaintContainer = containerForRepaint().renderer;
-        oldBounds = clippedOverflowRectForRepaint(repaintContainer.get());
+        oldBounds = clippedOverflowRectForRepaint(repaintContainer.get()).mappedRects.clippedRect;
     }
 
     if (!parent()->isRenderFrameSet() && !document().printing()) {
@@ -471,7 +471,7 @@ void RenderFrameSet::layout()
 
     if (doFullRepaint) {
         repaintUsingContainer(repaintContainer.get(), snappedIntRect(oldBounds));
-        LayoutRect newBounds = clippedOverflowRectForRepaint(repaintContainer.get());
+        auto newBounds = clippedOverflowRectForRepaint(repaintContainer.get()).mappedRects.clippedRect;
         if (newBounds != oldBounds)
             repaintUsingContainer(repaintContainer.get(), snappedIntRect(newBounds));
     }

@@ -1195,36 +1195,41 @@ LayoutSize RenderBox::cachedSizeForOverflowClip() const
     return layer()->size();
 }
 
-bool RenderBox::applyCachedClipAndScrollPosition(LayoutRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
+bool RenderBox::applyCachedClipAndScrollPosition(MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const
 {
-    flipForWritingMode(rect);
+    flipForWritingMode(rects);
 
-    if (context.options.contains(VisibleRectContextOption::ApplyCompositedContainerScrolls) || this != container || !usesCompositedScrolling())
-        rect.moveBy(-scrollPosition()); // For overflow:auto/scroll/hidden.
+    if (context.options.contains(VisibleRectContextOption::ApplyCompositedContainerScrolls) || this != container || !usesCompositedScrolling()) {
+        auto scrollPosition = this->scrollPosition();
+        rects.clippedRect.moveBy(-scrollPosition);
+        rects.unclippedRect.moveBy(-scrollPosition);
+    }
 
     // Do not clip scroll layer contents to reduce the number of repaints while scrolling.
     if ((!context.options.contains(VisibleRectContextOption::ApplyCompositedClips) && usesCompositedScrolling())
         || (!context.options.contains(VisibleRectContextOption::ApplyContainerClip) && this == container)) {
-        flipForWritingMode(rect);
+        flipForWritingMode(rects);
         return true;
     }
 
     // height() is inaccurate if we're in the middle of a layout of this RenderBox, so use the
     // layer's size instead. Even if the layer's size is wrong, the layer itself will repaint
     // anyway if its size does change.
-    LayoutRect clipRect(LayoutPoint(), cachedSizeForOverflowClip());
+    auto  clipRect = LayoutRect{ { }, cachedSizeForOverflowClip() };
     if (effectiveOverflowX() == Overflow::Visible)
         clipRect.expandToInfiniteX();
+
     if (effectiveOverflowY() == Overflow::Visible)
         clipRect.expandToInfiniteY();
+
     bool intersects;
     if (context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
-        intersects = rect.edgeInclusiveIntersect(clipRect);
+        intersects = rects.clippedRect.edgeInclusiveIntersect(clipRect);
     else {
-        rect.intersect(clipRect);
-        intersects = !rect.isEmpty();
+        rects.clippedRect.intersect(clipRect);
+        intersects = !rects.clippedRect.isEmpty();
     }
-    flipForWritingMode(rect);
+    flipForWritingMode(rects);
     return intersects;
 }
 
@@ -2526,38 +2531,52 @@ void RenderBox::deleteLineBoxWrapper()
     m_inlineBoxWrapper = nullptr;
 }
 
-LayoutRect RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     if (isInsideEntirelyHiddenLayer())
         return { };
 
-    LayoutRect r = visualOverflowRect();
+    auto localVisualOverflowRect = visualOverflowRect();
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
-    r.move(view().frameView().layoutContext().layoutDelta());
-    return computeRect(r, repaintContainer, context);
+    localVisualOverflowRect.move(view().frameView().layoutContext().layoutDelta());
+    auto mappedRects = computeRect(localVisualOverflowRect, repaintContainer, context);
+
+    // Strictly speaking we could get some combination of scale and clipping that gives us a rect with the same size, but that's pretty unlikely.
+    return { localVisualOverflowRect, mappedRects };
 }
 
-LayoutRect RenderBox::computeVisibleRectUsingPaintOffset(const LayoutRect& rect) const
+auto RenderBox::computeVisibleRectUsingPaintOffset(const MappedRects& rects) const -> MappedRects
 {
-    LayoutRect adjustedRect = rect;
-    auto* layoutState = view().frameView().layoutContext().layoutState();
+    MappedRects adjustedRects = rects;
 
-    if (layer() && layer()->transform())
-        adjustedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRect), document().deviceScaleFactor()));
+    if (layer() && layer()->transform()) {
+        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
+            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.unclippedRect = transformedRect;
+            adjustedRects.clippedRect = transformedRect;
+        } else {
+            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
+        }
+    }
 
     // We can't trust the bits on RenderObject, because this might be called while re-resolving style.
     if (style().hasInFlowPosition() && layer())
-        adjustedRect.move(layer()->offsetForInFlowPosition());
+        adjustedRects.move(layer()->offsetForInFlowPosition());
 
-    adjustedRect.moveBy(location());
-    adjustedRect.move(layoutState->paintOffset());
+    adjustedRects.moveBy(location());
+
+    auto* layoutState = view().frameView().layoutContext().layoutState();
+    adjustedRects.move(layoutState->paintOffset());
+
     if (layoutState->isClipped())
-        adjustedRect.intersect(layoutState->clipRect());
-    return adjustedRect;
+        adjustedRects.clippedRect.intersect(layoutState->clipRect());
+
+    return adjustedRects;
 }
 
-std::optional<LayoutRect> RenderBox::computeVisibleRectInContainer(const LayoutRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
+auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
 {
     // The rect we compute at each step is shifted by our x/y offset in the parent container's coordinate space.
     // Only when we cross a writing mode boundary will we have to possibly flipForWritingMode (to convert into a more appropriate
@@ -2570,37 +2589,42 @@ std::optional<LayoutRect> RenderBox::computeVisibleRectInContainer(const LayoutR
     const RenderStyle& styleToUse = style();
     // Paint offset cache is only valid for root-relative, non-fixed position repainting
     if (view().frameView().layoutContext().isPaintOffsetCacheEnabled() && !container && styleToUse.position() != PositionType::Fixed && !context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
-        return computeVisibleRectUsingPaintOffset(rect);
+        return computeVisibleRectUsingPaintOffset(rects);
 
-    LayoutRect adjustedRect = rect;
-    if (hasReflection())
-        adjustedRect.unite(reflectedRect(adjustedRect));
+    MappedRects adjustedRects = rects;
+    if (hasReflection()) {
+        adjustedRects.clippedRect.unite(reflectedRect(adjustedRects.clippedRect));
+        adjustedRects.unclippedRect.unite(reflectedRect(adjustedRects.unclippedRect));
+    }
 
     if (container == this) {
         if (container->style().isFlippedBlocksWritingMode())
-            flipForWritingMode(adjustedRect);
-        if (context.descendantNeedsEnclosingIntRect)
-            adjustedRect = enclosingIntRect(adjustedRect);
-        return adjustedRect;
+            flipForWritingMode(adjustedRects);
+        if (context.descendantNeedsEnclosingIntRect) {
+            adjustedRects.unclippedRect = enclosingIntRect(adjustedRects.unclippedRect);
+            adjustedRects.clippedRect = enclosingIntRect(adjustedRects.clippedRect);
+        }
+        return adjustedRects;
     }
 
     bool containerIsSkipped;
     auto* localContainer = this->container(container, containerIsSkipped);
     if (!localContainer)
-        return adjustedRect;
+        return adjustedRects;
     
     if (isWritingModeRoot()) {
         if (!isOutOfFlowPositioned() || !context.dirtyRectIsFlipped) {
-            flipForWritingMode(adjustedRect);
+            flipForWritingMode(adjustedRects);
             context.dirtyRectIsFlipped = true;
         }
     }
 
-    LayoutSize locationOffset = this->locationOffset();
+    auto locationOffset = this->locationOffset();
     // FIXME: This is needed as long as RenderWidget snaps to integral size/position.
     if (isRenderReplaced() && isRenderWidget()) {
         LayoutSize flooredLocationOffset = toIntSize(flooredIntPoint(locationOffset));
-        adjustedRect.expand(locationOffset - flooredLocationOffset);
+        adjustedRects.unclippedRect.expand(locationOffset - flooredLocationOffset);
+        adjustedRects.clippedRect.expand(locationOffset - flooredLocationOffset);
         locationOffset = flooredLocationOffset;
         context.descendantNeedsEnclosingIntRect = true;
     }
@@ -2612,56 +2636,77 @@ std::optional<LayoutRect> RenderBox::computeVisibleRectInContainer(const LayoutR
         // or not images should animate.
         // FIXME: Just as with offsetFromContainer, we aren't really handling objects that span
         // multiple columns properly.
-        LayoutPoint physicalPoint(flipForWritingMode(adjustedRect.location()));
+        auto physicalPoint = flipForWritingMode(adjustedRects.clippedRect.location());
         if (auto* fragment = downcast<RenderMultiColumnFlow>(*this).physicalTranslationFromFlowToFragment((physicalPoint))) {
-            adjustedRect.setLocation(fragment->flipForWritingMode(physicalPoint));
-            return fragment->computeVisibleRectInContainer(adjustedRect, container, context);
+            adjustedRects.clippedRect.setLocation(fragment->flipForWritingMode(physicalPoint));
+            auto unclippedPhysicalLocation = flipForWritingMode(adjustedRects.unclippedRect.location());
+            adjustedRects.unclippedRect.setLocation(fragment->flipForWritingMode(unclippedPhysicalLocation));
+            return fragment->computeVisibleRectInContainer(adjustedRects, container, context);
         }
     }
 
-    LayoutPoint topLeft = adjustedRect.location();
-    topLeft.move(locationOffset);
+    auto clippedTopLeft = adjustedRects.clippedRect.location();
+    auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+    clippedTopLeft.move(locationOffset);
+    unclippedTopLeft.move(locationOffset);
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
     auto position = styleToUse.position();
     if (hasLayer() && layer()->transform()) {
         context.hasPositionFixedDescendant = position == PositionType::Fixed;
-        adjustedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRect), document().deviceScaleFactor()));
-        topLeft = adjustedRect.location();
-        topLeft.move(locationOffset);
+
+        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
+            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.unclippedRect = transformedRect;
+            adjustedRects.clippedRect = transformedRect;
+        } else {
+            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
+        }
+
+        clippedTopLeft = adjustedRects.clippedRect.location();
+        unclippedTopLeft = adjustedRects.unclippedRect.location();
+        clippedTopLeft.move(locationOffset);
+        unclippedTopLeft.move(locationOffset);
     } else if (position == PositionType::Fixed)
         context.hasPositionFixedDescendant = true;
 
-    if (position == PositionType::Absolute && localContainer->isInFlowPositioned() && is<RenderInline>(*localContainer))
-        topLeft += downcast<RenderInline>(*localContainer).offsetForInFlowPositionedInline(this);
-    else if (styleToUse.hasInFlowPosition() && layer()) {
+    if (position == PositionType::Absolute && localContainer->isInFlowPositioned() && is<RenderInline>(*localContainer)) {
+        auto offset = downcast<RenderInline>(*localContainer).offsetForInFlowPositionedInline(this);
+        clippedTopLeft += offset;
+        unclippedTopLeft += offset;
+    } else if (styleToUse.hasInFlowPosition() && layer()) {
         // Apply the relative position offset when invalidating a rectangle.  The layer
         // is translated, but the render box isn't, so we need to do this to get the
         // right dirty rect.  Since this is called from RenderObject::setStyle, the relative position
         // flag on the RenderObject has been cleared, so use the one on the style().
-        topLeft += layer()->offsetForInFlowPosition();
+        auto offset = layer()->offsetForInFlowPosition();
+        clippedTopLeft += offset;
+        unclippedTopLeft += offset;
     }
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    adjustedRect.setLocation(topLeft);
+    adjustedRects.clippedRect.setLocation(clippedTopLeft);
+    adjustedRects.unclippedRect.setLocation(unclippedTopLeft);
+
     if (localContainer->hasNonVisibleOverflow()) {
-        bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRect, container, context);
+        bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);
         if (isEmpty) {
             if (context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
                 return std::nullopt;
-            return adjustedRect;
+            return adjustedRects;
         }
     }
 
     if (containerIsSkipped) {
         // If the container is below localContainer, then we need to map the rect into container's coordinates.
-        LayoutSize containerOffset = container->offsetFromAncestorContainer(*localContainer);
-        adjustedRect.move(-containerOffset);
-        return adjustedRect;
+        auto containerOffset = container->offsetFromAncestorContainer(*localContainer);
+        adjustedRects.move(-containerOffset);
+        return adjustedRects;
     }
-    return localContainer->computeVisibleRectInContainer(adjustedRect, container, context);
+    return localContainer->computeVisibleRectInContainer(adjustedRects, container, context);
 }
 
 void RenderBox::repaintDuringLayoutIfMoved(const LayoutRect& oldRect)
@@ -5469,6 +5514,20 @@ void RenderBox::flipForWritingMode(LayoutRect& rect) const
         rect.setY(height() - rect.maxY());
     else
         rect.setX(width() - rect.maxX());
+}
+
+void RenderBox::flipForWritingMode(MappedRects& rects) const
+{
+    if (!style().isFlippedBlocksWritingMode())
+        return;
+
+    if (isHorizontalWritingMode()) {
+        rects.unclippedRect.setY(height() - rects.unclippedRect.maxY());
+        rects.clippedRect.setY(height() - rects.clippedRect.maxY());
+    } else {
+        rects.unclippedRect.setX(width() - rects.unclippedRect.maxX());
+        rects.clippedRect.setX(width() - rects.clippedRect.maxX());
+    }
 }
 
 LayoutUnit RenderBox::flipForWritingMode(LayoutUnit position) const

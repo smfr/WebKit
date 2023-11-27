@@ -142,7 +142,7 @@ bool LegacyRenderSVGShape::strokeContains(const FloatPoint& point, bool requires
 void LegacyRenderSVGShape::layout()
 {
     StackStats::LayoutCheckPoint layoutCheckPoint;
-    LayoutRepainter repainter(*this, SVGRenderSupport::checkForSVGRepaintDuringLayout(*this) && selfNeedsLayout(), RepaintOutlineBounds::No);
+    LayoutRepainter repainter(*this, SVGRenderSupport::checkForSVGRepaintDuringLayout(*this) && selfNeedsLayout());
 
     bool updateCachedBoundariesInParents = false;
 

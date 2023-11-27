@@ -5652,6 +5652,8 @@ void LocalFrameView::setTracksRepaints(bool trackRepaints)
             renderView->compositor().setTracksRepaints(trackRepaints);
     }
 
+    ALWAYS_LOG_WITH_STREAM(stream << "\nLocalFrameView::setTracksRepaints " << trackRepaints);
+
     resetTrackedRepaints();
     m_isTrackingRepaints = trackRepaints;
 }

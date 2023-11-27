@@ -1831,7 +1831,7 @@ IntRect RenderText::linesBoundingBox() const
     return enclosingIntRect(boundingBox);
 }
 
-LayoutRect RenderText::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto RenderText::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     RenderObject* rendererToRepaint = containingBlock();
 
@@ -1892,7 +1892,8 @@ LayoutRect RenderText::collectSelectionGeometriesForLineBoxes(const RenderLayerM
     }
 
     if (clipToVisibleContent)
-        return computeRectForRepaint(resultRect, repaintContainer);
+        return computeRectForRepaint(resultRect, repaintContainer).clippedRect;
+
     return localToContainerQuad(FloatRect(resultRect), repaintContainer).enclosingBoundingBox();
 }
 

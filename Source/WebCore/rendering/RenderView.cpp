@@ -505,7 +505,8 @@ void RenderView::repaintRootContents()
     // Always use layoutOverflowRect() to fix rdar://problem/27182267.
     // This should be cleaned up via webkit.org/b/159913 and webkit.org/b/159914.
     CheckedPtr repaintContainer = containerForRepaint().renderer;
-    repaintUsingContainer(repaintContainer.get(), computeRectForRepaint(layoutOverflowRect(), repaintContainer.get()));
+    auto repaintRects = computeRectForRepaint(layoutOverflowRect(), repaintContainer.get());
+    repaintUsingContainer(repaintContainer.get(), repaintRects.clippedRect);
 }
 
 void RenderView::repaintViewRectangle(const LayoutRect& repaintRect) const
@@ -578,32 +579,42 @@ void RenderView::repaintViewAndCompositedLayers()
         compositor.repaintCompositedLayers();
 }
 
-std::optional<LayoutRect> RenderView::computeVisibleRectInContainer(const LayoutRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
+auto RenderView::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
 {
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     ASSERT_ARG(container, !container || container == this);
 
     if (printing())
-        return rect;
-    
-    LayoutRect adjustedRect = rect;
+        return rects;
+
+    auto adjustedRects = rects;
     if (style().isFlippedBlocksWritingMode()) {
-        // We have to flip by hand since the view's logical height has not been determined.  We
-        // can use the viewport width and height.
-        if (style().isHorizontalWritingMode())
-            adjustedRect.setY(viewHeight() - adjustedRect.maxY());
-        else
-            adjustedRect.setX(viewWidth() - adjustedRect.maxX());
+        // We have to flip by hand since the view's logical height has not been determined. We can use the viewport width and height.
+        if (style().isHorizontalWritingMode()) {
+            adjustedRects.clippedRect.setY(viewHeight() - adjustedRects.clippedRect.maxY());
+            adjustedRects.unclippedRect.setY(viewHeight() - adjustedRects.unclippedRect.maxY());
+        } else {
+            adjustedRects.clippedRect.setX(viewWidth() - adjustedRects.clippedRect.maxX());
+            adjustedRects.unclippedRect.setX(viewWidth() - adjustedRects.unclippedRect.maxX());
+        }
     }
 
     if (context.hasPositionFixedDescendant)
-        adjustedRect.moveBy(frameView().scrollPositionRespectingCustomFixedPosition());
-    
+        adjustedRects.moveBy(frameView().scrollPositionRespectingCustomFixedPosition());
+
     // Apply our transform if we have one (because of full page zooming).
-    if (!container && layer() && layer()->transform())
-        adjustedRect = LayoutRect(layer()->transform()->mapRect(snapRectToDevicePixels(adjustedRect, document().deviceScaleFactor())));
-    return adjustedRect;
+    if (!container && layer() && layer()->transform()) {
+        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
+            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.unclippedRect = transformedRect;
+            adjustedRects.clippedRect = transformedRect;
+        } else {
+            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
+            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
+        }
+    }
+    return adjustedRects;
 }
 
 bool RenderView::isScrollableOrRubberbandableBox() const

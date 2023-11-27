@@ -771,7 +771,8 @@ LayoutRect RenderReplaced::selectionRectForRepaint(const RenderLayerModelObject*
     
     LayoutRect rect = localSelectionRect();
     if (clipToVisibleContent)
-        return computeRectForRepaint(rect, repaintContainer);
+        return computeRectForRepaint(rect, repaintContainer).clippedRect;
+
     return localToContainerQuad(FloatRect(rect), repaintContainer).enclosingBoundingBox();
 }
 
@@ -817,18 +818,20 @@ bool RenderReplaced::isHighlighted(HighlightState state, const RenderHighlight& 
     return false;
 }
 
-LayoutRect RenderReplaced::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+auto RenderReplaced::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     if (isInsideEntirelyHiddenLayer())
         return { };
 
     // The selectionRect can project outside of the overflowRect, so take their union
     // for repainting to avoid selection painting glitches.
-    LayoutRect r = unionRect(localSelectionRect(false), visualOverflowRect());
+    auto localRepaintBounds = unionRect(localSelectionRect(false), visualOverflowRect());
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
-    r.move(view().frameView().layoutContext().layoutDelta());
-    return computeRect(r, repaintContainer, context);
+    localRepaintBounds.move(view().frameView().layoutContext().layoutDelta());
+
+    auto result = computeRect(localRepaintBounds, repaintContainer, context);
+    return { localRepaintBounds, result };
 }
 
 bool RenderReplaced::isContentLikelyVisibleInViewport()
@@ -838,7 +841,7 @@ bool RenderReplaced::isContentLikelyVisibleInViewport()
 
     auto& frameView = view().frameView();
     auto visibleRect = LayoutRect(frameView.windowToContents(frameView.windowClipRect()));
-    auto contentRect = computeRectForRepaint(replacedContentRect(), nullptr);
+    auto contentRect = computeRectForRepaint(replacedContentRect(), nullptr).clippedRect;
 
     // Content rectangle may be empty because it is intrinsically sized and the content has not loaded yet.
     if (contentRect.isEmpty() && (style().logicalWidth().isAuto() || style().logicalHeight().isAuto()))
