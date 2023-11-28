@@ -771,7 +771,7 @@ LayoutRect RenderReplaced::selectionRectForRepaint(const RenderLayerModelObject*
     
     LayoutRect rect = localSelectionRect();
     if (clipToVisibleContent)
-        return computeRectForRepaint(rect, repaintContainer).clippedRect;
+        return computeRectForRepaint(rect, repaintContainer).clippedOverflowRect;
 
     return localToContainerQuad(FloatRect(rect), repaintContainer).enclosingBoundingBox();
 }
@@ -825,13 +825,19 @@ auto RenderReplaced::clippedOverflowRect(const RenderLayerModelObject* repaintCo
 
     // The selectionRect can project outside of the overflowRect, so take their union
     // for repainting to avoid selection painting glitches.
-    auto localRepaintBounds = unionRect(localSelectionRect(false), visualOverflowRect());
+    auto overflowBounds = unionRect(localSelectionRect(false), visualOverflowRect());
+
+    auto outlineBoundsRect = borderBoundingBox();
+    applyVisualEffectOverflow(outlineBoundsRect);
+    auto rects = RepaintRects { overflowBounds, outlineBoundsRect };
+
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
-    localRepaintBounds.move(view().frameView().layoutContext().layoutDelta());
+    rects.move(view().frameView().layoutContext().layoutDelta());
 
-    auto result = computeRect(localRepaintBounds, repaintContainer, context);
-    return { localRepaintBounds, result };
+    auto mappedRects = computeVisibleRectInContainer(rects, repaintContainer, context);
+    RELEASE_ASSERT(mappedRects);
+    return *mappedRects;
 }
 
 bool RenderReplaced::isContentLikelyVisibleInViewport()
@@ -841,7 +847,7 @@ bool RenderReplaced::isContentLikelyVisibleInViewport()
 
     auto& frameView = view().frameView();
     auto visibleRect = LayoutRect(frameView.windowToContents(frameView.windowClipRect()));
-    auto contentRect = computeRectForRepaint(replacedContentRect(), nullptr).clippedRect;
+    auto contentRect = computeRectForRepaint(replacedContentRect(), nullptr).clippedOverflowRect;
 
     // Content rectangle may be empty because it is intrinsically sized and the content has not loaded yet.
     if (contentRect.isEmpty() && (style().logicalWidth().isAuto() || style().logicalHeight().isAuto()))

@@ -1892,7 +1892,7 @@ LayoutRect RenderText::collectSelectionGeometriesForLineBoxes(const RenderLayerM
     }
 
     if (clipToVisibleContent)
-        return computeRectForRepaint(resultRect, repaintContainer).clippedRect;
+        return computeRectForRepaint(resultRect, repaintContainer).clippedOverflowRect;
 
     return localToContainerQuad(FloatRect(resultRect), repaintContainer).enclosingBoundingBox();
 }

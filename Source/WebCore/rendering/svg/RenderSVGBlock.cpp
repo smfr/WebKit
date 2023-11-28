@@ -152,8 +152,7 @@ auto RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* repaintCo
 
         ASSERT(!view().frameView().layoutContext().isPaintOffsetCacheEnabled());
         auto overflowRect = visualOverflowRect();
-        auto result = computeRect(overflowRect, repaintContainer, context);
-        return { overflowRect, result };
+        return computeRect(overflowRect, repaintContainer, context);
     }
 #else
     UNUSED_PARAM(context);
@@ -162,18 +161,18 @@ auto RenderSVGBlock::clippedOverflowRect(const RenderLayerModelObject* repaintCo
     return SVGRenderSupport::clippedOverflowRectForRepaint(*this, repaintContainer, context);
 }
 
-auto RenderSVGBlock::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderSVGBlock::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
     if (document().settings().layerBasedSVGEngineEnabled())
         return computeVisibleRectInSVGContainer(rects, container, context);
 #endif
 
-    // FIXME: computeFloatVisibleRectInContainer needs to go away. It can't handle MappedRects.
-    std::optional<FloatRect> adjustedRect = computeFloatVisibleRectInContainer(rects.clippedRect, container, context);
+    // FIXME: computeFloatVisibleRectInContainer needs to go away. It can't handle RepaintRects.
+    std::optional<FloatRect> adjustedRect = computeFloatVisibleRectInContainer(rects.clippedOverflowRect, container, context);
     if (adjustedRect) {
         auto expandedRect = enclosingLayoutRect(*adjustedRect);
-        return MappedRects { expandedRect, expandedRect };
+        return RepaintRects { expandedRect, expandedRect };
     }
     return std::nullopt;
 }

@@ -65,10 +65,9 @@ RenderObject::RepaintRects SVGRenderSupport::clippedOverflowRectForRepaint(const
         return { };
 
     // Pass our local paint rect to computeFloatVisibleRectInContainer() which will map to parent coords and recurse up the parent chain.
-    auto localRepaintRect = renderer.repaintRectInLocalCoordinates(context.repaintRectCalculation());
     auto clippedRepaintRect = enclosingLayoutRect(renderer.computeFloatRectForRepaint(renderer.repaintRectInLocalCoordinates(context.repaintRectCalculation()), repaintContainer));
     // FIXME: We need to eliminate computeFloatRectForRepaint or teach it about clipped vs. unclipped rects.
-    return { enclosingLayoutRect(localRepaintRect), { clippedRepaintRect, clippedRepaintRect } };
+    return { clippedRepaintRect, clippedRepaintRect };
 }
 
 std::optional<FloatRect> SVGRenderSupport::computeFloatVisibleRectInContainer(const RenderElement& renderer, const FloatRect& rect, const RenderLayerModelObject* container, RenderObject::VisibleRectContext context)

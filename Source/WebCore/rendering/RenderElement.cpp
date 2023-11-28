@@ -1237,24 +1237,19 @@ static bool mustRepaintFillLayers(const RenderElement& renderer, const FillLayer
     return false;
 }
 
-bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* repaintContainer, RequiresFullRepaint requiresFullRepaint, const RepaintRects& oldClippedOverflowRects, const RepaintRects* newClippedOverflowRectsPtr, LayoutRect oldOutlineBounds)
+bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* repaintContainer, RequiresFullRepaint requiresFullRepaint, const RepaintRects& oldRepaintRects, const RepaintRects& newRepaintRects)
 {
     if (view().printing())
         return false;
 
-    auto newClippedOverflowRects = newClippedOverflowRectsPtr ? *newClippedOverflowRectsPtr : clippedOverflowRectForRepaint(repaintContainer);
+    auto oldClippedOverflowRect = oldRepaintRects.clippedOverflowRect;
+    auto newClippedOverflowRect = newRepaintRects.clippedOverflowRect;
 
-    auto oldClippedOverflowRect = oldClippedOverflowRects.mappedRects.clippedRect;
-    auto newClippedOverflowRect = newClippedOverflowRects.mappedRects.clippedRect;
+    auto oldUnclippedRect = oldRepaintRects.unclippedOutlineBoundsRect;
+    auto newUnclippedRect = newRepaintRects.unclippedOutlineBoundsRect;
 
-    auto oldUnclippedRect = oldClippedOverflowRects.mappedRects.unclippedRect;
-    auto newUnclippedRect = newClippedOverflowRects.mappedRects.unclippedRect;
-
-    ALWAYS_LOG_WITH_STREAM(stream << "RenderElement " << this << " repaintAfterLayoutIfNeeded - clippedOverflowRect changed from " << oldClippedOverflowRect << " to " << newClippedOverflowRect);
-    ALWAYS_LOG_WITH_STREAM(stream << " unclippedRect changed from " << oldUnclippedRect << " to " << newUnclippedRect);
-
-    auto newOutlineBounds = outlineBoundsForRepaint(repaintContainer);
-    ALWAYS_LOG_WITH_STREAM(stream << " outlineBounds changed from " << oldOutlineBounds << " to " << newOutlineBounds);
+//    ALWAYS_LOG_WITH_STREAM(stream << "RenderElement " << this << " repaintAfterLayoutIfNeeded - clippedOverflowRect changed from " << oldClippedOverflowRect << " to " << newClippedOverflowRect);
+//    ALWAYS_LOG_WITH_STREAM(stream << " unclippedRect changed from " << oldUnclippedRect << " to " << newUnclippedRect);
 
     if (oldClippedOverflowRect.isEmpty() && newClippedOverflowRect.isEmpty())
         return true;
@@ -1321,7 +1316,7 @@ bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* rep
         return true;
     }
 
-    if (oldClippedOverflowRects == newClippedOverflowRects)
+    if (oldRepaintRects == newRepaintRects)
         return false;
 
     // Repaint the delta between the old and new clipped overflow rects.

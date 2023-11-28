@@ -1048,7 +1048,7 @@ void RenderLayer::recursiveUpdateLayerPositions(RenderGeometryMap* geometryMap, 
         if (checkForRepaint && shouldRepaintAfterLayout() && newRects) {
             auto needsFullRepaint = m_repaintStatus == RepaintStatus::NeedsFullRepaint ? RenderElement::RequiresFullRepaint::Yes : RenderElement::RequiresFullRepaint::No;
             auto resolvedOldRects = valueOrDefault(oldRects);
-            renderer().repaintAfterLayoutIfNeeded(repaintContainer.get(), needsFullRepaint, resolvedOldRects, &(*newRects), { });
+            renderer().repaintAfterLayoutIfNeeded(repaintContainer.get(), needsFullRepaint, resolvedOldRects, *newRects);
         }
     };
 
@@ -1125,7 +1125,7 @@ LayoutRect RenderLayer::repaintRectIncludingNonCompositingDescendants() const
 {
     LayoutRect repaintRect;
     if (m_repaintRectsValid)
-        repaintRect = m_repaintRects.mappedRects.clippedRect;
+        repaintRect = m_repaintRects.clippedOverflowRect;
 
     for (auto* child = firstChild(); child; child = child->nextSibling()) {
         // Don't include repaint rects for composited child layers; they will paint themselves and have a different origin.
@@ -1171,7 +1171,7 @@ std::optional<LayoutRect> RenderLayer::cachedClippedOverflowRect() const
     if (!m_repaintRectsValid)
         return std::nullopt;
 
-    return m_repaintRects.mappedRects.clippedRect;
+    return m_repaintRects.clippedOverflowRect;
 }
 
 void RenderLayer::computeRepaintRects(const RenderLayerModelObject* repaintContainer, const RenderGeometryMap*)
@@ -1273,7 +1273,7 @@ void RenderLayer::recursiveUpdateLayerPositionsAfterScroll(RenderGeometryMap* ge
         // When ScrollView's m_paintsEntireContents flag flips due to layer backing changes, the repaint area transitions from
         // visual to layout overflow. When this happens the cached repaint rects become invalid and they need to be recomputed (see webkit.org/b/188121).
         // Check that our cached rects are correct.
-        ASSERT_IMPLIES(m_repaintRectsValid, m_repaintRects.mappedRects.clippedRect == renderer().clippedOverflowRectForRepaint(renderer().containerForRepaint().renderer.get()).mappedRects.clippedRect);
+        ASSERT_IMPLIES(m_repaintRectsValid, m_repaintRects.clippedOverflowRect == renderer().clippedOverflowRectForRepaint(renderer().containerForRepaint().renderer.get()).clippedOverflowRect);
     }
     
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
@@ -5395,7 +5395,7 @@ void RenderLayer::setBackingNeedsRepaintInRect(const LayoutRect& r, GraphicsLaye
 // Since we're only painting non-composited layers, we know that they all share the same repaintContainer.
 void RenderLayer::repaintIncludingNonCompositingDescendants(const RenderLayerModelObject* repaintContainer)
 {
-    auto clippedOverflowRect = valueOrCompute(cachedClippedOverflowRect(), [&] { return renderer().clippedOverflowRectForRepaint(repaintContainer).mappedRects.clippedRect; });
+    auto clippedOverflowRect = valueOrCompute(cachedClippedOverflowRect(), [&] { return renderer().clippedOverflowRectForRepaint(repaintContainer).clippedOverflowRect; });
     renderer().repaintUsingContainer(repaintContainer, clippedOverflowRect);
 
     for (auto* curr = firstChild(); curr; curr = curr->nextSibling()) {

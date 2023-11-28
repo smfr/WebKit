@@ -372,7 +372,7 @@ public:
     void deleteLineBoxWrapper();
 
     RepaintRects clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const override;
-    std::optional<MappedRects> computeVisibleRectInContainer(const MappedRects&, const RenderLayerModelObject* container, VisibleRectContext) const override;
+    std::optional<RepaintRects> computeVisibleRectInContainer(const RepaintRects&, const RenderLayerModelObject* container, VisibleRectContext) const override;
     void repaintDuringLayoutIfMoved(const LayoutRect&);
     virtual void repaintOverhangingFloats(bool paintAllDescendants);
 
@@ -551,7 +551,7 @@ public:
     LayoutPoint flipForWritingMode(const LayoutPoint&) const;
     LayoutSize flipForWritingMode(const LayoutSize&) const;
     void flipForWritingMode(LayoutRect&) const;
-    void flipForWritingMode(MappedRects&) const;
+    void flipForWritingMode(RepaintRects&) const;
     FloatPoint flipForWritingMode(const FloatPoint&) const;
     void flipForWritingMode(FloatRect&) const;
 
@@ -589,7 +589,7 @@ public:
 
     // Returns false if the rect has no intersection with the applied clip rect. When the context specifies edge-inclusive
     // intersection, this return value allows distinguishing between no intersection and zero-area intersection.
-    bool applyCachedClipAndScrollPosition(MappedRects&, const RenderLayerModelObject* container, VisibleRectContext) const final;
+    bool applyCachedClipAndScrollPosition(RepaintRects&, const RenderLayerModelObject* container, VisibleRectContext) const final;
 
     virtual bool hasRelativeDimensions() const;
     virtual bool hasRelativeLogicalHeight() const;
@@ -774,7 +774,7 @@ private:
 
     LayoutRect frameRectForStickyPositioning() const override { return frameRect(); }
 
-    MappedRects computeVisibleRectUsingPaintOffset(const MappedRects&) const;
+    RepaintRects computeVisibleRectUsingPaintOffset(const RepaintRects&) const;
     
     LayoutPoint topLeftLocationWithFlipping() const;
 

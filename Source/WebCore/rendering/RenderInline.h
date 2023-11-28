@@ -120,8 +120,8 @@ protected:
     RepaintRects clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const override;
     LayoutRect rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const final;
 
-    std::optional<MappedRects> computeVisibleRectInContainer(const MappedRects&, const RenderLayerModelObject* container, VisibleRectContext) const final;
-    MappedRects computeVisibleRectUsingPaintOffset(const MappedRects&) const;
+    std::optional<RepaintRects> computeVisibleRectInContainer(const RepaintRects&, const RenderLayerModelObject* container, VisibleRectContext) const final;
+    RepaintRects computeVisibleRectUsingPaintOffset(const RepaintRects&) const;
 
     void mapLocalToContainer(const RenderLayerModelObject* repaintContainer, TransformState&, OptionSet<MapCoordinatesMode>, bool* wasFixed) const override;
     const RenderObject* pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap&) const override;

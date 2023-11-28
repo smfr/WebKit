@@ -506,7 +506,7 @@ void RenderView::repaintRootContents()
     // This should be cleaned up via webkit.org/b/159913 and webkit.org/b/159914.
     CheckedPtr repaintContainer = containerForRepaint().renderer;
     auto repaintRects = computeRectForRepaint(layoutOverflowRect(), repaintContainer.get());
-    repaintUsingContainer(repaintContainer.get(), repaintRects.clippedRect);
+    repaintUsingContainer(repaintContainer.get(), repaintRects.clippedOverflowRect);
 }
 
 void RenderView::repaintViewRectangle(const LayoutRect& repaintRect) const
@@ -579,7 +579,23 @@ void RenderView::repaintViewAndCompositedLayers()
         compositor.repaintCompositedLayers();
 }
 
-auto RenderView::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+
+//void RenderBox::flipForWritingMode(RepaintRects& rects) const
+//{
+//    if (!style().isFlippedBlocksWritingMode())
+//        return;
+//
+//    if (isHorizontalWritingMode()) {
+//        rects.clippedOverflowRect.setY(height() - rects.clippedOverflowRect.maxY());
+//        rects.unclippedOutlineBoundsRect.setY(height() - rects.unclippedOutlineBoundsRect.maxY());
+//    } else {
+//        rects.clippedOverflowRect.setX(width() - rects.clippedOverflowRect.maxX());
+//        rects.unclippedOutlineBoundsRect.setX(width() - rects.unclippedOutlineBoundsRect.maxX());
+//    }
+//}
+//
+
+auto RenderView::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
@@ -591,29 +607,16 @@ auto RenderView::computeVisibleRectInContainer(const MappedRects& rects, const R
     auto adjustedRects = rects;
     if (style().isFlippedBlocksWritingMode()) {
         // We have to flip by hand since the view's logical height has not been determined. We can use the viewport width and height.
-        if (style().isHorizontalWritingMode()) {
-            adjustedRects.clippedRect.setY(viewHeight() - adjustedRects.clippedRect.maxY());
-            adjustedRects.unclippedRect.setY(viewHeight() - adjustedRects.unclippedRect.maxY());
-        } else {
-            adjustedRects.clippedRect.setX(viewWidth() - adjustedRects.clippedRect.maxX());
-            adjustedRects.unclippedRect.setX(viewWidth() - adjustedRects.unclippedRect.maxX());
-        }
+        adjustedRects.flipForWritingMode(LayoutSize { viewWidth(), viewHeight() }, style().isHorizontalWritingMode());
     }
 
     if (context.hasPositionFixedDescendant)
         adjustedRects.moveBy(frameView().scrollPositionRespectingCustomFixedPosition());
 
     // Apply our transform if we have one (because of full page zooming).
-    if (!container && layer() && layer()->transform()) {
-        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
-            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.unclippedRect = transformedRect;
-            adjustedRects.clippedRect = transformedRect;
-        } else {
-            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
-        }
-    }
+    if (!container && layer() && layer()->transform())
+        adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
+
     return adjustedRects;
 }
 

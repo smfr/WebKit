@@ -45,8 +45,7 @@ private:
     RenderElement& m_renderer;
     const RenderLayerModelObject* m_repaintContainer { nullptr };
     // We store these values as LayoutRects, but the final invalidations will be pixel snapped
-    RenderObject::RepaintRects m_oldRect;
-    LayoutRect m_oldOutlineBounds;
+    RenderObject::RepaintRects m_oldRects;
     bool m_checkForRepaint;
 };
 

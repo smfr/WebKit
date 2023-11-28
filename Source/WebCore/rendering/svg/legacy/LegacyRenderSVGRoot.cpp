@@ -370,9 +370,7 @@ auto LegacyRenderSVGRoot::clippedOverflowRect(const RenderLayerModelObject* repa
         repaintRect.unite(unionRect(localSelectionRect(false), visualOverflowRect()));
 
     auto repaintIntRect = enclosingIntRect(repaintRect);
-    auto result = RenderReplaced::computeRect(repaintIntRect, repaintContainer, context);
-
-    return { repaintIntRect, result };
+    return RenderReplaced::computeRect(repaintIntRect, repaintContainer, context);
 }
 
 std::optional<FloatRect> LegacyRenderSVGRoot::computeFloatVisibleRectInContainer(const FloatRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const
@@ -402,7 +400,7 @@ std::optional<FloatRect> LegacyRenderSVGRoot::computeFloatVisibleRectInContainer
     if (!mappedRects)
         return std::nullopt;
 
-    return mappedRects->clippedRect;
+    return mappedRects->clippedOverflowRect;
 }
 
 // This method expects local CSS box coordinates.

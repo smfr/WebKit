@@ -85,12 +85,10 @@ auto RenderSVGModelObject::clippedOverflowRect(const RenderLayerModelObject* rep
     ASSERT(!view().frameView().layoutContext().isPaintOffsetCacheEnabled());
 
     auto visualOverflowRect = visualOverflowRectEquivalent();
-    auto result = computeRect(visualOverflowRect, repaintContainer, context);
-
-    return { visualOverflowRect, result };
+    return computeRect(visualOverflowRect, repaintContainer, context);
 }
 
-auto RenderSVGModelObject::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderSVGModelObject::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     return computeVisibleRectInSVGContainer(rects, container, context);
 }
@@ -255,7 +253,7 @@ LayoutSize RenderSVGModelObject::cachedSizeForOverflowClip() const
     return layer()->size();
 }
 
-bool RenderSVGModelObject::applyCachedClipAndScrollPosition(MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const
+bool RenderSVGModelObject::applyCachedClipAndScrollPosition(RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const
 {
     // Based on RenderBox::applyCachedClipAndScrollPosition -- unused options removed.
     if (!context.options.contains(VisibleRectContextOption::ApplyContainerClip) && this == container)
@@ -269,10 +267,10 @@ bool RenderSVGModelObject::applyCachedClipAndScrollPosition(MappedRects& rects, 
 
     bool intersects;
     if (context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
-        intersects = rects.clippedRect.edgeInclusiveIntersect(clipRect);
+        intersects = rects.clippedOverflowRect.edgeInclusiveIntersect(clipRect);
     else {
-        rects.clippedRect.intersect(clipRect);
-        intersects = !rects.clippedRect.isEmpty();
+        rects.clippedOverflowRect.intersect(clipRect);
+        intersects = !rects.clippedOverflowRect.isEmpty();
     }
     return intersects;
 }

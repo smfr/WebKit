@@ -381,41 +381,45 @@ auto RenderTableCell::clippedOverflowRect(const RenderLayerModelObject* repaintC
     LayoutUnit right = std::max(borderHalfRight(true), outlineSize);
     LayoutUnit top = std::max(borderHalfTop(true), outlineSize);
     LayoutUnit bottom = std::max(borderHalfBottom(true), outlineSize);
+
     if ((left && !rtl) || (right && rtl)) {
         if (RenderTableCell* before = table()->cellBefore(this)) {
             top = std::max(top, before->borderHalfTop(true));
             bottom = std::max(bottom, before->borderHalfBottom(true));
         }
     }
+
     if ((left && rtl) || (right && !rtl)) {
         if (RenderTableCell* after = table()->cellAfter(this)) {
             top = std::max(top, after->borderHalfTop(true));
             bottom = std::max(bottom, after->borderHalfBottom(true));
         }
     }
+
     if (top) {
         if (RenderTableCell* above = table()->cellAbove(this)) {
             left = std::max(left, above->borderHalfLeft(true));
             right = std::max(right, above->borderHalfRight(true));
         }
     }
+
     if (bottom) {
         if (RenderTableCell* below = table()->cellBelow(this)) {
             left = std::max(left, below->borderHalfLeft(true));
             right = std::max(right, below->borderHalfRight(true));
         }
     }
+
     LayoutPoint location(std::max<LayoutUnit>(left, -visualOverflowRect().x()), std::max<LayoutUnit>(top, -visualOverflowRect().y()));
     auto localrepaintRect = LayoutRect(-location.x(), -location.y(), location.x() + std::max(width() + right, visualOverflowRect().maxX()), location.y() + std::max(height() + bottom, visualOverflowRect().maxY()));
 
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
     localrepaintRect.move(view().frameView().layoutContext().layoutDelta());
-    auto result = computeRect(localrepaintRect, repaintContainer, context);
-    return { localrepaintRect, result };
+    return computeRect(localrepaintRect, repaintContainer, context);
 }
 
-auto RenderTableCell::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderTableCell::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     if (container == this)
         return rects;

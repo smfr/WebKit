@@ -298,7 +298,7 @@ static std::optional<LayoutRect> computeClippedRectInRootContentsSpace(const Lay
     if (!mappedRects)
         return std::nullopt;
 
-    auto absoluteClippedRect = mappedRects->clippedRect;
+    auto absoluteClippedRect = mappedRects->clippedOverflowRect;
     if (renderer->frame().isMainFrame())
         return absoluteClippedRect;
 
@@ -399,7 +399,7 @@ auto IntersectionObserver::computeIntersectionState(const IntersectionObserverRe
             auto mappedRects = targetRenderer->computeVisibleRectInContainer({ localTargetBounds, localTargetBounds }, rootRenderer, { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
             if (!mappedRects)
                 return std::nullopt;
-            return mappedRects->clippedRect;
+            return mappedRects->clippedOverflowRect;
         }
 
         return computeClippedRectInRootContentsSpace(localTargetBounds, targetRenderer);

@@ -322,7 +322,7 @@ bool RenderLayerModelObject::shouldPaintSVGRenderer(const PaintInfo& paintInfo, 
     return true;
 }
 
-auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const MappedRects& rects, const RenderLayerModelObject* container, RenderObject::VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const RepaintRects& rects, const RenderLayerModelObject* container, RenderObject::VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     ASSERT(is<RenderSVGModelObject>(this) || is<RenderSVGBlock>(this));
     ASSERT(!style().hasInFlowPosition());
@@ -338,7 +338,7 @@ auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const MappedRects&
 
     ASSERT_UNUSED(containerIsSkipped, !containerIsSkipped);
 
-    MappedRects adjustedRects = rects;
+    RepaintRects adjustedRects = rects;
 
     LayoutSize locationOffset;
     if (is<RenderSVGModelObject>(this))
@@ -347,33 +347,26 @@ auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const MappedRects&
         locationOffset = downcast<RenderSVGBlock>(*this).locationOffset();
 
     // FIXME: Clean up this confusing logic.
-    auto clippedTopLeft = adjustedRects.clippedRect.location();
-    auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+    auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
+    auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
     clippedTopLeft.move(locationOffset);
     unclippedTopLeft.move(locationOffset);
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
     if (hasLayer() && layer()->transform()) {
-        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
-            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.unclippedRect = transformedRect;
-            adjustedRects.clippedRect = transformedRect;
-        } else {
-            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
-        }
+        adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
 
-        auto clippedTopLeft = adjustedRects.clippedRect.location();
-        auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+        auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
+        auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
         clippedTopLeft.move(locationOffset);
         unclippedTopLeft.move(locationOffset);
     }
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    adjustedRects.clippedRect.setLocation(clippedTopLeft);
-    adjustedRects.unclippedRect.setLocation(unclippedTopLeft);
+    adjustedRects.clippedOverflowRect.setLocation(clippedTopLeft);
+    adjustedRects.unclippedOutlineBoundsRect.setLocation(unclippedTopLeft);
 
     if (localContainer->hasNonVisibleOverflow()) {
         bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);

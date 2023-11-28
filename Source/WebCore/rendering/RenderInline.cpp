@@ -666,31 +666,30 @@ auto RenderInline::clippedOverflowRect(const RenderLayerModelObject* repaintCont
     LayoutUnit outlineSize { style().outlineSize() };
     repaintRect.inflate(outlineSize);
 
-    auto repaintRects = MappedRects { repaintRect, repaintRect };
+    auto repaintRects = RepaintRects { repaintRect, repaintRect };
 
     if (hitRepaintContainer || !containingBlock)
-        return { repaintRect, repaintRects };
+        return repaintRects;
 
     if (containingBlock->hasNonVisibleOverflow())
         containingBlock->applyCachedClipAndScrollPosition(repaintRects, repaintContainer, context);
 
-    auto localRect = repaintRects.unclippedRect;
-    // FIXME: Call computeVisibleRectInContainer()
-    repaintRects = containingBlock->computeRect(repaintRect, repaintContainer, context);
+    if (auto rects = containingBlock->computeVisibleRectInContainer(repaintRects, repaintContainer, context))
+        repaintRects = *rects;
 
     // FIXME: Think about this.
     if (outlineSize) {
         for (auto& child : childrenOfType<RenderElement>(*this))
-            repaintRects.clippedRect.unite(child.rectWithOutlineForRepaint(repaintContainer, outlineSize)); // FIXME
+            repaintRects.clippedOverflowRect.unite(child.rectWithOutlineForRepaint(repaintContainer, outlineSize)); // FIXME
 
         if (auto* continuation = this->continuation()) {
             if (!continuation->isInline() && continuation->parent())
-                repaintRects.clippedRect.unite(continuation->rectWithOutlineForRepaint(repaintContainer, outlineSize)); // FIXME
+                repaintRects.clippedOverflowRect.unite(continuation->rectWithOutlineForRepaint(repaintContainer, outlineSize)); // FIXME
         }
     }
 
     // FIXME: Wrong
-    return { localRect, repaintRects };
+    return repaintRects;
 }
 
 LayoutRect RenderInline::rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const
@@ -702,7 +701,7 @@ LayoutRect RenderInline::rectWithOutlineForRepaint(const RenderLayerModelObject*
     return outlineBounds;
 }
 
-auto RenderInline::computeVisibleRectUsingPaintOffset(const MappedRects& rects) const -> MappedRects
+auto RenderInline::computeVisibleRectUsingPaintOffset(const RepaintRects& rects) const -> RepaintRects
 {
     auto adjustedRects = rects;
     auto* layoutState = view().frameView().layoutContext().layoutState();
@@ -712,12 +711,12 @@ auto RenderInline::computeVisibleRectUsingPaintOffset(const MappedRects& rects) 
     adjustedRects.move(layoutState->paintOffset());
 
     if (layoutState->isClipped())
-        adjustedRects.clippedRect.intersect(layoutState->clipRect());
+        adjustedRects.clippedOverflowRect.intersect(layoutState->clipRect());
 
     return adjustedRects;
 }
 
-auto RenderInline::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderInline::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     // Repaint offset cache is only valid for root-relative repainting
     if (view().frameView().layoutContext().isPaintOffsetCacheEnabled() && !container && !context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))

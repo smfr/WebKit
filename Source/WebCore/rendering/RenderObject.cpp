@@ -958,8 +958,6 @@ void RenderObject::repaintUsingContainer(const RenderLayerModelObject* repaintCo
     if (r.isEmpty())
         return;
 
-    ALWAYS_LOG_WITH_STREAM(stream << "RenderObject " << this << " repaintUsingContainer - " << r);
-
     if (!repaintContainer)
         repaintContainer = &view();
 
@@ -1017,11 +1015,11 @@ void RenderObject::issueRepaint(std::optional<LayoutRect> partialRepaintRect, Cl
     LayoutRect repaintRect;
 
     if (partialRepaintRect) {
-        repaintRect = computeRectForRepaint(*partialRepaintRect, repaintContainer.renderer.get()).clippedRect;
+        repaintRect = computeRectForRepaint(*partialRepaintRect, repaintContainer.renderer.get()).clippedOverflowRect;
         if (additionalRepaintOutsets)
             repaintRect.expand(*additionalRepaintOutsets);
     } else
-        repaintRect = clippedOverflowRectForRepaint(repaintContainer.renderer.get()).mappedRects.clippedRect;
+        repaintRect = clippedOverflowRectForRepaint(repaintContainer.renderer.get()).clippedOverflowRect;
 
     repaintUsingContainer(repaintContainer.renderer.get(), repaintRect, clipRepaintToLayer == ClipRepaintToLayer::Yes);
 }
@@ -1071,7 +1069,7 @@ void RenderObject::repaintSlowRepaintObject() const
         shouldClipToLayer = !view->frameView().hasExtendedBackgroundRectForPainting();
         repaintRect = snappedIntRect(view->backgroundRect());
     } else
-        repaintRect = snappedIntRect(clippedOverflowRectForRepaint(repaintContainer.get()).mappedRects.clippedRect);
+        repaintRect = snappedIntRect(clippedOverflowRectForRepaint(repaintContainer.get()).clippedOverflowRect);
 
     repaintUsingContainer(repaintContainer.get(), repaintRect, shouldClipToLayer);
 }
@@ -1085,9 +1083,9 @@ LayoutRect RenderObject::rectWithOutlineForRepaint(const RenderLayerModelObject*
 {
     auto repaintRects = clippedOverflowRectForRepaint(repaintContainer);
 
-    // FIXME: All very suspect.
-    repaintRects.mappedRects.clippedRect.inflate(outlineWidth);
-    return repaintRects.mappedRects.clippedRect;
+    // This is wrong; it makes no sense to inflate rects that may have been partially clipped, or scaled by some ancestor transform.
+    repaintRects.clippedOverflowRect.inflate(outlineWidth);
+    return repaintRects.clippedOverflowRect;
 }
 
 auto RenderObject::clippedOverflowRect(const RenderLayerModelObject*, VisibleRectContext) const -> RepaintRects
@@ -1096,7 +1094,7 @@ auto RenderObject::clippedOverflowRect(const RenderLayerModelObject*, VisibleRec
     return { };
 }
 
-auto RenderObject::computeRect(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> MappedRects
+auto RenderObject::computeRect(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     auto mappedRects = computeVisibleRectInContainer({ rect, rect }, repaintContainer, context);
     RELEASE_ASSERT(mappedRects);
@@ -1108,7 +1106,7 @@ FloatRect RenderObject::computeFloatRectForRepaint(const FloatRect& rect, const 
     return *computeFloatVisibleRectInContainer(rect, repaintContainer, visibleRectContextForRepaint());
 }
 
-auto RenderObject::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderObject::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     if (container == this)
         return rects;
@@ -1117,7 +1115,7 @@ auto RenderObject::computeVisibleRectInContainer(const MappedRects& rects, const
     if (!parent)
         return rects;
 
-    MappedRects adjustedRects = rects;
+    RepaintRects adjustedRects = rects;
 
     if (parent->hasNonVisibleOverflow()) {
         bool isEmpty = !downcast<RenderLayerModelObject>(*parent).applyCachedClipAndScrollPosition(adjustedRects, container, context);
@@ -2199,7 +2197,7 @@ bool RenderObject::hasNonEmptyVisibleRectRespectingParentFrames() const
         CheckedRef box = renderer.enclosingBoxModelObject();
         auto borderBox = box->borderBoundingBox();
         auto mappedRects = box->computeVisibleRectInContainer({ borderBox, borderBox }, &box->view(), context);
-        return !mappedRects || mappedRects->clippedRect.isEmpty();
+        return !mappedRects || mappedRects->clippedOverflowRect.isEmpty();
     };
 
     for (CheckedPtr renderer = this; renderer; renderer = enclosingFrameRenderer(*renderer)) {
@@ -2313,7 +2311,7 @@ static Vector<FloatRect> borderAndTextRects(const SimpleRange& range, Coordinate
                     auto rootClippedBounds = renderer->computeVisibleRectInContainer({ localBounds, localBounds }, renderer->checkedView().ptr(), { false, false, visibleRectOptions });
                     if (!rootClippedBounds)
                         continue;
-                    auto snappedBounds = snapRectToDevicePixels(rootClippedBounds->clippedRect, node->document().deviceScaleFactor());
+                    auto snappedBounds = snapRectToDevicePixels(rootClippedBounds->clippedOverflowRect, node->document().deviceScaleFactor());
                     if (space == CoordinateSpace::Client)
                         node->protectedDocument()->convertAbsoluteToClientRect(snappedBounds, renderer->style());
                     rects.append(snappedBounds);
@@ -2369,6 +2367,29 @@ ScrollAnchoringController* RenderObject::findScrollAnchoringControllerForRendere
         }
     }
     return renderer.view().frameView().scrollAnchoringController();
+}
+
+void RenderObject::RepaintRects::applyTransform(const TransformationMatrix& matrix, float deviceScaleFactor)
+{
+    if (clippedOverflowRect == unclippedOutlineBoundsRect) {
+        auto transformedRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(clippedOverflowRect), deviceScaleFactor));
+        clippedOverflowRect = transformedRect;
+        unclippedOutlineBoundsRect = transformedRect;
+    } else {
+        clippedOverflowRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(clippedOverflowRect), deviceScaleFactor));
+        unclippedOutlineBoundsRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(unclippedOutlineBoundsRect), deviceScaleFactor));
+    }
+}
+
+void RenderObject::RepaintRects::flipForWritingMode(LayoutSize boxSize, bool isHorizontalWritingMode)
+{
+    if (isHorizontalWritingMode) {
+        clippedOverflowRect.setY(boxSize.height() - clippedOverflowRect.maxY());
+        unclippedOutlineBoundsRect.setY(boxSize.height() - unclippedOutlineBoundsRect.maxY());
+    } else {
+        clippedOverflowRect.setX(boxSize.width() - clippedOverflowRect.maxX());
+        unclippedOutlineBoundsRect.setX(boxSize.width() - unclippedOutlineBoundsRect.maxX());
+    }
 }
 
 #if PLATFORM(IOS_FAMILY)

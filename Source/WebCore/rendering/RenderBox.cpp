@@ -1195,14 +1195,13 @@ LayoutSize RenderBox::cachedSizeForOverflowClip() const
     return layer()->size();
 }
 
-bool RenderBox::applyCachedClipAndScrollPosition(MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const
+bool RenderBox::applyCachedClipAndScrollPosition(RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const
 {
     flipForWritingMode(rects);
 
     if (context.options.contains(VisibleRectContextOption::ApplyCompositedContainerScrolls) || this != container || !usesCompositedScrolling()) {
         auto scrollPosition = this->scrollPosition();
-        rects.clippedRect.moveBy(-scrollPosition);
-        rects.unclippedRect.moveBy(-scrollPosition);
+        rects.moveBy(-scrollPosition);
     }
 
     // Do not clip scroll layer contents to reduce the number of repaints while scrolling.
@@ -1224,10 +1223,10 @@ bool RenderBox::applyCachedClipAndScrollPosition(MappedRects& rects, const Rende
 
     bool intersects;
     if (context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
-        intersects = rects.clippedRect.edgeInclusiveIntersect(clipRect);
+        intersects = rects.clippedOverflowRect.edgeInclusiveIntersect(clipRect);
     else {
-        rects.clippedRect.intersect(clipRect);
-        intersects = !rects.clippedRect.isEmpty();
+        rects.clippedOverflowRect.intersect(clipRect);
+        intersects = !rects.clippedOverflowRect.isEmpty();
     }
     flipForWritingMode(rects);
     return intersects;
@@ -2536,30 +2535,25 @@ auto RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContain
     if (isInsideEntirelyHiddenLayer())
         return { };
 
-    auto localVisualOverflowRect = visualOverflowRect();
+    auto outlineBoundsRect = borderBoundingBox();
+    applyVisualEffectOverflow(outlineBoundsRect);
+    auto rects = RepaintRects { visualOverflowRect(), outlineBoundsRect };
+
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
-    localVisualOverflowRect.move(view().frameView().layoutContext().layoutDelta());
-    auto mappedRects = computeRect(localVisualOverflowRect, repaintContainer, context);
+    rects.move(view().frameView().layoutContext().layoutDelta());
 
-    // Strictly speaking we could get some combination of scale and clipping that gives us a rect with the same size, but that's pretty unlikely.
-    return { localVisualOverflowRect, mappedRects };
+    auto mappedRects = computeVisibleRectInContainer(rects, repaintContainer, context);
+    RELEASE_ASSERT(mappedRects);
+    return *mappedRects;
 }
 
-auto RenderBox::computeVisibleRectUsingPaintOffset(const MappedRects& rects) const -> MappedRects
+auto RenderBox::computeVisibleRectUsingPaintOffset(const RepaintRects& rects) const -> RepaintRects
 {
-    MappedRects adjustedRects = rects;
+    RepaintRects adjustedRects = rects;
 
-    if (layer() && layer()->transform()) {
-        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
-            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.unclippedRect = transformedRect;
-            adjustedRects.clippedRect = transformedRect;
-        } else {
-            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
-        }
-    }
+    if (layer() && layer()->transform())
+        adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
 
     // We can't trust the bits on RenderObject, because this might be called while re-resolving style.
     if (style().hasInFlowPosition() && layer())
@@ -2571,12 +2565,12 @@ auto RenderBox::computeVisibleRectUsingPaintOffset(const MappedRects& rects) con
     adjustedRects.move(layoutState->paintOffset());
 
     if (layoutState->isClipped())
-        adjustedRects.clippedRect.intersect(layoutState->clipRect());
+        adjustedRects.clippedOverflowRect.intersect(layoutState->clipRect());
 
     return adjustedRects;
 }
 
-auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<MappedRects>
+auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     // The rect we compute at each step is shifted by our x/y offset in the parent container's coordinate space.
     // Only when we cross a writing mode boundary will we have to possibly flipForWritingMode (to convert into a more appropriate
@@ -2591,18 +2585,18 @@ auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const Re
     if (view().frameView().layoutContext().isPaintOffsetCacheEnabled() && !container && styleToUse.position() != PositionType::Fixed && !context.options.contains(VisibleRectContextOption::UseEdgeInclusiveIntersection))
         return computeVisibleRectUsingPaintOffset(rects);
 
-    MappedRects adjustedRects = rects;
+    RepaintRects adjustedRects = rects;
     if (hasReflection()) {
-        adjustedRects.clippedRect.unite(reflectedRect(adjustedRects.clippedRect));
-        adjustedRects.unclippedRect.unite(reflectedRect(adjustedRects.unclippedRect));
+        adjustedRects.clippedOverflowRect.unite(reflectedRect(adjustedRects.clippedOverflowRect));
+        adjustedRects.unclippedOutlineBoundsRect.unite(reflectedRect(adjustedRects.unclippedOutlineBoundsRect));
     }
 
     if (container == this) {
         if (container->style().isFlippedBlocksWritingMode())
             flipForWritingMode(adjustedRects);
         if (context.descendantNeedsEnclosingIntRect) {
-            adjustedRects.unclippedRect = enclosingIntRect(adjustedRects.unclippedRect);
-            adjustedRects.clippedRect = enclosingIntRect(adjustedRects.clippedRect);
+            adjustedRects.clippedOverflowRect = enclosingIntRect(adjustedRects.clippedOverflowRect);
+            adjustedRects.unclippedOutlineBoundsRect = enclosingIntRect(adjustedRects.unclippedOutlineBoundsRect);
         }
         return adjustedRects;
     }
@@ -2623,8 +2617,8 @@ auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const Re
     // FIXME: This is needed as long as RenderWidget snaps to integral size/position.
     if (isRenderReplaced() && isRenderWidget()) {
         LayoutSize flooredLocationOffset = toIntSize(flooredIntPoint(locationOffset));
-        adjustedRects.unclippedRect.expand(locationOffset - flooredLocationOffset);
-        adjustedRects.clippedRect.expand(locationOffset - flooredLocationOffset);
+        adjustedRects.clippedOverflowRect.expand(locationOffset - flooredLocationOffset);
+        adjustedRects.unclippedOutlineBoundsRect.expand(locationOffset - flooredLocationOffset);
         locationOffset = flooredLocationOffset;
         context.descendantNeedsEnclosingIntRect = true;
     }
@@ -2636,17 +2630,17 @@ auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const Re
         // or not images should animate.
         // FIXME: Just as with offsetFromContainer, we aren't really handling objects that span
         // multiple columns properly.
-        auto physicalPoint = flipForWritingMode(adjustedRects.clippedRect.location());
+        auto physicalPoint = flipForWritingMode(adjustedRects.clippedOverflowRect.location());
         if (auto* fragment = downcast<RenderMultiColumnFlow>(*this).physicalTranslationFromFlowToFragment((physicalPoint))) {
-            adjustedRects.clippedRect.setLocation(fragment->flipForWritingMode(physicalPoint));
-            auto unclippedPhysicalLocation = flipForWritingMode(adjustedRects.unclippedRect.location());
-            adjustedRects.unclippedRect.setLocation(fragment->flipForWritingMode(unclippedPhysicalLocation));
+            adjustedRects.clippedOverflowRect.setLocation(fragment->flipForWritingMode(physicalPoint));
+            auto unclippedPhysicalLocation = flipForWritingMode(adjustedRects.unclippedOutlineBoundsRect.location());
+            adjustedRects.unclippedOutlineBoundsRect.setLocation(fragment->flipForWritingMode(unclippedPhysicalLocation));
             return fragment->computeVisibleRectInContainer(adjustedRects, container, context);
         }
     }
 
-    auto clippedTopLeft = adjustedRects.clippedRect.location();
-    auto unclippedTopLeft = adjustedRects.unclippedRect.location();
+    auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
+    auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
     clippedTopLeft.move(locationOffset);
     unclippedTopLeft.move(locationOffset);
 
@@ -2656,17 +2650,10 @@ auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const Re
     if (hasLayer() && layer()->transform()) {
         context.hasPositionFixedDescendant = position == PositionType::Fixed;
 
-        if (adjustedRects.unclippedRect == adjustedRects.clippedRect) {
-            auto transformedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.unclippedRect = transformedRect;
-            adjustedRects.clippedRect = transformedRect;
-        } else {
-            adjustedRects.unclippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.unclippedRect), document().deviceScaleFactor()));
-            adjustedRects.clippedRect = LayoutRect(encloseRectToDevicePixels(layer()->transform()->mapRect(adjustedRects.clippedRect), document().deviceScaleFactor()));
-        }
+        adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
 
-        clippedTopLeft = adjustedRects.clippedRect.location();
-        unclippedTopLeft = adjustedRects.unclippedRect.location();
+        clippedTopLeft = adjustedRects.clippedOverflowRect.location();
+        unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
         clippedTopLeft.move(locationOffset);
         unclippedTopLeft.move(locationOffset);
     } else if (position == PositionType::Fixed)
@@ -2688,8 +2675,8 @@ auto RenderBox::computeVisibleRectInContainer(const MappedRects& rects, const Re
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
-    adjustedRects.clippedRect.setLocation(clippedTopLeft);
-    adjustedRects.unclippedRect.setLocation(unclippedTopLeft);
+    adjustedRects.clippedOverflowRect.setLocation(clippedTopLeft);
+    adjustedRects.unclippedOutlineBoundsRect.setLocation(unclippedTopLeft);
 
     if (localContainer->hasNonVisibleOverflow()) {
         bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);
@@ -5516,18 +5503,12 @@ void RenderBox::flipForWritingMode(LayoutRect& rect) const
         rect.setX(width() - rect.maxX());
 }
 
-void RenderBox::flipForWritingMode(MappedRects& rects) const
+void RenderBox::flipForWritingMode(RepaintRects& rects) const
 {
     if (!style().isFlippedBlocksWritingMode())
         return;
 
-    if (isHorizontalWritingMode()) {
-        rects.unclippedRect.setY(height() - rects.unclippedRect.maxY());
-        rects.clippedRect.setY(height() - rects.clippedRect.maxY());
-    } else {
-        rects.unclippedRect.setX(width() - rects.unclippedRect.maxX());
-        rects.clippedRect.setX(width() - rects.clippedRect.maxX());
-    }
+    rects.flipForWritingMode(size(), isHorizontalWritingMode());
 }
 
 LayoutUnit RenderBox::flipForWritingMode(LayoutUnit position) const

@@ -183,9 +183,8 @@ auto RenderTableRow::clippedOverflowRect(const RenderLayerModelObject* repaintCo
         // Even if a cell is a repaint container, it's the row that paints the background behind it.
         // So we don't care if a cell is a repaintContainer here.
         auto cellRects = cell->clippedOverflowRect(repaintContainer, context);
-        result.localVisualOverflowRect.uniteIfNonZero(cellRects.localVisualOverflowRect);
-        result.mappedRects.clippedRect.uniteIfNonZero(cellRects.mappedRects.clippedRect);
-        result.mappedRects.unclippedRect.uniteIfNonZero(cellRects.mappedRects.unclippedRect);
+        result.clippedOverflowRect.uniteIfNonZero(cellRects.clippedOverflowRect);
+        result.unclippedOutlineBoundsRect.uniteIfNonZero(cellRects.unclippedOutlineBoundsRect);
     }
     return result;
 }

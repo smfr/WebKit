@@ -568,13 +568,14 @@ LayoutRect RenderListMarker::selectionRectForRepaint(const RenderLayerModelObjec
     ASSERT(!needsLayout());
 
     if (selectionState() == HighlightState::None || !inlineBoxWrapper())
-        return LayoutRect();
+        return { };
 
     LegacyRootInlineBox& rootBox = inlineBoxWrapper()->root();
     LayoutRect rect(0_lu, rootBox.selectionTop() - y(), width(), rootBox.selectionHeight());
             
     if (clipToVisibleContent)
-        return computeRectForRepaint(rect, repaintContainer).clippedRect;
+        return computeRectForRepaint(rect, repaintContainer).clippedOverflowRect;
+
     return localToContainerQuad(FloatRect(rect), repaintContainer).enclosingBoundingBox();
 }
 
