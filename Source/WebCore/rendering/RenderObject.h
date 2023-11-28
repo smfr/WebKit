@@ -826,20 +826,22 @@ public:
 
     struct RepaintRects {
         LayoutRect clippedOverflowRect;
-        LayoutRect unclippedOutlineBoundsRect;
+        std::optional<LayoutRect> unclippedOutlineBoundsRect;
 
         bool operator==(const RepaintRects&) const = default;
 
         void move(LayoutSize size)
         {
             clippedOverflowRect.move(size);
-            unclippedOutlineBoundsRect.move(size);
+            if (unclippedOutlineBoundsRect)
+                unclippedOutlineBoundsRect->move(size);
         }
 
         void moveBy(LayoutPoint size)
         {
             clippedOverflowRect.moveBy(size);
-            unclippedOutlineBoundsRect.moveBy(size);
+            if (unclippedOutlineBoundsRect)
+                unclippedOutlineBoundsRect->moveBy(size);
         }
 
         void flipForWritingMode(LayoutSize boxSize, bool isHorizontalWritingMode);
@@ -854,8 +856,11 @@ public:
     LayoutRect absoluteClippedOverflowRectForRenderTreeAsText() const { return clippedOverflowRect(nullptr, visibleRectContextForRenderTreeAsText()).clippedOverflowRect; }
     WEBCORE_EXPORT IntRect pixelSnappedAbsoluteClippedOverflowRect() const;
 
-    virtual RepaintRects clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
-    RepaintRects clippedOverflowRectForRepaint(const RenderLayerModelObject* repaintContainer) const { return clippedOverflowRect(repaintContainer, visibleRectContextForRepaint()); }
+    virtual LayoutRect clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+    LayoutRect clippedOverflowRectForRepaint(const RenderLayerModelObject* repaintContainer) const { return clippedOverflowRect(repaintContainer, visibleRectContextForRepaint()); }
+
+    virtual RepaintRects computeRectsForRepaint(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const;
+    RepaintRects rectsForRepaint(const RenderLayerModelObject* repaintContainer) const { return computeRectsForRepaint(repaintContainer, visibleRectContextForRepaint()); }
 
     // FIXME: These need to be re-visited.
     virtual LayoutRect rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const;

@@ -579,22 +579,6 @@ void RenderView::repaintViewAndCompositedLayers()
         compositor.repaintCompositedLayers();
 }
 
-
-//void RenderBox::flipForWritingMode(RepaintRects& rects) const
-//{
-//    if (!style().isFlippedBlocksWritingMode())
-//        return;
-//
-//    if (isHorizontalWritingMode()) {
-//        rects.clippedOverflowRect.setY(height() - rects.clippedOverflowRect.maxY());
-//        rects.unclippedOutlineBoundsRect.setY(height() - rects.unclippedOutlineBoundsRect.maxY());
-//    } else {
-//        rects.clippedOverflowRect.setX(width() - rects.clippedOverflowRect.maxX());
-//        rects.unclippedOutlineBoundsRect.setX(width() - rects.unclippedOutlineBoundsRect.maxX());
-//    }
-//}
-//
-
 auto RenderView::computeVisibleRectInContainer(const RepaintRects& rects, const RenderLayerModelObject* container, VisibleRectContext context) const -> std::optional<RepaintRects>
 {
     // If a container was specified, and was not nullptr or the RenderView,

@@ -2530,14 +2530,14 @@ void RenderBox::deleteLineBoxWrapper()
     m_inlineBoxWrapper = nullptr;
 }
 
-auto RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
+auto RenderBox::computeRectsForRepaint(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     if (isInsideEntirelyHiddenLayer())
         return { };
 
     auto outlineBoundsRect = borderBoundingBox();
     applyVisualEffectOverflow(outlineBoundsRect);
-    auto rects = RepaintRects { visualOverflowRect(), outlineBoundsRect };
+    auto rects = RepaintRects { visualOverflowRect(), std::nullopt };
 
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
@@ -2546,6 +2546,22 @@ auto RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContain
     auto mappedRects = computeVisibleRectInContainer(rects, repaintContainer, context);
     RELEASE_ASSERT(mappedRects);
     return *mappedRects;
+}
+
+LayoutRect RenderBox::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+{
+    if (isInsideEntirelyHiddenLayer())
+        return { };
+
+    auto rects = RepaintRects { visualOverflowRect(), std::nullopt };
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    rects.move(view().frameView().layoutContext().layoutDelta());
+
+    auto mappedRects = computeVisibleRectInContainer(rects, repaintContainer, context);
+    RELEASE_ASSERT(mappedRects);
+    return mappedRects->clippedOverflowRect;
 }
 
 auto RenderBox::computeVisibleRectUsingPaintOffset(const RepaintRects& rects) const -> RepaintRects
@@ -2588,7 +2604,8 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
     RepaintRects adjustedRects = rects;
     if (hasReflection()) {
         adjustedRects.clippedOverflowRect.unite(reflectedRect(adjustedRects.clippedOverflowRect));
-        adjustedRects.unclippedOutlineBoundsRect.unite(reflectedRect(adjustedRects.unclippedOutlineBoundsRect));
+        if (adjustedRects.unclippedOutlineBoundsRect)
+            adjustedRects.unclippedOutlineBoundsRect->unite(reflectedRect(*adjustedRects.unclippedOutlineBoundsRect));
     }
 
     if (container == this) {
@@ -2596,7 +2613,8 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
             flipForWritingMode(adjustedRects);
         if (context.descendantNeedsEnclosingIntRect) {
             adjustedRects.clippedOverflowRect = enclosingIntRect(adjustedRects.clippedOverflowRect);
-            adjustedRects.unclippedOutlineBoundsRect = enclosingIntRect(adjustedRects.unclippedOutlineBoundsRect);
+            if (adjustedRects.unclippedOutlineBoundsRect)
+                adjustedRects.unclippedOutlineBoundsRect = enclosingIntRect(*adjustedRects.unclippedOutlineBoundsRect);
         }
         return adjustedRects;
     }
@@ -2618,7 +2636,8 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
     if (isRenderReplaced() && isRenderWidget()) {
         LayoutSize flooredLocationOffset = toIntSize(flooredIntPoint(locationOffset));
         adjustedRects.clippedOverflowRect.expand(locationOffset - flooredLocationOffset);
-        adjustedRects.unclippedOutlineBoundsRect.expand(locationOffset - flooredLocationOffset);
+        if (adjustedRects.unclippedOutlineBoundsRect)
+            adjustedRects.unclippedOutlineBoundsRect->expand(locationOffset - flooredLocationOffset);
         locationOffset = flooredLocationOffset;
         context.descendantNeedsEnclosingIntRect = true;
     }
@@ -2633,16 +2652,23 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
         auto physicalPoint = flipForWritingMode(adjustedRects.clippedOverflowRect.location());
         if (auto* fragment = downcast<RenderMultiColumnFlow>(*this).physicalTranslationFromFlowToFragment((physicalPoint))) {
             adjustedRects.clippedOverflowRect.setLocation(fragment->flipForWritingMode(physicalPoint));
-            auto unclippedPhysicalLocation = flipForWritingMode(adjustedRects.unclippedOutlineBoundsRect.location());
-            adjustedRects.unclippedOutlineBoundsRect.setLocation(fragment->flipForWritingMode(unclippedPhysicalLocation));
+            if (adjustedRects.unclippedOutlineBoundsRect) {
+                auto unclippedPhysicalLocation = flipForWritingMode(adjustedRects.unclippedOutlineBoundsRect->location());
+                adjustedRects.unclippedOutlineBoundsRect->setLocation(fragment->flipForWritingMode(unclippedPhysicalLocation));
+            }
             return fragment->computeVisibleRectInContainer(adjustedRects, container, context);
         }
     }
 
     auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
-    auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
+
+    std::optional<LayoutPoint> unclippedTopLeft;
+    if (adjustedRects.unclippedOutlineBoundsRect)
+        unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect->location();
+
     clippedTopLeft.move(locationOffset);
-    unclippedTopLeft.move(locationOffset);
+    if (unclippedTopLeft)
+        unclippedTopLeft->move(locationOffset);
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
@@ -2653,16 +2679,19 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
         adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
 
         clippedTopLeft = adjustedRects.clippedOverflowRect.location();
-        unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
+        if (adjustedRects.unclippedOutlineBoundsRect)
+            unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect->location();
         clippedTopLeft.move(locationOffset);
-        unclippedTopLeft.move(locationOffset);
+        if (unclippedTopLeft)
+            unclippedTopLeft->move(locationOffset);
     } else if (position == PositionType::Fixed)
         context.hasPositionFixedDescendant = true;
 
     if (position == PositionType::Absolute && localContainer->isInFlowPositioned() && is<RenderInline>(*localContainer)) {
         auto offset = downcast<RenderInline>(*localContainer).offsetForInFlowPositionedInline(this);
         clippedTopLeft += offset;
-        unclippedTopLeft += offset;
+        if (unclippedTopLeft)
+            *unclippedTopLeft += offset;
     } else if (styleToUse.hasInFlowPosition() && layer()) {
         // Apply the relative position offset when invalidating a rectangle.  The layer
         // is translated, but the render box isn't, so we need to do this to get the
@@ -2670,13 +2699,15 @@ auto RenderBox::computeVisibleRectInContainer(const RepaintRects& rects, const R
         // flag on the RenderObject has been cleared, so use the one on the style().
         auto offset = layer()->offsetForInFlowPosition();
         clippedTopLeft += offset;
-        unclippedTopLeft += offset;
+        if (unclippedTopLeft)
+            *unclippedTopLeft += offset;
     }
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
     adjustedRects.clippedOverflowRect.setLocation(clippedTopLeft);
-    adjustedRects.unclippedOutlineBoundsRect.setLocation(unclippedTopLeft);
+    if (adjustedRects.unclippedOutlineBoundsRect)
+        adjustedRects.unclippedOutlineBoundsRect->setLocation(*unclippedTopLeft);
 
     if (localContainer->hasNonVisibleOverflow()) {
         bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);

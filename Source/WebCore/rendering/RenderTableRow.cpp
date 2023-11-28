@@ -184,7 +184,8 @@ auto RenderTableRow::clippedOverflowRect(const RenderLayerModelObject* repaintCo
         // So we don't care if a cell is a repaintContainer here.
         auto cellRects = cell->clippedOverflowRect(repaintContainer, context);
         result.clippedOverflowRect.uniteIfNonZero(cellRects.clippedOverflowRect);
-        result.unclippedOutlineBoundsRect.uniteIfNonZero(cellRects.unclippedOutlineBoundsRect);
+        if (result.unclippedOutlineBoundsRect && cellRects.unclippedOutlineBoundsRect)
+            result.unclippedOutlineBoundsRect->uniteIfNonZero(*cellRects.unclippedOutlineBoundsRect);
     }
     return result;
 }

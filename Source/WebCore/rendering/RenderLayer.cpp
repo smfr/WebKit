@@ -1048,6 +1048,8 @@ void RenderLayer::recursiveUpdateLayerPositions(RenderGeometryMap* geometryMap, 
         if (checkForRepaint && shouldRepaintAfterLayout() && newRects) {
             auto needsFullRepaint = m_repaintStatus == RepaintStatus::NeedsFullRepaint ? RenderElement::RequiresFullRepaint::Yes : RenderElement::RequiresFullRepaint::No;
             auto resolvedOldRects = valueOrDefault(oldRects);
+            if (!resolvedOldRects.unclippedOutlineBoundsRect)
+                resolvedOldRects.unclippedOutlineBoundsRect = LayoutRect { };
             renderer().repaintAfterLayoutIfNeeded(repaintContainer.get(), needsFullRepaint, resolvedOldRects, *newRects);
         }
     };

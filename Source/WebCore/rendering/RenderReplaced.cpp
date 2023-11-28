@@ -818,7 +818,27 @@ bool RenderReplaced::isHighlighted(HighlightState state, const RenderHighlight& 
     return false;
 }
 
-auto RenderReplaced::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
+LayoutRect RenderReplaced::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
+{
+    if (isInsideEntirelyHiddenLayer())
+        return { };
+
+    // The selectionRect can project outside of the overflowRect, so take their union
+    // for repainting to avoid selection painting glitches.
+    auto overflowBounds = unionRect(localSelectionRect(false), visualOverflowRect());
+
+    auto rects = RepaintRects { overflowBounds, std::nullopt };
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    rects.move(view().frameView().layoutContext().layoutDelta());
+
+    auto mappedRects = computeVisibleRectInContainer(rects, repaintContainer, context);
+    RELEASE_ASSERT(mappedRects);
+    return mappedRects->clippedOverflowRect;
+}
+
+auto RenderReplaced::computeRectsForRepaint(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
 {
     if (isInsideEntirelyHiddenLayer())
         return { };

@@ -51,9 +51,14 @@ LegacyRenderSVGModelObject::LegacyRenderSVGModelObject(Type type, SVGElement& el
 {
 }
 
-auto LegacyRenderSVGModelObject::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const -> RepaintRects
+LayoutRect LegacyRenderSVGModelObject::clippedOverflowRect(const RenderLayerModelObject* repaintContainer, VisibleRectContext context) const
 {
     return SVGRenderSupport::clippedOverflowRectForRepaint(*this, repaintContainer, context);
+}
+
+auto computeRectsForRepaint(const RenderLayerModelObject* repaintContainer, VisibleRectContext) const -> RepaintRects
+{
+
 }
 
 std::optional<FloatRect> LegacyRenderSVGModelObject::computeFloatVisibleRectInContainer(const FloatRect& rect, const RenderLayerModelObject* container, VisibleRectContext context) const

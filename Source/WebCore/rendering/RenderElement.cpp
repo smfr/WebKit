@@ -1245,8 +1245,11 @@ bool RenderElement::repaintAfterLayoutIfNeeded(const RenderLayerModelObject* rep
     auto oldClippedOverflowRect = oldRepaintRects.clippedOverflowRect;
     auto newClippedOverflowRect = newRepaintRects.clippedOverflowRect;
 
-    auto oldUnclippedRect = oldRepaintRects.unclippedOutlineBoundsRect;
-    auto newUnclippedRect = newRepaintRects.unclippedOutlineBoundsRect;
+    ASSERT(oldRepaintRects.unclippedOutlineBoundsRect);
+    ASSERT(newRepaintRects.unclippedOutlineBoundsRect);
+
+    auto oldUnclippedRect = *oldRepaintRects.unclippedOutlineBoundsRect;
+    auto newUnclippedRect = *newRepaintRects.unclippedOutlineBoundsRect;
 
 //    ALWAYS_LOG_WITH_STREAM(stream << "RenderElement " << this << " repaintAfterLayoutIfNeeded - clippedOverflowRect changed from " << oldClippedOverflowRect << " to " << newClippedOverflowRect);
 //    ALWAYS_LOG_WITH_STREAM(stream << " unclippedRect changed from " << oldUnclippedRect << " to " << newUnclippedRect);

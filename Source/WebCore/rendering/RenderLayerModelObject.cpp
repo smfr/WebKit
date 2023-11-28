@@ -348,25 +348,34 @@ auto RenderLayerModelObject::computeVisibleRectInSVGContainer(const RepaintRects
 
     // FIXME: Clean up this confusing logic.
     auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
-    auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
+
+    std::optional<LayoutPoint> unclippedTopLeft;
+    if (adjustedRects.unclippedOutlineBoundsRect)
+        unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect->location();
+
     clippedTopLeft.move(locationOffset);
-    unclippedTopLeft.move(locationOffset);
+    if (unclippedTopLeft)
+        unclippedTopLeft->move(locationOffset);
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
     if (hasLayer() && layer()->transform()) {
         adjustedRects.applyTransform(*layer()->transform(), document().deviceScaleFactor());
 
-        auto clippedTopLeft = adjustedRects.clippedOverflowRect.location();
-        auto unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect.location();
+        clippedTopLeft = adjustedRects.clippedOverflowRect.location();
+        if (adjustedRects.unclippedOutlineBoundsRect)
+            unclippedTopLeft = adjustedRects.unclippedOutlineBoundsRect->location();
+
         clippedTopLeft.move(locationOffset);
-        unclippedTopLeft.move(locationOffset);
+        if (unclippedTopLeft)
+            unclippedTopLeft->move(locationOffset);
     }
 
     // FIXME: We ignore the lightweight clipping rect that controls use, since if |o| is in mid-layout,
     // its controlClipRect will be wrong. For overflow clip we use the values cached by the layer.
     adjustedRects.clippedOverflowRect.setLocation(clippedTopLeft);
-    adjustedRects.unclippedOutlineBoundsRect.setLocation(unclippedTopLeft);
+    if (adjustedRects.unclippedOutlineBoundsRect)
+        adjustedRects.unclippedOutlineBoundsRect->setLocation(*unclippedTopLeft);
 
     if (localContainer->hasNonVisibleOverflow()) {
         bool isEmpty = !downcast<RenderLayerModelObject>(*localContainer).applyCachedClipAndScrollPosition(adjustedRects, container, context);

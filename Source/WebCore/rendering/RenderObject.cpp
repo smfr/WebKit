@@ -1088,7 +1088,13 @@ LayoutRect RenderObject::rectWithOutlineForRepaint(const RenderLayerModelObject*
     return repaintRects.clippedOverflowRect;
 }
 
-auto RenderObject::clippedOverflowRect(const RenderLayerModelObject*, VisibleRectContext) const -> RepaintRects
+LayoutRect RenderObject::clippedOverflowRect(const RenderLayerModelObject*, VisibleRectContext) const
+{
+    ASSERT_NOT_REACHED();
+    return { };
+}
+
+auto RenderObject::computeRectsForRepaint(const RenderLayerModelObject*, VisibleRectContext) const -> RepaintRects
 {
     ASSERT_NOT_REACHED();
     return { };
@@ -2371,13 +2377,18 @@ ScrollAnchoringController* RenderObject::findScrollAnchoringControllerForRendere
 
 void RenderObject::RepaintRects::applyTransform(const TransformationMatrix& matrix, float deviceScaleFactor)
 {
-    if (clippedOverflowRect == unclippedOutlineBoundsRect) {
+    if (!unclippedOutlineBoundsRect) {
+        clippedOverflowRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(clippedOverflowRect), deviceScaleFactor));
+        return;
+    }
+
+    if (clippedOverflowRect == *unclippedOutlineBoundsRect) {
         auto transformedRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(clippedOverflowRect), deviceScaleFactor));
         clippedOverflowRect = transformedRect;
         unclippedOutlineBoundsRect = transformedRect;
     } else {
         clippedOverflowRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(clippedOverflowRect), deviceScaleFactor));
-        unclippedOutlineBoundsRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(unclippedOutlineBoundsRect), deviceScaleFactor));
+        unclippedOutlineBoundsRect = LayoutRect(encloseRectToDevicePixels(matrix.mapRect(*unclippedOutlineBoundsRect), deviceScaleFactor));
     }
 }
 
@@ -2385,10 +2396,12 @@ void RenderObject::RepaintRects::flipForWritingMode(LayoutSize boxSize, bool isH
 {
     if (isHorizontalWritingMode) {
         clippedOverflowRect.setY(boxSize.height() - clippedOverflowRect.maxY());
-        unclippedOutlineBoundsRect.setY(boxSize.height() - unclippedOutlineBoundsRect.maxY());
+        if (unclippedOutlineBoundsRect)
+            unclippedOutlineBoundsRect->setY(boxSize.height() - unclippedOutlineBoundsRect->maxY());
     } else {
         clippedOverflowRect.setX(boxSize.width() - clippedOverflowRect.maxX());
-        unclippedOutlineBoundsRect.setX(boxSize.width() - unclippedOutlineBoundsRect.maxX());
+        if (unclippedOutlineBoundsRect)
+            unclippedOutlineBoundsRect->setX(boxSize.width() - unclippedOutlineBoundsRect->maxX());
     }
 }
 
