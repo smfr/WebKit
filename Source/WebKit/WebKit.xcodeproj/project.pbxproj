@@ -3373,6 +3373,8 @@
 		0FF7CE892901FDA500EA62D6 /* RemoteScrollingTreeIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RemoteScrollingTreeIOS.h; sourceTree = "<group>"; };
 		0FF7CE8A2901FDAC00EA62D6 /* RemoteScrollingTreeMac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RemoteScrollingTreeMac.h; sourceTree = "<group>"; };
 		0FF7CE8B2901FDAD00EA62D6 /* RemoteScrollingTreeMac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RemoteScrollingTreeMac.mm; sourceTree = "<group>"; };
+		0FF848392BE9B746008D6F93 /* PDFDiscreteModeController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PDFDiscreteModeController.mm; sourceTree = "<group>"; };
+		0FF8483A2BE9B746008D6F93 /* PDFDiscreteModeController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PDFDiscreteModeController.h; sourceTree = "<group>"; };
 		0FFACF032AC2453300ED8DB6 /* UnifiedPDFPlugin.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = UnifiedPDFPlugin.mm; sourceTree = "<group>"; };
 		0FFACF042AC2453300ED8DB6 /* UnifiedPDFPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnifiedPDFPlugin.h; sourceTree = "<group>"; };
 		0FFED98C23A3200400EEF459 /* WKWebViewIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKWebViewIOS.h; sourceTree = "<group>"; };
@@ -8768,6 +8770,8 @@
 				33DAECED2B99D05A005C596E /* PDFDataDetectorItem.mm */,
 				33DAECEE2B9AAE91005C596E /* PDFDataDetectorOverlayController.h */,
 				33DAECEF2B9AAE92005C596E /* PDFDataDetectorOverlayController.mm */,
+				0FF8483A2BE9B746008D6F93 /* PDFDiscreteModeController.h */,
+				0FF848392BE9B746008D6F93 /* PDFDiscreteModeController.mm */,
 				0F3D56732AC651390086D64E /* PDFDocumentLayout.h */,
 				0F3D56722AC651390086D64E /* PDFDocumentLayout.mm */,
 				0F9B0BC22B7DB9BF0003E962 /* PDFPageCoverage.h */,

@@ -69,6 +69,9 @@ public:
     bool isLeftPageIndex(PageIndex) const;
     bool isRightPageIndex(PageIndex) const;
     bool isLastPageIndex(PageIndex) const;
+    PageIndex lastPageIndex() const;
+
+    bool isFirstPageOfRow(PageIndex) const;
 
     RetainPtr<PDFPage> pageAtIndex(PageIndex) const;
     std::optional<unsigned> indexForPage(RetainPtr<PDFPage>) const;
@@ -80,6 +83,9 @@ public:
 
     // This is not scaled by scale().
     WebCore::FloatRect layoutBoundsForPageAtIndex(PageIndex) const;
+    // In two-up, the bounds of the two side-by-side pages, otherwise identical to layoutBoundsForPageAtIndex().
+    WebCore::FloatRect layoutBoundsForRowContainingPageAtIndex(PageIndex) const;
+
     // Returns 0, 90, 180, 270.
     WebCore::IntDegrees rotationForPageAtIndex(PageIndex) const;
 
@@ -95,12 +101,21 @@ public:
     void updateLayout(WebCore::IntSize pluginSize, ShouldUpdateAutoSizeScale);
     WebCore::FloatSize scaledContentsSize() const;
 
-    void setDisplayMode(DisplayMode displayMode) { m_displayMode = displayMode; }
+    void setDisplayMode(DisplayMode);
     DisplayMode displayMode() const { return m_displayMode; }
     bool isSinglePageDisplayMode() const { return m_displayMode == DisplayMode::SinglePageDiscrete || m_displayMode == DisplayMode::SinglePageContinuous; }
     bool isTwoUpDisplayMode() const { return m_displayMode == DisplayMode::TwoUpDiscrete || m_displayMode == DisplayMode::TwoUpContinuous; }
+    bool isDiscreteDisplayMode() const { return m_displayMode == DisplayMode::SinglePageDiscrete || m_displayMode == DisplayMode::TwoUpDiscrete; }
 
     unsigned pagesPerRow() const { return isSinglePageDisplayMode() ? 1 : 2; }
+
+    // Non-continuous layout mode.
+    void setDiscreteFirstVisiblePage(PageIndex);
+    std::optional<PageIndex> discreteFirstVisiblePage() const;
+    bool isDiscreteVisiblePage(PageIndex) const;
+
+    std::optional<PageIndex> previousDiscreteFirstPageForPage(PageIndex) const;
+    std::optional<PageIndex> nextDiscreteFirstPageForPage(PageIndex) const;
 
     struct PageGeometry {
         WebCore::FloatRect cropBox;
@@ -122,6 +137,7 @@ private:
     WebCore::FloatRect m_documentBounds;
     float m_scale { 1 };
     DisplayMode m_displayMode { DisplayMode::SinglePageContinuous };
+    std::optional<PageIndex> m_discreteFirstVisiblePage; // First of two pages if in two-up mode.
 };
 
 } // namespace WebKit

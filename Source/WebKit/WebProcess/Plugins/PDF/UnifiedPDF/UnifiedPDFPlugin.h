@@ -29,7 +29,6 @@
 
 #include "PDFDocumentLayout.h"
 #include "PDFPluginBase.h"
-#include <WebCore/ElementIdentifier.h>
 #include <WebCore/GraphicsLayer.h>
 #include <WebCore/GraphicsLayerClient.h>
 #include <WebCore/Page.h>
@@ -57,6 +56,7 @@ class AsyncPDFRenderer;
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
 class PDFDataDetectorOverlayController;
 #endif
+class PDFDiscreteModeController;
 class PDFPluginPasswordField;
 class PDFPluginPasswordForm;
 class WebFrame;
@@ -100,6 +100,7 @@ class UnifiedPDFPlugin final : public PDFPluginBase, public WebCore::GraphicsLay
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(UnifiedPDFPlugin);
 
     friend class AsyncPDFRenderer;
+    friend class PDFDiscreteModeController;
 public:
     static Ref<UnifiedPDFPlugin> create(WebCore::HTMLPlugInElement&);
     virtual ~UnifiedPDFPlugin();
@@ -273,9 +274,10 @@ private:
 
     NSData *liveData() const override;
 
-    bool wantsWheelEvents() const override { return false; }
+    bool wantsWheelEvents() const override;
+    bool handleWheelEvent(const WebWheelEvent&) override;
+
     bool handleMouseEvent(const WebMouseEvent&) override;
-    bool handleWheelEvent(const WebWheelEvent&) override { return false; }
     bool handleMouseEnterEvent(const WebMouseEvent&) override;
     bool handleMouseLeaveEvent(const WebMouseEvent&) override;
     bool handleContextMenuEvent(const WebMouseEvent&) override;
@@ -452,6 +454,7 @@ private:
 
     void revealRectInContentsSpace(WebCore::FloatRect);
     void scrollToPointInContentsSpace(WebCore::FloatPoint);
+    void scrollToPosition(WebCore::ScrollPosition);
     void scrollToPDFDestination(PDFDestination *);
     void scrollToPointInPage(WebCore::FloatPoint pointInPDFPageSpace, PDFDocumentLayout::PageIndex);
     void scrollToPage(PDFDocumentLayout::PageIndex);
@@ -461,12 +464,8 @@ private:
     bool requestScrollToPosition(const WebCore::ScrollPosition&, const WebCore::ScrollPositionChangeOptions& = WebCore::ScrollPositionChangeOptions::createProgrammatic()) override;
     bool requestStartKeyboardScrollAnimation(const WebCore::KeyboardScroll& scrollData) override;
     bool requestStopKeyboardScrollAnimation(bool immediate) override;
-    void updateSnapOffsets() override;
 
-    bool shouldDisplayPage(PDFDocumentLayout::PageIndex);
-    void populateScrollSnapIdentifiers();
-    PDFDocumentLayout::PageIndex pageForScrollSnapIdentifier(WebCore::ElementIdentifier) const;
-    void determineCurrentlySnappedPage();
+    bool shouldDisplayPage(PDFDocumentLayout::PageIndex) const;
 
     WebCore::FloatSize centeringOffset() const;
 
@@ -527,6 +526,8 @@ private:
     WebCore::GraphicsLayer* backgroundLayerForPage(PDFDocumentLayout::PageIndex) const;
     std::optional<PDFDocumentLayout::PageIndex> pageIndexForPageBackgroundLayer(const WebCore::GraphicsLayer*) const;
 
+    RefPtr<WebCore::GraphicsLayer> discretePageSwapLayer();
+
 #if PLATFORM(MAC)
     void createPasswordEntryForm();
 
@@ -537,9 +538,12 @@ private:
     bool isShowingTwoPages() const;
 
     WebCore::FloatRect pageBoundsInContentsSpace(PDFDocumentLayout::PageIndex) const;
+    WebCore::FloatRect boundsOfRowForPageInContentsSpace(PDFDocumentLayout::PageIndex) const;
 
     Ref<AsyncPDFRenderer> asyncRenderer();
     RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;
+
+    Ref<PDFDiscreteModeController> discreteModeController();
 
     PDFDocumentLayout m_documentLayout;
     RefPtr<WebCore::GraphicsLayer> m_rootLayer;
@@ -550,6 +554,8 @@ private:
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     RefPtr<WebCore::GraphicsLayer> m_selectionLayer;
 #endif
+
+    RefPtr<WebCore::GraphicsLayer> m_discretePageSwapLayer;
 
     RefPtr<WebCore::GraphicsLayer> m_overflowControlsContainer;
     RefPtr<WebCore::GraphicsLayer> m_layerForHorizontalScrollbar;
@@ -602,12 +608,10 @@ private:
     std::optional<WebCore::ScrollDirection> m_animatedKeyboardScrollingDirection;
 #endif
 
-    Vector<WebCore::ElementIdentifier> m_scrollSnapIdentifiers;
-    std::optional<PDFDocumentLayout::PageIndex> m_currentlySnappedPage;
-
     Vector<WebCore::FloatRect> m_findMatchRectsInDocumentCoordinates;
 
     RefPtr<AsyncPDFRenderer> m_asyncRenderer;
+    RefPtr<PDFDiscreteModeController> m_discreteModeController;
 
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     std::unique_ptr<PDFDataDetectorOverlayController> m_dataDetectorOverlayController;

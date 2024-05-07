@@ -56,7 +56,17 @@ bool PDFDocumentLayout::isRightPageIndex(PageIndex pageIndex) const
 
 bool PDFDocumentLayout::isLastPageIndex(PageIndex pageIndex) const
 {
-    return pageIndex == pageCount() - 1;
+    return pageIndex == lastPageIndex();
+}
+
+auto PDFDocumentLayout::lastPageIndex() const -> PageIndex
+{
+    return pageCount() - 1;
+}
+
+bool PDFDocumentLayout::isFirstPageOfRow(PageIndex pageIndex) const
+{
+    return isTwoUpDisplayMode() ? isLeftPageIndex(pageIndex) : true;
 }
 
 RetainPtr<PDFPage> PDFDocumentLayout::pageAtIndex(PageIndex index) const
@@ -73,7 +83,61 @@ std::optional<unsigned> PDFDocumentLayout::indexForPage(RetainPtr<PDFPage> page)
     return std::nullopt;
 }
 
-PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint(FloatPoint documentSpacePoint) const
+void PDFDocumentLayout::setDisplayMode(DisplayMode displayMode)
+{
+    m_displayMode = displayMode;
+    if (isDiscreteDisplayMode())
+        m_discreteFirstVisiblePage = 0;
+    else
+        m_discreteFirstVisiblePage = { };
+}
+
+void PDFDocumentLayout::setDiscreteFirstVisiblePage(PageIndex pageIndex)
+{
+    ASSERT(isDiscreteDisplayMode());
+    m_discreteFirstVisiblePage = pageIndex;
+}
+
+auto PDFDocumentLayout::discreteFirstVisiblePage() const -> std::optional<PageIndex>
+{
+    ASSERT(isDiscreteDisplayMode());
+    return m_discreteFirstVisiblePage;
+}
+
+auto PDFDocumentLayout::previousDiscreteFirstPageForPage(PageIndex pageIndex) const -> std::optional<PageIndex>
+{
+    ASSERT(isDiscreteDisplayMode());
+
+    if (pageIndex >= pagesPerRow())
+        return pageIndex - pagesPerRow();
+
+    return { };
+}
+
+auto PDFDocumentLayout::nextDiscreteFirstPageForPage(PageIndex pageIndex) const -> std::optional<PageIndex>
+{
+    ASSERT(isDiscreteDisplayMode());
+    auto nextPage = pageIndex + pagesPerRow();
+    if (nextPage <= lastPageIndex())
+        return nextPage;
+
+    return { };
+}
+
+bool PDFDocumentLayout::isDiscreteVisiblePage(PageIndex pageIndex) const
+{
+    ASSERT(isDiscreteDisplayMode());
+    ASSERT(m_discreteFirstVisiblePage);
+    if (pageIndex == *m_discreteFirstVisiblePage)
+        return true;
+
+    if (isTwoUpDisplayMode() && pageIndex < lastPageIndex() && pageIndex == *m_discreteFirstVisiblePage + 1)
+        return true;
+
+    return false;
+}
+
+auto PDFDocumentLayout::nearestPageIndexForDocumentPoint(FloatPoint documentSpacePoint) const -> PageIndex
 {
     auto pageCount = this->pageCount();
     ASSERT(pageCount);
@@ -311,6 +375,9 @@ void PDFDocumentLayout::layoutSingleColumn(float availableWidth, float maxRowWid
         if (i >= m_pageGeometry.size())
             break;
 
+        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
+            currentYOffset = documentMargin.height();
+
         auto pageBounds = m_pageGeometry[i].layoutBounds;
 
         LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutSingleColumn - page " << i << " bounds " << pageBounds);
@@ -342,6 +409,9 @@ void PDFDocumentLayout::layoutTwoUpColumn(float availableWidth, float maxRowWidt
     for (PageIndex i = 0; i < pageCount; ++i) {
         if (i >= m_pageGeometry.size())
             break;
+
+        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
+            currentYOffset = documentMargin.height();
 
         auto pageBounds = m_pageGeometry[i].layoutBounds;
 
@@ -403,6 +473,28 @@ FloatRect PDFDocumentLayout::layoutBoundsForPageAtIndex(PageIndex index) const
         return { };
 
     return m_pageGeometry[index].layoutBounds;
+}
+
+FloatRect PDFDocumentLayout::layoutBoundsForRowContainingPageAtIndex(PageIndex index) const
+{
+    if (index >= m_pageGeometry.size())
+        return { };
+
+    auto rowBounds = m_pageGeometry[index].layoutBounds;
+    if (isTwoUpDisplayMode()) {
+        std::optional<PageIndex> otherPageIndex;
+        if (isLeftPageIndex(index) && index < lastPageIndex())
+            otherPageIndex = index + 1;
+        else {
+            ASSERT(index > 0);
+            otherPageIndex = index - 1;
+        }
+
+        if (otherPageIndex)
+            rowBounds.unite(m_pageGeometry[*otherPageIndex].layoutBounds);
+    }
+
+    return rowBounds;
 }
 
 IntDegrees PDFDocumentLayout::rotationForPageAtIndex(PageIndex index) const
