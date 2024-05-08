@@ -38,15 +38,7 @@ namespace WebKit {
 
 using namespace WebCore;
 
-static float elasticDeltaForReboundDelta(float delta)
-{
-    return _NSElasticDeltaForReboundDelta(delta);
-}
-
-static float reboundDeltaForElasticDelta(float delta)
-{
-    return _NSReboundDeltaForElasticDelta(delta);
-}
+static constexpr auto pageSwapDistanceThreshold = 200.0f;
 
 Ref<PDFDiscreteModeController> PDFDiscreteModeController::create(UnifiedPDFPlugin& plugin)
 {
@@ -98,6 +90,13 @@ bool PDFDiscreteModeController::handleWheelEvent(const WebWheelEvent& event)
         return false;
 
     auto wheelEvent = platform(event);
+    WTF_ALWAYS_LOG("PDFDiscreteModeController::handleWheelEvent " << wheelEvent);
+
+    if (wheelEvent.isEndOfNonMomentumScroll() || wheelEvent.isEndOfMomentumScroll())
+        return handleEndedEvent(wheelEvent);
+
+    if (wheelEvent.isGestureCancel())
+        return handleCancelledEvent(wheelEvent);
 
     auto dominantAxis = dominantAxisFavoringVertical(event.delta());
     auto relevantSide = ScrollableArea::targetSideForScrollDelta(-wheelEvent.delta(), dominantAxis);
@@ -110,14 +109,14 @@ bool PDFDiscreteModeController::handleWheelEvent(const WebWheelEvent& event)
     if (!plugin->isPinnedOnSide(*relevantSide))
         return false;
 
-
     // Stretching.
     bool handled = false;
     switch (wheelEvent.phase()) {
-    case PlatformWheelEventPhase::None:
-        // FIXME: handle momentum events for the swipe.
-        handled = true;
+    case PlatformWheelEventPhase::None: {
+        if (wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed)
+            handled = handleChangedEvent(wheelEvent);
         break;
+    }
 
     case PlatformWheelEventPhase::Began:
         handled = handleBeginEvent(wheelEvent);
@@ -130,6 +129,7 @@ bool PDFDiscreteModeController::handleWheelEvent(const WebWheelEvent& event)
     default:
         break;
     }
+
 
     updatePageSwapLayerPosition();
 
@@ -159,35 +159,71 @@ bool PDFDiscreteModeController::handleBeginEvent(const WebCore::PlatformWheelEve
     // FIXME: scrollWheelMultiplier
 
     m_stretchDistance = wheelDelta;
-
-    m_stretchScrollForce.setWidth(reboundDeltaForElasticDelta(m_stretchDistance.width()));
-    m_stretchScrollForce.setHeight(reboundDeltaForElasticDelta(m_stretchDistance.height()));
-
-    m_unappliedOverscrollDelta = { };
-
     return false;
 }
 
-
 bool PDFDiscreteModeController::handleChangedEvent(const WebCore::PlatformWheelEvent& wheelEvent)
 {
-    bool isVerticallyStretched = m_stretchDistance.height();
-    bool isHorizontallyStretched = m_stretchDistance.width();
-    auto delta = (isVerticallyStretched || isHorizontallyStretched) ? -wheelEvent.unacceleratedScrollingDelta() : -wheelEvent.delta();
+    auto delta = -wheelEvent.delta();
 
     if (wheelEvent.isGestureEvent()) {
         // FIXME: This replicates what WheelEventDeltaFilter does. We should apply that to events in all phases, and remove axis locking here (webkit.org/b/231207).
         delta = deltaAlignedToDominantAxis(delta);
     }
 
-    m_stretchScrollForce += delta;
-    auto dampedDelta = FloatSize {
-        ceilf(elasticDeltaForReboundDelta(m_stretchScrollForce.width())),
-        ceilf(elasticDeltaForReboundDelta(m_stretchScrollForce.height()))
-    };
+    m_stretchDistance += delta;
 
-    m_stretchDistance = dampedDelta - m_stretchDistance;
+    WTF_ALWAYS_LOG("PDFDiscreteModeController::handleChangedEvent - stretch distance " << m_stretchDistance);
 
+    return true;
+}
+
+bool PDFDiscreteModeController::handleEndedEvent(const WebCore::PlatformWheelEvent&)
+{
+    RefPtr plugin = m_plugin.get();
+    if (!plugin)
+        return false;
+
+    RefPtr pageSwapLayer = plugin->discretePageSwapLayer();
+    if (!pageSwapLayer)
+        return false;
+
+    if (std::abs(m_stretchDistance.height()) < pageSwapDistanceThreshold) {
+        // FIXME: Animate back
+        m_stretchDistance = { };
+        updatePageSwapLayerPosition();
+
+        // Eventually
+        pageSwapLayer->removeFromParent();
+        return true;
+    }
+
+    if (m_stretchDistance.height() < 0) {
+        pageSwapLayer->removeFromParent();
+        plugin->goToPreviousRow();
+        return true;
+    }
+
+    if (m_stretchDistance.height() > 0) {
+        pageSwapLayer->removeFromParent();
+        plugin->goToNextRow();
+        return true;
+    }
+
+    return false;
+}
+
+bool PDFDiscreteModeController::handleCancelledEvent(const WebCore::PlatformWheelEvent&)
+{
+    RefPtr plugin = m_plugin.get();
+    if (!plugin)
+        return false;
+
+    RefPtr pageSwapLayer = plugin->discretePageSwapLayer();
+    if (!pageSwapLayer)
+        return false;
+
+    pageSwapLayer->removeFromParent();
     return true;
 }
 
@@ -203,7 +239,7 @@ void PDFDiscreteModeController::updatePageSwapLayerPosition()
 
     WTF_ALWAYS_LOG("PDFDiscreteModeController::updatePageSwapLayerPosition() - stretchDistance " << m_stretchDistance);
     auto layerPosition = FloatPoint { };
-    layerPosition += m_stretchDistance;
+    layerPosition -= m_stretchDistance;
     pageSwapLayer->setPosition(layerPosition);
 }
 

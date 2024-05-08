@@ -348,6 +348,13 @@ private:
     void stopAutoscroll();
     void scrollWithDelta(const WebCore::IntSize&);
 
+    // Discrete mode.
+    bool canGoToPreviousRow() const;
+    bool canGoToNextRow() const;
+
+    bool goToPreviousRow();
+    bool goToNextRow();
+
     // Selections
     enum class SelectionGranularity : uint8_t {
         Character,

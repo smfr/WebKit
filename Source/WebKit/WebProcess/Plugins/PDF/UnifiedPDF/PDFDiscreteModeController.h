@@ -62,6 +62,8 @@ private:
 
     bool handleBeginEvent(const WebCore::PlatformWheelEvent&);
     bool handleChangedEvent(const WebCore::PlatformWheelEvent&);
+    bool handleEndedEvent(const WebCore::PlatformWheelEvent&);
+    bool handleCancelledEvent(const WebCore::PlatformWheelEvent&);
 
     bool shouldTransitionOnSide(WebCore::BoxSide) const;
 
@@ -72,8 +74,6 @@ private:
 
 
     FloatSize m_stretchDistance;
-    FloatSize m_stretchScrollForce;
-    FloatSize m_unappliedOverscrollDelta;
 
     enum class PageTransitionState : uint8_t {
         Idle,

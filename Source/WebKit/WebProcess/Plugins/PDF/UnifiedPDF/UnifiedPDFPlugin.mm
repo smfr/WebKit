@@ -266,7 +266,9 @@ void UnifiedPDFPlugin::installPDFDocument()
     maybeClearHighLatencyDataProviderFlag();
 #endif
 
-    updateLayout(AdjustScaleAfterLayout::Yes);
+    // Testing
+    setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayMode::SinglePageDiscrete);
+    //updateLayout(AdjustScaleAfterLayout::Yes);
 
 #if ENABLE(PDF_HUD)
     updateHUDVisibility();
@@ -634,15 +636,21 @@ RefPtr<GraphicsLayer> UnifiedPDFPlugin::discretePageSwapLayer()
     auto currentPage = m_documentLayout.discreteFirstVisiblePage().value_or(0);
     auto currentRowContentRect = boundsOfRowForPageInContentsSpace(currentPage);
 
+    TransformationMatrix transform;
+    transform.scale(m_scaleFactor);
+    auto padding = centeringOffset();
+    transform.translate(padding.width() + currentRowContentRect.x(), padding.height() + currentRowContentRect.y());
+
+    m_discretePageSwapLayer->setTransform(transform);
+
     m_discretePageSwapLayer->setAnchorPoint({ });
-    m_discretePageSwapLayer->setPosition({ });
     m_discretePageSwapLayer->setSize(currentRowContentRect.size());
 
     m_discretePageSwapLayer->setBackgroundColor(WebCore::roundAndClampToSRGBALossy([WebCore::CocoaColor whiteColor].CGColor));
 
     // Make sure it's parented on top.
     m_discretePageSwapLayer->removeFromParent();
-    m_contentsLayer->addChild(*m_discretePageSwapLayer);
+    m_scrolledContentsLayer->addChild(*m_discretePageSwapLayer);
 
     return m_discretePageSwapLayer;
 }
@@ -1833,16 +1841,14 @@ FloatRect UnifiedPDFPlugin::pageBoundsInContentsSpace(PDFDocumentLayout::PageInd
 {
     auto bounds = m_documentLayout.layoutBoundsForPageAtIndex(index);
     bounds.inflate(PDFDocumentLayout::pageMargin);
-    bounds.scale(contentScaleFactor());
-    return bounds;
+    return convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::Contents, bounds);
 }
 
 FloatRect UnifiedPDFPlugin::boundsOfRowForPageInContentsSpace(PDFDocumentLayout::PageIndex index) const
 {
     auto bounds = m_documentLayout.layoutBoundsForRowContainingPageAtIndex(index);
     bounds.inflate(PDFDocumentLayout::pageMargin);
-    bounds.scale(contentScaleFactor());
-    return bounds;
+    return convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::Contents, bounds);
 }
 
 bool UnifiedPDFPlugin::shouldDisplayPage(PDFDocumentLayout::PageIndex pageIndex) const
@@ -2342,43 +2348,6 @@ bool UnifiedPDFPlugin::handleKeyboardEventForDiscreteDisplayMode(const WebKeyboa
     if (event.type() != WebEventType::KeyDown || m_isScrollingWithAnimationToPageExtent)
         return false;
 
-    auto goToNextRow = [&]() {
-        auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
-        if (!currentFirstPage)
-            return false;
-
-        auto nextFirstPage = m_documentLayout.nextDiscreteFirstPageForPage(*currentFirstPage);
-        if (nextFirstPage) {
-            m_documentLayout.setDiscreteFirstVisiblePage(*nextFirstPage);
-            updateLayout();
-
-            auto targetScrollPosition = scrollPosition();
-            targetScrollPosition.setY(minimumScrollPosition().y());
-            scrollToPosition(targetScrollPosition);
-            return true;
-        }
-        return false;
-    };
-
-    auto goToPreviousRow = [&]() {
-        auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
-        if (!currentFirstPage)
-            return false;
-
-        auto previousFirstPage = m_documentLayout.previousDiscreteFirstPageForPage(*currentFirstPage);
-        if (previousFirstPage) {
-            m_documentLayout.setDiscreteFirstVisiblePage(*previousFirstPage);
-            updateLayout();
-
-            auto targetScrollPosition = scrollPosition();
-            targetScrollPosition.setY(maximumScrollPosition().y());
-            scrollToPosition(targetScrollPosition);
-            return true;
-        }
-
-        return false;
-    };
-
     auto key = event.key();
 
     // FIXME: Handle Home and End
@@ -2433,6 +2402,69 @@ bool UnifiedPDFPlugin::handleKeyboardEventForDiscreteDisplayMode(const WebKeyboa
     if (isNextRowsKey && goToNextRow())
         return true;
 
+    return false;
+}
+
+bool UnifiedPDFPlugin::canGoToPreviousRow() const
+{
+    ASSERT(isInDiscreteDisplayMode());
+    auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
+    if (!currentFirstPage)
+        return false;
+
+    return m_documentLayout.previousDiscreteFirstPageForPage(*currentFirstPage).has_value();
+}
+
+bool UnifiedPDFPlugin::canGoToNextRow() const
+{
+    ASSERT(isInDiscreteDisplayMode());
+    auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
+    if (!currentFirstPage)
+        return false;
+
+    return m_documentLayout.nextDiscreteFirstPageForPage(*currentFirstPage).has_value();
+}
+
+bool UnifiedPDFPlugin::goToPreviousRow()
+{
+    ASSERT(isInDiscreteDisplayMode());
+
+    auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
+    if (!currentFirstPage)
+        return false;
+
+    auto previousFirstPage = m_documentLayout.previousDiscreteFirstPageForPage(*currentFirstPage);
+    if (previousFirstPage) {
+        m_documentLayout.setDiscreteFirstVisiblePage(*previousFirstPage);
+        updateLayout();
+
+        auto targetScrollPosition = scrollPosition();
+        targetScrollPosition.setY(maximumScrollPosition().y());
+        scrollToPosition(targetScrollPosition);
+        return true;
+    }
+
+    return false;
+}
+
+bool UnifiedPDFPlugin::goToNextRow()
+{
+    ASSERT(isInDiscreteDisplayMode());
+
+    auto currentFirstPage = m_documentLayout.discreteFirstVisiblePage();
+    if (!currentFirstPage)
+        return false;
+
+    auto nextFirstPage = m_documentLayout.nextDiscreteFirstPageForPage(*currentFirstPage);
+    if (nextFirstPage) {
+        m_documentLayout.setDiscreteFirstVisiblePage(*nextFirstPage);
+        updateLayout();
+
+        auto targetScrollPosition = scrollPosition();
+        targetScrollPosition.setY(minimumScrollPosition().y());
+        scrollToPosition(targetScrollPosition);
+        return true;
+    }
     return false;
 }
 
