@@ -457,11 +457,21 @@ void UnifiedPDFPlugin::ensureLayers()
         m_scrollContainerLayer->addChild(*m_scrolledContentsLayer);
     }
 
-    if (!m_pageBackgroundsContainerLayer) {
+    bool needsPageBackgroundsContainer = !isInDiscreteDisplayMode();
+    if (!m_pageBackgroundsContainerLayer && needsPageBackgroundsContainer) {
         m_pageBackgroundsContainerLayer = createGraphicsLayer("Page backgrounds"_s, GraphicsLayer::Type::Normal);
         m_pageBackgroundsContainerLayer->setAnchorPoint({ });
         m_scrolledContentsLayer->addChild(*m_pageBackgroundsContainerLayer);
-    }
+    } else if (m_pageBackgroundsContainerLayer && !needsPageBackgroundsContainer)
+        GraphicsLayer::unparentAndClear(m_pageBackgroundsContainerLayer);
+
+    bool needsRowsContainer = isInDiscreteDisplayMode();
+    if (!m_rowsContainersLayer && needsRowsContainer) {
+        m_rowsContainersLayer = createGraphicsLayer("Rows container"_s, GraphicsLayer::Type::Normal);
+        m_rowsContainersLayer->setAnchorPoint({ });
+        m_scrolledContentsLayer->addChild(*m_rowsContainersLayer);
+    } else if (m_rowsContainersLayer && !needsRowsContainer)
+        GraphicsLayer::unparentAndClear(m_rowsContainersLayer);
 
     if (!m_contentsLayer) {
         m_contentsLayer = createGraphicsLayer("PDF contents"_s, isFullMainFramePlugin() ? GraphicsLayer::Type::PageTiledBacking : GraphicsLayer::Type::TiledBacking);
@@ -480,6 +490,7 @@ void UnifiedPDFPlugin::ensureLayers()
     }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+    // FIXME: Needed per row for discrete.
     if (!m_selectionLayer) {
         m_selectionLayer = createGraphicsLayer("PDF selections"_s, GraphicsLayer::Type::TiledBacking);
         m_selectionLayer->setAnchorPoint({ });
@@ -492,8 +503,40 @@ void UnifiedPDFPlugin::ensureLayers()
 #endif
 }
 
-void UnifiedPDFPlugin::updatePageBackgroundLayers()
+void UnifiedPDFPlugin::updateLayersAfterScaleChange()
 {
+    updateLayerPositions();
+
+    if (isInDiscreteDisplayMode()) {
+
+        return;
+    }
+
+    updatePageBackgroundLayersForScrollingMode();
+}
+
+static constexpr auto containerShadowOffset = IntPoint { 0, 1 };
+static constexpr auto containerShadowColor = SRGBA<uint8_t> { 0, 0, 0, 46 };
+static constexpr int containerShadowStdDeviation = 2;
+
+static constexpr auto shadowOffset = IntPoint { 0, 2 };
+static constexpr auto shadowColor = SRGBA<uint8_t> { 0, 0, 0, 38 };
+static constexpr int shadowStdDeviation = 6;
+
+static void addLayerShadow(GraphicsLayer& layer, IntPoint shadowOffset, const Color& shadowColor, int shadowStdDeviation)
+{
+    Vector<RefPtr<FilterOperation>> filterOperations;
+    filterOperations.append(DropShadowFilterOperation::create(shadowOffset, shadowStdDeviation, shadowColor));
+
+    FilterOperations filters;
+    filters.setOperations(WTFMove(filterOperations));
+    layer.setFilters(filters);
+}
+
+void UnifiedPDFPlugin::updatePageBackgroundLayersForScrollingMode()
+{
+    ASSERT(!isInDiscreteDisplayMode());
+
     RefPtr page = this->page();
     if (!page)
         return;
@@ -510,23 +553,6 @@ void UnifiedPDFPlugin::updatePageBackgroundLayers()
         auto pageBoundsRect = m_documentLayout.layoutBoundsForPageAtIndex(i);
         auto destinationRect = pageBoundsRect;
         destinationRect.scale(m_documentLayout.scale());
-
-        auto addLayerShadow = [](GraphicsLayer& layer, IntPoint shadowOffset, const Color& shadowColor, int shadowStdDeviation) {
-            Vector<RefPtr<FilterOperation>> filterOperations;
-            filterOperations.append(DropShadowFilterOperation::create(shadowOffset, shadowStdDeviation, shadowColor));
-
-            FilterOperations filters;
-            filters.setOperations(WTFMove(filterOperations));
-            layer.setFilters(filters);
-        };
-
-        const auto containerShadowOffset = IntPoint { 0, 1 };
-        constexpr auto containerShadowColor = SRGBA<uint8_t> { 0, 0, 0, 46 };
-        constexpr int containerShadowStdDeviation = 2;
-
-        const auto shadowOffset = IntPoint { 0, 2 };
-        constexpr auto shadowColor = SRGBA<uint8_t> { 0, 0, 0, 38 };
-        constexpr int shadowStdDeviation = 6;
 
         auto pageContainerLayer = [&](PDFDocumentLayout::PageIndex pageIndex) {
             if (pageIndex < pageContainerLayers.size())
@@ -575,6 +601,70 @@ void UnifiedPDFPlugin::updatePageBackgroundLayers()
     }
 
     m_pageBackgroundsContainerLayer->setChildren(WTFMove(pageContainerLayers));
+}
+
+void UnifiedPDFPlugin::updatePageRowLayersForDiscreteMode()
+{
+    ASSERT(m_rowsContainersLayer);
+
+    Vector<Ref<GraphicsLayer>> rowContainerLayers = m_rowsContainersLayer->children();
+
+    std::optional<PDFDocumentLayout::PageIndex> currentLeftPage = PDFDocumentLayout::PageIndex { 0 };
+    unsigned rowIndex = 0;
+    while (currentLeftPage) {
+
+        auto rowBoundsRect = m_documentLayout.layoutBoundsForRowContainingPageAtIndex(*currentLeftPage);
+        auto destinationRect = rowBoundsRect;
+        destinationRect.scale(m_documentLayout.scale());
+
+
+        auto rowContainerLayer = [&](PDFDocumentLayout::PageIndex leftPageIndex) {
+            if (rowIndex < rowContainerLayers.size())
+                return rowContainerLayers[rowIndex];
+
+            auto rowContainerLayer = createGraphicsLayer(makeString("Row container "_s, rowIndex), GraphicsLayer::Type::Normal);
+            auto rowBackgroundLayer = createGraphicsLayer(makeString("Row background "_s, rowIndex), GraphicsLayer::Type::Normal);
+            // Can only be null if this->page() is null, which we checked above.
+            ASSERT(rowContainerLayer);
+            ASSERT(rowBackgroundLayer);
+
+            rowContainerLayer->addChild(*rowBackgroundLayer);
+
+            rowContainerLayer->setAnchorPoint({ });
+            addLayerShadow(*rowContainerLayer, containerShadowOffset, containerShadowColor, containerShadowStdDeviation);
+
+            rowBackgroundLayer->setAnchorPoint({ });
+            rowBackgroundLayer->setBackgroundColor(Color::white);
+            rowBackgroundLayer->setDrawsContent(true);
+            rowBackgroundLayer->setShouldUpdateRootRelativeScaleFactor(false);
+            rowBackgroundLayer->setNeedsDisplay(); // We only need to paint this layer once.
+
+            // FIXME: Need to add a 1px black border with alpha 0.0586.
+
+            addLayerShadow(*rowBackgroundLayer, shadowOffset, shadowColor, shadowStdDeviation);
+
+            auto containerLayer = rowContainerLayer.releaseNonNull();
+            rowContainerLayers.append(WTFMove(containerLayer));
+
+            return rowContainerLayers[rowIndex];
+        }(*currentLeftPage);
+
+        rowContainerLayer->setPosition(destinationRect.location());
+        rowContainerLayer->setSize(destinationRect.size());
+        //rowContainerLayer->setOpacity(shouldDisplayPage(i) ? 1 : 0);
+
+        auto rowBackgroundLayer = rowContainerLayer->children()[0];
+        rowBackgroundLayer->setSize(rowBoundsRect.size());
+
+        TransformationMatrix documentScaleTransform;
+        documentScaleTransform.scale(m_documentLayout.scale());
+        rowBackgroundLayer->setTransform(documentScaleTransform);
+
+        currentLeftPage = m_documentLayout.nextDiscreteFirstPageForPage(*currentLeftPage);
+        ++rowIndex;
+    }
+
+    m_rowsContainersLayer->setChildren(WTFMove(rowContainerLayers));
 }
 
 void UnifiedPDFPlugin::paintBackgroundLayerForPage(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, PDFDocumentLayout::PageIndex pageIndex)
@@ -742,10 +832,31 @@ void UnifiedPDFPlugin::updateLayerHierarchy()
     m_selectionLayer->setNeedsDisplay();
 #endif
 
-    updatePageBackgroundLayers();
+    if (isInDiscreteDisplayMode())
+        updateLayersForDiscreteMode();
+    else
+        updateLayersForContinuousScrollingMode();
 
     didChangeSettings();
     didChangeIsInWindow();
+}
+
+void UnifiedPDFPlugin::updateLayersForContinuousScrollingMode()
+{
+    ASSERT(!isInDiscreteDisplayMode());
+
+    ASSERT(m_pageBackgroundsContainerLayer);
+
+    updatePageBackgroundLayersForScrollingMode();
+}
+
+void UnifiedPDFPlugin::updateLayersForDiscreteMode()
+{
+    ASSERT(isInDiscreteDisplayMode());
+
+    ASSERT(!m_pageBackgroundsContainerLayer);
+
+    updatePageRowLayersForDiscreteMode();
 }
 
 void UnifiedPDFPlugin::updateLayerPositions()
@@ -759,7 +870,12 @@ void UnifiedPDFPlugin::updateLayerPositions()
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     m_selectionLayer->setTransform(transform);
 #endif
-    m_pageBackgroundsContainerLayer->setTransform(transform);
+
+    if (m_pageBackgroundsContainerLayer)
+        m_pageBackgroundsContainerLayer->setTransform(transform);
+
+    if (m_rowsContainersLayer)
+        m_rowsContainersLayer->setTransform(transform);
 }
 
 bool UnifiedPDFPlugin::shouldShowDebugIndicators() const
@@ -784,17 +900,25 @@ void UnifiedPDFPlugin::didChangeSettings()
     propagateSettingsToLayer(*m_rootLayer);
     propagateSettingsToLayer(*m_scrollContainerLayer);
     propagateSettingsToLayer(*m_scrolledContentsLayer);
-    propagateSettingsToLayer(*m_pageBackgroundsContainerLayer);
     propagateSettingsToLayer(*m_contentsLayer);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     propagateSettingsToLayer(*m_selectionLayer);
 #endif
 
-    for (auto& pageLayer : m_pageBackgroundsContainerLayer->children()) {
-        propagateSettingsToLayer(pageLayer);
-        if (pageLayer->children().size())
-            propagateSettingsToLayer(pageLayer->children()[0]);
-    }
+    auto propagateToLayerAndChildren = [&](RefPtr<GraphicsLayer> layer) {
+        if (!layer)
+            return;
+
+        propagateSettingsToLayer(*layer);
+        for (auto& pageLayer : layer->children()) {
+            propagateSettingsToLayer(pageLayer);
+            if (pageLayer->children().size())
+                propagateSettingsToLayer(pageLayer->children()[0]);
+        }
+    };
+
+    propagateToLayerAndChildren(m_pageBackgroundsContainerLayer);
+    propagateToLayerAndChildren(m_rowsContainersLayer);
 
     if (m_layerForHorizontalScrollbar)
         propagateSettingsToLayer(*m_layerForHorizontalScrollbar);
@@ -856,12 +980,20 @@ void UnifiedPDFPlugin::didChangeIsInWindow()
     m_selectionLayer->setIsInWindow(isInWindow);
 #endif
 
-    for (auto& pageLayer : m_pageBackgroundsContainerLayer->children()) {
-        if (pageLayer->children().size()) {
-            Ref pageContentsLayer = pageLayer->children()[0];
-            pageContentsLayer->setIsInWindow(isInWindow);
+    auto propagateIsInWindowToChildren = [](RefPtr<GraphicsLayer> layer, bool isInWindow) {
+        if (!layer)
+            return;
+
+        for (auto& pageLayer : layer->children()) {
+            if (pageLayer->children().size()) {
+                Ref firstChildLayer = pageLayer->children()[0];
+                firstChildLayer->setIsInWindow(isInWindow);
+            }
         }
-    }
+    };
+
+    propagateIsInWindowToChildren(m_pageBackgroundsContainerLayer, isInWindow);
+    propagateIsInWindowToChildren(m_rowsContainersLayer, isInWindow);
 }
 
 void UnifiedPDFPlugin::windowActivityDidChange()
@@ -1321,8 +1453,7 @@ void UnifiedPDFPlugin::setScaleFactor(double scale, std::optional<WebCore::IntPo
     if (!m_inMagnificationGesture || !handlesPageScaleFactor())
         m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
 
-    updateLayerPositions();
-    updatePageBackgroundLayers();
+    updateLayersAfterScaleChange();
 
 #if PLATFORM(MAC)
     if (m_activeAnnotation)

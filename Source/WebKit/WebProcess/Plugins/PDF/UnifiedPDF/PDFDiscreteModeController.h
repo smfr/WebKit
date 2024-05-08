@@ -44,6 +44,13 @@ namespace WebKit {
 class UnifiedPDFPlugin;
 class WebWheelEvent;
 
+enum class PageTransitionState : uint8_t {
+    Idle,
+    Stretching,
+    Settling,
+    Animating
+};
+
 class PDFDiscreteModeController : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<PDFDiscreteModeController> {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(PDFDiscreteModeController);
@@ -69,20 +76,23 @@ private:
 
     void updatePageSwapLayerPosition();
 
+    void startOrStopTimerIfNecessary();
+    void animationTimerFired();
+    void animateRubberBand(MonotonicTime);
+
+    void hidePageSwapLayer();
+
+    void updateState(PageTransitionState);
 
     ThreadSafeWeakPtr<UnifiedPDFPlugin> m_plugin;
 
+    PageTransitionState m_transitionState { PageTransitionState::Idle };
 
     FloatSize m_stretchDistance;
 
-    enum class PageTransitionState : uint8_t {
-        Idle,
-        Stretching,
-        Settling,
-        Animating
-    };
-
-    PageTransitionState m_transitionState { PageTransitionState::Idle };
+    WebCore::Timer m_animationTimer { *this, &PDFDiscreteModeController::animationTimerFired };
+    MonotonicTime m_animationStartTime;
+    float m_animationStartDistance { 0 };
 
 };
 

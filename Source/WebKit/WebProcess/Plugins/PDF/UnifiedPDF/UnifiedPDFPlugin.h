@@ -430,9 +430,15 @@ private:
     bool canPaintSelectionIntoOwnedLayer() const;
 
     void ensureLayers();
-    void updatePageBackgroundLayers();
     void updateLayerHierarchy();
     void updateLayerPositions();
+    void updateLayersAfterScaleChange();
+
+    void updateLayersForContinuousScrollingMode();
+    void updateLayersForDiscreteMode();
+
+    void updatePageBackgroundLayersForScrollingMode();
+    void updatePageRowLayersForDiscreteMode();
 
     void didChangeScrollOffset() override;
     void didChangeIsInWindow();
@@ -556,20 +562,29 @@ private:
     RefPtr<WebCore::GraphicsLayer> m_rootLayer;
     RefPtr<WebCore::GraphicsLayer> m_scrollContainerLayer;
     RefPtr<WebCore::GraphicsLayer> m_scrolledContentsLayer;
-    RefPtr<WebCore::GraphicsLayer> m_pageBackgroundsContainerLayer;
     RefPtr<WebCore::GraphicsLayer> m_contentsLayer;
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     RefPtr<WebCore::GraphicsLayer> m_selectionLayer;
 #endif
 
-    RefPtr<WebCore::GraphicsLayer> m_discretePageSwapLayer;
+    // Scrolling mode layers
+    RefPtr<WebCore::GraphicsLayer> m_pageBackgroundsContainerLayer;
+    HashMap<RefPtr<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_pageBackgroundLayers;
+
+    // Discrete mode layers
+    RefPtr<WebCore::GraphicsLayer> m_discretePageSwapLayer; // Temporary
+
+    RefPtr<WebCore::GraphicsLayer> m_rowsContainersLayer;
+    Vector<RefPtr<WebCore::GraphicsLayer>> m_rowContainerLayers; // A "row" is one page, or two pages side by side.
+
+
+
+
 
     RefPtr<WebCore::GraphicsLayer> m_overflowControlsContainer;
     RefPtr<WebCore::GraphicsLayer> m_layerForHorizontalScrollbar;
     RefPtr<WebCore::GraphicsLayer> m_layerForVerticalScrollbar;
     RefPtr<WebCore::GraphicsLayer> m_layerForScrollCorner;
-
-    HashMap<RefPtr<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_pageBackgroundLayers;
 
     WebCore::ScrollingNodeID m_scrollingNodeID;
 

@@ -39,6 +39,23 @@ namespace WebKit {
 using namespace WebCore;
 
 static constexpr auto pageSwapDistanceThreshold = 200.0f;
+static constexpr auto animationFrameInterval = 16.667_ms;
+
+static float elasticDeltaForTimeDelta(float initialPosition, float initialVelocity, Seconds elapsedTime)
+{
+    return _NSElasticDeltaForTimeDelta(initialPosition, initialVelocity, elapsedTime.seconds());
+}
+
+static TextStream& operator<<(TextStream& ts, PageTransitionState state)
+{
+    switch (state) {
+    case PageTransitionState::Idle: ts << "Idle"; break;
+    case PageTransitionState::Stretching: ts << "Stretching"; break;
+    case PageTransitionState::Settling: ts << "Settling"; break;
+    case PageTransitionState::Animating: ts << "Animating"; break;
+    }
+    return ts;
+}
 
 Ref<PDFDiscreteModeController> PDFDiscreteModeController::create(UnifiedPDFPlugin& plugin)
 {
@@ -56,7 +73,19 @@ PDFDiscreteModeController::~PDFDiscreteModeController() = default;
 
 bool PDFDiscreteModeController::shouldTransitionOnSide(BoxSide side) const
 {
-    return side == BoxSide::Bottom; // FIXME: Also top if we're not at the start.
+    RefPtr plugin = m_plugin.get();
+    if (!plugin)
+        return false;
+
+    switch (side) {
+    case BoxSide::Left:
+    case BoxSide::Top:
+        return plugin->canGoToPreviousRow();
+    case BoxSide::Right:
+    case BoxSide::Bottom:
+        return plugin->canGoToNextRow();
+    }
+    return false;
 }
 
 static ScrollEventAxis dominantAxisFavoringVertical(FloatSize delta)
@@ -90,7 +119,7 @@ bool PDFDiscreteModeController::handleWheelEvent(const WebWheelEvent& event)
         return false;
 
     auto wheelEvent = platform(event);
-    WTF_ALWAYS_LOG("PDFDiscreteModeController::handleWheelEvent " << wheelEvent);
+    WTF_ALWAYS_LOG("PDFDiscreteModeController::handleWheelEvent " << wheelEvent << " (state " << m_transitionState << ")");
 
     if (wheelEvent.isEndOfNonMomentumScroll() || wheelEvent.isEndOfMomentumScroll())
         return handleEndedEvent(wheelEvent);
@@ -103,39 +132,32 @@ bool PDFDiscreteModeController::handleWheelEvent(const WebWheelEvent& event)
     if (!relevantSide)
         return false;
 
-    // FIXME: only care about top and bottom.
-
     // Just let normal scrolling happen.
     if (!plugin->isPinnedOnSide(*relevantSide))
         return false;
 
     // Stretching.
-    bool handled = false;
     switch (wheelEvent.phase()) {
     case PlatformWheelEventPhase::None: {
         if (wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed)
-            handled = handleChangedEvent(wheelEvent);
+            handleChangedEvent(wheelEvent);
         break;
     }
 
     case PlatformWheelEventPhase::Began:
-        handled = handleBeginEvent(wheelEvent);
+        handleBeginEvent(wheelEvent);
         break;
 
     case PlatformWheelEventPhase::Changed:
-        handled = handleChangedEvent(wheelEvent);
+        handleChangedEvent(wheelEvent);
         break;
 
     default:
         break;
     }
 
-
-    updatePageSwapLayerPosition();
-
-    return handled;
+    return true;
 }
-
 
 bool PDFDiscreteModeController::handleBeginEvent(const WebCore::PlatformWheelEvent& wheelEvent)
 {
@@ -155,23 +177,33 @@ bool PDFDiscreteModeController::handleBeginEvent(const WebCore::PlatformWheelEve
         return false;
 
     // FIXME: Have we filtered the wheel event delta yet?
+    // FIXME: We need to allow the drag to start on a Changed event, since the begin event might have a small X delta.
+    // FIXME: We need to lock a drag to one axis.
+    // FIXME: Handle clicky wheel mouse.
 
-    // FIXME: scrollWheelMultiplier
+    // FIXME: scrollWheelMultiplier?
 
     m_stretchDistance = wheelDelta;
+    updatePageSwapLayerPosition();
+
+    updateState(PageTransitionState::Stretching);
+
     return false;
 }
 
 bool PDFDiscreteModeController::handleChangedEvent(const WebCore::PlatformWheelEvent& wheelEvent)
 {
+    if (m_transitionState != PageTransitionState::Stretching)
+        return true;
+
     auto delta = -wheelEvent.delta();
 
     if (wheelEvent.isGestureEvent()) {
-        // FIXME: This replicates what WheelEventDeltaFilter does. We should apply that to events in all phases, and remove axis locking here (webkit.org/b/231207).
         delta = deltaAlignedToDominantAxis(delta);
     }
 
     m_stretchDistance += delta;
+    updatePageSwapLayerPosition();
 
     WTF_ALWAYS_LOG("PDFDiscreteModeController::handleChangedEvent - stretch distance " << m_stretchDistance);
 
@@ -180,6 +212,9 @@ bool PDFDiscreteModeController::handleChangedEvent(const WebCore::PlatformWheelE
 
 bool PDFDiscreteModeController::handleEndedEvent(const WebCore::PlatformWheelEvent&)
 {
+    if (m_transitionState != PageTransitionState::Stretching)
+        return false;
+
     RefPtr plugin = m_plugin.get();
     if (!plugin)
         return false;
@@ -188,25 +223,25 @@ bool PDFDiscreteModeController::handleEndedEvent(const WebCore::PlatformWheelEve
     if (!pageSwapLayer)
         return false;
 
+    // FIXME: Adjust pageSwapDistanceThreshold for scale
     if (std::abs(m_stretchDistance.height()) < pageSwapDistanceThreshold) {
-        // FIXME: Animate back
-        m_stretchDistance = { };
-        updatePageSwapLayerPosition();
-
-        // Eventually
-        pageSwapLayer->removeFromParent();
+        updateState(PageTransitionState::Settling);
         return true;
     }
 
     if (m_stretchDistance.height() < 0) {
+        updateState(PageTransitionState::Animating);
         pageSwapLayer->removeFromParent();
         plugin->goToPreviousRow();
+        updateState(PageTransitionState::Idle);
         return true;
     }
 
     if (m_stretchDistance.height() > 0) {
+        updateState(PageTransitionState::Animating);
         pageSwapLayer->removeFromParent();
         plugin->goToNextRow();
+        updateState(PageTransitionState::Idle);
         return true;
     }
 
@@ -215,16 +250,21 @@ bool PDFDiscreteModeController::handleEndedEvent(const WebCore::PlatformWheelEve
 
 bool PDFDiscreteModeController::handleCancelledEvent(const WebCore::PlatformWheelEvent&)
 {
+    hidePageSwapLayer();
+    return true;
+}
+
+void PDFDiscreteModeController::hidePageSwapLayer()
+{
     RefPtr plugin = m_plugin.get();
     if (!plugin)
-        return false;
+        return;
 
     RefPtr pageSwapLayer = plugin->discretePageSwapLayer();
     if (!pageSwapLayer)
-        return false;
+        return;
 
     pageSwapLayer->removeFromParent();
-    return true;
 }
 
 void PDFDiscreteModeController::updatePageSwapLayerPosition()
@@ -241,6 +281,69 @@ void PDFDiscreteModeController::updatePageSwapLayerPosition()
     auto layerPosition = FloatPoint { };
     layerPosition -= m_stretchDistance;
     pageSwapLayer->setPosition(layerPosition);
+}
+
+void PDFDiscreteModeController::updateState(PageTransitionState newState)
+{
+    if (newState == m_transitionState)
+        return;
+
+    m_transitionState = newState;
+    startOrStopTimerIfNecessary();
+}
+
+void PDFDiscreteModeController::startOrStopTimerIfNecessary()
+{
+    switch (m_transitionState) {
+    case PageTransitionState::Idle:
+        m_animationTimer.stop();
+        break;
+    case PageTransitionState::Stretching:
+        break;
+    case PageTransitionState::Settling:
+        m_animationStartTime = MonotonicTime::now();
+        m_animationStartDistance = m_stretchDistance.height(); // FIXME: for horizontal.
+        if (!m_animationTimer.isActive())
+            m_animationTimer.startRepeating(animationFrameInterval);
+        break;
+    case PageTransitionState::Animating:
+        m_animationStartTime = MonotonicTime::now();
+        m_animationStartDistance = m_stretchDistance.height(); // FIXME: for horizontal.
+        if (!m_animationTimer.isActive())
+            m_animationTimer.startRepeating(animationFrameInterval);
+        break;
+    }
+}
+
+void PDFDiscreteModeController::animationTimerFired()
+{
+    switch (m_transitionState) {
+    case PageTransitionState::Idle:
+        break;
+    case PageTransitionState::Stretching:
+        break;
+    case PageTransitionState::Settling:
+        animateRubberBand(MonotonicTime::now());
+        break;
+    case PageTransitionState::Animating:
+        break;
+    }
+}
+
+void PDFDiscreteModeController::animateRubberBand(MonotonicTime now)
+{
+    static constexpr auto initialVelocity = 0.0f;
+
+    auto stretch = elasticDeltaForTimeDelta(m_animationStartDistance, initialVelocity, now - m_animationStartTime);
+
+    WTF_ALWAYS_LOG("PDFDiscreteModeController::animateRubberBand at " << (now - m_animationStartTime) << " " << stretch);
+    m_stretchDistance.setHeight(stretch);
+    updatePageSwapLayerPosition();
+
+    if (std::abs(stretch) < 0.5) {
+        hidePageSwapLayer();
+        updateState(PageTransitionState::Idle);
+    }
 }
 
 } // namespace WebKit
