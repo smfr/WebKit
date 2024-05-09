@@ -424,6 +424,7 @@ private:
     enum class PaintingBehavior : bool { All, PageContentsOnly };
     enum class AllowsAsyncRendering : bool { No, Yes };
     void paintPDFContent(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, PaintingBehavior = PaintingBehavior::All, AllowsAsyncRendering = AllowsAsyncRendering::No);
+    void paintContentsOfRowLayerWithLeftPage(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, PDFDocumentLayout::PageIndex, PaintingBehavior = PaintingBehavior::All, AllowsAsyncRendering = AllowsAsyncRendering::No);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     void paintPDFSelection(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect);
 #endif
@@ -537,7 +538,9 @@ private:
     float scaleForPagePreviews() const;
     void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex);
     WebCore::GraphicsLayer* backgroundLayerForPage(PDFDocumentLayout::PageIndex) const;
+
     std::optional<PDFDocumentLayout::PageIndex> pageIndexForPageBackgroundLayer(const WebCore::GraphicsLayer*) const;
+    std::optional<PDFDocumentLayout::PageIndex> firstPageIndexForRowContentsLayer(const WebCore::GraphicsLayer*) const;
 
     RefPtr<WebCore::GraphicsLayer> discretePageSwapLayer();
 
@@ -576,8 +579,7 @@ private:
 
     RefPtr<WebCore::GraphicsLayer> m_rowsContainersLayer;
     Vector<RefPtr<WebCore::GraphicsLayer>> m_rowContainerLayers; // A "row" is one page, or two pages side by side.
-
-
+    HashMap<RefPtr<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_rowContentLayers;
 
 
 

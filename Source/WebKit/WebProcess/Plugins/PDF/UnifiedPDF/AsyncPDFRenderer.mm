@@ -212,6 +212,7 @@ void AsyncPDFRenderer::willRepaintAllTiles(TileGridIndex)
 
 void AsyncPDFRenderer::coverageRectDidChange(const FloatRect& coverageRect)
 {
+return;
     RefPtr plugin = m_plugin.get();
     if (!plugin)
         return;

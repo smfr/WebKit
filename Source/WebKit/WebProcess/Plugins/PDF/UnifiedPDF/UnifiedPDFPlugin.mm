@@ -185,6 +185,8 @@ void UnifiedPDFPlugin::teardown()
 
     PDFPluginBase::teardown();
 
+    m_pageBackgroundLayers.clear();
+
     GraphicsLayer::unparentAndClear(m_rootLayer);
     GraphicsLayer::unparentAndClear(m_contentsLayer);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
@@ -617,31 +619,32 @@ void UnifiedPDFPlugin::updatePageRowLayersForDiscreteMode()
         auto destinationRect = rowBoundsRect;
         destinationRect.scale(m_documentLayout.scale());
 
-
         auto rowContainerLayer = [&](PDFDocumentLayout::PageIndex leftPageIndex) {
             if (rowIndex < rowContainerLayers.size())
                 return rowContainerLayers[rowIndex];
 
             auto rowContainerLayer = createGraphicsLayer(makeString("Row container "_s, rowIndex), GraphicsLayer::Type::Normal);
-            auto rowBackgroundLayer = createGraphicsLayer(makeString("Row background "_s, rowIndex), GraphicsLayer::Type::Normal);
+            auto rowContentsLayer = createGraphicsLayer(makeString("Row contents "_s, rowIndex), GraphicsLayer::Type::Normal);
+
             // Can only be null if this->page() is null, which we checked above.
             ASSERT(rowContainerLayer);
-            ASSERT(rowBackgroundLayer);
 
-            rowContainerLayer->addChild(*rowBackgroundLayer);
+            rowContainerLayer->addChild(*rowContentsLayer);
 
             rowContainerLayer->setAnchorPoint({ });
             addLayerShadow(*rowContainerLayer, containerShadowOffset, containerShadowColor, containerShadowStdDeviation);
 
-            rowBackgroundLayer->setAnchorPoint({ });
-            rowBackgroundLayer->setBackgroundColor(Color::white);
-            rowBackgroundLayer->setDrawsContent(true);
-            rowBackgroundLayer->setShouldUpdateRootRelativeScaleFactor(false);
-            rowBackgroundLayer->setNeedsDisplay(); // We only need to paint this layer once.
+            rowContentsLayer->setAnchorPoint({ });
+            rowContentsLayer->setBackgroundColor(Color::white);
+            rowContentsLayer->setDrawsContent(true);
+            rowContentsLayer->setNeedsDisplay();
 
             // FIXME: Need to add a 1px black border with alpha 0.0586.
 
-            addLayerShadow(*rowBackgroundLayer, shadowOffset, shadowColor, shadowStdDeviation);
+            // Sure would be nice if we could just stuff data onto a GraphicsLayer.
+            m_rowContentLayers.add(rowContentsLayer, leftPageIndex);
+
+            addLayerShadow(*rowContentsLayer, shadowOffset, shadowColor, shadowStdDeviation);
 
             auto containerLayer = rowContainerLayer.releaseNonNull();
             rowContainerLayers.append(WTFMove(containerLayer));
@@ -651,14 +654,15 @@ void UnifiedPDFPlugin::updatePageRowLayersForDiscreteMode()
 
         rowContainerLayer->setPosition(destinationRect.location());
         rowContainerLayer->setSize(destinationRect.size());
-        //rowContainerLayer->setOpacity(shouldDisplayPage(i) ? 1 : 0);
+        // FIXME
+        rowContainerLayer->setOpacity(shouldDisplayPage(*currentLeftPage) ? 1 : 0);
 
-        auto rowBackgroundLayer = rowContainerLayer->children()[0];
-        rowBackgroundLayer->setSize(rowBoundsRect.size());
+        auto rowContentsLayer = rowContainerLayer->children()[0];
+        rowContentsLayer->setSize(rowBoundsRect.size());
 
         TransformationMatrix documentScaleTransform;
         documentScaleTransform.scale(m_documentLayout.scale());
-        rowBackgroundLayer->setTransform(documentScaleTransform);
+        rowContentsLayer->setTransform(documentScaleTransform);
 
         currentLeftPage = m_documentLayout.nextDiscreteFirstPageForPage(*currentLeftPage);
         ++rowIndex;
@@ -715,8 +719,18 @@ std::optional<PDFDocumentLayout::PageIndex> UnifiedPDFPlugin::pageIndexForPageBa
     return it->value;
 }
 
+std::optional<PDFDocumentLayout::PageIndex> UnifiedPDFPlugin::firstPageIndexForRowContentsLayer(const GraphicsLayer* layer) const
+{
+    auto it = m_rowContentLayers.find(layer);
+    if (it == m_rowContentLayers.end())
+        return { };
+
+    return it->value;
+}
+
 RefPtr<GraphicsLayer> UnifiedPDFPlugin::discretePageSwapLayer()
 {
+return nullptr;
     if (!isInDiscreteDisplayMode())
         return nullptr;
 
@@ -857,6 +871,17 @@ void UnifiedPDFPlugin::updateLayersForDiscreteMode()
     ASSERT(!m_pageBackgroundsContainerLayer);
 
     updatePageRowLayersForDiscreteMode();
+
+
+    // Hack
+    if (RefPtr asyncRenderer = asyncRendererIfExists()) {
+        auto previewScale = scaleForPagePreviews();
+
+        for (PDFDocumentLayout::PageIndex i = 0; i < m_documentLayout.pageCount(); ++i)
+            asyncRenderer->generatePreviewImageForPage(i, previewScale);
+    }
+
+
 }
 
 void UnifiedPDFPlugin::updateLayerPositions()
@@ -1055,8 +1080,14 @@ void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext
         return;
     }
 
+    // FIXME: In discrete mode, m_contentsLayer goes away.
     if (layer == m_contentsLayer.get()) {
         paintPDFContent(context, clipRect, PaintingBehavior::All, AllowsAsyncRendering::Yes);
+        return;
+    }
+
+    if (auto rowContentsLeftPageIndex = firstPageIndexForRowContentsLayer(layer)) {
+        paintContentsOfRowLayerWithLeftPage(layer, context, clipRect, *rowContentsLeftPageIndex, PaintingBehavior::All, AllowsAsyncRendering::Yes);
         return;
     }
 
@@ -1069,7 +1100,6 @@ void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext
         paintBackgroundLayerForPage(layer, context, clipRect, *backgroundLayerPageIndex);
         return;
     }
-
 }
 
 PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect) const
@@ -1111,6 +1141,102 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect)
     }
 
     return pageCoverage;
+}
+
+void UnifiedPDFPlugin::paintContentsOfRowLayerWithLeftPage(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, PDFDocumentLayout::PageIndex leftPageIndex, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
+{
+    if (m_size.isEmpty() || documentSize().isEmpty())
+        return;
+
+
+    auto stateSaver = GraphicsContextStateSaver(context);
+
+    bool haveSelection = false;
+    bool isVisibleAndActive = false;
+    bool shouldPaintSelection = behavior == PaintingBehavior::All && !canPaintSelectionIntoOwnedLayer();
+    if (m_currentSelection && ![m_currentSelection isEmpty] && shouldPaintSelection) {
+        haveSelection = true;
+        if (RefPtr page = this->page())
+            isVisibleAndActive = page->isVisibleAndActive();
+    }
+
+    auto pageWithAnnotation = pageIndexWithHoveredAnnotation();
+//    auto showDebugIndicators = shouldShowDebugIndicators();
+    auto documentScale = m_documentLayout.scale();
+
+    auto paintAPage = [&](PDFDocumentLayout::PageIndex pageIndex) {
+
+        auto page = m_documentLayout.pageAtIndex(pageIndex);
+        if (!page)
+            return;
+
+        auto pageDestinationRect = m_documentLayout.layoutBoundsForPageAtIndex(pageIndex);
+
+        // FIXME: Intersect with clip
+
+        RefPtr<AsyncPDFRenderer> asyncRenderer;
+        if (allowsAsyncRendering == AllowsAsyncRendering::Yes)
+            asyncRenderer = asyncRendererIfExists();
+
+        if (asyncRenderer) {
+            auto pageBoundsInPaintingCoordinates = pageDestinationRect;
+            pageBoundsInPaintingCoordinates.scale(documentScale);
+
+            auto pageStateSaver = GraphicsContextStateSaver(context);
+            context.clip(pageBoundsInPaintingCoordinates);
+
+            // Hack
+            asyncRenderer->paintPagePreview(context, clipRect, pageBoundsInPaintingCoordinates, pageIndex);
+
+/*
+            // FIXME: We have no tiles.
+            bool paintedPageContent = asyncRenderer->paintTilesForPage(context, documentScale, clipRect, pageBoundsInPaintingCoordinates, pageIndex);
+            LOG_WITH_STREAM(PDFAsyncRendering, stream << "UnifiedPDFPlugin::paintPDFContent - painting tiles for page " << pageIndex << " dest rect " << pageBoundsInPaintingCoordinates << " clip " << clipRect << " - painted cached tile " << paintedPageContent);
+
+            if (!paintedPageContent && showDebugIndicators)
+                context.fillRect(pageBoundsInPaintingCoordinates, Color::yellow.colorWithAlphaByte(128));
+*/
+        }
+
+        bool currentPageHasAnnotation = pageWithAnnotation && *pageWithAnnotation == pageIndex;
+        if (asyncRenderer && !haveSelection && !currentPageHasAnnotation)
+            return;
+
+        auto pageStateSaver = GraphicsContextStateSaver(context);
+        context.scale(documentScale);
+        context.clip(pageDestinationRect);
+
+        if (!asyncRenderer)
+            context.fillRect(pageDestinationRect, Color::white);
+
+        // Translate the context to the bottom of pageBounds and flip, so that PDFKit operates
+        // from this page's drawing origin.
+        context.translate(pageDestinationRect.minXMaxYCorner());
+        context.scale({ 1, -1 });
+
+        if (!asyncRenderer) {
+            LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: painting PDF page " << pageIndex << " into rect " << pageDestinationRect << " with clip " << clipRect);
+
+            [page drawWithBox:kPDFDisplayBoxCropBox toContext:context.platformContext()];
+        }
+
+        if (haveSelection || currentPageHasAnnotation) {
+            auto pageGeometry = m_documentLayout.geometryForPage(page);
+            auto transformForBox = m_documentLayout.toPageTransform(*pageGeometry).inverse().value_or(AffineTransform { });
+            GraphicsContextStateSaver stateSaver(context);
+            context.concatCTM(transformForBox);
+
+            if (haveSelection)
+                [m_currentSelection drawForPage:page.get() withBox:kCGPDFCropBox active:isVisibleAndActive inContext:context.platformContext()];
+
+            if (currentPageHasAnnotation)
+                paintHoveredAnnotationOnPage(pageIndex, context, clipRect);
+        }
+    };
+
+    paintAPage(leftPageIndex);
+    if (m_documentLayout.pagesPerRow() == 2 && leftPageIndex < m_documentLayout.lastPageIndex())
+        paintAPage(leftPageIndex + 1);
 }
 
 void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
