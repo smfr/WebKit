@@ -27,26 +27,22 @@
 
 #if ENABLE(UNIFIED_PDF)
 
-#include "PDFDocumentLayout.h"
+#include "PDFPresentationController.h"
 
 namespace WebKit {
 
-class UnifiedPDFPlugin;
-
-class PDFPresentationController {
+class PDFDiscretePresentationController : public PDFPresentationController {
+    WTF_MAKE_FAST_ALLOCATED;
+    WTF_MAKE_NONCOPYABLE(PDFDiscretePresentationController);
 public:
-    static std::unique_ptr<PDFPresentationController> createForMode(PDFDocumentLayout::DisplayMode, UnifiedPDFPlugin&);
-
-    PDFPresentationController(UnifiedPDFPlugin&);
-    virtual ~PDFPresentationController();
-
-    virtual bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const = 0;
+    PDFDiscretePresentationController(UnifiedPDFPlugin& plugin);
 
 
 private:
+    bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const;
 
-    Ref<UnifiedPDFPlugin> m_plugin;
 };
+
 
 } // namespace WebKit
 

@@ -64,6 +64,7 @@ class PDFDataDetectorOverlayController;
 #endif
 class PDFPluginPasswordField;
 class PDFPluginPasswordForm;
+class PDFPresentationController;
 class WebFrame;
 class WebMouseEvent;
 struct PDFContextMenu;
@@ -305,6 +306,7 @@ private:
 
     void animatedScrollDidEnd() final;
 
+    void setDisplayMode(PDFDocumentLayout::DisplayMode);
     void setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayMode);
 
     // Context Menu
@@ -556,6 +558,8 @@ private:
     bool isShowingTwoPages() const;
 
     WebCore::FloatRect pageBoundsInContentsSpace(PDFDocumentLayout::PageIndex) const;
+
+    std::unique_ptr<PDFPresentationController> m_presentationController;
 
     Ref<AsyncPDFRenderer> asyncRenderer();
     RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;

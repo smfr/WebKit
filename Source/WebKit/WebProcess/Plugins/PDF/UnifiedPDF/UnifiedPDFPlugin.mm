@@ -39,6 +39,7 @@
 #include "PDFPluginAnnotation.h"
 #include "PDFPluginPasswordField.h"
 #include "PDFPluginPasswordForm.h"
+#include "PDFScrollingPresentationController.h"
 #include "PasteboardTypes.h"
 #include "PluginView.h"
 #include "WKAccessibilityPDFDocumentObject.h"
@@ -160,6 +161,8 @@ UnifiedPDFPlugin::UnifiedPDFPlugin(HTMLPlugInElement& element)
         RefPtr { document->bodyOrFrameset() }->appendChild(*m_annotationContainer);
     }
 
+    setDisplayMode(PDFDocumentLayout::DisplayMode::SinglePageContinuous);
+
 #if PLATFORM(MAC)
     m_accessibilityDocumentObject = adoptNS([[WKAccessibilityPDFDocumentObject alloc] initWithPDFDocument:m_pdfDocument andElement:&element]);
     [m_accessibilityDocumentObject setPDFPlugin:this];
@@ -202,6 +205,8 @@ void UnifiedPDFPlugin::teardown()
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     std::exchange(m_dataDetectorOverlayController, nullptr)->teardown();
 #endif
+
+    m_presentationController = nullptr; // Breaks retain cycle,
 }
 
 GraphicsLayer* UnifiedPDFPlugin::graphicsLayer() const
@@ -4138,10 +4143,16 @@ void UnifiedPDFPlugin::setPDFDisplayModeForTesting(const String& mode)
     }());
 }
 
+void UnifiedPDFPlugin::setDisplayMode(PDFDocumentLayout::DisplayMode mode)
+{
+    m_documentLayout.setDisplayMode(mode);
+    m_presentationController = PDFPresentationController::createForMode(mode, *this);
+}
+
 void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayMode mode)
 {
     auto shouldAdjustPageScale = m_shouldUpdateAutoSizeScale == ShouldUpdateAutoSizeScale::Yes ? AdjustScaleAfterLayout::No : AdjustScaleAfterLayout::Yes;
-    m_documentLayout.setDisplayMode(mode);
+    setDisplayMode(mode);
     {
         SetForScope scope(m_shouldUpdateAutoSizeScale, ShouldUpdateAutoSizeScale::Yes);
         updateLayout(shouldAdjustPageScale);
