@@ -27,8 +27,21 @@
 
 #if ENABLE(UNIFIED_PDF)
 
+#include "PDFPresentationController.h"
+
 namespace WebKit {
 
+class PDFScrollingPresentationController : public PDFPresentationController {
+    WTF_MAKE_FAST_ALLOCATED;
+    WTF_MAKE_NONCOPYABLE(PDFScrollingPresentationController);
+public:
+    PDFScrollingPresentationController(UnifiedPDFPlugin& plugin);
+
+
+private:
+    bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const;
+
+};
 
 
 } // namespace WebKit

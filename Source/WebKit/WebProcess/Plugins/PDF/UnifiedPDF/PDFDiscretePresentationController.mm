@@ -23,30 +23,30 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "config.h"
+#include "PDFDiscretePresentationController.h"
 
 #if ENABLE(UNIFIED_PDF)
 
-#include "PDFDocumentLayout.h"
+#include "Logging.h"
 
 namespace WebKit {
+using namespace WebCore;
 
-class UnifiedPDFPlugin;
+PDFDiscretePresentationController::PDFDiscretePresentationController(UnifiedPDFPlugin& plugin)
+    : PDFPresentationController(plugin)
+{
 
-class PDFPresentationController {
-public:
-    static std::unique_ptr<PDFPresentationController> createForMode(PDFDocumentLayout::DisplayMode, UnifiedPDFPlugin&);
-
-    PDFPresentationController(UnifiedPDFPlugin&);
-    virtual ~PDFPresentationController();
-
-    virtual bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const = 0;
+}
 
 
-private:
 
-    Ref<UnifiedPDFPlugin> m_plugin;
-};
+bool PDFDiscretePresentationController::supportsDisplayMode(PDFDocumentLayout::DisplayMode mode) const
+{
+    return PDFDocumentLayout::isDiscreteDisplayMode(mode);
+}
+
+
 
 } // namespace WebKit
 

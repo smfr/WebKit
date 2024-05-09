@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "PDFPresentationController.h"
+#include "PDFScrollingPresentationController.h"
 
 #if ENABLE(UNIFIED_PDF)
 
@@ -32,6 +32,20 @@
 
 namespace WebKit {
 using namespace WebCore;
+
+PDFScrollingPresentationController::PDFScrollingPresentationController(UnifiedPDFPlugin& plugin)
+    : PDFPresentationController(plugin)
+{
+
+}
+
+
+
+bool PDFScrollingPresentationController::supportsDisplayMode(PDFDocumentLayout::DisplayMode mode) const
+{
+    return PDFDocumentLayout::isScrollingDisplayMode(mode);
+}
+
 
 } // namespace WebKit
 

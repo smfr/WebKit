@@ -28,10 +28,32 @@
 
 #if ENABLE(UNIFIED_PDF)
 
-#include "Logging.h"
+#include "PDFDiscretePresentationController.h"
+#include "PDFScrollingPresentationController.h"
 
 namespace WebKit {
 using namespace WebCore;
+
+std::unique_ptr<PDFPresentationController> PDFPresentationController::createForMode(PDFDocumentLayout::DisplayMode mode, UnifiedPDFPlugin& plugin)
+{
+    if (PDFDocumentLayout::isScrollingDisplayMode(mode))
+        return makeUnique<PDFScrollingPresentationController>(plugin);
+
+    if (PDFDocumentLayout::isDiscreteDisplayMode(mode))
+        return makeUnique<PDFDiscretePresentationController>(plugin);
+
+    ASSERT_NOT_REACHED();
+    return nullptr;
+}
+
+PDFPresentationController::PDFPresentationController(UnifiedPDFPlugin& plugin)
+    : m_plugin(plugin)
+{
+
+}
+
+PDFPresentationController::~PDFPresentationController() = default;
+
 
 } // namespace WebKit
 
