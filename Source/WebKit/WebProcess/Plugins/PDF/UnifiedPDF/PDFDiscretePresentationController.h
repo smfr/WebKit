@@ -31,7 +31,7 @@
 
 namespace WebKit {
 
-class PDFDiscretePresentationController : public PDFPresentationController {
+class PDFDiscretePresentationController final : public PDFPresentationController {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(PDFDiscretePresentationController);
 public:
@@ -39,7 +39,24 @@ public:
 
 
 private:
-    bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const;
+    bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const override;
+    void teardown() override;
+
+    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&) const override;
+    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&) const override;
+
+    void setupLayers(WebCore::GraphicsLayer& scrolledContentsLayer) override;
+    void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) override;
+
+    void updateIsInWindow(bool isInWindow) override;
+    void updateDebugBorders(bool showDebugBorders, bool showRepaintCounters) override;
+    void updateForCurrentScrollability(OptionSet<TiledBackingScrollability>) override;
+
+    void repaintForIncrementalLoad() override;
+    void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) override;
+
+    void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex) override;
+
 
 };
 
