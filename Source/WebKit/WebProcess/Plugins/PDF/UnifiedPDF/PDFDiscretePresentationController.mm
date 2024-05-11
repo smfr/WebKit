@@ -39,14 +39,65 @@ PDFDiscretePresentationController::PDFDiscretePresentationController(UnifiedPDFP
 
 }
 
+void PDFDiscretePresentationController::teardown()
+{
 
+}
 
 bool PDFDiscretePresentationController::supportsDisplayMode(PDFDocumentLayout::DisplayMode mode) const
 {
     return PDFDocumentLayout::isDiscreteDisplayMode(mode);
 }
 
+PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const FloatRect&) const
+{
+    return { };
+}
 
+PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForRect(const FloatRect&) const
+{
+    return { };
+}
+
+void PDFDiscretePresentationController::setupLayers(GraphicsLayer& scrolledContentsLayer)
+{
+
+}
+
+void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
+{
+
+}
+
+void PDFDiscretePresentationController::updateIsInWindow(bool isInWindow)
+{
+
+}
+
+void PDFDiscretePresentationController::updateDebugBorders(bool showDebugBorders, bool showRepaintCounters)
+{
+
+}
+
+void PDFDiscretePresentationController::updateForCurrentScrollability(OptionSet<TiledBackingScrollability>)
+{
+
+}
+
+void PDFDiscretePresentationController::repaintForIncrementalLoad()
+{
+
+}
+
+void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const FloatRect& rectInDocumentCoordinates)
+{
+
+}
+
+void PDFDiscretePresentationController::didGeneratePreviewForPage(PDFDocumentLayout::PageIndex)
+{
+
+}
 
 } // namespace WebKit
 

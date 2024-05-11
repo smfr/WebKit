@@ -187,10 +187,7 @@ void UnifiedPDFPlugin::teardown()
     PDFPluginBase::teardown();
 
     GraphicsLayer::unparentAndClear(m_rootLayer);
-    GraphicsLayer::unparentAndClear(m_contentsLayer);
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    GraphicsLayer::unparentAndClear(m_selectionLayer);
-#endif
+    setPresentationController(nullptr); // Breaks retain cycle,
 
     RefPtr page = this->page();
     if (m_scrollingNodeID && page) {
@@ -205,8 +202,6 @@ void UnifiedPDFPlugin::teardown()
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     std::exchange(m_dataDetectorOverlayController, nullptr)->teardown();
 #endif
-
-    m_presentationController = nullptr; // Breaks retain cycle,
 }
 
 GraphicsLayer* UnifiedPDFPlugin::graphicsLayer() const
@@ -226,6 +221,14 @@ Ref<AsyncPDFRenderer> UnifiedPDFPlugin::asyncRenderer()
 RefPtr<AsyncPDFRenderer> UnifiedPDFPlugin::asyncRendererIfExists() const
 {
     return m_asyncRenderer;
+}
+
+void UnifiedPDFPlugin::setPresentationController(std::unique_ptr<PDFPresentationController>&& presentationController)
+{
+    if (m_presentationController)
+        m_presentationController->teardown();
+
+    m_presentationController = WTFMove(presentationController);
 }
 
 FrameView* UnifiedPDFPlugin::mainFrameView() const
@@ -391,6 +394,15 @@ RefPtr<GraphicsLayer> UnifiedPDFPlugin::createGraphicsLayer(GraphicsLayerClient&
     return createGraphicsLayer(client, GraphicsLayer::Type::Normal);
 }
 
+GraphicsLayerFactory* UnifiedPDFPlugin::graphicsLayerFactory() const
+{
+    RefPtr page = this->page();
+    if (!page)
+        return nullptr;
+
+    return page->chrome().client().graphicsLayerFactory();
+}
+
 RefPtr<GraphicsLayer> UnifiedPDFPlugin::createGraphicsLayer(GraphicsLayerClient& client, GraphicsLayer::Type layerType)
 {
     RefPtr page = this->page();
@@ -420,21 +432,8 @@ void UnifiedPDFPlugin::setNeedsRepaintInDocumentRect(RepaintRequirements repaint
     if (!repaintRequirements)
         return;
 
-    auto contentsRect = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::Contents, rectInDocumentCoordinates);
-    if (repaintRequirements.contains(RepaintRequirement::PDFContent)) {
-        if (RefPtr asyncRenderer = asyncRendererIfExists())
-            asyncRenderer->pdfContentChangedInRect(m_scaleFactor, contentsRect);
-    }
-
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    if (repaintRequirements.contains(RepaintRequirement::Selection) && canPaintSelectionIntoOwnedLayer()) {
-        RefPtr { m_selectionLayer }->setNeedsDisplayInRect(contentsRect);
-        if (repaintRequirements.hasExactlyOneBitSet())
-            return;
-    }
-#endif
-
-    RefPtr { m_contentsLayer }->setNeedsDisplayInRect(contentsRect);
+    // FIXME: We need to handle repaints per-page, since pages overlap in discrete mode.
+    m_presentationController->setNeedsRepaintInDocumentRect(repaintRequirements, rectInDocumentCoordinates);
 }
 
 void UnifiedPDFPlugin::setNeedsRepaintInDocumentRects(RepaintRequirements repaintRequirements, const Vector<FloatRect>& rectsInDocumentCoordinates)
@@ -478,125 +477,13 @@ void UnifiedPDFPlugin::ensureLayers()
         m_scrollContainerLayer->addChild(*m_scrolledContentsLayer);
     }
 
-    if (!m_pageBackgroundsContainerLayer) {
-        m_pageBackgroundsContainerLayer = createGraphicsLayer("Page backgrounds"_s, GraphicsLayer::Type::Normal);
-        m_pageBackgroundsContainerLayer->setAnchorPoint({ });
-        m_scrolledContentsLayer->addChild(*m_pageBackgroundsContainerLayer);
-    }
-
-    if (!m_contentsLayer) {
-        m_contentsLayer = createGraphicsLayer("PDF contents"_s, isFullMainFramePlugin() ? GraphicsLayer::Type::PageTiledBacking : GraphicsLayer::Type::TiledBacking);
-        m_contentsLayer->setAnchorPoint({ });
-        m_contentsLayer->setDrawsContent(true);
-        // FIXME: <https://webkit.org/b/274387> Re-enable asynchronous drawing for the contents layer.
-        m_scrolledContentsLayer->addChild(*m_contentsLayer);
-
-        // This is the call that enables async rendering.
-        asyncRenderer()->setupWithLayer(*m_contentsLayer);
-    }
-
     if (!m_overflowControlsContainer) {
         m_overflowControlsContainer = createGraphicsLayer("Overflow controls container"_s, GraphicsLayer::Type::Normal);
         m_overflowControlsContainer->setAnchorPoint({ });
         m_rootLayer->addChild(*m_overflowControlsContainer);
     }
 
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    if (!m_selectionLayer) {
-        m_selectionLayer = createGraphicsLayer("PDF selections"_s, GraphicsLayer::Type::TiledBacking);
-        m_selectionLayer->setAnchorPoint({ });
-        m_selectionLayer->setDrawsContent(true);
-        m_selectionLayer->setAcceleratesDrawing(true);
-        m_selectionLayer->setBlendMode(BlendMode::Multiply);
-        m_scrolledContentsLayer->addChild(*m_selectionLayer);
-    }
-#endif
-}
-
-void UnifiedPDFPlugin::updatePageBackgroundLayers()
-{
-    RefPtr page = this->page();
-    if (!page)
-        return;
-
-    if (isLocked())
-        return;
-
-    Vector<Ref<GraphicsLayer>> pageContainerLayers = m_pageBackgroundsContainerLayer->children();
-
-    // pageContentsLayers are always the size of `layoutBoundsForPageAtIndex`; we generate a page preview
-    // buffer of the same size. On zooming, this layer just gets scaled, to avoid repainting.
-
-    for (PDFDocumentLayout::PageIndex i = 0; i < m_documentLayout.pageCount(); ++i) {
-        auto pageBoundsRect = m_documentLayout.layoutBoundsForPageAtIndex(i);
-        auto destinationRect = pageBoundsRect;
-        destinationRect.scale(m_documentLayout.scale());
-
-        auto addLayerShadow = [](GraphicsLayer& layer, IntPoint shadowOffset, const Color& shadowColor, int shadowStdDeviation) {
-            Vector<RefPtr<FilterOperation>> filterOperations;
-            filterOperations.append(DropShadowFilterOperation::create(shadowOffset, shadowStdDeviation, shadowColor));
-
-            FilterOperations filters;
-            filters.setOperations(WTFMove(filterOperations));
-            layer.setFilters(filters);
-        };
-
-        const auto containerShadowOffset = IntPoint { 0, 1 };
-        constexpr auto containerShadowColor = SRGBA<uint8_t> { 0, 0, 0, 46 };
-        constexpr int containerShadowStdDeviation = 2;
-
-        const auto shadowOffset = IntPoint { 0, 2 };
-        constexpr auto shadowColor = SRGBA<uint8_t> { 0, 0, 0, 38 };
-        constexpr int shadowStdDeviation = 6;
-
-        auto pageContainerLayer = [&](PDFDocumentLayout::PageIndex pageIndex) {
-            if (pageIndex < pageContainerLayers.size())
-                return pageContainerLayers[pageIndex];
-
-            auto pageContainerLayer = createGraphicsLayer(makeString("Page container "_s, pageIndex), GraphicsLayer::Type::Normal);
-            auto pageBackgroundLayer = createGraphicsLayer(makeString("Page background "_s, pageIndex), GraphicsLayer::Type::Normal);
-            // Can only be null if this->page() is null, which we checked above.
-            ASSERT(pageContainerLayer);
-            ASSERT(pageBackgroundLayer);
-
-            pageContainerLayer->addChild(*pageBackgroundLayer);
-
-            pageContainerLayer->setAnchorPoint({ });
-            addLayerShadow(*pageContainerLayer, containerShadowOffset, containerShadowColor, containerShadowStdDeviation);
-
-            pageBackgroundLayer->setAnchorPoint({ });
-            pageBackgroundLayer->setBackgroundColor(Color::white);
-            pageBackgroundLayer->setDrawsContent(true);
-            pageBackgroundLayer->setAcceleratesDrawing(true);
-            pageBackgroundLayer->setShouldUpdateRootRelativeScaleFactor(false);
-            pageBackgroundLayer->setNeedsDisplay(); // We only need to paint this layer once.
-
-            // Sure would be nice if we could just stuff data onto a GraphicsLayer.
-            m_pageBackgroundLayers.add(pageBackgroundLayer, pageIndex);
-
-            // FIXME: Need to add a 1px black border with alpha 0.0586.
-
-            addLayerShadow(*pageBackgroundLayer, shadowOffset, shadowColor, shadowStdDeviation);
-
-            auto containerLayer = pageContainerLayer.releaseNonNull();
-            pageContainerLayers.append(WTFMove(containerLayer));
-
-            return pageContainerLayers[pageIndex];
-        }(i);
-
-        pageContainerLayer->setPosition(destinationRect.location());
-        pageContainerLayer->setSize(destinationRect.size());
-        pageContainerLayer->setOpacity(shouldDisplayPage(i) ? 1 : 0);
-
-        auto pageBackgroundLayer = pageContainerLayer->children()[0];
-        pageBackgroundLayer->setSize(pageBoundsRect.size());
-
-        TransformationMatrix documentScaleTransform;
-        documentScaleTransform.scale(m_documentLayout.scale());
-        pageBackgroundLayer->setTransform(documentScaleTransform);
-    }
-
-    m_pageBackgroundsContainerLayer->setChildren(WTFMove(pageContainerLayers));
+    m_presentationController->setupLayers(*m_scrollContainerLayer);
 }
 
 void UnifiedPDFPlugin::incrementalLoadingRepaintTimerFired()
@@ -606,24 +493,7 @@ void UnifiedPDFPlugin::incrementalLoadingRepaintTimerFired()
 
 void UnifiedPDFPlugin::repaintForIncrementalLoad()
 {
-    auto coverageRect = FloatRect { { }, m_documentLayout.contentsSize() };
-
-    if (auto* tiledBacking = m_contentsLayer->tiledBacking()) {
-        coverageRect = tiledBacking->coverageRect();
-
-        coverageRect = convertDown(CoordinateSpace::Contents, CoordinateSpace::PDFDocumentLayout, coverageRect);
-    }
-
-    setNeedsRepaintInDocumentRect(RepaintRequirement::PDFContent, coverageRect);
-}
-
-void UnifiedPDFPlugin::paintBackgroundLayerForPage(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, PDFDocumentLayout::PageIndex pageIndex)
-{
-    auto destinationRect = m_documentLayout.layoutBoundsForPageAtIndex(pageIndex);
-    destinationRect.setLocation({ });
-
-    if (RefPtr asyncRenderer = asyncRendererIfExists())
-        asyncRenderer->paintPagePreview(context, clipRect, destinationRect, pageIndex);
+    m_presentationController->repaintForIncrementalLoad();
 }
 
 float UnifiedPDFPlugin::scaleForPagePreviews() const
@@ -636,33 +506,7 @@ float UnifiedPDFPlugin::scaleForPagePreviews() const
 
 void UnifiedPDFPlugin::didGeneratePreviewForPage(PDFDocumentLayout::PageIndex pageIndex)
 {
-    if (RefPtr layer = backgroundLayerForPage(pageIndex))
-        layer->setNeedsDisplay();
-}
-
-GraphicsLayer* UnifiedPDFPlugin::backgroundLayerForPage(PDFDocumentLayout::PageIndex pageIndex) const
-{
-    if (!m_pageBackgroundsContainerLayer)
-        return nullptr;
-
-    auto pageContainerLayers = m_pageBackgroundsContainerLayer->children();
-    if (pageContainerLayers.size() <= pageIndex)
-        return nullptr;
-
-    Ref pageContainerLayer = pageContainerLayers[pageIndex];
-    if (!pageContainerLayer->children().size())
-        return nullptr;
-
-    return pageContainerLayer->children()[0].ptr();
-}
-
-std::optional<PDFDocumentLayout::PageIndex> UnifiedPDFPlugin::pageIndexForPageBackgroundLayer(const GraphicsLayer* layer) const
-{
-    auto it = m_pageBackgroundLayers.find(layer);
-    if (it == m_pageBackgroundLayers.end())
-        return { };
-
-    return it->value;
+    m_presentationController->didGeneratePreviewForPage(pageIndex);
 }
 
 void UnifiedPDFPlugin::willAttachScrollingNode()
@@ -744,33 +588,11 @@ void UnifiedPDFPlugin::updateLayerHierarchy()
     m_scrollContainerLayer->setPosition(scrollContainerRect.location());
     m_scrollContainerLayer->setSize(scrollContainerRect.size());
 
-    m_contentsLayer->setSize(documentSize());
-    m_contentsLayer->setNeedsDisplay();
-
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    m_selectionLayer->setSize(documentSize());
-    m_selectionLayer->setNeedsDisplay();
-#endif
-
-    updatePageBackgroundLayers();
+    m_presentationController->updateLayersOnLayoutChange(documentSize(), centeringOffset(), m_scaleFactor);
     updateSnapOffsets();
 
     didChangeSettings();
     didChangeIsInWindow();
-}
-
-void UnifiedPDFPlugin::updateLayerPositions()
-{
-    TransformationMatrix transform;
-    transform.scale(m_scaleFactor);
-    auto padding = centeringOffset();
-    transform.translate(padding.width(), padding.height());
-
-    m_contentsLayer->setTransform(transform);
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    m_selectionLayer->setTransform(transform);
-#endif
-    m_pageBackgroundsContainerLayer->setTransform(transform);
 }
 
 bool UnifiedPDFPlugin::shouldShowDebugIndicators() const
@@ -795,17 +617,6 @@ void UnifiedPDFPlugin::didChangeSettings()
     propagateSettingsToLayer(*m_rootLayer);
     propagateSettingsToLayer(*m_scrollContainerLayer);
     propagateSettingsToLayer(*m_scrolledContentsLayer);
-    propagateSettingsToLayer(*m_pageBackgroundsContainerLayer);
-    propagateSettingsToLayer(*m_contentsLayer);
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    propagateSettingsToLayer(*m_selectionLayer);
-#endif
-
-    for (auto& pageLayer : m_pageBackgroundsContainerLayer->children()) {
-        propagateSettingsToLayer(pageLayer);
-        if (pageLayer->children().size())
-            propagateSettingsToLayer(pageLayer->children()[0]);
-    }
 
     if (m_layerForHorizontalScrollbar)
         propagateSettingsToLayer(*m_layerForHorizontalScrollbar);
@@ -818,6 +629,8 @@ void UnifiedPDFPlugin::didChangeSettings()
 
     if (RefPtr asyncRenderer = asyncRendererIfExists())
         asyncRenderer->setShowDebugBorders(showDebugBorders);
+
+    m_presentationController->updateDebugBorders(showDebugBorders, showRepaintCounter);
 }
 
 void UnifiedPDFPlugin::notifyFlushRequired(const GraphicsLayer*)
@@ -825,55 +638,20 @@ void UnifiedPDFPlugin::notifyFlushRequired(const GraphicsLayer*)
     scheduleRenderingUpdate();
 }
 
-std::optional<float> UnifiedPDFPlugin::customContentsScale(const GraphicsLayer* layer) const
-{
-    if (pageIndexForPageBackgroundLayer(layer))
-        return scaleForPagePreviews();
-
-    return { };
-}
-
-bool UnifiedPDFPlugin::layerNeedsPlatformContext(const WebCore::GraphicsLayer* layer) const
-{
-    // We need a platform context if the plugin can not paint selections into its own layer,
-    // since we would then have to vend a platform context that PDFKit can paint into.
-    // However, this constraint only applies for the contents layer. No other layer needs to be WP-backed.
-    return layer == m_contentsLayer.get() && !canPaintSelectionIntoOwnedLayer();
-}
-
-void UnifiedPDFPlugin::tiledBackingUsageChanged(const GraphicsLayer* layer, bool usingTiledBacking)
+bool UnifiedPDFPlugin::isInWindow() const
 {
     RefPtr page = this->page();
-    if (!page)
-        return;
-
-    if (usingTiledBacking)
-        layer->tiledBacking()->setIsInWindow(page->isInWindow());
+    return page ? page->isInWindow() : false;
 }
 
 void UnifiedPDFPlugin::didChangeIsInWindow()
 {
     RefPtr page = this->page();
-    if (!page || !m_contentsLayer)
+    if (!page)
         return;
-
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    if (!m_selectionLayer)
-        return;
-#endif
 
     bool isInWindow = page->isInWindow();
-    m_contentsLayer->setIsInWindow(isInWindow);
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    m_selectionLayer->setIsInWindow(isInWindow);
-#endif
-
-    for (auto& pageLayer : m_pageBackgroundsContainerLayer->children()) {
-        if (pageLayer->children().size()) {
-            Ref pageContentsLayer = pageLayer->children()[0];
-            pageContentsLayer->setIsInWindow(isInWindow);
-        }
-    }
+    m_presentationController->updateIsInWindow(isInWindow);
 }
 
 void UnifiedPDFPlugin::windowActivityDidChange()
@@ -935,20 +713,8 @@ void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext
         return;
     }
 
-    if (layer == m_contentsLayer.get()) {
-        paintPDFContent(context, clipRect, PaintingBehavior::All, AllowsAsyncRendering::Yes);
-        return;
-    }
-
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    if (layer == m_selectionLayer.get())
-        return paintPDFSelection(context, clipRect);
-#endif
-
-    if (auto backgroundLayerPageIndex = pageIndexForPageBackgroundLayer(layer)) {
-        paintBackgroundLayerForPage(layer, context, clipRect, *backgroundLayerPageIndex);
-        return;
-    }
+    // Other layers should be painted by the PDFPresentationController.
+    ASSERT_NOT_REACHED();
 }
 
 PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect) const
@@ -956,45 +722,15 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect)
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { };
 
-    auto documentLayoutScale = m_documentLayout.scale();
-
-    auto pageCoverage = PDFPageCoverage { };
-
-    auto drawingRect = IntRect { { }, documentSize() };
-    drawingRect.intersect(enclosingIntRect(clipRect));
-
-    auto inverseScale = 1.0f / documentLayoutScale;
-    auto scaleTransform = AffineTransform::makeScale({ inverseScale, inverseScale });
-    auto drawingRectInPDFLayoutCoordinates = scaleTransform.mapRect(FloatRect { drawingRect });
-
-    for (PDFDocumentLayout::PageIndex i = 0; i < m_documentLayout.pageCount(); ++i) {
-        auto page = m_documentLayout.pageAtIndex(i);
-        if (!page)
-            continue;
-
-        auto pageBounds = m_documentLayout.layoutBoundsForPageAtIndex(i);
-        if (!pageBounds.intersects(drawingRectInPDFLayoutCoordinates))
-            continue;
-
-        pageCoverage.append(PerPageInfo { i, pageBounds });
-    }
-
-    return pageCoverage;
+    return m_presentationController->pageCoverageForRect(clipRect);
 }
 
-PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const WebCore::FloatRect& clipRect) const
+PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect) const
 {
-    auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForRect(clipRect) };
+    if (m_size.isEmpty() || documentSize().isEmpty())
+        return { { }, 1, 1, 1 };
 
-    auto tilingScaleFactor = 1.0f;
-    if (auto* tiledBacking = m_contentsLayer->tiledBacking())
-        tilingScaleFactor = tiledBacking->tilingScaleFactor();
-
-    pageCoverageAndScales.deviceScaleFactor = deviceScaleFactor();
-    pageCoverageAndScales.pdfDocumentScale = m_documentLayout.scale();
-    pageCoverageAndScales.tilingScaleFactor = tilingScaleFactor;
-
-    return pageCoverageAndScales;
+    return m_presentationController->pageCoverageAndScalesForRect(clipRect);
 }
 
 void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
@@ -1275,7 +1011,7 @@ double UnifiedPDFPlugin::scaleFactor() const
 // want to use the normalized scale factor.
 float UnifiedPDFPlugin::pageScaleFactor() const
 {
-    return m_scaleFactor;
+    return nonNormalizedScaleFactor();
 }
 
 double UnifiedPDFPlugin::contentScaleFactor() const
@@ -1340,8 +1076,7 @@ void UnifiedPDFPlugin::setScaleFactor(double scale, std::optional<WebCore::IntPo
     if (!m_inMagnificationGesture || !handlesPageScaleFactor())
         m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
 
-    updateLayerPositions();
-    updatePageBackgroundLayers();
+    m_presentationController->updateLayersOnLayoutChange(documentSize(), centeringOffset(), m_scaleFactor);
     updateSnapOffsets();
 
 #if PLATFORM(MAC)
@@ -1457,7 +1192,6 @@ void UnifiedPDFPlugin::updateLayout(AdjustScaleAfterLayout shouldAdjustScale)
     m_didLayoutWithValidDocument = m_documentLayout.hasPDFDocument();
 
     updateLayerHierarchy();
-    updateLayerPositions();
     updateScrollingExtents();
     computeNormalizationFactor();
 
@@ -1807,8 +1541,7 @@ void UnifiedPDFPlugin::updateScrollingExtents()
     auto& scrollingCoordinator = *page->scrollingCoordinator();
     scrollingCoordinator.setScrollingNodeScrollableAreaGeometry(m_scrollingNodeID, *this);
 
-    if (auto* tiledBacking = m_contentsLayer->tiledBacking())
-        tiledBacking->setScrollability(computeScrollability());
+    m_presentationController->updateForCurrentScrollability(computeScrollability());
 
     EventRegion eventRegion;
     auto eventRegionContext = eventRegion.makeContext();
@@ -1962,11 +1695,8 @@ void UnifiedPDFPlugin::determineCurrentlySnappedPage()
 
     if (m_currentlySnappedPage != newSnappedPage) {
         m_currentlySnappedPage = newSnappedPage;
-        updatePageBackgroundLayers();
-        m_contentsLayer->setNeedsDisplay();
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-        m_selectionLayer->setNeedsDisplay();
-#endif
+        // FIXME: remove
+        m_presentationController->currentlySnappedPageChanged();
     }
 }
 
@@ -4146,7 +3876,11 @@ void UnifiedPDFPlugin::setPDFDisplayModeForTesting(const String& mode)
 void UnifiedPDFPlugin::setDisplayMode(PDFDocumentLayout::DisplayMode mode)
 {
     m_documentLayout.setDisplayMode(mode);
-    m_presentationController = PDFPresentationController::createForMode(mode, *this);
+
+    if (m_presentationController && m_presentationController->supportsDisplayMode(mode))
+        return;
+
+    setPresentationController(PDFPresentationController::createForMode(mode, *this));
 }
 
 void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayMode mode)

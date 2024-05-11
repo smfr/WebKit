@@ -28,10 +28,17 @@
 #if ENABLE(UNIFIED_PDF)
 
 #include "PDFDocumentLayout.h"
+#include "PDFPageCoverage.h"
+#include <wtf/OptionSet.h>
+
+namespace WebCore {
+enum class TiledBackingScrollability : uint8_t;
+};
 
 namespace WebKit {
 
 class UnifiedPDFPlugin;
+enum class RepaintRequirement : uint8_t;
 
 class PDFPresentationController {
 public:
@@ -42,8 +49,30 @@ public:
 
     virtual bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const = 0;
 
+    virtual void teardown() = 0;
 
-private:
+    virtual PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&) const = 0;
+    virtual PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&) const = 0;
+
+    virtual void setupLayers(WebCore::GraphicsLayer&) = 0;
+    virtual void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) = 0;
+
+    virtual void updateIsInWindow(bool isInWindow) = 0;
+    virtual void updateDebugBorders(bool showDebugBorders, bool showRepaintCounters) = 0;
+
+    virtual void updateForCurrentScrollability(OptionSet<WebCore::TiledBackingScrollability>) = 0;
+
+    // FIXME: Obsolete.
+    virtual void currentlySnappedPageChanged() { }
+
+    virtual void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex) = 0;
+
+    virtual void repaintForIncrementalLoad() = 0;
+    virtual void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) = 0;
+
+
+
+protected:
 
     Ref<UnifiedPDFPlugin> m_plugin;
 };

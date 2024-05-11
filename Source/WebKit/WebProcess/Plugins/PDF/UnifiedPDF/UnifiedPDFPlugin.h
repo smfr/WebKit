@@ -106,6 +106,8 @@ class UnifiedPDFPlugin final : public PDFPluginBase, public WebCore::GraphicsLay
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(UnifiedPDFPlugin);
 
     friend class AsyncPDFRenderer;
+    friend class PDFScrollingPresentationController;
+    friend class PDFDiscretePresentationController;
 public:
     static Ref<UnifiedPDFPlugin> create(WebCore::HTMLPlugInElement&);
     virtual ~UnifiedPDFPlugin();
@@ -159,7 +161,7 @@ public:
 #endif
 
     void scheduleRenderingUpdate(OptionSet<WebCore::RenderingUpdateStep> = WebCore::RenderingUpdateStep::LayerFlush);
-    RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(WebCore::GraphicsLayerClient&);
+    RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(WebCore::GraphicsLayerClient&); // Why public?
     float deviceScaleFactor() const override;
 
     WebCore::FloatRect rectForSelectionInMainFrameContentsSpace(PDFSelection *) const;
@@ -216,6 +218,8 @@ private:
     PDFDataDetectorOverlayController& dataDetectorOverlayController() { return *m_dataDetectorOverlayController; }
 #endif
 
+    const PDFDocumentLayout& documentLayout() const { return m_documentLayout; }
+
     double scaleForActualSize() const;
     double initialScale() const;
     double scaleForFitToView() const;
@@ -239,6 +243,7 @@ private:
     */
     double scaleFactor() const override;
     double contentScaleFactor() const final;
+    double nonNormalizedScaleFactor() const { return m_scaleFactor; }
 
     // Scale normalization is used to map the internal "scale factor" to the exposed scaleFactor()/setPageScaleFactor()
     // so that scale factor 1 shows at "Actual Size".
@@ -416,13 +421,16 @@ private:
 
     void paint(WebCore::GraphicsContext&, const WebCore::IntRect&) override;
 
+
+
+
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
     void paintContents(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect&, OptionSet<WebCore::GraphicsLayerPaintBehavior>) override;
     float pageScaleFactor() const override;
-    bool layerNeedsPlatformContext(const WebCore::GraphicsLayer*) const override;
-    void tiledBackingUsageChanged(const WebCore::GraphicsLayer*, bool /*usingTiledBacking*/) override;
-    std::optional<float> customContentsScale(const WebCore::GraphicsLayer*) const override;
+
+
+
 
     // Package up the data needed to paint a set of pages for the given clip, for use by UnifiedPDFPlugin::paintPDFContent and async rendering.
     PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect& clipRect) const;
@@ -437,15 +445,14 @@ private:
     bool canPaintSelectionIntoOwnedLayer() const;
 
     void ensureLayers();
-    void updatePageBackgroundLayers();
     void updateLayerHierarchy();
-    void updateLayerPositions();
-
+    
     void incrementalLoadingRepaintTimerFired();
     void repaintForIncrementalLoad();
 
     void didChangeScrollOffset() override;
     void didChangeIsInWindow();
+    bool isInWindow() const;
 
     void didChangeSettings() override;
 
@@ -516,6 +523,7 @@ private:
 
     void revealAnnotation(PDFAnnotation *);
 
+    WebCore::GraphicsLayerFactory* graphicsLayerFactory() const;
     RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(GraphicsLayerClient&, WebCore::GraphicsLayer::Type);
     RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(const String& name, WebCore::GraphicsLayer::Type);
 
@@ -542,11 +550,8 @@ private:
 
     bool shouldShowDebugIndicators() const;
 
-    void paintBackgroundLayerForPage(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect&, PDFDocumentLayout::PageIndex);
     float scaleForPagePreviews() const;
     void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex);
-    WebCore::GraphicsLayer* backgroundLayerForPage(PDFDocumentLayout::PageIndex) const;
-    std::optional<PDFDocumentLayout::PageIndex> pageIndexForPageBackgroundLayer(const WebCore::GraphicsLayer*) const;
 
 #if PLATFORM(MAC)
     void createPasswordEntryForm();
@@ -556,6 +561,9 @@ private:
 
     bool isInDiscreteDisplayMode() const;
     bool isShowingTwoPages() const;
+
+
+    void setPresentationController(std::unique_ptr<PDFPresentationController>&&);
 
     WebCore::FloatRect pageBoundsInContentsSpace(PDFDocumentLayout::PageIndex) const;
 
@@ -568,18 +576,11 @@ private:
     RefPtr<WebCore::GraphicsLayer> m_rootLayer;
     RefPtr<WebCore::GraphicsLayer> m_scrollContainerLayer;
     RefPtr<WebCore::GraphicsLayer> m_scrolledContentsLayer;
-    RefPtr<WebCore::GraphicsLayer> m_pageBackgroundsContainerLayer;
-    RefPtr<WebCore::GraphicsLayer> m_contentsLayer;
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    RefPtr<WebCore::GraphicsLayer> m_selectionLayer;
-#endif
 
     RefPtr<WebCore::GraphicsLayer> m_overflowControlsContainer;
     RefPtr<WebCore::GraphicsLayer> m_layerForHorizontalScrollbar;
     RefPtr<WebCore::GraphicsLayer> m_layerForVerticalScrollbar;
     RefPtr<WebCore::GraphicsLayer> m_layerForScrollCorner;
-
-    HashMap<RefPtr<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_pageBackgroundLayers;
 
     WebCore::ScrollingNodeID m_scrollingNodeID;
 
