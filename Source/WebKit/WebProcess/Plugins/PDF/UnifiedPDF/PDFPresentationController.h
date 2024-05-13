@@ -51,8 +51,8 @@ public:
 
     virtual void teardown() = 0;
 
-    virtual PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&) const = 0;
-    virtual PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&) const = 0;
+    virtual PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const = 0;
+    virtual PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const = 0;
 
     virtual void setupLayers(WebCore::GraphicsLayer&) = 0;
     virtual void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) = 0;

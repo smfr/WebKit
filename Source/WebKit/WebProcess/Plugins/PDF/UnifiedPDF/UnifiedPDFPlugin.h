@@ -421,26 +421,21 @@ private:
 
     void paint(WebCore::GraphicsContext&, const WebCore::IntRect&) override;
 
-
-
-
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
     void paintContents(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect&, OptionSet<WebCore::GraphicsLayerPaintBehavior>) override;
     float pageScaleFactor() const override;
 
 
-
-
     // Package up the data needed to paint a set of pages for the given clip, for use by UnifiedPDFPlugin::paintPDFContent and async rendering.
-    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect& clipRect) const;
-    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect& clipRect) const;
+    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow>) const;
+    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow>) const;
 
     enum class PaintingBehavior : bool { All, PageContentsOnly };
     enum class AllowsAsyncRendering : bool { No, Yes };
-    void paintPDFContent(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, PaintingBehavior = PaintingBehavior::All, AllowsAsyncRendering = AllowsAsyncRendering::No);
+    void paintPDFContent(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow> = { }, PaintingBehavior = PaintingBehavior::All, AllowsAsyncRendering = AllowsAsyncRendering::No);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    void paintPDFSelection(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect);
+    void paintPDFSelection(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow>std::optional<PDFLayoutRow> = { });
 #endif
     bool canPaintSelectionIntoOwnedLayer() const;
 

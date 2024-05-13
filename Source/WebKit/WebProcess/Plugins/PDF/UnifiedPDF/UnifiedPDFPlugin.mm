@@ -678,6 +678,7 @@ void UnifiedPDFPlugin::paint(GraphicsContext& context, const IntRect&)
 
     clipRect.scale(1.0f / m_scaleFactor);
 
+    // FIXME: Need to ask the presentationController which row is relevant.
     paintPDFContent(context, clipRect);
 }
 
@@ -717,23 +718,23 @@ void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext
     ASSERT_NOT_REACHED();
 }
 
-PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect) const
+PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { };
 
-    return m_presentationController->pageCoverageForRect(clipRect);
+    return m_presentationController->pageCoverageForRect(clipRect, row);
 }
 
-PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect) const
+PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { { }, 1, 1, 1 };
 
-    return m_presentationController->pageCoverageAndScalesForRect(clipRect);
+    return m_presentationController->pageCoverageAndScalesForRect(clipRect, row);
 }
 
-void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
+void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return;
@@ -752,7 +753,7 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
     }
 
     auto pageWithAnnotation = pageIndexWithHoveredAnnotation();
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect);
+    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row);
     auto documentScale = pageCoverage.pdfDocumentScale;
 
     LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: paintPDFContent " << pageCoverage);
@@ -822,7 +823,7 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void UnifiedPDFPlugin::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect)
+void UnifiedPDFPlugin::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
     if (!m_currentSelection || [m_currentSelection isEmpty] || !canPaintSelectionIntoOwnedLayer())
         return;
@@ -838,7 +839,7 @@ void UnifiedPDFPlugin::paintPDFSelection(GraphicsContext& context, const FloatRe
         return blendSourceOver(Color::white, selectionColor);
     }();
 
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect);
+    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row);
     auto documentScale = pageCoverage.pdfDocumentScale;
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
@@ -3353,7 +3354,8 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForSelection(PDFSelection *
         context.scale(m_scaleFactor);
         context.translate(-rectInContentsCoordinates.location());
 
-        paintPDFContent(context, rectInContentsCoordinates, PaintingBehavior::PageContentsOnly);
+        // FIXME: Compute row.
+        paintPDFContent(context, rectInContentsCoordinates, { }, PaintingBehavior::PageContentsOnly);
     }
 
     // FIXME: Figure out how to share this with WebTextIndicatorLayer.

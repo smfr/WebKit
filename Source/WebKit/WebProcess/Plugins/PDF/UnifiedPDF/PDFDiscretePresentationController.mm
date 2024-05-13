@@ -49,12 +49,12 @@ bool PDFDiscretePresentationController::supportsDisplayMode(PDFDocumentLayout::D
     return PDFDocumentLayout::isDiscreteDisplayMode(mode);
 }
 
-PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const FloatRect&) const
+PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const FloatRect&, std::optional<PDFLayoutRow>) const
 {
     return { };
 }
 
-PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForRect(const FloatRect&) const
+PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForRect(const FloatRect&, std::optional<PDFLayoutRow>) const
 {
     return { };
 }

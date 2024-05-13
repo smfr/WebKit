@@ -43,8 +43,8 @@ private:
     bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const override;
     void teardown() override;
 
-    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&) const override;
-    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&) const override;
+    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
+    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
 
     RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(const String&, WebCore::GraphicsLayer::Type = WebCore::GraphicsLayer::Type::Normal);
 

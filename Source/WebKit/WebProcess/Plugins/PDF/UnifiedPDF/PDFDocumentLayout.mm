@@ -56,7 +56,15 @@ bool PDFDocumentLayout::isRightPageIndex(PageIndex pageIndex) const
 
 bool PDFDocumentLayout::isLastPageIndex(PageIndex pageIndex) const
 {
-    return pageIndex == pageCount() - 1;
+    return pageIndex == lastPageIndex();
+}
+
+auto PDFDocumentLayout::lastPageIndex() const -> PageIndex
+{
+    if (!pageCount())
+        return 0;
+
+    return pageCount() - 1;
 }
 
 RetainPtr<PDFPage> PDFDocumentLayout::pageAtIndex(PageIndex index) const
@@ -64,9 +72,9 @@ RetainPtr<PDFPage> PDFDocumentLayout::pageAtIndex(PageIndex index) const
     return [m_pdfDocument pageAtIndex:index];
 }
 
-std::optional<unsigned> PDFDocumentLayout::indexForPage(RetainPtr<PDFPage> page) const
+std::optional<PDFDocumentLayout::PageIndex> PDFDocumentLayout::indexForPage(RetainPtr<PDFPage> page) const
 {
-    for (unsigned pageIndex = 0; pageIndex < [m_pdfDocument pageCount]; ++pageIndex) {
+    for (PDFDocumentLayout::PageIndex pageIndex = 0; pageIndex < [m_pdfDocument pageCount]; ++pageIndex) {
         if (page == [m_pdfDocument pageAtIndex:pageIndex])
             return pageIndex;
     }
@@ -248,7 +256,7 @@ void PDFDocumentLayout::updateLayout(IntSize pluginSize, ShouldUpdateAutoSizeSca
 
     float maxRowWidth = 0;
     float currentRowWidth = 0;
-    bool isTwoUpLayout = m_displayMode == DisplayMode::TwoUpDiscrete || m_displayMode == DisplayMode::TwoUpContinuous;
+    bool isTwoUpLayout = isTwoUpDisplayMode();
 
     for (PageIndex i = 0; i < pageCount; ++i) {
         auto page = pageAtIndex(i);
@@ -395,6 +403,35 @@ size_t PDFDocumentLayout::pageCount() const
         return 0;
 
     return [m_pdfDocument pageCount];
+}
+
+size_t PDFDocumentLayout::rowCount() const
+{
+    if (!m_pdfDocument)
+        return 0;
+
+    if (isTwoUpDisplayMode())
+        return std::round(pageCount() / 2);
+
+    return pageCount();
+}
+
+PDFLayoutRow PDFDocumentLayout::rowForPageIndex(PageIndex index) const
+{
+    if (!m_pdfDocument)
+        return { };
+
+    if (isTwoUpDisplayMode()) {
+        if (isLeftPageIndex(index) && index < lastPageIndex())
+            return { { index, index + 1 } };
+
+        if (isRightPageIndex(index)) {
+            ASSERT(index);
+            return { { index - 1, index } };
+        }
+    }
+
+    return { { index } };
 }
 
 FloatRect PDFDocumentLayout::layoutBoundsForPageAtIndex(PageIndex index) const

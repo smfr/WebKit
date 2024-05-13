@@ -43,6 +43,8 @@ namespace WebKit {
 
 enum class ShouldUpdateAutoSizeScale : bool { No, Yes };
 
+struct PDFLayoutRow;
+
 class PDFDocumentLayout {
 public:
     using PageIndex = size_t; // This is a zero-based index.
@@ -62,6 +64,8 @@ public:
     bool hasLaidOutPDFDocument() const { return !m_pageGeometry.isEmpty(); }
 
     size_t pageCount() const;
+    size_t rowCount() const;
+    PDFLayoutRow rowForPageIndex(PageIndex) const;
 
     static constexpr WebCore::FloatSize documentMargin { 6, 8 };
     static constexpr WebCore::FloatSize pageMargin { 4, 6 };
@@ -69,9 +73,10 @@ public:
     bool isLeftPageIndex(PageIndex) const;
     bool isRightPageIndex(PageIndex) const;
     bool isLastPageIndex(PageIndex) const;
+    PageIndex lastPageIndex() const;
 
     RetainPtr<PDFPage> pageAtIndex(PageIndex) const;
-    std::optional<unsigned> indexForPage(RetainPtr<PDFPage>) const;
+    std::optional<PDFDocumentLayout::PageIndex> indexForPage(RetainPtr<PDFPage>) const;
     PDFDocumentLayout::PageIndex nearestPageIndexForDocumentPoint(WebCore::FloatPoint) const;
     // For the given Y offset, return a page index and page point for the page at this offset. Returns the leftmost
     // page if two-up and both pages intersect that offset, otherwise the right page if only it intersects the offset.
@@ -130,6 +135,11 @@ private:
     WebCore::FloatRect m_documentBounds;
     float m_scale { 1 };
     DisplayMode m_displayMode { DisplayMode::SinglePageContinuous };
+};
+
+struct PDFLayoutRow {
+    Vector<PDFDocumentLayout::PageIndex, 2> pages;
+    unsigned numPages() const { return pages.size(); }
 };
 
 } // namespace WebKit
