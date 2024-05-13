@@ -220,7 +220,8 @@ void AsyncPDFRenderer::coverageRectDidChange(const FloatRect& coverageRect)
     if (!plugin)
         return;
 
-    auto pageCoverage = plugin->pageCoverageForRect(coverageRect);
+    // FIXME: Need to know about rows.
+    auto pageCoverage = plugin->pageCoverageForRect(coverageRect, { });
     auto pagePreviewScale = plugin->scaleForPagePreviews();
 
     PDFPageIndexSet unwantedPageIndices;
@@ -320,7 +321,8 @@ auto AsyncPDFRenderer::renderInfoForTile(const TileForGrid& tileInfo, const Floa
         tilingScaleFactor = tiledBacking->tilingScaleFactor();
 
     auto paintingClipRect = convertTileRectToPaintingCoords(tileRect, tilingScaleFactor);
-    auto pageCoverage = plugin->pageCoverageAndScalesForRect(paintingClipRect);
+    // FIXME: Need to know about rows.
+    auto pageCoverage = plugin->pageCoverageAndScalesForRect(paintingClipRect, { });
 
     return TileRenderInfo { tileRect, clipRect, pageCoverage, m_contentsVersion };
 }
@@ -624,7 +626,8 @@ void AsyncPDFRenderer::pdfContentChangedInRect(float pageScaleFactor, const Floa
     if (!plugin)
         return;
 
-    auto pageCoverage = plugin->pageCoverageForRect(paintingRect);
+    // FIXME: Need to know about rows.
+    auto pageCoverage = plugin->pageCoverageForRect(paintingRect, { });
     if (pageCoverage.isEmpty())
         return;
 
