@@ -66,14 +66,17 @@ public:
     size_t pageCount() const;
     size_t rowCount() const;
     PDFLayoutRow rowForPageIndex(PageIndex) const;
+    Vector<PDFLayoutRow> rows() const;
+    unsigned rowIndexForPageIndex(PageIndex) const;
 
-    static constexpr WebCore::FloatSize documentMargin { 6, 8 };
-    static constexpr WebCore::FloatSize pageMargin { 4, 6 };
+    static constexpr WebCore::FloatSize documentMargin { 16, 18 };
+    static constexpr WebCore::FloatSize pageMargin { 14, 16 };
 
     bool isLeftPageIndex(PageIndex) const;
     bool isRightPageIndex(PageIndex) const;
     bool isLastPageIndex(PageIndex) const;
     PageIndex lastPageIndex() const;
+    bool isFirstPageOfRow(PageIndex) const;
 
     RetainPtr<PDFPage> pageAtIndex(PageIndex) const;
     std::optional<PDFDocumentLayout::PageIndex> indexForPage(RetainPtr<PDFPage>) const;
@@ -113,6 +116,9 @@ public:
     bool isSinglePageDisplayMode() const { return isSinglePageDisplayMode(m_displayMode); }
     bool isTwoUpDisplayMode() const { return isTwoUpDisplayMode(m_displayMode); }
 
+    bool isScrollingDisplayMode() const { return isScrollingDisplayMode(m_displayMode); }
+    bool isDiscreteDisplayMode() const { return isDiscreteDisplayMode(m_displayMode); }
+
     unsigned pagesPerRow() const { return isSinglePageDisplayMode() ? 1 : 2; }
 
     struct PageGeometry {
@@ -140,6 +146,7 @@ private:
 struct PDFLayoutRow {
     Vector<PDFDocumentLayout::PageIndex, 2> pages;
     unsigned numPages() const { return pages.size(); }
+    bool containsPage(PDFDocumentLayout::PageIndex pageIndex) const { return pages.contains(pageIndex); }
 };
 
 } // namespace WebKit

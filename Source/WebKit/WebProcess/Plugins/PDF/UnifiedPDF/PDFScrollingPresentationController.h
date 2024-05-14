@@ -46,8 +46,6 @@ private:
     PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
     PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
 
-    RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(const String&, WebCore::GraphicsLayer::Type = WebCore::GraphicsLayer::Type::Normal);
-
     void setupLayers(WebCore::GraphicsLayer& scrolledContentsLayer) override;
     void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) override;
 
@@ -55,6 +53,8 @@ private:
     void updateDebugBorders(bool showDebugBorders, bool showRepaintCounters) override;
     void updateForCurrentScrollability(OptionSet<WebCore::TiledBackingScrollability>) override;
     void currentlySnappedPageChanged() override;
+
+    GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
