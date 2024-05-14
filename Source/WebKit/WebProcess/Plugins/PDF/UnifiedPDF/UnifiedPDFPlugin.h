@@ -106,6 +106,7 @@ class UnifiedPDFPlugin final : public PDFPluginBase, public WebCore::GraphicsLay
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(UnifiedPDFPlugin);
 
     friend class AsyncPDFRenderer;
+    friend class PDFPresentationController;
     friend class PDFScrollingPresentationController;
     friend class PDFDiscretePresentationController;
 public:

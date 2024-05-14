@@ -67,6 +67,11 @@ auto PDFDocumentLayout::lastPageIndex() const -> PageIndex
     return pageCount() - 1;
 }
 
+bool PDFDocumentLayout::isFirstPageOfRow(PageIndex pageIndex) const
+{
+    return isTwoUpDisplayMode() ? isLeftPageIndex(pageIndex) : true;
+}
+
 RetainPtr<PDFPage> PDFDocumentLayout::pageAtIndex(PageIndex index) const
 {
     return [m_pdfDocument pageAtIndex:index];
@@ -319,6 +324,9 @@ void PDFDocumentLayout::layoutSingleColumn(float availableWidth, float maxRowWid
         if (i >= m_pageGeometry.size())
             break;
 
+        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
+            currentYOffset = documentMargin.height();
+
         auto pageBounds = m_pageGeometry[i].layoutBounds;
 
         LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutSingleColumn - page " << i << " bounds " << pageBounds);
@@ -351,6 +359,9 @@ void PDFDocumentLayout::layoutTwoUpColumn(float availableWidth, float maxRowWidt
         if (i >= m_pageGeometry.size())
             break;
 
+        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
+            currentYOffset = documentMargin.height();
+
         auto pageBounds = m_pageGeometry[i].layoutBounds;
 
         // Lay out the pages in pairs.
@@ -375,6 +386,8 @@ void PDFDocumentLayout::layoutTwoUpColumn(float availableWidth, float maxRowWidt
 
             m_pageGeometry[i - 1].layoutBounds = leftPageBounds;
             m_pageGeometry[i].layoutBounds = rightPageBounds;
+
+            LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutTwoUpColumn - left page bounds " << leftPageBounds << " right page bounds " << rightPageBounds);
 
             currentYOffset += currentRowSize.height() + pageMargin.height();
         } else {
@@ -416,6 +429,37 @@ size_t PDFDocumentLayout::rowCount() const
     return pageCount();
 }
 
+Vector<PDFLayoutRow> PDFDocumentLayout::rows() const
+{
+    if (!m_pdfDocument)
+        return { };
+
+    Vector<PDFLayoutRow> rows;
+    rows.reserveInitialCapacity(rowCount());
+
+    auto pageCount = this->pageCount();
+
+    if (isSinglePageDisplayMode()) {
+        for (PageIndex i = 0; i < pageCount; ++i)
+            rows.append(PDFLayoutRow { { i } });
+
+        return rows;
+    }
+
+    // Two-up mode.
+    auto numFullRows = pageCount / 2;
+    for (unsigned rowIndex = 0; rowIndex < numFullRows; ++rowIndex) {
+        PageIndex leftPageIndex = rowIndex * 2;
+        rows.append(PDFLayoutRow { { leftPageIndex, leftPageIndex + 1 } } );
+    }
+
+    if (pageCount % 1)
+        rows.append(PDFLayoutRow { { lastPageIndex() } });
+
+    return rows;
+}
+
+// Unused.
 PDFLayoutRow PDFDocumentLayout::rowForPageIndex(PageIndex index) const
 {
     if (!m_pdfDocument)
@@ -432,6 +476,14 @@ PDFLayoutRow PDFDocumentLayout::rowForPageIndex(PageIndex index) const
     }
 
     return { { index } };
+}
+
+unsigned PDFDocumentLayout::rowIndexForPageIndex(PageIndex index) const
+{
+    if (isSinglePageDisplayMode())
+        return index;
+
+    return index / 2;
 }
 
 FloatRect PDFDocumentLayout::layoutBoundsForPageAtIndex(PageIndex index) const

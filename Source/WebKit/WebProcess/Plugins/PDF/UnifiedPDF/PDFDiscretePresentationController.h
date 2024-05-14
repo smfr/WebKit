@@ -28,10 +28,11 @@
 #if ENABLE(UNIFIED_PDF)
 
 #include "PDFPresentationController.h"
+#include <WebCore/GraphicsLayerClient.h>
 
 namespace WebKit {
 
-class PDFDiscretePresentationController final : public PDFPresentationController {
+class PDFDiscretePresentationController final : public PDFPresentationController, public WebCore::GraphicsLayerClient {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(PDFDiscretePresentationController);
 public:
@@ -57,7 +58,44 @@ private:
 
     void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex) override;
 
+    GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 
+    // GraphicsLayerClient
+    void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
+    float pageScaleFactor() const override;
+    float deviceScaleFactor() const override;
+    std::optional<float> customContentsScale(const WebCore::GraphicsLayer*) const override;
+    bool layerNeedsPlatformContext(const WebCore::GraphicsLayer*) const override;
+    void tiledBackingUsageChanged(const WebCore::GraphicsLayer*, bool /*usingTiledBacking*/) override;
+    void paintContents(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect&, OptionSet<WebCore::GraphicsLayerPaintBehavior>) override;
+
+    void paintBackgroundLayerForRow(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, unsigned rowIndex);
+
+    void buildRows(bool displayModeChanged);
+    std::optional<unsigned> rowIndexForLayer(const WebCore::GraphicsLayer*) const;
+
+    RefPtr<GraphicsLayer> m_rowsContainerLayer;
+
+    struct RowData {
+        PDFLayoutRow pages;
+        RefPtr<GraphicsLayer> containerLayer;
+        RefPtr<GraphicsLayer> leftPageContainerLayer;
+        RefPtr<GraphicsLayer> rightPageContainerLayer;
+        RefPtr<GraphicsLayer> contentsLayer;
+#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+        RefPtr<GraphicsLayer> selectionLayer;
+#endif
+        bool isPageBackgroundLayer(const GraphicsLayer*) const;
+
+        RefPtr<GraphicsLayer> leftPageBackgroundLayer() const;
+        RefPtr<GraphicsLayer> rightPageBackgroundLayer() const;
+
+        RefPtr<GraphicsLayer> backgroundLayerForPageIndex(PDFDocumentLayout::PageIndex) const;
+    };
+
+    Vector<RowData> m_rows;
+    HashMap<RefPtr<WebCore::GraphicsLayer>, unsigned> m_layerToRowIndexMap;
+    std::optional<PDFDocumentLayout::DisplayMode> m_displayModeAtLastLayerSetup;
 };
 
 

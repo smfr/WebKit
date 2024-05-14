@@ -30,6 +30,7 @@
 
 #include "PDFDiscretePresentationController.h"
 #include "PDFScrollingPresentationController.h"
+#include <WebCore/GraphicsLayer.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -54,6 +55,73 @@ PDFPresentationController::PDFPresentationController(UnifiedPDFPlugin& plugin)
 
 PDFPresentationController::~PDFPresentationController() = default;
 
+RefPtr<GraphicsLayer> PDFPresentationController::createGraphicsLayer(const String& name, GraphicsLayer::Type layerType)
+{
+    auto* graphicsLayerFactory = m_plugin->graphicsLayerFactory();
+    if (!graphicsLayerFactory)
+        return nullptr;
+
+    Ref graphicsLayer = GraphicsLayer::create(graphicsLayerFactory, graphicsLayerClient(), layerType);
+    graphicsLayer->setName(name);
+    return graphicsLayer;
+}
+
+RefPtr<GraphicsLayer> PDFPresentationController::makePageContainerLayer(PDFDocumentLayout::PageIndex pageIndex)
+{
+    auto addLayerShadow = [](GraphicsLayer& layer, IntPoint shadowOffset, const Color& shadowColor, int shadowStdDeviation) {
+        Vector<RefPtr<FilterOperation>> filterOperations;
+        filterOperations.append(DropShadowFilterOperation::create(shadowOffset, shadowStdDeviation, shadowColor));
+
+        FilterOperations filters;
+        filters.setOperations(WTFMove(filterOperations));
+        layer.setFilters(filters);
+    };
+
+    constexpr auto containerShadowOffset = IntPoint { 0, 1 };
+    constexpr auto containerShadowColor = SRGBA<uint8_t> { 0, 0, 0, 46 };
+    constexpr int containerShadowStdDeviation = 2;
+
+    constexpr auto shadowOffset = IntPoint { 0, 2 };
+    constexpr auto shadowColor = SRGBA<uint8_t> { 0, 0, 0, 38 };
+    constexpr int shadowStdDeviation = 6;
+
+    RefPtr pageContainerLayer = createGraphicsLayer(makeString("Page container "_s, pageIndex), GraphicsLayer::Type::Normal);
+    RefPtr pageBackgroundLayer = createGraphicsLayer(makeString("Page background "_s, pageIndex), GraphicsLayer::Type::Normal);
+    // Can only be null if this->page() is null, which we checked above.
+    ASSERT(pageContainerLayer);
+    ASSERT(pageBackgroundLayer);
+
+    pageContainerLayer->setAnchorPoint({ });
+    addLayerShadow(*pageContainerLayer, containerShadowOffset, containerShadowColor, containerShadowStdDeviation);
+
+    pageBackgroundLayer->setAnchorPoint({ });
+    pageBackgroundLayer->setBackgroundColor(Color::white);
+//    pageBackgroundLayer->setBackgroundColor(Color::yellow.colorWithAlphaByte(64));
+
+    pageBackgroundLayer->setDrawsContent(true);
+    pageBackgroundLayer->setAcceleratesDrawing(true);
+    pageBackgroundLayer->setShouldUpdateRootRelativeScaleFactor(false);
+    pageBackgroundLayer->setNeedsDisplay(); // We only need to paint this layer once when page backgrounds change.
+
+    // FIXME: Need to add a 1px black border with alpha 0.0586.
+
+    addLayerShadow(*pageBackgroundLayer, shadowOffset, shadowColor, shadowStdDeviation);
+
+    pageContainerLayer->addChild(*pageBackgroundLayer);
+
+    return pageContainerLayer;
+}
+
+RefPtr<GraphicsLayer> PDFPresentationController::pageBackgroundLayerForPageContainerLayer(GraphicsLayer& pageContainerLayer)
+{
+    auto& children = pageContainerLayer.children();
+    if (children.size()) {
+        Ref layer = children[0];
+        return WTFMove(layer);
+    }
+
+    return nullptr;
+}
 
 } // namespace WebKit
 

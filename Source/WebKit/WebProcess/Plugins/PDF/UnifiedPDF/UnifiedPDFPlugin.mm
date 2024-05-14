@@ -161,7 +161,7 @@ UnifiedPDFPlugin::UnifiedPDFPlugin(HTMLPlugInElement& element)
         RefPtr { document->bodyOrFrameset() }->appendChild(*m_annotationContainer);
     }
 
-    setDisplayMode(PDFDocumentLayout::DisplayMode::SinglePageContinuous);
+    setDisplayMode(PDFDocumentLayout::DisplayMode::SinglePageDiscrete);
 
 #if PLATFORM(MAC)
     m_accessibilityDocumentObject = adoptNS([[WKAccessibilityPDFDocumentObject alloc] initWithPDFDocument:m_pdfDocument andElement:&element]);
@@ -1861,7 +1861,7 @@ T UnifiedPDFPlugin::convertDown(CoordinateSpace sourceSpace, CoordinateSpace des
     return mappedValue;
 }
 
-#if !LOG_DISABLED
+#if 0 // !LOG_DISABLED
 static TextStream& operator<<(TextStream& ts, UnifiedPDFPlugin::PDFElementType elementType)
 {
     switch (elementType) {
@@ -1959,7 +1959,7 @@ auto UnifiedPDFPlugin::pdfElementTypesForPluginPoint(const IntPoint& point) cons
             pdfElementTypes.add(PDFElementType::Control);
     }
 
-    LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin::pdfElementTypesForPluginPoint " << point << " document point " << pointInDocumentSpace << " found page " << pageIndex << " point in page " << pointInPDFPageSpace << " - elements " << pdfElementTypes);
+//    LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin::pdfElementTypesForPluginPoint " << point << " document point " << pointInDocumentSpace << " found page " << pageIndex << " point in page " << pointInPDFPageSpace << " - elements " << pdfElementTypes);
 
     if (!isTaggedPDF())
         return pdfElementTypes;

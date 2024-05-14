@@ -101,17 +101,6 @@ PDFPageCoverageAndScales PDFScrollingPresentationController::pageCoverageAndScal
     return pageCoverageAndScales;
 }
 
-RefPtr<GraphicsLayer> PDFScrollingPresentationController::createGraphicsLayer(const String& name, GraphicsLayer::Type layerType)
-{
-    auto* graphicsLayerFactory = m_plugin->graphicsLayerFactory();
-    if (!graphicsLayerFactory)
-        return nullptr;
-
-    Ref graphicsLayer = GraphicsLayer::create(graphicsLayerFactory, *this, layerType);
-    graphicsLayer->setName(name);
-    return graphicsLayer;
-}
-
 void PDFScrollingPresentationController::setupLayers(GraphicsLayer& scrolledContentsLayer)
 {
     if (!m_pageBackgroundsContainerLayer) {
@@ -180,51 +169,15 @@ void PDFScrollingPresentationController::updatePageBackgroundLayers()
         auto destinationRect = pageBoundsRect;
         destinationRect.scale(documentLayout.scale());
 
-        auto addLayerShadow = [](GraphicsLayer& layer, IntPoint shadowOffset, const Color& shadowColor, int shadowStdDeviation) {
-            Vector<RefPtr<FilterOperation>> filterOperations;
-            filterOperations.append(DropShadowFilterOperation::create(shadowOffset, shadowStdDeviation, shadowColor));
-
-            FilterOperations filters;
-            filters.setOperations(WTFMove(filterOperations));
-            layer.setFilters(filters);
-        };
-
-        const auto containerShadowOffset = IntPoint { 0, 1 };
-        constexpr auto containerShadowColor = SRGBA<uint8_t> { 0, 0, 0, 46 };
-        constexpr int containerShadowStdDeviation = 2;
-
-        const auto shadowOffset = IntPoint { 0, 2 };
-        constexpr auto shadowColor = SRGBA<uint8_t> { 0, 0, 0, 38 };
-        constexpr int shadowStdDeviation = 6;
-
         auto pageContainerLayer = [&](PDFDocumentLayout::PageIndex pageIndex) {
             if (pageIndex < pageContainerLayers.size())
                 return pageContainerLayers[pageIndex];
 
-            auto pageContainerLayer = createGraphicsLayer(makeString("Page container "_s, pageIndex), GraphicsLayer::Type::Normal);
-            auto pageBackgroundLayer = createGraphicsLayer(makeString("Page background "_s, pageIndex), GraphicsLayer::Type::Normal);
-            // Can only be null if this->page() is null, which we checked above.
-            ASSERT(pageContainerLayer);
-            ASSERT(pageBackgroundLayer);
-
-            pageContainerLayer->addChild(*pageBackgroundLayer);
-
-            pageContainerLayer->setAnchorPoint({ });
-            addLayerShadow(*pageContainerLayer, containerShadowOffset, containerShadowColor, containerShadowStdDeviation);
-
-            pageBackgroundLayer->setAnchorPoint({ });
-            pageBackgroundLayer->setBackgroundColor(Color::white);
-            pageBackgroundLayer->setDrawsContent(true);
-            pageBackgroundLayer->setAcceleratesDrawing(true);
-            pageBackgroundLayer->setShouldUpdateRootRelativeScaleFactor(false);
-            pageBackgroundLayer->setNeedsDisplay(); // We only need to paint this layer once.
+            RefPtr pageContainerLayer = makePageContainerLayer(pageIndex);
 
             // Sure would be nice if we could just stuff data onto a GraphicsLayer.
+            RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*pageContainerLayer);
             m_pageBackgroundLayers.add(pageBackgroundLayer, pageIndex);
-
-            // FIXME: Need to add a 1px black border with alpha 0.0586.
-
-            addLayerShadow(*pageBackgroundLayer, shadowOffset, shadowColor, shadowStdDeviation);
 
             auto containerLayer = pageContainerLayer.releaseNonNull();
             pageContainerLayers.append(WTFMove(containerLayer));
@@ -371,6 +324,15 @@ void PDFScrollingPresentationController::paintBackgroundLayerForPage(const Graph
         asyncRenderer->paintPagePreview(context, clipRect, destinationRect, pageIndex);
 }
 
+std::optional<PDFDocumentLayout::PageIndex> PDFScrollingPresentationController::pageIndexForPageBackgroundLayer(const GraphicsLayer* layer) const
+{
+    auto it = m_pageBackgroundLayers.find(layer);
+    if (it == m_pageBackgroundLayers.end())
+        return { };
+
+    return it->value;
+}
+
 #pragma mark -
 
 void PDFScrollingPresentationController::notifyFlushRequired(const GraphicsLayer*)
@@ -410,15 +372,6 @@ void PDFScrollingPresentationController::tiledBackingUsageChanged(const Graphics
 {
     if (usingTiledBacking)
         layer->tiledBacking()->setIsInWindow(m_plugin->isInWindow());
-}
-
-std::optional<PDFDocumentLayout::PageIndex> PDFScrollingPresentationController::pageIndexForPageBackgroundLayer(const GraphicsLayer* layer) const
-{
-    auto it = m_pageBackgroundLayers.find(layer);
-    if (it == m_pageBackgroundLayers.end())
-        return { };
-
-    return it->value;
 }
 
 void PDFScrollingPresentationController::paintContents(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, OptionSet<GraphicsLayerPaintBehavior>)

@@ -33,6 +33,8 @@
 
 namespace WebCore {
 enum class TiledBackingScrollability : uint8_t;
+class GraphicsLayerClient;
+class GraphicsLayer;
 };
 
 namespace WebKit {
@@ -73,6 +75,12 @@ public:
 
 
 protected:
+    virtual WebCore::GraphicsLayerClient& graphicsLayerClient() = 0;
+
+    RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(const String&, WebCore::GraphicsLayer::Type);
+    RefPtr<WebCore::GraphicsLayer> makePageContainerLayer(PDFDocumentLayout::PageIndex);
+
+    static RefPtr<WebCore::GraphicsLayer> pageBackgroundLayerForPageContainerLayer(WebCore::GraphicsLayer&);
 
     Ref<UnifiedPDFPlugin> m_plugin;
 };
