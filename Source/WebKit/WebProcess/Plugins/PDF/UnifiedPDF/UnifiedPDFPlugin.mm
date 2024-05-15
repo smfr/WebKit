@@ -2153,96 +2153,10 @@ bool UnifiedPDFPlugin::handleContextMenuEvent(const WebMouseEvent& event)
 
 #if PLATFORM(MAC)
 
+// FIXME: Remove.
 CheckedPtr<KeyboardScrollingAnimator> UnifiedPDFPlugin::checkedKeyboardScrollingAnimator() const
 {
     return scrollAnimator().keyboardScrollingAnimator();
-}
-
-bool UnifiedPDFPlugin::handleKeyboardCommand(const WebKeyboardEvent& event)
-{
-    auto& commands = event.commands();
-    if (commands.size() != 1)
-        return false;
-
-    auto commandName = commands[0].commandName;
-    if (commandName == "scrollToBeginningOfDocument:"_s)
-        return checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollUp, ScrollGranularity::Document, false);
-
-    if (commandName == "scrollToEndOfDocument:"_s)
-        return checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollDown, ScrollGranularity::Document, false);
-
-    return false;
-}
-
-bool UnifiedPDFPlugin::handleKeyboardEventForDiscreteDisplayMode(const WebKeyboardEvent& event)
-{
-    if (!m_currentlySnappedPage || !isInDiscreteDisplayMode())
-        return false;
-
-    if (event.type() == WebEventType::KeyUp) {
-        checkedKeyboardScrollingAnimator()->handleKeyUpEvent();
-        return false;
-    }
-
-    if (event.type() != WebEventType::KeyDown || m_isScrollingWithAnimationToPageExtent)
-        return false;
-
-    auto key = event.key();
-    if (key == "ArrowLeft"_s) {
-        if (checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollLeft, ScrollGranularity::Line, false)) {
-            m_animatedKeyboardScrollingDirection = ScrollDirection::ScrollLeft;
-            return true;
-        }
-        return false;
-    }
-
-    if (key == "ArrowRight"_s) {
-        if (checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollRight, ScrollGranularity::Line, false)) {
-            m_animatedKeyboardScrollingDirection = ScrollDirection::ScrollRight;
-            return true;
-        }
-        return false;
-    }
-
-    auto currentPage = *m_currentlySnappedPage;
-    auto currentPageContentRect = pageBoundsInContentsSpace(currentPage);
-    bool isTallerThanViewport = currentPageContentRect.height() > m_size.height();
-    if (isTallerThanViewport) {
-        if (key == "ArrowUp"_s) {
-            if (snapToNearbyPageExtentForKeyboardScrolling(ScrollDirection::ScrollUp))
-                return true;
-
-            if (checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollUp, ScrollGranularity::Line, false)) {
-                m_animatedKeyboardScrollingDirection = ScrollDirection::ScrollUp;
-                return true;
-            }
-        }
-
-        if (key == "ArrowDown"_s) {
-            if (snapToNearbyPageExtentForKeyboardScrolling(ScrollDirection::ScrollDown))
-                return true;
-
-            if (checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollDown, ScrollGranularity::Line, false)) {
-                m_animatedKeyboardScrollingDirection = ScrollDirection::ScrollDown;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    if (key == "ArrowUp"_s && currentPage) {
-        auto previousPageContentRect = pageBoundsInContentsSpace(currentPage - 1);
-        return scrollAnimator().scrollToPositionWithoutAnimation({ static_cast<float>(m_scrollOffset.width()), previousPageContentRect.y() });
-    }
-
-    auto pagesToSkip = isShowingTwoPages() ? 2 : 1;
-    if (key == "ArrowDown"_s && currentPage < m_documentLayout.pageCount() - pagesToSkip) {
-        auto nextPageContentRect = pageBoundsInContentsSpace(currentPage + pagesToSkip);
-        return scrollAnimator().scrollToPositionWithoutAnimation({ static_cast<float>(m_scrollOffset.width()), nextPageContentRect.y() });
-    }
-
-    return false;
 }
 
 bool UnifiedPDFPlugin::snapToNearbyPageExtentForKeyboardScrolling(ScrollDirection direction)
@@ -2282,15 +2196,7 @@ void UnifiedPDFPlugin::animatedScrollDidEnd()
 
 bool UnifiedPDFPlugin::handleKeyboardEvent(const WebKeyboardEvent& event)
 {
-#if PLATFORM(MAC)
-    if (handleKeyboardCommand(event))
-        return true;
-
-    if (handleKeyboardEventForDiscreteDisplayMode(event))
-        return true;
-#endif
-
-    return false;
+    return m_presentationController->handleKeyboardEvent(event);
 }
 
 void UnifiedPDFPlugin::followLinkAnnotation(PDFAnnotation *annotation)
@@ -3877,10 +3783,13 @@ void UnifiedPDFPlugin::setPDFDisplayModeForTesting(const String& mode)
 
 void UnifiedPDFPlugin::setDisplayMode(PDFDocumentLayout::DisplayMode mode)
 {
+    // FIXME: Preserve the visible page.
     m_documentLayout.setDisplayMode(mode);
 
-    if (m_presentationController && m_presentationController->supportsDisplayMode(mode))
+    if (m_presentationController && m_presentationController->supportsDisplayMode(mode)) {
+        m_presentationController->willChangeDisplayMode(mode);
         return;
+    }
 
     setPresentationController(PDFPresentationController::createForMode(mode, *this));
 }

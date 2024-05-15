@@ -39,6 +39,7 @@ class GraphicsLayer;
 
 namespace WebKit {
 
+class WebKeyboardEvent;
 class UnifiedPDFPlugin;
 enum class RepaintRequirement : uint8_t;
 
@@ -50,6 +51,7 @@ public:
     virtual ~PDFPresentationController();
 
     virtual bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const = 0;
+    virtual void willChangeDisplayMode(PDFDocumentLayout::DisplayMode newMode) = 0;
 
     virtual void teardown() = 0;
 
@@ -72,6 +74,9 @@ public:
     virtual void repaintForIncrementalLoad() = 0;
     virtual void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) = 0;
 
+
+    // Event handling.
+    virtual bool handleKeyboardEvent(const WebKeyboardEvent&) = 0;
 
 
 protected:

@@ -41,6 +41,8 @@ public:
 
 private:
     bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const override;
+    void willChangeDisplayMode(PDFDocumentLayout::DisplayMode) override;
+
     void teardown() override;
 
     PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
@@ -60,6 +62,13 @@ private:
 
     GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 
+
+    bool handleKeyboardEvent(const WebKeyboardEvent&) override;
+
+    bool handleKeyboardCommand(const WebKeyboardEvent&);
+    bool handleKeyboardEventForPageNavigation(const WebKeyboardEvent&);
+
+
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
     float pageScaleFactor() const override;
@@ -73,6 +82,17 @@ private:
 
     void buildRows(bool displayModeChanged);
     std::optional<unsigned> rowIndexForLayer(const WebCore::GraphicsLayer*) const;
+
+    bool canGoToNextRow() const;
+    bool canGoToPreviousRow() const;
+
+    enum class Animated : bool { No, Yes };
+    void goToNextRow(Animated);
+    void goToPreviousRow(Animated);
+
+    void setVisibleRow(unsigned);
+
+    void updateLayersAfterChangeInVisibleRow();
 
     RefPtr<GraphicsLayer> m_rowsContainerLayer;
 
@@ -96,6 +116,8 @@ private:
     Vector<RowData> m_rows;
     HashMap<RefPtr<WebCore::GraphicsLayer>, unsigned> m_layerToRowIndexMap;
     std::optional<PDFDocumentLayout::DisplayMode> m_displayModeAtLastLayerSetup;
+
+    unsigned m_visibleRowIndex { 0 };
 };
 
 

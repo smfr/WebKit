@@ -29,6 +29,11 @@
 
 #include "PDFPresentationController.h"
 #include <WebCore/GraphicsLayerClient.h>
+#include <wtf/CheckedPtr.h>
+
+namespace WebCore {
+class KeyboardScrollingAnimator;
+};
 
 namespace WebKit {
 
@@ -41,6 +46,8 @@ public:
 
 private:
     bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const override;
+    void willChangeDisplayMode(PDFDocumentLayout::DisplayMode) override { }
+
     void teardown() override;
 
     PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
@@ -55,6 +62,12 @@ private:
     void currentlySnappedPageChanged() override;
 
     GraphicsLayerClient& graphicsLayerClient() override { return *this; }
+
+    bool handleKeyboardEvent(const WebKeyboardEvent&) override;
+#if PLATFORM(MAC)
+    bool handleKeyboardCommand(const WebKeyboardEvent&);
+    CheckedPtr<WebCore::KeyboardScrollingAnimator> checkedKeyboardScrollingAnimator() const;
+#endif
 
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;

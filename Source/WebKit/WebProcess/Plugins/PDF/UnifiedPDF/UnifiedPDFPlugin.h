@@ -305,8 +305,6 @@ private:
     void performCopyLinkOperation(const WebCore::IntPoint& contextMenuEventRootViewPoint) const;
 
 #if PLATFORM(MAC)
-    bool handleKeyboardCommand(const WebKeyboardEvent&);
-    bool handleKeyboardEventForDiscreteDisplayMode(const WebKeyboardEvent&);
     CheckedPtr<WebCore::KeyboardScrollingAnimator> checkedKeyboardScrollingAnimator() const;
 #endif
 

@@ -30,7 +30,10 @@
 
 #include "Logging.h"
 #include "UnifiedPDFPlugin.h"
+#include "WebKeyboardEvent.h"
 #include <WebCore/GraphicsLayer.h>
+#include <WebCore/KeyboardScrollingAnimator.h>
+#include <WebCore/ScrollAnimator.h>
 #include <WebCore/TiledBacking.h>
 #include <WebCore/TransformationMatrix.h>
 
@@ -56,6 +59,43 @@ bool PDFScrollingPresentationController::supportsDisplayMode(PDFDocumentLayout::
 {
     return PDFDocumentLayout::isScrollingDisplayMode(mode);
 }
+
+#pragma mark -
+
+bool PDFScrollingPresentationController::handleKeyboardEvent(const WebKeyboardEvent& event)
+{
+#if PLATFORM(MAC)
+    if (handleKeyboardCommand(event))
+        return true;
+#endif
+
+    return false;
+}
+
+#if PLATFORM(MAC)
+CheckedPtr<WebCore::KeyboardScrollingAnimator> PDFScrollingPresentationController::checkedKeyboardScrollingAnimator() const
+{
+    return m_plugin->scrollAnimator().keyboardScrollingAnimator();
+}
+
+bool PDFScrollingPresentationController::handleKeyboardCommand(const WebKeyboardEvent& event)
+{
+    auto& commands = event.commands();
+    if (commands.size() != 1)
+        return false;
+
+    auto commandName = commands[0].commandName;
+    if (commandName == "scrollToBeginningOfDocument:"_s)
+        return checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollUp, ScrollGranularity::Document, false);
+
+    if (commandName == "scrollToEndOfDocument:"_s)
+        return checkedKeyboardScrollingAnimator()->beginKeyboardScrollGesture(ScrollDirection::ScrollDown, ScrollGranularity::Document, false);
+
+    return false;
+}
+#endif
+
+#pragma mark -
 
 PDFPageCoverage PDFScrollingPresentationController::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow>) const
 {

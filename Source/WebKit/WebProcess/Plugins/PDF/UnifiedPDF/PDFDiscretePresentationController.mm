@@ -29,6 +29,10 @@
 #if ENABLE(UNIFIED_PDF)
 
 #include "Logging.h"
+#include "WebKeyboardEvent.h"
+#include <WebCore/GraphicsLayer.h>
+#include <WebCore/TiledBacking.h>
+#include <WebCore/TransformationMatrix.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -50,6 +54,106 @@ bool PDFDiscretePresentationController::supportsDisplayMode(PDFDocumentLayout::D
 {
     return PDFDocumentLayout::isDiscreteDisplayMode(mode);
 }
+
+void PDFDiscretePresentationController::willChangeDisplayMode(PDFDocumentLayout::DisplayMode newMode)
+{
+    ASSERT(supportsDisplayMode(newMode));
+    m_visibleRowIndex = 0;
+}
+
+#pragma mark -
+
+bool PDFDiscretePresentationController::handleKeyboardEvent(const WebKeyboardEvent& event)
+{
+#if PLATFORM(MAC)
+    if (handleKeyboardCommand(event))
+        return true;
+
+    if (handleKeyboardEventForPageNavigation(event))
+        return true;
+#endif
+
+    return false;
+}
+
+// FIXME: Do we need this?
+bool PDFDiscretePresentationController::handleKeyboardCommand(const WebKeyboardEvent& event)
+{
+    return false;
+}
+
+bool PDFDiscretePresentationController::handleKeyboardEventForPageNavigation(const WebKeyboardEvent& event)
+{
+//    if (m_isScrollingWithAnimationToPageExtent)
+//        return false;
+
+    if (event.type() == WebEventType::KeyUp)
+        return false;
+
+    auto key = event.key();
+    if (key == "ArrowLeft"_s || key == "ArrowUp"_s) {
+        if (!canGoToPreviousRow())
+            return false;
+
+        goToPreviousRow(Animated::No);
+        return true;
+    }
+
+    if (key == "ArrowRight"_s || key == "ArrowDown"_s) {
+        if (!canGoToNextRow())
+            return false;
+
+        goToNextRow(Animated::No);
+        return true;
+    }
+
+    return false;
+}
+
+#pragma mark -
+
+bool PDFDiscretePresentationController::canGoToNextRow() const
+{
+    if (m_rows.isEmpty())
+        return false;
+
+    return m_visibleRowIndex < m_rows.size() - 1;
+}
+
+bool PDFDiscretePresentationController::canGoToPreviousRow() const
+{
+    return m_visibleRowIndex > 0;
+}
+
+void PDFDiscretePresentationController::goToNextRow(Animated)
+{
+    if (!canGoToNextRow())
+        return;
+
+    setVisibleRow(m_visibleRowIndex + 1);
+}
+
+void PDFDiscretePresentationController::goToPreviousRow(Animated)
+{
+    if (!canGoToPreviousRow())
+        return;
+
+    setVisibleRow(m_visibleRowIndex - 1);
+}
+
+void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
+{
+    ASSERT(rowIndex < m_rows.size());
+
+    if (rowIndex == m_visibleRowIndex)
+        return;
+
+    m_visibleRowIndex = rowIndex;
+    WTF_ALWAYS_LOG("PDFDiscretePresentationController::setVisibleRow " << rowIndex);
+    updateLayersAfterChangeInVisibleRow();
+}
+
+#pragma mark -
 
 PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
 {
@@ -117,9 +221,6 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
     auto layoutRows = m_plugin->documentLayout().rows();
 
     m_rows.resize(layoutRows.size());
-
-    Vector<Ref<GraphicsLayer>> containerChildren;
-    containerChildren.reserveInitialCapacity(layoutRows.size());
 
     auto updateRowPageBackgroundContainerLayers = [&](size_t rowIndex, PDFLayoutRow& layoutRow, RowData& row, bool displayModeChanged) {
         if (!row.leftPageContainerLayer) {
@@ -200,12 +301,7 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         row.pages = layoutRow;
 
         ensureLayersForRow(rowIndex, layoutRow, row);
-
-        RefPtr rowContainerLayer = row.containerLayer;
-        containerChildren.append(rowContainerLayer.releaseNonNull());
     }
-
-    m_rowsContainerLayer->setChildren(WTFMove(containerChildren));
 }
 
 void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
@@ -261,14 +357,12 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
 
         row.containerLayer->setPosition(scaledRowBounds.location());
         row.containerLayer->setSize(scaledRowBounds.size());
-        row.containerLayer->setOpacity(0);
 
         updateRowPageContainerLayers(row);
 
         row.contentsLayer->setPosition(scaledRowBounds.location());
         row.contentsLayer->setSize(scaledRowBounds.size());
-
-        row.contentsLayer->setOpacity(0.2);
+//        row.contentsLayer->setOpacity(0.2);
 
         m_plugin->asyncRenderer()->setupWithLayer(*row.contentsLayer);
 
@@ -278,9 +372,26 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
 #endif
     }
 
-    // hack
-    if (!m_rows.isEmpty())
-        m_rows[0].containerLayer->setOpacity(1);
+    updateLayersAfterChangeInVisibleRow();
+}
+
+void PDFDiscretePresentationController::updateLayersAfterChangeInVisibleRow()
+{
+    if (m_visibleRowIndex >= m_rows.size())
+        return;
+
+    m_rowsContainerLayer->removeAllChildren();
+
+    auto& visibleRow = m_rows[m_visibleRowIndex];
+
+    bool isInWindow = m_plugin->isInWindow();
+    visibleRow.contentsLayer->setIsInWindow(isInWindow);
+#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+    visibleRow.selectionLayer->setIsInWindow(isInWindow);
+#endif
+
+    RefPtr rowContainer = visibleRow.containerLayer;
+    m_rowsContainerLayer->addChild(rowContainer.releaseNonNull());
 }
 
 void PDFDiscretePresentationController::updateIsInWindow(bool isInWindow)
