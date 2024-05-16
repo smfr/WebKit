@@ -191,13 +191,13 @@ PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const Flo
     return pageCoverage;
 }
 
-PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
+PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
     auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForRect(clipRect, row) };
 
     pageCoverageAndScales.deviceScaleFactor = m_plugin->deviceScaleFactor();
     pageCoverageAndScales.pdfDocumentScale = m_plugin->documentLayout().scale();
-    pageCoverageAndScales.tilingScaleFactor = 1; // FIXME
+    pageCoverageAndScales.tilingScaleFactor = tilingScaleFactor;
 
     return pageCoverageAndScales;
 }
@@ -222,6 +222,7 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
     // one-up and two-up mode.
     auto layoutRows = m_plugin->documentLayout().rows();
 
+    // FIXME: Need to unregister for removed layers.
     m_rows.resize(layoutRows.size());
 
     auto updateRowPageBackgroundContainerLayers = [&](size_t rowIndex, PDFLayoutRow& layoutRow, RowData& row, bool displayModeChanged) {
@@ -229,6 +230,7 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
             auto leftPageIndex = layoutRow.pages[0];
 
             row.leftPageContainerLayer = makePageContainerLayer(leftPageIndex);
+            row.leftPageContainerLayer->setOpacity(0.1);
             RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.leftPageContainerLayer);
             m_layerToRowIndexMap.add(pageBackgroundLayer, rowIndex);
         }
@@ -247,6 +249,7 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         if (!row.rightPageContainerLayer) {
             auto rightPageIndex = layoutRow.pages[1];
             row.rightPageContainerLayer = makePageContainerLayer(rightPageIndex);
+            row.rightPageContainerLayer->setOpacity(0.1);
             RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.rightPageContainerLayer);
             m_layerToRowIndexMap.add(pageBackgroundLayer, rowIndex);
         }
@@ -285,8 +288,7 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         row.contentsLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
 
         // This is the call that enables async rendering.
-        // FIXME: Broken
-        asyncRenderer()->setupWithLayer(*row.contentsLayer);
+        asyncRenderer()->startTrackingLayer(*row.contentsLayer);
 
         m_layerToRowIndexMap.set(row.contentsLayer, rowIndex);
 
@@ -311,6 +313,9 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         ensureLayersForRow(rowIndex, layoutRow, row);
     }
 }
+
+// FIXME: We fail to update all the tiled layers on zooming
+
 
 void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
 {
@@ -587,7 +592,7 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
 
     if (layer == row.contentsLayer.get()) {
         RefPtr asyncRenderer = asyncRendererIfExists();
-        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
+        m_plugin->paintPDFContent(layer, context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
         return;
     }
 
@@ -599,7 +604,7 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void PDFDiscretePresentationController::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+void PDFDiscretePresentationController::paintPDFSelection(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
 }
 #endif

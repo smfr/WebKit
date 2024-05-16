@@ -128,13 +128,9 @@ PDFPageCoverage PDFScrollingPresentationController::pageCoverageForRect(const Fl
     return pageCoverage;
 }
 
-PDFPageCoverageAndScales PDFScrollingPresentationController::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
+PDFPageCoverageAndScales PDFScrollingPresentationController::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
     auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForRect(clipRect, row) };
-
-    auto tilingScaleFactor = 1.0f;
-    if (auto* tiledBacking = m_contentsLayer->tiledBacking())
-        tilingScaleFactor = tiledBacking->tilingScaleFactor();
 
     pageCoverageAndScales.deviceScaleFactor = m_plugin->deviceScaleFactor();
     pageCoverageAndScales.pdfDocumentScale = m_plugin->documentLayout().scale();
@@ -159,7 +155,7 @@ void PDFScrollingPresentationController::setupLayers(GraphicsLayer& scrolledCont
         scrolledContentsLayer.addChild(*m_contentsLayer);
 
         // This is the call that enables async rendering.
-        asyncRenderer()->setupWithLayer(*m_contentsLayer);
+        asyncRenderer()->startTrackingLayer(*m_contentsLayer);
     }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
@@ -341,7 +337,7 @@ void PDFScrollingPresentationController::setNeedsRepaintInDocumentRect(OptionSet
     auto contentsRect = m_plugin->convertUp(UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, UnifiedPDFPlugin::CoordinateSpace::Contents, rectInDocumentCoordinates);
     if (repaintRequirements.contains(RepaintRequirement::PDFContent)) {
         if (RefPtr asyncRenderer = asyncRendererIfExists())
-            asyncRenderer->pdfContentChangedInRect(m_plugin->nonNormalizedScaleFactor(), contentsRect);
+            asyncRenderer->pdfContentChangedInRect(m_contentsLayer.get(), m_plugin->nonNormalizedScaleFactor(), contentsRect);
     }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
@@ -420,13 +416,13 @@ void PDFScrollingPresentationController::paintContents(const GraphicsLayer* laye
 
     if (layer == m_contentsLayer.get()) {
         RefPtr asyncRenderer = asyncRendererIfExists();
-        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
+        m_plugin->paintPDFContent(layer, context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
         return;
     }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
     if (layer == m_selectionLayer.get())
-        return paintPDFSelection(context, clipRect, { });
+        return paintPDFSelection(layer, context, clipRect, { });
 #endif
 
     if (auto backgroundLayerPageIndex = pageIndexForPageBackgroundLayer(layer)) {
@@ -436,7 +432,7 @@ void PDFScrollingPresentationController::paintContents(const GraphicsLayer* laye
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void PDFScrollingPresentationController::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+void PDFScrollingPresentationController::paintPDFSelection(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
 }
 #endif

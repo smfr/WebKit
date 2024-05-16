@@ -659,7 +659,7 @@ void UnifiedPDFPlugin::paint(GraphicsContext& context, const IntRect&)
     clipRect.scale(1.0f / m_scaleFactor);
 
     // FIXME: Need to ask the presentationController which row is relevant.
-    paintPDFContent(context, clipRect);
+    paintPDFContent(nullptr, context, clipRect);
 }
 
 void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, OptionSet<GraphicsLayerPaintBehavior>)
@@ -706,15 +706,15 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect,
     return m_presentationController->pageCoverageForRect(clipRect, row);
 }
 
-PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
+PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { { }, 1, 1, 1 };
 
-    return m_presentationController->pageCoverageAndScalesForRect(clipRect, row);
+    return m_presentationController->pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
 }
 
-void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AsyncPDFRenderer* asyncRenderer)
+void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AsyncPDFRenderer* asyncRenderer)
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return;
@@ -733,7 +733,12 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
     }
 
     auto pageWithAnnotation = pageIndexWithHoveredAnnotation();
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row);
+
+    auto tilingScaleFactor = 1.0f;
+    if (auto* tiledBacking = layer->tiledBacking())
+        tilingScaleFactor = tiledBacking->tilingScaleFactor();
+
+    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
 
     LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: paintPDFContent " << pageCoverage);
@@ -755,7 +760,8 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
             auto pageStateSaver = GraphicsContextStateSaver(context);
             context.clip(pageBoundsInPaintingCoordinates);
 
-            bool paintedPageContent = asyncRenderer->paintTilesForPage(context, documentScale, clipRect, pageBoundsInPaintingCoordinates, pageInfo.pageIndex);
+            ASSERT(layer);
+            bool paintedPageContent = asyncRenderer->paintTilesForPage(layer, context, documentScale, clipRect, pageBoundsInPaintingCoordinates, pageInfo.pageIndex);
             LOG_WITH_STREAM(PDFAsyncRendering, stream << "UnifiedPDFPlugin::paintPDFContent - painting tiles for page " << pageInfo.pageIndex << " dest rect " << pageBoundsInPaintingCoordinates << " clip " << clipRect << " - painted cached tile " << paintedPageContent);
 
             if (!paintedPageContent && showDebugIndicators)
@@ -800,7 +806,7 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void UnifiedPDFPlugin::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
     if (!m_currentSelection || [m_currentSelection isEmpty] || !canPaintSelectionIntoOwnedLayer())
         return;
@@ -816,7 +822,11 @@ void UnifiedPDFPlugin::paintPDFSelection(GraphicsContext& context, const FloatRe
         return blendSourceOver(Color::white, selectionColor);
     }();
 
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row);
+    auto tilingScaleFactor = 1.0f;
+    if (auto* tiledBacking = layer->tiledBacking())
+        tilingScaleFactor = tiledBacking->tilingScaleFactor();
+
+    auto pageCoverage = pageCoverageAndScalesForRect(layer, clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
@@ -3238,7 +3248,7 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForSelection(PDFSelection *
         context.translate(-rectInContentsCoordinates.location());
 
         // FIXME: Compute row.
-        paintPDFContent(context, rectInContentsCoordinates, { }, PaintingBehavior::PageContentsOnly);
+        paintPDFContent(nullptr, context, rectInContentsCoordinates, { }, PaintingBehavior::PageContentsOnly);
     }
 
     // FIXME: Figure out how to share this with WebTextIndicatorLayer.
