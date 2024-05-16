@@ -156,6 +156,7 @@ private:
     float topContentInset() const { return m_topContentInset; }
 
     // TiledBacking member functions.
+    PlatformLayerIdentifier layerIdentifier() const final;
     void setClient(TiledBackingClient*) final;
     void setVisibleRect(const FloatRect&) final;
     void setLayoutViewportRect(std::optional<FloatRect>) final;

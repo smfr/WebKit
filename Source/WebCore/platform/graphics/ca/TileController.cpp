@@ -94,6 +94,11 @@ void TileController::setClient(TiledBackingClient* client)
     m_client = nullptr;
 }
 
+PlatformLayerIdentifier TileController::layerIdentifier() const
+{
+    return owningGraphicsLayer()->platformCALayerIdentifier();
+}
+
 void TileController::tileCacheLayerBoundsChanged()
 {
     ASSERT(owningGraphicsLayer()->isCommittingChanges());
