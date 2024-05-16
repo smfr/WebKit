@@ -39,6 +39,7 @@ class GraphicsLayer;
 
 namespace WebKit {
 
+class AsyncPDFRenderer;
 class WebKeyboardEvent;
 class UnifiedPDFPlugin;
 enum class RepaintRequirement : uint8_t;
@@ -50,10 +51,11 @@ public:
     PDFPresentationController(UnifiedPDFPlugin&);
     virtual ~PDFPresentationController();
 
+    // Subclasses must call the base class teardown().
+    virtual void teardown();
+
     virtual bool supportsDisplayMode(PDFDocumentLayout::DisplayMode) const = 0;
     virtual void willChangeDisplayMode(PDFDocumentLayout::DisplayMode newMode) = 0;
-
-    virtual void teardown() = 0;
 
     virtual PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const = 0;
     virtual PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const = 0;
@@ -87,7 +89,12 @@ protected:
 
     static RefPtr<WebCore::GraphicsLayer> pageBackgroundLayerForPageContainerLayer(WebCore::GraphicsLayer&);
 
+    Ref<AsyncPDFRenderer> asyncRenderer();
+    RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;
+
     Ref<UnifiedPDFPlugin> m_plugin;
+    RefPtr<AsyncPDFRenderer> m_asyncRenderer;
+
 };
 
 } // namespace WebKit

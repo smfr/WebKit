@@ -48,6 +48,8 @@ PDFScrollingPresentationController::PDFScrollingPresentationController(UnifiedPD
 
 void PDFScrollingPresentationController::teardown()
 {
+    PDFPresentationController::teardown();
+
     GraphicsLayer::unparentAndClear(m_contentsLayer);
     GraphicsLayer::unparentAndClear(m_pageBackgroundsContainerLayer);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
@@ -157,7 +159,7 @@ void PDFScrollingPresentationController::setupLayers(GraphicsLayer& scrolledCont
         scrolledContentsLayer.addChild(*m_contentsLayer);
 
         // This is the call that enables async rendering.
-        m_plugin->asyncRenderer()->setupWithLayer(*m_contentsLayer);
+        asyncRenderer()->setupWithLayer(*m_contentsLayer);
     }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
@@ -311,9 +313,8 @@ void PDFScrollingPresentationController::updateDebugBorders(bool showDebugBorder
             propagateSettingsToLayer(pageLayer->children()[0]);
     }
 
-    if (RefPtr asyncRenderer = m_plugin->asyncRendererIfExists())
+    if (RefPtr asyncRenderer = asyncRendererIfExists())
         asyncRenderer->setShowDebugBorders(showDebugBorders);
-
 }
 
 void PDFScrollingPresentationController::updateForCurrentScrollability(OptionSet<TiledBackingScrollability>)
@@ -339,7 +340,7 @@ void PDFScrollingPresentationController::setNeedsRepaintInDocumentRect(OptionSet
 
     auto contentsRect = m_plugin->convertUp(UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, UnifiedPDFPlugin::CoordinateSpace::Contents, rectInDocumentCoordinates);
     if (repaintRequirements.contains(RepaintRequirement::PDFContent)) {
-        if (RefPtr asyncRenderer = m_plugin->asyncRendererIfExists())
+        if (RefPtr asyncRenderer = asyncRendererIfExists())
             asyncRenderer->pdfContentChangedInRect(m_plugin->nonNormalizedScaleFactor(), contentsRect);
     }
 
@@ -360,7 +361,7 @@ void PDFScrollingPresentationController::paintBackgroundLayerForPage(const Graph
     auto destinationRect = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
     destinationRect.setLocation({ });
 
-    if (RefPtr asyncRenderer = m_plugin->asyncRendererIfExists())
+    if (RefPtr asyncRenderer = asyncRendererIfExists())
         asyncRenderer->paintPagePreview(context, clipRect, destinationRect, pageIndex);
 }
 
@@ -418,7 +419,8 @@ void PDFScrollingPresentationController::paintContents(const GraphicsLayer* laye
 {
 
     if (layer == m_contentsLayer.get()) {
-        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, UnifiedPDFPlugin::AllowsAsyncRendering::Yes);
+        RefPtr asyncRenderer = asyncRendererIfExists();
+        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
         return;
     }
 
@@ -432,6 +434,12 @@ void PDFScrollingPresentationController::paintContents(const GraphicsLayer* laye
         return;
     }
 }
+
+#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+void PDFScrollingPresentationController::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+{
+}
+#endif
 
 } // namespace WebKit
 

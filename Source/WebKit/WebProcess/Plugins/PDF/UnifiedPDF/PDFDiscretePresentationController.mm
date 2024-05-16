@@ -45,6 +45,8 @@ PDFDiscretePresentationController::PDFDiscretePresentationController(UnifiedPDFP
 
 void PDFDiscretePresentationController::teardown()
 {
+    PDFPresentationController::teardown();
+
     GraphicsLayer::unparentAndClear(m_rowsContainerLayer);
     // FIXME: More
     m_layerToRowIndexMap.clear();
@@ -281,13 +283,19 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         row.contentsLayer->setAnchorPoint({ });
         row.contentsLayer->setDrawsContent(true);
         row.contentsLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
+
+        // This is the call that enables async rendering.
+        // FIXME: Broken
+        asyncRenderer()->setupWithLayer(*row.contentsLayer);
+
         m_layerToRowIndexMap.set(row.contentsLayer, rowIndex);
+
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
         row.selectionLayer = createGraphicsLayer(makeString("Row selection "_s, rowIndex), GraphicsLayer::Type::TiledBacking);
         row.selectionLayer->setAnchorPoint({ });
         row.selectionLayer->setDrawsContent(true);
-        row.selectionLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
+        row.selectionLayer->setAcceleratesDrawing(true);
         m_layerToRowIndexMap.set(row.selectionLayer, rowIndex);
 #endif
 
@@ -362,9 +370,6 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
 
         row.contentsLayer->setPosition(scaledRowBounds.location());
         row.contentsLayer->setSize(scaledRowBounds.size());
-//        row.contentsLayer->setOpacity(0.2);
-
-        m_plugin->asyncRenderer()->setupWithLayer(*row.contentsLayer);
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
         row.selectionLayer->setPosition(scaledRowBounds.location());
@@ -427,6 +432,9 @@ void PDFDiscretePresentationController::updateDebugBorders(bool showDebugBorders
         propagateSettingsToLayer(*row.selectionLayer);
 #endif
     }
+
+    if (RefPtr asyncRenderer = asyncRendererIfExists())
+        asyncRenderer->setShowDebugBorders(showDebugBorders);
 }
 
 void PDFDiscretePresentationController::updateForCurrentScrollability(OptionSet<TiledBackingScrollability>)
@@ -456,6 +464,11 @@ void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<
         // FIXME: Do incremental repaint.
         row.contentsLayer->setNeedsDisplay();
     }
+
+
+//    if (RefPtr asyncRenderer = asyncRendererIfExists())
+//        asyncRenderer->pdfContentChangedInRect(m_plugin->nonNormalizedScaleFactor(), contentsRect);
+
 }
 
 void PDFDiscretePresentationController::didGeneratePreviewForPage(PDFDocumentLayout::PageIndex pageIndex)
@@ -492,18 +505,23 @@ std::optional<float> PDFDiscretePresentationController::customContentsScale(cons
 {
     auto rowIndex = rowIndexForLayer(layer);
     if (!rowIndex || *rowIndex >= m_rows.size())
-        return false;
+        return { };
 
     auto& row = m_rows[*rowIndex];
-    return layer == row.leftPageBackgroundLayer().get() || layer == row.rightPageBackgroundLayer();
+    if (row.isPageBackgroundLayer(layer))
+        return m_plugin->scaleForPagePreviews();
+
+    return { };
 }
 
 bool PDFDiscretePresentationController::layerNeedsPlatformContext(const GraphicsLayer* layer) const
 {
+    if (m_plugin->canPaintSelectionIntoOwnedLayer())
+        return false;
+
     // We need a platform context if the plugin can not paint selections into its own layer,
     // since we would then have to vend a platform context that PDFKit can paint into.
     // However, this constraint only applies for the contents layer. No other layer needs to be WP-backed.
-
     auto rowIndex = rowIndexForLayer(layer);
     if (!rowIndex || *rowIndex >= m_rows.size())
         return false;
@@ -530,7 +548,7 @@ void PDFDiscretePresentationController::paintBackgroundLayerForRow(const Graphic
         auto destinationRect = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
         destinationRect.setLocation({ });
 
-        if (RefPtr asyncRenderer = m_plugin->asyncRendererIfExists())
+        if (RefPtr asyncRenderer = asyncRendererIfExists())
             asyncRenderer->paintPagePreview(context, clipRect, destinationRect, pageIndex);
     };
 
@@ -568,7 +586,8 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
     }
 
     if (layer == row.contentsLayer.get()) {
-        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, UnifiedPDFPlugin::AllowsAsyncRendering::Yes);
+        RefPtr asyncRenderer = asyncRendererIfExists();
+        m_plugin->paintPDFContent(context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
         return;
     }
 
@@ -578,6 +597,12 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
     }
 #endif
 }
+
+#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+void PDFDiscretePresentationController::paintPDFSelection(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+{
+}
+#endif
 
 #pragma mark -
 

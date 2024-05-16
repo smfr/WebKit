@@ -431,10 +431,9 @@ private:
     PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow>) const;
 
     enum class PaintingBehavior : bool { All, PageContentsOnly };
-    enum class AllowsAsyncRendering : bool { No, Yes };
-    void paintPDFContent(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow> = { }, PaintingBehavior = PaintingBehavior::All, AllowsAsyncRendering = AllowsAsyncRendering::No);
+    void paintPDFContent(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow> = { }, PaintingBehavior = PaintingBehavior::All, AsyncPDFRenderer* = nullptr);
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    void paintPDFSelection(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow>std::optional<PDFLayoutRow> = { });
+    void paintPDFSelection(WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, std::optional<PDFLayoutRow> = { });
 #endif
     bool canPaintSelectionIntoOwnedLayer() const;
 
@@ -563,9 +562,6 @@ private:
 
     std::unique_ptr<PDFPresentationController> m_presentationController;
 
-    Ref<AsyncPDFRenderer> asyncRenderer();
-    RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;
-
     PDFDocumentLayout m_documentLayout;
     RefPtr<WebCore::GraphicsLayer> m_rootLayer;
     RefPtr<WebCore::GraphicsLayer> m_scrollContainerLayer;
@@ -626,8 +622,6 @@ private:
     std::optional<PDFDocumentLayout::PageIndex> m_currentlySnappedPage;
 
     Vector<WebCore::FloatRect> m_findMatchRectsInDocumentCoordinates;
-
-    RefPtr<AsyncPDFRenderer> m_asyncRenderer;
 
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     std::unique_ptr<PDFDataDetectorOverlayController> m_dataDetectorOverlayController;

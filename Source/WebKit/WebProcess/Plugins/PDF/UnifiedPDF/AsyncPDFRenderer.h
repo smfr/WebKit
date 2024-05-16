@@ -170,6 +170,7 @@ private:
     static WebCore::AffineTransform tileToPaintingTransform(float tilingScaleFactor);
     static WebCore::AffineTransform paintingToTileTransform(float tilingScaleFactor);
 
+    // FIXME: Point to the presentation controller.
     ThreadSafeWeakPtr<UnifiedPDFPlugin> m_plugin;
     RefPtr<WebCore::GraphicsLayer> m_pdfContentsLayer;
     Ref<ConcurrentWorkQueue> m_paintingWorkQueue;

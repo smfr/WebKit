@@ -28,6 +28,7 @@
 
 #if ENABLE(UNIFIED_PDF)
 
+#include "AsyncPDFRenderer.h"
 #include "PDFDiscretePresentationController.h"
 #include "PDFScrollingPresentationController.h"
 #include <WebCore/GraphicsLayer.h>
@@ -54,6 +55,26 @@ PDFPresentationController::PDFPresentationController(UnifiedPDFPlugin& plugin)
 }
 
 PDFPresentationController::~PDFPresentationController() = default;
+
+void PDFPresentationController::teardown()
+{
+    if (RefPtr asyncRenderer = asyncRendererIfExists())
+        asyncRenderer->teardown();
+}
+
+Ref<AsyncPDFRenderer> PDFPresentationController::asyncRenderer()
+{
+    if (m_asyncRenderer)
+        return *m_asyncRenderer;
+
+    m_asyncRenderer = AsyncPDFRenderer::create(m_plugin.get());
+    return *m_asyncRenderer;
+}
+
+RefPtr<AsyncPDFRenderer> PDFPresentationController::asyncRendererIfExists() const
+{
+    return m_asyncRenderer;
+}
 
 RefPtr<GraphicsLayer> PDFPresentationController::createGraphicsLayer(const String& name, GraphicsLayer::Type layerType)
 {

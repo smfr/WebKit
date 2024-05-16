@@ -181,9 +181,6 @@ static String mutationObserverNotificationString()
 
 void UnifiedPDFPlugin::teardown()
 {
-    if (RefPtr asyncRenderer = asyncRendererIfExists())
-        asyncRenderer->teardown();
-
     PDFPluginBase::teardown();
 
     GraphicsLayer::unparentAndClear(m_rootLayer);
@@ -207,20 +204,6 @@ void UnifiedPDFPlugin::teardown()
 GraphicsLayer* UnifiedPDFPlugin::graphicsLayer() const
 {
     return m_rootLayer.get();
-}
-
-Ref<AsyncPDFRenderer> UnifiedPDFPlugin::asyncRenderer()
-{
-    if (m_asyncRenderer)
-        return *m_asyncRenderer;
-
-    m_asyncRenderer = AsyncPDFRenderer::create(*this);
-    return *m_asyncRenderer;
-}
-
-RefPtr<AsyncPDFRenderer> UnifiedPDFPlugin::asyncRendererIfExists() const
-{
-    return m_asyncRenderer;
 }
 
 void UnifiedPDFPlugin::setPresentationController(std::unique_ptr<PDFPresentationController>&& presentationController)
@@ -627,9 +610,6 @@ void UnifiedPDFPlugin::didChangeSettings()
     if (m_layerForScrollCorner)
         propagateSettingsToLayer(*m_layerForScrollCorner);
 
-    if (RefPtr asyncRenderer = asyncRendererIfExists())
-        asyncRenderer->setShowDebugBorders(showDebugBorders);
-
     m_presentationController->updateDebugBorders(showDebugBorders, showRepaintCounter);
 }
 
@@ -734,7 +714,7 @@ PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const Fl
     return m_presentationController->pageCoverageAndScalesForRect(clipRect, row);
 }
 
-void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AllowsAsyncRendering allowsAsyncRendering)
+void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AsyncPDFRenderer* asyncRenderer)
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return;
@@ -768,9 +748,6 @@ void UnifiedPDFPlugin::paintPDFContent(GraphicsContext& context, const FloatRect
 
         auto pageDestinationRect = pageInfo.pageBounds;
 
-        RefPtr<AsyncPDFRenderer> asyncRenderer;
-        if (allowsAsyncRendering == AllowsAsyncRendering::Yes)
-            asyncRenderer = asyncRendererIfExists();
         if (asyncRenderer) {
             auto pageBoundsInPaintingCoordinates = pageDestinationRect;
             pageBoundsInPaintingCoordinates.scale(documentScale);
