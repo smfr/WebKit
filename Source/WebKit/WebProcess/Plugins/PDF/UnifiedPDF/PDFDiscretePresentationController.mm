@@ -149,8 +149,9 @@ void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
     if (rowIndex == m_visibleRowIndex)
         return;
 
+    // FIXME: Commit annoations
+
     m_visibleRowIndex = rowIndex;
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::setVisibleRow " << rowIndex);
     updateLayersAfterChangeInVisibleRow();
 }
 
@@ -578,6 +579,14 @@ auto PDFDiscretePresentationController::rowDataForLayerID(PlatformLayerIdentifie
         return nullptr;
 
     return &m_rows[*rowIndex];
+}
+
+std::optional<PDFLayoutRow> PDFDiscretePresentationController::visibleRow() const
+{
+    if (m_visibleRowIndex >= m_rows.size())
+        return { };
+
+    return m_rows[m_visibleRowIndex].pages;
 }
 
 std::optional<PDFLayoutRow> PDFDiscretePresentationController::rowForLayerID(PlatformLayerIdentifier layerID) const

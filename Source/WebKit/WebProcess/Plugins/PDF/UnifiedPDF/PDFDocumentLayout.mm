@@ -86,15 +86,81 @@ std::optional<PDFDocumentLayout::PageIndex> PDFDocumentLayout::indexForPage(Reta
     return std::nullopt;
 }
 
-PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint(FloatPoint documentSpacePoint) const
+PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint(FloatPoint documentSpacePoint, std::optional<PDFLayoutRow> visibleRow) const
 {
     auto pageCount = this->pageCount();
     ASSERT(pageCount);
 
     switch (displayMode()) {
-    case PDFDocumentLayout::DisplayMode::TwoUpDiscrete:
-    case PDFDocumentLayout::DisplayMode::TwoUpContinuous: {
+    case PDFDocumentLayout::DisplayMode::SinglePageDiscrete:
+    case PDFDocumentLayout::DisplayMode::TwoUpDiscrete: {
+        using PairedPagesLayoutBounds = std::pair<FloatRect, std::optional<FloatRect>>;
 
+        auto layoutBoundsForRow = [this](PDFLayoutRow row) -> PairedPagesLayoutBounds {
+            if (row.numPages() == 2)
+                return { layoutBoundsForPageAtIndex(row.pages[0]), layoutBoundsForPageAtIndex(row.pages[1]) };
+
+            return { layoutBoundsForPageAtIndex(row.pages[0]), { } };
+        };
+
+        auto minimumDistanceToPage = [documentSpacePoint](const FloatRect& pageLayoutBounds) {
+            if (pageLayoutBounds.contains(documentSpacePoint))
+                return 0.0f;
+
+            auto pointsToCompare = Vector<FloatPoint> { pageLayoutBounds.minXMinYCorner(), pageLayoutBounds.minXMaxYCorner(), pageLayoutBounds.maxXMinYCorner(), pageLayoutBounds.maxXMaxYCorner() };
+
+            bool isAbovePage = documentSpacePoint.y() < pageLayoutBounds.y();
+            bool isBelowPage = documentSpacePoint.y() > pageLayoutBounds.maxY();
+            bool isLeftOfPage = documentSpacePoint.x() < pageLayoutBounds.x();
+            bool isRightOfPage = documentSpacePoint.x() > pageLayoutBounds.maxX();
+
+            bool isWithinPageWidth = isInRange(documentSpacePoint.x(), pageLayoutBounds.x(), pageLayoutBounds.maxX());
+            bool isWithinPageHeight = isInRange(documentSpacePoint.y(), pageLayoutBounds.y(), pageLayoutBounds.maxY());
+
+            if (isAbovePage && isWithinPageWidth)
+                pointsToCompare.append({ documentSpacePoint.x(), pageLayoutBounds.y() });
+            else if (isRightOfPage && isWithinPageHeight)
+                pointsToCompare.append({ pageLayoutBounds.x(), documentSpacePoint.y() });
+            else if (isBelowPage && isWithinPageWidth)
+                pointsToCompare.append({ documentSpacePoint.x(), pageLayoutBounds.maxY() });
+            else if (isLeftOfPage && isWithinPageHeight)
+                pointsToCompare.append({ pageLayoutBounds.x(), documentSpacePoint.y() });
+
+            auto distancesToPoints = WTF::map(pointsToCompare, [documentSpacePoint](FloatPoint point) {
+                return euclidianDistance(point, documentSpacePoint);
+            });
+
+            return *std::min_element(distancesToPoints.begin(), distancesToPoints.end());
+        };
+
+        ASSERT(visibleRow);
+        auto [leftPageLayoutBounds, rightPageLayoutBounds] = layoutBoundsForRow(*visibleRow);
+
+        if (documentSpacePoint.y() < leftPageLayoutBounds.maxY() || (rightPageLayoutBounds && documentSpacePoint.y() < rightPageLayoutBounds->maxY())) {
+            if (!rightPageLayoutBounds || leftPageLayoutBounds.contains(documentSpacePoint))
+                return visibleRow->pages[0];
+
+            if (rightPageLayoutBounds->contains(documentSpacePoint))
+                return visibleRow->pages[1];
+
+            if (minimumDistanceToPage(leftPageLayoutBounds) < minimumDistanceToPage(rightPageLayoutBounds.value()))
+                return visibleRow->pages[0];
+
+            if (visibleRow->numPages() == 2)
+                return visibleRow->pages[1];
+        }
+
+        // The point is below the pages in the row.
+        if (minimumDistanceToPage(leftPageLayoutBounds) < minimumDistanceToPage(rightPageLayoutBounds.value_or(FloatRect { })))
+            return visibleRow->pages[0];
+
+        if (visibleRow->numPages() == 2)
+            return visibleRow->pages[1];
+
+        return visibleRow->pages[0];
+    }
+
+    case PDFDocumentLayout::DisplayMode::TwoUpContinuous: {
         using PairedPagesLayoutBounds = std::pair<FloatRect, std::optional<FloatRect>>;
 
         auto layoutBoundsForPairedPages = [this](PageIndex pageIndex) -> PairedPagesLayoutBounds {
@@ -111,6 +177,7 @@ PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint
 
             auto pointsToCompare = Vector<FloatPoint> { pageLayoutBounds.minXMinYCorner(), pageLayoutBounds.minXMaxYCorner(), pageLayoutBounds.maxXMinYCorner(), pageLayoutBounds.maxXMaxYCorner() };
 
+            // FIXME: Share some code.
             bool isAbovePage = documentSpacePoint.y() < pageLayoutBounds.y();
             bool isBelowPage = documentSpacePoint.y() > pageLayoutBounds.maxY();
             bool isLeftOfPage = documentSpacePoint.x() < pageLayoutBounds.x();
@@ -165,14 +232,15 @@ PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint
 
         return lastPageIndex;
     }
-    case PDFDocumentLayout::DisplayMode::SinglePageDiscrete:
+
     case PDFDocumentLayout::DisplayMode::SinglePageContinuous: {
         for (PDFDocumentLayout::PageIndex index = 0; index < pageCount; ++index) {
             auto pageBounds = layoutBoundsForPageAtIndex(index);
 
-            if (documentSpacePoint.y() <= pageBounds.maxY() || index == pageCount - 1)
+            if (documentSpacePoint.y() <= pageBounds.maxY())
                 return index;
         }
+        return lastPageIndex();
     }
     }
     ASSERT_NOT_REACHED();

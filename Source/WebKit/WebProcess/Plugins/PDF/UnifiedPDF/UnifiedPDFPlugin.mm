@@ -1715,12 +1715,30 @@ static WebCore::Cursor::Type toWebCoreCursorType(UnifiedPDFPlugin::PDFElementTyp
     return WebCore::Cursor::Type::Pointer;
 }
 
+// FIXME: Move to presentation controller.
+PDFDocumentLayout::PageIndex UnifiedPDFPlugin::nearestPageIndexForDocumentPoint(const FloatPoint& point) const
+{
+    return m_documentLayout.nearestPageIndexForDocumentPoint(point, m_presentationController->visibleRow());
+}
+
+// FIXME: Move to presentation controller.
 std::optional<PDFDocumentLayout::PageIndex> UnifiedPDFPlugin::pageIndexForDocumentPoint(const FloatPoint& point) const
 {
-    for (PDFDocumentLayout::PageIndex index = 0; index < m_documentLayout.pageCount(); ++index) {
-        auto pageBounds = m_documentLayout.layoutBoundsForPageAtIndex(index);
+    auto visibleRow = m_presentationController->visibleRow();
+    if (visibleRow) {
+        for (auto pageIndex : visibleRow->pages) {
+            auto pageBounds = m_documentLayout.layoutBoundsForPageAtIndex(pageIndex);
+            if (pageBounds.contains(point))
+                return pageIndex;
+        }
+
+        return { };
+    }
+
+    for (PDFDocumentLayout::PageIndex pageIndex = 0; pageIndex < m_documentLayout.pageCount(); ++pageIndex) {
+        auto pageBounds = m_documentLayout.layoutBoundsForPageAtIndex(pageIndex);
         if (pageBounds.contains(point))
-            return index;
+            return pageIndex;
     }
 
     return { };
@@ -1729,7 +1747,7 @@ std::optional<PDFDocumentLayout::PageIndex> UnifiedPDFPlugin::pageIndexForDocume
 PDFDocumentLayout::PageIndex UnifiedPDFPlugin::indexForCurrentPageInView() const
 {
     auto centerInDocumentSpace = convertDown(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, FloatPoint { flooredIntPoint(size() / 2) });
-    return m_documentLayout.nearestPageIndexForDocumentPoint(centerInDocumentSpace);
+    return nearestPageIndexForDocumentPoint(centerInDocumentSpace);
 }
 
 RetainPtr<PDFAnnotation> UnifiedPDFPlugin::annotationForRootViewPoint(const IntPoint& point) const
@@ -1982,7 +2000,7 @@ bool UnifiedPDFPlugin::handleMouseEvent(const WebMouseEvent& event)
     });
 
     auto pointInDocumentSpace = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, lastKnownMousePositionInView());
-    auto pageIndex = m_documentLayout.nearestPageIndexForDocumentPoint(pointInDocumentSpace);
+    auto pageIndex = nearestPageIndexForDocumentPoint(pointInDocumentSpace);
 
     if (!shouldDisplayPage(pageIndex)) {
         notifyCursorChanged(toWebCoreCursorType({ }));
@@ -2281,6 +2299,7 @@ void UnifiedPDFPlugin::scrollToPage(PDFDocumentLayout::PageIndex pageIndex)
 {
     ASSERT(pageIndex < m_documentLayout.pageCount());
 
+    // FIXME for discrete.
     auto pageBounds = m_documentLayout.layoutBoundsForPageAtIndex(pageIndex);
     auto boundsInScrolledContents = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::ScrolledContents, pageBounds);
 
@@ -2427,7 +2446,7 @@ std::optional<PDFContextMenu> UnifiedPDFPlugin::createContextMenu(const WebMouse
 
     auto contextMenuEventPluginPoint = convertFromRootViewToPlugin(contextMenuEventRootViewPoint);
     auto contextMenuEventDocumentPoint = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, contextMenuEventPluginPoint);
-    menuItems.appendVector(navigationContextMenuItemsForPageAtIndex(m_documentLayout.nearestPageIndexForDocumentPoint(contextMenuEventDocumentPoint)));
+    menuItems.appendVector(navigationContextMenuItemsForPageAtIndex(nearestPageIndexForDocumentPoint(contextMenuEventDocumentPoint)));
 
     auto contextMenuPoint = frameView->contentsToScreen(IntRect(frameView->windowToContents(contextMenuEventRootViewPoint), IntSize())).location();
 
@@ -3067,7 +3086,7 @@ void UnifiedPDFPlugin::continueAutoscroll()
     scrollWithDelta(scrollDelta);
 
     auto lastKnownMousePositionInDocumentSpace = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, lastKnownMousePositionInPluginSpace);
-    auto pageIndex = m_documentLayout.nearestPageIndexForDocumentPoint(lastKnownMousePositionInDocumentSpace);
+    auto pageIndex = nearestPageIndexForDocumentPoint(lastKnownMousePositionInDocumentSpace);
     auto lastKnownMousePositionInPageSpace = convertDown(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::PDFPage, lastKnownMousePositionInDocumentSpace, pageIndex);
 
     continueTrackingSelection(pageIndex, lastKnownMousePositionInPageSpace, IsDraggingSelection::Yes);
@@ -3784,6 +3803,7 @@ void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayM
         if (!m_currentlySnappedPage)
             return;
 
+        // FIXME for discrete.
         auto pageBoundsInDocumentSpace = layoutBoundsForPageAtIndex(m_currentlySnappedPage.value());
         auto pageBoundsInScrolledContents = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::ScrolledContents, pageBoundsInDocumentSpace);
 

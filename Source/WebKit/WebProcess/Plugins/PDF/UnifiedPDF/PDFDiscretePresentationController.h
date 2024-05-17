@@ -62,6 +62,7 @@ private:
 
     GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 
+    std::optional<PDFLayoutRow> visibleRow() const override;
     std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const override;
 
     bool handleKeyboardEvent(const WebKeyboardEvent&) override;
