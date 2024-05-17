@@ -62,6 +62,7 @@ private:
 
     GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 
+    std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const override;
 
     bool handleKeyboardEvent(const WebKeyboardEvent&) override;
 
@@ -85,7 +86,6 @@ private:
     void paintBackgroundLayerForRow(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, unsigned rowIndex);
 
     void buildRows(bool displayModeChanged);
-    std::optional<unsigned> rowIndexForLayer(const WebCore::GraphicsLayer*) const;
 
     bool canGoToNextRow() const;
     bool canGoToPreviousRow() const;
@@ -97,8 +97,6 @@ private:
     void setVisibleRow(unsigned);
 
     void updateLayersAfterChangeInVisibleRow();
-
-    RefPtr<GraphicsLayer> m_rowsContainerLayer;
 
     struct RowData {
         PDFLayoutRow pages;
@@ -117,8 +115,11 @@ private:
         RefPtr<GraphicsLayer> backgroundLayerForPageIndex(PDFDocumentLayout::PageIndex) const;
     };
 
+    const RowData* rowDataForLayerID(WebCore::PlatformLayerIdentifier) const;
+
+    RefPtr<GraphicsLayer> m_rowsContainerLayer;
     Vector<RowData> m_rows;
-    HashMap<RefPtr<WebCore::GraphicsLayer>, unsigned> m_layerToRowIndexMap;
+    HashMap<WebCore::PlatformLayerIdentifier, unsigned> m_layerIDToRowIndexMap;
     std::optional<PDFDocumentLayout::DisplayMode> m_displayModeAtLastLayerSetup;
 
     unsigned m_visibleRowIndex { 0 };

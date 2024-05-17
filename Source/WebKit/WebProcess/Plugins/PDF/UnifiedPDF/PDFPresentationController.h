@@ -76,6 +76,7 @@ public:
     virtual void repaintForIncrementalLoad() = 0;
     virtual void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) = 0;
 
+    virtual std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const { return { }; }
 
     // Event handling.
     virtual bool handleKeyboardEvent(const WebKeyboardEvent&) = 0;

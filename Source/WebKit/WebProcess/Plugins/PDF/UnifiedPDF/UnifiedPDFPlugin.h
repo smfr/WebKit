@@ -437,6 +437,8 @@ private:
 #endif
     bool canPaintSelectionIntoOwnedLayer() const;
 
+    std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const;
+
     void ensureLayers();
     void updateLayerHierarchy();
     

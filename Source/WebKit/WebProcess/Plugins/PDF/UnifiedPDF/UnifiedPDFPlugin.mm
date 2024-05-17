@@ -826,7 +826,7 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
     if (auto* tiledBacking = layer->tiledBacking())
         tilingScaleFactor = tiledBacking->tilingScaleFactor();
 
-    auto pageCoverage = pageCoverageAndScalesForRect(layer, clipRect, row, tilingScaleFactor);
+    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
@@ -870,6 +870,11 @@ bool UnifiedPDFPlugin::canPaintSelectionIntoOwnedLayer() const
     return [getPDFSelectionClass() instancesRespondToSelector:@selector(enumerateRectsAndTransformsForPage:usingBlock:)];
 #endif
     return false;
+}
+
+std::optional<PDFLayoutRow> UnifiedPDFPlugin::rowForLayerID(PlatformLayerIdentifier layerID) const
+{
+    return m_presentationController->rowForLayerID(layerID);
 }
 
 static const WebCore::Color textAnnotationHoverColor()

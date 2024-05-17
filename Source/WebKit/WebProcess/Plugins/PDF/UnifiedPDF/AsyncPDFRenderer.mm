@@ -61,41 +61,43 @@ AsyncPDFRenderer::~AsyncPDFRenderer()
 
 void AsyncPDFRenderer::teardown()
 {
-    for (auto& layer : m_tiledLayers) {
+    for (auto& keyValuePair : m_layerIDtoLayerMap) {
+        auto& layer = keyValuePair.value;
         if (auto* tiledBacking = layer->tiledBacking())
             tiledBacking->setClient(nullptr);
     }
 
-    m_tiledLayers.clear();
-    m_tileGridToLayerMap.clear();
+    m_layerIDtoLayerMap.clear();
 }
 
 void AsyncPDFRenderer::startTrackingLayer(GraphicsLayer& layer)
 {
-    m_tiledLayers.add(layer);
-
-    if (auto* tiledBacking = layer.tiledBacking()) {
+    Ref layerRef = layer;
+    if (auto* tiledBacking = layerRef->tiledBacking()) {
         tiledBacking->setClient(this);
-        Ref layerRef = layer;
-        m_tileGridToLayerMap.set(tiledBacking->primaryGridIdentifier(), WTFMove(layerRef));
+        m_tileGridToLayerIDMap.set(tiledBacking->primaryGridIdentifier(), layer.primaryLayerID());
     }
+
+    m_layerIDtoLayerMap.set(layer.primaryLayerID(), WTFMove(layerRef));
 }
 
 void AsyncPDFRenderer::stopTrackingLayer(GraphicsLayer& layer)
 {
-    if (auto* tiledBacking = layer.tiledBacking())
+    if (auto* tiledBacking = layer.tiledBacking()) {
+        m_tileGridToLayerIDMap.remove(tiledBacking->primaryGridIdentifier());
         tiledBacking->setClient(nullptr);
+    }
 
-    m_tileGridToLayerMap.removeIf([&layer](auto& entry) {
-        return entry.value.ptr() == &layer;
-    });
-
-    m_tiledLayers.remove(layer);
+    m_layerIDtoLayerMap.remove(layer.primaryLayerID());
 }
 
 GraphicsLayer* AsyncPDFRenderer::layerForTileGrid(TileGridIdentifier identifier) const
 {
-    return m_tileGridToLayerMap.get(identifier);
+    auto layerID = m_tileGridToLayerIDMap.getOptional(identifier);
+    if (!layerID)
+        return nullptr;
+
+    return m_layerIDtoLayerMap.get(*layerID);
 }
 
 void AsyncPDFRenderer::setShowDebugBorders(bool showDebugBorders)
@@ -259,10 +261,9 @@ void AsyncPDFRenderer::tilingScaleFactorDidChange(TiledBacking&, float)
 {
 }
 
-
-void AsyncPDFRenderer::didAddGrid(TiledBacking&, TileGridIdentifier)
+void AsyncPDFRenderer::didAddGrid(TiledBacking& tiledBacking, TileGridIdentifier gridIdentifier)
 {
-
+    m_tileGridToLayerIDMap.set(gridIdentifier, tiledBacking.layerIdentifier());
 }
 
 void AsyncPDFRenderer::willRemoveGrid(TiledBacking&, TileGridIdentifier gridIdentifier)
@@ -283,6 +284,8 @@ void AsyncPDFRenderer::willRemoveGrid(TiledBacking&, TileGridIdentifier gridIden
 
     for (auto& tile : requestsToRemove)
         m_requestWorkQueue.remove(tile);
+
+    m_tileGridToLayerIDMap.remove(gridIdentifier);
 }
 
 void AsyncPDFRenderer::clearRequestsAndCachedTiles()
@@ -356,10 +359,12 @@ auto AsyncPDFRenderer::renderInfoForTile(const TiledBacking& tiledBacking, const
     auto tilingScaleFactor = tiledBacking.tilingScaleFactor();
     auto paintingClipRect = convertTileRectToPaintingCoords(tileRect, tilingScaleFactor);
 
-    // FIXME: Need to know about rows
-    #warning
+    std::optional<PDFLayoutRow> layoutRow;
+    auto layerID = m_tileGridToLayerIDMap.getOptional(tileInfo.gridIdentifier);
+    if (layerID)
+        layoutRow = plugin->rowForLayerID(*layerID);
 
-    auto pageCoverage = plugin->pageCoverageAndScalesForRect(paintingClipRect, { }, tilingScaleFactor);
+    auto pageCoverage = plugin->pageCoverageAndScalesForRect(paintingClipRect, layoutRow, tilingScaleFactor);
 
     return TileRenderInfo { tileRect, clipRect, pageCoverage };
 }
@@ -527,6 +532,7 @@ void AsyncPDFRenderer::transferBufferToMainThread(RefPtr<ImageBuffer>&& imageBuf
 
         bool haveBuffer = !!imageBuffer;
 
+        // FIXME: this also calls layerForTileGrid
         protectedThis->didCompleteTileRender(WTFMove(imageBuffer), tileInfo, renderInfo, renderIdentifier);
 
         if (haveBuffer) {

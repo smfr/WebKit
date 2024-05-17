@@ -179,8 +179,8 @@ private:
     // FIXME: Point to the presentation controller.
     ThreadSafeWeakPtr<UnifiedPDFPlugin> m_plugin;
 
-    HashSet<Ref<WebCore::GraphicsLayer>> m_tiledLayers;
-    HashMap<WebCore::TileGridIdentifier, Ref<WebCore::GraphicsLayer>> m_tileGridToLayerMap;
+    HashMap<WebCore::PlatformLayerIdentifier, Ref<WebCore::GraphicsLayer>> m_layerIDtoLayerMap;
+    HashMap<WebCore::TileGridIdentifier, WebCore::PlatformLayerIdentifier> m_tileGridToLayerIDMap;
 
     Ref<ConcurrentWorkQueue> m_paintingWorkQueue;
 
