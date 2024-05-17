@@ -227,14 +227,19 @@ void AsyncPDFRenderer::willRepaintAllTiles(TiledBacking&, TileGridIdentifier)
     clearRequestsAndCachedTiles();
 }
 
-void AsyncPDFRenderer::coverageRectDidChange(TiledBacking&, const FloatRect& coverageRect)
+void AsyncPDFRenderer::coverageRectDidChange(TiledBacking& tiledBacking, const FloatRect& coverageRect)
 {
     RefPtr plugin = m_plugin.get();
     if (!plugin)
         return;
 
-    // FIXME: Need to know about rows.
-    auto pageCoverage = plugin->pageCoverageForRect(coverageRect, { });
+    std::optional<PDFLayoutRow> layoutRow;
+    auto layerID = m_tileGridToLayerIDMap.getOptional(tiledBacking.primaryGridIdentifier());
+    if (layerID)
+        layoutRow = plugin->rowForLayerID(*layerID);
+
+    auto pageCoverage = plugin->pageCoverageForRect(coverageRect, layoutRow);
+
     auto pagePreviewScale = plugin->scaleForPagePreviews();
 
     PDFPageIndexSet unwantedPageIndices;
@@ -624,8 +629,6 @@ bool AsyncPDFRenderer::paintTilesForPage(const GraphicsLayer* layer, GraphicsCon
 
     bool paintedATile = false;
 
-    WTF_ALWAYS_LOG("\nAsyncPDFRenderer::paintTilesForPage for layer " << layer << " grid " << tileGridIdentifier << " clipRect " << clipRect);
-
     // This scale takes us from "painting" coordinates into the coordinate system of the tile grid,
     // so we can paint tiles directly.
     auto scaleTransform = tileToPaintingTransform(tilingScaleFactor);
@@ -638,8 +641,6 @@ bool AsyncPDFRenderer::paintTilesForPage(const GraphicsLayer* layer, GraphicsCon
             auto& tileForGrid = keyValuePair.key;
             auto& renderedTile = keyValuePair.value;
 
-            WTF_ALWAYS_LOG("AsyncPDFRenderer::paintTilesForPage - rendered tile " << tileForGrid << " " << renderedTile.tileInfo.tileRect);
-
             if (tileForGrid.gridIdentifier != tileGridIdentifier)
                 continue;
 
@@ -649,7 +650,7 @@ bool AsyncPDFRenderer::paintTilesForPage(const GraphicsLayer* layer, GraphicsCon
 
             // FIXME: respect clip rect!
 
-            ALWAYS_LOG_WITH_STREAM(stream << "AsyncPDFRenderer::paintTilesForPage " << pageBoundsInPaintingCoordinates  << " - painting tile for " << tileForGrid << " with clip " << renderedTile.tileInfo.tileRect << " tiling scale " << tilingScaleFactor);
+            LOG_WITH_STREAM(PDFAsyncRendering, stream << "AsyncPDFRenderer::paintTilesForPage " << pageBoundsInPaintingCoordinates  << " - painting tile for " << tileForGrid << " with clip " << renderedTile.tileInfo.tileRect << " tiling scale " << tilingScaleFactor);
 
             context.drawImageBuffer(*renderedTile.buffer, renderedTile.tileInfo.tileRect.location());
             paintedATile = true;

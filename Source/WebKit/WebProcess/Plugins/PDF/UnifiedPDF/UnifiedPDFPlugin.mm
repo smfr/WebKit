@@ -735,13 +735,13 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
     auto pageWithAnnotation = pageIndexWithHoveredAnnotation();
 
     auto tilingScaleFactor = 1.0f;
-    if (auto* tiledBacking = layer->tiledBacking())
-        tilingScaleFactor = tiledBacking->tilingScaleFactor();
+    if (layer) {
+        if (auto* tiledBacking = layer->tiledBacking())
+            tilingScaleFactor = tiledBacking->tilingScaleFactor();
+    }
 
     auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
-
-    LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: paintPDFContent " << pageCoverage);
 
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
@@ -1695,23 +1695,7 @@ void UnifiedPDFPlugin::determineCurrentlySnappedPage()
 
 bool UnifiedPDFPlugin::shouldDisplayPage(PDFDocumentLayout::PageIndex pageIndex)
 {
-    if (!isInDiscreteDisplayMode())
-        return true;
-
-    if (!m_currentlySnappedPage)
-        return true;
-    auto currentlySnappedPage = *m_currentlySnappedPage;
-
-    if (pageIndex == currentlySnappedPage)
-        return true;
-
-    if (m_documentLayout.displayMode() == PDFDocumentLayout::DisplayMode::TwoUpDiscrete) {
-        if (currentlySnappedPage % 2)
-            return pageIndex == currentlySnappedPage - 1;
-        return pageIndex == currentlySnappedPage + 1;
-    }
-
-    return false;
+    return true;
 }
 
 #pragma mark -

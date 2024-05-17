@@ -494,6 +494,16 @@ FloatRect PDFDocumentLayout::layoutBoundsForPageAtIndex(PageIndex index) const
     return m_pageGeometry[index].layoutBounds;
 }
 
+FloatRect PDFDocumentLayout::layoutBoundsForRow(PDFLayoutRow layoutRow) const
+{
+    auto bounds = layoutBoundsForPageAtIndex(layoutRow.pages[0]);
+    if (layoutRow.numPages() == 2)
+        bounds.unite(layoutBoundsForPageAtIndex(layoutRow.pages[1]));
+
+    bounds.inflate(PDFDocumentLayout::documentMargin);
+    return bounds;
+}
+
 IntDegrees PDFDocumentLayout::rotationForPageAtIndex(PageIndex index) const
 {
     if (index >= m_pageGeometry.size())

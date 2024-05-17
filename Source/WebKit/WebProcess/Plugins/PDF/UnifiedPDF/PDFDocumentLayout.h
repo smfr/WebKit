@@ -88,6 +88,9 @@ public:
 
     // This is not scaled by scale().
     WebCore::FloatRect layoutBoundsForPageAtIndex(PageIndex) const;
+    // Bounds of the pages in the row, including document margins. Not scaled.
+    WebCore::FloatRect layoutBoundsForRow(PDFLayoutRow) const;
+
     // Returns 0, 90, 180, 270.
     WebCore::IntDegrees rotationForPageAtIndex(PageIndex) const;
 

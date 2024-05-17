@@ -158,7 +158,11 @@ void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
 
 PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
 {
-    // FIXME: Assert that we have a row here.
+    if (!row) {
+        // PDFDiscretePresentationController layout is row-based.
+        ASSERT_NOT_REACHED();
+        return { };
+    }
 
     auto& documentLayout = m_plugin->documentLayout();
     auto documentLayoutScale = documentLayout.scale();
@@ -171,21 +175,20 @@ PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const Flo
     auto inverseScale = 1.0f / documentLayoutScale;
     auto scaleTransform = AffineTransform::makeScale({ inverseScale, inverseScale });
     auto drawingRectInPDFLayoutCoordinates = scaleTransform.mapRect(FloatRect { drawingRect });
+    auto rowBounds = documentLayout.layoutBoundsForRow(*row);
 
-    for (PDFDocumentLayout::PageIndex i = 0; i < documentLayout.pageCount(); ++i) {
-        if (row && !row->containsPage(i))
-            continue;
-
-        auto page = documentLayout.pageAtIndex(i);
-        if (!page)
-            continue;
-
-        auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(i);
+    auto addPageToCoverage = [&](PDFDocumentLayout::PageIndex pageIndex) {
+        auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
         if (!pageBounds.intersects(drawingRectInPDFLayoutCoordinates))
-            continue;
+            return;
 
-        pageCoverage.append(PerPageInfo { i, pageBounds });
-    }
+        // Account for row.containerLayer already being positioned by the origin of rowBounds.
+        pageBounds.moveBy(-rowBounds.location());
+        pageCoverage.append(PerPageInfo { pageIndex, pageBounds });
+    };
+
+    for (auto pageIndex : row->pages)
+        addPageToCoverage(pageIndex);
 
     return pageCoverage;
 }
@@ -286,6 +289,8 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
         row.contentsLayer->setDrawsContent(true);
         row.contentsLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
 
+        row.contentsLayer->setOpacity(0.8);
+
         // This is the call that enables async rendering.
         asyncRenderer()->startTrackingLayer(*row.contentsLayer);
 
@@ -323,17 +328,11 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
     TransformationMatrix documentScaleTransform;
     documentScaleTransform.scale(documentLayout.scale());
 
-    auto layoutPageBoundsForRow = [&](const PDFLayoutRow& layoutRow) {
-        auto bounds = m_plugin->documentLayout().layoutBoundsForPageAtIndex(layoutRow.pages[0]);
-        if (layoutRow.numPages() == 2)
-            bounds.unite(m_plugin->documentLayout().layoutBoundsForPageAtIndex(layoutRow.pages[1]));
-
-        bounds.inflate(PDFDocumentLayout::documentMargin);
-        return bounds;
-    };
-
-    auto updatePageContainerLayerBounds = [&](GraphicsLayer* pageContainerLayer, PDFDocumentLayout::PageIndex pageIndex) {
+    auto updatePageContainerLayerBounds = [&](GraphicsLayer* pageContainerLayer, PDFDocumentLayout::PageIndex pageIndex, const FloatRect& rowBounds) {
         auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
+        // Account for row.containerLayer already being positioned by the origin of rowBounds.
+        pageBounds.moveBy(-rowBounds.location());
+
         auto destinationRect = pageBounds;
         destinationRect.scale(documentLayout.scale());
 
@@ -345,38 +344,42 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
         pageBackgroundLayer->setTransform(documentScaleTransform);
     };
 
-    auto updateRowPageContainerLayers = [&](const RowData& row) {
+    auto updateRowPageContainerLayers = [&](const RowData& row, const FloatRect& rowBounds) {
         auto leftPageIndex = row.pages.pages[0];
-        updatePageContainerLayerBounds(row.leftPageContainerLayer.get(), leftPageIndex);
+        updatePageContainerLayerBounds(row.leftPageContainerLayer.get(), leftPageIndex, rowBounds);
 
         if (row.pages.numPages() == 1)
             return;
 
         auto rightPageIndex = row.pages.pages[1];
-        updatePageContainerLayerBounds(row.rightPageContainerLayer.get(), rightPageIndex);
+        updatePageContainerLayerBounds(row.rightPageContainerLayer.get(), rightPageIndex, rowBounds);
     };
 
     TransformationMatrix transform;
     transform.scale(scaleFactor);
     transform.translate(centeringOffset.width(), centeringOffset.height());
 
+    WTF_ALWAYS_LOG("PDFDiscretePresentationController::updateLayersOnLayoutChange - offset " << centeringOffset);
+
     m_rowsContainerLayer->setTransform(transform);
 
     for (auto& row : m_rows) {
-        auto rowPageBounds = layoutPageBoundsForRow(row.pages);
+        auto rowPageBounds = m_plugin->documentLayout().layoutBoundsForRow(row.pages);
         auto scaledRowBounds = rowPageBounds;
         scaledRowBounds.scale(documentLayout.scale());
+
+        WTF_ALWAYS_LOG(" scaled row bounds " << rowPageBounds);
 
         row.containerLayer->setPosition(scaledRowBounds.location());
         row.containerLayer->setSize(scaledRowBounds.size());
 
-        updateRowPageContainerLayers(row);
+        updateRowPageContainerLayers(row, rowPageBounds);
 
-        row.contentsLayer->setPosition(scaledRowBounds.location());
+        row.contentsLayer->setPosition({ });
         row.contentsLayer->setSize(scaledRowBounds.size());
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-        row.selectionLayer->setPosition(scaledRowBounds.location());
+        row.selectionLayer->setPosition({ });
         row.selectionLayer->setSize(scaledRowBounds.size());
 #endif
     }
@@ -603,7 +606,7 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
 
     if (layer == rowData.contentsLayer.get()) {
         RefPtr asyncRenderer = asyncRendererIfExists();
-        m_plugin->paintPDFContent(layer, context, clipRect, { }, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
+        m_plugin->paintPDFContent(layer, context, clipRect, rowData.pages, UnifiedPDFPlugin::PaintingBehavior::All, asyncRenderer.get());
         return;
     }
 
