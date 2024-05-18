@@ -93,6 +93,7 @@ protected:
 
     Ref<AsyncPDFRenderer> asyncRenderer();
     RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;
+    void clearAsyncRenderer();
 
     Ref<UnifiedPDFPlugin> m_plugin;
     RefPtr<AsyncPDFRenderer> m_asyncRenderer;

@@ -58,8 +58,7 @@ PDFPresentationController::~PDFPresentationController() = default;
 
 void PDFPresentationController::teardown()
 {
-    if (RefPtr asyncRenderer = asyncRendererIfExists())
-        asyncRenderer->teardown();
+    clearAsyncRenderer();
 }
 
 Ref<AsyncPDFRenderer> PDFPresentationController::asyncRenderer()
@@ -74,6 +73,12 @@ Ref<AsyncPDFRenderer> PDFPresentationController::asyncRenderer()
 RefPtr<AsyncPDFRenderer> PDFPresentationController::asyncRendererIfExists() const
 {
     return m_asyncRenderer;
+}
+
+void PDFPresentationController::clearAsyncRenderer()
+{
+    if (RefPtr asyncRenderer = std::exchange(m_asyncRenderer, nullptr))
+        asyncRenderer->teardown();
 }
 
 RefPtr<GraphicsLayer> PDFPresentationController::createGraphicsLayer(const String& name, GraphicsLayer::Type layerType)

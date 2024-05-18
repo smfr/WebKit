@@ -217,50 +217,44 @@ void PDFDiscretePresentationController::setupLayers(GraphicsLayer& scrolledConte
     bool displayModeChanged = !m_displayModeAtLastLayerSetup || m_displayModeAtLastLayerSetup != m_plugin->documentLayout().displayMode();
     m_displayModeAtLastLayerSetup = m_plugin->documentLayout().displayMode();
 
-    buildRows(displayModeChanged);
+    if (displayModeChanged) {
+        clearAsyncRenderer();
+        m_rows.clear();
+    }
+
+    buildRows();
 }
 
-void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
+void PDFDiscretePresentationController::buildRows()
 {
-    // For incrementally loading PDFs we may have some rows already. This has to handle incremental changes, and changes between
-    // one-up and two-up mode.
+    // For incrementally loading PDFs we may have some rows already. This has to handle incremental changes.
     auto layoutRows = m_plugin->documentLayout().rows();
 
     // FIXME: Need to unregister for removed layers.
     m_rows.resize(layoutRows.size());
 
-    auto updateRowPageBackgroundContainerLayers = [&](size_t rowIndex, PDFLayoutRow& layoutRow, RowData& row, bool displayModeChanged) {
-        if (!row.leftPageContainerLayer) {
-            auto leftPageIndex = layoutRow.pages[0];
+    auto createRowPageBackgroundContainerLayers = [&](size_t rowIndex, PDFLayoutRow& layoutRow, RowData& row) {
+        ASSERT(!row.leftPageContainerLayer);
 
-            row.leftPageContainerLayer = makePageContainerLayer(leftPageIndex);
-            row.leftPageContainerLayer->setOpacity(0.1);
-            RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.leftPageContainerLayer);
-            m_layerIDToRowIndexMap.add(pageBackgroundLayer->primaryLayerID(), rowIndex);
-        }
+        auto leftPageIndex = layoutRow.pages[0];
+
+        row.leftPageContainerLayer = makePageContainerLayer(leftPageIndex);
+        RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.leftPageContainerLayer);
+        m_layerIDToRowIndexMap.add(pageBackgroundLayer->primaryLayerID(), rowIndex);
 
         if (row.pages.numPages() == 1) {
-            if (row.rightPageContainerLayer) {
-                RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.rightPageContainerLayer);
-                if (pageBackgroundLayer)
-                    m_layerIDToRowIndexMap.remove(pageBackgroundLayer->primaryLayerID());
-
-                GraphicsLayer::unparentAndClear(row.rightPageContainerLayer);
-            }
+            ASSERT(!row.rightPageContainerLayer);
             return;
         }
 
-        if (!row.rightPageContainerLayer) {
-            auto rightPageIndex = layoutRow.pages[1];
-            row.rightPageContainerLayer = makePageContainerLayer(rightPageIndex);
-            row.rightPageContainerLayer->setOpacity(0.1);
-            RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.rightPageContainerLayer);
-            m_layerIDToRowIndexMap.add(pageBackgroundLayer->primaryLayerID(), rowIndex);
-        }
+        auto rightPageIndex = layoutRow.pages[1];
+        row.rightPageContainerLayer = makePageContainerLayer(rightPageIndex);
+        RefPtr rightPageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*row.rightPageContainerLayer);
+        m_layerIDToRowIndexMap.add(rightPageBackgroundLayer->primaryLayerID(), rowIndex);
     };
 
     auto parentRowLayers = [](RowData& row) {
-        row.containerLayer->removeAllChildren();
+        ASSERT(row.containerLayer->children().isEmpty());
         row.containerLayer->addChild(*row.leftPageContainerLayer);
         if (row.rightPageContainerLayer)
             row.containerLayer->addChild(*row.rightPageContainerLayer);
@@ -272,18 +266,13 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
     };
 
     auto ensureLayersForRow = [&](size_t rowIndex, PDFLayoutRow& layoutRow, RowData& row) {
-        if (row.containerLayer) {
-            updateRowPageBackgroundContainerLayers(rowIndex, layoutRow, row, displayModeChanged);
-
-            if (displayModeChanged)
-                parentRowLayers(row);
+        if (row.containerLayer)
             return;
-        }
 
         row.containerLayer = createGraphicsLayer(makeString("Row container "_s, rowIndex), GraphicsLayer::Type::Normal);
         row.containerLayer->setAnchorPoint({ });
 
-        updateRowPageBackgroundContainerLayers(rowIndex, layoutRow, row, displayModeChanged);
+        createRowPageBackgroundContainerLayers(rowIndex, layoutRow, row);
 
         // This contents layer is used to paint both pages in two-up; it spans across both backgrounds.
         row.contentsLayer = createGraphicsLayer(makeString("Row contents "_s, rowIndex), GraphicsLayer::Type::TiledBacking);
@@ -321,7 +310,6 @@ void PDFDiscretePresentationController::buildRows(bool displayModeChanged)
 }
 
 // FIXME: We fail to update all the tiled layers on zooming
-
 
 void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
 {

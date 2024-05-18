@@ -86,7 +86,7 @@ private:
 
     void paintBackgroundLayerForRow(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::FloatRect& clipRect, unsigned rowIndex);
 
-    void buildRows(bool displayModeChanged);
+    void buildRows();
 
     bool canGoToNextRow() const;
     bool canGoToPreviousRow() const;
