@@ -94,6 +94,7 @@ private:
     enum class Animated : bool { No, Yes };
     void goToNextRow(Animated);
     void goToPreviousRow(Animated);
+    void goToRowIndex(unsigned rowIndex, Animated);
 
     void setVisibleRow(unsigned);
 

@@ -92,7 +92,7 @@ bool PDFDiscretePresentationController::handleKeyboardEventForPageNavigation(con
         return false;
 
     auto key = event.key();
-    if (key == "ArrowLeft"_s || key == "ArrowUp"_s) {
+    if (key == "ArrowLeft"_s || key == "ArrowUp"_s || key == "PageUp"_s) {
         if (!canGoToPreviousRow())
             return false;
 
@@ -100,11 +100,28 @@ bool PDFDiscretePresentationController::handleKeyboardEventForPageNavigation(con
         return true;
     }
 
-    if (key == "ArrowRight"_s || key == "ArrowDown"_s) {
+    if (key == "ArrowRight"_s || key == "ArrowDown"_s || key == "PageDown"_s) {
         if (!canGoToNextRow())
             return false;
 
         goToNextRow(Animated::No);
+        return true;
+    }
+
+    if (key == "Home"_s) {
+        if (!m_visibleRowIndex)
+            return false;
+
+        goToRowIndex(0, Animated::No);
+        return true;
+    }
+
+    if (key == "End"_s) {
+        auto lastRowIndex = m_rows.size() - 1;
+        if (m_visibleRowIndex == lastRowIndex)
+            return false;
+
+        goToRowIndex(lastRowIndex, Animated::No);
         return true;
     }
 
@@ -140,6 +157,14 @@ void PDFDiscretePresentationController::goToPreviousRow(Animated)
         return;
 
     setVisibleRow(m_visibleRowIndex - 1);
+}
+
+void PDFDiscretePresentationController::goToRowIndex(unsigned rowIndex, Animated)
+{
+    if (rowIndex >= m_rows.size())
+        return;
+
+    setVisibleRow(rowIndex);
 }
 
 void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
@@ -357,8 +382,6 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
         auto rowPageBounds = m_plugin->documentLayout().layoutBoundsForRow(row.pages);
         auto scaledRowBounds = rowPageBounds;
         scaledRowBounds.scale(documentLayout.scale());
-
-        WTF_ALWAYS_LOG(" scaled row bounds " << rowPageBounds);
 
         row.containerLayer->setPosition(scaledRowBounds.location());
         row.containerLayer->setSize(scaledRowBounds.size());
