@@ -619,7 +619,6 @@ bool AsyncPDFRenderer::paintTilesForPage(const GraphicsLayer* layer, GraphicsCon
     ASSERT(isMainRunLoop());
     ASSERT(layer);
 
-
     auto* tiledBacking = layer->tiledBacking();
     if (!tiledBacking)
         return false;
@@ -649,7 +648,6 @@ bool AsyncPDFRenderer::paintTilesForPage(const GraphicsLayer* layer, GraphicsCon
                 continue;
 
             // FIXME: respect clip rect!
-
             LOG_WITH_STREAM(PDFAsyncRendering, stream << "AsyncPDFRenderer::paintTilesForPage " << pageBoundsInPaintingCoordinates  << " - painting tile for " << tileForGrid << " with clip " << renderedTile.tileInfo.tileRect << " tiling scale " << tilingScaleFactor);
 
             context.drawImageBuffer(*renderedTile.buffer, renderedTile.tileInfo.tileRect.location());
@@ -699,8 +697,20 @@ void AsyncPDFRenderer::pdfContentChangedInRect(const GraphicsLayer* layer, float
     if (!plugin)
         return;
 
-    // FIXME: Need to know about rows.
-    auto pageCoverage = plugin->pageCoverageForRect(paintingRect, { });
+    auto* tiledBacking = layer->tiledBacking();
+    if (!tiledBacking) {
+        // We only expect AsyncPDFRenderer to be used with tiled layers.
+        ASSERT_NOT_REACHED();
+        return;
+    }
+
+    // FIXME: Pass in row?
+    std::optional<PDFLayoutRow> layoutRow;
+    auto layerID = m_tileGridToLayerIDMap.getOptional(tiledBacking->primaryGridIdentifier());
+    if (layerID)
+        layoutRow = plugin->rowForLayerID(*layerID);
+
+    auto pageCoverage = plugin->pageCoverageForRect(paintingRect, layoutRow);
     if (pageCoverage.isEmpty())
         return;
 
@@ -721,13 +731,6 @@ void AsyncPDFRenderer::pdfContentChangedInRect(const GraphicsLayer* layer, float
         std::optional<FloatRect> clipRect = intersection(renderedTile.tileInfo.tileRect, paintingRectInTileCoordinates);
         if (*clipRect == renderedTile.tileInfo.tileRect)
             clipRect = { };
-
-        auto* tiledBacking = layer->tiledBacking();
-        if (!tiledBacking) {
-            // We only expect AsyncPDFRenderer to be used with tiled layers.
-            ASSERT_NOT_REACHED();
-            return;
-        }
 
         enqueueTilePaintIfNecessary(*tiledBacking, tileInfo, renderedTile.tileInfo.tileRect, clipRect);
     }

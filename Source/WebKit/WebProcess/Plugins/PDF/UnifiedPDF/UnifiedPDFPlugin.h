@@ -523,7 +523,7 @@ private:
     RefPtr<WebCore::GraphicsLayer> createGraphicsLayer(const String& name, WebCore::GraphicsLayer::Type);
 
     void setNeedsRepaintForAnnotation(PDFAnnotation *, RepaintRequirements);
-    void setNeedsRepaintInDocumentRect(RepaintRequirements, const WebCore::FloatRect&);
+    void setNeedsRepaintInDocumentRect(RepaintRequirements, const WebCore::FloatRect&, std::optional<PDFLayoutRow>);
     void setNeedsRepaintInDocumentRects(RepaintRequirements, const Vector<WebCore::FloatRect>&);
 
     // "Up" is inside-out.

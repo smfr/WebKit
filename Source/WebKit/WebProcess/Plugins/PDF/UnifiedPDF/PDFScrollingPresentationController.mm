@@ -106,6 +106,7 @@ PDFPageCoverage PDFScrollingPresentationController::pageCoverageForRect(const Fl
 
     auto pageCoverage = PDFPageCoverage { };
 
+    // FIXME: Can this use coordinate conversion?
     auto drawingRect = IntRect { { }, m_plugin->documentSize() };
     drawingRect.intersect(enclosingIntRect(clipRect));
 
@@ -271,7 +272,7 @@ void PDFScrollingPresentationController::repaintForIncrementalLoad()
         coverageRect = m_plugin->convertDown(UnifiedPDFPlugin::CoordinateSpace::Contents, UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, coverageRect);
     }
 
-    setNeedsRepaintInDocumentRect(RepaintRequirement::PDFContent, coverageRect);
+    setNeedsRepaintInDocumentRect(RepaintRequirement::PDFContent, coverageRect, { });
 }
 
 void PDFScrollingPresentationController::updateIsInWindow(bool isInWindow)
@@ -328,8 +329,7 @@ void PDFScrollingPresentationController::currentlySnappedPageChanged()
 #endif
 }
 
-// FIXME: Need to repaint per page.
-void PDFScrollingPresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates)
+void PDFScrollingPresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow>)
 {
     if (!repaintRequirements)
         return;

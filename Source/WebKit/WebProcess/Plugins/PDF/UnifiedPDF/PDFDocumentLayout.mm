@@ -521,7 +521,7 @@ Vector<PDFLayoutRow> PDFDocumentLayout::rows() const
         rows.append(PDFLayoutRow { { leftPageIndex, leftPageIndex + 1 } } );
     }
 
-    if (pageCount % 1)
+    if (pageCount % 2)
         rows.append(PDFLayoutRow { { lastPageIndex() } });
 
     return rows;

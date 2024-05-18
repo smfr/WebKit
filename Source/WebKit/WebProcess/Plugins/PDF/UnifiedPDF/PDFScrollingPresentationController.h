@@ -91,7 +91,7 @@ private:
     void paintBackgroundLayerForPage(const WebCore::GraphicsLayer*, WebCore::GraphicsContext& context, const WebCore::FloatRect& clipRect, PDFDocumentLayout::PageIndex);
 
     void repaintForIncrementalLoad() override;
-    void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) override;
+    void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow>) override;
 
     RefPtr<WebCore::GraphicsLayer> m_pageBackgroundsContainerLayer;
     RefPtr<WebCore::GraphicsLayer> m_contentsLayer;

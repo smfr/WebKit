@@ -56,7 +56,7 @@ private:
     void updateForCurrentScrollability(OptionSet<TiledBackingScrollability>) override;
 
     void repaintForIncrementalLoad() override;
-    void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates) override;
+    void setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const WebCore::FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow>) override;
 
     void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex) override;
 

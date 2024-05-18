@@ -180,11 +180,12 @@ PDFPageCoverage PDFDiscretePresentationController::pageCoverageForRect(const Flo
 
     auto addPageToCoverage = [&](PDFDocumentLayout::PageIndex pageIndex) {
         auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
+        // Account for row.containerLayer already being positioned by the origin of rowBounds.
+        pageBounds.moveBy(-rowBounds.location());
+
         if (!pageBounds.intersects(drawingRectInPDFLayoutCoordinates))
             return;
 
-        // Account for row.containerLayer already being positioned by the origin of rowBounds.
-        pageBounds.moveBy(-rowBounds.location());
         pageCoverage.append(PerPageInfo { pageIndex, pageBounds });
     };
 
@@ -466,17 +467,35 @@ void PDFDiscretePresentationController::repaintForIncrementalLoad()
     }
 }
 
-void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement>, const FloatRect& rectInDocumentCoordinates)
+void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow> layoutRow)
 {
-    for (auto& row : m_rows) {
-        // FIXME: Do incremental repaint.
-        row.contentsLayer->setNeedsDisplay();
+    ASSERT(layoutRow);
+    if (!layoutRow)
+        return;
+
+    auto rowIndex = m_plugin->documentLayout().rowIndexForPageIndex(layoutRow->pages[0]);
+    if (rowIndex >= m_rows.size())
+        return;
+
+    auto& row = m_rows[rowIndex];
+
+    // FIXME: Need to convert to the coords of the row's contents layer
+    auto contentsRect = m_plugin->convertUp(UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, UnifiedPDFPlugin::CoordinateSpace::Contents, rectInDocumentCoordinates);
+
+    if (repaintRequirements.contains(RepaintRequirement::PDFContent)) {
+        if (RefPtr asyncRenderer = asyncRendererIfExists())
+            asyncRenderer->pdfContentChangedInRect(row.contentsLayer.get(), m_plugin->nonNormalizedScaleFactor(), contentsRect);
     }
 
+#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
+    if (repaintRequirements.contains(RepaintRequirement::Selection) && m_plugin->canPaintSelectionIntoOwnedLayer()) {
+        RefPtr { row.selectionLayer }->setNeedsDisplayInRect(contentsRect);
+        if (repaintRequirements.hasExactlyOneBitSet())
+            return;
+    }
+#endif
 
-//    if (RefPtr asyncRenderer = asyncRendererIfExists())
-//        asyncRenderer->pdfContentChangedInRect(m_plugin->nonNormalizedScaleFactor(), contentsRect);
-
+    RefPtr { row.contentsLayer.get() }->setNeedsDisplayInRect(contentsRect);
 }
 
 void PDFDiscretePresentationController::didGeneratePreviewForPage(PDFDocumentLayout::PageIndex pageIndex)

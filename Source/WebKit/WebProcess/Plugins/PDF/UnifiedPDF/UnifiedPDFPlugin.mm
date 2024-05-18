@@ -407,22 +407,23 @@ void UnifiedPDFPlugin::setNeedsRepaintForAnnotation(PDFAnnotation *annotation, R
         return;
 
     auto annotationBounds = convertUp(CoordinateSpace::PDFPage, CoordinateSpace::PDFDocumentLayout, FloatRect { [annotation bounds] }, pageIndex);
-    setNeedsRepaintInDocumentRect(repaintRequirements, annotationBounds);
+    auto layoutRow = m_documentLayout.rowForPageIndex(*pageIndex);
+    setNeedsRepaintInDocumentRect(repaintRequirements, annotationBounds, layoutRow);
 }
 
-void UnifiedPDFPlugin::setNeedsRepaintInDocumentRect(RepaintRequirements repaintRequirements, const FloatRect& rectInDocumentCoordinates)
+void UnifiedPDFPlugin::setNeedsRepaintInDocumentRect(RepaintRequirements repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow> layoutRow)
 {
     if (!repaintRequirements)
         return;
 
-    // FIXME: We need to handle repaints per-page, since pages overlap in discrete mode.
-    m_presentationController->setNeedsRepaintInDocumentRect(repaintRequirements, rectInDocumentCoordinates);
+    m_presentationController->setNeedsRepaintInDocumentRect(repaintRequirements, rectInDocumentCoordinates, layoutRow);
 }
 
 void UnifiedPDFPlugin::setNeedsRepaintInDocumentRects(RepaintRequirements repaintRequirements, const Vector<FloatRect>& rectsInDocumentCoordinates)
 {
+    // FIXME: Pass row
     for (auto& rectInDocumentCoordinates : rectsInDocumentCoordinates)
-        setNeedsRepaintInDocumentRect(repaintRequirements, rectInDocumentCoordinates);
+        setNeedsRepaintInDocumentRect(repaintRequirements, rectInDocumentCoordinates, { });
 }
 
 void UnifiedPDFPlugin::scheduleRenderingUpdate(OptionSet<RenderingUpdateStep> requestedSteps)
