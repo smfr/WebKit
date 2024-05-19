@@ -2120,6 +2120,22 @@ bool UnifiedPDFPlugin::handleMouseLeaveEvent(const WebMouseEvent&)
     return false;
 }
 
+bool UnifiedPDFPlugin::wantsWheelEvents() const
+{
+    if (!m_pdfDocument)
+        return false;
+
+    return m_presentationController->wantsWheelEvents();
+}
+
+bool UnifiedPDFPlugin::handleWheelEvent(const WebWheelEvent& wheelEvent)
+{
+    if (m_presentationController->handleWheelEvent(wheelEvent))
+        return true;
+
+    return handleWheelEventForScrolling(platform(wheelEvent), { });
+}
+
 bool UnifiedPDFPlugin::handleContextMenuEvent(const WebMouseEvent& event)
 {
 #if ENABLE(CONTEXT_MENUS)
@@ -3793,6 +3809,7 @@ void UnifiedPDFPlugin::setDisplayMode(PDFDocumentLayout::DisplayMode mode)
 void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayMode mode)
 {
     auto shouldAdjustPageScale = m_shouldUpdateAutoSizeScale == ShouldUpdateAutoSizeScale::Yes ? AdjustScaleAfterLayout::No : AdjustScaleAfterLayout::Yes;
+    bool didWantWheelEvents = m_presentationController->wantsWheelEvents();
     setDisplayMode(mode);
     {
         SetForScope scope(m_shouldUpdateAutoSizeScale, ShouldUpdateAutoSizeScale::Yes);
@@ -3809,6 +3826,16 @@ void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayM
         auto pageBoundsInScrolledContents = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::ScrolledContents, pageBoundsInDocumentSpace);
 
         scrollToPointInContentsSpace(pageBoundsInScrolledContents.location());
+    }
+
+    bool wantsWheelEvents = m_presentationController->wantsWheelEvents();
+    if (didWantWheelEvents != wantsWheelEvents) {
+        if (RefPtr page = this->page()) {
+            if (RefPtr scrollingCoordinator = page->scrollingCoordinator()) {
+                if (RefPtr frameView = dynamicDowncast<LocalFrameView>(mainFrameView()))
+                    scrollingCoordinator->frameViewEventTrackingRegionsChanged(*frameView);
+            }
+        }
     }
 }
 

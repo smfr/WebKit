@@ -30,7 +30,18 @@
 #include "PDFPresentationController.h"
 #include <WebCore/GraphicsLayerClient.h>
 
+namespace WebCore {
+class PlatformWheelEvent;
+}
+
 namespace WebKit {
+
+enum class PageTransitionState : uint8_t {
+    Idle,
+    Stretching,
+    Settling,
+    Animating
+};
 
 class PDFDiscretePresentationController final : public PDFPresentationController, public WebCore::GraphicsLayerClient {
     WTF_MAKE_FAST_ALLOCATED;
@@ -70,6 +81,30 @@ private:
     bool handleKeyboardCommand(const WebKeyboardEvent&);
     bool handleKeyboardEventForPageNavigation(const WebKeyboardEvent&);
 
+    bool wantsWheelEvents() const override { return true; }
+    bool handleWheelEvent(const WebWheelEvent&) override;
+
+    bool handleBeginEvent(const WebCore::PlatformWheelEvent&);
+    bool handleChangedEvent(const WebCore::PlatformWheelEvent&);
+    bool handleEndedEvent(const WebCore::PlatformWheelEvent&);
+    bool handleCancelledEvent(const WebCore::PlatformWheelEvent&);
+
+    bool shouldTransitionOnSide(WebCore::BoxSide) const;
+
+    // Transition state
+    enum class TransitionDirection : bool { Previous, Next };
+
+    void startOrStopAnimationTimerIfNecessary();
+    void animationTimerFired();
+    void animateRubberBand(MonotonicTime);
+
+    void maybeEndGesture();
+    void gestureEndTimerFired();
+
+    void updateState(PageTransitionState);
+    void updateLayerVisibilityForTransitionState(PageTransitionState previousState);
+    void updateLayerPositionsForTransitionState();
+    void updateTransitionDirectionFromStretchDelta();
 
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
@@ -97,8 +132,9 @@ private:
     void goToRowIndex(unsigned rowIndex, Animated);
 
     void setVisibleRow(unsigned);
+    void updateLayersAfterChangeInVisibleRow(std::optional<unsigned> additionalVisibleRowIndex = { });
 
-    void updateLayersAfterChangeInVisibleRow();
+    std::optional<unsigned> additionalVisibleRowIndexForDirection(TransitionDirection) const;
 
     struct RowData {
         PDFLayoutRow pages;
@@ -118,6 +154,8 @@ private:
     };
 
     const RowData* rowDataForLayerID(WebCore::PlatformLayerIdentifier) const;
+    WebCore::FloatPoint positionForRowContainerLayer(const PDFLayoutRow&) const;
+    WebCore::FloatSize rowContainerSize(const PDFLayoutRow&) const;
 
     RefPtr<GraphicsLayer> m_rowsContainerLayer;
     Vector<RowData> m_rows;
@@ -125,6 +163,15 @@ private:
     std::optional<PDFDocumentLayout::DisplayMode> m_displayModeAtLastLayerSetup;
 
     unsigned m_visibleRowIndex { 0 };
+
+    // Gesture state
+    WebCore::Timer m_gestureEndTimer { *this, &PDFDiscretePresentationController::gestureEndTimerFired };
+    WebCore::Timer m_animationTimer { *this, &PDFDiscretePresentationController::animationTimerFired };
+    MonotonicTime m_animationStartTime;
+    FloatSize m_stretchDistance;
+    float m_animationStartDistance { 0 };
+    PageTransitionState m_transitionState { PageTransitionState::Idle };
+    std::optional<TransitionDirection> m_transitionDirection;
 };
 
 

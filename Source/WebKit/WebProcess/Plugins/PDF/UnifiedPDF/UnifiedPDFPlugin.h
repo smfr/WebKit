@@ -287,9 +287,9 @@ private:
 
     NSData *liveData() const override;
 
-    bool wantsWheelEvents() const override { return false; }
+    bool wantsWheelEvents() const override;
     bool handleMouseEvent(const WebMouseEvent&) override;
-    bool handleWheelEvent(const WebWheelEvent&) override { return false; }
+    bool handleWheelEvent(const WebWheelEvent&) override;
     bool handleMouseEnterEvent(const WebMouseEvent&) override;
     bool handleMouseLeaveEvent(const WebMouseEvent&) override;
     bool handleContextMenuEvent(const WebMouseEvent&) override;

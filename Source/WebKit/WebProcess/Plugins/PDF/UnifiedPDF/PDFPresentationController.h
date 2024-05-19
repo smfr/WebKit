@@ -82,6 +82,8 @@ public:
     // Event handling.
     virtual bool handleKeyboardEvent(const WebKeyboardEvent&) = 0;
 
+    virtual bool wantsWheelEvents() const { return false; }
+    virtual bool handleWheelEvent(const WebWheelEvent&) { return false; }
 
 protected:
     virtual WebCore::GraphicsLayerClient& graphicsLayerClient() = 0;
