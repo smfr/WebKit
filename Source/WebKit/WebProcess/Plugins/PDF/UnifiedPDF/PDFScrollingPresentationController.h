@@ -59,7 +59,6 @@ private:
     void updateIsInWindow(bool isInWindow) override;
     void updateDebugBorders(bool showDebugBorders, bool showRepaintCounters) override;
     void updateForCurrentScrollability(OptionSet<WebCore::TiledBackingScrollability>) override;
-    void currentlySnappedPageChanged() override;
 
     GraphicsLayerClient& graphicsLayerClient() override { return *this; }
 

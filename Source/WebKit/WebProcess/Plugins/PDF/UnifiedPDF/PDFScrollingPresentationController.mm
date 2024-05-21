@@ -226,8 +226,6 @@ void PDFScrollingPresentationController::updatePageBackgroundLayers()
 
         pageContainerLayer->setPosition(destinationRect.location());
         pageContainerLayer->setSize(destinationRect.size());
-        // FIXME: shouldDisplayPage only applies to the discrete presention.
-        pageContainerLayer->setOpacity(m_plugin->shouldDisplayPage(i) ? 1 : 0);
 
         auto pageBackgroundLayer = pageContainerLayer->children()[0];
         pageBackgroundLayer->setSize(pageBoundsRect.size());
@@ -318,15 +316,6 @@ void PDFScrollingPresentationController::updateForCurrentScrollability(OptionSet
 {
     if (auto* tiledBacking = m_contentsLayer->tiledBacking())
         tiledBacking->setScrollability(m_plugin->computeScrollability());
-}
-
-void PDFScrollingPresentationController::currentlySnappedPageChanged()
-{
-    updatePageBackgroundLayers();
-    m_contentsLayer->setNeedsDisplay();
-#if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-    m_selectionLayer->setNeedsDisplay();
-#endif
 }
 
 void PDFScrollingPresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow>)

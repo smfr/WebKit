@@ -354,7 +354,7 @@ void PDFDiscretePresentationController::updateState(PageTransitionState newState
     if (newState == m_transitionState)
         return;
 
-    ALWAYS_LOG_WITH_STREAM(stream << "PDFDiscretePresentationController::updateState from " << m_transitionState << " to " << newState);
+    LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::updateState from " << m_transitionState << " to " << newState);
     auto oldState = std::exchange(m_transitionState, newState);
 
     switch (m_transitionState) {

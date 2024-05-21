@@ -68,9 +68,6 @@ public:
 
     virtual void updateForCurrentScrollability(OptionSet<WebCore::TiledBackingScrollability>) = 0;
 
-    // FIXME: Obsolete.
-    virtual void currentlySnappedPageChanged() { }
-
     virtual void didGeneratePreviewForPage(PDFDocumentLayout::PageIndex) = 0;
 
     virtual void repaintForIncrementalLoad() = 0;

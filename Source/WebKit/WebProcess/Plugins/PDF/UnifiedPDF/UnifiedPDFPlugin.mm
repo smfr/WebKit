@@ -749,9 +749,6 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
         if (!page)
             continue;
 
-        if (!shouldDisplayPage(pageInfo.pageIndex))
-            continue;
-
         auto pageDestinationRect = pageInfo.pageBounds;
 
         if (asyncRenderer) {
@@ -831,7 +828,7 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
     auto documentScale = pageCoverage.pdfDocumentScale;
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
-        if (!page || !shouldDisplayPage(pageInfo.pageIndex))
+        if (!page)
             continue;
 
         auto pageDestinationRect = pageInfo.pageBounds;
@@ -1319,12 +1316,7 @@ void UnifiedPDFPlugin::didChangeScrollOffset()
 #if PLATFORM(MAC)
     if (m_activeAnnotation)
         m_activeAnnotation->updateGeometry();
-
-    if (m_animatedKeyboardScrollingDirection && !m_isScrollingWithAnimationToPageExtent)
-        snapToNearbyPageExtentForKeyboardScrolling(*m_animatedKeyboardScrollingDirection);
 #endif // PLATFORM(MAC)
-
-    determineCurrentlySnappedPage();
 
     // FIXME: Make the overlay scroll with the tiles instead of repainting constantly.
     updateFindOverlay(HideFindIndicator::Yes);
@@ -1573,25 +1565,6 @@ bool UnifiedPDFPlugin::requestStopKeyboardScrollAnimation(bool immediate)
     return scrollingCoordinator.requestStopKeyboardScrollAnimation(*this, immediate);
 }
 
-void UnifiedPDFPlugin::populateScrollSnapIdentifiers()
-{
-    ASSERT(m_scrollSnapIdentifiers.isEmpty());
-
-    // Create fake ElementIdentifiers for each page.
-    // FIXME: Ideally we would not use DOM Element identifiers here, but scroll
-    // snap code wants them (but never uses them to look the element back up).
-    // We should consider making it generic.
-    for (PDFDocumentLayout::PageIndex i = 0; i < m_documentLayout.pageCount(); ++i)
-        m_scrollSnapIdentifiers.append(ElementIdentifier::generate());
-}
-
-PDFDocumentLayout::PageIndex UnifiedPDFPlugin::pageForScrollSnapIdentifier(ElementIdentifier scrollSnapIdentifier) const
-{
-    auto index = m_scrollSnapIdentifiers.find(scrollSnapIdentifier);
-    RELEASE_ASSERT(index != notFound);
-    return index;
-}
-
 bool UnifiedPDFPlugin::isInDiscreteDisplayMode() const
 {
     return m_documentLayout.displayMode() == PDFDocumentLayout::DisplayMode::SinglePageDiscrete || m_documentLayout.displayMode() == PDFDocumentLayout::DisplayMode::TwoUpDiscrete;
@@ -1608,95 +1581,6 @@ FloatRect UnifiedPDFPlugin::pageBoundsInContentsSpace(PDFDocumentLayout::PageInd
     bounds.inflate(PDFDocumentLayout::pageMargin);
     bounds.scale(contentScaleFactor());
     return bounds;
-}
-
-void UnifiedPDFPlugin::updateSnapOffsets()
-{
-    if (m_scrollSnapIdentifiers.isEmpty())
-        populateScrollSnapIdentifiers();
-
-    if (!isInDiscreteDisplayMode()) {
-        clearSnapOffsets();
-        return;
-    }
-
-    Vector<SnapOffset<LayoutUnit>> verticalSnapOffsets;
-    Vector<LayoutRect> snapAreas;
-
-    for (PDFDocumentLayout::PageIndex i = 0; i < m_documentLayout.pageCount(); ++i) {
-        auto pageBoundsInDocumentSpace = m_documentLayout.layoutBoundsForPageAtIndex(i);
-        auto destinationRect = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::Contents, pageBoundsInDocumentSpace);
-
-        snapAreas.append(LayoutRect { destinationRect });
-
-        bool isTallerThanViewport = destinationRect.height() > m_size.height();
-
-        verticalSnapOffsets.append(SnapOffset<LayoutUnit> {
-            LayoutUnit { destinationRect.y() },
-            ScrollSnapStop::Always,
-            isTallerThanViewport,
-            m_scrollSnapIdentifiers[i],
-            false,
-            { i },
-        });
-
-        if (isTallerThanViewport) {
-            verticalSnapOffsets.append(SnapOffset<LayoutUnit> {
-                LayoutUnit { destinationRect.maxY() - m_size.height() },
-                ScrollSnapStop::Always,
-                isTallerThanViewport,
-                m_scrollSnapIdentifiers[i],
-                false,
-                { i },
-            });
-        }
-    }
-
-    setScrollSnapOffsetInfo({
-        ScrollSnapStrictness::Mandatory,
-        { },
-        verticalSnapOffsets,
-        snapAreas,
-        m_scrollSnapIdentifiers,
-    });
-
-    determineCurrentlySnappedPage();
-}
-
-void UnifiedPDFPlugin::determineCurrentlySnappedPage()
-{
-    std::optional<PDFDocumentLayout::PageIndex> newSnappedPage;
-
-    if (isInDiscreteDisplayMode() && snapOffsetsInfo() && snapOffsetsInfo()->verticalSnapOffsets.size()) {
-        std::optional<ElementIdentifier> newSnapIdentifier = snapOffsetsInfo()->verticalSnapOffsets[0].snapTargetID;
-
-        FloatPoint currentScrollPosition = scrollPosition();
-        float scrollPositionYInContentsSpace = convertDown(CoordinateSpace::ScrolledContents, CoordinateSpace::Contents, currentScrollPosition).y();
-
-        auto closestDistanceToSnapOffset = std::numeric_limits<float>::max();
-        for (const auto& offsetInfo : snapOffsetsInfo()->verticalSnapOffsets) {
-            // FIXME: Can this padding be derived from something?
-            auto distance = std::abs(scrollPositionYInContentsSpace + 10 - offsetInfo.offset);
-            if (distance < closestDistanceToSnapOffset) {
-                closestDistanceToSnapOffset = distance;
-                newSnapIdentifier = offsetInfo.snapTargetID;
-            }
-        }
-
-        if (newSnapIdentifier)
-            newSnappedPage = pageForScrollSnapIdentifier(*newSnapIdentifier);
-    }
-
-    if (m_currentlySnappedPage != newSnappedPage) {
-        m_currentlySnappedPage = newSnappedPage;
-        // FIXME: remove
-        m_presentationController->currentlySnappedPageChanged();
-    }
-}
-
-bool UnifiedPDFPlugin::shouldDisplayPage(PDFDocumentLayout::PageIndex pageIndex)
-{
-    return true;
 }
 
 #pragma mark -
@@ -2002,12 +1886,6 @@ bool UnifiedPDFPlugin::handleMouseEvent(const WebMouseEvent& event)
 
     auto pointInDocumentSpace = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, lastKnownMousePositionInView());
     auto pageIndex = nearestPageIndexForDocumentPoint(pointInDocumentSpace);
-
-    if (!shouldDisplayPage(pageIndex)) {
-        notifyCursorChanged(toWebCoreCursorType({ }));
-        return false;
-    }
-
     auto pointInPageSpace = convertDown(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::PDFPage, pointInDocumentSpace, pageIndex);
 
     auto mouseEventButton = event.button();
@@ -2180,31 +2058,6 @@ bool UnifiedPDFPlugin::handleContextMenuEvent(const WebMouseEvent& event)
 CheckedPtr<KeyboardScrollingAnimator> UnifiedPDFPlugin::checkedKeyboardScrollingAnimator() const
 {
     return scrollAnimator().keyboardScrollingAnimator();
-}
-
-bool UnifiedPDFPlugin::snapToNearbyPageExtentForKeyboardScrolling(ScrollDirection direction)
-{
-    if (!m_currentlySnappedPage)
-        return false;
-
-    auto currentPage = *m_currentlySnappedPage;
-    auto currentPageContentRect = pageBoundsInContentsSpace(currentPage);
-    static constexpr auto distanceBeforeSnappingToPageExtents = 100;
-    if (direction == ScrollDirection::ScrollUp && currentPage && m_scrollOffset.height() < currentPageContentRect.y() + distanceBeforeSnappingToPageExtents) {
-        checkedKeyboardScrollingAnimator()->stopScrollingImmediately();
-        m_isScrollingWithAnimationToPageExtent |= scrollAnimator().scrollToPositionWithAnimation({ static_cast<float>(m_scrollOffset.width()), currentPageContentRect.y() });
-        return true;
-    }
-
-    float scrollExtentForCurrentPage = currentPageContentRect.maxY() - m_size.height();
-    auto pagesToSkip = isShowingTwoPages() ? 2 : 1;
-    if (direction == ScrollDirection::ScrollDown && currentPage < m_documentLayout.pageCount() - pagesToSkip && m_scrollOffset.height() > scrollExtentForCurrentPage - distanceBeforeSnappingToPageExtents) {
-        checkedKeyboardScrollingAnimator()->stopScrollingImmediately();
-        m_isScrollingWithAnimationToPageExtent |= scrollAnimator().scrollToPositionWithAnimation({ static_cast<float>(m_scrollOffset.width()), scrollExtentForCurrentPage });
-        return true;
-    }
-
-    return false;
 }
 
 #endif // PLATFORM(MAC)
@@ -3829,15 +3682,7 @@ void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayM
     }
 
     if (isInDiscreteDisplayMode()) {
-        ASSERT(m_currentlySnappedPage);
-        if (!m_currentlySnappedPage)
-            return;
-
         // FIXME for discrete.
-        auto pageBoundsInDocumentSpace = layoutBoundsForPageAtIndex(m_currentlySnappedPage.value());
-        auto pageBoundsInScrolledContents = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::ScrolledContents, pageBoundsInDocumentSpace);
-
-        scrollToPointInContentsSpace(pageBoundsInScrolledContents.location());
     }
 
     bool wantsWheelEvents = m_presentationController->wantsWheelEvents();
