@@ -2136,6 +2136,18 @@ bool UnifiedPDFPlugin::handleWheelEvent(const WebWheelEvent& wheelEvent)
     return handleWheelEventForScrolling(platform(wheelEvent), { });
 }
 
+PlatformWheelEvent UnifiedPDFPlugin::wheelEventCopyWithVelocity(const PlatformWheelEvent& wheelEvent) const
+{
+    if (!isFullMainFramePlugin())
+        return wheelEvent;
+
+    RefPtr webPage = m_frame->page();
+    if (!webPage)
+        return wheelEvent;
+
+    return webPage->corePage()->wheelEventDeltaFilter()->eventCopyWithVelocity(wheelEvent);
+}
+
 bool UnifiedPDFPlugin::handleContextMenuEvent(const WebMouseEvent& event)
 {
 #if ENABLE(CONTEXT_MENUS)

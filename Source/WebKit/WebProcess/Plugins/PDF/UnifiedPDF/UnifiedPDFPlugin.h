@@ -50,6 +50,7 @@ namespace WebCore {
 class FrameView;
 class KeyboardScrollingAnimator;
 class PageOverlay;
+class PlatformWheelEvent;
 
 enum class DelegatedScrollingMode : uint8_t;
 
@@ -559,6 +560,7 @@ private:
     bool isInDiscreteDisplayMode() const;
     bool isShowingTwoPages() const;
 
+    WebCore::PlatformWheelEvent wheelEventCopyWithVelocity(const WebCore::PlatformWheelEvent&) const;
 
     void setPresentationController(std::unique_ptr<PDFPresentationController>&&);
 

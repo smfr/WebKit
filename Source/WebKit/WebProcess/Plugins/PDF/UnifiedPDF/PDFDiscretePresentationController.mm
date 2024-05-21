@@ -32,10 +32,14 @@
 #include "WebKeyboardEvent.h"
 #include "WebEventConversion.h"
 #include "WebWheelEvent.h"
+#include <WebCore/Animation.h>
 #include <WebCore/GraphicsLayer.h>
+#include <WebCore/Length.h>
 #include <WebCore/PlatformWheelEvent.h>
 #include <WebCore/TiledBacking.h>
+#include <WebCore/TimingFunction.h>
 #include <WebCore/TransformationMatrix.h>
+#include <WebCore/TransformOperations.h>
 #include <pal/spi/mac/NSScrollViewSPI.h>
 
 namespace WebKit {
@@ -53,8 +57,11 @@ static TextStream& operator<<(TextStream& ts, PageTransitionState state)
 {
     switch (state) {
     case PageTransitionState::Idle: ts << "Idle"; break;
+    case PageTransitionState::DeterminingStretchAxis: ts << "DeterminingStretchAxis"; break;
     case PageTransitionState::Stretching: ts << "Stretching"; break;
     case PageTransitionState::Settling: ts << "Settling"; break;
+    case PageTransitionState::StartingAnimationFromStationary: ts << "StartingAnimationFromStationary"; break;
+    case PageTransitionState::StartingAnimationFromMomentum: ts << "StartingAnimationFromMomentum"; break;
     case PageTransitionState::Animating: ts << "Animating"; break;
     }
     return ts;
@@ -174,31 +181,19 @@ static ScrollEventAxis dominantAxisFavoringVertical(FloatSize delta)
     return ScrollEventAxis::Horizontal;
 }
 
-static FloatSize deltaAlignedToAxis(FloatSize delta, ScrollEventAxis axis)
-{
-    switch (axis) {
-    case ScrollEventAxis::Horizontal: return FloatSize { delta.width(), 0 };
-    case ScrollEventAxis::Vertical: return FloatSize { 0, delta.height() };
-    }
-
-    return { };
-}
-
-static FloatSize deltaAlignedToDominantAxis(FloatSize delta)
-{
-    auto dominantAxis = dominantAxisFavoringVertical(delta);
-    return deltaAlignedToAxis(delta, dominantAxis);
-}
-
 bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& event)
 {
+    // FIXME: Consume all the events if we're not scrollable.
+
+    if (m_transitionState == PageTransitionState::Animating)
+        return true; // Consume the events. Ideally we'd allow this to start another animation.
+
     auto wheelEvent = platform(event);
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::handleWheelEvent " << wheelEvent << " (state " << m_transitionState << ")");
 
     // When we receive the last non-momentum event, we don't know if momentum events are coming (but see rdar://85308435).
     if (wheelEvent.isEndOfNonMomentumScroll()) {
         maybeEndGesture();
-        return false;
+        return true;
     }
 
     if (wheelEvent.isTransitioningToMomentumScroll())
@@ -210,6 +205,7 @@ bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& ev
     if (wheelEvent.isGestureCancel())
         return handleCancelledEvent(wheelEvent);
 
+    // FIXME: Maybe consume all the events until we've determined direction.
     auto dominantAxis = dominantAxisFavoringVertical(event.delta());
     auto relevantSide = ScrollableArea::targetSideForScrollDelta(-wheelEvent.delta(), dominantAxis);
     if (!relevantSide)
@@ -246,7 +242,6 @@ bool PDFDiscretePresentationController::handleBeginEvent(const WebCore::Platform
 {
     auto wheelDelta = -wheelEvent.delta();
 
-    // FIXME: Trying to decide if a gesture is horizontal or vertical at the "began" phase is very error-prone.
     auto horizontalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Horizontal);
     if (horizontalSide && !shouldTransitionOnSide(*horizontalSide))
         return false;
@@ -255,82 +250,42 @@ bool PDFDiscretePresentationController::handleBeginEvent(const WebCore::Platform
     if (verticalSide && !shouldTransitionOnSide(*verticalSide))
         return false;
 
-    // FIXME: Have we filtered the wheel event delta yet?
-    // FIXME: We need to allow the drag to start on a Changed event, since the begin event might have a small X delta.
-    // FIXME: We need to lock a drag to one axis.
     // FIXME: Handle clicky wheel mouse.
+    // FIXME: Should we consult NSScrollWheelMultiplier like ScrollingEffectsController does?
 
-    // FIXME: scrollWheelMultiplier?
-
-    m_stretchDistance = wheelDelta;
-    updateTransitionDirectionFromStretchDelta();
-    updateLayerPositionsForTransitionState();
-
-    updateState(PageTransitionState::Stretching);
+    updateState(PageTransitionState::DeterminingStretchAxis);
+    applyWheelEventDelta(wheelDelta);
 
     return true;
 }
 
 bool PDFDiscretePresentationController::handleChangedEvent(const WebCore::PlatformWheelEvent& wheelEvent)
 {
-    if (m_transitionState != PageTransitionState::Stretching)
+    if (m_transitionState != PageTransitionState::DeterminingStretchAxis && m_transitionState != PageTransitionState::Stretching)
         return true;
 
     auto delta = -wheelEvent.delta();
+    applyWheelEventDelta(delta);
 
-    if (wheelEvent.isGestureEvent()) {
-        delta = deltaAlignedToDominantAxis(delta);
+    auto stetchOffset = relevantAxisForDirection(m_transitionDirection.value_or(TransitionDirection::NextVertical), m_stretchDistance);
+    if (std::abs(stetchOffset) >= pageSwapDistanceThreshold && wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed) {
+        auto eventWithVelocity = m_plugin->wheelEventCopyWithVelocity(wheelEvent);
+        auto velocity = eventWithVelocity.scrollingVelocity();
+        if (!velocity.isZero())
+            m_momentumVelocity = velocity;
+
+        updateState(PageTransitionState::StartingAnimationFromMomentum);
+        return true;
     }
 
-    m_stretchDistance += delta;
-    updateTransitionDirectionFromStretchDelta();
-    updateLayerPositionsForTransitionState();
-
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::handleChangedEvent - stretch distance " << m_stretchDistance);
-
+    updateLayersForTransitionState();
     return true;
 }
 
 bool PDFDiscretePresentationController::handleEndedEvent(const WebCore::PlatformWheelEvent&)
 {
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::handleEndedEvent - state " << m_transitionState << " stretch distance " << m_stretchDistance);
-
-
-    switch (m_transitionState) {
-    case PageTransitionState::Idle:
-        break;
-    case PageTransitionState::Stretching:
-        if (std::abs(m_stretchDistance.height()) < pageSwapDistanceThreshold) {
-            updateState(PageTransitionState::Settling);
-            return true;
-        }
-
-        if (m_stretchDistance.height() < 0) {
-            updateState(PageTransitionState::Animating);
-            goToPreviousRow(Animated::Yes);
-            updateState(PageTransitionState::Idle);
-            return true;
-        }
-
-        if (m_stretchDistance.height() > 0) {
-            updateState(PageTransitionState::Animating);
-            goToNextRow(Animated::Yes);
-            updateState(PageTransitionState::Idle);
-            return true;
-        }
-        break;
-    case PageTransitionState::Settling:
-        break;
-    case PageTransitionState::Animating:
-        // FIXME: Temporary
-        updateState(PageTransitionState::Idle);
-        break;
-
-    }
-
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::handleEndedEvent - unhandled");
-
-    return false;
+    startPageTransitionOrSettle();
+    return true;
 }
 
 bool PDFDiscretePresentationController::handleCancelledEvent(const WebCore::PlatformWheelEvent&)
@@ -343,17 +298,41 @@ bool PDFDiscretePresentationController::handleCancelledEvent(const WebCore::Plat
 
 void PDFDiscretePresentationController::maybeEndGesture()
 {
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::maybeEndGesture");
-
     static constexpr auto gestureEndTimerDelay = 32_ms;
+    // Wait for two frames to see if momentum will start.
     m_gestureEndTimer.startOneShot(gestureEndTimerDelay);
 }
 
 void PDFDiscretePresentationController::gestureEndTimerFired()
 {
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::gestureEndTimerFired - state " << m_transitionState);
+    startPageTransitionOrSettle();
+}
 
-    updateState(PageTransitionState::Idle);
+void PDFDiscretePresentationController::startPageTransitionOrSettle()
+{
+    if (m_transitionState == PageTransitionState::DeterminingStretchAxis) {
+        updateState(PageTransitionState::Idle);
+        return;
+    }
+
+    if (m_transitionState != PageTransitionState::Stretching)
+        return;
+
+    auto stetchOffset = relevantAxisForDirection(m_transitionDirection.value_or(TransitionDirection::NextVertical), m_stretchDistance);
+    if (std::abs(stetchOffset) < pageSwapDistanceThreshold) {
+        updateState(PageTransitionState::Settling);
+        return;
+    }
+
+    if (stetchOffset < 0) {
+        updateState(PageTransitionState::StartingAnimationFromStationary);
+        return;
+    }
+
+    if (stetchOffset > 0) {
+        updateState(PageTransitionState::StartingAnimationFromStationary);
+        return;
+    }
 }
 
 void PDFDiscretePresentationController::updateState(PageTransitionState newState)
@@ -361,13 +340,32 @@ void PDFDiscretePresentationController::updateState(PageTransitionState newState
     if (newState == m_transitionState)
         return;
 
+    ALWAYS_LOG_WITH_STREAM(stream << "PDFDiscretePresentationController::updateState from " << m_transitionState << " to " << newState);
     auto oldState = std::exchange(m_transitionState, newState);
 
-    if (m_transitionState == PageTransitionState::Idle)
+    switch (m_transitionState) {
+    case PageTransitionState::Idle:
+    case PageTransitionState::DeterminingStretchAxis:
+        m_unappliedStretchDelta = { };
+        m_stretchDistance = { };
         m_transitionDirection = { };
+        m_momentumVelocity = { };
+        break;
+    case PageTransitionState::Stretching:
+        break;
+    case PageTransitionState::Settling:
+        break;
+    case PageTransitionState::StartingAnimationFromStationary:
+    case PageTransitionState::StartingAnimationFromMomentum:
+        startTransitionAnimation(m_transitionState);
+        m_transitionState = PageTransitionState::Animating;
+        break;
+    case PageTransitionState::Animating:
+        break;
+    }
 
     startOrStopAnimationTimerIfNecessary();
-    updateLayerPositionsForTransitionState();
+    updateLayersForTransitionState();
     updateLayerVisibilityForTransitionState(oldState);
 }
 
@@ -375,19 +373,16 @@ void PDFDiscretePresentationController::startOrStopAnimationTimerIfNecessary()
 {
     switch (m_transitionState) {
     case PageTransitionState::Idle:
-        m_animationTimer.stop();
-        break;
     case PageTransitionState::Stretching:
+    case PageTransitionState::DeterminingStretchAxis:
+    case PageTransitionState::StartingAnimationFromStationary:
+    case PageTransitionState::StartingAnimationFromMomentum:
+    case PageTransitionState::Animating:
+        m_animationTimer.stop();
         break;
     case PageTransitionState::Settling:
         m_animationStartTime = MonotonicTime::now();
-        m_animationStartDistance = m_stretchDistance.height(); // FIXME: for horizontal.
-        if (!m_animationTimer.isActive())
-            m_animationTimer.startRepeating(animationFrameInterval);
-        break;
-    case PageTransitionState::Animating:
-        m_animationStartTime = MonotonicTime::now();
-        m_animationStartDistance = m_stretchDistance.height(); // FIXME: for horizontal.
+        m_animationStartDistance = relevantAxisForDirection(m_transitionDirection.value_or(TransitionDirection::NextVertical), m_stretchDistance);
         if (!m_animationTimer.isActive())
             m_animationTimer.startRepeating(animationFrameInterval);
         break;
@@ -398,13 +393,14 @@ void PDFDiscretePresentationController::animationTimerFired()
 {
     switch (m_transitionState) {
     case PageTransitionState::Idle:
-        break;
     case PageTransitionState::Stretching:
+    case PageTransitionState::DeterminingStretchAxis:
+    case PageTransitionState::StartingAnimationFromStationary:
+    case PageTransitionState::StartingAnimationFromMomentum:
+    case PageTransitionState::Animating:
         break;
     case PageTransitionState::Settling:
         animateRubberBand(MonotonicTime::now());
-        break;
-    case PageTransitionState::Animating:
         break;
     }
 }
@@ -414,21 +410,168 @@ void PDFDiscretePresentationController::animateRubberBand(MonotonicTime now)
     static constexpr auto initialVelocity = 0.0f;
 
     auto stretch = elasticDeltaForTimeDelta(m_animationStartDistance, initialVelocity, now - m_animationStartTime);
-    m_stretchDistance.setHeight(stretch);
-    updateTransitionDirectionFromStretchDelta();
-    updateLayerPositionsForTransitionState();
+    setRelevantAxisForDirection(m_transitionDirection.value_or(TransitionDirection::NextVertical), m_stretchDistance, stretch);
+    updateLayersForTransitionState();
 
     if (std::abs(stretch) < 0.5)
         updateState(PageTransitionState::Idle);
+}
+
+void PDFDiscretePresentationController::startTransitionAnimation(PageTransitionState animationStartState)
+{
+    if (!m_transitionDirection)
+        return;
+
+    static constexpr auto defaultTransitionDuration = 0.5_s;
+    static constexpr auto maximumTransitionDuration = 0.75_s;
+    static constexpr auto minimumTransitionDuration = 0.20_s;
+
+    auto transitionDuration = defaultTransitionDuration;
+
+    auto transformAnimationValueForTranslation = [](double keyTime, FloatSize offset) {
+        auto xLength = Length(offset.width(), LengthType::Fixed);
+        auto yLength = Length(offset.height(), LengthType::Fixed);
+
+        TransformOperations transformOps;
+        RefPtr translateOperation = TranslateTransformOperation::create(xLength, yLength, Length(0, LengthType::Fixed), TransformOperationType::Translate);
+        transformOps.operations().append(WTFMove(translateOperation));
+
+        return makeUnique<TransformAnimationValue>(keyTime, transformOps, nullptr);
+    };
+
+    auto createPositionKeyframesForAnimation = [&](TransitionDirection direction, FloatSize initialOffset, FloatSize finalOffset) {
+        auto keyframes = KeyframeValueList { AnimatedProperty::Translate };
+        auto initialValue = transformAnimationValueForTranslation(0, initialOffset);
+        auto finalValue = transformAnimationValueForTranslation(1, finalOffset);
+        keyframes.insert(WTFMove(initialValue));
+        keyframes.insert(WTFMove(finalValue));
+        return keyframes;
+    };
+
+    auto createOpacityKeyframesForAnimation = [](TransitionDirection direction, std::array<float, 2> startEndOpacities) {
+        auto keyframes = KeyframeValueList { AnimatedProperty::Opacity };
+        keyframes.insert(makeUnique<FloatAnimationValue>(0, startEndOpacities[startIndex]));
+        keyframes.insert(makeUnique<FloatAnimationValue>(1, startEndOpacities[endIndex]));
+        return keyframes;
+    };
+
+    auto addAnimationsToRowContainer = [&](const RowData& animatingRow, const RowData& stationaryRow, TransitionDirection direction, FloatSize startOffset, FloatSize endOffset, const std::array<std::array<float, 2>, 2>& layerEndOpacities) {
+        auto transitionDuration = defaultTransitionDuration;
+
+        RefPtr<TimingFunction> moveTimingFunction;
+        RefPtr<TimingFunction> fadeTimingFunction;
+
+        if (animationStartState == PageTransitionState::StartingAnimationFromMomentum) {
+            moveTimingFunction = LinearTimingFunction::create();
+            fadeTimingFunction = LinearTimingFunction::create();
+
+            if (m_momentumVelocity) {
+                float velocity = std::abs(relevantAxisForDirection(direction, *m_momentumVelocity));
+                float distance = std::abs(relevantAxisForDirection(direction, endOffset - startOffset));
+
+                transitionDuration = Seconds { distance / velocity };
+                transitionDuration = std::min(std::max(transitionDuration, minimumTransitionDuration), maximumTransitionDuration);
+            }
+        } else {
+            auto timingFunctionPreset = isNextDirection(direction) ? CubicBezierTimingFunction::TimingFunctionPreset::EaseIn : CubicBezierTimingFunction::TimingFunctionPreset::EaseOut;
+            moveTimingFunction = CubicBezierTimingFunction::create(timingFunctionPreset);
+            fadeTimingFunction = CubicBezierTimingFunction::create(timingFunctionPreset);
+        }
+
+        auto moveFrames = createPositionKeyframesForAnimation(direction, startOffset, endOffset);
+        Ref moveAnimation = Animation::create();
+        moveAnimation->setDuration(transitionDuration.seconds());
+        moveAnimation->setTimingFunction(WTFMove(moveTimingFunction));
+        animatingRow.containerLayer->addAnimation(moveFrames, { }, moveAnimation.ptr(), "move"_s, 0);
+
+        auto fadeKeyframes = createOpacityKeyframesForAnimation(direction, layerEndOpacities[topLayerIndex]);
+        Ref fadeAnimation = Animation::create();
+        fadeAnimation->setDuration(transitionDuration.seconds());
+        fadeAnimation->setTimingFunction(WTFMove(fadeTimingFunction));
+        animatingRow.containerLayer->addAnimation(fadeKeyframes, { }, fadeAnimation.ptr(), "fade"_s, 0);
+
+        auto stationaryLayerFadeKeyframes = createOpacityKeyframesForAnimation(direction, layerEndOpacities[bottomLayerIndex]);
+        stationaryRow.containerLayer->addAnimation(stationaryLayerFadeKeyframes, { }, fadeAnimation.ptr(), "fade"_s, 0);
+
+        return transitionDuration;
+    };
+
+    auto setupAnimations = [&](const RowData& animatingRow, const RowData& stationaryRow, TransitionDirection direction, FloatSize stretchDistance, FloatSize endOffset, FloatSize rowSize) {
+        auto startOffset = layerOffsetForStretch(direction, stretchDistance, rowSize);
+
+        auto layerOpacities = layerOpacitiesForStretchOffset(direction, startOffset, rowSize);
+        transitionDuration = addAnimationsToRowContainer(animatingRow, stationaryRow, direction, startOffset, endOffset, layerOpacities);
+
+        // The animation runs on top of the non-stretched layer position and opacity.
+        auto layerPosition = positionForRowContainerLayer(animatingRow.pages);
+        animatingRow.containerLayer->setPosition(layerPosition);
+        animatingRow.containerLayer->setOpacity(1);
+        stationaryRow.containerLayer->setOpacity(1);
+
+        return transitionDuration;
+    };
+
+    switch (*m_transitionDirection) {
+    case TransitionDirection::PreviousHorizontal:
+    case TransitionDirection::PreviousVertical: {
+        // Top page animates down, fading in. Bottom page fades out.
+        auto animatingRowIndex = additionalVisibleRowIndexForDirection(*m_transitionDirection);
+        if (!animatingRowIndex)
+            return;
+
+        auto& animatingRow = m_rows[*animatingRowIndex];
+        auto& stationaryRow = m_rows[m_visibleRowIndex];
+        auto rowSize = rowContainerSize(animatingRow.pages);
+        auto endOffset = FloatSize { };
+        transitionDuration = setupAnimations(animatingRow, stationaryRow, *m_transitionDirection, m_stretchDistance, endOffset, rowSize);
+        break;
+    }
+
+    case TransitionDirection::NextHorizontal:
+    case TransitionDirection::NextVertical: {
+        // Top page animates up, fading out. Botom page fades in.
+        auto additionalVisibleRowIndex = additionalVisibleRowIndexForDirection(*m_transitionDirection);
+        if (!additionalVisibleRowIndex)
+            return;
+
+        auto& animatingRow = m_rows[m_visibleRowIndex];
+        auto& stationaryRow = m_rows[*additionalVisibleRowIndex];
+        auto rowSize = rowContainerSize(animatingRow.pages);
+        auto endOffset = layerOffsetForStretch(*m_transitionDirection, rowSize, rowSize);
+        transitionDuration = setupAnimations(animatingRow, stationaryRow, *m_transitionDirection, m_stretchDistance, endOffset, rowSize);
+        break;
+    }
+    }
+
+    m_transitionEndTimer.startOneShot(transitionDuration);
+}
+
+void PDFDiscretePresentationController::transitionEndTimerFired()
+{
+    if (!m_transitionDirection)
+        return;
+
+    switch (*m_transitionDirection) {
+    case TransitionDirection::PreviousHorizontal:
+    case TransitionDirection::PreviousVertical:
+        goToPreviousRow(Animated::No);
+        break;
+    case TransitionDirection::NextHorizontal:
+    case TransitionDirection::NextVertical:
+        goToNextRow(Animated::No);
+        break;
+    }
+
+    updateState(PageTransitionState::Idle);
 }
 
 std::optional<unsigned> PDFDiscretePresentationController::additionalVisibleRowIndexForDirection(TransitionDirection direction) const
 {
     std::optional<unsigned> additionalVisibleRow;
     if (m_transitionDirection) {
-        if (*m_transitionDirection == TransitionDirection::Previous && m_visibleRowIndex > 0)
+        if (isPreviousDirection(*m_transitionDirection) && m_visibleRowIndex > 0)
             additionalVisibleRow = m_visibleRowIndex - 1;
-        else if (*m_transitionDirection == TransitionDirection::Next && m_visibleRowIndex < m_rows.size() - 1)
+        else if (isNextDirection(*m_transitionDirection) && m_visibleRowIndex < m_rows.size() - 1)
             additionalVisibleRow = m_visibleRowIndex + 1;
     }
 
@@ -442,13 +585,14 @@ void PDFDiscretePresentationController::updateLayerVisibilityForTransitionState(
         updateLayersAfterChangeInVisibleRow(m_visibleRowIndex);
         break;
 
-    case PageTransitionState::Settling: {
-        WTF_ALWAYS_LOG("updateLayerVisibilityForTransitionState " << m_transitionState);
+    case PageTransitionState::DeterminingStretchAxis:
+    case PageTransitionState::Settling:
+    case PageTransitionState::Animating:
         break;
-    }
 
     case PageTransitionState::Stretching:
-    case PageTransitionState::Animating: {
+    case PageTransitionState::StartingAnimationFromStationary:
+    case PageTransitionState::StartingAnimationFromMomentum: {
         std::optional<unsigned> additionalVisibleRow;
         if (m_transitionDirection)
             additionalVisibleRow = additionalVisibleRowIndexForDirection(*m_transitionDirection);
@@ -459,38 +603,156 @@ void PDFDiscretePresentationController::updateLayerVisibilityForTransitionState(
     }
 }
 
-void PDFDiscretePresentationController::updateTransitionDirectionFromStretchDelta()
+void PDFDiscretePresentationController::applyWheelEventDelta(FloatSize delta)
 {
-    if (std::abs(m_stretchDistance.height()) >= std::abs(m_stretchDistance.width()))
-        m_transitionDirection = m_stretchDistance.height() > 0 ? TransitionDirection::Next : TransitionDirection::Previous;
-    else
-        m_transitionDirection = m_stretchDistance.width() > 0 ? TransitionDirection::Next : TransitionDirection::Previous;
-}
+    auto directionFromDelta = [](FloatSize accumulatedDelta) -> std::optional<TransitionDirection> {
+        // 3x the distance on one axis than the other, and at least 3px of movement.
+        auto horizontalDelta = std::abs(accumulatedDelta.width());
+        auto verticalDelta = std::abs(accumulatedDelta.height());
 
-void PDFDiscretePresentationController::updateLayerPositionsForTransitionState()
-{
-    auto layerOpacitiesForStretch = [](TransitionDirection direction, FloatSize stretchDistance, FloatSize rowSize) {
+        static constexpr auto minimumAxisMovement = 3.0f;
+        if (std::max(horizontalDelta, verticalDelta) < minimumAxisMovement)
+            return { };
 
-        switch (direction) {
-        case TransitionDirection::Previous: {
-            // Pulling down.
-            constexpr auto distanceForMaxOpacity = 400.0f;
-            auto firstLayerOpacity = std::min(std::abs(stretchDistance.height()), distanceForMaxOpacity) / distanceForMaxOpacity;
-            return std::vector<float> { firstLayerOpacity, 1 };
-            break;
-        }
-        case TransitionDirection::Next: {
-            // Pushing up.
-            // FIXME for sideways.
-            constexpr auto distanceForMaxOpacity = 80.0f;
-            auto secondLayerOpacity = std::min(std::abs(stretchDistance.height()), distanceForMaxOpacity) / distanceForMaxOpacity;
-            return std::vector<float> { 1, secondLayerOpacity };
-        }
-        }
-        return std::vector<float> { 1, 1 };
+        static constexpr auto minimumAxisRatio = 1.5f;
+
+        if (horizontalDelta > verticalDelta && (!verticalDelta || horizontalDelta / verticalDelta >= minimumAxisRatio))
+            return accumulatedDelta.width() < 0 ? TransitionDirection::PreviousHorizontal : TransitionDirection::NextHorizontal;
+
+        if (verticalDelta > horizontalDelta && (!horizontalDelta || verticalDelta / horizontalDelta >= minimumAxisRatio))
+            return accumulatedDelta.height() < 0 ? TransitionDirection::PreviousVertical : TransitionDirection::NextVertical;
+
+        return { };
     };
 
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::updateLayerPositionsForTransitionState() " << m_transitionState);
+    auto stretchDeltaConstrainedForTransitionDirection = [](FloatSize delta, TransitionDirection direction) {
+        switch (direction) {
+        case TransitionDirection::PreviousHorizontal:
+            if (delta.width() > 0)
+                delta.setWidth(0);
+            delta.setHeight(0);
+            break;
+        case TransitionDirection::PreviousVertical:
+            delta.setWidth(0);
+            if (delta.height() > 0)
+                delta.setHeight(0);
+            break;
+        case TransitionDirection::NextHorizontal:
+            delta.setHeight(0);
+            break;
+        case TransitionDirection::NextVertical:
+            delta.setWidth(0);
+            if (delta.height() < 0)
+                delta.setHeight(0);
+            break;
+        }
+        return delta;
+    };
+
+    if (!m_transitionDirection) {
+        ASSERT(m_transitionState == PageTransitionState::DeterminingStretchAxis);
+        m_unappliedStretchDelta += delta;
+
+        if (auto direction = directionFromDelta(m_unappliedStretchDelta)) {
+            m_transitionDirection = *direction;
+            m_stretchDistance = stretchDeltaConstrainedForTransitionDirection(std::exchange(m_unappliedStretchDelta, { }), *m_transitionDirection);
+            updateState(PageTransitionState::Stretching);
+        }
+        return;
+    }
+
+    ASSERT(m_transitionDirection);
+    m_stretchDistance = stretchDeltaConstrainedForTransitionDirection(m_stretchDistance + delta, *m_transitionDirection);
+}
+
+float PDFDiscretePresentationController::relevantAxisForDirection(TransitionDirection direction, WebCore::FloatSize size)
+{
+    switch (direction) {
+    case TransitionDirection::PreviousHorizontal:
+    case TransitionDirection::NextHorizontal:
+        return size.width();
+    case TransitionDirection::PreviousVertical:
+    case TransitionDirection::NextVertical:
+        return size.height();
+    }
+    return 0;
+}
+
+void PDFDiscretePresentationController::setRelevantAxisForDirection(TransitionDirection direction, WebCore::FloatSize& size, float value)
+{
+    switch (direction) {
+    case TransitionDirection::PreviousHorizontal:
+    case TransitionDirection::NextHorizontal:
+        size.setWidth(value);
+        break;
+    case TransitionDirection::PreviousVertical:
+    case TransitionDirection::NextVertical:
+        size.setHeight(value);
+        break;
+    }
+}
+
+std::array<std::array<float, 2>, 2> PDFDiscretePresentationController::layerOpacitiesForStretchOffset(TransitionDirection direction, FloatSize layerOffset, FloatSize rowSize) const
+{
+    auto topLayerThresholdDistance = relevantAxisForDirection(direction, rowSize) / 2;
+    switch (direction) {
+    case TransitionDirection::PreviousHorizontal:
+    case TransitionDirection::PreviousVertical: {
+        auto topLayerStartOpacity = std::min(std::abs(relevantAxisForDirection(direction, layerOffset)), topLayerThresholdDistance) / topLayerThresholdDistance;
+        auto bottomStartOpacity = std::min(std::abs(relevantAxisForDirection(direction, layerOffset)), pageSwapDistanceThreshold) / pageSwapDistanceThreshold;
+        return { {
+            { 1 - topLayerStartOpacity, 1.0f },
+            { bottomStartOpacity, 0.0f }
+        } };
+    }
+    case TransitionDirection::NextHorizontal:
+    case TransitionDirection::NextVertical: {
+        auto topLayerStartOpacity = std::min(std::abs(relevantAxisForDirection(direction, layerOffset)), topLayerThresholdDistance) / topLayerThresholdDistance;
+        auto bottomStartOpacity = std::min(std::abs(relevantAxisForDirection(direction, layerOffset)), pageSwapDistanceThreshold) / pageSwapDistanceThreshold;
+        return { {
+            { 1 - topLayerStartOpacity, 0.0f },
+            { bottomStartOpacity, 1.0f }
+        } };
+    }
+    }
+    return { { { 1, 1 }, { 1, 1 } } };
+}
+
+// FIXME: The gestures should be zoom-indpendent.
+FloatSize PDFDiscretePresentationController::layerOffsetForStretch(TransitionDirection direction, WebCore::FloatSize stretchDistance, WebCore::FloatSize rowSize) const
+{
+    auto constrainedForDirection = [](FloatSize size, TransitionDirection direction) {
+        switch (direction) {
+        case TransitionDirection::PreviousHorizontal:
+        case TransitionDirection::NextHorizontal:
+            return FloatSize { size.width(), 0 };
+        case TransitionDirection::PreviousVertical:
+        case TransitionDirection::NextVertical:
+            return FloatSize { 0, size.height() };
+        }
+    };
+
+    switch (direction) {
+    case TransitionDirection::PreviousHorizontal: // Pulling from the left.
+    case TransitionDirection::PreviousVertical: // Pulling from the top.
+    {
+        // The previous page starts showing about 1/2 of the way in.
+        static constexpr float previousPageStartProportion = 0.5;
+
+        auto startOffset = constrainedForDirection(rowSize, direction);
+        startOffset.scale(previousPageStartProportion);
+        return -startOffset - stretchDistance;
+    }
+
+    case TransitionDirection::NextHorizontal: // Pushing right.
+    case TransitionDirection::NextVertical: // Pushing up.
+        return constrainedForDirection(-stretchDistance, direction);
+    }
+    return { };
+}
+
+void PDFDiscretePresentationController::updateLayersForTransitionState()
+{
     switch (m_transitionState) {
     case PageTransitionState::Idle: {
         // We could optimize by only touching rows we know were animating.
@@ -498,58 +760,60 @@ void PDFDiscretePresentationController::updateLayerPositionsForTransitionState()
             auto layerPosition = positionForRowContainerLayer(row.pages);
             row.containerLayer->setPosition(layerPosition);
             row.containerLayer->setOpacity(1);
+            row.containerLayer->removeAnimation("move"_s, { });
+            row.containerLayer->removeAnimation("fade"_s, { });
         }
         break;
     }
+    case PageTransitionState::DeterminingStretchAxis:
+        break;
     case PageTransitionState::Stretching:
     case PageTransitionState::Settling:
-    case PageTransitionState::Animating: {
+    case PageTransitionState::StartingAnimationFromStationary:
+    case PageTransitionState::StartingAnimationFromMomentum: {
         if (!m_transitionDirection)
             return;
 
         auto additionalVisibleRowIndex = additionalVisibleRowIndexForDirection(*m_transitionDirection);
 
-        // The lower index is the one that moves.
-        unsigned animatingRowIndex = std::min(m_visibleRowIndex, additionalVisibleRowIndex.value_or(m_visibleRowIndex));
-        auto& row = m_rows[animatingRowIndex];
-        auto layerPosition = positionForRowContainerLayer(row.pages);
-        auto rowSize = rowContainerSize(row.pages);
+        // The lower index (which is on top) is the one that moves.
+        unsigned topLayerRowIndex = std::min(m_visibleRowIndex, additionalVisibleRowIndex.value_or(m_visibleRowIndex));
+        auto& topLayerRow = m_rows[topLayerRowIndex];
+        auto rowSize = rowContainerSize(topLayerRow.pages);
+        auto stretchOffset = layerOffsetForStretch(*m_transitionDirection, m_stretchDistance, rowSize);
+        auto layerPosition = positionForRowContainerLayer(topLayerRow.pages);
+        layerPosition += stretchOffset;
+        auto layerOpacities = layerOpacitiesForStretchOffset(*m_transitionDirection, stretchOffset, rowSize);
 
         switch (*m_transitionDirection) {
-        case TransitionDirection::Previous: {
-            // Previous page pulls down up from the top.
-            // FIXME: Deal with sideways swipes.
-            auto verticalOffset = rowSize.height() + m_stretchDistance.height();
-            layerPosition -= FloatSize { 0.0f, verticalOffset };
-
-            row.containerLayer->setPosition(layerPosition);
-            auto layerOpacities = layerOpacitiesForStretch(TransitionDirection::Previous, m_stretchDistance, rowSize);
-            row.containerLayer->setOpacity(layerOpacities[1]);
+        case TransitionDirection::PreviousHorizontal:
+        case TransitionDirection::PreviousVertical: {
+            // Previous page pulls down up from the top or right.
+            topLayerRow.containerLayer->setPosition(layerPosition);
+            topLayerRow.containerLayer->setOpacity(layerOpacities[topLayerIndex][startIndex]);
             if (additionalVisibleRowIndex) {
-                auto& previousRow = m_rows[*additionalVisibleRowIndex];
-                previousRow.containerLayer->setOpacity(layerOpacities[0]);
+                auto& bottomRow = m_rows[topLayerRowIndex + 1];
+                bottomRow.containerLayer->setOpacity(layerOpacities[bottomLayerIndex][startIndex]);
             }
             break;
         }
-
-        case TransitionDirection::Next: {
+        case TransitionDirection::NextHorizontal:
+        case TransitionDirection::NextVertical: {
             // Current page pushes up from the bottom, revealing the next page.
-            // FIXME: The layer positions should be based on view size.
-            // FIXME: The gestures should be zoom-indpendent.
-
-            layerPosition -= m_stretchDistance;
-            row.containerLayer->setPosition(layerPosition);
-            auto layerOpacities = layerOpacitiesForStretch(TransitionDirection::Next, m_stretchDistance, rowSize);
-            row.containerLayer->setOpacity(layerOpacities[0]);
+            topLayerRow.containerLayer->setPosition(layerPosition);
+            topLayerRow.containerLayer->setOpacity(layerOpacities[topLayerIndex][startIndex]);
             if (additionalVisibleRowIndex) {
-                auto& nextRow = m_rows[*additionalVisibleRowIndex];
-                nextRow.containerLayer->setOpacity(layerOpacities[1]);
+                auto& bottomRow = m_rows[topLayerRowIndex + 1];
+                bottomRow.containerLayer->setOpacity(layerOpacities[bottomLayerIndex][startIndex]);
             }
             break;
         }
         }
         break;
     }
+
+    case PageTransitionState::Animating:
+        break;
     }
 }
 
@@ -729,8 +993,7 @@ void PDFDiscretePresentationController::buildRows()
         row.contentsLayer->setAnchorPoint({ });
         row.contentsLayer->setDrawsContent(true);
         row.contentsLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
-
-        row.contentsLayer->setOpacity(0.8);
+//        row.contentsLayer->setOpacity(0.8);
 
         // This is the call that enables async rendering.
         asyncRenderer()->startTrackingLayer(*row.contentsLayer);
@@ -820,8 +1083,6 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
     TransformationMatrix transform;
     transform.scale(scaleFactor);
     transform.translate(centeringOffset.width(), centeringOffset.height());
-
-    WTF_ALWAYS_LOG("PDFDiscretePresentationController::updateLayersOnLayoutChange - offset " << centeringOffset);
 
     m_rowsContainerLayer->setTransform(transform);
 
@@ -946,7 +1207,7 @@ void PDFDiscretePresentationController::repaintForIncrementalLoad()
 
 void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow> layoutRow)
 {
-    ASSERT(layoutRow);
+//    ASSERT(layoutRow);
     if (!layoutRow)
         return;
 
