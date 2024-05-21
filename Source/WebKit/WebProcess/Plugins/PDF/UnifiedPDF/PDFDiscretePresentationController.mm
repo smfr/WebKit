@@ -1222,7 +1222,7 @@ void PDFDiscretePresentationController::repaintForIncrementalLoad()
 
 void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<RepaintRequirement> repaintRequirements, const FloatRect& rectInDocumentCoordinates, std::optional<PDFLayoutRow> layoutRow)
 {
-//    ASSERT(layoutRow);
+    ASSERT(layoutRow);
     if (!layoutRow)
         return;
 
@@ -1398,8 +1398,9 @@ void PDFDiscretePresentationController::paintContents(const GraphicsLayer* layer
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void PDFDiscretePresentationController::paintPDFSelection(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+void PDFDiscretePresentationController::paintPDFSelection(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
+    m_plugin->paintPDFSelection(layer, context, clipRect, row);
 }
 #endif
 

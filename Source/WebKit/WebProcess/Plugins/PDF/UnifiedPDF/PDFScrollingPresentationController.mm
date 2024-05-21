@@ -421,8 +421,9 @@ void PDFScrollingPresentationController::paintContents(const GraphicsLayer* laye
 }
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
-void PDFScrollingPresentationController::paintPDFSelection(const GraphicsLayer*, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
+void PDFScrollingPresentationController::paintPDFSelection(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row)
 {
+    m_plugin->paintPDFSelection(layer, context, clipRect, row);
 }
 #endif
 

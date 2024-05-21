@@ -637,7 +637,7 @@ void UnifiedPDFPlugin::didChangeIsInWindow()
 
 void UnifiedPDFPlugin::windowActivityDidChange()
 {
-    repaintOnSelectionActiveStateChangeIfNeeded(ActiveStateChangeReason::WindowActivityChanged);
+    repaintOnSelectionChange(ActiveStateChangeReason::WindowActivityChanged);
 }
 
 void UnifiedPDFPlugin::paint(GraphicsContext& context, const IntRect&)
@@ -2839,7 +2839,7 @@ Vector<FloatRect> UnifiedPDFPlugin::boundsForSelection(PDFSelection *selection, 
     return pageRects;
 }
 
-void UnifiedPDFPlugin::repaintOnSelectionActiveStateChangeIfNeeded(ActiveStateChangeReason reason, const Vector<FloatRect>& additionalDocumentRectsToRepaint)
+void UnifiedPDFPlugin::repaintOnSelectionChange(ActiveStateChangeReason reason, PDFSelection* previousSelection)
 {
     switch (reason) {
     case ActiveStateChangeReason::WindowActivityChanged:
@@ -2852,9 +2852,19 @@ void UnifiedPDFPlugin::repaintOnSelectionActiveStateChangeIfNeeded(ActiveStateCh
         RELEASE_ASSERT_NOT_REACHED();
     }
 
-    auto selectionDocumentRectsToRepaint = boundsForSelection(protectedCurrentSelection().get(), CoordinateSpace::PDFDocumentLayout);
-    selectionDocumentRectsToRepaint.appendVector(additionalDocumentRectsToRepaint);
-    setNeedsRepaintInDocumentRects(RepaintRequirement::Selection, selectionDocumentRectsToRepaint);
+    auto repaintSelection = [&](PDFSelection* selection) {
+        auto selectionPageCoverage = pageCoverageForSelection(selection);
+        for (auto& page : selectionPageCoverage) {
+            auto layoutRow = m_documentLayout.rowForPageIndex(page.pageIndex);
+            auto pageSelectionBounds = convertUp(CoordinateSpace::PDFPage, CoordinateSpace::PDFDocumentLayout, page.pageBounds, page.pageIndex);
+            setNeedsRepaintInDocumentRect(RepaintRequirement::Selection, pageSelectionBounds, layoutRow);
+        }
+    };
+
+    if (previousSelection)
+        repaintSelection(previousSelection);
+
+    repaintSelection(protectedCurrentSelection().get());
 }
 
 RetainPtr<PDFSelection> UnifiedPDFPlugin::protectedCurrentSelection() const
@@ -2864,12 +2874,11 @@ RetainPtr<PDFSelection> UnifiedPDFPlugin::protectedCurrentSelection() const
 
 void UnifiedPDFPlugin::setCurrentSelection(RetainPtr<PDFSelection>&& selection)
 {
-    auto previousSelectionDocumentRectsToRepaint = boundsForSelection(protectedCurrentSelection().get(), CoordinateSpace::PDFDocumentLayout);
+    RetainPtr previousSelection = std::exchange(m_currentSelection, WTFMove(selection));
 
-    m_currentSelection = WTFMove(selection);
     // FIXME: <https://webkit.org/b/268980> Selection painting requests should be only be made if the current selection has changed.
     // FIXME: <https://webkit.org/b/270070> Selection painting should be optimized by only repainting diff between old and new selection.
-    repaintOnSelectionActiveStateChangeIfNeeded(ActiveStateChangeReason::SetCurrentSelection, previousSelectionDocumentRectsToRepaint);
+    repaintOnSelectionChange(ActiveStateChangeReason::SetCurrentSelection, previousSelection.get());
     notifySelectionChanged();
 }
 
