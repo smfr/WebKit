@@ -190,6 +190,9 @@ bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& ev
 
     auto wheelEvent = platform(event);
 
+    if (wheelEvent.isNonGestureEvent())
+        return handleDiscreteWheelEvent(wheelEvent);
+
     // When we receive the last non-momentum event, we don't know if momentum events are coming (but see rdar://85308435).
     if (wheelEvent.isEndOfNonMomentumScroll()) {
         maybeEndGesture();
@@ -238,7 +241,7 @@ bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& ev
     return true;
 }
 
-bool PDFDiscretePresentationController::handleBeginEvent(const WebCore::PlatformWheelEvent& wheelEvent)
+bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEvent& wheelEvent)
 {
     auto wheelDelta = -wheelEvent.delta();
 
@@ -250,16 +253,12 @@ bool PDFDiscretePresentationController::handleBeginEvent(const WebCore::Platform
     if (verticalSide && !shouldTransitionOnSide(*verticalSide))
         return false;
 
-    // FIXME: Handle clicky wheel mouse.
-    // FIXME: Should we consult NSScrollWheelMultiplier like ScrollingEffectsController does?
-
     updateState(PageTransitionState::DeterminingStretchAxis);
     applyWheelEventDelta(wheelDelta);
-
     return true;
 }
 
-bool PDFDiscretePresentationController::handleChangedEvent(const WebCore::PlatformWheelEvent& wheelEvent)
+bool PDFDiscretePresentationController::handleChangedEvent(const PlatformWheelEvent& wheelEvent)
 {
     if (m_transitionState != PageTransitionState::DeterminingStretchAxis && m_transitionState != PageTransitionState::Stretching)
         return true;
@@ -282,16 +281,31 @@ bool PDFDiscretePresentationController::handleChangedEvent(const WebCore::Platfo
     return true;
 }
 
-bool PDFDiscretePresentationController::handleEndedEvent(const WebCore::PlatformWheelEvent&)
+bool PDFDiscretePresentationController::handleEndedEvent(const PlatformWheelEvent&)
 {
     startPageTransitionOrSettle();
     return true;
 }
 
-bool PDFDiscretePresentationController::handleCancelledEvent(const WebCore::PlatformWheelEvent&)
+bool PDFDiscretePresentationController::handleCancelledEvent(const PlatformWheelEvent&)
 {
     updateState(PageTransitionState::Idle);
     return true;
+}
+
+bool PDFDiscretePresentationController::handleDiscreteWheelEvent(const PlatformWheelEvent& wheelEvent)
+{
+    if ((wheelEvent.deltaY() > 0 || wheelEvent.deltaX() > 0) && canGoToPreviousRow()) {
+        goToPreviousRow(Animated::No);
+        return true;
+    }
+
+    if ((wheelEvent.deltaY() < 0 || wheelEvent.deltaX() < 0) && canGoToNextRow()) {
+        goToNextRow(Animated::No);
+        return true;
+    }
+
+    return false;
 }
 
 #pragma mark -
@@ -662,10 +676,11 @@ void PDFDiscretePresentationController::applyWheelEventDelta(FloatSize delta)
     }
 
     ASSERT(m_transitionDirection);
+    // FIXME: Should we consult NSScrollWheelMultiplier like ScrollingEffectsController does?
     m_stretchDistance = stretchDeltaConstrainedForTransitionDirection(m_stretchDistance + delta, *m_transitionDirection);
 }
 
-float PDFDiscretePresentationController::relevantAxisForDirection(TransitionDirection direction, WebCore::FloatSize size)
+float PDFDiscretePresentationController::relevantAxisForDirection(TransitionDirection direction, FloatSize size)
 {
     switch (direction) {
     case TransitionDirection::PreviousHorizontal:
@@ -678,7 +693,7 @@ float PDFDiscretePresentationController::relevantAxisForDirection(TransitionDire
     return 0;
 }
 
-void PDFDiscretePresentationController::setRelevantAxisForDirection(TransitionDirection direction, WebCore::FloatSize& size, float value)
+void PDFDiscretePresentationController::setRelevantAxisForDirection(TransitionDirection direction, FloatSize& size, float value)
 {
     switch (direction) {
     case TransitionDirection::PreviousHorizontal:
@@ -719,7 +734,7 @@ std::array<std::array<float, 2>, 2> PDFDiscretePresentationController::layerOpac
 }
 
 // FIXME: The gestures should be zoom-indpendent.
-FloatSize PDFDiscretePresentationController::layerOffsetForStretch(TransitionDirection direction, WebCore::FloatSize stretchDistance, WebCore::FloatSize rowSize) const
+FloatSize PDFDiscretePresentationController::layerOffsetForStretch(TransitionDirection direction, FloatSize stretchDistance, FloatSize rowSize) const
 {
     auto constrainedForDirection = [](FloatSize size, TransitionDirection direction) {
         switch (direction) {

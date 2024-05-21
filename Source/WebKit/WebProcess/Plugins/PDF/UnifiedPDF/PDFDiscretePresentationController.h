@@ -92,6 +92,8 @@ private:
     bool handleEndedEvent(const WebCore::PlatformWheelEvent&);
     bool handleCancelledEvent(const WebCore::PlatformWheelEvent&);
 
+    bool handleDiscreteWheelEvent(const WebCore::PlatformWheelEvent&);
+
     bool shouldTransitionOnSide(WebCore::BoxSide) const;
 
     // Transition state
