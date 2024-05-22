@@ -99,28 +99,21 @@ bool PDFScrollingPresentationController::handleKeyboardCommand(const WebKeyboard
 
 #pragma mark -
 
-PDFPageCoverage PDFScrollingPresentationController::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow>) const
+PDFPageCoverage PDFScrollingPresentationController::pageCoverageForContentsRect(const FloatRect& contentsRect, std::optional<PDFLayoutRow>) const
 {
-    auto& documentLayout = m_plugin->documentLayout();
-    auto documentLayoutScale = documentLayout.scale();
-
-    auto pageCoverage = PDFPageCoverage { };
-
-    // FIXME: Can this use coordinate conversion?
     auto drawingRect = IntRect { { }, m_plugin->documentSize() };
-    drawingRect.intersect(enclosingIntRect(clipRect));
+    drawingRect.intersect(enclosingIntRect(contentsRect));
+    auto rectInPDFLayoutCoordinates = m_plugin->convertDown(UnifiedPDFPlugin::CoordinateSpace::Contents, UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, FloatRect { drawingRect });
 
-    auto inverseScale = 1.0f / documentLayoutScale;
-    auto scaleTransform = AffineTransform::makeScale({ inverseScale, inverseScale });
-    auto drawingRectInPDFLayoutCoordinates = scaleTransform.mapRect(FloatRect { drawingRect });
-
+    auto& documentLayout = m_plugin->documentLayout();
+    auto pageCoverage = PDFPageCoverage { };
     for (PDFDocumentLayout::PageIndex i = 0; i < documentLayout.pageCount(); ++i) {
         auto page = documentLayout.pageAtIndex(i);
         if (!page)
             continue;
 
         auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(i);
-        if (!pageBounds.intersects(drawingRectInPDFLayoutCoordinates))
+        if (!pageBounds.intersects(rectInPDFLayoutCoordinates))
             continue;
 
         pageCoverage.append(PerPageInfo { i, pageBounds });
@@ -129,9 +122,9 @@ PDFPageCoverage PDFScrollingPresentationController::pageCoverageForRect(const Fl
     return pageCoverage;
 }
 
-PDFPageCoverageAndScales PDFScrollingPresentationController::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
+PDFPageCoverageAndScales PDFScrollingPresentationController::pageCoverageAndScalesForContentsRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
-    auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForRect(clipRect, row) };
+    auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForContentsRect(clipRect, row) };
 
     pageCoverageAndScales.deviceScaleFactor = m_plugin->deviceScaleFactor();
     pageCoverageAndScales.pdfDocumentScale = m_plugin->documentLayout().scale();

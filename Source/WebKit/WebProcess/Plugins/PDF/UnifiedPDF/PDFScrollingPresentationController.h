@@ -50,8 +50,8 @@ private:
 
     void teardown() override;
 
-    PDFPageCoverage pageCoverageForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
-    PDFPageCoverageAndScales pageCoverageAndScalesForRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>, float tilingScaleFactor) const override;
+    PDFPageCoverage pageCoverageForContentsRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
+    PDFPageCoverageAndScales pageCoverageAndScalesForContentsRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>, float tilingScaleFactor) const override;
 
     void setupLayers(WebCore::GraphicsLayer& scrolledContentsLayer) override;
     void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) override;

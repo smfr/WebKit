@@ -238,7 +238,7 @@ void AsyncPDFRenderer::coverageRectDidChange(TiledBacking& tiledBacking, const F
     if (layerID)
         layoutRow = plugin->rowForLayerID(*layerID);
 
-    auto pageCoverage = plugin->pageCoverageForRect(coverageRect, layoutRow);
+    auto pageCoverage = plugin->pageCoverageForContentsRect(coverageRect, layoutRow);
 
     auto pagePreviewScale = plugin->scaleForPagePreviews();
 
@@ -369,7 +369,7 @@ auto AsyncPDFRenderer::renderInfoForTile(const TiledBacking& tiledBacking, const
     if (layerID)
         layoutRow = plugin->rowForLayerID(*layerID);
 
-    auto pageCoverage = plugin->pageCoverageAndScalesForRect(paintingClipRect, layoutRow, tilingScaleFactor);
+    auto pageCoverage = plugin->pageCoverageAndScalesForContentsRect(paintingClipRect, layoutRow, tilingScaleFactor);
 
     return TileRenderInfo { tileRect, clipRect, pageCoverage };
 }
@@ -710,7 +710,7 @@ void AsyncPDFRenderer::pdfContentChangedInRect(const GraphicsLayer* layer, float
     if (layerID)
         layoutRow = plugin->rowForLayerID(*layerID);
 
-    auto pageCoverage = plugin->pageCoverageForRect(paintingRect, layoutRow);
+    auto pageCoverage = plugin->pageCoverageForContentsRect(paintingRect, layoutRow);
     if (pageCoverage.isEmpty())
         return;
 

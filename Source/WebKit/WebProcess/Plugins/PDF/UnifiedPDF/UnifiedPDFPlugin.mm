@@ -699,20 +699,20 @@ void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext
     ASSERT_NOT_REACHED();
 }
 
-PDFPageCoverage UnifiedPDFPlugin::pageCoverageForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
+PDFPageCoverage UnifiedPDFPlugin::pageCoverageForContentsRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { };
 
-    return m_presentationController->pageCoverageForRect(clipRect, row);
+    return m_presentationController->pageCoverageForContentsRect(clipRect, row);
 }
 
-PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
+PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForContentsRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
         return { { }, 1, 1, 1 };
 
-    return m_presentationController->pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
+    return m_presentationController->pageCoverageAndScalesForContentsRect(clipRect, row, tilingScaleFactor);
 }
 
 void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, std::optional<PDFLayoutRow> row, PaintingBehavior behavior, AsyncPDFRenderer* asyncRenderer)
@@ -741,7 +741,7 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
             tilingScaleFactor = tiledBacking->tilingScaleFactor();
     }
 
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
+    auto pageCoverage = pageCoverageAndScalesForContentsRect(clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
 
     for (auto& pageInfo : pageCoverage.pages) {
@@ -824,7 +824,7 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
     if (auto* tiledBacking = layer->tiledBacking())
         tilingScaleFactor = tiledBacking->tilingScaleFactor();
 
-    auto pageCoverage = pageCoverageAndScalesForRect(clipRect, row, tilingScaleFactor);
+    auto pageCoverage = pageCoverageAndScalesForContentsRect(clipRect, row, tilingScaleFactor);
     auto documentScale = pageCoverage.pdfDocumentScale;
     for (auto& pageInfo : pageCoverage.pages) {
         auto page = m_documentLayout.pageAtIndex(pageInfo.pageIndex);
