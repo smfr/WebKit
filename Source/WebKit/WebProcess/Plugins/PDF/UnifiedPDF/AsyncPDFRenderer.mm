@@ -171,7 +171,7 @@ RefPtr<ImageBuffer> AsyncPDFRenderer::previewImageForPage(PDFDocumentLayout::Pag
     return m_pagePreviews.get(pageIndex);
 }
 
-bool AsyncPDFRenderer::renderInfoIsValidForTile(const TileForGrid& tileInfo, const TileRenderInfo& renderInfo) const
+bool AsyncPDFRenderer::renderInfoIsValidForTile(WebCore::TiledBacking& tiledBacking, const TileForGrid& tileInfo, const TileRenderInfo& renderInfo) const
 {
     ASSERT(isMainRunLoop());
 
@@ -194,7 +194,7 @@ void AsyncPDFRenderer::willRepaintTile(TiledBacking& tiledBacking, TileGridIdent
         if (renderInfo.tileRect != tileRect)
             return false;
 
-        return renderInfoIsValidForTile(tileInfo, renderInfo);
+        return renderInfoIsValidForTile(tiledBacking, tileInfo, renderInfo);
     };
 
     LOG_WITH_STREAM(PDFAsyncRendering, stream << "AsyncPDFRenderer::willRepaintTile " << tileInfo << " rect " << tileRect << " (dirty rect " << tileDirtyRect << ") - already queued "

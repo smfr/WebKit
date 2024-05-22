@@ -1021,6 +1021,7 @@ void PDFDiscretePresentationController::buildRows()
         row.selectionLayer->setAnchorPoint({ });
         row.selectionLayer->setDrawsContent(true);
         row.selectionLayer->setAcceleratesDrawing(true);
+        row.selectionLayer->setBlendMode(BlendMode::Multiply);
         m_layerIDToRowIndexMap.set(row.selectionLayer->primaryLayerID(), rowIndex);
 #endif
 

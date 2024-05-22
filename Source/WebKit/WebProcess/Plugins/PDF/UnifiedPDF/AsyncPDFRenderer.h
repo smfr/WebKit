@@ -137,7 +137,7 @@ private:
 
     TileRenderInfo renderInfoForTile(const WebCore::TiledBacking&, const TileForGrid& tileInfo, const WebCore::FloatRect& tileRect, const std::optional<WebCore::FloatRect>& clipRect = { }) const;
 
-    bool renderInfoIsValidForTile(const TileForGrid&, const TileRenderInfo&) const;
+    bool renderInfoIsValidForTile(WebCore::TiledBacking&, const TileForGrid&, const TileRenderInfo&) const;
 
     // TiledBackingClient
     void willRepaintTile(WebCore::TiledBacking&, WebCore::TileGridIdentifier, WebCore::TileIndex, const WebCore::FloatRect& tileRect, const WebCore::FloatRect& tileDirtyRect) final;

@@ -2816,6 +2816,7 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForSelection(PDFSelection *selecti
         if (!pageIndex)
             continue;
 
+        // FIXME: This needs per-row adjustment via the presentation controller.
         pageCoverage.append({ *pageIndex, FloatRect { [selection boundsForPage:page] } });
         if (firstPageOnly == FirstPageOnly::Yes)
             break;
