@@ -2825,21 +2825,6 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForSelection(PDFSelection *selecti
     return pageCoverage;
 }
 
-Vector<FloatRect> UnifiedPDFPlugin::boundsForSelection(PDFSelection *selection, CoordinateSpace targetSpace) const
-{
-    auto pageCoverage = pageCoverageForSelection(selection);
-    if (pageCoverage.isEmpty())
-        return { };
-
-    Vector<FloatRect> pageRects;
-    pageRects.reserveInitialCapacity(pageCoverage.size());
-
-    for (auto& page : pageCoverage)
-        pageRects.append(convertUp(CoordinateSpace::PDFPage, targetSpace, page.pageBounds, page.pageIndex));
-
-    return pageRects;
-}
-
 void UnifiedPDFPlugin::repaintOnSelectionChange(ActiveStateChangeReason reason, PDFSelection* previousSelection)
 {
     switch (reason) {

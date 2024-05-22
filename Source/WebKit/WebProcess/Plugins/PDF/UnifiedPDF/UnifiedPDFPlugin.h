@@ -407,8 +407,6 @@ private:
     enum class FirstPageOnly : bool { No, Yes };
     PDFPageCoverage pageCoverageForSelection(PDFSelection *, FirstPageOnly = FirstPageOnly::No) const;
 
-    Vector<WebCore::FloatRect> boundsForSelection(PDFSelection *, CoordinateSpace) const;
-
     bool showDefinitionForSelection(PDFSelection *);
     std::pair<String, RetainPtr<PDFSelection>> textForImmediateActionHitTestAtPoint(const WebCore::FloatPoint&, WebHitTestResultData&) override;
     WebCore::DictionaryPopupInfo dictionaryPopupInfoForSelection(PDFSelection *, WebCore::TextIndicatorPresentationTransition) override;
