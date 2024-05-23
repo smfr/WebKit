@@ -886,7 +886,7 @@ void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
 
 #pragma mark -
 
-PDFPageCoverage PDFDiscretePresentationController::pageCoverageForContentsRect(const FloatRect& contentsRect, std::optional<PDFLayoutRow> row) const
+PDFPageCoverage PDFDiscretePresentationController::pageCoverageForContentsRect(const FloatRect& paintingRect, std::optional<PDFLayoutRow> row) const
 {
     if (!row) {
         // PDFDiscretePresentationController layout is row-based.
@@ -894,20 +894,18 @@ PDFPageCoverage PDFDiscretePresentationController::pageCoverageForContentsRect(c
         return { };
     }
 
+    auto contentsRect = convertFromPaintingToContents(paintingRect, row->pages[0]);
+
     auto drawingRect = IntRect { { }, m_plugin->documentSize() };
     drawingRect.intersect(enclosingIntRect(contentsRect));
+
     auto rectInPDFLayoutCoordinates = m_plugin->convertDown(UnifiedPDFPlugin::CoordinateSpace::Contents, UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, FloatRect { drawingRect });
 
     auto& documentLayout = m_plugin->documentLayout();
-    auto rowBounds = documentLayout.layoutBoundsForRow(*row);
     auto pageCoverage = PDFPageCoverage { };
 
     auto addPageToCoverage = [&](PDFDocumentLayout::PageIndex pageIndex) {
         auto pageBounds = documentLayout.layoutBoundsForPageAtIndex(pageIndex);
-        // Account for row.containerLayer already being positioned by the origin of rowBounds.
-        // FIXME: This is the wrong place to do this.
-        pageBounds.moveBy(-rowBounds.location());
-
         if (!pageBounds.intersects(rectInPDFLayoutCoordinates))
             return;
 
@@ -922,13 +920,55 @@ PDFPageCoverage PDFDiscretePresentationController::pageCoverageForContentsRect(c
 
 PDFPageCoverageAndScales PDFDiscretePresentationController::pageCoverageAndScalesForContentsRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
+    if (!row) {
+        // PDFDiscretePresentationController layout is row-based.
+        ASSERT_NOT_REACHED();
+        return { };
+    }
+
     auto pageCoverageAndScales = PDFPageCoverageAndScales { pageCoverageForContentsRect(clipRect, row) };
 
     pageCoverageAndScales.deviceScaleFactor = m_plugin->deviceScaleFactor();
     pageCoverageAndScales.pdfDocumentScale = m_plugin->documentLayout().scale();
     pageCoverageAndScales.tilingScaleFactor = tilingScaleFactor;
+    pageCoverageAndScales.contentsOffset = contentsOffsetForPage(row->pages[0]);
 
     return pageCoverageAndScales;
+}
+
+FloatSize PDFDiscretePresentationController::contentsOffsetForPage(PDFDocumentLayout::PageIndex pageIndex) const
+{
+    auto rowIndex = m_plugin->documentLayout().rowIndexForPageIndex(pageIndex);
+    if (rowIndex >= m_rows.size())
+        return { };
+
+    return m_rows[rowIndex].contentsOffset;
+}
+
+FloatRect PDFDiscretePresentationController::convertFromContentsToPainting(const FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex> pageIndex) const
+{
+    if (!pageIndex) {
+        ASSERT_NOT_REACHED();
+        return { };
+    }
+
+    auto rowOffset = contentsOffsetForPage(*pageIndex);
+    auto adjustedRect = rect;
+    adjustedRect.move(-rowOffset);
+    return adjustedRect;
+}
+
+FloatRect PDFDiscretePresentationController::convertFromPaintingToContents(const FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex> pageIndex) const
+{
+    if (!pageIndex) {
+        ASSERT_NOT_REACHED();
+        return { };
+    }
+
+    auto rowOffset = contentsOffsetForPage(*pageIndex);
+    auto adjustedRect = rect;
+    adjustedRect.move(rowOffset);
+    return adjustedRect;
 }
 
 void PDFDiscretePresentationController::setupLayers(GraphicsLayer& scrolledContentsLayer)
@@ -1004,7 +1044,7 @@ void PDFDiscretePresentationController::buildRows()
         row.contentsLayer->setAnchorPoint({ });
         row.contentsLayer->setDrawsContent(true);
         row.contentsLayer->setAcceleratesDrawing(m_plugin->canPaintSelectionIntoOwnedLayer());
-//        row.contentsLayer->setOpacity(0.8);
+//        row.contentsLayer->setOpacity(0.5);
 
         // This is the call that enables async rendering.
         asyncRenderer()->startTrackingLayer(*row.contentsLayer);
@@ -1103,6 +1143,11 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
         auto rowPageBounds = documentLayout.layoutBoundsForRow(row.pages);
         auto scaledRowBounds = rowPageBounds;
         scaledRowBounds.scale(documentLayout.scale());
+
+        // This contents offset accounts for containerLayer being positioned with an offset from the edge of the
+        // plugin's "contents" area. When painting into row.contentsLayer, we need to take this into account.
+        // This is done via convertFromContentsToPainting()/convertFromPaintingToContents().
+        row.contentsOffset = toFloatSize(scaledRowBounds.location());
 
         row.containerLayer->setPosition(scaledRowBounds.location());
         row.containerLayer->setSize(scaledRowBounds.size());
@@ -1229,8 +1274,8 @@ void PDFDiscretePresentationController::setNeedsRepaintInDocumentRect(OptionSet<
 
     auto& row = m_rows[rowIndex];
 
-    // FIXME: Need to convert to the coords of the row's contents layer
     auto contentsRect = m_plugin->convertUp(UnifiedPDFPlugin::CoordinateSpace::PDFDocumentLayout, UnifiedPDFPlugin::CoordinateSpace::Contents, rectInDocumentCoordinates);
+    contentsRect = convertFromContentsToPainting(contentsRect, row.pages.pages[0]);
 
     if (repaintRequirements.contains(RepaintRequirement::PDFContent)) {
         if (RefPtr asyncRenderer = asyncRendererIfExists())

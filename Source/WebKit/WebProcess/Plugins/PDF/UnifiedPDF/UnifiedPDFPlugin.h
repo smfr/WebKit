@@ -177,7 +177,10 @@ public:
             ignoring all internal transforms).
 
         - "contents": the space of the contents layer, with scrolling subtracted
-            out and page scale multiplied in; the painting space.
+            out and page scale multiplied in. In scrolling mode, the same as the
+            painting space. In discrete mode, with variable sized pages, use
+            convertFromContentsToPainting/convertFromPaintingToContents to go
+            to and from painting space.
 
         - "document": the space that the PDF pages are laid down in, with
             PDFDocumentLayout's width-fitting scale divided out; includes margins.
@@ -189,7 +192,7 @@ public:
     enum class CoordinateSpace : uint8_t {
         PDFPage,
         PDFDocumentLayout,
-        Contents, // aka "ScaledDocument" aka "Painting"
+        Contents,
         ScrolledContents,
         Plugin
     };
@@ -526,6 +529,10 @@ private:
     // "Down" is outside-in.
     template <typename T>
     T convertDown(CoordinateSpace sourceSpace, CoordinateSpace destinationSpace, T sourceValue, std::optional<PDFDocumentLayout::PageIndex> = { }) const;
+
+    // Painting coordinates are a "branch" off the linear CoordinateSpace list, but only different from "Contents" for variable-page-sized PDFs in discrete mode.
+    WebCore::FloatRect convertFromContentsToPainting(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex> = { }) const;
+    WebCore::FloatRect convertFromPaintingToContents(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex> = { }) const;
 
     PDFDocumentLayout::PageIndex nearestPageIndexForDocumentPoint(const WebCore::FloatPoint&) const;
     std::optional<PDFDocumentLayout::PageIndex> pageIndexForDocumentPoint(const WebCore::FloatPoint&) const;

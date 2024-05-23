@@ -468,7 +468,9 @@ void AsyncPDFRenderer::paintPDFIntoBuffer(RetainPtr<PDFDocument>&& pdfDocument, 
     if (m_showDebugBorders.load())
         context.fillRect(bufferRect, Color::green.colorWithAlphaByte(32));
 
-    context.scale(renderInfo.pageCoverage.pdfDocumentScale * renderInfo.pageCoverage.tilingScaleFactor);
+    context.scale(renderInfo.pageCoverage.tilingScaleFactor);
+    context.translate(-renderInfo.pageCoverage.contentsOffset);
+    context.scale(renderInfo.pageCoverage.pdfDocumentScale);
 
     for (auto& pageInfo : renderInfo.pageCoverage.pages) {
         RetainPtr pdfPage = [pdfDocument pageAtIndex:pageInfo.pageIndex];

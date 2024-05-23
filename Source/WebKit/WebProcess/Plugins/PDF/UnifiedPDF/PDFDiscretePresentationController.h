@@ -62,6 +62,9 @@ private:
     PDFPageCoverage pageCoverageForContentsRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>) const override;
     PDFPageCoverageAndScales pageCoverageAndScalesForContentsRect(const WebCore::FloatRect&, std::optional<PDFLayoutRow>, float tilingScaleFactor) const override;
 
+    WebCore::FloatRect convertFromContentsToPainting(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex>) const override;
+    WebCore::FloatRect convertFromPaintingToContents(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex>) const override;
+
     void setupLayers(WebCore::GraphicsLayer& scrolledContentsLayer) override;
     void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) override;
 
@@ -78,6 +81,8 @@ private:
 
     std::optional<PDFLayoutRow> visibleRow() const override;
     std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const override;
+
+    WebCore::FloatSize contentsOffsetForPage(PDFDocumentLayout::PageIndex) const;
 
     bool handleKeyboardEvent(const WebKeyboardEvent&) override;
 
@@ -173,6 +178,7 @@ private:
 
     struct RowData {
         PDFLayoutRow pages;
+        WebCore::FloatSize contentsOffset;
         RefPtr<WebCore::GraphicsLayer> containerLayer;
         RefPtr<WebCore::GraphicsLayer> leftPageContainerLayer;
         RefPtr<WebCore::GraphicsLayer> rightPageContainerLayer;

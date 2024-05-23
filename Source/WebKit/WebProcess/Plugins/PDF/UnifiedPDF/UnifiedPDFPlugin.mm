@@ -710,7 +710,7 @@ PDFPageCoverage UnifiedPDFPlugin::pageCoverageForContentsRect(const FloatRect& c
 PDFPageCoverageAndScales UnifiedPDFPlugin::pageCoverageAndScalesForContentsRect(const FloatRect& clipRect, std::optional<PDFLayoutRow> row, float tilingScaleFactor) const
 {
     if (m_size.isEmpty() || documentSize().isEmpty())
-        return { { }, 1, 1, 1 };
+        return { { }, { }, 1, 1, 1 };
 
     return m_presentationController->pageCoverageAndScalesForContentsRect(clipRect, row, tilingScaleFactor);
 }
@@ -752,8 +752,8 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
         auto pageDestinationRect = pageInfo.pageBounds;
 
         if (asyncRenderer) {
-            auto pageBoundsInPaintingCoordinates = pageDestinationRect;
-            pageBoundsInPaintingCoordinates.scale(documentScale);
+            auto pageBoundsInContentCoordinates = convertUp(CoordinateSpace::PDFDocumentLayout, CoordinateSpace::Contents, pageDestinationRect, pageInfo.pageIndex);
+            auto pageBoundsInPaintingCoordinates = convertFromContentsToPainting(pageBoundsInContentCoordinates, pageInfo.pageIndex);
 
             auto pageStateSaver = GraphicsContextStateSaver(context);
             context.clip(pageBoundsInPaintingCoordinates);
@@ -771,6 +771,9 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
             continue;
 
         auto pageStateSaver = GraphicsContextStateSaver(context);
+        auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
+        context.translate(contentsOffset.location());
+
         context.scale(documentScale);
         context.clip(pageDestinationRect);
 
@@ -784,7 +787,6 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
 
         if (!asyncRenderer) {
             LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: painting PDF page " << pageInfo.pageIndex << " into rect " << pageDestinationRect << " with clip " << clipRect);
-
             [page drawWithBox:kPDFDisplayBoxCropBox toContext:context.platformContext()];
         }
 
@@ -831,11 +833,15 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
         if (!page)
             continue;
 
+        GraphicsContextStateSaver pageStateSaver { context };
+
         auto pageDestinationRect = pageInfo.pageBounds;
 
-        GraphicsContextStateSaver pageStateSaver { context };
+        auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
+        context.translate(contentsOffset.location());
         context.scale(documentScale);
         context.clip(pageDestinationRect);
+
         // Translate the context to the bottom of pageBounds and flip, so that PDFKit operates
         // from this page's drawing origin.
         context.translate(pageDestinationRect.minXMaxYCorner());
@@ -1740,6 +1746,16 @@ T UnifiedPDFPlugin::convertDown(CoordinateSpace sourceSpace, CoordinateSpace des
     return mappedValue;
 }
 
+FloatRect UnifiedPDFPlugin::convertFromContentsToPainting(const FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex> pageIndex) const
+{
+    return m_presentationController->convertFromContentsToPainting(rect, pageIndex);
+}
+
+FloatRect UnifiedPDFPlugin::convertFromPaintingToContents(const FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex> pageIndex) const
+{
+    return m_presentationController->convertFromPaintingToContents(rect, pageIndex);
+}
+
 #if 0 // !LOG_DISABLED
 static TextStream& operator<<(TextStream& ts, UnifiedPDFPlugin::PDFElementType elementType)
 {
@@ -2327,6 +2343,7 @@ std::optional<PDFContextMenu> UnifiedPDFPlugin::createContextMenu(const WebMouse
     addSeparator();
 
     auto contextMenuEventPluginPoint = convertFromRootViewToPlugin(contextMenuEventRootViewPoint);
+    // FIXME: Fix for rows.
     auto contextMenuEventDocumentPoint = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, contextMenuEventPluginPoint);
     menuItems.appendVector(navigationContextMenuItemsForPageAtIndex(nearestPageIndexForDocumentPoint(contextMenuEventDocumentPoint)));
 
