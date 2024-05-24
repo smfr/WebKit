@@ -1035,7 +1035,8 @@ void UnifiedPDFPlugin::didEndMagnificationGesture()
     m_inMagnificationGesture = false;
     m_magnificationOriginInContentCoordinates = { };
     m_magnificationOriginInPluginCoordinates = { };
-    m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
+
+    deviceOrPageScaleFactorChanged();
 }
 
 void UnifiedPDFPlugin::setScaleFactor(double scale, std::optional<WebCore::IntPoint> originInRootViewCoordinates)
@@ -1074,8 +1075,7 @@ void UnifiedPDFPlugin::setScaleFactor(double scale, std::optional<WebCore::IntPo
     updateScrollbars();
     updateScrollingExtents();
 
-    if (!m_inMagnificationGesture || !handlesPageScaleFactor())
-        m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
+    deviceOrPageScaleFactorChanged(CheckForMagnificationGesture::Yes);
 
     m_presentationController->updateLayersOnLayoutChange(documentSize(), centeringOffset(), m_scaleFactor);
     updateSnapOffsets();
@@ -1104,10 +1104,9 @@ void UnifiedPDFPlugin::setScaleFactor(double scale, std::optional<WebCore::IntPo
 
 void UnifiedPDFPlugin::setPageScaleFactor(double scale, std::optional<WebCore::IntPoint> origin)
 {
-    if (!handlesPageScaleFactor()) {
-        m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
+    deviceOrPageScaleFactorChanged(CheckForMagnificationGesture::Yes);
+    if (!handlesPageScaleFactor())
         return;
-    }
 
     RefPtr page = this->page();
     if (!page)
@@ -1148,6 +1147,17 @@ bool UnifiedPDFPlugin::geometryDidChange(const IntSize& pluginSize, const Affine
         updateLayout();
 
     return true;
+}
+
+void UnifiedPDFPlugin::deviceOrPageScaleFactorChanged(CheckForMagnificationGesture checkForMagnificationGesture)
+{
+    bool gestureAllowsScaleUpdate = checkForMagnificationGesture == CheckForMagnificationGesture::No || !m_inMagnificationGesture;
+
+    if (!handlesPageScaleFactor() || gestureAllowsScaleUpdate)
+        m_rootLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
+
+    if (gestureAllowsScaleUpdate)
+        m_presentationController->deviceOrPageScaleFactorChanged();
 }
 
 IntRect UnifiedPDFPlugin::availableContentsRect() const

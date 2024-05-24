@@ -261,6 +261,9 @@ private:
     void setPageScaleFactor(double scale, std::optional<WebCore::IntPoint> origin) final;
     void setScaleFactor(double scale, std::optional<WebCore::IntPoint> origin = std::nullopt);
 
+    enum class CheckForMagnificationGesture : bool { No, Yes };
+    void deviceOrPageScaleFactorChanged(CheckForMagnificationGesture = CheckForMagnificationGesture::No);
+
     WebCore::IntSize documentSize() const;
     WebCore::IntSize contentsSize() const override;
     unsigned firstPageHeight() const override;

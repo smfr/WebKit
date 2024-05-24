@@ -100,6 +100,8 @@ bool PDFDiscretePresentationController::handleKeyboardEvent(const WebKeyboardEve
     if (handleKeyboardCommand(event))
         return true;
 
+    // FIXME: Need to check for scrollability first.
+
     if (handleKeyboardEventForPageNavigation(event))
         return true;
 #endif
@@ -969,6 +971,15 @@ FloatRect PDFDiscretePresentationController::convertFromPaintingToContents(const
     auto adjustedRect = rect;
     adjustedRect.move(rowOffset);
     return adjustedRect;
+}
+
+void PDFDiscretePresentationController::deviceOrPageScaleFactorChanged()
+{
+    for (auto& row : m_rows) {
+        // We need to manually propagate noteDeviceOrPageScaleFactorChangedIncludingDescendants to the layers of unparented rows.
+        if (!row.containerLayer->parent())
+            row.containerLayer->noteDeviceOrPageScaleFactorChangedIncludingDescendants();
+    }
 }
 
 void PDFDiscretePresentationController::setupLayers(GraphicsLayer& scrolledContentsLayer)

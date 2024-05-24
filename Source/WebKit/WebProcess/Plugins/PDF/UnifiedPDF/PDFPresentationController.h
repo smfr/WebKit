@@ -63,6 +63,8 @@ public:
     virtual WebCore::FloatRect convertFromContentsToPainting(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex> = { }) const = 0;
     virtual WebCore::FloatRect convertFromPaintingToContents(const WebCore::FloatRect&, std::optional<PDFDocumentLayout::PageIndex> = { }) const = 0;
 
+    virtual void deviceOrPageScaleFactorChanged() = 0;
+
     virtual void setupLayers(WebCore::GraphicsLayer&) = 0;
     virtual void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) = 0;
 

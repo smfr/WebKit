@@ -56,6 +56,8 @@ private:
     WebCore::FloatRect convertFromContentsToPainting(const WebCore::FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex>) const override { return rect; }
     WebCore::FloatRect convertFromPaintingToContents(const WebCore::FloatRect& rect, std::optional<PDFDocumentLayout::PageIndex>) const override { return rect; }
 
+    void deviceOrPageScaleFactorChanged() override { }
+
     void setupLayers(WebCore::GraphicsLayer& scrolledContentsLayer) override;
     void updateLayersOnLayoutChange(WebCore::FloatSize documentSize, WebCore::FloatSize centeringOffset, double scaleFactor) override;
 
