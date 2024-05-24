@@ -771,8 +771,10 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
             continue;
 
         auto pageStateSaver = GraphicsContextStateSaver(context);
-        auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
-        context.translate(contentsOffset.location());
+        if (layer) {
+            auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
+            context.translate(contentsOffset.location());
+        }
 
         context.scale(documentScale);
         context.clip(pageDestinationRect);
@@ -833,12 +835,14 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
         if (!page)
             continue;
 
-        GraphicsContextStateSaver pageStateSaver { context };
-
         auto pageDestinationRect = pageInfo.pageBounds;
 
-        auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
-        context.translate(contentsOffset.location());
+        GraphicsContextStateSaver pageStateSaver { context };
+        if (layer) {
+            auto contentsOffset = convertFromContentsToPainting({ }, pageInfo.pageIndex);
+            context.translate(contentsOffset.location());
+        }
+
         context.scale(documentScale);
         context.clip(pageDestinationRect);
 
@@ -3149,8 +3153,8 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForSelection(PDFSelection *
         context.scale(m_scaleFactor);
         context.translate(-rectInContentsCoordinates.location());
 
-        // FIXME: Compute row.
-        paintPDFContent(nullptr, context, rectInContentsCoordinates, { }, PaintingBehavior::PageContentsOnly);
+        auto layoutRow = m_documentLayout.rowForPageIndex(selectionPageCoverage[0].pageIndex);
+        paintPDFContent(nullptr, context, rectInContentsCoordinates, layoutRow, PaintingBehavior::PageContentsOnly);
     }
 
     // FIXME: Figure out how to share this with WebTextIndicatorLayer.
