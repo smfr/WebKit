@@ -1144,22 +1144,36 @@ void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize doc
         auto scaledRowBounds = rowPageBounds;
         scaledRowBounds.scale(documentLayout.scale());
 
-        // This contents offset accounts for containerLayer being positioned with an offset from the edge of the
-        // plugin's "contents" area. When painting into row.contentsLayer, we need to take this into account.
-        // This is done via convertFromContentsToPainting()/convertFromPaintingToContents().
-        row.contentsOffset = toFloatSize(scaledRowBounds.location());
-
         row.containerLayer->setPosition(scaledRowBounds.location());
         row.containerLayer->setSize(scaledRowBounds.size());
 
         updateRowPageContainerLayers(row, rowPageBounds);
 
         row.contentsLayer->setPosition({ });
-        row.contentsLayer->setSize(scaledRowBounds.size());
+
+        bool needsRepaint = false;
+        // This contents offset accounts for containerLayer being positioned with an offset from the edge of the
+        // plugin's "contents" area. When painting into row.contentsLayer, we need to take this into account.
+        // This is done via convertFromContentsToPainting()/convertFromPaintingToContents().
+        auto newContentsOffset = toFloatSize(scaledRowBounds.location());
+        if (row.contentsOffset != newContentsOffset) {
+            row.contentsOffset = newContentsOffset;
+            needsRepaint = true;
+        }
+
+        if (row.contentsLayer->size() != scaledRowBounds.size()) {
+            row.contentsLayer->setSize(scaledRowBounds.size());
+            needsRepaint = true;
+        }
+
+        if (needsRepaint)
+            row.contentsLayer->setNeedsDisplay();
 
 #if ENABLE(UNIFIED_PDF_SELECTION_LAYER)
         row.selectionLayer->setPosition({ });
         row.selectionLayer->setSize(scaledRowBounds.size());
+        if (needsRepaint)
+            row.selectionLayer->setNeedsDisplay();
 #endif
     }
 
