@@ -175,6 +175,14 @@ bool PDFDiscretePresentationController::shouldTransitionOnSide(BoxSide side) con
     return false;
 }
 
+bool PDFDiscretePresentationController::canTransitionInDirection(TransitionDirection direction) const
+{
+    if (isPreviousDirection(direction))
+        return canGoToPreviousRow();
+
+    return canGoToNextRow();
+}
+
 static ScrollEventAxis dominantAxisFavoringVertical(FloatSize delta)
 {
     if (std::abs(delta.height()) >= std::abs(delta.width()))
@@ -247,13 +255,19 @@ bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEven
 {
     auto wheelDelta = -wheelEvent.delta();
 
+/*
     auto horizontalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Horizontal);
-    if (horizontalSide && !shouldTransitionOnSide(*horizontalSide))
+    if (horizontalSide && !shouldTransitionOnSide(*horizontalSide)) {
+        LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleBeginEvent " << wheelEvent << " - side " << stringForSide(horizontalSide));
         return false;
+    }
 
     auto verticalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Vertical);
-    if (verticalSide && !shouldTransitionOnSide(*verticalSide))
+    if (verticalSide && !shouldTransitionOnSide(*verticalSide)) {
+        LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleBeginEvent " << wheelEvent << " - side " << stringForSide(verticalSide));
         return false;
+    }
+*/
 
     updateState(PageTransitionState::DeterminingStretchAxis);
     applyWheelEventDelta(wheelDelta);
@@ -262,6 +276,8 @@ bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEven
 
 bool PDFDiscretePresentationController::handleChangedEvent(const PlatformWheelEvent& wheelEvent)
 {
+    LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleChangedEvent - state " << m_transitionState);
+
     if (m_transitionState != PageTransitionState::DeterminingStretchAxis && m_transitionState != PageTransitionState::Stretching)
         return true;
 
@@ -670,9 +686,15 @@ void PDFDiscretePresentationController::applyWheelEventDelta(FloatSize delta)
         m_unappliedStretchDelta += delta;
 
         if (auto direction = directionFromDelta(m_unappliedStretchDelta)) {
+            if (!canTransitionInDirection(*direction)) {
+                updateState(PageTransitionState::Idle);
+                return;
+            }
+
             m_transitionDirection = *direction;
             m_stretchDistance = stretchDeltaConstrainedForTransitionDirection(std::exchange(m_unappliedStretchDelta, { }), *m_transitionDirection);
             updateState(PageTransitionState::Stretching);
+            // FIXME: Need to check if we're allowed in this direction.
         }
         return;
     }
@@ -680,6 +702,9 @@ void PDFDiscretePresentationController::applyWheelEventDelta(FloatSize delta)
     ASSERT(m_transitionDirection);
     // FIXME: Should we consult NSScrollWheelMultiplier like ScrollingEffectsController does?
     m_stretchDistance = stretchDeltaConstrainedForTransitionDirection(m_stretchDistance + delta, *m_transitionDirection);
+
+    LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::applyWheelEventDelta " << delta << " - stretch " << m_stretchDistance);
+
 }
 
 float PDFDiscretePresentationController::relevantAxisForDirection(TransitionDirection direction, FloatSize size)
@@ -1106,8 +1131,6 @@ FloatSize PDFDiscretePresentationController::rowContainerSize(const PDFLayoutRow
 
     return scaledRowBounds.size();
 }
-
-// FIXME: We fail to update all the tiled layers on zooming
 
 void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
 {

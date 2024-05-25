@@ -121,6 +121,8 @@ private:
         return direction == TransitionDirection::NextHorizontal || direction == TransitionDirection::NextVertical;
     }
 
+    bool canTransitionInDirection(TransitionDirection) const;
+
     void startOrStopAnimationTimerIfNecessary();
     void animationTimerFired();
     void animateRubberBand(MonotonicTime);
