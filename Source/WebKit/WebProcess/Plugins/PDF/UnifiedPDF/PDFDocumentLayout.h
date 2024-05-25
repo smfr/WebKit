@@ -134,10 +134,15 @@ public:
     WebCore::AffineTransform toPageTransform(const PageGeometry&) const;
 
 private:
-    void layoutPages(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale);
+    void layoutPages(WebCore::FloatSize availableSize, WebCore::FloatSize maxRowSize, ShouldUpdateAutoSizeScale);
 
-    void layoutSingleColumn(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale);
-    void layoutTwoUpColumn(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale);
+    // maxRowSize does not include document margins.
+    enum class CenterRowVertically : bool { No, Yes };
+    void layoutContinuousRows(WebCore::FloatSize availableSize, WebCore::FloatSize maxRowSize, CenterRowVertically);
+    void layoutDiscreteRows(WebCore::FloatSize availableSize, WebCore::FloatSize maxRowSize, CenterRowVertically);
+
+    // Returns row rect including page margins.
+    WebCore::FloatRect layoutRow(const PDFLayoutRow&, WebCore::FloatSize maxRowSize, float rowTop, CenterRowVertically centerVertically);
 
     RetainPtr<PDFDocument> m_pdfDocument;
     Vector<PageGeometry> m_pageGeometry;

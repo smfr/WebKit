@@ -1253,8 +1253,12 @@ FloatSize UnifiedPDFPlugin::centeringOffset() const
         std::floor(std::max<float>(availableSize.height() - documentPresentationSize.height(), 0) / 2)
     };
 
-    offset.scale(1 / m_scaleFactor);
-    return offset;
+    auto scaledOffset = offset;
+    scaledOffset.scale(1 / m_scaleFactor);
+
+    LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin::centeringOffset - availableSize " << availableSize << " scaled document size " << m_documentLayout.scaledContentsSize() << " scale " << m_scaleFactor << " - offset " << offset << " scaled to " << scaledOffset);
+
+    return scaledOffset;
 }
 
 IntSize UnifiedPDFPlugin::documentSize() const

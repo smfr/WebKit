@@ -1111,6 +1111,8 @@ FloatSize PDFDiscretePresentationController::rowContainerSize(const PDFLayoutRow
 
 void PDFDiscretePresentationController::updateLayersOnLayoutChange(FloatSize documentSize, FloatSize centeringOffset, double scaleFactor)
 {
+    LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::updateLayersOnLayoutChange - documentSize " << documentSize << " centeringOffset " << centeringOffset);
+
     auto& documentLayout = m_plugin->documentLayout();
 
     TransformationMatrix documentScaleTransform;

@@ -247,7 +247,7 @@ PDFDocumentLayout::PageIndex PDFDocumentLayout::nearestPageIndexForDocumentPoint
     return pageCount - 1;
 }
 
-std::pair<PDFDocumentLayout::PageIndex, WebCore::FloatPoint> PDFDocumentLayout::pageIndexAndPagePointForDocumentYOffset(float documentYOffset) const
+std::pair<PDFDocumentLayout::PageIndex, FloatPoint> PDFDocumentLayout::pageIndexAndPagePointForDocumentYOffset(float documentYOffset) const
 {
     auto pageCount = this->pageCount();
 
@@ -327,8 +327,8 @@ void PDFDocumentLayout::updateLayout(IntSize pluginSize, ShouldUpdateAutoSizeSca
         return r;
     };
 
-    float maxRowWidth = 0;
-    float currentRowWidth = 0;
+    FloatSize maxRowSize;
+    FloatSize currentRowSize;
     bool isTwoUpLayout = isTwoUpDisplayMode();
 
     for (PageIndex i = 0; i < pageCount; ++i) {
@@ -346,136 +346,129 @@ void PDFDocumentLayout::updateLayout(IntSize pluginSize, ShouldUpdateAutoSizeSca
         auto pageBounds = normalizePageBounds(pageCropBox, rotation);
 
         if (isTwoUpLayout) {
-            if (i % 2) {
-                currentRowWidth += pageMargin.width() + pageBounds.width();
-                maxRowWidth = std::max(maxRowWidth, currentRowWidth);
+            if (isRightPageIndex(i)) {
+                currentRowSize.expand(pageMargin.width() + pageBounds.width(), 0);
+                currentRowSize = currentRowSize.expandedTo({ 0, pageBounds.height() });
+                maxRowSize = maxRowSize.expandedTo(currentRowSize);
             } else {
-                currentRowWidth = pageBounds.width();
+                currentRowSize = pageBounds.size();
                 if (i == pageCount - 1)
-                    maxRowWidth = std::max(maxRowWidth, currentRowWidth);
+                    maxRowSize = maxRowSize.expandedTo(currentRowSize);
             }
         } else
-            maxRowWidth = std::max(maxRowWidth, pageBounds.width());
+            maxRowSize = maxRowSize.expandedTo(pageBounds.size());
 
         m_pageGeometry.append({ pageCropBox, pageBounds, rotation });
     }
 
-    maxRowWidth += 2 * documentMargin.width();
-
-    layoutPages(pluginSize.width(), maxRowWidth, shouldUpdateScale);
+    layoutPages(pluginSize, maxRowSize, shouldUpdateScale);
 
     LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::updateLayout() - plugin size " << pluginSize << " document bounds " << m_documentBounds << " scale " << m_scale);
 }
 
-void PDFDocumentLayout::layoutPages(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale shouldUpdateScale)
+void PDFDocumentLayout::layoutPages(FloatSize availableSize, FloatSize maxRowSize, ShouldUpdateAutoSizeScale shouldUpdateScale)
 {
     // We always lay out in a continuous mode. We handle non-continuous mode via scroll snap.
     switch (m_displayMode) {
     case DisplayMode::SinglePageDiscrete:
-    case DisplayMode::SinglePageContinuous:
-        layoutSingleColumn(availableWidth, maxRowWidth, shouldUpdateScale);
-        break;
-
     case DisplayMode::TwoUpDiscrete:
+        layoutDiscreteRows(availableSize, maxRowSize, CenterRowVertically::Yes);
+        break;
+
+    case DisplayMode::SinglePageContinuous:
     case DisplayMode::TwoUpContinuous:
-        layoutTwoUpColumn(availableWidth, maxRowWidth, shouldUpdateScale);
+        layoutContinuousRows(availableSize, maxRowSize, CenterRowVertically::No);
         break;
     }
+
+    if (shouldUpdateScale == ShouldUpdateAutoSizeScale::Yes) {
+        auto contentWidth = maxRowSize.width() + 2 * documentMargin.width();
+        m_scale = std::max<float>(availableSize.width() / contentWidth, minScale);
+    }
+
+    LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutContinuousRows - document bounds " << m_documentBounds << " scale " << m_scale);
 }
 
-void PDFDocumentLayout::layoutSingleColumn(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale shouldUpdateScale)
+void PDFDocumentLayout::layoutContinuousRows(FloatSize availableSize, FloatSize maxRowSize, CenterRowVertically centerVertically)
 {
     float currentYOffset = documentMargin.height();
-    auto pageCount = this->pageCount();
 
-    for (PageIndex i = 0; i < pageCount; ++i) {
-        if (i >= m_pageGeometry.size())
-            break;
-
-        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
-            currentYOffset = documentMargin.height();
-
-        auto pageBounds = m_pageGeometry[i].layoutBounds;
-
-        LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutSingleColumn - page " << i << " bounds " << pageBounds);
-
-        auto pageLeft = std::max<float>(std::floor((maxRowWidth - pageBounds.width()) / 2), 0);
-        pageBounds.setLocation({ pageLeft, currentYOffset });
-
-        currentYOffset += pageBounds.height() + pageMargin.height();
-
-        m_pageGeometry[i].layoutBounds = pageBounds;
+    for (auto& row : rows()) {
+        auto rowBounds = layoutRow(row, maxRowSize, currentYOffset, centerVertically);
+        currentYOffset = rowBounds.maxY();
     }
 
     currentYOffset -= pageMargin.height();
     currentYOffset += documentMargin.height();
 
-    if (shouldUpdateScale == ShouldUpdateAutoSizeScale::Yes)
-        m_scale = std::max<float>(availableWidth / maxRowWidth, minScale);
-    m_documentBounds = FloatRect { 0, 0, maxRowWidth, currentYOffset };
-
-    LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutSingleColumn - document bounds " << m_documentBounds << " scale " << m_scale);
+    maxRowSize.expand(2 * documentMargin.width(), 0);
+    m_documentBounds = FloatRect { 0, 0, maxRowSize.width(), currentYOffset };
 }
 
-void PDFDocumentLayout::layoutTwoUpColumn(float availableWidth, float maxRowWidth, ShouldUpdateAutoSizeScale shouldUpdateScale)
+void PDFDocumentLayout::layoutDiscreteRows(FloatSize availableSize, FloatSize maxRowSize, CenterRowVertically centerVertically)
 {
-    FloatSize currentRowSize;
-    float currentYOffset = documentMargin.height();
-    auto pageCount = this->pageCount();
+    for (auto& row : rows())
+        layoutRow(row, maxRowSize, documentMargin.height(), centerVertically);
 
-    for (PageIndex i = 0; i < pageCount; ++i) {
-        if (i >= m_pageGeometry.size())
-            break;
+    maxRowSize += 2 * documentMargin;
+    m_documentBounds = FloatRect { { }, maxRowSize };
+}
 
-        if (isDiscreteDisplayMode() && isFirstPageOfRow(i))
-            currentYOffset = documentMargin.height();
+FloatRect PDFDocumentLayout::layoutRow(const PDFLayoutRow& row, FloatSize maxRowSize, float rowTop, CenterRowVertically centerVertically)
+{
+    FloatRect rowBounds;
 
-        auto pageBounds = m_pageGeometry[i].layoutBounds;
+    switch (row.numPages()) {
+    case 1: {
+        auto pageIndex = row.pages[0];
+        auto pageBounds = m_pageGeometry[pageIndex].layoutBounds;
+        auto pageLeft = documentMargin.width() + std::max<float>(std::floor((maxRowSize.width() - pageBounds.width()) / 2), 0);
+        auto pageTop = rowTop;
 
-        // Lay out the pages in pairs.
-        if (i % 2) {
-            currentRowSize.expand(pageMargin.width() + pageBounds.width(), 0);
-            currentRowSize.setHeight(std::max(currentRowSize.height(), pageBounds.height()));
+        if (centerVertically == CenterRowVertically::Yes)
+            pageTop += std::floor((maxRowSize.height() - pageBounds.height()) / 2);
 
-            auto leftPageBounds = m_pageGeometry[i - 1].layoutBounds;
-            auto rightPageBounds = pageBounds;
+        pageBounds.setLocation({ pageLeft, pageTop });
+        rowBounds = pageBounds;
 
-            // Center each page vertically in the row.
-            // Center the pair of pages horizontally.
-            float horizontalSpace = maxRowWidth - 2 * documentMargin.width() - leftPageBounds.width() - rightPageBounds.width() - pageMargin.width();
-            leftPageBounds.setX(std::floor(documentMargin.width() + horizontalSpace / 2));
-            rightPageBounds.setX(leftPageBounds.maxX() + pageMargin.width());
+        LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutSingleColumn - page " << pageIndex << " maxRowSize " << maxRowSize << ", bounds " << pageBounds);
 
-            float leftVerticalSpace = currentRowSize.height() - leftPageBounds.height();
-            leftPageBounds.setY(currentYOffset + std::floor(leftVerticalSpace / 2));
+        m_pageGeometry[pageIndex].layoutBounds = pageBounds;
+        break;
+    }
+    case 2: {
+        auto leftPageIndex = row.pages[0];
+        auto rightPageIndex = row.pages[1];
 
-            float rightVerticalSpace = currentRowSize.height() - rightPageBounds.height();
-            rightPageBounds.setY(currentYOffset + std::floor(rightVerticalSpace / 2));
+        auto leftPageBounds = m_pageGeometry[leftPageIndex].layoutBounds;
+        auto rightPageBounds = m_pageGeometry[rightPageIndex].layoutBounds;
 
-            m_pageGeometry[i - 1].layoutBounds = leftPageBounds;
-            m_pageGeometry[i].layoutBounds = rightPageBounds;
+        // Center the pair of pages horizontally.
+        float horizontalSpace = maxRowSize.width() - leftPageBounds.width() - rightPageBounds.width() - pageMargin.width();
+        leftPageBounds.setX(std::floor(documentMargin.width() + horizontalSpace / 2));
+        rightPageBounds.setX(leftPageBounds.maxX() + pageMargin.width());
 
-            LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutTwoUpColumn - left page bounds " << leftPageBounds << " right page bounds " << rightPageBounds);
+        // Center each page vertically in the row.
+        auto maxPageHeight = std::max(leftPageBounds.height(), rightPageBounds.height());
 
-            currentYOffset += currentRowSize.height() + pageMargin.height();
-        } else {
-            currentRowSize = pageBounds.size();
-            if (i == pageCount - 1) {
-                // Position the last page, which is centered horizontally.
-                float horizontalSpace = maxRowWidth - 2 * documentMargin.width() - pageBounds.width();
-                m_pageGeometry[i].layoutBounds.setLocation({ documentMargin.width() + std::floor(horizontalSpace / 2), currentYOffset });
-                currentYOffset += currentRowSize.height() + pageMargin.height();
-            }
-        }
+        float leftVerticalSpace = maxPageHeight - leftPageBounds.height();
+        leftPageBounds.setY(rowTop + std::floor(leftVerticalSpace / 2));
+
+        float rightVerticalSpace = maxPageHeight - rightPageBounds.height();
+        rightPageBounds.setY(rowTop + std::floor(rightVerticalSpace / 2));
+
+        m_pageGeometry[leftPageIndex].layoutBounds = leftPageBounds;
+        m_pageGeometry[rightPageIndex].layoutBounds = rightPageBounds;
+
+        LOG_WITH_STREAM(PDF, stream << "PDFDocumentLayout::layoutTwoUpColumn - left page bounds " << leftPageBounds << " right page bounds " << rightPageBounds);
+
+        rowBounds = unionRect(leftPageBounds, rightPageBounds);
+        break;
+    }
     }
 
-    // Subtract the last row's bottom margin.
-    currentYOffset -= pageMargin.height();
-    currentYOffset += documentMargin.height();
-
-    if (shouldUpdateScale == ShouldUpdateAutoSizeScale::Yes)
-        m_scale = std::max<float>(availableWidth / maxRowWidth, minScale);
-    m_documentBounds = FloatRect { 0, 0, maxRowWidth, currentYOffset };
+    rowBounds.inflateY(pageMargin.height());
+    return rowBounds;
 }
 
 size_t PDFDocumentLayout::pageCount() const
@@ -527,7 +520,6 @@ Vector<PDFLayoutRow> PDFDocumentLayout::rows() const
     return rows;
 }
 
-// Unused.
 PDFLayoutRow PDFDocumentLayout::rowForPageIndex(PageIndex index) const
 {
     if (!m_pdfDocument)
