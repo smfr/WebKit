@@ -228,46 +228,43 @@ bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& ev
     if (!m_plugin->isPinnedOnSide(*relevantSide))
         return false;
 
-    // Stretching.
+    bool handled = false;
+
     switch (wheelEvent.phase()) {
     case PlatformWheelEventPhase::None: {
         if (wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed)
-            handleChangedEvent(wheelEvent);
+            handled = handleChangedEvent(wheelEvent);
         break;
     }
 
     case PlatformWheelEventPhase::Began:
-        handleBeginEvent(wheelEvent);
+        handled = handleBeginEvent(wheelEvent);
         break;
 
     case PlatformWheelEventPhase::Changed:
-        handleChangedEvent(wheelEvent);
+        handled = handleChangedEvent(wheelEvent);
         break;
 
     default:
         break;
     }
 
-    return true;
+    return handled;
 }
 
 bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEvent& wheelEvent)
 {
     auto wheelDelta = -wheelEvent.delta();
 
-/*
+    // Trying to determine which axis a gesture is for based on the small deltas in the begin event is unreliable,
+    // but if we unconditionally handle the begin event, history swiping doesn't work.
     auto horizontalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Horizontal);
-    if (horizontalSide && !shouldTransitionOnSide(*horizontalSide)) {
-        LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleBeginEvent " << wheelEvent << " - side " << stringForSide(horizontalSide));
+    if (horizontalSide && !shouldTransitionOnSide(*horizontalSide))
         return false;
-    }
 
     auto verticalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Vertical);
-    if (verticalSide && !shouldTransitionOnSide(*verticalSide)) {
-        LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleBeginEvent " << wheelEvent << " - side " << stringForSide(verticalSide));
+    if (verticalSide && !shouldTransitionOnSide(*verticalSide))
         return false;
-    }
-*/
 
     updateState(PageTransitionState::DeterminingStretchAxis);
     applyWheelEventDelta(wheelDelta);
@@ -277,6 +274,9 @@ bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEven
 bool PDFDiscretePresentationController::handleChangedEvent(const PlatformWheelEvent& wheelEvent)
 {
     LOG_WITH_STREAM(PDF, stream << "PDFDiscretePresentationController::handleChangedEvent - state " << m_transitionState);
+
+    if (m_transitionState == PageTransitionState::Idle)
+        return false;
 
     if (m_transitionState != PageTransitionState::DeterminingStretchAxis && m_transitionState != PageTransitionState::Stretching)
         return true;

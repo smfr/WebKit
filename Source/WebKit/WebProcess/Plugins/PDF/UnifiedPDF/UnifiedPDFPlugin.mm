@@ -169,6 +169,9 @@ UnifiedPDFPlugin::UnifiedPDFPlugin(HTMLPlugInElement& element)
     if (this->isFullFramePlugin() && m_frame && m_frame->page() && m_frame->isMainFrame())
         [m_accessibilityDocumentObject setParent:dynamic_objc_cast<NSObject>(m_frame->protectedPage()->accessibilityRemoteObject())];
 #endif
+
+    if (m_presentationController->wantsWheelEvents())
+        wantsWheelEventsChanged();
 }
 
 UnifiedPDFPlugin::~UnifiedPDFPlugin() = default;
@@ -184,7 +187,12 @@ void UnifiedPDFPlugin::teardown()
     PDFPluginBase::teardown();
 
     GraphicsLayer::unparentAndClear(m_rootLayer);
+
+    bool wantedWheelEvents = m_presentationController->wantsWheelEvents();
     setPresentationController(nullptr); // Breaks retain cycle,
+
+    if (wantedWheelEvents)
+        wantsWheelEventsChanged();
 
     RefPtr page = this->page();
     if (m_scrollingNodeID && page) {
@@ -264,6 +272,9 @@ void UnifiedPDFPlugin::installPDFDocument()
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     enableDataDetection();
 #endif
+
+    if (m_presentationController->wantsWheelEvents())
+        wantsWheelEventsChanged();
 
     scrollToFragmentIfNeeded();
 
@@ -2033,6 +2044,9 @@ bool UnifiedPDFPlugin::wantsWheelEvents() const
     if (!m_pdfDocument)
         return false;
 
+    if (!m_presentationController)
+        return false;
+
     return m_presentationController->wantsWheelEvents();
 }
 
@@ -3708,18 +3722,12 @@ void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDocumentLayout::DisplayM
     }
 
     if (isInDiscreteDisplayMode()) {
-        // FIXME for discrete.
+        // FIXME: restore current page.
     }
 
     bool wantsWheelEvents = m_presentationController->wantsWheelEvents();
-    if (didWantWheelEvents != wantsWheelEvents) {
-        if (RefPtr page = this->page()) {
-            if (RefPtr scrollingCoordinator = page->scrollingCoordinator()) {
-                if (RefPtr frameView = dynamicDowncast<LocalFrameView>(mainFrameView()))
-                    scrollingCoordinator->frameViewEventTrackingRegionsChanged(*frameView);
-            }
-        }
-    }
+    if (didWantWheelEvents != wantsWheelEvents)
+        wantsWheelEventsChanged();
 }
 
 TextStream& operator<<(TextStream& ts, RepaintRequirement requirement)

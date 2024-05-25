@@ -951,6 +951,24 @@ void PDFPluginBase::destroyScrollbar(ScrollbarOrientation orientation)
     scrollbar = nullptr;
 }
 
+void PDFPluginBase::wantsWheelEventsChanged()
+{
+    if (!m_element)
+        return;
+
+    if (!m_frame || !m_frame->coreLocalFrame())
+        return;
+
+    RefPtr document = m_frame->coreLocalFrame()->document();
+    if (!document)
+        return;
+
+    if (wantsWheelEvents())
+        document->didAddWheelEventHandler(*m_element);
+    else
+        document->didRemoveWheelEventHandler(*m_element, EventHandlerRemoval::All);
+}
+
 void PDFPluginBase::print()
 {
     if (RefPtr page = this->page())

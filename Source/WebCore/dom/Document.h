@@ -1438,8 +1438,8 @@ public:
 
     void initDNSPrefetch();
 
-    void didAddWheelEventHandler(Node&);
-    void didRemoveWheelEventHandler(Node&, EventHandlerRemoval = EventHandlerRemoval::One);
+    WEBCORE_EXPORT void didAddWheelEventHandler(Node&);
+    WEBCORE_EXPORT void didRemoveWheelEventHandler(Node&, EventHandlerRemoval = EventHandlerRemoval::One);
 
     void didAddOrRemoveMouseEventHandler(Node&);
 

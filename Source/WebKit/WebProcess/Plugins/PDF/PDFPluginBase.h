@@ -344,6 +344,8 @@ protected:
     virtual Ref<WebCore::Scrollbar> createScrollbar(WebCore::ScrollbarOrientation);
     virtual void destroyScrollbar(WebCore::ScrollbarOrientation);
 
+    void wantsWheelEventsChanged();
+
     virtual void incrementalLoadingDidProgress() { }
     virtual void incrementalLoadingDidCancel() { }
     virtual void incrementalLoadingDidFinish() { }
