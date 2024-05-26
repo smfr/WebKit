@@ -671,8 +671,7 @@ void UnifiedPDFPlugin::paint(GraphicsContext& context, const IntRect&)
 
     clipRect.scale(1.0f / m_scaleFactor);
 
-    // FIXME: Need to ask the presentationController which row is relevant.
-    paintPDFContent(nullptr, context, clipRect);
+    paintPDFContent(nullptr, context, clipRect, m_presentationController->visibleRow());
 }
 
 void UnifiedPDFPlugin::paintContents(const GraphicsLayer* layer, GraphicsContext& context, const FloatRect& clipRect, OptionSet<GraphicsLayerPaintBehavior>)
