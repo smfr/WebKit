@@ -905,10 +905,12 @@ void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
     if (rowIndex == m_visibleRowIndex)
         return;
 
-    // FIXME: Commit annotations
+    m_plugin->willChangeVisibleRow();
 
     m_visibleRowIndex = rowIndex;
     updateLayersAfterChangeInVisibleRow();
+
+    m_plugin->didChangeVisibleRow();
 }
 
 #pragma mark -

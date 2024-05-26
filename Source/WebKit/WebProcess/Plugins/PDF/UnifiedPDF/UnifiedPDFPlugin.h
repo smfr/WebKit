@@ -444,6 +444,9 @@ private:
 
     std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const;
 
+    void willChangeVisibleRow();
+    void didChangeVisibleRow();
+
     void ensureLayers();
     void updateLayerHierarchy();
     
@@ -618,7 +621,7 @@ private:
     std::optional<WebCore::ScrollDirection> m_animatedKeyboardScrollingDirection;
 #endif
 
-    Vector<WebCore::FloatRect> m_findMatchRectsInDocumentCoordinates;
+    PDFPageCoverage m_findMatchRects;
 
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
     std::unique_ptr<PDFDataDetectorOverlayController> m_dataDetectorOverlayController;
