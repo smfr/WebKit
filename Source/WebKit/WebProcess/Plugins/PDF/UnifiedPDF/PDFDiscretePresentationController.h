@@ -140,6 +140,11 @@ private:
 
     void applyWheelEventDelta(FloatSize);
 
+    std::optional<VisiblePDFPosition> pdfPositionForCurrentView(bool preservePosition) const override;
+    void restorePDFPosition(const VisiblePDFPosition&) override;
+
+    void ensurePageIsVisible(PDFDocumentLayout::PageIndex) override;
+
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
     float pageScaleFactor() const override;
@@ -204,6 +209,7 @@ private:
 
     RefPtr<WebCore::GraphicsLayer> m_rowsContainerLayer;
     Vector<RowData> m_rows;
+
     HashMap<WebCore::PlatformLayerIdentifier, unsigned> m_layerIDToRowIndexMap;
     std::optional<PDFDocumentLayout::DisplayMode> m_displayModeAtLastLayerSetup;
 

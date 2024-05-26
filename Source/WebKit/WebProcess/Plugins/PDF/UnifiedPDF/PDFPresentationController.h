@@ -81,6 +81,16 @@ public:
     virtual std::optional<PDFLayoutRow> visibleRow() const { return { }; }
     virtual std::optional<PDFLayoutRow> rowForLayerID(WebCore::PlatformLayerIdentifier) const { return { }; }
 
+    struct VisiblePDFPosition {
+        PDFDocumentLayout::PageIndex pageIndex { 0 };
+        WebCore::FloatPoint pagePoint;
+    };
+
+    virtual std::optional<VisiblePDFPosition> pdfPositionForCurrentView(bool preservePosition = true) const = 0;
+    virtual void restorePDFPosition(const VisiblePDFPosition&) = 0;
+
+    virtual void ensurePageIsVisible(PDFDocumentLayout::PageIndex) = 0;
+
     // Event handling.
     virtual bool handleKeyboardEvent(const WebKeyboardEvent&) = 0;
 

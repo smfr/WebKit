@@ -73,6 +73,11 @@ private:
     CheckedPtr<WebCore::KeyboardScrollingAnimator> checkedKeyboardScrollingAnimator() const;
 #endif
 
+    std::optional<VisiblePDFPosition> pdfPositionForCurrentView(bool preservePosition) const override;
+    void restorePDFPosition(const VisiblePDFPosition&) override;
+
+    void ensurePageIsVisible(PDFDocumentLayout::PageIndex) override { }
+
     // GraphicsLayerClient
     void notifyFlushRequired(const WebCore::GraphicsLayer*) override;
     float pageScaleFactor() const override;

@@ -476,12 +476,14 @@ private:
     WebCore::ScrollingCoordinator* scrollingCoordinator();
     void createScrollingNodeIfNecessary();
 
-    void revealRectInContentsSpace(WebCore::FloatRect);
+    void revealPDFDestination(PDFDestination *);
+    void revealPointInPage(WebCore::FloatPoint pointInPDFPageSpace, PDFDocumentLayout::PageIndex);
+    void revealPDFPageRect(const WebCore::FloatRect& pageRect, PDFDocumentLayout::PageIndex pageIndex);
+    void revealPage(PDFDocumentLayout::PageIndex);
+    void revealFragmentIfNeeded();
+
+    // Only call this after calling the presentation controller to ensure the relevant page is visible.
     void scrollToPointInContentsSpace(WebCore::FloatPoint);
-    void scrollToPDFDestination(PDFDestination *);
-    void scrollToPointInPage(WebCore::FloatPoint pointInPDFPageSpace, PDFDocumentLayout::PageIndex);
-    void scrollToPage(PDFDocumentLayout::PageIndex);
-    void scrollToFragmentIfNeeded();
 
     // ScrollableArea
     bool requestScrollToPosition(const WebCore::ScrollPosition&, const WebCore::ScrollPositionChangeOptions& = WebCore::ScrollPositionChangeOptions::createProgrammatic()) override;
@@ -489,14 +491,6 @@ private:
     bool requestStopKeyboardScrollAnimation(bool immediate) override;
 
     WebCore::FloatSize centeringOffset() const;
-
-    struct ScrollAnchoringInfo {
-        PDFDocumentLayout::PageIndex pageIndex { 0 };
-        WebCore::FloatPoint pagePoint;
-    };
-
-    std::optional<ScrollAnchoringInfo> scrollAnchoringForCurrentScrollPosition(bool preserveScrollPosition) const;
-    void restoreScrollPositionWithInfo(const ScrollAnchoringInfo&);
 
     // HUD Actions.
 #if ENABLE(PDF_HUD)

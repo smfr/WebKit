@@ -84,6 +84,7 @@ public:
     // For the given Y offset, return a page index and page point for the page at this offset. Returns the leftmost
     // page if two-up and both pages intersect that offset, otherwise the right page if only it intersects the offset.
     // The point is centered horizontally in the given page.
+    // FIXME: Remove or provide row.
     std::pair<PDFDocumentLayout::PageIndex, WebCore::FloatPoint> pageIndexAndPagePointForDocumentYOffset(float) const;
 
     // This is not scaled by scale().

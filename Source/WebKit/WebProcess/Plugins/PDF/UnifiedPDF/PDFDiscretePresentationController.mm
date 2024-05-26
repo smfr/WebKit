@@ -905,7 +905,7 @@ void PDFDiscretePresentationController::setVisibleRow(unsigned rowIndex)
     if (rowIndex == m_visibleRowIndex)
         return;
 
-    // FIXME: Commit annoations
+    // FIXME: Commit annotations
 
     m_visibleRowIndex = rowIndex;
     updateLayersAfterChangeInVisibleRow();
@@ -1352,6 +1352,34 @@ void PDFDiscretePresentationController::didGeneratePreviewForPage(PDFDocumentLay
     auto& row = m_rows[rowIndex];
     if (RefPtr backgroundLayer = row.backgroundLayerForPageIndex(pageIndex))
         backgroundLayer->setNeedsDisplay();
+}
+
+#pragma mark -
+
+auto PDFDiscretePresentationController::pdfPositionForCurrentView(bool preservePosition) const -> std::optional<VisiblePDFPosition>
+{
+    if (!preservePosition)
+        return { };
+
+    if (!m_plugin->documentLayout().hasLaidOutPDFDocument())
+        return { };
+
+    auto visibleRow = this->visibleRow();
+    if (!visibleRow)
+        return { };
+
+    return VisiblePDFPosition { visibleRow->pages[0], { } };
+}
+
+void PDFDiscretePresentationController::restorePDFPosition(const VisiblePDFPosition& info)
+{
+    ensurePageIsVisible(info.pageIndex);
+}
+
+void PDFDiscretePresentationController::ensurePageIsVisible(PDFDocumentLayout::PageIndex pageIndex)
+{
+    auto rowIndex = m_plugin->documentLayout().rowIndexForPageIndex(pageIndex);
+    setVisibleRow(rowIndex);
 }
 
 #pragma mark -
