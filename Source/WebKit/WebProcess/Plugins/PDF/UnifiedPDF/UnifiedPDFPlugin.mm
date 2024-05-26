@@ -3502,7 +3502,7 @@ void UnifiedPDFPlugin::revealAnnotation(PDFAnnotation *annotation)
 }
 
 #if PLATFORM(MAC)
-void UnifiedPDFPlugin::handlePDFActionForAnnotation(PDFAnnotation *annotation, unsigned currentPageIndex)
+void UnifiedPDFPlugin::handlePDFActionForAnnotation(PDFAnnotation *annotation, PDFDocumentLayout::PageIndex currentPageIndex)
 {
     if (!annotation)
         return;
