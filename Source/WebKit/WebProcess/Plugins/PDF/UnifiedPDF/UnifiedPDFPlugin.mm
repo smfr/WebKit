@@ -1342,18 +1342,11 @@ void UnifiedPDFPlugin::didChangeScrollOffset()
 
 void UnifiedPDFPlugin::willChangeVisibleRow()
 {
-    // FIXME: Commit annotation
+    setActiveAnnotation(nullptr);
 }
 
 void UnifiedPDFPlugin::didChangeVisibleRow()
 {
-#if PLATFORM(MAC)
-    if (m_activeAnnotation)
-        m_activeAnnotation->updateGeometry();
-#endif // PLATFORM(MAC)
-
-    // FIXME: Need to recompute find rects
-
     // FIXME: Make the overlay scroll with the tiles instead of repainting constantly.
     updateFindOverlay(HideFindIndicator::Yes);
 
