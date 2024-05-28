@@ -760,6 +760,26 @@ ScrollPosition PDFPluginBase::maximumScrollPosition() const
     return maximumOffset;
 }
 
+IntSize PDFPluginBase::overhangAmount() const
+{
+    IntSize stretch;
+
+    // ScrollableArea's maximumScrollOffset() doesn't handle being zoomed below 1.
+    auto maximumScrollOffset = scrollOffsetFromPosition(maximumScrollPosition());
+    auto scrollOffset = this->scrollOffset();
+    if (scrollOffset.y() < 0)
+        stretch.setHeight(scrollOffset.y());
+    else if (scrollOffset.y() > maximumScrollOffset.y())
+        stretch.setHeight(scrollOffset.y() - maximumScrollOffset.y());
+
+    if (scrollOffset.x() < 0)
+        stretch.setWidth(scrollOffset.x());
+    else if (scrollOffset.x() > maximumScrollOffset.x())
+        stretch.setWidth(scrollOffset.x() - maximumScrollOffset.x());
+
+    return stretch;
+}
+
 float PDFPluginBase::deviceScaleFactor() const
 {
     if (RefPtr page = this->page())

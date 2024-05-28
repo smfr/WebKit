@@ -2048,7 +2048,11 @@ bool UnifiedPDFPlugin::wantsWheelEvents() const
 
 bool UnifiedPDFPlugin::handleWheelEvent(const WebWheelEvent& wheelEvent)
 {
-    if (m_presentationController->handleWheelEvent(wheelEvent))
+    auto handledByPresentationController = m_presentationController->handleWheelEvent(wheelEvent);
+
+    WTF_ALWAYS_LOG("UnifiedPDFPlugin::handleWheelEvent " << platform(wheelEvent) << " - handledByPresentationController " << handledByPresentationController);
+
+    if (handledByPresentationController)
         return true;
 
     return handleWheelEventForScrolling(platform(wheelEvent), { });

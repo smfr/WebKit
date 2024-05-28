@@ -162,7 +162,7 @@ bool PDFDiscretePresentationController::handleKeyboardEventForPageNavigation(con
 
 #pragma mark -
 
-bool PDFDiscretePresentationController::shouldTransitionOnSide(BoxSide side) const
+bool PDFDiscretePresentationController::canTransitionOnSide(BoxSide side) const
 {
     switch (side) {
     case BoxSide::Left:
@@ -183,28 +183,36 @@ bool PDFDiscretePresentationController::canTransitionInDirection(TransitionDirec
     return canGoToNextRow();
 }
 
-static ScrollEventAxis dominantAxisFavoringVertical(FloatSize delta)
-{
-    if (std::abs(delta.height()) >= std::abs(delta.width()))
-        return ScrollEventAxis::Vertical;
-
-    return ScrollEventAxis::Horizontal;
-}
-
+#warning still an issue wiht stretching.
 bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& event)
 {
-    // FIXME: Consume all the events if we're not scrollable.
+    // This code has to handle wheel events for swiping in a way that's compatible with
+    // normal scrolling when zoomed in, and allowing history swipes. It does so as follows:
+    // * For begin events and non-gesture events, check for scrollability first.
+    // * For all other events, return `false` if our state is idle.
 
     if (m_transitionState == PageTransitionState::Animating)
         return true; // Consume the events. Ideally we'd allow this to start another animation.
 
     auto wheelEvent = platform(event);
 
+    WTF_ALWAYS_LOG("PDFDiscretePresentationController::handleWheelEvent " << wheelEvent << " state " << m_transitionState);
+
     if (wheelEvent.isNonGestureEvent())
         return handleDiscreteWheelEvent(wheelEvent);
 
+    if (wheelEvent.phase() == PlatformWheelEventPhase::Began)
+        return handleBeginEvent(wheelEvent);
+
+    // Only Begin and non-gesture events take us out of the Idle state.
+    if (m_transitionState == PageTransitionState::Idle)
+        return false;
+
     // When we receive the last non-momentum event, we don't know if momentum events are coming (but see rdar://85308435).
     if (wheelEvent.isEndOfNonMomentumScroll()) {
+        if (m_transitionState == PageTransitionState::Idle)
+            return false;
+
         maybeEndGesture();
         return true;
     }
@@ -218,55 +226,44 @@ bool PDFDiscretePresentationController::handleWheelEvent(const WebWheelEvent& ev
     if (wheelEvent.isGestureCancel())
         return handleCancelledEvent(wheelEvent);
 
-    // FIXME: Maybe consume all the events until we've determined direction.
-    auto dominantAxis = dominantAxisFavoringVertical(event.delta());
-    auto relevantSide = ScrollableArea::targetSideForScrollDelta(-wheelEvent.delta(), dominantAxis);
-    if (!relevantSide)
-        return false;
+    if (wheelEvent.phase() == PlatformWheelEventPhase::Changed || wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed)
+        return handleChangedEvent(wheelEvent);
 
-    // Just let normal scrolling happen.
-    if (!m_plugin->isPinnedOnSide(*relevantSide))
-        return false;
-
-    bool handled = false;
-
-    switch (wheelEvent.phase()) {
-    case PlatformWheelEventPhase::None: {
-        if (wheelEvent.momentumPhase() == PlatformWheelEventPhase::Changed)
-            handled = handleChangedEvent(wheelEvent);
-        break;
-    }
-
-    case PlatformWheelEventPhase::Began:
-        handled = handleBeginEvent(wheelEvent);
-        break;
-
-    case PlatformWheelEventPhase::Changed:
-        handled = handleChangedEvent(wheelEvent);
-        break;
-
-    default:
-        break;
-    }
-
-    return handled;
+    return false;
 }
 
-bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEvent& wheelEvent)
+bool PDFDiscretePresentationController::eventCanStartPageTransition(const PlatformWheelEvent& wheelEvent) const
 {
     auto wheelDelta = -wheelEvent.delta();
+
+    auto shouldTransitionOnSize = [&](BoxSide side) {
+        if (!m_plugin->isPinnedOnSide(side))
+            return false;
+
+        return canTransitionOnSide(side);
+    };
 
     // Trying to determine which axis a gesture is for based on the small deltas in the begin event is unreliable,
     // but if we unconditionally handle the begin event, history swiping doesn't work.
     auto horizontalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Horizontal);
-    if (horizontalSide && !shouldTransitionOnSide(*horizontalSide))
+    if (horizontalSide && !shouldTransitionOnSize(*horizontalSide))
         return false;
 
     auto verticalSide = ScrollableArea::targetSideForScrollDelta(wheelDelta, ScrollEventAxis::Vertical);
-    if (verticalSide && !shouldTransitionOnSide(*verticalSide))
+    if (verticalSide && !shouldTransitionOnSize(*verticalSide))
+        return false;
+
+    return true;
+}
+
+bool PDFDiscretePresentationController::handleBeginEvent(const PlatformWheelEvent& wheelEvent)
+{
+    if (!eventCanStartPageTransition(wheelEvent))
         return false;
 
     updateState(PageTransitionState::DeterminingStretchAxis);
+
+    auto wheelDelta = -wheelEvent.delta();
     applyWheelEventDelta(wheelDelta);
     return true;
 }
@@ -313,6 +310,9 @@ bool PDFDiscretePresentationController::handleCancelledEvent(const PlatformWheel
 
 bool PDFDiscretePresentationController::handleDiscreteWheelEvent(const PlatformWheelEvent& wheelEvent)
 {
+    if (!eventCanStartPageTransition(wheelEvent))
+        return false;
+
     if ((wheelEvent.deltaY() > 0 || wheelEvent.deltaX() > 0) && canGoToPreviousRow()) {
         goToPreviousRow(Animated::No);
         return true;

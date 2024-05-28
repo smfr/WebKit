@@ -101,7 +101,9 @@ private:
 
     bool handleDiscreteWheelEvent(const WebCore::PlatformWheelEvent&);
 
-    bool shouldTransitionOnSide(WebCore::BoxSide) const;
+    bool eventCanStartPageTransition(const PlatformWheelEvent&) const;
+
+    bool canTransitionOnSide(WebCore::BoxSide) const;
 
     // Transition state
     enum class TransitionDirection : uint8_t {
