@@ -211,6 +211,13 @@ template<typename Visitor> constexpr decltype(auto) CSSValue::visitDerived(Visit
         return std::invoke(std::forward<Visitor>(visitor), uncheckedDowncast<CSSScrollValue>(*this));
     case ShadowClass:
         return std::invoke(std::forward<Visitor>(visitor), uncheckedDowncast<CSSShadowValue>(*this));
+
+
+    case ShapeClass:
+        return std::invoke(std::forward<Visitor>(visitor), uncheckedDowncast<CSSShapeValue>(*this));
+    case ShapeCommandClass:
+        return std::invoke(std::forward<Visitor>(visitor), uncheckedDowncast<CSSShapeCommandValue>(*this));
+
     case SubgridClass:
         return std::invoke(std::forward<Visitor>(visitor), uncheckedDowncast<CSSSubgridValue>(*this));
     case StepsTimingFunctionClass:

@@ -51,6 +51,7 @@ class RenderBox;
 class SVGPathByteStream;
 
 class BasicShape : public RefCounted<BasicShape> {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     virtual ~BasicShape() = default;
 
@@ -61,7 +62,8 @@ public:
         Ellipse,
         Inset,
         Rect,
-        Xywh
+        Xywh,
+        Shape
     };
 
     virtual Ref<BasicShape> clone() const = 0;
@@ -80,6 +82,7 @@ public:
 };
 
 class BasicShapeCenterCoordinate {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     enum class Direction : bool {
         TopLeft,

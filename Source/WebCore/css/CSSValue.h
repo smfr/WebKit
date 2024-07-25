@@ -128,6 +128,8 @@ public:
     bool isReflectValue() const { return m_classType == ReflectClass; }
     bool isScrollValue() const { return m_classType == ScrollClass; }
     bool isShadowValue() const { return m_classType == ShadowClass; }
+    bool isShape() const { return m_classType == ShapeClass; }
+    bool isShapeCommand() const { return m_classType == ShapeCommandClass; }
     bool isSpringTimingFunctionValue() const { return m_classType == SpringTimingFunctionClass; }
     bool isStepsTimingFunctionValue() const { return m_classType == StepsTimingFunctionClass; }
     bool isSubgridValue() const { return m_classType == SubgridClass; }
@@ -271,6 +273,7 @@ protected:
         ReflectClass,
         ScrollClass,
         ShadowClass,
+        ShapeCommandClass,
         UnicodeRangeClass,
         ValuePairClass,
         VariableReferenceClass,
@@ -284,6 +287,7 @@ protected:
         GridIntegerRepeatClass,
         ImageSetClass,
         PolygonClass,
+        ShapeClass,
         SubgridClass,
         TransformListClass,
         // Do not append classes here unless they derive from CSSValueContainingVector.

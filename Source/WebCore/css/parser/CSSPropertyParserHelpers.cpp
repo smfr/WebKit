@@ -99,6 +99,7 @@
 #include "ColorInterpolation.h"
 #include "FontCustomPlatformData.h"
 #include "FontFace.h"
+#include "LengthPoint.h"
 #include "Logging.h"
 #include "RenderStyleConstants.h"
 #include "SVGPathByteStream.h"
@@ -2606,6 +2607,102 @@ static RefPtr<CSSPathValue> consumeBasicShapePath(CSSParserTokenRange& args, Opt
     return CSSPathValue::create(WTFMove(byteStream), rule);
 }
 
+
+static RefPtr<CSSValue> consumeCoordinatPair(CSSParserTokenRange& range, const CSSParserContext& context)
+{
+    auto xDimension = consumeLengthOrPercent(range, context.mode);
+    if (!xDimension)
+        return nullptr;
+
+    auto yDimension = consumeLengthOrPercent(range, context.mode);
+    if (!yDimension)
+        return nullptr;
+
+    return CSSValuePair::create(xDimension.releaseNonNull(), yDimension.releaseNonNull());
+}
+
+static RefPtr<CSSValue> consumeShapeCommand(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption>)
+{
+    if (range.peek().type() != IdentToken)
+        return nullptr;
+
+    auto consumeByTo = [&]() -> RefPtr<CSSValue> {
+        if (range.peek().type() != IdentToken)
+            return nullptr;
+
+        CSSValueID token = range.peek().id();
+        if (token != CSSValueBy && token != CSSValueTo)
+            return nullptr;
+
+        return consumeIdent(range);
+    };
+
+    auto id = range.consumeIncludingWhitespace().id();
+    if (id == CSSValueMove) {
+        // <move-command> = move <by-to> <coordinate-pair>
+        auto byOrTo = consumeByTo();
+        if (!byOrTo)
+            return nullptr;
+
+        auto toCoordinates = consumeCoordinatPair(range, context);
+        if (!toCoordinates)
+            return nullptr;
+
+    } else if (id == CSSValueLine) {
+        // <line-command> = line <by-to> <coordinate-pair>
+        ;
+    } else if (id == CSSValueHline || id == CSSValueVline) {
+        // <hv-line-command> = [hline | vline] <by-to> <length-percentage>
+        ;
+    } else if (id == CSSValueCurve) {
+        // <curve-command> = curve <by-to> <coordinate-pair> via <coordinate-pair>{1,2}
+        ;
+    } else if (id == CSSValueSmooth) {
+        // <smooth-command> = smooth <by-to> <coordinate-pair> [via <coordinate-pair>]?
+        ;
+    } else if (id == CSSValueArc) {
+        // arc <by-to> <coordinate-pair> of <length-percentage>{1,2} [ <arc-sweep> || <arc-size> || rotate <angle> ]?
+        ;
+    } else if (id == CSSValueClose)
+        return CSSPrimitiveValue::create(id);
+
+    return nullptr;
+}
+
+// https://drafts.csswg.org/css-shapes-2/#shape-function
+static RefPtr<CSSPathValue> consumeBasicShapeShape(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption> options)
+{
+    if (!context.cssShapeFunctionEnabled)
+        return nullptr;
+
+    // shape() = shape( <'fill-rule'>? from <coordinate-pair>, <shape-command>#)
+    WindRule rule = WindRule::NonZero;
+    if (identMatches<CSSValueEvenodd, CSSValueNonzero>(range.peek().id())) {
+        if (range.consumeIncludingWhitespace().id() == CSSValueEvenodd)
+            rule = WindRule::EvenOdd;
+    }
+
+    if (!consumeIdent<CSSValueFrom>(range))
+        return nullptr;
+
+    auto fromCoordinates = consumeCoordinatPair(range, context);
+    if (!fromCoordinates)
+        return nullptr;
+
+    if (!consumeCommaIncludingWhitespace(range))
+        return nullptr;
+
+    CSSValueListBuilder commands;
+    do {
+        auto command = consumeShapeCommand(range, context, options);
+        if (!command)
+            return nullptr;
+
+    } while (consumeCommaIncludingWhitespace(range));
+
+    return CSSShapeValue::create(rule, fromCoordinates.releaseNonNull(), WTFMove(commands));
+}
+
 template<typename ElementType> static void complete4Sides(std::array<ElementType, 4>& sides)
 {
     if (!sides[1])
@@ -2745,6 +2842,9 @@ static RefPtr<CSSValue> consumeBasicShape(CSSParserTokenRange& range, const CSSP
         result = consumeBasicShapeXywh(args, context);
     else if (id == CSSValuePath)
         result = consumeBasicShapePath(args, options);
+    else if (id == CSSValueShape)
+        result = consumeBasicShapeShape(args, context, options);
+
     if (!result || !args.atEnd())
         return nullptr;
 

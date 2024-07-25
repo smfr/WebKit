@@ -160,6 +160,9 @@ Ref<CSSValue> valueForBasicShape(const RenderStyle& style, const BasicShape& bas
             createPair(rect.topLeftRadius()), createPair(rect.topRightRadius()),
             createPair(rect.bottomRightRadius()), createPair(rect.bottomLeftRadius()));
     }
+    case BasicShape::Type::Shape: {
+        return CSSPrimitiveValue::create(0); // FIXME
+    }
     }
     RELEASE_ASSERT_NOT_REACHED();
 }

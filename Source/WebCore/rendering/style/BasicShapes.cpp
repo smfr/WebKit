@@ -141,6 +141,8 @@ static const Path& cachedTransformedByteStreamPath(const SVGPathByteStream& stre
     return cache.get().get(SVGPathTransformedByteStream { stream, zoom, offset });
 }
 
+// MARK: - BasicShapeCircle
+
 Ref<BasicShapeCircle> BasicShapeCircle::create(BasicShapeCenterCoordinate&& centerX, BasicShapeCenterCoordinate&& centerY, BasicShapeRadius&& radius)
 {
     return adoptRef(*new BasicShapeCircle(WTFMove(centerX), WTFMove(centerY), WTFMove(radius)));
@@ -225,6 +227,8 @@ void BasicShapeCircle::dump(TextStream& ts) const
     ts.dumpProperty("center-y", centerY());
     ts.dumpProperty("radius", radius());
 }
+
+// MARK: - BasicShapeEllipse
 
 Ref<BasicShapeEllipse> BasicShapeEllipse::create(BasicShapeCenterCoordinate&& centerX, BasicShapeCenterCoordinate&& centerY, BasicShapeRadius&& radiusX, BasicShapeRadius&& radiusY)
 {
@@ -326,6 +330,8 @@ void BasicShapeEllipse::dump(TextStream& ts) const
     ts.dumpProperty("radius-x", radiusX());
     ts.dumpProperty("radius-y", radiusY());
 }
+
+// MARK: - BasicShapeRect
 
 Ref<BasicShapeRect> BasicShapeRect::create(Length&& top, Length&& right, Length&& bottom, Length&& left, LengthSize&& topLeftRadius, LengthSize&& topRightRadius, LengthSize&& bottomRightRadius, LengthSize&& bottomLeftRadius)
 {
@@ -434,6 +440,8 @@ void BasicShapeRect::dump(TextStream& ts) const
     ts.dumpProperty("bottom-left-radius", bottomLeftRadius());
 }
 
+// MARK: - BasicShapeXywh
+
 Ref<BasicShapeXywh> BasicShapeXywh::create(Length&& insetX, Length&& insetY, Length&& width, Length&& height, LengthSize&& topLeftRadius, LengthSize&& topRightRadius, LengthSize&& bottomRightRadius, LengthSize&& bottomLeftRadius)
 {
     return adoptRef(*new BasicShapeXywh(WTFMove(insetX), WTFMove(insetY), WTFMove(width), WTFMove(height), WTFMove(topLeftRadius), WTFMove(topRightRadius), WTFMove(bottomRightRadius), WTFMove(bottomLeftRadius)));
@@ -539,6 +547,8 @@ void BasicShapeXywh::dump(TextStream& ts) const
 
 }
 
+// MARK: - BasicShapePolygon
+
 Ref<BasicShapePolygon> BasicShapePolygon::create(WindRule windRule, Vector<Length>&& values)
 {
     return adoptRef(*new BasicShapePolygon(windRule, WTFMove(values)));
@@ -619,6 +629,8 @@ void BasicShapePolygon::dump(TextStream& ts) const
     ts.dumpProperty("path", values());
 }
 
+// MARK: - BasicShapePath
+
 Ref<BasicShapePath> BasicShapePath::create(std::unique_ptr<SVGPathByteStream>&& byteStream, float zoom, WindRule windRule)
 {
     return adoptRef(*new BasicShapePath(WTFMove(byteStream), zoom, windRule));
@@ -686,6 +698,8 @@ void BasicShapePath::dump(TextStream& ts) const
     ts.dumpProperty("wind-rule", windRule());
     // FIXME: print the byte stream?
 }
+
+// MARK: - BasicShapeInset
 
 Ref<BasicShapeInset> BasicShapeInset::create(Length&& right, Length&& top, Length&& bottom, Length&& left, LengthSize&& topLeftRadius, LengthSize&& topRightRadius, LengthSize&& bottomRightRadius, LengthSize&& bottomLeftRadius)
 {
@@ -785,6 +799,8 @@ void BasicShapeInset::dump(TextStream& ts) const
     ts.dumpProperty("bottom-right-radius", bottomRightRadius());
     ts.dumpProperty("bottom-left-radius", bottomLeftRadius());
 }
+
+// MARK: - Dumping
 
 static TextStream& operator<<(TextStream& ts, BasicShapeRadius::Type radiusType)
 {

@@ -903,6 +903,7 @@ css/CSSSegmentedFontFace.cpp
 css/CSSSelector.cpp
 css/CSSSelectorList.cpp
 css/CSSShadowValue.cpp
+css/CSSShapeCommandValue.cpp
 css/CSSStartingStyleRule.cpp
 css/CSSStyleDeclaration.cpp
 css/CSSStyleRule.cpp
@@ -2797,6 +2798,7 @@ rendering/shapes/RectangleShape.cpp
 rendering/shapes/Shape.cpp
 rendering/shapes/ShapeOutsideInfo.cpp
 rendering/style/BasicShapes.cpp
+rendering/style/BasicShapesShape.cpp
 rendering/style/BorderData.cpp
 rendering/style/BorderValue.cpp
 rendering/style/ContentData.cpp
