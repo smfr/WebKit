@@ -86,6 +86,7 @@
 #include "CSSRectValue.h"
 #include "CSSReflectValue.h"
 #include "CSSScrollValue.h"
+#include "CSSShapeCommandValue.h"
 #include "CSSSubgridValue.h"
 #include "CSSTimingFunctionValue.h"
 #include "CSSTransformListValue.h"
@@ -2608,7 +2609,7 @@ static RefPtr<CSSPathValue> consumeBasicShapePath(CSSParserTokenRange& args, Opt
 }
 
 
-static RefPtr<CSSValue> consumeCoordinatPair(CSSParserTokenRange& range, const CSSParserContext& context)
+static RefPtr<CSSValuePair> consumeCoordinatPair(CSSParserTokenRange& range, const CSSParserContext& context)
 {
     auto xDimension = consumeLengthOrPercent(range, context.mode);
     if (!xDimension)
@@ -2626,28 +2627,32 @@ static RefPtr<CSSValue> consumeShapeCommand(CSSParserTokenRange& range, const CS
     if (range.peek().type() != IdentToken)
         return nullptr;
 
-    auto consumeByTo = [&]() -> RefPtr<CSSValue> {
+    auto consumeAffinity = [&]() -> std::optional<CSSShapeCommandValue::CoordinateAffinity> {
         if (range.peek().type() != IdentToken)
-            return nullptr;
+            return std::nullopt;
 
         CSSValueID token = range.peek().id();
         if (token != CSSValueBy && token != CSSValueTo)
-            return nullptr;
+            return std::nullopt;
 
-        return consumeIdent(range);
+        if (!consumeIdent(range))
+            return std::nullopt;
+
+        return token == CSSValueBy ? CSSShapeCommandValue::CoordinateAffinity::Relative : CSSShapeCommandValue::CoordinateAffinity::Absolute;
     };
 
     auto id = range.consumeIncludingWhitespace().id();
     if (id == CSSValueMove) {
         // <move-command> = move <by-to> <coordinate-pair>
-        auto byOrTo = consumeByTo();
-        if (!byOrTo)
+        auto affinityValue = consumeAffinity();
+        if (!affinityValue)
             return nullptr;
 
         auto toCoordinates = consumeCoordinatPair(range, context);
         if (!toCoordinates)
             return nullptr;
 
+        return CSSShapeCommandValue::createMove(*affinityValue, toCoordinates.releaseNonNull());
     } else if (id == CSSValueLine) {
         // <line-command> = line <by-to> <coordinate-pair>
         ;
@@ -2670,7 +2675,7 @@ static RefPtr<CSSValue> consumeShapeCommand(CSSParserTokenRange& range, const CS
 }
 
 // https://drafts.csswg.org/css-shapes-2/#shape-function
-static RefPtr<CSSPathValue> consumeBasicShapeShape(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption> options)
+static RefPtr<CSSShapeValue> consumeBasicShapeShape(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption> options)
 {
     if (!context.cssShapeFunctionEnabled)
         return nullptr;

@@ -548,4 +548,15 @@ CSSShapeValue::CSSShapeValue(WindRule windRule, Ref<CSSValuePair>&& fromCoordina
 {
 }
 
+String CSSShapeValue::customCSSText() const
+{
+    return ""_s; // FIXME
+}
+
+bool CSSShapeValue::equals(const CSSShapeValue&) const
+{
+    return false; // FIXME
+}
+
+
 } // namespace WebCore

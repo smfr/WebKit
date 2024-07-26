@@ -47,16 +47,21 @@
 
 namespace WebCore {
 
-
-BasicShapeShape::BasicShapeShape()
-    : m_startPoint(Length(0, LengthType::Fixed), Length(0, LengthType::Fixed))
+Ref<BasicShapeShape> BasicShapeShape::create(WindRule windRule, const CoordinatePair& startPoint, Vector<ShapeCommand>&& commands)
 {
+    return adoptRef(* new BasicShapeShape(windRule, startPoint, WTFMove(commands)));
+}
 
+BasicShapeShape::BasicShapeShape(WindRule windRule, const CoordinatePair& startPoint, Vector<ShapeCommand>&& commands)
+    : m_startPoint(startPoint)
+    , m_windRule(windRule)
+    , m_commands(WTFMove(commands))
+{
 }
 
 Ref<BasicShape> BasicShapeShape::clone() const
 {
-    return BasicShapeShape::create(); // FIXME wrong.
+    return BasicShapeShape::create(windRule(), startPoint(), m_commands); // FIXME: does this move the commands?
 }
 
 const Path& BasicShapeShape::path(const FloatRect&)
@@ -80,12 +85,20 @@ bool BasicShapeShape::operator==(const BasicShape& other) const
     if (type() != other.type())
         return false;
 
-    return true;
+    const& otherShape = downcast<BasicShapeShape>(other);
+    if (windRule() != otherShape.windRule)
+        return false;
+
+    if (startPoint() != otherShape.startPoint)
+        return false;
+
+    return commands() == other.commands();
 }
 
-void BasicShapeShape::dump(TextStream&) const
+void BasicShapeShape::dump(TextStream& stream) const
 {
-
+    stream.dumpProperty("wind rule", windRule());
+    stream.dumpProperty("startp point", startPoint());
 }
 
 } // namespace WebCore

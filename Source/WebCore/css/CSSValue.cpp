@@ -72,6 +72,7 @@
 #include "CSSReflectValue.h"
 #include "CSSScrollValue.h"
 #include "CSSShadowValue.h"
+#include "CSSShapeCommandValue.h"
 #include "CSSSubgridValue.h"
 #include "CSSTimingFunctionValue.h"
 #include "CSSTransformListValue.h"

@@ -364,8 +364,13 @@ class CSSShapeValue final : public CSSValueContainingVector {
 public:
     static Ref<CSSShapeValue> create(WindRule, Ref<CSSValuePair>&& fromCoordinates, CSSValueListBuilder&& shapeCommands);
 
-
     WindRule windRule() const { return m_windRule; }
+
+    String customCSSText() const;
+    bool equals(const CSSShapeValue&) const;
+
+    const CSSValue& fromCoordinates() const { return m_fromCoordinates; }
+    Ref<CSSValue> protectedFromCoordinates() const { return m_fromCoordinates; }
 
 
 private:

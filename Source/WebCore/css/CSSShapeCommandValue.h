@@ -118,7 +118,7 @@ private:
                 return false;
 
             auto& otherOnePoint = static_cast<const OnePointData&>(other);
-            return p1->equals(otherOnePoint.p1.get());
+            return compareCSSValue(p1, otherOnePoint.p1);
         }
     };
 
@@ -138,8 +138,8 @@ private:
                 return false;
 
             auto& otherTwoPoint = static_cast<const TwoPointData&>(other);
-            return p1->equals(otherTwoPoint.p1.get())
-                && p2->equals(otherTwoPoint.p2.get());
+            return compareCSSValue(p1, otherTwoPoint.p1)
+                && compareCSSValue(p2, otherTwoPoint.p2);
         }
     };
 
@@ -162,11 +162,12 @@ private:
             if (!ShapeCommandData::operator==(other))
                 return false;
 
+            // FIXME: compareCSSValuePtr
             auto& otherArc = static_cast<const ArcData&>(other);
-            return radius->equals(otherArc.radius.get())
-                && sweep->equals(otherArc.sweep.get())
-                && size->equals(otherArc.size.get())
-                && angle->equals(otherArc.angle.get());
+            return compareCSSValue(radius, otherArc.radius)
+                && compareCSSValue(sweep, otherArc.sweep)
+                && compareCSSValue(size, otherArc.size)
+                && compareCSSValue(angle, otherArc.angle);
         }
     };
 

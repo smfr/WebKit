@@ -44,38 +44,33 @@ using CoordinatePair = LengthPoint;
 
 class ShapeCommand {
 public:
-    enum class ByOrTo : bool { By, To };
+    enum class CoordinateAffinity : bool { Absolute, Relative };
 
-    explicit ShapeCommand(ByOrTo mode)
-        : m_byOrTo(mode)
-    {
-    }
+    explicit ShapeCommand(CoordinateAffinity affinity)
+        : m_affinity(affinity)
+    { }
 
 private:
-
-
-    const ByOrTo m_byOrTo;
+    const CoordinateAffinity m_affinity;
 };
-
-
 
 class ShapeMoveCommand final : public ShapeCommand {
 public:
-    ShapeMoveCommand(ByOrTo byOrTo, CoordinatePair&& coordinates)
-        : ShapeCommand(byOrTo)
-        , m_coordinates(WTFMove(coordinates))
+    ShapeMoveCommand(CoordinateAffinity affinity, CoordinatePair&& offset)
+        : ShapeCommand(affinity)
+        , m_offset(WTFMove(offset))
     {
     }
 
 private:
-    CoordinatePair m_coordinates;
+    CoordinatePair m_offset;
 };
 
 class ShapeLineCommand final : public ShapeCommand {
 public:
-    ShapeLineCommand(ByOrTo byOrTo, CoordinatePair&& coordinates)
-        : ShapeCommand(byOrTo)
-        , m_coordinates(WTFMove(coordinates))
+    ShapeLineCommand(CoordinateAffinity affinity, CoordinatePair&& coordinates)
+        : ShapeCommand(affinity)
+        , m_offset(WTFMove(offset))
     {
     }
 
@@ -83,10 +78,22 @@ private:
     CoordinatePair m_coordinates;
 };
 
-class ShapeHVLineCommand final : public ShapeCommand {
+class ShapeHorizontalLineCommand final : public ShapeCommand {
 public:
-    ShapeHVLineCommand(ByOrTo byOrTo, Length&& length)
-        : ShapeCommand(byOrTo)
+    ShapeHorizontalLineCommand(CoordinateAffinity affinity, Length&& length)
+        : ShapeCommand(affinity)
+        , m_length(WTFMove(length))
+    {
+    }
+
+private:
+    Length m_length;
+};
+
+class ShapeVerticalLineCommand final : public ShapeCommand {
+public:
+    ShapeVerticalLineCommand(CoordinateAffinity affinity, Length&& length)
+        : ShapeCommand(affinity)
         , m_length(WTFMove(length))
     {
     }
@@ -97,9 +104,9 @@ private:
 
 class ShapeCurveCommand final : public ShapeCommand {
 public:
-    ShapeCurveCommand(ByOrTo byOrTo, CoordinatePair&& endPoint, CoordinatePair&& controlPoint1, std::optional<CoordinatePair>&& controlPoint2)
-        : ShapeCommand(byOrTo)
-        , m_endPoint(WTFMove(endPoint))
+    ShapeCurveCommand(CoordinateAffinity affinity, CoordinatePair&& offset, CoordinatePair&& controlPoint1, std::optional<CoordinatePair>&& controlPoint2)
+        : ShapeCommand(affinity)
+        , m_offset(WTFMove(offset))
         , m_controlPoint1(WTFMove(controlPoint1))
         , m_controlPoint2(WTFMove(controlPoint2))
     {
@@ -107,23 +114,22 @@ public:
 
 
 private:
-    CoordinatePair m_endPoint;
+    CoordinatePair m_offset;
     CoordinatePair m_controlPoint1;
     std::optional<CoordinatePair> m_controlPoint2;
 };
 
 class ShapeSmoothCommand final : public ShapeCommand {
 public:
-    ShapeSmoothCommand(ByOrTo byOrTo, CoordinatePair&& endPoint, std::optional<CoordinatePair>&& intermediatePoint)
-        : ShapeCommand(byOrTo)
-        , m_endPoint(WTFMove(endPoint))
+    ShapeSmoothCommand(CoordinateAffinity affinity, CoordinatePair&& offset, std::optional<CoordinatePair>&& intermediatePoint)
+        : ShapeCommand(affinity)
+        , m_offset(WTFMove(offset))
         , m_intermediatePoint(WTFMove(intermediatePoint))
     {
     }
 
-
 private:
-    CoordinatePair m_endPoint;
+    CoordinatePair m_offset;
     std::optional<CoordinatePair> m_intermediatePoint;
 };
 
@@ -132,9 +138,9 @@ public:
     enum class ArcSize : uint8_t { Small, Large };
     using AngleDegrees = double;
 
-    ShapeArcCommand(ByOrTo byOrTo, CoordinatePair&& endPoint, LengthSize&& ellipseSize, RotationDirection sweep, ArcSize arcSize, AngleDegrees angle)
-        : ShapeCommand(byOrTo)
-        , m_endPoint(WTFMove(endPoint))
+    ShapeArcCommand(CoordinateAffinity affinity, CoordinatePair&& offset, LengthSize&& ellipseSize, RotationDirection sweep, ArcSize arcSize, AngleDegrees angle)
+        : ShapeCommand(affinity)
+        , m_offset(WTFMove(offset))
         , m_ellipseSize(WTFMove(ellipseSize))
         , m_arcSweep(sweep)
         , m_arcSize(arcSize)
@@ -142,8 +148,10 @@ public:
     {
     }
 
+    const LengthSize& size() const { return m_ellipseSize; }
+
 private:
-    CoordinatePair m_endPoint;
+    CoordinatePair m_offset;
     LengthSize m_ellipseSize;
     RotationDirection m_arcSweep { RotationDirection::Counterclockwise };
     ArcSize m_arcSize { ArcSize::Small };
@@ -157,13 +165,12 @@ public:
 // https://drafts.csswg.org/css-shapes-2/#shape-function
 class BasicShapeShape final : public BasicShape {
 public:
-
-    static Ref<BasicShapeShape> create() { return adoptRef(*new BasicShapeShape); }
-//    WEBCORE_EXPORT static Ref<BasicShapeShape> create(WindRule, Vector<Length>&& values);
+    static Ref<BasicShapeShape> create(WindRule, const CoordinatePair&, Vector<ShapeCommand>&&);
 
     Ref<BasicShape> clone() const final;
 
     Type type() const final { return Type::Shape; }
+    const CoordinatePair& startPoint() const { m_startPoint; }
 
     const Path& path(const FloatRect&) final;
 
@@ -174,15 +181,27 @@ public:
 
     void dump(TextStream&) const final;
 
+    using ShapeCommand = std::variant<
+        ShapeMoveCommand,
+        ShapeLineCommand,
+        ShapeHorizontalLineCommand,
+        ShapeVerticalLineCommand,
+        ShapeCurveCommand,
+        ShapeSmoothCommand,
+        ShapeArcCommand,
+        ShapeCloseCommand
+    >;
+
+    const Vector<ShapeCommand>& commands() const { return m_commands; }
 
 private:
-    BasicShapeShape();
-    //BasicShapeShape(/* arguments */);
+    BasicShapeShape(WindRule, const CoordinatePair&, Vector<ShapeCommand>&&);
 
     using ShapeCommand = std::variant<
         ShapeMoveCommand,
         ShapeLineCommand,
-        ShapeHVLineCommand,
+        ShapeHorizontalLineCommand,
+        ShapeVerticalLineCommand,
         ShapeCurveCommand,
         ShapeSmoothCommand,
         ShapeArcCommand,
@@ -190,6 +209,7 @@ private:
     >;
 
     CoordinatePair m_startPoint;
+    const WindRule m_windRule { WindRule::NonZero; }
     Vector<ShapeCommand> m_commands;
 };
 

@@ -36,7 +36,9 @@ namespace WebCore {
 class BasicShape;
 class BasicShapeCenterCoordinate;
 class BasicShapePath;
+class BasicShapeShape;
 class CSSPathValue;
+class CSSShapeValue;
 class CSSToLengthConversionData;
 class CSSValue;
 class RenderStyle;
@@ -47,6 +49,7 @@ Ref<CSSValue> valueForBasicShape(const RenderStyle&, const BasicShape&, SVGPathC
 Ref<CSSValue> valueForSVGPath(const BasicShapePath&, SVGPathConversion = SVGPathConversion::None);
 Ref<BasicShape> basicShapeForValue(const CSSToLengthConversionData&, const CSSValue&, float zoom = 1);
 Ref<BasicShapePath> basicShapePathForValue(const CSSPathValue&, float zoom = 1);
+Ref<BasicShapeShape> basicShapeShapeForValue(const CSSShapeValue&, const CSSToLengthConversionData&);
 float floatValueForCenterCoordinate(const BasicShapeCenterCoordinate&, float);
 
 }
