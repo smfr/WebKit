@@ -41,6 +41,20 @@
 
 namespace WebCore {
 
+static bool decorationHasAllSolidEdges(const RectEdges<BorderEdge>& edges)
+{
+    for (auto side : allBoxSides) {
+        auto& currEdge = edges.at(side);
+
+        if (currEdge.presentButInvisible() || !currEdge.widthForPainting())
+            continue;
+
+        if (currEdge.style() != BorderStyle::Solid)
+            return false;
+    }
+    return true;
+}
+
 struct BorderPainter::Sides {
     RoundedRect outerBorder;
     RoundedRect innerBorder;
@@ -92,6 +106,33 @@ bool BorderPainter::allCornersClippedOut(const RoundedRect& border, const Layout
     return true;
 }
 
+std::optional<Path> BorderPainter::pathForBorderArea(const LayoutRect& rect, const RenderStyle& style, float deviceScaleFactor, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
+{
+    auto edges = borderEdges(style, deviceScaleFactor, includeLogicalLeftEdge, includeLogicalRightEdge);
+    bool haveAllSolidEdges = decorationHasAllSolidEdges(edges);
+    // FIXME: Test more things.
+    if (!haveAllSolidEdges)
+        return std::nullopt;
+
+    auto outerBorder = style.getRoundedBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto innerBorder = style.getRoundedInnerBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge);
+
+    Path path;
+    auto pixelSnappedOuterBorder = outerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedOuterBorder.isRounded())
+        path.addRoundedRect(pixelSnappedOuterBorder);
+    else
+        path.addRect(pixelSnappedOuterBorder.rect());
+
+    auto pixelSnappedInnerBorder = innerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedInnerBorder.isRounded())
+        path.addRoundedRect(pixelSnappedInnerBorder);
+    else
+        path.addRect(pixelSnappedInnerBorder.rect());
+
+    return path;
+}
+
 static LayoutRect calculateSideRect(const RoundedRect& outerBorder, const BorderEdges& edges, BoxSide side)
 {
     LayoutRect sideRect = outerBorder.rect();
@@ -122,20 +163,6 @@ LayoutRect shrinkRectByOneDevicePixel(const GraphicsContext& context, const Layo
     shrunkRect.inflateX(-ceilToDevicePixel(1_lu / transform.xScale(), devicePixelRatio));
     shrunkRect.inflateY(-ceilToDevicePixel(1_lu / transform.yScale(), devicePixelRatio));
     return shrunkRect;
-}
-
-static bool decorationHasAllSolidEdges(const RectEdges<BorderEdge>& edges)
-{
-    for (auto side : allBoxSides) {
-        auto& currEdge = edges.at(side);
-
-        if (currEdge.presentButInvisible() || !currEdge.widthForPainting())
-            continue;
-
-        if (currEdge.style() != BorderStyle::Solid)
-            return false;
-    }
-    return true;
 }
 
 void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style, BackgroundBleedAvoidance bleedAvoidance, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
@@ -178,7 +205,7 @@ void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style
     RoundedRect innerBorder = style.getRoundedInnerBorderFor(borderInnerRectAdjustedForBleedAvoidance(rect, bleedAvoidance), includeLogicalLeftEdge, includeLogicalRightEdge);
     RoundedRect unadjustedInnerBorder = (bleedAvoidance == BackgroundBleedBackgroundOverBorder) ? style.getRoundedInnerBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge) : innerBorder;
     auto edges = borderEdges(style, document().deviceScaleFactor(), includeLogicalLeftEdge, includeLogicalRightEdge);
-    auto haveAllSolidEdges = decorationHasAllSolidEdges(edges);
+    bool haveAllSolidEdges = decorationHasAllSolidEdges(edges);
 
     if (haveAllSolidEdges && outerBorder.isRounded() && allCornersClippedOut(outerBorder, m_paintInfo.rect))
         outerBorder.setRadii(RoundedRect::Radii());

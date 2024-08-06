@@ -945,6 +945,7 @@ padding
 padding-box
 // text
 -webkit-text
+border-area
 
 // block-step-insert
 margin

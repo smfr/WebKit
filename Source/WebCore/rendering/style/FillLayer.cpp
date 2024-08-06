@@ -318,6 +318,7 @@ static inline FillBox clipMax(FillBox clipA, FillBox clipB)
         return FillBox::PaddingBox;
     if (clipA == FillBox::ContentBox || clipB == FillBox::ContentBox)
         return FillBox::ContentBox;
+    // FIXME: Text or Border-area?
     return FillBox::NoClip;
 }
 

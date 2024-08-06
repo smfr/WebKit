@@ -1661,6 +1661,11 @@
                     "url": "https://drafts.csswg.org/css-backgrounds-4/#background-clip"
                 },
                 {
+                    "value": "border-area",
+                    "status": "experimental",
+                    "url": "https://drafts.csswg.org/css-backgrounds-4/#background-clip"
+                },
+                {
                     "value": "-webkit-text",
                     "status": "non-standard"
                 }
@@ -10562,7 +10567,7 @@
             }
         },
         "<single-background-clip>": {
-            "grammar": "<box> | text | -webkit-text",
+            "grammar": "<box> | text | border-area | -webkit-text",
             "exported": true,
             "specification": {
                 "category": "css-backgrounds",

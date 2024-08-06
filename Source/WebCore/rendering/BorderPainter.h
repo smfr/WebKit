@@ -39,6 +39,8 @@ public:
     bool paintNinePieceImage(const LayoutRect&, const RenderStyle&, const NinePieceImage&, CompositeOperator = CompositeOperator::SourceOver) const;
     static void drawLineForBoxSide(GraphicsContext&, const Document&, const FloatRect&, BoxSide, Color, BorderStyle, float adjacentWidth1, float adjacentWidth2, bool antialias = false);
 
+    static std::optional<Path> pathForBorderArea(const LayoutRect&, const RenderStyle&, float deviceScaleFactor, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+
     static bool allCornersClippedOut(const RoundedRect&, const LayoutRect&);
     static bool shouldAntialiasLines(GraphicsContext&);
     static Color calculateBorderStyleColor(const BorderStyle&, const BoxSide&, const Color&);

@@ -331,6 +331,38 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
         backgroundClipStateSaver.save();
         context.clip(maskRect);
         context.beginTransparencyLayer(1);
+    } else if (bgLayer.clip() == FillBox::BorderArea) {
+        auto borderAreaPath = BorderPainter::pathForBorderArea(rect, style, deviceScaleFactor);
+        if (borderAreaPath) {
+            backgroundClipStateSaver.save();
+            context.clipPath(borderAreaPath.value());
+        } else {
+            maskRect = snapRectToDevicePixels(rect, deviceScaleFactor);
+            maskRect.intersect(snapRectToDevicePixels(m_paintInfo.rect, deviceScaleFactor));
+
+            maskRect.inflate(1);
+
+            // Now create the mask.
+            maskImage = context.createAlignedImageBuffer(maskRect.size());
+            if (!maskImage)
+                return;
+
+            // paint the border
+            {
+                auto& maskContext = maskImage->context();
+                maskContext.translate(-maskRect.location());
+
+                // FIXME: Behavior for ForceBlackBorder.
+                auto maskPaintInfo = PaintInfo { maskContext, LayoutRect { maskRect }, PaintPhase::BlockBackground, PaintBehavior::ForceBlackText };
+
+                auto borderPainter = BorderPainter { m_renderer, maskPaintInfo };
+                borderPainter.paintBorder(rect, style);
+            }
+
+            backgroundClipStateSaver.save();
+            context.clip(maskRect);
+            context.beginTransparencyLayer(1);
+        }
     }
 
     auto isOpaqueRoot = false;
@@ -422,7 +454,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
         }
     }
 
-    if (maskImage && bgLayer.clip() == FillBox::Text) {
+    if (maskImage) {
         context.drawConsumingImageBuffer(WTFMove(maskImage), maskRect, { CompositeOperator::DestinationIn });
         context.endTransparencyLayer();
     }
