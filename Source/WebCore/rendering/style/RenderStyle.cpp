@@ -1209,6 +1209,9 @@ static bool rareDataChangeRequiresRepaint(const StyleRareNonInheritedData& first
     if (first.shapeOutside != second.shapeOutside)
         return true;
 
+    if (first.cornerShape != second.cornerShape)
+        return true;
+
     // FIXME: this should probably be moved to changeRequiresLayerRepaint().
     if (first.clipPath != second.clipPath) {
         changedContextSensitiveProperties.add(StyleDifferenceContextSensitiveProperty::ClipPath);
@@ -1911,6 +1914,8 @@ void RenderStyle::conservativelyCollectChangedAnimatableProperties(const RenderS
             changingProperties.m_properties.set(CSSPropertyMixBlendMode);
         if (first.isolation != second.isolation)
             changingProperties.m_properties.set(CSSPropertyIsolation);
+        if (first.cornerShape != second.cornerShape)
+            changingProperties.m_properties.set(CSSPropertyCornerShape);
         if (first.breakAfter != second.breakAfter)
             changingProperties.m_properties.set(CSSPropertyBreakAfter);
         if (first.breakBefore != second.breakBefore)

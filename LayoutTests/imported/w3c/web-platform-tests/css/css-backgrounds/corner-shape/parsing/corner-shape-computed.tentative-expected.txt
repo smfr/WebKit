@@ -1,0 +1,4 @@
+
+PASS Property corner-shape value 'round'
+PASS Property corner-shape value 'bevel'
+

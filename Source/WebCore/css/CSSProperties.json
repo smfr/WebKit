@@ -3248,6 +3248,21 @@
                 "url": "https://www.w3.org/TR/css-content-3/#content-property"
             }
         },
+        "corner-shape": {
+            "values": [
+                "round",
+                "bevel",
+                "scoop"
+            ],
+            "codegen-properties": {
+                "settings-flag": "cssCornerShapeEnabled",
+                "parser-grammar": "<<values>>"
+            },
+            "specification": {
+                "category": "css-backgrounds"
+            },
+            "status": "experimental"
+        },
         "counter-increment": {
             "values": [
                 "none"

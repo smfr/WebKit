@@ -1,0 +1,5 @@
+
+PASS e.style['corner-shape'] = "none" should not set the property value
+PASS e.style['corner-shape'] = "border" should not set the property value
+PASS e.style['corner-shape'] = "10%" should not set the property value
+

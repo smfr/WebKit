@@ -137,6 +137,7 @@ enum class Containment : uint8_t;
 enum class ContentDistribution : uint8_t;
 enum class ContentPosition : uint8_t;
 enum class ContentVisibility : uint8_t;
+enum class CornerShape : uint8_t;
 enum class CursorType : uint8_t;
 enum class CursorVisibility : bool;
 enum class DisplayType : uint8_t;
@@ -749,6 +750,8 @@ public:
     // Returns true for skipped content roots and skipped content itself.
     inline bool hasSkippedContent() const;
 
+    inline CornerShape cornerShape() const;
+
     inline ContainIntrinsicSizeType containIntrinsicWidthType() const;
     inline ContainIntrinsicSizeType containIntrinsicHeightType() const;
     inline ContainIntrinsicSizeType containIntrinsicLogicalWidthType() const;
@@ -1346,8 +1349,9 @@ public:
     inline void setContainIntrinsicHeight(std::optional<Length>);
 
     inline void setContentVisibility(ContentVisibility);
-
     inline void setUsedContentVisibility(ContentVisibility);
+
+    inline void setCornerShape(CornerShape);
 
     inline void setListStyleType(ListStyleType);
     void setListStyleImage(RefPtr<StyleImage>&&);
@@ -1966,6 +1970,7 @@ public:
     static constexpr OptionSet<Containment> contentContainment();
     static constexpr ContainerType initialContainerType();
     static constexpr ContentVisibility initialContentVisibility();
+    static constexpr CornerShape initialCornerShape();
     static Vector<Style::ScopedName> initialContainerNames();
     static double initialAspectRatioWidth() { return 1.0; }
     static double initialAspectRatioHeight() { return 1.0; }

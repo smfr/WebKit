@@ -108,6 +108,7 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , textDecorationStyle(static_cast<unsigned>(RenderStyle::initialTextDecorationStyle()))
     , textGroupAlign(static_cast<unsigned>(RenderStyle::initialTextGroupAlign()))
     , contentVisibility(static_cast<unsigned>(RenderStyle::initialContentVisibility()))
+    , cornerShape(static_cast<unsigned>(RenderStyle::initialCornerShape()))
     , effectiveBlendMode(static_cast<unsigned>(RenderStyle::initialBlendMode()))
     , isolation(static_cast<unsigned>(RenderStyle::initialIsolation()))
 #if ENABLE(APPLE_PAY)
@@ -201,6 +202,7 @@ inline StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonIn
     , textDecorationStyle(o.textDecorationStyle)
     , textGroupAlign(o.textGroupAlign)
     , contentVisibility(o.contentVisibility)
+    , cornerShape(o.cornerShape)
     , effectiveBlendMode(o.effectiveBlendMode)
     , isolation(o.isolation)
 #if ENABLE(APPLE_PAY)
@@ -305,6 +307,7 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && applePayButtonType == o.applePayButtonType
 #endif
         && contentVisibility == o.contentVisibility
+        && cornerShape == o.cornerShape
         && breakAfter == o.breakAfter
         && breakBefore == o.breakBefore
         && breakInside == o.breakInside

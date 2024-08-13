@@ -1047,6 +1047,20 @@ CSSContentVisibilityEnabled:
     WebCore:
       default: true
 
+CSSCornerShapeEnabled:
+  type: bool
+  status: testable
+  category: css
+  humanReadableName: "CSS Corner Shape"
+  humanReadableDescription: "Enable CSS corner-shape"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 CSSCounterStyleAtRuleImageSymbolsEnabled:
   type: bool
   status: testable

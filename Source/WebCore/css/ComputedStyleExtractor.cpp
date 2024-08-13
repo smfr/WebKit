@@ -4296,6 +4296,8 @@ RefPtr<CSSValue> ComputedStyleExtractor::valueForPropertyInStyle(const RenderSty
         return valueForContainIntrinsicSize(style, style.containIntrinsicHeightType(), style.containIntrinsicHeight());
     case CSSPropertyContentVisibility:
         return createConvertingToCSSValueID(style.contentVisibility());
+    case CSSPropertyCornerShape:
+        return createConvertingToCSSValueID(style.cornerShape());
     case CSSPropertyBackfaceVisibility:
         return CSSPrimitiveValue::create((style.backfaceVisibility() == BackfaceVisibility::Hidden) ? CSSValueHidden : CSSValueVisible);
     case CSSPropertyBorderImage:

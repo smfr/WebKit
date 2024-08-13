@@ -932,6 +932,12 @@ textfield
 round
 
 //
+// corner-shape
+//
+// bevel
+scoop
+
+//
 // CSS_PROP_BACKGROUND_CLIP/ORIGIN
 //
 // border/content/padding are deprecated and ultimately will only apply to the -webkit- form of these properties.

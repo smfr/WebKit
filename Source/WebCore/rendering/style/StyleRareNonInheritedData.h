@@ -213,6 +213,8 @@ public:
 
     unsigned contentVisibility : 2; // ContentVisibility
 
+    unsigned cornerShape : 2; // CornerShape
+
     unsigned effectiveBlendMode: 5; // EBlendMode
     unsigned isolation : 1; // Isolation
 

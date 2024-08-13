@@ -1,0 +1,4 @@
+
+PASS e.style['corner-shape'] = "round" should set the property value
+PASS e.style['corner-shape'] = "bevel" should set the property value
+
