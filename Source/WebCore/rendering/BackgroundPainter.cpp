@@ -27,6 +27,7 @@
 #include "BackgroundPainter.h"
 
 #include "BorderPainter.h"
+#include "BorderShapeUtilities.h"
 #include "CachedImage.h"
 #include "ColorBlending.h"
 #include "FloatRoundedRect.h"
@@ -239,7 +240,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
             applyBoxShadowForBackground(context, style);
 
         if (hasRoundedBorder && bleedAvoidance != BackgroundBleedUseTransparencyLayer) {
-            FloatRoundedRect pixelSnappedBorder = backgroundRoundedRectAdjustedForBleedAvoidance(rect, bleedAvoidance, box,
+            auto pixelSnappedBorder = backgroundRoundedRectAdjustedForBleedAvoidance(rect, bleedAvoidance, box,
                 includeLeftEdge, includeRightEdge).pixelSnappedRoundedRectForPainting(deviceScaleFactor);
             if (pixelSnappedBorder.isRenderable()) {
                 CompositeOperator previousOperator = context.compositeOperation();
@@ -273,7 +274,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
         if (bgLayer.clip() == FillBox::ContentBox)
             border = m_renderer.roundedContentBoxRect(border.rect(), includeLeftEdge, includeRightEdge);
         else if (bgLayer.clip() == FillBox::PaddingBox)
-            border = style.getRoundedInnerBorderFor(border.rect(), includeLeftEdge, includeRightEdge);
+            border = BorderShapeUtilities::getRoundedInnerBorder(style, border.rect(), includeLeftEdge, includeRightEdge);
 
         clipRoundedInnerRect(context, pixelSnappedRect, border.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
     }
@@ -469,10 +470,11 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
     }
 }
 
+// FIXME: Unify this with BorderShapeUtilities::clipToPaddingArea().
 void BackgroundPainter::clipRoundedInnerRect(GraphicsContext& context, const FloatRect& rect, const FloatRoundedRect& clipRect)
 {
     if (clipRect.isRenderable()) {
-        context.clipRoundedRect(clipRect);
+        BorderShapeUtilities::clipRoundedRect(context, clipRect);
         return;
     }
 
@@ -481,24 +483,24 @@ void BackgroundPainter::clipRoundedInnerRect(GraphicsContext& context, const Flo
         FloatRect topCorner(clipRect.rect().x(), clipRect.rect().y(), rect.maxX() - clipRect.rect().x(), rect.maxY() - clipRect.rect().y());
         FloatRoundedRect::Radii topCornerRadii;
         topCornerRadii.setTopLeft(clipRect.radii().topLeft());
-        context.clipRoundedRect(FloatRoundedRect(topCorner, topCornerRadii));
+        BorderShapeUtilities::clipRoundedRect(context, FloatRoundedRect(topCorner, topCornerRadii));
 
         FloatRect bottomCorner(rect.x(), rect.y(), clipRect.rect().maxX() - rect.x(), clipRect.rect().maxY() - rect.y());
         FloatRoundedRect::Radii bottomCornerRadii;
         bottomCornerRadii.setBottomRight(clipRect.radii().bottomRight());
-        context.clipRoundedRect(FloatRoundedRect(bottomCorner, bottomCornerRadii));
+        BorderShapeUtilities::clipRoundedRect(context, FloatRoundedRect(bottomCorner, bottomCornerRadii));
     }
 
     if (!clipRect.radii().topRight().isEmpty() || !clipRect.radii().bottomLeft().isEmpty()) {
         FloatRect topCorner(rect.x(), clipRect.rect().y(), clipRect.rect().maxX() - rect.x(), rect.maxY() - clipRect.rect().y());
         FloatRoundedRect::Radii topCornerRadii;
         topCornerRadii.setTopRight(clipRect.radii().topRight());
-        context.clipRoundedRect(FloatRoundedRect(topCorner, topCornerRadii));
+        BorderShapeUtilities::clipRoundedRect(context, FloatRoundedRect(topCorner, topCornerRadii));
 
         FloatRect bottomCorner(clipRect.rect().x(), rect.y(), rect.maxX() - clipRect.rect().x(), clipRect.rect().maxY() - rect.y());
         FloatRoundedRect::Radii bottomCornerRadii;
         bottomCornerRadii.setBottomLeft(clipRect.radii().bottomLeft());
-        context.clipRoundedRect(FloatRoundedRect(bottomCorner, bottomCornerRadii));
+        BorderShapeUtilities::clipRoundedRect(context, FloatRoundedRect(bottomCorner, bottomCornerRadii));
     }
 }
 
@@ -510,16 +512,16 @@ RoundedRect BackgroundPainter::backgroundRoundedRectAdjustedForBleedAvoidance(co
             includeLogicalLeftEdge, includeLogicalRightEdge);
     }
     if (bleedAvoidance == BackgroundBleedBackgroundOverBorder)
-        return m_renderer.style().getRoundedInnerBorderFor(borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+        return BorderShapeUtilities::getRoundedInnerBorder(m_renderer.style(), borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
     return backgroundRoundedRect(borderRect, box, includeLogicalLeftEdge, includeLogicalRightEdge);
 }
 
 RoundedRect BackgroundPainter::backgroundRoundedRect(const LayoutRect& borderRect, const InlineIterator::InlineBoxIterator& box, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
 {
-    RoundedRect border = m_renderer.style().getRoundedBorderFor(borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    RoundedRect border = BorderShapeUtilities::getRoundedBorder(m_renderer.style(), borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
     if (box && (box->nextInlineBox() || box->previousInlineBox())) {
-        RoundedRect segmentBorder = m_renderer.style().getRoundedBorderFor(LayoutRect(0_lu, 0_lu, borderRect.width(), borderRect.height()), includeLogicalLeftEdge, includeLogicalRightEdge);
+        RoundedRect segmentBorder = BorderShapeUtilities::getRoundedBorder(m_renderer.style(), LayoutRect(0_lu, 0_lu, borderRect.width(), borderRect.height()), includeLogicalLeftEdge, includeLogicalRightEdge);
         border.setRadii(segmentBorder.radii());
     }
     return border;
@@ -838,8 +840,8 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
     if (context.paintingDisabled() || !style.boxShadow())
         return;
 
-    RoundedRect borderRect = (shadowStyle == ShadowStyle::Inset) ? style.getRoundedInnerBorderFor(paintRect, includeLogicalLeftEdge, includeLogicalRightEdge)
-        : style.getRoundedBorderFor(paintRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    RoundedRect borderRect = (shadowStyle == ShadowStyle::Inset) ? BorderShapeUtilities::getRoundedInnerBorder(style, paintRect, includeLogicalLeftEdge, includeLogicalRightEdge)
+        : BorderShapeUtilities::getRoundedBorder(style, paintRect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
     if (!borderRect.isRenderable())
         borderRect.adjustRadii();
@@ -900,7 +902,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
                     pixelSnappedRectToClipOut.inflateWithRadii(-1.0f);
 
                 if (!pixelSnappedRectToClipOut.isEmpty())
-                    context.clipOutRoundedRect(pixelSnappedRectToClipOut);
+                    BorderShapeUtilities::clipOutRoundedRect(context, pixelSnappedRectToClipOut);
 
                 RoundedRect influenceRect(LayoutRect(pixelSnappedShadowRect), borderRect.radii());
                 influenceRect.expandRadii(2 * shadowPaintingExtent + shadowSpread);
@@ -960,7 +962,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
                     LayoutUnit topWidth { (horizontal || includeLogicalLeftEdge) ? style.borderTopWidth() + shadowSpread : 0 };
                     LayoutUnit bottomWidth { (horizontal || includeLogicalRightEdge) ? style.borderBottomWidth() + shadowSpread : 0 };
 
-                    return style.getRoundedInnerBorderFor(paintRect, topWidth, bottomWidth, leftWidth, rightWidth, includeLogicalLeftEdge, includeLogicalRightEdge);
+                    return BorderShapeUtilities::getRoundedInnerBorder(style, paintRect, topWidth, bottomWidth, leftWidth, rightWidth, includeLogicalLeftEdge, includeLogicalRightEdge);
                 }();
                 roundedHoleRect.setRadii(rounedRectCorrectingForSpread.radii());
             }
@@ -981,7 +983,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
 
             GraphicsContextStateSaver stateSaver(context);
             if (hasBorderRadius)
-                context.clipRoundedRect(pixelSnappedBorderRect);
+                BorderShapeUtilities::clipRoundedRect(context, pixelSnappedBorderRect);
             else
                 context.clip(pixelSnappedBorderRect.rect());
 

@@ -49,6 +49,7 @@
 
 #include "AccessibilityRegionContext.h"
 #include "BitmapImage.h"
+#include "BorderShapeUtilities.h"
 #include "BoxShape.h"
 #include "CSSFilter.h"
 #include "CSSPropertyNames.h"
@@ -2877,11 +2878,11 @@ void RenderLayer::clipToRect(GraphicsContext& context, GraphicsContextStateSaver
             if (layer->renderer().hasNonVisibleOverflow() && layer->renderer().style().hasBorderRadius() && ancestorLayerIsInContainingBlockChain(*layer)) {
                 LayoutRect adjustedClipRect = LayoutRect(toLayoutPoint(layer->offsetFromAncestor(paintingInfo.rootLayer, AdjustForColumns)), layer->size());
                 adjustedClipRect.move(paintingInfo.subpixelOffset);
-                FloatRoundedRect roundedRect = layer->renderer().style().getRoundedInnerBorderFor(adjustedClipRect).pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-                if (roundedRect.intersectionIsRectangular(paintingInfo.paintDirtyRect))
+                auto paddingAreaRect = BorderShapeUtilities::getRoundedInnerBorder(layer->renderer().style(), adjustedClipRect).pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+                if (paddingAreaRect.intersectionIsRectangular(paintingInfo.paintDirtyRect))
                     context.clip(snapRectToDevicePixels(intersection(paintingInfo.paintDirtyRect, adjustedClipRect), deviceScaleFactor));
                 else
-                    context.clipRoundedRect(roundedRect);
+                    BorderShapeUtilities::clipRoundedRect(context, paddingAreaRect);
             }
             
             if (layer == paintingInfo.rootLayer)

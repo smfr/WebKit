@@ -28,6 +28,7 @@
 
 #include "BackgroundPainter.h"
 #include "BorderPainter.h"
+#include "BorderShapeUtilities.h"
 #include "CSSFontSelector.h"
 #include "Document.h"
 #include "DocumentInlines.h"
@@ -793,7 +794,7 @@ RoundedRect RenderBox::borderRoundedRect() const
     LayoutRect bounds = frameRect();
     bounds.setLocation({ });
 
-    return style.getRoundedBorderFor(bounds);
+    return BorderShapeUtilities::getRoundedBorder(style, bounds);
 }
 
 RoundedRect::Radii RenderBox::borderRadii() const
@@ -805,12 +806,12 @@ RoundedRect::Radii RenderBox::borderRadii() const
     unsigned borderTop = style.borderTopWidth();
     bounds.moveBy(LayoutPoint(borderLeft, borderTop));
     bounds.contract(borderLeft + style.borderRightWidth(), borderTop + style.borderBottomWidth());
-    return style.getRoundedBorderFor(bounds).radii();
+    return BorderShapeUtilities::getRoundedBorder(style, bounds).radii();
 }
 
-RoundedRect RenderBox::roundedBorderBoxRect() const
+RoundedRect RenderBox::roundedPaddingBoxRect() const
 {
-    return style().getRoundedInnerBorderFor(borderBoxRect());
+    return BorderShapeUtilities::getRoundedInnerBorder(style(), borderBoxRect());
 }
 
 LayoutRect RenderBox::paddingBoxRect() const
@@ -1579,7 +1580,7 @@ bool RenderBox::hitTestBorderRadius(const HitTestLocation& hitTestLocation, cons
     LayoutPoint adjustedLocation = accumulatedOffset + location();
     LayoutRect borderRect = borderBoxRect();
     borderRect.moveBy(adjustedLocation);
-    RoundedRect border = style().getRoundedBorderFor(borderRect);
+    RoundedRect border = BorderShapeUtilities::getRoundedBorder(style(), borderRect);
     return hitTestLocation.intersects(border);
 }
 
@@ -1707,7 +1708,7 @@ void RenderBox::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& pai
         // into a transparency layer, and then clip that in one go (which requires setting up the clip before
         // beginning the layer).
         stateSaver.save();
-        paintInfo.context().clipRoundedRect(style().getRoundedBorderFor(paintRect).pixelSnappedRoundedRectForPainting(document().deviceScaleFactor()));
+        BorderShapeUtilities::clipToBorderArea(paintInfo.context(), style(), paintRect, document().deviceScaleFactor());
         paintInfo.context().beginTransparencyLayer(1);
     }
 
@@ -2141,8 +2142,7 @@ bool RenderBox::repaintLayerRectsForImage(WrappedImagePtr image, const FillLayer
 
 void RenderBox::clipContentForBorderRadius(GraphicsContext& context, const LayoutPoint& accumulatedOffset, float deviceScaleFactor)
 {
-    auto innerBorder = style().getRoundedInnerBorderFor(LayoutRect(accumulatedOffset, size()));
-    context.clipRoundedRect(innerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
+    BorderShapeUtilities::clipToPaddingArea(context, style(), { accumulatedOffset, size() }, deviceScaleFactor);
 }
 
 bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumulatedOffset)

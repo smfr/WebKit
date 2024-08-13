@@ -30,6 +30,7 @@
 
 #import "ARKitBadgeSystemImage.h"
 #import "BitmapImage.h"
+#import "BorderShapeUtilities.h"
 #import "BorderPainter.h"
 #import "CSSPrimitiveValue.h"
 #import "CSSToLengthConversionData.h"
@@ -136,7 +137,7 @@ FloatRect RenderThemeIOS::addRoundedBorderClip(const RenderObject& box, Graphics
     // To fix inner border bleeding issues <rdar://problem/9812507>, we clip to the outer border and assert that
     // the border is opaque or transparent, unless we're checked because checked radio/checkboxes show no bleeding.
     auto& style = box.style();
-    RoundedRect border = isChecked(box) ? style.getRoundedInnerBorderFor(rect) : style.getRoundedBorderFor(rect);
+    RoundedRect border = isChecked(box) ? BorderShapeUtilities::getRoundedInnerBorder(style, rect) : BorderShapeUtilities::getRoundedBorder(style, rect);
 
     if (border.isRounded())
         context.clipRoundedRect(FloatRoundedRect(border));
@@ -315,7 +316,7 @@ void RenderThemeIOS::paintTextFieldDecorations(const RenderBox& box, const Paint
     GraphicsContextStateSaver stateSaver(context);
 
     auto& style = box.style();
-    auto roundedRect = style.getRoundedBorderFor(LayoutRect(rect)).pixelSnappedRoundedRectForPainting(box.document().deviceScaleFactor());
+    auto roundedRect = BorderShapeUtilities::getRoundedBorder(style, LayoutRect(rect)).pixelSnappedRoundedRectForPainting(box.document().deviceScaleFactor());
 
     auto shouldPaintFillAndInnerShadow = false;
     auto element = box.element();

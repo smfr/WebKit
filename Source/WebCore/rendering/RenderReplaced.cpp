@@ -26,6 +26,7 @@
 #include "RenderReplaced.h"
 
 #include "BackgroundPainter.h"
+#include "BorderShapeUtilities.h"
 #include "DocumentInlines.h"
 #include "DocumentMarkerController.h"
 #include "ElementRuleCollector.h"
@@ -235,7 +236,7 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         if (visibleToHitTesting()) {
 #endif
             auto borderRect = LayoutRect(adjustedPaintOffset, size());
-            auto borderRoundedRect = style().getRoundedBorderFor(borderRect);
+            auto borderRoundedRect = BorderShapeUtilities::getRoundedBorder(style(), borderRect);
             paintInfo.eventRegionContext()->unite(FloatRoundedRect(borderRoundedRect), *this, style());
         }
         return;

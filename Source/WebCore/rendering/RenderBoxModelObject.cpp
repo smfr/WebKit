@@ -871,7 +871,7 @@ RoundedRect RenderBoxModelObject::roundedContentBoxRect(const LayoutRect& border
 {
     auto borderWidths = this->borderWidths();
     auto padding = this->padding();
-    return style().getRoundedInnerBorderFor(borderBoxRect,
+    return BorderShapeUtilities::getRoundedInnerBorder(style(), borderBoxRect,
         borderWidths.top() + padding.top(), borderWidths.bottom() + padding.bottom(),
         borderWidths.left() + padding.left(), borderWidths.right() + padding.right(),
         includeLeftEdge, includeRightEdge);

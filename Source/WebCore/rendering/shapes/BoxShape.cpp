@@ -30,6 +30,7 @@
 #include "config.h"
 #include "BoxShape.h"
 
+#include "BorderShapeUtilities.h"
 #include "RenderBoxInlines.h"
 #include <wtf/MathExtras.h>
 
@@ -71,12 +72,12 @@ RoundedRect computeRoundedRectForBoxShape(CSSBoxType box, const RenderBox& rende
             return RoundedRect(renderer.marginBoxRect(), RoundedRect::Radii());
 
         LayoutRect marginBox = renderer.marginBoxRect();
-        RoundedRect::Radii radii = computeMarginBoxShapeRadii(style.getRoundedBorderFor(renderer.borderBoxRect()).radii(), renderer);
+        RoundedRect::Radii radii = computeMarginBoxShapeRadii(BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect()).radii(), renderer);
         radii.scale(calcBorderRadiiConstraintScaleFor(marginBox, radii));
         return RoundedRect(marginBox, radii);
     }
     case CSSBoxType::PaddingBox:
-        return style.getRoundedInnerBorderFor(renderer.borderBoxRect());
+        return BorderShapeUtilities::getRoundedInnerBorder(style, renderer.borderBoxRect());
     // fill-box compute to content-box for HTML elements.
     case CSSBoxType::FillBox:
     case CSSBoxType::ContentBox:
@@ -86,11 +87,11 @@ RoundedRect computeRoundedRectForBoxShape(CSSBoxType box, const RenderBox& rende
     case CSSBoxType::StrokeBox:
     case CSSBoxType::ViewBox:
     case CSSBoxType::BoxMissing:
-        return style.getRoundedBorderFor(renderer.borderBoxRect());
+        return BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect());
     }
 
     ASSERT_NOT_REACHED();
-    return style.getRoundedBorderFor(renderer.borderBoxRect());
+    return BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect());
 }
 
 LayoutRect BoxShape::shapeMarginLogicalBoundingBox() const

@@ -26,6 +26,7 @@
 #include "config.h"
 #include "MotionPath.h"
 
+#include "BorderShapeUtilities.h"
 #include "GeometryUtilities.h"
 #include "PathOperation.h"
 #include "PathTraversalState.h"
@@ -46,7 +47,7 @@ static FloatRoundedRect containingBlockRectForRenderer(const RenderObject& rende
 {
     auto referenceRect = snapRectToDevicePixelsIfNeeded(container.referenceBoxRect(operation.referenceBox()), downcast<RenderLayerModelObject>(renderer));
     if (is<BoxPathOperation>(operation))
-        return FloatRoundedRect(container.style().getRoundedBorderFor(LayoutRect(referenceRect)));
+        return FloatRoundedRect(BorderShapeUtilities::getRoundedBorder(container.style(), LayoutRect(referenceRect)));
     return FloatRoundedRect(referenceRect);
 }
 

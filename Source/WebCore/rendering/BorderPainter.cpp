@@ -28,6 +28,7 @@
 
 #include "BorderData.h"
 #include "BorderEdge.h"
+#include "BorderShapeUtilities.h"
 #include "CachedImage.h"
 #include "FloatRoundedRect.h"
 #include "GeometryUtilities.h"
@@ -178,8 +179,8 @@ std::optional<Path> BorderPainter::pathForBorderArea(const LayoutRect& rect, con
     if (!decorationHasAllSimpleEdges(edges))
         return std::nullopt;
 
-    auto outerBorder = style.getRoundedBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge);
-    auto innerBorder = style.getRoundedInnerBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto outerBorder = BorderShapeUtilities::getRoundedBorder(style, rect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto innerBorder = BorderShapeUtilities::getRoundedInnerBorder(style, rect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
     Path path;
     auto pixelSnappedOuterBorder = outerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
@@ -279,9 +280,9 @@ void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style
     if (paintNinePieceImage(rect, style, style.borderImage()))
         return;
 
-    RoundedRect outerBorder = style.getRoundedBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge);
-    RoundedRect innerBorder = style.getRoundedInnerBorderFor(borderInnerRectAdjustedForBleedAvoidance(rect, bleedAvoidance), includeLogicalLeftEdge, includeLogicalRightEdge);
-    RoundedRect unadjustedInnerBorder = (bleedAvoidance == BackgroundBleedBackgroundOverBorder) ? style.getRoundedInnerBorderFor(rect, includeLogicalLeftEdge, includeLogicalRightEdge) : innerBorder;
+    auto outerBorder = BorderShapeUtilities::getRoundedBorder(style, rect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto innerBorder = BorderShapeUtilities::getRoundedInnerBorder(style, borderInnerRectAdjustedForBleedAvoidance(rect, bleedAvoidance), includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto unadjustedInnerBorder = (bleedAvoidance == BackgroundBleedBackgroundOverBorder) ? BorderShapeUtilities::getRoundedInnerBorder(style, rect, includeLogicalLeftEdge, includeLogicalRightEdge) : innerBorder;
     auto edges = borderEdges(style, document().deviceScaleFactor(), m_paintInfo.paintBehavior.contains(PaintBehavior::ForceBlackBorder), includeLogicalLeftEdge, includeLogicalRightEdge);
     bool haveAllSolidEdges = decorationHasAllSolidEdges(edges);
 
@@ -355,7 +356,7 @@ void BorderPainter::paintOutline(const LayoutRect& paintRect) const
                 adjustedRadius(styleToUse.borderBottomRightRadius(), borderOffset)
             };
         }
-        return RenderStyle::getRoundedInnerBorderFor(borderRect, { }, { }, { }, { }, borderRadii, isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
+        return BorderShapeUtilities::getRoundedInnerBorder(borderRect, { }, { }, { }, { }, borderRadii, isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
     };
     auto innerRectForOutline = paintRect;
     innerRectForOutline.inflate(outlineOffset);
@@ -567,11 +568,11 @@ void BorderPainter::paintSides(const Sides& sides) const
     if (clipToOuterBorder) {
         // Clip to the inner and outer radii rects.
         if (sides.bleedAvoidance != BackgroundBleedUseTransparencyLayer)
-            graphicsContext.clipRoundedRect(sides.outerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
+            BorderShapeUtilities::clipRoundedRect(graphicsContext, sides.outerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
         // isRenderable() check avoids issue described in https://bugs.webkit.org/show_bug.cgi?id=38787
         // The inside will be clipped out later (in clipBorderSideForComplexInnerPath)
         if (sides.innerBorder.isRenderable())
-            graphicsContext.clipOutRoundedRect(sides.innerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
+            BorderShapeUtilities::clipOutRoundedRect(graphicsContext, sides.innerBorder.pixelSnappedRoundedRectForPainting(deviceScaleFactor));
     }
 
     // If only one edge visible antialiasing doesn't create seams
@@ -936,7 +937,7 @@ void BorderPainter::paintOneBorderSide(const RoundedRect& outerBorder, const Rou
 
         if (!innerBorder.isRenderable())  {
             auto adjustedInnerBorder = FloatRoundedRect(calculateAdjustedInnerBorder(innerBorder, side));
-            graphicsContext.clipOutRoundedRect(adjustedInnerBorder);
+            BorderShapeUtilities::clipOutRoundedRect(graphicsContext, adjustedInnerBorder);
         }
 
         float thickness = std::max(std::max(edgeToRender.widthForPainting(), adjacentEdge1.widthForPainting()), adjacentEdge2.widthForPainting());
@@ -1037,12 +1038,13 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
         // Draw inner border line
         {
             GraphicsContextStateSaver stateSaver(graphicsContext);
-            auto innerClip = RenderStyle::getRoundedInnerBorderFor(borderRect,
+            auto innerClip = BorderShapeUtilities::getRoundedInnerBorder(borderRect,
                 innerBorderTopWidth, innerBorderBottomWidth, innerBorderLeftWidth, innerBorderRightWidth,
                 radii, isHorizontal,
                 includeLogicalLeftEdge, includeLogicalRightEdge);
 
-            graphicsContext.clipRoundedRect(FloatRoundedRect(innerClip));
+            // FIXME: Need pixel snapping here.
+            BorderShapeUtilities::clipRoundedRect(graphicsContext, FloatRoundedRect(innerClip));
             drawBoxSideFromPath(borderRect, borderPath, edges, radii, thickness, drawThickness, side, color, BorderStyle::Solid, bleedAvoidance, includeLogicalLeftEdge, includeLogicalRightEdge, isHorizontal);
         }
 
@@ -1058,11 +1060,12 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
                 ++outerBorderRightWidth;
             }
 
-            auto outerClip = RenderStyle::getRoundedInnerBorderFor(outerRect,
+            auto outerClip = BorderShapeUtilities::getRoundedInnerBorder(outerRect,
                 outerBorderTopWidth, outerBorderBottomWidth, outerBorderLeftWidth, outerBorderRightWidth,
                 radii, isHorizontal,
                 includeLogicalLeftEdge, includeLogicalRightEdge);
-            graphicsContext.clipOutRoundedRect(FloatRoundedRect(outerClip));
+
+            BorderShapeUtilities::clipOutRoundedRect(graphicsContext, FloatRoundedRect(outerClip));
             drawBoxSideFromPath(borderRect, borderPath, edges, radii,  thickness, drawThickness, side, color, BorderStyle::Solid, bleedAvoidance, includeLogicalLeftEdge, includeLogicalRightEdge, isHorizontal);
         }
         return;
@@ -1090,12 +1093,13 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
         LayoutUnit leftWidth { edges.left().widthForPainting() / 2 };
         LayoutUnit rightWidth { edges.right().widthForPainting() / 2 };
 
-        auto clipRect = RenderStyle::getRoundedInnerBorderFor(borderRect,
+        auto clipRect = BorderShapeUtilities::getRoundedInnerBorder(borderRect,
             topWidth, bottomWidth, leftWidth, rightWidth,
             radii, isHorizontal,
             includeLogicalLeftEdge, includeLogicalRightEdge);
 
-        graphicsContext.clipRoundedRect(FloatRoundedRect(clipRect));
+        // FIXME: Need pixel snapping here.
+        BorderShapeUtilities::clipRoundedRect(graphicsContext, FloatRoundedRect(clipRect));
         drawBoxSideFromPath(borderRect, borderPath, edges, radii,  thickness, drawThickness, side, color, s2, bleedAvoidance, includeLogicalLeftEdge, includeLogicalRightEdge, isHorizontal);
         return;
     }

@@ -25,6 +25,7 @@
 #include "RenderBlock.h"
 
 #include "AXObjectCache.h"
+#include "BorderShapeUtilities.h"
 #include "DocumentInlines.h"
 #include "Editor.h"
 #include "Element.h"
@@ -1168,7 +1169,7 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
         auto borderRect = LayoutRect(paintOffset, size());
 
         if (paintInfo.paintBehavior.contains(PaintBehavior::EventRegionIncludeBackground) && visibleToHitTesting()) {
-            auto borderRoundedRect = style().getRoundedBorderFor(borderRect);
+            auto borderRoundedRect = BorderShapeUtilities::getRoundedBorder(style(), borderRect);
             LOG_WITH_STREAM(EventRegions, stream << "RenderBlock " << *this << " uniting region " << borderRoundedRect << " event listener types " << style().eventListenerRegionTypes());
             paintInfo.eventRegionContext()->unite(FloatRoundedRect(borderRoundedRect), *this, style(), isRenderTextControl() && downcast<RenderTextControl>(*this).textFormControlElement().isInnerTextElementEditable());
         }
