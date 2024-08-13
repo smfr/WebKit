@@ -271,6 +271,32 @@ void Path::addRoundedRect(const RoundedRect& rect)
     addRoundedRect(FloatRoundedRect(rect));
 }
 
+void Path::addBeveledRect(const FloatRoundedRect& roundedRect)
+{
+    if (roundedRect.isEmpty())
+        return;
+
+    ensureImpl().addLinesForBeveledRect(roundedRect);
+}
+
+void Path::addBeveledRect(const RoundedRect& roundedRect)
+{
+    addBeveledRect(FloatRoundedRect(roundedRect));
+}
+
+void Path::addScoopedRect(const FloatRoundedRect& roundedRect)
+{
+    if (roundedRect.isEmpty())
+        return;
+
+    ensureImpl().addBeziersForScoopedRect(roundedRect);
+}
+
+void Path::addScoopedRect(const RoundedRect& roundedRect)
+{
+    addScoopedRect(FloatRoundedRect(roundedRect));
+}
+
 void Path::closeSubpath()
 {
     if (isEmpty() || isClosed())

@@ -39,28 +39,156 @@
 
 namespace WebCore {
 
-void BorderShapeUtilities::clipRoundedRect(GraphicsContext& context, const FloatRoundedRect& clipRect)
+void BorderShapeUtilities::clipRoundedRect(GraphicsContext& context, const FloatRoundedRect& clipRect, CornerShape shape)
 {
-    context.clipRoundedRect(clipRect);
+    switch (shape) {
+    case CornerShape::Round:
+        context.clipRoundedRect(clipRect);
+        break;
+
+    case CornerShape::Bevel: {
+        if (!clipRect.isRounded()) {
+            context.clip(clipRect.rect());
+            return;
+        }
+
+        Path path;
+        path.addBeveledRect(clipRect);
+        context.clipPath(path);
+        break;
+    }
+    case CornerShape::Scoop: {
+        if (!clipRect.isRounded()) {
+            context.clip(clipRect.rect());
+            return;
+        }
+
+        Path path;
+        path.addScoopedRect(clipRect);
+        context.clipPath(path);
+        break;
+    }
+    }
 }
 
-void BorderShapeUtilities::clipOutRoundedRect(GraphicsContext& context, const FloatRoundedRect& clipRect)
+void BorderShapeUtilities::clipOutRoundedRect(GraphicsContext& context, const FloatRoundedRect& clipRect, CornerShape shape)
 {
-    context.clipOutRoundedRect(clipRect);
+    switch (shape) {
+    case CornerShape::Round:
+        context.clipOutRoundedRect(clipRect);
+        break;
+
+    case CornerShape::Bevel: {
+        if (!clipRect.isRounded()) {
+            context.clipOut(clipRect.rect());
+            return;
+        }
+
+        Path path;
+        path.addBeveledRect(clipRect);
+        context.clipOut(path);
+        break;
+    }
+    case CornerShape::Scoop: {
+        if (!clipRect.isRounded()) {
+            context.clipOut(clipRect.rect());
+            return;
+        }
+
+        Path path;
+        path.addScoopedRect(clipRect);
+        context.clipOut(path);
+        break;
+    }
+    }
 }
+
+void BorderShapeUtilities::fillBorderShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, const Color& color, CornerShape shape)
+{
+    switch (shape) {
+    case CornerShape::Round:
+        context.fillRoundedRect(roundedRect, color);
+        break;
+    case CornerShape::Bevel: {
+        GraphicsContextStateSaver bevelPathStateSaver(context);
+        context.setFillColor(color);
+        Path borderPath;
+        borderPath.addBeveledRect(roundedRect);
+        context.fillPath(borderPath);
+        break;
+    }
+    case CornerShape::Scoop: {
+        GraphicsContextStateSaver bevelPathStateSaver(context);
+        context.setFillColor(color);
+        Path borderPath;
+        borderPath.addScoopedRect(roundedRect);
+        context.fillPath(borderPath);
+        break;
+    }
+    }
+}
+
+void BorderShapeUtilities::fillBorderHoleShape(GraphicsContext& context, const FloatRect& rect, const FloatRoundedRect& roundedHoleRect, const Color& color, CornerShape shape)
+{
+    switch (shape) {
+    case CornerShape::Round:
+        context.fillRectWithRoundedHole(rect, roundedHoleRect, color);
+        break;
+    case CornerShape::Bevel: {
+        GraphicsContextStateSaver bevelPathStateSaver(context);
+        context.setFillColor(color);
+
+        auto oldFillRule = context.fillRule();
+        auto oldFillColor = context.fillColor();
+
+        context.setFillRule(WindRule::EvenOdd);
+        context.setFillColor(color);
+
+        Path path;
+        path.addRect(rect);
+        path.addBeveledRect(roundedHoleRect);
+        context.fillPath(path);
+
+        context.setFillRule(oldFillRule);
+        context.setFillColor(oldFillColor);
+        break;
+    }
+    case CornerShape::Scoop: {
+        GraphicsContextStateSaver bevelPathStateSaver(context);
+        context.setFillColor(color);
+
+        auto oldFillRule = context.fillRule();
+        auto oldFillColor = context.fillColor();
+
+        context.setFillRule(WindRule::EvenOdd);
+        context.setFillColor(color);
+
+        Path path;
+        path.addRect(rect);
+        path.addScoopedRect(roundedHoleRect);
+        context.fillPath(path);
+
+        context.setFillRule(oldFillRule);
+        context.setFillColor(oldFillColor);
+        break;
+    }
+    }
+}
+
+// MARK: -
 
 void BorderShapeUtilities::clipToBorderArea(GraphicsContext& context, const RenderStyle& style, const LayoutRect& borderBoxRect, float deviceScaleFactor)
 {
-    auto roundedBorderBox = BorderShapeUtilities::getRoundedBorder(style, borderBoxRect);
+    auto roundedBorderBox = getRoundedBorder(style, borderBoxRect);
     auto pixelSnappedRoundedBorderBox = roundedBorderBox.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    context.clipRoundedRect(pixelSnappedRoundedBorderBox);
+    clipRoundedRect(context, pixelSnappedRoundedBorderBox, style.cornerShape());
 }
 
 void BorderShapeUtilities::clipToPaddingArea(GraphicsContext& context, const RenderStyle& style, const LayoutRect& borderBoxRect, float deviceScaleFactor)
 {
-    auto roundedPaddingBox = BorderShapeUtilities::getRoundedInnerBorder(style, borderBoxRect);
+    auto roundedPaddingBox = getRoundedInnerBorder(style, borderBoxRect);
     auto pixelSnappedRoundedPaddingBox = roundedPaddingBox.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    context.clipRoundedRect(pixelSnappedRoundedPaddingBox);
+    clipRoundedRect(context, pixelSnappedRoundedPaddingBox, style.cornerShape());
 }
 
 // MARK: -
@@ -116,7 +244,7 @@ RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const LayoutRect& border
     };
     if (radii) {
         auto adjustedRadii = calcRadiiFor(*radii, borderRect.size());
-        adjustedRadii.scale(calcBorderRadiiConstraintScaleFor(borderRect, adjustedRadii));
+        adjustedRadii.scale(calcBorderRadiiConstraintScaleFor(borderRect, adjustedRadii)); // FIXME: for shapes
         adjustedRadii.shrink(topWidth, bottomWidth, leftWidth, rightWidth);
         roundedRect.includeLogicalEdges(adjustedRadii, isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
     }

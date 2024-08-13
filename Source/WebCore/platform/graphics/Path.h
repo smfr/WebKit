@@ -70,6 +70,12 @@ public:
     void addRoundedRect(const FloatRect&, const FloatSize& roundingRadii, PathRoundedRect::Strategy = PathRoundedRect::Strategy::PreferNative);
     void addRoundedRect(const RoundedRect&);
 
+    void addBeveledRect(const RoundedRect&);
+    void addBeveledRect(const FloatRoundedRect&);
+
+    void addScoopedRect(const RoundedRect&);
+    void addScoopedRect(const FloatRoundedRect&);
+
     WEBCORE_EXPORT void closeSubpath();
 
     void addPath(const Path&, const AffineTransform&);

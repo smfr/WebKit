@@ -37,6 +37,80 @@ void PathImpl::addLinesForRect(const FloatRect& rect)
     add(PathCloseSubpath { });
 }
 
+void PathImpl::addLinesForBeveledRect(const FloatRoundedRect& roundedRect)
+{
+    const auto& radii = roundedRect.radii();
+    const auto& rect = roundedRect.rect();
+
+    const auto& topLeftRadius = radii.topLeft();
+    const auto& topRightRadius = radii.topRight();
+    const auto& bottomLeftRadius = radii.bottomLeft();
+    const auto& bottomRightRadius = radii.bottomRight();
+
+    add(PathMoveTo { FloatPoint(rect.x() + topLeftRadius.width(), rect.y()) });
+
+    add(PathLineTo { FloatPoint(rect.maxX() - topRightRadius.width(), rect.y()) });
+    if (topRightRadius.width() > 0 || topRightRadius.height() > 0)
+        add(PathLineTo { FloatPoint(rect.maxX(), rect.y() + topRightRadius.height()) });
+
+    add(PathLineTo { FloatPoint(rect.maxX(), rect.maxY() - bottomRightRadius.height()) });
+    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0)
+        add(PathLineTo { FloatPoint(rect.maxX() - bottomRightRadius.width(), rect.maxY()) });
+
+    add(PathLineTo { FloatPoint(rect.x() + bottomLeftRadius.width(), rect.maxY()) });
+    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0)
+        add(PathLineTo { FloatPoint(rect.x(), rect.maxY() - bottomLeftRadius.height()) });
+
+    add(PathLineTo { FloatPoint(rect.x(), rect.y() + topLeftRadius.height()) });
+    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0)
+        add(PathLineTo { FloatPoint(rect.x() + topLeftRadius.width(), rect.y()) });
+
+    add(PathCloseSubpath { });
+}
+
+void PathImpl::addBeziersForScoopedRect(const FloatRoundedRect& roundedRect)
+{
+    const auto& radii = roundedRect.radii();
+    const auto& rect = roundedRect.rect();
+
+    const auto& topLeftRadius = radii.topLeft();
+    const auto& topRightRadius = radii.topRight();
+    const auto& bottomLeftRadius = radii.bottomLeft();
+    const auto& bottomRightRadius = radii.bottomRight();
+
+    add(PathMoveTo { FloatPoint(rect.x() + topLeftRadius.width(), rect.y()) });
+
+    add(PathLineTo { FloatPoint(rect.maxX() - topRightRadius.width(), rect.y()) });
+    if (topRightRadius.width() > 0 || topRightRadius.height() > 0) {
+        add(PathBezierCurveTo { FloatPoint(rect.maxX() - topRightRadius.width(), rect.y() + topRightRadius.height() * circleControlPoint()),
+            FloatPoint(rect.maxX() - topRightRadius.width() * circleControlPoint(), rect.y() + topRightRadius.height()),
+            FloatPoint(rect.maxX(), rect.y() + topRightRadius.height()) });
+    }
+
+    add(PathLineTo { FloatPoint(rect.maxX(), rect.maxY() - bottomRightRadius.height()) });
+    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0) {
+        add(PathBezierCurveTo { FloatPoint(rect.maxX() - bottomRightRadius.width() * circleControlPoint(), rect.maxY() - bottomRightRadius.height()),
+            FloatPoint(rect.maxX() - bottomRightRadius.width(), rect.maxY() - bottomRightRadius.height() * circleControlPoint()),
+            FloatPoint(rect.maxX() - bottomRightRadius.width(), rect.maxY()) });
+    }
+
+    add(PathLineTo { FloatPoint(rect.x() + bottomLeftRadius.width(), rect.maxY()) });
+    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0) {
+        add(PathBezierCurveTo { FloatPoint(rect.x() + bottomLeftRadius.width(), rect.maxY() - bottomLeftRadius.height() * circleControlPoint()),
+            FloatPoint(rect.x() + bottomLeftRadius.width() * circleControlPoint(), rect.maxY() - bottomLeftRadius.height()),
+            FloatPoint(rect.x(), rect.maxY() - bottomLeftRadius.height()) });
+    }
+
+    add(PathLineTo { FloatPoint(rect.x(), rect.y() + topLeftRadius.height()) });
+    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0) {
+        add(PathBezierCurveTo { FloatPoint(rect.x() + topLeftRadius.width() * circleControlPoint(), rect.y() + topLeftRadius.height()),
+            FloatPoint(rect.x() + topLeftRadius.width(), rect.y() + topLeftRadius.height() * circleControlPoint()),
+            FloatPoint(rect.x() + topLeftRadius.width(), rect.y()) });
+    }
+
+    add(PathCloseSubpath { });
+}
+
 void PathImpl::addBeziersForRoundedRect(const FloatRoundedRect& roundedRect)
 {
     const auto& radii = roundedRect.radii();

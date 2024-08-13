@@ -2879,10 +2879,10 @@ void RenderLayer::clipToRect(GraphicsContext& context, GraphicsContextStateSaver
                 LayoutRect adjustedClipRect = LayoutRect(toLayoutPoint(layer->offsetFromAncestor(paintingInfo.rootLayer, AdjustForColumns)), layer->size());
                 adjustedClipRect.move(paintingInfo.subpixelOffset);
                 auto paddingAreaRect = BorderShapeUtilities::getRoundedInnerBorder(layer->renderer().style(), adjustedClipRect).pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-                if (paddingAreaRect.intersectionIsRectangular(paintingInfo.paintDirtyRect))
+                if (paddingAreaRect.intersectionIsRectangular(paintingInfo.paintDirtyRect)) // FIXME: Correct for bevel and scoop?
                     context.clip(snapRectToDevicePixels(intersection(paintingInfo.paintDirtyRect, adjustedClipRect), deviceScaleFactor));
                 else
-                    BorderShapeUtilities::clipRoundedRect(context, paddingAreaRect);
+                    BorderShapeUtilities::clipRoundedRect(context, paddingAreaRect, layer->renderer().style().cornerShape());
             }
             
             if (layer == paintingInfo.rootLayer)

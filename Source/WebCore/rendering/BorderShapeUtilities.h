@@ -47,19 +47,14 @@ enum class CornerShape : uint8_t;
 
 class BorderShapeUtilities {
 public:
+    static void clipRoundedRect(GraphicsContext&, const FloatRoundedRect&, CornerShape);
+    static void clipOutRoundedRect(GraphicsContext&, const FloatRoundedRect&, CornerShape);
+
+    static void fillBorderShape(GraphicsContext&, const FloatRoundedRect&, const Color&, CornerShape);
+    static void fillBorderHoleShape(GraphicsContext&, const FloatRect&, const FloatRoundedRect&, const Color&, CornerShape);
 
     static void clipToBorderArea(GraphicsContext&, const RenderStyle&, const LayoutRect& borderBoxRect, float deviceScaleFactor);
     static void clipToPaddingArea(GraphicsContext&, const RenderStyle&, const LayoutRect& borderBoxRect, float deviceScaleFactor);
-
-
-
-    static void clipRoundedRect(GraphicsContext&, const FloatRoundedRect&);
-    static void clipOutRoundedRect(GraphicsContext&, const FloatRoundedRect&);
-
-    static void fillBorderShape(GraphicsContext&, const FloatRoundedRect&, const Color&);
-    static void fillBorderHoleShape(GraphicsContext&, const FloatRect&, const FloatRoundedRect&, const Color&);
-
-
 
     static RoundedRect getRoundedBorder(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
     static RoundedRect getRoundedInnerBorder(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
