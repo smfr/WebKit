@@ -62,14 +62,9 @@ public:
     static RoundedRect getRoundedInnerBorder(const RenderStyle&, const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth, LayoutUnit rightWidth,
         bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
     static RoundedRect getRoundedInnerBorder(const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth, LayoutUnit rightWidth,
-        const std::optional<BorderData::Radii>&, bool isHorizontal, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+        const std::optional<BorderData::Radii>&, CornerShape, bool isHorizontal, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 
-
-    // Make renderable helpers
-
-
-    // Inner border computation
-
+private:
 
 };
 

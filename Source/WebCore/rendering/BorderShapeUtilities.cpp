@@ -228,11 +228,11 @@ RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const RenderStyle& style
     bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
 {
     auto radii = style.hasBorderRadius() ? std::make_optional(style.borderRadii()) : std::nullopt;
-    return getRoundedInnerBorder(borderRect, topWidth, bottomWidth, leftWidth, rightWidth, radii, style.isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
+    return getRoundedInnerBorder(borderRect, topWidth, bottomWidth, leftWidth, rightWidth, radii, style.cornerShape(), style.isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
 }
 
 RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth, LayoutUnit rightWidth,
-    const std::optional<BorderData::Radii>& radii, bool isHorizontal, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
+    const std::optional<BorderData::Radii>& radii, CornerShape, bool isHorizontal, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
 {
     auto width = std::max(0_lu, borderRect.width() - leftWidth - rightWidth);
     auto height = std::max(0_lu, borderRect.height() - topWidth - bottomWidth);
@@ -244,12 +244,14 @@ RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const LayoutRect& border
     };
     if (radii) {
         auto adjustedRadii = calcRadiiFor(*radii, borderRect.size());
-        adjustedRadii.scale(calcBorderRadiiConstraintScaleFor(borderRect, adjustedRadii)); // FIXME: for shapes
+        adjustedRadii.scale(calcBorderRadiiConstraintScaleFor(borderRect, adjustedRadii));
         adjustedRadii.shrink(topWidth, bottomWidth, leftWidth, rightWidth);
         roundedRect.includeLogicalEdges(adjustedRadii, isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
     }
+
     if (!roundedRect.isRenderable())
         roundedRect.adjustRadii();
+
     return roundedRect;
 }
 

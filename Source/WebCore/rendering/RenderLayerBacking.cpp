@@ -30,6 +30,7 @@
 #include "BackgroundPainter.h"
 #include "BitmapImage.h"
 #include "BlendingKeyframes.h"
+#include "BorderShapeUtilities.h"
 #include "CSSPropertyNames.h"
 #include "CachedImage.h"
 #include "CanvasRenderingContext2DBase.h"

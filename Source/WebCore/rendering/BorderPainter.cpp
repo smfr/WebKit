@@ -371,7 +371,7 @@ void BorderPainter::paintOutline(const LayoutRect& paintRect) const
                 adjustedRadius(styleToUse.borderBottomRightRadius(), borderOffset)
             };
         }
-        return BorderShapeUtilities::getRoundedInnerBorder(borderRect, { }, { }, { }, { }, borderRadii, isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
+        return BorderShapeUtilities::getRoundedInnerBorder(borderRect, { }, { }, { }, { }, borderRadii, styleToUse.cornerShape(), isHorizontal, includeLogicalLeftEdge, includeLogicalRightEdge);
     };
     auto innerRectForOutline = paintRect;
     innerRectForOutline.inflate(outlineOffset);
@@ -977,6 +977,7 @@ void BorderPainter::paintOneBorderSide(const RoundedRect& outerBorder, const Rou
     }
 }
 
+// FIXME: Make static
 void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path& borderPath, const BorderEdges& edges,
     std::optional<BorderData::Radii> radii, float thickness, float drawThickness, BoxSide side, Color color, BorderStyle borderStyle, BackgroundBleedAvoidance bleedAvoidance,
     bool includeLogicalLeftEdge, bool includeLogicalRightEdge, bool isHorizontal) const
@@ -1055,7 +1056,7 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
             GraphicsContextStateSaver stateSaver(graphicsContext);
             auto innerClip = BorderShapeUtilities::getRoundedInnerBorder(borderRect,
                 innerBorderTopWidth, innerBorderBottomWidth, innerBorderLeftWidth, innerBorderRightWidth,
-                radii, isHorizontal,
+                radii, m_renderer.style().cornerShape(), isHorizontal,
                 includeLogicalLeftEdge, includeLogicalRightEdge);
 
             // FIXME: Need pixel snapping here.
@@ -1077,7 +1078,7 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
 
             auto outerClip = BorderShapeUtilities::getRoundedInnerBorder(outerRect,
                 outerBorderTopWidth, outerBorderBottomWidth, outerBorderLeftWidth, outerBorderRightWidth,
-                radii, isHorizontal,
+                radii, m_renderer.style().cornerShape(), isHorizontal,
                 includeLogicalLeftEdge, includeLogicalRightEdge);
 
             BorderShapeUtilities::clipOutRoundedRect(graphicsContext, FloatRoundedRect(outerClip), m_renderer.style().cornerShape());
@@ -1110,7 +1111,7 @@ void BorderPainter::drawBoxSideFromPath(const LayoutRect& borderRect, const Path
 
         auto clipRect = BorderShapeUtilities::getRoundedInnerBorder(borderRect,
             topWidth, bottomWidth, leftWidth, rightWidth,
-            radii, isHorizontal,
+            radii, m_renderer.style().cornerShape(), isHorizontal,
             includeLogicalLeftEdge, includeLogicalRightEdge);
 
         // FIXME: Need pixel snapping here.
