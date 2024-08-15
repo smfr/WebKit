@@ -30,6 +30,7 @@
 #include "config.h"
 #include "BorderShapeUtilities.h"
 
+#include "BorderShape.h"
 #include "FloatRoundedRect.h"
 #include "GraphicsContext.h"
 #include "LayoutRect.h"
@@ -203,17 +204,47 @@ static RoundedRect::Radii calcRadiiFor(const BorderData::Radii& radii, const Lay
     };
 }
 
-RoundedRect BorderShapeUtilities::getRoundedBorder(const RenderStyle& style, const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
+RoundedRect BorderShapeUtilities::getBorderShape(const RenderStyle& style, const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
 {
     RoundedRect roundedRect(borderRect);
+
+    // top, right, bottom, left.
+    auto borderWidths = RectEdges<LayoutUnit> {
+        { (horizontal || includeLogicalLeftEdge) ? style.borderTopWidth() : 0lu },
+        { (!horizontal || includeLogicalRightEdge) ? style.borderRightWidth() : 0lu },
+        { (horizontal || includeLogicalRightEdge) ? style.borderBottomWidth() : 0lu },
+        { (!horizontal || includeLogicalLeftEdge) ? style.borderLeftWidth() : 0lu },
+    };
+
     if (style.hasBorderRadius()) {
-        RoundedRect::Radii radii = calcRadiiFor(style.borderRadii(), borderRect.size());
+        auto radii = calcRadiiFor(style.borderRadii(), borderRect.size());
         radii.scale(calcBorderRadiiConstraintScaleFor(borderRect, radii));
-        roundedRect.includeLogicalEdges(radii, style.isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
+
+        if (!includeLogicalLeftEdge) {
+            radii.setTopLeft({ });
+
+            if (isHorizontal)
+                radii.setBottomLeft({ });
+            else
+                radii.setTopRight({ });
+        }
+
+        if (!includeLogicalRightEdge) {
+            radii.setBottomRight({ });
+
+            if (isHorizontal)
+                radii.setTopRight({ });
+            else
+                radii.setBottomLeft({ });
+        }
+
+        return BorderShape { borderRect, borderWidths, radii, style.cornerShape() };
     }
-    return roundedRect;
+
+    return BorderShape { borderRect, borderWidths };
 }
 
+/*
 RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const RenderStyle& style, const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
 {
     bool horizontal = style.isHorizontalWritingMode();
@@ -254,5 +285,6 @@ RoundedRect BorderShapeUtilities::getRoundedInnerBorder(const LayoutRect& border
 
     return roundedRect;
 }
+*/
 
 } // namespace WebCore

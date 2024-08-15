@@ -33,6 +33,7 @@
 
 namespace WebCore {
 
+class BorderShape;
 class Color;
 class GraphicsContext;
 class FloatRect;
@@ -45,6 +46,7 @@ class LayoutUnit;
 struct BorderDataRadii;
 enum class CornerShape : uint8_t;
 
+// FIXME: Maybe all this moves to BorderShape
 class BorderShapeUtilities {
 public:
     static void clipRoundedRect(GraphicsContext&, const FloatRoundedRect&, CornerShape);
@@ -56,13 +58,7 @@ public:
     static void clipToBorderArea(GraphicsContext&, const RenderStyle&, const LayoutRect& borderBoxRect, float deviceScaleFactor);
     static void clipToPaddingArea(GraphicsContext&, const RenderStyle&, const LayoutRect& borderBoxRect, float deviceScaleFactor);
 
-    static RoundedRect getRoundedBorder(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
-    static RoundedRect getRoundedInnerBorder(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
-
-    static RoundedRect getRoundedInnerBorder(const RenderStyle&, const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth, LayoutUnit rightWidth,
-        bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
-    static RoundedRect getRoundedInnerBorder(const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth, LayoutUnit leftWidth, LayoutUnit rightWidth,
-        const std::optional<BorderData::Radii>&, CornerShape, bool isHorizontal, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+    static BorderShape getBorderShape(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 
 private:
 

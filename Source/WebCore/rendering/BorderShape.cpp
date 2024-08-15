@@ -30,28 +30,75 @@
 #include "config.h"
 #include "BorderShape.h"
 
+#include "BorderData.h"
 #include "FloatRoundedRect.h"
 #include "GraphicsContext.h"
 #include "LayoutRect.h"
 #include "Path.h"
-#include "RenderStyleConstants.h"
+#include "RenderStyle.h"
 #include "RoundedRect.h"
 
 namespace WebCore {
 
+static RoundedRect::Radii calcRadiiFor(const BorderData::Radii& radii, const LayoutSize& size)
+{
+    return {
+        sizeForLengthSize(radii.topLeft, size),
+        sizeForLengthSize(radii.topRight, size),
+        sizeForLengthSize(radii.bottomLeft, size),
+        sizeForLengthSize(radii.bottomRight, size)
+    };
+}
+
+BorderShape BorderShape::shapeForBorderRect(const RenderStyle& style, const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
+{
+    // top, right, bottom, left.
+    bool horizontal = style.isHorizontalWritingMode();
+
+    auto borderWidths = RectEdges<LayoutUnit> {
+        { (horizontal || includeLogicalLeftEdge) ? style.borderTopWidth() : 0lu },
+        { (!horizontal || includeLogicalRightEdge) ? style.borderRightWidth() : 0lu },
+        { (horizontal || includeLogicalRightEdge) ? style.borderBottomWidth() : 0lu },
+        { (!horizontal || includeLogicalLeftEdge) ? style.borderLeftWidth() : 0lu },
+    };
+
+    if (style.hasBorderRadius()) {
+        auto radii = calcRadiiFor(style.borderRadii(), borderRect.size());
+        radii.scale(calcBorderRadiiConstraintScaleFor(borderRect, radii));
+
+        if (!includeLogicalLeftEdge) {
+            radii.setTopLeft({ });
+
+            if (isHorizontal)
+                radii.setBottomLeft({ });
+            else
+                radii.setTopRight({ });
+        }
+
+        if (!includeLogicalRightEdge) {
+            radii.setBottomRight({ });
+
+            if (isHorizontal)
+                radii.setTopRight({ });
+            else
+                radii.setBottomLeft({ });
+        }
+
+        return BorderShape { borderRect, borderWidths, radii, style.cornerShape() };
+    }
+
+    return BorderShape { borderRect, borderWidths };
+}
+
 BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, bool includeLeftEdge, bool includeRightEdge)
     : m_borderRect(borderRect)
     , m_borderWidths(borderWidths)
-    , m_includeLeftEdge(includeLeftEdge)
-    , m_includeRightEdge(includeRightEdge)
 {
 }
 
 BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, CornerShape cornerShape, bool includeLeftEdge, bool includeRightEdge)
     : m_borderRect(borderRect, radii)
     , m_borderWidths(borderWidths)
-    , m_includeLeftEdge(includeLeftEdge)
-    , m_includeRightEdge(includeRightEdge)
     , m_cornerShape(cornerShape)
 {
     // The caller should have adjusted the radii already.
@@ -124,7 +171,6 @@ void BorderShape::clipToOuterEdge(GraphicsContext& context, float deviceScaleFac
 
 void BorderShape::clipToInnerEdge(GraphicsContext& context, float deviceScaleFactor)
 {
-
     if (!needPathBasedClipping()) {
         auto innerEdgeRect = innerEdgeRoundedRect();
         auto pixelSnappedRect = innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
@@ -190,6 +236,5 @@ RoundedRect BorderShape::innerEdgeRoundedRect() const
 
     return roundedRect;
 }
-
 
 } // namespace WebCore

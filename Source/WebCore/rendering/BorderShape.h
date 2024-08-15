@@ -46,9 +46,14 @@ class LayoutUnit;
 
 class BorderShape {
 public:
-    // FIXME: Do we need includeLeftEdge, includeRightEdge ??
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, bool includeLeftEdge = true, bool includeRightEdge = true);
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, CornerShape cornerShape, bool includeLeftEdge = true, bool includeRightEdge = true);
+    static BorderShape shapeForBorderRect(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+
+    // These are physical edges.
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths);
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, CornerShape cornerShape);
+
+    const RoundedRectRadii& radii() const { return m_borderRect.radii(); }
+    void setRadii(const RoundedRectRadii& radii) { m_borderRect.setRadii(radii); }
 
     void clipToOuterEdge(GraphicsContext&, float deviceScaleFactor);
     void clipToInnerEdge(GraphicsContext&, float deviceScaleFactor);
@@ -70,8 +75,6 @@ private:
 
     RoundedRect m_borderRect;
     RectEdges<LayoutUnit> m_borderWidths;
-    bool m_includeLeftEdge { true };
-    bool m_includeRightEdge { true };
     CornerShape m_cornerShape { CornerShape::Round };
 };
 

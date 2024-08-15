@@ -517,14 +517,16 @@ RoundedRect BackgroundPainter::backgroundRoundedRectAdjustedForBleedAvoidance(co
     return backgroundRoundedRect(borderRect, box, includeLogicalLeftEdge, includeLogicalRightEdge);
 }
 
-RoundedRect BackgroundPainter::backgroundRoundedRect(const LayoutRect& borderRect, const InlineIterator::InlineBoxIterator& box, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
+BorderShape BackgroundPainter::backgroundShape(const LayoutRect& borderRect, const InlineIterator::InlineBoxIterator& box, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
 {
-    RoundedRect border = BorderShapeUtilities::getRoundedBorder(m_renderer.style(), borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+    auto borderShape = BorderShape:shapeForBorderRect(m_renderer.style(), borderRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+
     if (box && (box->nextInlineBox() || box->previousInlineBox())) {
-        RoundedRect segmentBorder = BorderShapeUtilities::getRoundedBorder(m_renderer.style(), LayoutRect(0_lu, 0_lu, borderRect.width(), borderRect.height()), includeLogicalLeftEdge, includeLogicalRightEdge);
-        border.setRadii(segmentBorder.radii());
+        auto segmentRect = LayoutRect{ { }, borderRect.size() };
+        auto segmentShape = BorderShapeUtilities:shapeForBorderRect(m_renderer.style(), segmentRect, includeLogicalLeftEdge, includeLogicalRightEdge);
+        borderShape.setRadii(segmentShape.radii());
     }
-    return border;
+    return borderShape;
 }
 
 static inline std::optional<LayoutUnit> getSpace(LayoutUnit areaSize, LayoutUnit tileSize)
