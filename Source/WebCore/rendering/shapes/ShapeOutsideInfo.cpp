@@ -158,6 +158,7 @@ Ref<const Shape> makeShapeForShapeOutside(const RenderBox& renderer)
         return Shape::createRasterShape(image.get(), shapeImageThreshold, imageRect, marginRect, writingMode, margin);
     }
     case ShapeValue::Type::Box: {
+        // FIXME: Needs to handle corner-shape.
         auto shapeRect = computeRoundedRectForBoxShape(shapeValue.effectiveCSSBox(), renderer);
         if (!isHorizontalWritingMode)
             shapeRect = shapeRect.transposedRect();

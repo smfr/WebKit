@@ -37,6 +37,7 @@ namespace WebCore {
 
 class RenderBox;
 
+// FIXME: This doesn't work with corner-shape.
 RoundedRect computeRoundedRectForBoxShape(CSSBoxType, const RenderBox&);
 
 class BoxShape final : public Shape {

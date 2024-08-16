@@ -25,6 +25,7 @@
 
 #include "AXObjectCache.h"
 #include "BackgroundPainter.h"
+#include "BorderShape.h"
 #include "DocumentInlines.h"
 #include "FloatRoundedRect.h"
 #include "HTMLFrameOwnerElement.h"
@@ -327,8 +328,9 @@ void RenderWidget::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
         // Push a clip if we have a border radius, since we want to round the foreground content that gets painted.
         paintInfo.context().save();
-        auto roundedInnerRect = FloatRoundedRect(roundedContentBoxRect(borderRect));
-        BackgroundPainter::clipRoundedInnerRect(paintInfo.context(), borderRect, roundedInnerRect, style().cornerShape());
+
+        auto borderShape = BorderShape::shapeForBorderRect(borderRect, style());
+        borderShape.clipToInnerShape(paintInfo.context(), document().deviceScaleFactor());
     }
 
     if (m_widget && !isSkippedContentRoot())

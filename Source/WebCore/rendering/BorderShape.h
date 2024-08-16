@@ -48,18 +48,44 @@ class BorderShape {
 public:
     static BorderShape shapeForBorderRect(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 
-    // These are physical edges.
     BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths);
     BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, CornerShape cornerShape);
 
     const RoundedRectRadii& radii() const { return m_borderRect.radii(); }
     void setRadii(const RoundedRectRadii& radii) { m_borderRect.setRadii(radii); }
+    
+    // Don't call these; they doesn't handle non-round corner styles.
+    FloatRoundedRect deprecatedSnappedRoundedBorderRect(float deviceScaleFactor) const;
+    FloatRoundedRect deprecatedSnappedInnerBorderRect(float deviceScaleFactor) const;
 
-    void clipToOuterEdge(GraphicsContext&, float deviceScaleFactor);
-    void clipToInnerEdge(GraphicsContext&, float deviceScaleFactor);
-    void clipOutInnerEdge(GraphicsContext&, float deviceScaleFactor);
+    RoundedRect deprecatedBorderRect() const;
+    RoundedRect deprecatedInnerBorderRect() const;
+    RoundedRect deprecatedContentBoxRect(const RectEdges<LayoutUnit>& paddingWidths) const;
+    
+    FloatRect snappedOuterRect(float deviceScaleFactor) const;
+    FloatRect snappedInnerRect(float deviceScaleFactor) const;
+
+    bool isRounded() const { return m_borderRect.isRounded(); }
+
+    bool rectIsEntirelyInsideInnerEdge(const LayoutRect&) const;
+
+    Path pathForOuterShape(float deviceScaleFactor) const;
+    Path pathForInnerShape(float deviceScaleFactor) const;
+
+    Path pathForBorderArea(float deviceScaleFactor) const;
+
+    void clipToOuterShape(GraphicsContext&, float deviceScaleFactor);
+    void clipToInnerShape(GraphicsContext&, float deviceScaleFactor);
+    void clipToContentBoxShape(GraphicsContext&, const RectEdges<LayoutUnit>& paddingWidths, float deviceScaleFactor);
+
+    void clipOutInnerShape(GraphicsContext&, float deviceScaleFactor);
 
     void fillOuterShape(GraphicsContext&, const Color& color, float deviceScaleFactor);
+
+
+    void fillDoubleBordersShape(GraphicsContext&, const LayoutRect& innerThirdRect, const LayoutRect& outerThirdRect, const Color& color, float deviceScaleFactor);
+
+
 
     // FIXME: This needs to deal with shadow spread.
     void fillInnerHoleShape(GraphicsContext&, const FloatRect&, const Color& color, float deviceScaleFactor);
@@ -68,10 +94,9 @@ public:
 private:
 
     bool needPathBasedClipping() const;
-    Path pathForOuterShape(float deviceScaleFactor) const;
-    Path pathForInnerShape(float deviceScaleFactor) const;
 
     RoundedRect innerEdgeRoundedRect() const;
+    LayoutRect innerEdgeRect() const;
 
     RoundedRect m_borderRect;
     RectEdges<LayoutUnit> m_borderWidths;

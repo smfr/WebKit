@@ -30,7 +30,7 @@
 #include "BackgroundPainter.h"
 #include "BitmapImage.h"
 #include "BlendingKeyframes.h"
-#include "BorderShapeUtilities.h"
+#include "BorderShape.h"
 #include "CSSPropertyNames.h"
 #include "CachedImage.h"
 #include "CanvasRenderingContext2DBase.h"
@@ -1508,7 +1508,8 @@ void RenderLayerBacking::updateGeometry(const RenderLayer* compositedAncestor)
 
         auto computeMasksToBoundsRect = [&] {
             if ((renderer().style().clipPath() || renderer().style().hasBorderRadius())) {
-                auto contentsClippingRect = FloatRoundedRect(BorderShapeUtilities::getRoundedInnerBorder(renderer().style(), m_owningLayer.rendererBorderBoxRect()));
+                auto borderShape = BorderShape::shapeForBorderRect(renderer().style(), m_owningLayer.rendererBorderBoxRect());
+                auto contentsClippingRect = borderShape.deprecatedSnappedInnerBorderRect(deviceScaleFactor);
                 contentsClippingRect.move(LayoutSize(-clipLayer->offsetFromRenderer()));
                 return contentsClippingRect;
             }
@@ -1868,7 +1869,8 @@ void RenderLayerBacking::updateContentsRects()
     m_graphicsLayer->setContentsRect(snapRectToDevicePixelsIfNeeded(contentsBox(), renderer()));
     
     if (CheckedPtr renderReplaced = dynamicDowncast<RenderReplaced>(renderer())) {
-        FloatRoundedRect contentsClippingRect = renderReplaced->roundedContentBoxRect(renderReplaced->borderBoxRect()).pixelSnappedRoundedRectForPainting(deviceScaleFactor());
+        auto borderShape = BorderShape::shapeForBorderRect(renderReplaced->style(), renderReplaced->borderBoxRect());
+        auto contentsClippingRect = borderShape.deprecatedSnappedInnerBorderRect(deviceScaleFactor());
         contentsClippingRect.move(contentOffsetInCompositingLayer());
         m_graphicsLayer->setContentsClippingRect(contentsClippingRect);
     }

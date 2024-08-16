@@ -3123,6 +3123,7 @@ std::pair<Path, WindRule> RenderLayer::computeClipPath(const LayoutSize& offsetF
     RefPtr clipPath = dynamicDowncast<BoxPathOperation>(*style.clipPath());
     CheckedPtr box = dynamicDowncast<RenderBox>(renderer());
     if (clipPath && box) {
+        // FIXME: Needs to handle corner-shape.
         auto shapeRect = computeRoundedRectForBoxShape(clipPath->referenceBox(), *box).pixelSnappedRoundedRectForPainting(renderer().document().deviceScaleFactor());
         shapeRect.move(offsetFromRoot);
 

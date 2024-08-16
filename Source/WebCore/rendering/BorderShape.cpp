@@ -84,6 +84,9 @@ BorderShape BorderShape::shapeForBorderRect(const RenderStyle& style, const Layo
                 radii.setBottomLeft({ });
         }
 
+        if (!radii.areRenderableInRect(borderRect))
+            radii.makeRenderableInRect(borderRect);
+
         return BorderShape { borderRect, borderWidths, radii, style.cornerShape() };
     }
 
@@ -110,6 +113,26 @@ bool BorderShape::needPathBasedClipping() const
     return !m_borderRect.isRounded() || m_cornerShape != CornerShape::Round;
 }
 
+FloatRect BorderShape::snappedOuterRect(float deviceScaleFactor) const
+{
+    return snapRectToDevicePixels(m_borderRect.rect(), deviceScaleFactor);
+}
+
+FloatRect BorderShape::snappedInnerRect(float deviceScaleFactor) const
+{
+    return snapRectToDevicePixels(innerEdgeRect(), deviceScaleFactor);
+}
+
+FloatRoundedRect BorderShape::deprecatedSnappedRoundedBorderRect(float deviceScaleFactor) const
+{
+    return m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+}
+
+FloatRoundedRect BorderShape::deprecatedSnappedInnerBorderRect(float deviceScaleFactor) const
+{
+    return innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+}
+
 Path BorderShape::pathForOuterShape(float deviceScaleFactor) const
 {
     ASSERT(needPathBasedClipping());
@@ -118,6 +141,7 @@ Path BorderShape::pathForOuterShape(float deviceScaleFactor) const
     Path path;
     switch (m_cornerShape) {
     case CornerShape::Round:
+        path.addRect(pixelSnappedRect.rect());
         break;
 
     case CornerShape::Bevel: {
@@ -136,21 +160,21 @@ Path BorderShape::pathForInnerShape(float deviceScaleFactor) const
 {
     ASSERT(needPathBasedClipping());
 
+    // FIXME: This is wrong for non-round corner shapes.
     auto innerEdgeRect = innerEdgeRoundedRect();
     auto pixelSnappedRect = innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
 
     Path path;
     switch (m_cornerShape) {
     case CornerShape::Round:
+        path.addRect(pixelSnappedRect.rect());
         break;
 
     case CornerShape::Bevel: {
-        // Wrong!
         path.addBeveledRect(pixelSnappedRect);
         break;
     }
     case CornerShape::Scoop: {
-        // Wrong!
         path.addScoopedRect(pixelSnappedRect);
         break;
     }
@@ -158,7 +182,38 @@ Path BorderShape::pathForInnerShape(float deviceScaleFactor) const
     return path;
 }
 
-void BorderShape::clipToOuterEdge(GraphicsContext& context, float deviceScaleFactor)
+Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
+{
+    auto pixelSnappedOuterRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+
+    // FIXME: This is wrong for non-round corner shapes.
+    auto innerEdgeRect = innerEdgeRoundedRect();
+    auto pixelSnappedInnerRect = innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+
+    Path path;
+    switch (m_cornerShape) {
+    case CornerShape::Round:
+        path.addRect(pixelSnappedOuterRect.rect());
+        path.addRect(pixelSnappedInnerRect.rect());
+        break;
+
+    case CornerShape::Bevel: {
+        // Wrong!
+        path.addRect(pixelSnappedOuterRect.rect());
+        path.addRect(pixelSnappedInnerRect.rect());
+        break;
+    }
+    case CornerShape::Scoop: {
+        // Wrong!
+        path.addRect(pixelSnappedOuterRect.rect());
+        path.addRect(pixelSnappedInnerRect.rect());
+        break;
+    }
+    }
+    return path;
+}
+
+void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFactor)
 {
     if (!needPathBasedClipping()) {
         auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
@@ -169,7 +224,7 @@ void BorderShape::clipToOuterEdge(GraphicsContext& context, float deviceScaleFac
     context.clipPath(pathForOuterShape(deviceScaleFactor));
 }
 
-void BorderShape::clipToInnerEdge(GraphicsContext& context, float deviceScaleFactor)
+void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFactor)
 {
     if (!needPathBasedClipping()) {
         auto innerEdgeRect = innerEdgeRoundedRect();
@@ -183,6 +238,11 @@ void BorderShape::clipToInnerEdge(GraphicsContext& context, float deviceScaleFac
 
 void BorderShape::clipOutInnerEdge(GraphicsContext& context, float deviceScaleFactor)
 {
+
+    // isRenderable() check avoids issue described in https://bugs.webkit.org/show_bug.cgi?id=38787
+    // The inside will be clipped out later (in clipBorderSideForComplexInnerPath)
+
+
     if (!needPathBasedClipping()) {
         auto innerEdgeRect = innerEdgeRoundedRect();
         auto pixelSnappedRect = innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
@@ -213,18 +273,23 @@ void BorderShape::fillInnerHoleShape(GraphicsContext&, const FloatRect&, const C
 
 }
 
+void BorderShape::fillDoubleBordersShape(GraphicsContext&, const LayoutRect& innerThirdRect, const LayoutRect& outerThirdRect, const Color& color, float deviceScaleFactor)
+{
+    // FIXME: Check renderabiliy of inner edges
+    // https://bugs.webkit.org/show_bug.cgi?id=38787
+
+
+
+}
+
+bool BorderShape::rectIsEntirelyInsideInnerEdge(const LayoutRect&) const
+{
+    return false;
+}
+
 RoundedRect BorderShape::innerEdgeRoundedRect() const
 {
-    auto& borderRect = m_borderRect.rect();
-    auto width = std::max(0_lu, borderRect.width() - m_borderWidths.left() - m_borderWidths.right());
-    auto height = std::max(0_lu, borderRect.height() - m_borderWidths.top() - m_borderWidths.bottom());
-    auto roundedRect = RoundedRect {
-        borderRect.x() + m_borderWidths.left(),
-        borderRect.y() + m_borderWidths.top(),
-        width,
-        height
-    };
-
+    auto roundedRect = RoundedRect { innerEdgeRect() };
     if (m_borderRect.isRounded()) {
         auto innerRadii = m_borderRect.radii();
         innerRadii.shrink(m_borderWidths.top(), m_borderWidths.bottom(), m_borderWidths.left(), m_borderWidths.right());
@@ -235,6 +300,19 @@ RoundedRect BorderShape::innerEdgeRoundedRect() const
         roundedRect.adjustRadii();
 
     return roundedRect;
+}
+
+LayoutRect BorderShape::innerEdgeRect() const
+{
+    auto& borderRect = m_borderRect.rect();
+    auto width = std::max(0_lu, borderRect.width() - m_borderWidths.left() - m_borderWidths.right());
+    auto height = std::max(0_lu, borderRect.height() - m_borderWidths.top() - m_borderWidths.bottom());
+    return {
+        borderRect.x() + m_borderWidths.left(),
+        borderRect.y() + m_borderWidths.top(),
+        width,
+        height
+    };
 }
 
 } // namespace WebCore

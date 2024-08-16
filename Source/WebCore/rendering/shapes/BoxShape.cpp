@@ -65,33 +65,41 @@ static inline RoundedRect::Radii computeMarginBoxShapeRadii(const RoundedRect::R
 
 RoundedRect computeRoundedRectForBoxShape(CSSBoxType box, const RenderBox& renderer)
 {
-    const RenderStyle& style = renderer.style();
+    auto& style = renderer.style();
     switch (box) {
     case CSSBoxType::MarginBox: {
         if (!style.hasBorderRadius())
             return RoundedRect(renderer.marginBoxRect(), RoundedRect::Radii());
 
-        LayoutRect marginBox = renderer.marginBoxRect();
-        RoundedRect::Radii radii = computeMarginBoxShapeRadii(BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect()).radii(), renderer);
+        auto marginBox = renderer.marginBoxRect();
+        auto borderShape = BorderShape::shapeForBorderRect(style, renderer.borderBoxRect());
+        auto radii = computeMarginBoxShapeRadii(borderShape.radii(), renderer);
         radii.scale(calcBorderRadiiConstraintScaleFor(marginBox, radii));
         return RoundedRect(marginBox, radii);
     }
-    case CSSBoxType::PaddingBox:
-        return BorderShapeUtilities::getRoundedInnerBorder(style, renderer.borderBoxRect());
+    case CSSBoxType::PaddingBox: {
+        auto borderShape = BorderShape::shapeForBorderRect(style, renderer.borderBoxRect());
+        return borderShape.deprecatedInnerBorderRect();
+    }
     // fill-box compute to content-box for HTML elements.
     case CSSBoxType::FillBox:
-    case CSSBoxType::ContentBox:
-        return renderer.roundedContentBoxRect(renderer.borderBoxRect());
+    case CSSBoxType::ContentBox: {
+        auto borderShape = BorderShape::shapeForBorderRect(style, renderer.borderBoxRect());
+        return borderShape.deprecatedContentBoxRect(paddingWidths);
+    }
     // stroke-box, view-box compute to border-box for HTML elements.
     case CSSBoxType::BorderBox:
     case CSSBoxType::StrokeBox:
     case CSSBoxType::ViewBox:
-    case CSSBoxType::BoxMissing:
-        return BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect());
+    case CSSBoxType::BoxMissing: {
+        auto borderShape = BorderShape::shapeForBorderRect(style, renderer.borderBoxRect());
+        return borderShape.deprecatedBorderRect();
+    }
     }
 
     ASSERT_NOT_REACHED();
-    return BorderShapeUtilities::getRoundedBorder(style, renderer.borderBoxRect());
+    auto borderShape = BorderShape::shapeForBorderRect(style, renderer.borderBoxRect());
+    return borderShape.deprecatedBorderRect();
 }
 
 LayoutRect BoxShape::shapeMarginLogicalBoundingBox() const

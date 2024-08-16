@@ -26,7 +26,7 @@
 #include "RenderReplaced.h"
 
 #include "BackgroundPainter.h"
-#include "BorderShapeUtilities.h"
+#include "BorderShape.h"
 #include "DocumentInlines.h"
 #include "DocumentMarkerController.h"
 #include "ElementRuleCollector.h"
@@ -236,8 +236,8 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         if (visibleToHitTesting()) {
 #endif
             auto borderRect = LayoutRect(adjustedPaintOffset, size());
-            auto borderRoundedRect = BorderShapeUtilities::getRoundedBorder(style(), borderRect);
-            paintInfo.eventRegionContext()->unite(FloatRoundedRect(borderRoundedRect), *this, style());
+            auto borderShape = BorderShape::shapeForBorderRect(style(), borderRect);
+            paintInfo.eventRegionContext()->unite(borderShape.deprecatedSnappedInnerBorderRect(), *this, style());
         }
         return;
     }
@@ -304,8 +304,8 @@ void RenderReplaced::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
         if (!completelyClippedOut) {
             // Push a clip if we have a border radius, since we want to round the foreground content that gets painted.
             paintInfo.context().save();
-            auto pixelSnappedRoundedRect = roundedContentBoxRect(paintRect).pixelSnappedRoundedRectForPainting(document().deviceScaleFactor());
-            BackgroundPainter::clipRoundedInnerRect(paintInfo.context(), paintRect, pixelSnappedRoundedRect, style().cornerShape());
+            auto borderShape = BorderShape::shapeForBorderRect(style(), paintRect);
+            borderShape.clipToInnerShape(document().deviceScaleFactor());
         }
     }
 

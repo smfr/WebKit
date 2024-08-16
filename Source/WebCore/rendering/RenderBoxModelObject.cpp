@@ -867,6 +867,7 @@ bool RenderBoxModelObject::borderObscuresBackground() const
     return true;
 }
 
+// FIXME: Needs to account for corner shape.
 RoundedRect RenderBoxModelObject::roundedContentBoxRect(const LayoutRect& borderBoxRect, bool includeLeftEdge, bool includeRightEdge) const
 {
     auto borderWidths = this->borderWidths();

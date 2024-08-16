@@ -493,6 +493,7 @@ public:
     virtual void setContentsRect(const FloatRect& r) { m_contentsRect = r; }
 
     // Set a rounded rect that will be used to clip the layer contents.
+    // FIXME: Need a path-based solution too.
     FloatRoundedRect contentsClippingRect() const { return m_contentsClippingRect; }
     virtual void setContentsClippingRect(const FloatRoundedRect& roundedRect) { m_contentsClippingRect = roundedRect; }
     
