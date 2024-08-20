@@ -61,6 +61,7 @@ public:
     }
     
     LayoutRect borderRect() const { return m_borderRect.rect(); }
+    LayoutRect innerRect() const { return innerEdgeRect(); }
     
     RoundedRect deprecatedRoundedRect() const;
     RoundedRect deprecatedInnerRoundedRect() const;
@@ -72,6 +73,8 @@ public:
 
     const RoundedRectRadii& radii() const { return m_borderRect.radii(); }
     void setRadii(const RoundedRectRadii& radii) { m_borderRect.setRadii(radii); }
+    
+    void makeRenderable();
 
     FloatRect snappedOuterRect(float deviceScaleFactor) const;
     FloatRect snappedInnerRect(float deviceScaleFactor) const;
@@ -89,14 +92,16 @@ public:
 
     Path pathForBorderArea(float deviceScaleFactor) const;
 
-    void clipToOuterShape(GraphicsContext&, float deviceScaleFactor);
-    void clipToInnerShape(GraphicsContext&, float deviceScaleFactor);
+    void clipToOuterShape(GraphicsContext&, float deviceScaleFactor) const;
+    void clipToInnerShape(GraphicsContext&, float deviceScaleFactor) const;
 
-    void clipOutOuterShape(GraphicsContext&, float deviceScaleFactor);
-    void clipOutInnerShape(GraphicsContext&, float deviceScaleFactor);
+    void clipOutOuterShape(GraphicsContext&, float deviceScaleFactor) const;
+    void clipOutInnerShape(GraphicsContext&, float deviceScaleFactor) const;
 
-    void fillOuterShape(GraphicsContext&, const Color&, float deviceScaleFactor);
-    void fillInnerShape(GraphicsContext&, const Color&, float deviceScaleFactor);
+    void fillOuterShape(GraphicsContext&, const Color&, float deviceScaleFactor) const;
+    void fillInnerShape(GraphicsContext&, const Color&, float deviceScaleFactor) const;
+
+    void fillRectWithInnerHoleShape(GraphicsContext&, const LayoutRect& outerRect, const Color&, float deviceScaleFactor) const;
 
 private:
     RoundedRect innerEdgeRoundedRect() const;
