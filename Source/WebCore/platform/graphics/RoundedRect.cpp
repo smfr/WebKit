@@ -84,11 +84,11 @@ void RoundedRect::Radii::expand(const LayoutUnit& topWidth, const LayoutUnit& bo
     }
 }
 
-void RoundedRect::inflateWithRadii(const LayoutUnit& size)
+void RoundedRect::inflateWithRadii(const LayoutUnit& amount)
 {
     LayoutRect old = m_rect;
 
-    m_rect.inflate(size);
+    m_rect.inflate(amount);
     // Considering the inflation factor of shorter size to scale the radii seems appropriate here
     float factor;
     if (m_rect.width() < m_rect.height())

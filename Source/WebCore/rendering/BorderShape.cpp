@@ -149,6 +149,47 @@ FloatRect BorderShape::snappedInnerRect(float deviceScaleFactor) const
     return snapRectToDevicePixels(innerEdgeRect(), deviceScaleFactor);
 }
 
+bool BorderShape::encloses(const LayoutRect& rect) const
+{
+    auto boundingRect = m_borderRect.rect();
+    if (rect.contains(boundingRect))
+        return false;
+
+    auto radii = m_borderRect.radii();
+
+    LayoutRect topLeftRect(boundingRect.location(), radii.topLeft());
+    if (rect.intersects(topLeftRect))
+        return false;
+
+    LayoutRect topRightRect(boundingRect.location(), radii.topRight());
+    topRightRect.setX(boundingRect.maxX() - topRightRect.width());
+    if (rect.intersects(topRightRect))
+        return false;
+
+    LayoutRect bottomLeftRect(boundingRect.location(), radii.bottomLeft());
+    bottomLeftRect.setY(boundingRect.maxY() - bottomLeftRect.height());
+    if (rect.intersects(bottomLeftRect))
+        return false;
+
+    LayoutRect bottomRightRect(boundingRect.location(), radii.bottomRight());
+    bottomRightRect.setX(boundingRect.maxX() - bottomRightRect.width());
+    bottomRightRect.setY(boundingRect.maxY() - bottomRightRect.height());
+    if (rect.intersects(bottomRightRect))
+        return false;
+
+    return true;
+}
+
+void BorderShape::move(LayoutSize offset)
+{
+    m_borderRect.move(offset);
+}
+
+void BorderShape::inflate(LayoutUnit amount)
+{
+    m_borderRect.inflateWithRadii(amount);
+}
+
 static void addRoundedRectToPath(const FloatRoundedRect& roundedRect, Path& path)
 {
     if (roundedRect.isRounded())
@@ -205,6 +246,15 @@ void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFa
         context.clipRoundedRect(pixelSnappedRect);
     else
         context.clip(pixelSnappedRect.rect());
+}
+
+void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleFactor)
+{
+    auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.isRounded())
+        context.clipOutRoundedRect(pixelSnappedRect);
+    else
+        context.clipOut(pixelSnappedRect.rect());
 }
 
 void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleFactor)
