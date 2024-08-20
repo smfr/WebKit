@@ -49,6 +49,7 @@
 
 #include "AccessibilityRegionContext.h"
 #include "BitmapImage.h"
+#include "BorderShape.h"
 #include "BoxShape.h"
 #include "CSSFilter.h"
 #include "CSSPropertyNames.h"
@@ -2877,7 +2878,9 @@ void RenderLayer::clipToRect(GraphicsContext& context, GraphicsContextStateSaver
             if (layer->renderer().hasNonVisibleOverflow() && layer->renderer().style().hasBorderRadius() && ancestorLayerIsInContainingBlockChain(*layer)) {
                 LayoutRect adjustedClipRect = LayoutRect(toLayoutPoint(layer->offsetFromAncestor(paintingInfo.rootLayer, AdjustForColumns)), layer->size());
                 adjustedClipRect.move(paintingInfo.subpixelOffset);
-                FloatRoundedRect roundedRect = layer->renderer().style().getRoundedInnerBorderFor(adjustedClipRect).pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+                auto borderShape = BorderShape::shapeForBorderRect(layer->renderer().style(), adjustedClipRect);
+                auto roundedRect = borderShape.deprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor);
+                // FIXME: Have BorderShape do this "is the clip rectangular" check.
                 if (roundedRect.intersectionIsRectangular(paintingInfo.paintDirtyRect))
                     context.clip(snapRectToDevicePixels(intersection(paintingInfo.paintDirtyRect, adjustedClipRect), deviceScaleFactor));
                 else
