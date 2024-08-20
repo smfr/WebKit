@@ -289,7 +289,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
             break;
         }
         case FillBox::PaddingBox: {
-            auto borderShape = borderShapeRespectingBleedAvoidance(includeLeftEdge, includeRightEdge, isBorderFill);
+            auto borderShape = borderShapeRespectingBleedAvoidance(isBorderFill);
             borderShape.clipToInnerShape(context, deviceScaleFactor);
             break;
         }
