@@ -149,6 +149,12 @@ FloatRect BorderShape::snappedInnerRect(float deviceScaleFactor) const
     return snapRectToDevicePixels(innerEdgeRect(), deviceScaleFactor);
 }
 
+void BorderShape::makeRenderable()
+{
+    if (!m_borderRect.isRenderable())
+        m_borderRect.adjustRadii();
+}
+
 bool BorderShape::innerShapeContains(const LayoutRect& rect) const
 {
     return innerEdgeRoundedRect().contains(rect);
@@ -208,7 +214,7 @@ Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
     return path;
 }
 
-void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFactor)
+void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     if (pixelSnappedRect.isRounded())
@@ -217,7 +223,7 @@ void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFa
         context.clip(pixelSnappedRect.rect());
 }
 
-void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFactor)
+void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
@@ -227,7 +233,7 @@ void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFa
         context.clip(pixelSnappedRect.rect());
 }
 
-void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleFactor)
+void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     if (pixelSnappedRect.isEmpty())
@@ -239,7 +245,7 @@ void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleF
         context.clipOut(pixelSnappedRect.rect());
 }
 
-void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleFactor)
+void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     if (pixelSnappedRect.isEmpty())
@@ -251,7 +257,7 @@ void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleF
         context.clipOut(pixelSnappedRect.rect());
 }
 
-void BorderShape::fillOuterShape(GraphicsContext& context, const Color& color, float deviceScaleFactor)
+void BorderShape::fillOuterShape(GraphicsContext& context, const Color& color, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     if (pixelSnappedRect.isRounded())
@@ -260,7 +266,7 @@ void BorderShape::fillOuterShape(GraphicsContext& context, const Color& color, f
         context.fillRect(pixelSnappedRect.rect(), color);
 }
 
-void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, float deviceScaleFactor)
+void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
@@ -268,6 +274,14 @@ void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, f
         context.fillRoundedRect(pixelSnappedRect, color);
     else
         context.fillRect(pixelSnappedRect.rect(), color);
+}
+
+void BorderShape::fillRectWithInnerHoleShape(GraphicsContext& context, const LayoutRect& outerRect, const Color& color, float deviceScaleFactor) const
+{
+    auto pixelSnappedOuterRect = snapRectToDevicePixels(outerRect, deviceScaleFactor);
+    auto pixelSnappedRect = innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    ASSERT(pixelSnappedRect.isRenderable());
+    context.fillRectWithRoundedHole(pixelSnappedOuterRect, pixelSnappedRect, color);
 }
 
 RoundedRect BorderShape::innerEdgeRoundedRect() const
