@@ -105,6 +105,55 @@ BorderShape BorderShape::shapeForBorderRect(const RenderStyle& style, const Layo
     return BorderShape { borderRect, usedBorderWidths };
 }
 
+BorderShape BorderShape::shapeForOutlineRect(const RenderStyle& style, const LayoutRect& borderRect, const LayoutRect& outlineBoxRect, const RectEdges<LayoutUnit>& outlineWidths, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
+{
+    bool isHorizontal = style.isHorizontalWritingMode();
+
+    // top, right, bottom, left.
+    auto usedOutlineWidths = RectEdges<LayoutUnit> {
+        LayoutUnit((isHorizontal || includeLogicalLeftEdge) ? outlineWidths.top() : 0_lu),
+        LayoutUnit((!isHorizontal || includeLogicalRightEdge) ? outlineWidths.right() : 0_lu),
+        LayoutUnit((isHorizontal || includeLogicalRightEdge) ? outlineWidths.bottom() : 0_lu),
+        LayoutUnit((!isHorizontal || includeLogicalLeftEdge) ? outlineWidths.left() : 0_lu),
+    };
+
+    if (style.hasBorderRadius()) {
+        auto radii = calcRadiiFor(style.borderRadii(), borderRect.size());
+
+        auto leftOutset = std::max(borderRect.x() - outlineBoxRect.x(), 0_lu);
+        auto topOutset = std::max(borderRect.y() - outlineBoxRect.y(), 0_lu);
+        auto rightOutset = std::max(outlineBoxRect.maxX() - borderRect.maxX(), 0_lu);
+        auto bottomOutset = std::max(outlineBoxRect.maxY() - borderRect.maxY(), 0_lu);
+
+        radii.expand(topOutset, bottomOutset, leftOutset, rightOutset);
+
+        if (!includeLogicalLeftEdge) {
+            radii.setTopLeft({ });
+
+            if (isHorizontal)
+                radii.setBottomLeft({ });
+            else
+                radii.setTopRight({ });
+        }
+
+        if (!includeLogicalRightEdge) {
+            radii.setBottomRight({ });
+
+            if (isHorizontal)
+                radii.setTopRight({ });
+            else
+                radii.setBottomLeft({ });
+        }
+
+        if (!radii.areRenderableInRect(outlineBoxRect))
+            radii.makeRenderableInRect(outlineBoxRect);
+
+        return BorderShape { outlineBoxRect, usedOutlineWidths, radii };
+    }
+
+    return BorderShape { outlineBoxRect, usedOutlineWidths };
+}
+
 BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths)
     : m_borderRect(borderRect)
     , m_borderWidths(borderWidths)
@@ -212,6 +261,24 @@ Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
     addRoundedRectToPath(pixelSnappedOuterRect, path);
     addRoundedRectToPath(pixelSnappedInnerRect, path);
     return path;
+}
+
+void BorderShape::addOuterShapeToPath(Path& path, float deviceScaleFactor) const
+{
+    auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.isRounded())
+        path.addRoundedRect(pixelSnappedRect);
+    else
+        path.addRect(pixelSnappedRect.rect());
+}
+
+void BorderShape::addInnerShapeToPath(Path& path, float deviceScaleFactor) const
+{
+    auto pixelSnappedRect = innerEdgeRoundedRect().pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+    if (pixelSnappedRect.isRounded())
+        path.addRoundedRect(pixelSnappedRect);
+    else
+        path.addRect(pixelSnappedRect.rect());
 }
 
 void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFactor) const

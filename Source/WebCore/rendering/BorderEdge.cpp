@@ -102,11 +102,32 @@ bool BorderEdge::obscuresBackground() const
     return true;
 }
 
-void BorderEdge::getDoubleBorderStripeWidths(LayoutUnit& outerWidth, LayoutUnit& innerWidth) const
+DoubleBorderInsets doubleBorderInsetWidths(const BorderEdges& edges)
 {
-    LayoutUnit fullWidth { widthForPainting() };
-    innerWidth = ceilToDevicePixel(fullWidth * 2 / 3, m_devicePixelRatio);
-    outerWidth = floorToDevicePixel(fullWidth / 3, m_devicePixelRatio);
+    auto computeStripeWidthsForEdge = [](const BorderEdge& edge, LayoutUnit& outer, LayoutUnit& inner) {
+        auto fullWidth = edge.widthForPainting();
+        outer = floorToDevicePixel(fullWidth / 3, edge.devicePixelRatio());
+        inner = ceilToDevicePixel(fullWidth * 2 / 3, edge.devicePixelRatio());
+    };
+
+    DoubleBorderInsets result;
+
+    computeStripeWidthsForEdge(edges.top(), result.widthsOfOuterStripe.top(), result.widthsToInnerStripe.top());
+    computeStripeWidthsForEdge(edges.right(), result.widthsOfOuterStripe.right(), result.widthsToInnerStripe.right());
+    computeStripeWidthsForEdge(edges.bottom(), result.widthsOfOuterStripe.bottom(), result.widthsToInnerStripe.bottom());
+    computeStripeWidthsForEdge(edges.left(), result.widthsOfOuterStripe.left(), result.widthsToInnerStripe.left());
+
+    return result;
+}
+
+RectEdges<LayoutUnit> halfBorderWidths(const BorderEdges& edges)
+{
+    return {
+        LayoutUnit { edges.top().widthForPainting() / 2 },
+        LayoutUnit { edges.right().widthForPainting() / 2 },
+        LayoutUnit { edges.bottom().widthForPainting() / 2 },
+        LayoutUnit { edges.left().widthForPainting() / 2 },
+    };
 }
 
 } // namespace WebCore

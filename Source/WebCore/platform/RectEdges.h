@@ -151,6 +151,24 @@ inline RectEdges<T>& operator+=(RectEdges<T>& a, const RectEdges<T>& b)
 }
 
 template<typename T>
+constexpr RectEdges<T> operator+(const RectEdges<T>& a, const T& d)
+{
+    return {
+        a.top() + d,
+        a.right() + d,
+        a.bottom() + d,
+        a.left() + d,
+    };
+}
+
+template<typename T>
+inline RectEdges<T>& operator+=(RectEdges<T>& a, const T& d)
+{
+    a = a + d;
+    return a;
+}
+
+template<typename T>
 TextStream& operator<<(TextStream& ts, const RectEdges<T>& edges)
 {
     ts << "[top " << edges.top() << " right " << edges.right() << " bottom " << edges.bottom() << " left " << edges.left() << "]";

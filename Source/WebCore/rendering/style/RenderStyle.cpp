@@ -2473,16 +2473,6 @@ void RenderStyle::setBoxShadow(std::unique_ptr<ShadowData> shadowData, bool add)
     rareData.boxShadow = WTFMove(shadowData);
 }
 
-static RoundedRect::Radii calcRadiiFor(const BorderData::Radii& radii, const LayoutSize& size)
-{
-    return {
-        sizeForLengthSize(radii.topLeft, size),
-        sizeForLengthSize(radii.topRight, size),
-        sizeForLengthSize(radii.bottomLeft, size),
-        sizeForLengthSize(radii.bottomRight, size)
-    };
-}
-
 StyleImage* RenderStyle::listStyleImage() const
 {
     return m_rareInheritedData->listStyleImage.get();
@@ -2532,45 +2522,6 @@ void RenderStyle::setHorizontalBorderSpacing(float v)
 void RenderStyle::setVerticalBorderSpacing(float v)
 {
     SET_VAR(m_inheritedData, verticalBorderSpacing, v);
-}
-
-RoundedRect RenderStyle::getRoundedInnerBorderFor(const LayoutRect& borderRect, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
-{
-    bool horizontal = isHorizontalWritingMode();
-    LayoutUnit leftWidth { (!horizontal || includeLogicalLeftEdge) ? borderLeftWidth() : 0 };
-    LayoutUnit rightWidth { (!horizontal || includeLogicalRightEdge) ? borderRightWidth() : 0 };
-    LayoutUnit topWidth { (horizontal || includeLogicalLeftEdge) ? borderTopWidth() : 0 };
-    LayoutUnit bottomWidth { (horizontal || includeLogicalRightEdge) ? borderBottomWidth() : 0 };
-    return getRoundedInnerBorderFor(borderRect, topWidth, bottomWidth, leftWidth, rightWidth, includeLogicalLeftEdge, includeLogicalRightEdge);
-}
-
-RoundedRect RenderStyle::getRoundedInnerBorderFor(const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth,
-    LayoutUnit leftWidth, LayoutUnit rightWidth, bool includeLogicalLeftEdge, bool includeLogicalRightEdge) const
-{
-    auto radii = hasBorderRadius() ? std::make_optional(m_nonInheritedData->surroundData->border.m_radii) : std::nullopt;
-    return getRoundedInnerBorderFor(borderRect, topWidth, bottomWidth, leftWidth, rightWidth, radii, isHorizontalWritingMode(), includeLogicalLeftEdge, includeLogicalRightEdge);
-}
-
-RoundedRect RenderStyle::getRoundedInnerBorderFor(const LayoutRect& borderRect, LayoutUnit topWidth, LayoutUnit bottomWidth,
-    LayoutUnit leftWidth, LayoutUnit rightWidth, std::optional<BorderData::Radii> radii, bool isHorizontalWritingMode, bool includeLogicalLeftEdge, bool includeLogicalRightEdge)
-{
-    auto width = std::max(0_lu, borderRect.width() - leftWidth - rightWidth);
-    auto height = std::max(0_lu, borderRect.height() - topWidth - bottomWidth);
-    auto roundedRect = RoundedRect {
-        borderRect.x() + leftWidth,
-        borderRect.y() + topWidth,
-        width,
-        height
-    };
-    if (radii) {
-        auto adjustedRadii = calcRadiiFor(*radii, borderRect.size());
-        adjustedRadii.scale(calcBorderRadiiConstraintScaleFor(borderRect, adjustedRadii));
-        adjustedRadii.shrink(topWidth, bottomWidth, leftWidth, rightWidth);
-        roundedRect.includeLogicalEdges(adjustedRadii, isHorizontalWritingMode, includeLogicalLeftEdge, includeLogicalRightEdge);
-    }
-    if (!roundedRect.isRenderable())
-        roundedRect.adjustRadii();
-    return roundedRect;
 }
 
 static bool allLayersAreFixed(const FillLayer& layers)

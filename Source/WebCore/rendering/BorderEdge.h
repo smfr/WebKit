@@ -50,9 +50,10 @@ public:
     inline bool shouldRender() const { return m_isPresent && widthForPainting() && hasVisibleColorAndStyle(); }
     inline bool presentButInvisible() const { return widthForPainting() && !hasVisibleColorAndStyle(); }
     inline float widthForPainting() const { return m_isPresent ?  m_flooredToDevicePixelWidth : 0; }
-    void getDoubleBorderStripeWidths(LayoutUnit& outerWidth, LayoutUnit& innerWidth) const;
     bool obscuresBackgroundEdge(float scale) const;
     bool obscuresBackground() const;
+
+    float devicePixelRatio() const { return m_devicePixelRatio; }
 
 private:
     inline float borderWidthInDevicePixel(int logicalPixels) const { return LayoutUnit(logicalPixels / m_devicePixelRatio).toFloat(); }
@@ -69,6 +70,13 @@ private:
 using BorderEdges = RectEdges<BorderEdge>;
 BorderEdges borderEdges(const RenderStyle&, float deviceScaleFactor, bool setColorsToBlack = false, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 BorderEdges borderEdgesForOutline(const RenderStyle&, float deviceScaleFactor);
+
+struct DoubleBorderInsets {
+    RectEdges<LayoutUnit> widthsOfOuterStripe;
+    RectEdges<LayoutUnit> widthsToInnerStripe;
+};
+DoubleBorderInsets doubleBorderInsetWidths(const BorderEdges&);
+RectEdges<LayoutUnit> halfBorderWidths(const BorderEdges&);
 
 inline bool edgesShareColor(const BorderEdge& firstEdge, const BorderEdge& secondEdge) { return firstEdge.color() == secondEdge.color(); }
 inline BoxSideFlag edgeFlagForSide(BoxSide side) { return static_cast<BoxSideFlag>(1 << static_cast<unsigned>(side)); }

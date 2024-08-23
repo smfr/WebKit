@@ -48,8 +48,12 @@ class RenderStyle;
 class BorderShape {
 public:
     static BorderShape shapeForBorderRect(const RenderStyle&, const LayoutRect& borderRect, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+
     // overrideBorderWidths describe custom insets from the border box, used instead of the border widths from the style.
     static BorderShape shapeForBorderRect(const RenderStyle&, const LayoutRect& borderRect, const RectEdges<LayoutUnit>& overrideBorderWidths, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
+
+    // Create a BorderShape suitable for rendering an outline. borderRect is provided to allow for scaling the corner radii.
+    static BorderShape shapeForOutlineRect(const RenderStyle&, const LayoutRect& borderRect, const LayoutRect& outlineBoxRect, const RectEdges<LayoutUnit>& outlineWidths, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 
     BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths);
     BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii&);
@@ -92,6 +96,9 @@ public:
     Path pathForInnerShape(float deviceScaleFactor) const;
 
     Path pathForBorderArea(float deviceScaleFactor) const;
+
+    void addOuterShapeToPath(Path&, float deviceScaleFactor) const;
+    void addInnerShapeToPath(Path&, float deviceScaleFactor) const;
 
     void clipToOuterShape(GraphicsContext&, float deviceScaleFactor) const;
     void clipToInnerShape(GraphicsContext&, float deviceScaleFactor) const;

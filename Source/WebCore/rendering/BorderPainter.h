@@ -46,7 +46,7 @@ public:
 
 private:
     struct Sides;
-    void paintSides(const Sides&) const;
+    void paintSides(const BorderShape&, const Sides&) const;
 
     void paintTranslucentBorderSides(const RoundedRect& outerBorder, const RoundedRect& innerBorder, const IntPoint& innerBorderAdjustment,
         const BorderEdges&, BoxSideSet edgesToDraw, std::optional<BorderDataRadii>, BleedAvoidance, bool includeLogicalLeftEdge, bool includeLogicalRightEdge, bool antialias, bool isHorizontal) const;
