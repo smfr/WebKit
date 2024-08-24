@@ -198,20 +198,25 @@ FloatRect BorderShape::snappedInnerRect(float deviceScaleFactor) const
     return snapRectToDevicePixels(innerEdgeRect(), deviceScaleFactor);
 }
 
+bool BorderShape::innerShapeIsRounded() const
+{
+    return innerEdgeRoundedRect().isRounded();
+}
+
 void BorderShape::makeRenderable()
 {
     if (!m_borderRect.isRenderable())
         m_borderRect.adjustRadii();
 }
 
-bool BorderShape::innerShapeContains(const LayoutRect& rect) const
-{
-    return innerEdgeRoundedRect().contains(rect);
-}
-
 bool BorderShape::outerShapeContains(const LayoutRect& rect) const
 {
     return m_borderRect.contains(rect);
+}
+
+bool BorderShape::innerShapeContains(const LayoutRect& rect) const
+{
+    return innerEdgeRoundedRect().contains(rect);
 }
 
 void BorderShape::move(LayoutSize offset)
