@@ -884,6 +884,9 @@ static bool rareDataChangeRequiresLayout(const StyleRareNonInheritedData& first,
     if (first.overflowContinue != second.overflowContinue)
         return true;
 
+    if (!arePointingToEqualData(first.borderShape, second.borderShape))
+        return true;
+
     return false;
 }
 
@@ -1870,6 +1873,8 @@ void RenderStyle::conservativelyCollectChangedAnimatableProperties(const RenderS
             changingProperties.m_properties.set(CSSPropertyPerspective);
         if (!arePointingToEqualData(first.clipPath, second.clipPath))
             changingProperties.m_properties.set(CSSPropertyClipPath);
+        if (!arePointingToEqualData(first.borderShape, second.borderShape))
+            changingProperties.m_properties.set(CSSPropertyBorderShape);
         if (first.textDecorationColor != second.textDecorationColor)
             changingProperties.m_properties.set(CSSPropertyTextDecorationColor);
         if (!arePointingToEqualData(first.rotate, second.rotate))

@@ -2844,6 +2844,16 @@
                 "url": "https://drafts.csswg.org/css-logical-1/#border-radius-properties"
             }
         },
+        "border-shape": {
+            "codegen-properties": {
+                "parser-function": "consumeBorderShape",
+                "converter": "BorderShape",
+                "parser-grammar-unused": "[ <basic-shape> <geometry-box>? ]{1,2} | none",
+                "parser-grammar-unused-reason": "Needs support for '{A,B}' multipliers.",
+                "settings-flag": "cssBorderShapeEnabled"
+            },
+            "status": "experimental"
+        },
         "border-style": {
             "codegen-properties": {
                 "longhands": [

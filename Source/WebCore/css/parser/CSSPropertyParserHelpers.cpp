@@ -1184,6 +1184,43 @@ RefPtr<CSSValue> consumeBorderRadiusCorner(CSSParserTokenRange& range, const CSS
     return CSSValuePair::create(parsedValue1.releaseNonNull(), parsedValue2.releaseNonNull());
 }
 
+// Syntax: [ <basic-shape> <geometry-box>? ]{1,2} | none
+RefPtr<CSSValue> consumeBorderShape(CSSParserTokenRange& range, const CSSParserContext& context)
+{
+    if (range.peek().id() == CSSValueNone)
+        return consumeIdent(range);
+
+    auto consumeOneShape = [&]() -> RefPtr<CSSValue> {
+        CSSValueListBuilder list;
+        RefPtr shape = consumeBasicShape(range, context, { RejectRay });
+        if (!shape)
+            return nullptr;
+
+        list.append(shape.releaseNonNull());
+
+        if (RefPtr outerShapeBox = CSSPropertyParsing::consumeGeometryBox(range))
+            list.append(outerShapeBox.releaseNonNull());
+
+        return CSSValueList::createSpaceSeparated(WTFMove(list));
+    };
+
+    RefPtr outerShape = consumeOneShape();
+    if (!outerShape)
+        return nullptr;
+
+    CSSValueListBuilder shapeList;
+    shapeList.append(outerShape.releaseNonNull());
+
+    if (consumeCommaIncludingWhitespace(range)) {
+        RefPtr innerShape = consumeOneShape();
+        if (!innerShape)
+            return nullptr;
+
+        shapeList.append(innerShape.releaseNonNull());
+    }
+    return CSSValueList::createCommaSeparated(WTFMove(shapeList));
+}
+
 static RefPtr<CSSPrimitiveValue> consumeShapeRadius(CSSParserTokenRange& args, const CSSParserContext& context)
 {
     if (identMatches<CSSValueClosestSide, CSSValueFarthestSide, CSSValueClosestCorner, CSSValueFarthestCorner>(args.peek().id()))
@@ -1687,7 +1724,7 @@ static RefPtr<CSSInsetShapeValue> consumeBasicShapeInset(CSSParserTokenRange& ar
     return nullptr;
 }
 
-static RefPtr<CSSValue> consumeBasicShape(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption> options)
+RefPtr<CSSValue> consumeBasicShape(CSSParserTokenRange& range, const CSSParserContext& context, OptionSet<PathParsingOption> options)
 {
     auto rangeCopy = range;
 

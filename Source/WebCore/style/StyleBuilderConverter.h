@@ -56,6 +56,7 @@
 #include "CSSSubgridValue.h"
 #include "CSSTimingFunctionValue.h"
 #include "CSSValuePair.h"
+#include "BorderShape.h"
 #include "CalculationValue.h"
 #include "FontPalette.h"
 #include "FontSelectionValueInlines.h"
@@ -135,6 +136,7 @@ public:
     static RefPtr<BasicShapePath> convertSVGPath(const BuilderState&, const CSSValue&);
     static RefPtr<PathOperation> convertPathOperation(const BuilderState&, const CSSValue&);
     static RefPtr<PathOperation> convertRayPathOperation(const BuilderState&, const CSSValue&);
+    static RefPtr<BorderShapeValue> convertBorderShape(const BuilderState&, const CSSValue&);
     static Resize convertResize(const BuilderState&, const CSSValue&);
     static int convertMarqueeRepetition(const BuilderState&, const CSSValue&);
     static int convertMarqueeSpeed(const BuilderState&, const CSSValue&);
@@ -833,6 +835,38 @@ inline RefPtr<PathOperation> BuilderConverter::convertPathOperation(const Builde
     }
 
     return operation;
+}
+
+inline RefPtr<BorderShapeValue> BuilderConverter::convertBorderShape(const BuilderState& builderState, const CSSValue& value)
+{
+    if (auto* primitiveValue = dynamicDowncast<CSSPrimitiveValue>(value))
+        return nullptr;
+
+    // Value is a list of lists.
+    RefPtr shapeList = dynamicDowncast<CSSValueList>(value);
+    if (!shapeList || !shapeList->size())
+        return nullptr;
+
+    auto processSingleValue = [&](const CSSValue* currentValue, RefPtr<BasicShape>& shape, CSSBoxType& boxType) {
+        RefPtr singleShapeList = dynamicDowncast<CSSValueList>(currentValue);
+        if (!singleShapeList || !singleShapeList->size())
+            return;
+
+        shape = basicShapeForValue(*singleShapeList->item(0), builderState, 1);
+        if (singleShapeList->size() == 2)
+            boxType = fromCSSValue<CSSBoxType>(*singleShapeList->item(1));
+    };
+
+    RefPtr<BasicShape> outerShape;
+    RefPtr<BasicShape> innerShape;
+    auto outerReferenceBox = CSSBoxType::BoxMissing;
+    auto innerReferenceBox = CSSBoxType::BoxMissing;
+
+    processSingleValue(shapeList->item(0), outerShape, outerReferenceBox);
+    if (shapeList->size() == 2)
+        processSingleValue(shapeList->item(1), innerShape, innerReferenceBox);
+
+    return BorderShapeValue::create(outerShape.releaseNonNull(), outerReferenceBox, WTFMove(innerShape), innerReferenceBox);
 }
 
 inline Resize BuilderConverter::convertResize(const BuilderState& builderState, const CSSValue& value)

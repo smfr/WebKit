@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "BorderShapeValue.h"
 #include "CSSPropertyNames.h"
 #include "CounterDirectives.h"
 #include "FillLayer.h"
@@ -150,6 +151,7 @@ public:
     float perspective;
 
     RefPtr<PathOperation> clipPath;
+    RefPtr<BorderShapeValue> borderShape;
 
     StyleColor textDecorationColor;
 

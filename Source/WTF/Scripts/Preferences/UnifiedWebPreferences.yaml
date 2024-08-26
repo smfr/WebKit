@@ -1105,6 +1105,34 @@ CSSBackgroundClipBorderAreaEnabled:
     WebCore:
       default: true
 
+CSSBorderShapeEnabled:
+  type: bool
+  status: unstable
+  category: css
+  humanReadableName: "CSS border-shape property"
+  humanReadableDescription: "Enable the CSS border-shape property"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
+CSSColorContrastEnabled:
+  type: bool
+  status: testable
+  category: css
+  humanReadableName: "CSS color-contrast()"
+  humanReadableDescription: "Enable support for CSS color-contrast() defined in CSS Color 5"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 CSSColorLayersEnabled:
   type: bool
   category: css

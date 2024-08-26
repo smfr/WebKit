@@ -2861,6 +2861,7 @@ rendering/style/BasicShapes.cpp
 rendering/style/BasicShapesShape.cpp
 rendering/style/BorderData.cpp
 rendering/style/BorderValue.cpp
+rendering/style/BorderShapeValue.cpp
 rendering/style/ContentData.cpp
 rendering/style/FillLayer.cpp
 rendering/style/GapLength.cpp

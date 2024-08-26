@@ -102,6 +102,8 @@ bool consumeBorderImageComponents(CSSParserTokenRange&, const CSSParserContext&,
 RefPtr<CSSValue> consumeReflect(CSSParserTokenRange&, const CSSParserContext&);
 RefPtr<CSSValue> consumeSingleBackgroundClip(CSSParserTokenRange&, const CSSParserContext&);
 RefPtr<CSSValue> consumeBackgroundClip(CSSParserTokenRange&, const CSSParserContext&);
+RefPtr<CSSValue> consumeBasicShape(CSSParserTokenRange&, const CSSParserContext&, OptionSet<PathParsingOption>);
+RefPtr<CSSValue> consumeBorderShape(CSSParserTokenRange&, const CSSParserContext&);
 RefPtr<CSSValue> consumeSingleBackgroundSize(CSSParserTokenRange&, const CSSParserContext&);
 RefPtr<CSSValue> consumeSingleMaskSize(CSSParserTokenRange&, const CSSParserContext&);
 RefPtr<CSSValue> consumeSingleWebkitBackgroundSize(CSSParserTokenRange&, const CSSParserContext&);

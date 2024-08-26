@@ -141,6 +141,7 @@ inline const LengthSize& RenderStyle::borderTopRightRadius() const { return bord
 inline BorderStyle RenderStyle::borderTopStyle() const { return border().top().style(); }
 inline float RenderStyle::borderTopWidth() const { return border().borderTopWidth(); }
 inline FloatBoxExtent RenderStyle::borderWidth() const { return border().borderWidth(); }
+inline BorderShapeValue* RenderStyle::borderShape() const { return m_nonInheritedData->rareData->borderShape.get(); }
 inline const Length& RenderStyle::bottom() const { return m_nonInheritedData->surroundData->offset.bottom(); }
 inline BoxAlignment RenderStyle::boxAlign() const { return static_cast<BoxAlignment>(m_nonInheritedData->miscData->deprecatedFlexibleBox->align); }
 inline float RenderStyle::boxFlex() const { return m_nonInheritedData->miscData->deprecatedFlexibleBox->flex; }

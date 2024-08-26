@@ -62,6 +62,7 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , shapeImageThreshold(RenderStyle::initialShapeImageThreshold())
     , perspective(RenderStyle::initialPerspective())
     , clipPath(RenderStyle::initialClipPath())
+    , borderShape(RenderStyle::initialBorderShape())
     , textDecorationColor(RenderStyle::initialTextDecorationColor())
     , customProperties(StyleCustomPropertyData::create())
     // customPaintWatchedProperties
@@ -160,6 +161,7 @@ inline StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonIn
     , shapeImageThreshold(o.shapeImageThreshold)
     , perspective(o.perspective)
     , clipPath(o.clipPath)
+    , borderShape(o.borderShape)
     , textDecorationColor(o.textDecorationColor)
     , customProperties(o.customProperties)
     , customPaintWatchedProperties(o.customPaintWatchedProperties)
@@ -265,6 +267,7 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && shapeImageThreshold == o.shapeImageThreshold
         && perspective == o.perspective
         && arePointingToEqualData(clipPath, o.clipPath)
+        && arePointingToEqualData(borderShape, o.borderShape)
         && textDecorationColor == o.textDecorationColor
         && customProperties == o.customProperties
         && customPaintWatchedProperties == o.customPaintWatchedProperties

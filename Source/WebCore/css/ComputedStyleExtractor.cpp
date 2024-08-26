@@ -2028,6 +2028,12 @@ static Ref<CSSValue> valueForPathOperation(const RenderStyle& style, const PathO
     return CSSPrimitiveValue::create(CSSValueNone);
 }
 
+static Ref<CSSValue> valueForBorderShape(const RenderStyle&, const BorderShapeValue*)
+{
+    // FIXME
+    return CSSPrimitiveValue::create(CSSValueNone);
+}
+
 static Ref<CSSValue> valueForContainIntrinsicSize(const RenderStyle& style, const ContainIntrinsicSizeType& type, const std::optional<Length> containIntrinsicLength)
 {
     switch (type) {
@@ -3648,6 +3654,8 @@ RefPtr<CSSValue> ComputedStyleExtractor::valueForPropertyInStyle(const RenderSty
         if (style.borderImageSource())
             return style.borderImageSource()->computedStyleValue(style);
         return CSSPrimitiveValue::create(CSSValueNone);
+    case CSSPropertyBorderShape:
+        return valueForBorderShape(style, style.borderShape());
     case CSSPropertyBorderTopColor:
         return m_allowVisitedStyle ? cssValuePool.createColorValue(style.visitedDependentColor(CSSPropertyBorderTopColor)) : currentColorOrValidColor(style, style.borderTopColor());
     case CSSPropertyBorderRightColor:

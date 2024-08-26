@@ -37,6 +37,7 @@ class AnimationList;
 class AutosizeStatus;
 class BasicShapePath;
 class BorderData;
+class BorderShapeValue;
 class BorderValue;
 class CSSCustomPropertyValue;
 struct CSSPropertiesBitSet;
@@ -1773,7 +1774,11 @@ public:
 
     inline void setClipPath(RefPtr<PathOperation>&&);
     inline PathOperation* clipPath() const;
-    static PathOperation* initialClipPath() { return nullptr; }
+    static constexpr PathOperation* initialClipPath() { return nullptr; }
+
+    inline void setBorderShape(RefPtr<BorderShapeValue>&&);
+    inline BorderShapeValue* borderShape() const;
+    static constexpr BorderShapeValue* initialBorderShape() { return nullptr; }
 
     inline bool hasUsedContentNone() const;
     inline bool hasContent() const;

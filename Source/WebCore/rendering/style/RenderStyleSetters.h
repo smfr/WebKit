@@ -447,6 +447,12 @@ inline void RenderStyle::setClipPath(RefPtr<PathOperation>&& operation)
         m_nonInheritedData.access().rareData.access().clipPath = WTFMove(operation);
 }
 
+inline void RenderStyle::setBorderShape(RefPtr<BorderShapeValue>&& borderShape)
+{
+    if (m_nonInheritedData->rareData->borderShape != borderShape)
+        m_nonInheritedData.access().rareData.access().borderShape = WTFMove(borderShape);
+}
+
 inline void RenderStyle::setColumnCount(unsigned short count)
 {
     unsigned short clampedCount = std::max<unsigned short>(count, 1);
