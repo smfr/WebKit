@@ -4379,6 +4379,7 @@ CSSPropertyAnimationWrapperMap::CSSPropertyAnimationWrapperMap()
 #endif
         case CSSPropertyWebkitUserDrag:
         case CSSPropertyWebkitUserModify:
+        case CSSPropertyBorderShape: // FIXME
             continue;
         default:
             if (CSSProperty::isDescriptorOnly(property))

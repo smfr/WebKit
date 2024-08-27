@@ -44,8 +44,8 @@ public:
         return adoptRef(*new BorderShapeValue(WTFMove(outerShape), outerShapeCSSBox, WTFMove(innerShape), innerShapeCSSBox));
     }
 
-    BasicShape* outerShape() const { return m_outerShape.get(); }
-    BasicShape* innerShape() const { return m_innerShape.get(); }
+    const BasicShape& outerShape() const { return m_outerShape.get(); }
+    const BasicShape* innerShape() const { return m_innerShape.get(); }
 
     CSSBoxType outerShapeCSSBox() const { return m_outerShapeCSSBox; }
     CSSBoxType effectiveOuterShapeCSSBox() const;
@@ -67,7 +67,7 @@ private:
     {
     }
 
-    RefPtr<BasicShape> m_outerShape;
+    Ref<BasicShape> m_outerShape;
     RefPtr<BasicShape> m_innerShape;
     CSSBoxType m_outerShapeCSSBox { CSSBoxType::BoxMissing };
     CSSBoxType m_innerShapeCSSBox { CSSBoxType::BoxMissing };

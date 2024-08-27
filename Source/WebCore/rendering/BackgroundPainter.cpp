@@ -179,7 +179,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
     auto& style = m_renderer.style();
     auto layerClip = m_overrideClip.value_or(bgLayer.clip());
 
-    bool hasRoundedBorder = style.hasBorderRadius() && (includeLeftEdge || includeRightEdge);
+    bool needsShapeBasedClip = (style.hasBorderRadius() && (includeLeftEdge || includeRightEdge)) || style.borderShape();
     bool clippedWithLocalScrolling = m_renderer.hasNonVisibleOverflow() && bgLayer.attachment() == FillAttachment::LocalBackground;
     bool isBorderFill = layerClip == FillBox::BorderBox;
     bool isRoot = m_renderer.isDocumentElementRenderer();
@@ -254,7 +254,7 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
         if (applyBoxShadowToBackground)
             applyBoxShadowForBackground(context, style);
 
-        if (hasRoundedBorder && bleedAvoidance != BleedAvoidance::UseTransparencyLayer) {
+        if (needsShapeBasedClip && bleedAvoidance != BleedAvoidance::UseTransparencyLayer) {
             auto borderShape = borderShapeRespectingBleedAvoidance(includeLeftEdge, includeRightEdge);
             auto previousOperator = context.compositeOperation();
             bool saveRestoreCompositeOp = op != previousOperator;
@@ -274,8 +274,8 @@ void BackgroundPainter::paintFillLayer(const Color& color, const FillLayer& bgLa
         return;
     }
 
-    // FillBox::BorderBox radius clipping is taken care of by BleedAvoidance::UseTransparencyLayer
-    bool clipToBorderRadius = hasRoundedBorder && !(isBorderFill && bleedAvoidance == BleedAvoidance::UseTransparencyLayer);
+    // FillBox::BorderBox radius clipping is taken care of by BackgroundBleedUseTransparencyLayer
+    bool clipToBorderRadius = needsShapeBasedClip && !(isBorderFill && bleedAvoidance == BleedAvoidance::UseTransparencyLayer);
     GraphicsContextStateSaver clipToBorderStateSaver(context, clipToBorderRadius);
     if (clipToBorderRadius) {
 
@@ -791,7 +791,6 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
 
     const auto borderShape = BorderShape::shapeForBorderRect(style, paintRect, includeLogicalLeftEdge, includeLogicalRightEdge);
 
-    bool hasBorderRadius = style.hasBorderRadius();
     float deviceScaleFactor = document().deviceScaleFactor();
 
     bool hasOpaqueBackground = style.visitedDependentColorWithColorFilter(CSSPropertyBackgroundColor).isOpaque();
@@ -823,6 +822,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
         };
 
         if (shadow->style() == ShadowStyle::Normal) {
+            WTF_ALWAYS_LOG("Rendering normal shadow");
             auto shadowShape = borderShape;
             shadowShape.inflate(shadowSpread);
             if (shadowShape.isEmpty())
@@ -860,7 +860,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
 
             adjustedBorderShape.clipOutOuterShape(context, deviceScaleFactor);
 
-            if (hasBorderRadius) {
+            if (borderShape.isRounded() || borderShape.requiresPathBasedRendering()) {
                 auto influenceShape = BorderShape::shapeForBorderRect(style, shadowRect);
                 auto influenceRadii = influenceShape.radii();
                 influenceRadii.expand(2 * shadowPaintingExtent + shadowSpread);

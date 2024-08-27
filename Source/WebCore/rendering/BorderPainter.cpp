@@ -261,7 +261,7 @@ void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style
     auto edges = borderEdges(style, document().deviceScaleFactor(), m_paintInfo.paintBehavior.contains(PaintBehavior::ForceBlackBorder), includeLogicalLeftEdge, includeLogicalRightEdge);
     bool haveAllSolidEdges = decorationHasAllSolidEdges(edges);
 
-    if (haveAllSolidEdges && borderShape.isRounded() && borderShape.outerShapeContains(m_paintInfo.rect))
+    if (haveAllSolidEdges && (borderShape.isRounded() || borderShape.requiresPathBasedRendering()) && borderShape.outerShapeContains(m_paintInfo.rect))
         borderShape.setRadii({ });
 
     paintSides(borderShape, {
@@ -427,14 +427,23 @@ void BorderPainter::paintSides(const BorderShape& borderShape, const Sides& side
     auto deviceScaleFactor = document().deviceScaleFactor();
     if ((sides.haveAllSolidEdges || haveAllDoubleEdges) && allEdgesShareColor) {
         // Fast path for drawing all solid edges and all unrounded double edges
-        if (numEdgesVisible == 4 && (borderShape.isRounded() || haveAlphaColor)
+        if (numEdgesVisible == 4 && (borderShape.isRounded() || borderShape.requiresPathBasedRendering() || haveAlphaColor)
             && (sides.haveAllSolidEdges || (!borderShape.isRounded() && !borderShape.innerShapeIsRounded()))) {
-            Path path;
 
+            if (borderShape.hasSingleBorderShape()) {
+                auto borderPath = borderShape.pathForOuterShape(deviceScaleFactor);
+                graphicsContext.setStrokeThickness(sides.edges.at(*firstVisibleSide).widthForPainting());
+                graphicsContext.setStrokeColor(sides.edges.at(*firstVisibleSide).color());
+                graphicsContext.strokePath(borderPath);
+                return;
+            }
+
+            Path path;
             if (sides.bleedAvoidance == BleedAvoidance::UseTransparencyLayer)
                 path.addRect(borderShape.snappedOuterRect(deviceScaleFactor));
             else
                 borderShape.addOuterShapeToPath(path, deviceScaleFactor);
+
 
             if (haveAllDoubleEdges) {
                 auto stripeInsetWidths = doubleBorderInsetWidths(sides.edges);
@@ -774,7 +783,7 @@ void BorderPainter::paintBorderSides(const BorderShape& borderShape, LayoutSize 
     bool isRounded = borderShape.isRounded();
 
     Path roundedPath;
-    if (isRounded)
+    if (isRounded || borderShape.requiresPathBasedRendering())
         borderShape.addOuterShapeToPath(roundedPath, document().deviceScaleFactor());
 
     auto paintOneSide = [&](BoxSide side, BoxSide adjacentSide1, BoxSide adjacentSide2) {

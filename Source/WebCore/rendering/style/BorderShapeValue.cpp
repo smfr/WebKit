@@ -31,11 +31,16 @@
 
 namespace WebCore {
 
+template<typename T> inline bool refsAreEqual(const Ref<T>& a, const Ref<T>& b)
+{
+    return a.ptr() == b.ptr() || a == b;
+}
+
 bool BorderShapeValue::operator==(const BorderShapeValue& other) const
 {
     return m_outerShapeCSSBox == other.m_outerShapeCSSBox
         && m_innerShapeCSSBox == other.m_innerShapeCSSBox
-        && arePointingToEqualData(m_outerShape, other.m_outerShape)
+        && refsAreEqual(m_outerShape, other.m_outerShape)
         && arePointingToEqualData(m_innerShape, other.m_innerShape);
 }
 
@@ -49,7 +54,7 @@ Ref<BorderShapeValue> BorderShapeValue::blend(const BorderShapeValue& to, const 
     RefPtr<BasicShape> blendedInnerShape;
     if (m_innerShape)
         blendedInnerShape = to.innerShape()->blend(*m_innerShape, context);
-    return BorderShapeValue::create(to.outerShape()->blend(*m_outerShape, context), m_outerShapeCSSBox, WTFMove(blendedInnerShape), m_innerShapeCSSBox);
+    return BorderShapeValue::create(to.outerShape().blend(m_outerShape.get(), context), m_outerShapeCSSBox, WTFMove(blendedInnerShape), m_innerShapeCSSBox);
 }
 
 CSSBoxType BorderShapeValue::effectiveOuterShapeCSSBox() const

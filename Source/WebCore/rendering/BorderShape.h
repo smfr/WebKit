@@ -35,6 +35,7 @@
 
 namespace WebCore {
 
+class BorderShapeValue;
 class Color;
 class GraphicsContext;
 class FloatRect;
@@ -55,12 +56,13 @@ public:
     // Create a BorderShape suitable for rendering an outline. borderRect is provided to allow for scaling the corner radii.
     static BorderShape shapeForOutlineRect(const RenderStyle&, const LayoutRect& borderRect, const LayoutRect& outlineBoxRect, const RectEdges<LayoutUnit>& outlineWidths, bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true);
 
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths);
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii&);
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, RefPtr<BorderShapeValue>&& borderShape);
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii&, RefPtr<BorderShapeValue>&& borderShape);
 
     BorderShape(const BorderShape& other)
         : m_borderRect(other.m_borderRect)
         , m_borderWidths(other.m_borderWidths)
+        , m_borderShape(other.m_borderShape)
     {
     }
 
@@ -87,6 +89,9 @@ public:
     bool isRounded() const { return m_borderRect.isRounded(); }
     bool innerShapeIsRounded() const;
 
+    bool requiresPathBasedRendering() const;
+    bool hasSingleBorderShape() const;
+
     bool isEmpty() const { return m_borderRect.rect().isEmpty(); }
 
     void move(LayoutSize);
@@ -97,7 +102,7 @@ public:
     Path pathForOuterShape(float deviceScaleFactor) const;
     Path pathForInnerShape(float deviceScaleFactor) const;
 
-    Path pathForBorderArea(float deviceScaleFactor) const;
+    std::optional<Path> pathForBorderArea(float deviceScaleFactor) const;
 
     void addOuterShapeToPath(Path&, float deviceScaleFactor) const;
     void addInnerShapeToPath(Path&, float deviceScaleFactor) const;
@@ -117,8 +122,11 @@ private:
     RoundedRect innerEdgeRoundedRect() const;
     LayoutRect innerEdgeRect() const;
 
+    bool needPathBasedShapes() const;
+
     RoundedRect m_borderRect;
     RectEdges<LayoutUnit> m_borderWidths;
+    RefPtr<BorderShapeValue> m_borderShape;
 };
 
 } // namespace WebCore
