@@ -822,7 +822,6 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
         };
 
         if (shadow->style() == ShadowStyle::Normal) {
-            WTF_ALWAYS_LOG("Rendering normal shadow");
             auto shadowShape = borderShape;
             shadowShape.inflate(shadowSpread);
             if (shadowShape.isEmpty())
