@@ -1090,6 +1090,7 @@ bool RenderLayerBacking::updateConfiguration(const RenderLayer* compositingAnces
         // If it's scrollable, it has to be a box.
         auto& renderBox = downcast<RenderBox>(renderer());
         auto borderShape = BorderShape::shapeForBorderRect(renderBox.style(), renderBox.borderBoxRect());
+        // FIXME.
         FloatRoundedRect contentsClippingRect = borderShape.deprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor());
         needsDescendantsClippingLayer = contentsClippingRect.isRounded();
     } else
@@ -1515,18 +1516,16 @@ void RenderLayerBacking::updateGeometry(const RenderLayer* compositedAncestor)
         clipLayer->setSize(snappedClippingGraphicsLayer.m_snappedRect.size());
         clipLayer->setOffsetFromRenderer(toLayoutSize(clippingBox.location() - snappedClippingGraphicsLayer.m_snapDelta));
 
-        auto computeMasksToBoundsRect = [&] {
-            if ((renderer().style().clipPath() || renderer().style().hasBorderRadius())) {
-                auto borderShape = BorderShape::shapeForBorderRect(renderer().style(), m_owningLayer.rendererBorderBoxRect());
-                auto contentsClippingRect = borderShape.deprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor);
-                contentsClippingRect.move(LayoutSize(-clipLayer->offsetFromRenderer()));
-                return contentsClippingRect;
-            }
+        if ((renderer().style().clipPath() || renderer().style().hasBorderRadius()) || renderer().style().borderShape()) {
+            auto borderShape = BorderShape::shapeForBorderRect(renderer().style(), m_owningLayer.rendererBorderBoxRect());
+            auto clippingPath = borderShape.pathForInnerShape(deviceScaleFactor);
+            clipLayer->setContentsClippingPath(WTFMove(clippingPath));
 
-            return FloatRoundedRect { FloatRect { { }, snappedClippingGraphicsLayer.m_snappedRect.size() } };
-        };
-
-        clipLayer->setContentsClippingRect(computeMasksToBoundsRect());
+        } else {
+            Path path;
+            path.addRect(FloatRect { { }, snappedClippingGraphicsLayer.m_snappedRect.size() });
+            clipLayer->setContentsClippingPath(WTFMove(path));
+        }
     }
 
     if (m_maskLayer)
@@ -1769,7 +1768,7 @@ void RenderLayerBacking::updateMaskingLayerGeometry()
             if (!pathOffset.isZero())
                 clipPath.translate(-pathOffset);
             
-            m_maskLayer->setShapeLayerPath(clipPath);
+            m_maskLayer->setShapeLayerPath(WTFMove(clipPath));
             m_maskLayer->setShapeLayerWindRule(windRule);
         }
     }
@@ -1879,9 +1878,11 @@ void RenderLayerBacking::updateContentsRects()
     
     if (CheckedPtr renderReplaced = dynamicDowncast<RenderReplaced>(renderer())) {
         auto borderShape = renderReplaced->borderShapeForContentClipping(renderReplaced->borderBoxRect());
-        auto contentsClippingRect = borderShape.deprecatedPixelSnappedInnerRoundedRect(deviceScaleFactor());
-        contentsClippingRect.move(contentOffsetInCompositingLayer());
-        m_graphicsLayer->setContentsClippingRect(contentsClippingRect);
+
+        auto contentsClippingPath = borderShape.pathForInnerShape(deviceScaleFactor());
+        // FIXME: Don't translate.
+        contentsClippingPath.translate(contentOffsetInCompositingLayer());
+        m_graphicsLayer->setContentsClippingPath(WTFMove(contentsClippingPath));
     }
 }
 
@@ -2190,7 +2191,12 @@ void RenderLayerBacking::updateClippingStackLayerGeometry(LayerAncestorClippingS
 
         clipRect.setLocation({ });
         roundedClipRect.setRect(clipRect);
-        entry.clippingLayer->setContentsClippingRect(FloatRoundedRect(roundedClipRect));
+
+        Path path;
+        // FIXME: Pixel snapping.
+        path.addRoundedRect(FloatRoundedRect(roundedClipRect));
+
+        entry.clippingLayer->setContentsClippingPath(WTFMove(path));
         entry.clippingLayer->setContentsRectClipsDescendants(true);
 
         lastClipLayerRect = snappedClippingLayerRect;
@@ -2399,7 +2405,11 @@ void RenderLayerBacking::positionOverflowControlsLayers()
         if (layer.usesContentsLayer()) {
             IntRect barRect = IntRect(IntPoint(), scrollbarRect.size());
             layer.setContentsRect(barRect);
-            layer.setContentsClippingRect(FloatRoundedRect(barRect));
+
+            Path path;
+            // FIXME: Pixel snapping
+            path.addRoundedRect(FloatRoundedRect(barRect));
+            layer.setContentsClippingPath(WTFMove(path));
         }
     };
 
@@ -2795,7 +2805,11 @@ void RenderLayerBacking::updateDirectlyCompositedBackgroundColor(PaintedContents
         // big enough to hide overflow areas of the root.
         contentsRect.inflate(contentsRect.size());
         m_backgroundLayer->setContentsRect(contentsRect);
-        m_backgroundLayer->setContentsClippingRect(FloatRoundedRect(contentsRect));
+
+        Path path;
+        // FIXME: Pixel snapping
+        path.addRoundedRect(FloatRoundedRect(contentsRect));
+        m_backgroundLayer->setContentsClippingPath(WTFMove(path));
         return;
     }
 
@@ -2810,7 +2824,11 @@ void RenderLayerBacking::updateDirectlyCompositedBackgroundColor(PaintedContents
     m_graphicsLayer->setContentsToSolidColor(backgroundColor);
     FloatRect contentsRect = backgroundBoxForSimpleContainerPainting();
     m_graphicsLayer->setContentsRect(contentsRect);
-    m_graphicsLayer->setContentsClippingRect(FloatRoundedRect(contentsRect));
+
+    Path path;
+    // FIXME: Pixel snapping
+    path.addRoundedRect(FloatRoundedRect(contentsRect));
+    m_graphicsLayer->setContentsClippingPath(WTFMove(path));
     didUpdateContentsRect = true;
 }
 
@@ -2835,7 +2853,11 @@ void RenderLayerBacking::updateDirectlyCompositedBackgroundImage(PaintedContents
     m_graphicsLayer->setContentsTileSize(geometry.tileSize);
     m_graphicsLayer->setContentsTilePhase(geometry.phase);
     m_graphicsLayer->setContentsRect(geometry.destinationRect);
-    m_graphicsLayer->setContentsClippingRect(FloatRoundedRect(geometry.destinationRect));
+
+    Path path;
+    // FIXME: Pixel snapping
+    path.addRoundedRect(FloatRoundedRect(geometry.destinationRect));
+    m_graphicsLayer->setContentsClippingPath(WTFMove(path));
     m_graphicsLayer->setContentsToImage(style.backgroundLayers().image()->cachedImage()->image());
 
     didUpdateContentsRect = true;

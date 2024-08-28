@@ -525,10 +525,10 @@ Path GraphicsLayer::shapeLayerPath() const
 #endif
 }
 
-void GraphicsLayer::setShapeLayerPath(const Path& path)
+void GraphicsLayer::setShapeLayerPath(Path&& path)
 {
 #if USE(CA)
-    m_shapeLayerPath = path;
+    m_shapeLayerPath = WTFMove(path);
 #else
     UNUSED_PARAM(path);
 #endif

@@ -129,12 +129,12 @@ public:
     WEBCORE_EXPORT void setContentsNeedsDisplay() override;
     
     WEBCORE_EXPORT void setContentsRect(const FloatRect&) override;
-    WEBCORE_EXPORT void setContentsClippingRect(const FloatRoundedRect&) override;
+    WEBCORE_EXPORT void setContentsClippingPath(Path&&) override;
     WEBCORE_EXPORT void setContentsRectClipsDescendants(bool) override;
 
     WEBCORE_EXPORT void setVideoGravity(MediaPlayerVideoGravity) override;
 
-    WEBCORE_EXPORT void setShapeLayerPath(const Path&) override;
+    WEBCORE_EXPORT void setShapeLayerPath(Path&&) override;
     WEBCORE_EXPORT void setShapeLayerWindRule(WindRule) override;
 
     WEBCORE_EXPORT void setEventRegion(EventRegion&&) override;
@@ -344,7 +344,7 @@ private:
     void setupContentsLayer(PlatformCALayer*, CompositingCoordinatesOrientation = defaultContentsOrientation);
     PlatformCALayer* contentsLayer() const { return m_contentsLayer.get(); }
 
-    void updateClippingStrategy(PlatformCALayer&, RefPtr<PlatformCALayer>& shapeMaskLayer, const FloatRoundedRect&);
+    void updateClippingStrategy(PlatformCALayer&, RefPtr<PlatformCALayer>& shapeMaskLayer, const Path&);
 
     WEBCORE_EXPORT void setReplicatedByLayer(RefPtr<GraphicsLayer>&&) override;
 

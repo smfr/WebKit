@@ -498,9 +498,9 @@ public:
     virtual void setContentsRect(const FloatRect& r) { m_contentsRect = r; }
 
     // Set a rounded rect that will be used to clip the layer contents.
-    FloatRoundedRect contentsClippingRect() const { return m_contentsClippingRect; }
-    virtual void setContentsClippingRect(const FloatRoundedRect& roundedRect) { m_contentsClippingRect = roundedRect; }
-    
+    const Path& contentsClippingPath() const { return m_contentsClippingPath; }
+    virtual void setContentsClippingPath(Path&& path) { m_contentsClippingPath = WTFMove(path); }
+
     // If true, contentsClippingRect is used to clip child GraphicsLayers.
     bool contentsRectClipsDescendants() const { return m_contentsRectClipsDescendants; }
     virtual void setContentsRectClipsDescendants(bool b) { m_contentsRectClipsDescendants = b; }
@@ -510,7 +510,7 @@ public:
     WEBCORE_EXPORT virtual void setVideoGravity(MediaPlayerVideoGravity);
 
     Path shapeLayerPath() const;
-    WEBCORE_EXPORT virtual void setShapeLayerPath(const Path&);
+    WEBCORE_EXPORT virtual void setShapeLayerPath(Path&&);
 
     WindRule shapeLayerWindRule() const;
     WEBCORE_EXPORT virtual void setShapeLayerWindRule(WindRule);
@@ -835,7 +835,7 @@ protected:
     FloatPoint m_replicatedLayerPosition; // For a replica layer, the position of the replica.
 
     FloatRect m_contentsRect;
-    FloatRoundedRect m_contentsClippingRect;
+    Path m_contentsClippingPath;
     FloatSize m_contentsTilePhase;
     FloatSize m_contentsTileSize;
     ScalingFilter m_contentsMinificationFilter = ScalingFilter::Linear;

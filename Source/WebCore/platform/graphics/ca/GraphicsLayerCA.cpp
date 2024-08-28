@@ -968,12 +968,12 @@ void GraphicsLayerCA::setContentsRect(const FloatRect& rect)
     noteLayerPropertyChanged(ContentsRectsChanged);
 }
 
-void GraphicsLayerCA::setContentsClippingRect(const FloatRoundedRect& rect)
+void GraphicsLayerCA::setContentsClippingPath(Path&& path)
 {
-    if (rect == m_contentsClippingRect)
+    if (m_contentsClippingPath.definitelyEqual(path))
         return;
 
-    GraphicsLayer::setContentsClippingRect(rect);
+    GraphicsLayer::setContentsClippingPath(WTFMove(path));
     noteLayerPropertyChanged(ContentsRectsChanged);
 }
 
@@ -995,10 +995,12 @@ void GraphicsLayerCA::setVideoGravity(MediaPlayerVideoGravity gravity)
     noteLayerPropertyChanged(VideoGravityChanged);
 }
 
-void GraphicsLayerCA::setShapeLayerPath(const Path& path)
+void GraphicsLayerCA::setShapeLayerPath(Path&& path)
 {
-    // FIXME: need to check for path equality. No bool Path::operator==(const Path&)!.
-    GraphicsLayer::setShapeLayerPath(path);
+    if (m_shapeLayerPath.definitelyEqual(path))
+        return;
+
+    GraphicsLayer::setShapeLayerPath(WTFMove(path));
     noteLayerPropertyChanged(ShapeChanged);
 }
 
@@ -2589,7 +2591,9 @@ void GraphicsLayerCA::updateBackdropFiltersRect()
 
     auto backdropRectRelativeToBackdropLayer = m_backdropFiltersRect;
     backdropRectRelativeToBackdropLayer.setLocation({ });
-    updateClippingStrategy(*m_backdropLayer, m_backdropClippingLayer, backdropRectRelativeToBackdropLayer);
+    Path backdropFiltersPath;
+    backdropFiltersPath.addRoundedRect(backdropRectRelativeToBackdropLayer);
+    updateClippingStrategy(*m_backdropLayer, m_backdropClippingLayer, backdropFiltersPath);
 
     if (m_layerClones) {
         for (auto& clone : m_layerClones->backdropLayerClones) {
@@ -2601,7 +2605,7 @@ void GraphicsLayerCA::updateBackdropFiltersRect()
             RefPtr<PlatformCALayer> backdropClippingLayerClone = m_layerClones->backdropClippingLayerClones.get(cloneID);
 
             bool hadBackdropClippingLayer = backdropClippingLayerClone;
-            updateClippingStrategy(*backdropCloneLayer, backdropClippingLayerClone, backdropRectRelativeToBackdropLayer);
+            updateClippingStrategy(*backdropCloneLayer, backdropClippingLayerClone, backdropFiltersPath);
 
             if (!backdropClippingLayerClone)
                 m_layerClones->backdropClippingLayerClones.remove(cloneID);
@@ -2976,9 +2980,19 @@ void GraphicsLayerCA::updateContentsColorLayer()
 
 // The clipping strategy depends on whether the rounded rect has equal corner radii.
 // roundedRect is in the coordinate space of clippingLayer.
-void GraphicsLayerCA::updateClippingStrategy(PlatformCALayer& clippingLayer, RefPtr<PlatformCALayer>& shapeMaskLayer, const FloatRoundedRect& roundedRect)
+void GraphicsLayerCA::updateClippingStrategy(PlatformCALayer& clippingLayer, RefPtr<PlatformCALayer>& shapeMaskLayer, const Path& path)
 {
-    if (roundedRect.radii().isUniformCornerRadius() && clippingLayer.bounds() == roundedRect.rect()) {
+    auto roundedRectFromPath = [](const Path& path) -> std::optional<FloatRoundedRect> {
+        if (auto singleRectData = path.singleRect())
+            return FloatRoundedRect { singleRectData->rect };
+
+        if (auto singleRoundedRectData = path.singleRoundedRect())
+            return singleRoundedRectData->roundedRect;
+
+        return std::nullopt;
+    }(path);
+
+    if (roundedRectFromPath && roundedRectFromPath->radii().isUniformCornerRadius() && clippingLayer.bounds() == roundedRectFromPath->rect()) {
         clippingLayer.setMaskLayer(nullptr);
         if (shapeMaskLayer) {
             shapeMaskLayer->setOwner(nullptr);
@@ -2986,7 +3000,7 @@ void GraphicsLayerCA::updateClippingStrategy(PlatformCALayer& clippingLayer, Ref
         }
 
         clippingLayer.setMasksToBounds(true);
-        clippingLayer.setCornerRadius(roundedRect.radii().topLeft().width());
+        clippingLayer.setCornerRadius(roundedRectFromPath->radii().topLeft().width());
         return;
     }
 
@@ -2998,15 +3012,18 @@ void GraphicsLayerCA::updateClippingStrategy(PlatformCALayer& clippingLayer, Ref
 
     // clippingLayer's boundsOrigin is roundedRect.rect().location(), and is non-zero to positioning descendant layers.
     // The mask layer needs an equivalent position.
-    auto rectLocation = roundedRect.rect().location();
-    shapeMaskLayer->setPosition({ rectLocation.x(), rectLocation.y(), 0.0f });
 
-    auto shapeBounds = FloatRect { { }, roundedRect.rect().size() };
-    shapeMaskLayer->setBounds(shapeBounds);
-    
-    auto localRoundedRect = roundedRect;
-    localRoundedRect.setLocation({ });
-    shapeMaskLayer->setShapeRoundedRect(localRoundedRect);
+    if (roundedRectFromPath) {
+        auto localRoundedRect = *roundedRectFromPath;
+        shapeMaskLayer->setPosition({ localRoundedRect.rect().x(), localRoundedRect.rect().y(), 0.0f });
+
+        localRoundedRect.setLocation({ });
+        shapeMaskLayer->setBounds(localRoundedRect.rect());
+        shapeMaskLayer->setShapeRoundedRect(localRoundedRect);
+    } else {
+        // FIXME: Need to compute the layer location.
+        shapeMaskLayer->setShapePath(path);
+    }
 
     clippingLayer.setCornerRadius(0);
     RefPtr maskLayer = shapeMaskLayer;
@@ -3019,9 +3036,38 @@ void GraphicsLayerCA::updateContentsRects()
         return;
 
     auto contentBounds = FloatRect { { }, m_contentsRect.size() };
-    
+
     bool gainedOrLostClippingLayer = false;
-    if (m_contentsClippingRect.isRounded() || !m_contentsClippingRect.rect().contains(m_contentsRect)) {
+
+    auto needContentsClippingLayer = [&]() {
+        if (m_contentsClippingPath.isEmpty())
+            return false;
+
+        if (auto singleRectData = m_contentsClippingPath.singleRect())
+            return !singleRectData->rect.contains(m_contentsRect);
+
+        if (auto singleRoundedRectData = m_contentsClippingPath.singleRoundedRect()) {
+            if (singleRoundedRectData->roundedRect.isRounded())
+                return true;
+
+            return !singleRoundedRectData->roundedRect.rect().contains(m_contentsRect);
+        }
+
+        return true;
+    };
+
+    // FIXME: Repetitive
+    auto roundedRectFromPath = [](const Path& path) -> std::optional<FloatRoundedRect> {
+        if (auto singleRectData = path.singleRect())
+            return FloatRoundedRect { singleRectData->rect };
+
+        if (auto singleRoundedRectData = path.singleRoundedRect())
+            return singleRoundedRectData->roundedRect;
+
+        return std::nullopt;
+    }(m_contentsClippingPath);
+
+    if (needContentsClippingLayer()) {
         if (!m_contentsClippingLayer) {
             m_contentsClippingLayer = createPlatformCALayer(PlatformCALayer::LayerType::LayerTypeLayer, this);
             m_contentsClippingLayer->setAnchorPoint({ });
@@ -3033,10 +3079,13 @@ void GraphicsLayerCA::updateContentsRects()
             gainedOrLostClippingLayer = true;
         }
 
-        m_contentsClippingLayer->setPosition(m_contentsClippingRect.rect().location());
-        m_contentsClippingLayer->setBounds(m_contentsClippingRect.rect());
-        
-        updateClippingStrategy(*m_contentsClippingLayer, m_contentsShapeMaskLayer, m_contentsClippingRect);
+        // FIXME: For path clipping
+        if (roundedRectFromPath) {
+            m_contentsClippingLayer->setPosition(roundedRectFromPath->rect().location());
+            m_contentsClippingLayer->setBounds(roundedRectFromPath->rect());
+        }
+
+        updateClippingStrategy(*m_contentsClippingLayer, m_contentsShapeMaskLayer, m_contentsClippingPath);
 
         if (m_contentsLayer && gainedOrLostClippingLayer) {
             m_contentsLayer->removeFromSuperlayer();
@@ -3079,7 +3128,7 @@ void GraphicsLayerCA::updateContentsRects()
             RefPtr<PlatformCALayer> shapeMaskLayerClone = m_layerClones->contentsShapeMaskLayerClones.get(cloneID);
 
             bool hadShapeMask = shapeMaskLayerClone;
-            updateClippingStrategy(*clone.value, shapeMaskLayerClone, m_contentsClippingRect);
+            updateClippingStrategy(*clone.value, shapeMaskLayerClone, m_contentsClippingPath);
 
             if (!shapeMaskLayerClone)
                 m_layerClones->contentsShapeMaskLayerClones.remove(cloneID);
