@@ -33,6 +33,7 @@
 #include "AnimationMalloc.h"
 #include "AnimationUtilities.h"
 #include "BlockEllipsis.h"
+#include "BorderShapeValue.h"
 #include "CSSCustomPropertyValue.h"
 #include "CSSPrimitiveValue.h"
 #include "CSSPropertyBlendingClient.h"
@@ -328,6 +329,17 @@ static inline RefPtr<PathOperation> blendFunc(PathOperation* from, PathOperation
 }
 
 static inline RefPtr<ShapeValue> blendFunc(ShapeValue* from, ShapeValue* to, const CSSPropertyBlendingContext& context)
+{
+    if (context.isDiscrete) {
+        ASSERT(!context.progress || context.progress == 1);
+        return context.progress ? to : from;
+    }
+
+    ASSERT(from && to);
+    return from->blend(*to, context);
+}
+
+static inline RefPtr<BorderShapeValue> blendFunc(BorderShapeValue* from, BorderShapeValue* to, const CSSPropertyBlendingContext& context)
 {
     if (context.isDiscrete) {
         ASSERT(!context.progress || context.progress == 1);
@@ -1348,6 +1360,35 @@ private:
     }
 };
 
+
+class BorderShapePropertyWrapper final : public RefCountedPropertyWrapper<BorderShapeValue> {
+    WTF_MAKE_FAST_ALLOCATED_WITH_HEAP_IDENTIFIER(Animation);
+public:
+    BorderShapePropertyWrapper()
+        : RefCountedPropertyWrapper(CSSPropertyBorderShape, &RenderStyle::borderShape, &RenderStyle::setBorderShape)
+    {
+    }
+
+private:
+    bool canInterpolate(const RenderStyle& from, const RenderStyle& to, CompositeOperation) const override
+    {
+        auto* fromBorderShape = value(from);
+        auto* toBorderShape = value(to);
+        return fromBorderShape && toBorderShape && fromBorderShape->canBlend(*toBorderShape);
+    }
+
+    bool equals(const RenderStyle& a, const RenderStyle& b) const final
+    {
+        // If the style pointers are the same, don't bother doing the test.
+        if (&a == &b)
+            return true;
+
+        RefPtr borderShapeA = value(a);
+        RefPtr borderShapeB = value(b);
+
+        return arePointingToEqualData(borderShapeA, borderShapeB);
+    }
+};
 
 #if ENABLE(VARIATION_FONTS)
 
@@ -3872,6 +3913,8 @@ CSSPropertyAnimationWrapperMap::CSSPropertyAnimationWrapperMap()
         new PropertyWrapperFilter(CSSPropertyAppleColorFilter, &RenderStyle::appleColorFilter, &RenderStyle::setAppleColorFilter),
 
         new PathOperationPropertyWrapper(CSSPropertyClipPath, &RenderStyle::clipPath, &RenderStyle::setClipPath),
+
+        new BorderShapePropertyWrapper(),
 
         new PropertyWrapperShape(CSSPropertyShapeOutside, &RenderStyle::shapeOutside, &RenderStyle::setShapeOutside),
         new LengthPropertyWrapper(CSSPropertyShapeMargin, &RenderStyle::shapeMargin, &RenderStyle::setShapeMargin, { LengthPropertyWrapper::Flags::IsLengthPercentage, LengthPropertyWrapper::Flags::NegativeLengthsAreInvalid }),

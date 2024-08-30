@@ -44,9 +44,26 @@ bool BorderShapeValue::operator==(const BorderShapeValue& other) const
         && arePointingToEqualData(m_innerShape, other.m_innerShape);
 }
 
-bool BorderShapeValue::canBlend(const BorderShapeValue&) const
+bool BorderShapeValue::canBlend(const BorderShapeValue& other) const
 {
-    return false;
+    if (haveInnerShape() != other.haveInnerShape())
+        return false;
+
+    if (effectiveOuterShapeCSSBox() != other.effectiveOuterShapeCSSBox())
+        return false;
+
+    if (effectiveInnerShapeCSSBox() != other.effectiveInnerShapeCSSBox())
+        return false;
+
+    if (!m_outerShape->canBlend(other.outerShape()))
+        return false;
+
+    if (innerShape()) {
+        ASSERT(other.innerShape());
+        if (!innerShape()->canBlend(*other.innerShape()))
+            return false;
+    }
+    return true;
 }
 
 Ref<BorderShapeValue> BorderShapeValue::blend(const BorderShapeValue& to, const BlendingContext& context) const

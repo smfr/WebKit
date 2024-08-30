@@ -67,6 +67,8 @@ private:
     {
     }
 
+    bool haveInnerShape() const { return m_innerShape; }
+
     Ref<BasicShape> m_outerShape;
     RefPtr<BasicShape> m_innerShape;
     CSSBoxType m_outerShapeCSSBox { CSSBoxType::BoxMissing };
