@@ -232,7 +232,7 @@ void Length::deref() const
 
 LengthType Length::typeFromIndex(const IPCData& data)
 {
-    static_assert(std::variant_size_v<IPCData> == 13);
+    static_assert(std::variant_size_v<IPCData> == 14);
     switch (data.index()) {
     case WTF::alternativeIndexV<AutoData, IPCData>:
         return LengthType::Auto;
@@ -254,6 +254,8 @@ LengthType Length::typeFromIndex(const IPCData& data)
         return LengthType::MaxContent;
     case WTF::alternativeIndexV<FillAvailableData, IPCData>:
         return LengthType::FillAvailable;
+    case WTF::alternativeIndexV<SVGViewboxRelativeData, IPCData>:
+        return LengthType::SVGViewboxRelative;
     case WTF::alternativeIndexV<FitContentData, IPCData>:
         return LengthType::FitContent;
     case WTF::alternativeIndexV<ContentData, IPCData>:
@@ -298,6 +300,8 @@ auto Length::ipcData() const -> IPCData
         return PercentData { floatOrInt(), m_hasQuirk };
     case LengthType::Fixed:
         return FixedData { floatOrInt(), m_hasQuirk };
+    case LengthType::SVGViewboxRelative:
+        return SVGViewboxRelativeData { floatOrInt(), m_hasQuirk };
     case LengthType::Intrinsic:
         return IntrinsicData { floatOrInt(), m_hasQuirk };
     case LengthType::MinIntrinsic:
@@ -484,6 +488,7 @@ static TextStream& operator<<(TextStream& ts, LengthType type)
     case LengthType::FillAvailable: ts << "fill-available"; break;
     case LengthType::FitContent: ts << "fit-content"; break;
     case LengthType::Fixed: ts << "fixed"; break;
+    case LengthType::SVGViewboxRelative: ts << "svg-viewbox-relative"; break;
     case LengthType::Intrinsic: ts << "intrinsic"; break;
     case LengthType::MinIntrinsic: ts << "min-intrinsic"; break;
     case LengthType::MinContent: ts << "min-content"; break;
@@ -514,6 +519,7 @@ TextStream& operator<<(TextStream& ts, Length length)
     case LengthType::MinContent:
     case LengthType::MaxContent:
     case LengthType::FillAvailable:
+    case LengthType::SVGViewboxRelative:
     case LengthType::FitContent:
         ts << length.type() << " " << TextStream::FormatNumberRespectingIntegers(length.value());
         break;

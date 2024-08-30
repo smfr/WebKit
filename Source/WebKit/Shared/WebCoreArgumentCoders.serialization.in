@@ -1882,6 +1882,7 @@ enum class WebCore::LengthType : uint8_t {
     Relative,
     Percent,
     Fixed,
+    SVGViewboxRelative,
     Intrinsic,
     MinIntrinsic,
     MinContent,
@@ -7713,7 +7714,7 @@ header: <WebCore/Image.h>
 };
 
 struct WebCore::Length {
-    std::variant<WebCore::Length::AutoData, WebCore::Length::NormalData, WebCore::Length::RelativeData, WebCore::Length::PercentData, WebCore::Length::FixedData, WebCore::Length::IntrinsicData, WebCore::Length::MinIntrinsicData, WebCore::Length::MinContentData, WebCore::Length::MaxContentData, WebCore::Length::FillAvailableData, WebCore::Length::FitContentData, WebCore::Length::ContentData, WebCore::Length::UndefinedData> ipcData()
+    std::variant<WebCore::Length::AutoData, WebCore::Length::NormalData, WebCore::Length::RelativeData, WebCore::Length::PercentData, WebCore::Length::FixedData, WebCore::Length::SVGViewboxRelativeData, WebCore::Length::IntrinsicData, WebCore::Length::MinIntrinsicData, WebCore::Length::MinContentData, WebCore::Length::MaxContentData, WebCore::Length::FillAvailableData, WebCore::Length::FitContentData, WebCore::Length::ContentData, WebCore::Length::UndefinedData> ipcData()
 }
 [Nested] struct WebCore::Length::AutoData {
 };
@@ -7728,6 +7729,10 @@ struct WebCore::Length {
     bool hasQuirk
 };
 [Nested] struct WebCore::Length::FixedData {
+    std::variant<float, int> value
+    bool hasQuirk
+};
+[Nested] struct WebCore::Length::SVGViewboxRelativeData {
     std::variant<float, int> value
     bool hasQuirk
 };
@@ -8247,7 +8252,8 @@ using WebCore::PageOverlay::PageOverlayID = uint64_t
     SVG_PRESERVEASPECTRATIO_XMAXYMID,
     SVG_PRESERVEASPECTRATIO_XMINYMAX,
     SVG_PRESERVEASPECTRATIO_XMIDYMAX,
-    SVG_PRESERVEASPECTRATIO_XMAXYMAX
+    SVG_PRESERVEASPECTRATIO_XMAXYMAX,
+    SVG_PRESERVEASPECTRATIO_RESPONSIVE
 }
 
 [Nested] enum class WebCore::SVGPreserveAspectRatioValue::SVGMeetOrSliceType : uint8_t {

@@ -40,6 +40,7 @@ LayoutUnit valueForLength(const Length& length, LayoutUnit maximumValue)
 {
     switch (length.type()) {
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
     case LengthType::Percent:
     case LengthType::Calculated:
         return minimumValueForLength(length, maximumValue);
@@ -67,6 +68,7 @@ float floatValueForLength(const Length& length, LayoutUnit maximumValue)
 {
     switch (length.type()) {
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return length.value();
     case LengthType::Percent:
         return static_cast<float>(maximumValue * length.percent() / 100.0f);
@@ -95,6 +97,7 @@ float floatValueForLength(const Length& length, float maximumValue)
 {
     switch (length.type()) {
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return length.value();
     case LengthType::Percent:
         return static_cast<float>(maximumValue * length.percent() / 100.0f);

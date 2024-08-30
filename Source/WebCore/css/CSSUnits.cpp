@@ -41,6 +41,7 @@ CSSUnitCategory unitCategory(CSSUnitType type)
     case CSSUnitType::CSS_PT:
     case CSSUnitType::CSS_PC:
     case CSSUnitType::CSS_Q:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return CSSUnitCategory::AbsoluteLength;
     // https://drafts.csswg.org/css-values-4/#font-relative-lengths
     case CSSUnitType::CSS_EM:
@@ -269,6 +270,7 @@ TextStream& operator<<(TextStream& ts, CSSUnitType unitType)
     case CSSUnitType::CSS_VALUE_ID: ts << "value_id"; break;
     case CSSUnitType::CSS_QUIRKY_EM: ts << "quirky_em"; break;
     case CSSUnitType::CSS_ANCHOR: ts << "anchor"; break;
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE: ts << "svg_viewbox_relative_length"; break;
     }
     return ts;
 }
@@ -393,6 +395,7 @@ bool conversionToCanonicalUnitRequiresConversionData(CSSUnitType unit)
     case CSSUnitType::CSS_UNRESOLVED_COLOR:
     case CSSUnitType::CSS_URI:
     case CSSUnitType::CSS_VALUE_ID:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
     case CSSUnitType::CustomIdent:
         break;
     }

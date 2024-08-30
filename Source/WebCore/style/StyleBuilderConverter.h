@@ -253,6 +253,11 @@ inline Length BuilderConverter::convertLength(const BuilderState& builderState, 
         builderState.cssToLengthConversionData().copyWithAdjustedZoom(1.0f)
         : builderState.cssToLengthConversionData();
 
+    if (primitiveValue.isSVGViewportRelativeValue()) {
+        // Hacky
+        auto doubleLength = primitiveValue.resolveAsLength<Length>(conversionData);
+        return Length(doubleLength.value(), LengthType::SVGViewboxRelative);
+    }
     if (primitiveValue.isLength()) {
         Length length = primitiveValue.resolveAsLength<Length>(conversionData);
         length.setHasQuirk(primitiveValue.primitiveType() == CSSUnitType::CSS_QUIRKY_EM);

@@ -41,6 +41,7 @@ enum class LengthType : uint8_t {
     Relative,
     Percent,
     Fixed,
+    SVGViewboxRelative,
     Intrinsic,
     MinIntrinsic,
     MinContent,
@@ -80,6 +81,10 @@ public:
         FloatOrInt value;
         bool hasQuirk;
     };
+    struct SVGViewboxRelativeData {
+        FloatOrInt value;
+        bool hasQuirk;
+    };
     struct IntrinsicData {
         FloatOrInt value;
         bool hasQuirk;
@@ -112,6 +117,7 @@ public:
         RelativeData,
         PercentData,
         FixedData,
+        SVGViewboxRelativeData,
         IntrinsicData,
         MinIntrinsicData,
         MinContentData,
@@ -307,6 +313,7 @@ inline void Length::initialize(const Length& other)
         m_intValue = 0;
         break;
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
     case LengthType::Relative:
     case LengthType::Intrinsic:
     case LengthType::MinIntrinsic:
@@ -341,6 +348,7 @@ inline void Length::initialize(Length&& other)
         m_intValue = 0;
         break;
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
     case LengthType::Relative:
     case LengthType::Intrinsic:
     case LengthType::MinIntrinsic:

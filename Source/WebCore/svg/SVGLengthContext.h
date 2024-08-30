@@ -32,6 +32,11 @@ class WeakPtrImplWithEventTargetData;
 
 struct Length;
 
+struct ResponsiveViewportData {
+    std::optional<FloatSize> viewboxViewportSize;
+    std::optional<FloatSize> svgRootCSSBoxSize;
+};
+
 class SVGLengthContext {
 public:
     explicit SVGLengthContext(const SVGElement*);
@@ -53,6 +58,8 @@ public:
 
     std::optional<FloatSize> viewportSize() const;
 
+    ResponsiveViewportData responsiveViewportData() const;
+
 private:
     SVGLengthContext(const SVGElement*, const FloatRect& viewport);
 
@@ -66,6 +73,7 @@ private:
     ExceptionOr<float> convertValueFromEXSToUserUnits(float value) const;
 
     std::optional<FloatSize> computeViewportSize() const;
+    std::optional<FloatSize> svgRootCSSBoxSize() const;
 
     RefPtr<const SVGElement> protectedContext() const;
 

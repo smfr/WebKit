@@ -95,6 +95,7 @@ public:
     bool isNumberOrInteger() const { return isNumber() || isInteger(); }
     bool isPercentage() const { return primitiveType() == CSSUnitType::CSS_PERCENTAGE; }
     bool isPx() const { return primitiveType() == CSSUnitType::CSS_PX; }
+    bool isSVGViewportRelativeValue() const { return primitiveType() == CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE; }
     bool isTime() const { return unitCategory(primitiveType()) == CSSUnitCategory::Time; }
     bool isFrequency() const { return unitCategory(primitiveType()) == CSSUnitCategory::Frequency; }
     bool isCalculated() const { return primitiveUnitType() == CSSUnitType::CSS_CALC; }
@@ -365,6 +366,7 @@ constexpr bool CSSPrimitiveValue::isLength(CSSUnitType type)
         || type == CSSUnitType::CSS_PT
         || type == CSSUnitType::CSS_PC
         || type == CSSUnitType::CSS_Q
+        || type == CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE
         || isFontRelativeLength(type)
         || isViewportPercentageLength(type)
         || isContainerPercentageLength(type)

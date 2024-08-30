@@ -125,6 +125,7 @@ static inline bool isValidCSSUnitTypeForDoubleConversion(CSSUnitType unitType)
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return true;
     case CSSUnitType::CSS_ATTR:
     case CSSUnitType::CSS_FONT_FAMILY:
@@ -233,6 +234,7 @@ static inline bool isStringType(CSSUnitType type)
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return false;
     }
 
@@ -458,6 +460,7 @@ CSSPrimitiveValue::~CSSPrimitiveValue()
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         ASSERT(!isStringType(type));
         break;
     }
@@ -528,6 +531,7 @@ Ref<CSSPrimitiveValue> CSSPrimitiveValue::create(const Length& length)
     case LengthType::FitContent:
         return create(CSSValueFitContent);
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return create(length.value(), CSSUnitType::CSS_PX);
     case LengthType::Intrinsic:
         return create(CSSValueIntrinsic);
@@ -565,6 +569,7 @@ Ref<CSSPrimitiveValue> CSSPrimitiveValue::create(const Length& length, const Ren
     case LengthType::Percent:
         return create(length);
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return create(adjustFloatForAbsoluteZoom(length.value(), style), CSSUnitType::CSS_PX);
     case LengthType::Calculated:
         return create(CSSCalcValue::create(length.calculationValue(), style));
@@ -726,6 +731,7 @@ double CSSPrimitiveValue::computeUnzoomedNonCalcLengthDouble(CSSUnitType primiti
         ASSERT(fontCascadeForUnit);
         return fontCascadeForUnit->metricsOfPrimaryFont().ideogramWidth().value_or(0) * value;
     case CSSUnitType::CSS_PX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return value;
     case CSSUnitType::CSS_CM:
         return CSS::pixelsPerCm * value;
@@ -859,6 +865,10 @@ double CSSPrimitiveValue::computeNonCalcLengthDouble(const CSSToLengthConversion
     case CSSUnitType::CSS_PC:
     case CSSUnitType::CSS_CALC_PERCENTAGE_WITH_LENGTH:
     case CSSUnitType::CSS_CALC_PERCENTAGE_WITH_NUMBER:
+        value = computeUnzoomedNonCalcLengthDouble(primitiveType, value, conversionData.propertyToCompute());
+        break;
+
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         value = computeUnzoomedNonCalcLengthDouble(primitiveType, value, conversionData.propertyToCompute());
         break;
 
@@ -1430,6 +1440,7 @@ ASCIILiteral CSSPrimitiveValue::unitTypeString(CSSUnitType unitType)
     case CSSUnitType::CSS_UNRESOLVED_COLOR:
     case CSSUnitType::CSS_URI:
     case CSSUnitType::CSS_VALUE_ID:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
     case CSSUnitType::CustomIdent:
         return ""_s;
     }
@@ -1505,6 +1516,7 @@ ALWAYS_INLINE String CSSPrimitiveValue::serializeInternal() const
     case CSSUnitType::CSS_VMIN:
     case CSSUnitType::CSS_VW:
     case CSSUnitType::CSS_X:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return formatNumberValue(unitTypeString(type));
 
     case CSSUnitType::CSS_ANCHOR:
@@ -1644,6 +1656,7 @@ bool CSSPrimitiveValue::equals(const CSSPrimitiveValue& other) const
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         return m_value.number == other.m_value.number;
     case CSSUnitType::CSS_PROPERTY_ID:
         return m_value.propertyID == other.m_value.propertyID;
@@ -1747,6 +1760,7 @@ bool CSSPrimitiveValue::addDerivedHash(Hasher& hasher) const
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         add(hasher, m_value.number);
         break;
     case CSSUnitType::CSS_PROPERTY_ID:
@@ -1887,6 +1901,7 @@ void CSSPrimitiveValue::collectComputedStyleDependencies(ComputedStyleDependenci
     case CSSUnitType::CSS_UNRESOLVED_COLOR:
     case CSSUnitType::CSS_PROPERTY_ID:
     case CSSUnitType::CSS_VALUE_ID:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         break;
     }
 }

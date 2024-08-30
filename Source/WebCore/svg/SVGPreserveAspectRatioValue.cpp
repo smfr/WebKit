@@ -152,6 +152,17 @@ template<typename CharacterType> bool SVGPreserveAspectRatioValue::parseInternal
             return false;
         buffer += 8;
         skipOptionalSVGSpaces(buffer);
+    } else if (*buffer == 'r') {
+        if (buffer.lengthRemaining() < 10)
+            return false;
+
+        auto bufferStringView = buffer.stringViewOfCharactersRemaining();
+        if (!bufferStringView.startsWithIgnoringASCIICase("responsive"_s))
+            return false;
+
+        buffer += 10;
+        align = SVG_PRESERVEASPECTRATIO_RESPONSIVE;
+        skipOptionalSVGSpaces(buffer);
     } else
         return false;
 
@@ -351,6 +362,8 @@ String SVGPreserveAspectRatioValue::valueAsString() const
             return "xMidYMax"_s;
         case SVG_PRESERVEASPECTRATIO_XMAXYMAX:
             return "xMaxYMax"_s;
+        case SVG_PRESERVEASPECTRATIO_RESPONSIVE:
+            return "responsive"_s;
         case SVG_PRESERVEASPECTRATIO_UNKNOWN:
             return "unknown"_s;
         };

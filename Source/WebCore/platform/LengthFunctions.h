@@ -51,6 +51,7 @@ inline LayoutUnit minimumValueForLength(const Length& length, LayoutUnit maximum
 {
     switch (length.type()) {
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return LayoutUnit(length.value());
     case LengthType::Percent:
         // Don't remove the extra cast to float. It is needed for rounding on 32-bit Intel machines that use the FPU stack.

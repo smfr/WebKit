@@ -199,7 +199,7 @@ static RefPtr<CSSValue> parseSimpleLengthValue(StringView string, CSSParserMode 
     if (unit == CSSUnitType::CSS_NUMBER) {
         if (number && cssParserMode != SVGAttributeMode)
             return nullptr;
-        unit = CSSUnitType::CSS_PX;
+        unit = CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE;
     }
 
     if (number < 0 && valueRange == ValueRange::NonNegative)

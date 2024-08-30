@@ -3480,6 +3480,7 @@ LayoutUnit RenderBox::computeReplacedLogicalWidthUsing(SizeType widthType, Lengt
 
     switch (logicalWidth.type()) {
     case LengthType::Fixed:
+    case LengthType::SVGViewboxRelative:
         return adjustContentBoxLogicalWidthForBoxSizing(logicalWidth);
     case LengthType::MinContent:
     case LengthType::MaxContent: {

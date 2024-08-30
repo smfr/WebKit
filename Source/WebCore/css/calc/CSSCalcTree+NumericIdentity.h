@@ -216,6 +216,7 @@ constexpr NumericIdentity toNumericIdentity(const NonCanonicalDimension& dimensi
     case CSSUnitType::CSS_UNRESOLVED_COLOR:
     case CSSUnitType::CSS_URI:
     case CSSUnitType::CSS_VALUE_ID:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
     case CSSUnitType::CustomIdent:
         break;
     }

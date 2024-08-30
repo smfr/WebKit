@@ -256,6 +256,7 @@ Type Type::determineType(CSSUnitType unitType)
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         // the type is «[ "length" → 1 ]»
         return Type { .length = 1 };
 

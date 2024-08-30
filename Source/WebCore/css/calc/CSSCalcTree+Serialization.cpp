@@ -159,20 +159,21 @@ static unsigned sortPriority(CSSUnitType unit)
     case CSSUnitType::CSS_RIC:          return 47;
     case CSSUnitType::CSS_RLH:          return 48;
     case CSSUnitType::CSS_S:            return 49;
-    case CSSUnitType::CSS_SVB:          return 50;
-    case CSSUnitType::CSS_SVH:          return 51;
-    case CSSUnitType::CSS_SVI:          return 52;
-    case CSSUnitType::CSS_SVMAX:        return 53;
-    case CSSUnitType::CSS_SVMIN:        return 54;
-    case CSSUnitType::CSS_SVW:          return 55;
-    case CSSUnitType::CSS_TURN:         return 56;
-    case CSSUnitType::CSS_VB:           return 57;
-    case CSSUnitType::CSS_VH:           return 58;
-    case CSSUnitType::CSS_VI:           return 59;
-    case CSSUnitType::CSS_VMAX:         return 50;
-    case CSSUnitType::CSS_VMIN:         return 61;
-    case CSSUnitType::CSS_VW:           return 62;
-    case CSSUnitType::CSS_X:            return 63;
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE: return 50;
+    case CSSUnitType::CSS_SVB:          return 51;
+    case CSSUnitType::CSS_SVH:          return 52;
+    case CSSUnitType::CSS_SVI:          return 53;
+    case CSSUnitType::CSS_SVMAX:        return 54;
+    case CSSUnitType::CSS_SVMIN:        return 55;
+    case CSSUnitType::CSS_SVW:          return 56;
+    case CSSUnitType::CSS_TURN:         return 57;
+    case CSSUnitType::CSS_VB:           return 58;
+    case CSSUnitType::CSS_VH:           return 59;
+    case CSSUnitType::CSS_VI:           return 60;
+    case CSSUnitType::CSS_VMAX:         return 61;
+    case CSSUnitType::CSS_VMIN:         return 62;
+    case CSSUnitType::CSS_VW:           return 63;
+    case CSSUnitType::CSS_X:            return 64;
 
     // Non-numeric types are not supported.
     case CSSUnitType::CSS_ANCHOR:

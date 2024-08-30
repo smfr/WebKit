@@ -29,7 +29,7 @@
 #include "LegacyRenderSVGRoot.h"
 #include "LengthFunctions.h"
 #include "LocalFrame.h"
-#include "RenderView.h"
+#include "RenderBoxInlines.h"
 #include "SVGElementTypeHelpers.h"
 #include "SVGSVGElement.h"
 #include <wtf/MathExtras.h>
@@ -90,6 +90,7 @@ float SVGLengthContext::resolveLength(const SVGElement* context, SVGUnitTypes::S
 
 float SVGLengthContext::valueForLength(const Length& length, SVGLengthMode lengthMode)
 {
+    WTF_ALWAYS_LOG("SVGLengthContext::valueForLength " << length);
     switch (length.type()) {
     case LengthType::Percent: {
         auto result = convertValueFromPercentageToUserUnits(length.value() / 100, lengthMode);
@@ -98,18 +99,48 @@ float SVGLengthContext::valueForLength(const Length& length, SVGLengthMode lengt
         return result.releaseReturnValue();
     }
 
-    case LengthType::Fixed:
+    case LengthType::Fixed: {
+        // FIXME: Respect "preserveAspectRatio=responsive".
+        auto viewportData = responsiveViewportData();
+        if (!viewportData.viewboxViewportSize || !viewportData.svgRootCSSBoxSize)
+            return length.value();
+
+        auto floatValue = length.value();
+
+        switch (lengthMode) {
+        case SVGLengthMode::Width: {
+            auto horizontalScale = viewportData.viewboxViewportSize->width() / viewportData.svgRootCSSBoxSize->width();
+            return floatValue * horizontalScale;
+        }
+        case SVGLengthMode::Height: {
+            auto verticalScale = viewportData.viewboxViewportSize->height() / viewportData.svgRootCSSBoxSize->height();
+            return floatValue * verticalScale;
+        }
+        case SVGLengthMode::Other:
+            return floatValue;
+        }
+
+        return floatValue;
+    }
+    case LengthType::SVGViewboxRelative:
         return length.value();
 
     case LengthType::Calculated: {
-        auto viewportSize = this->viewportSize().value_or(FloatSize { });
+        // FIXME: Respect "preserveAspectRatio=responsive".
+        auto viewportData = responsiveViewportData();
+
         switch (lengthMode) {
-        case SVGLengthMode::Width:
-            return length.nonNanCalculatedValue(viewportSize.width());
-        case SVGLengthMode::Height:
-            return length.nonNanCalculatedValue(viewportSize.height());
-        case SVGLengthMode::Other:
-            return length.nonNanCalculatedValue(viewportSize.diagonalLength() / sqrtOfTwoFloat);
+        case SVGLengthMode::Width: {
+            auto horizontalScale = viewportData.viewboxViewportSize->width() / viewportData.svgRootCSSBoxSize->width();
+            return horizontalScale * length.nonNanCalculatedValue(viewportData.svgRootCSSBoxSize->width());
+        }
+        case SVGLengthMode::Height: {
+            auto verticalScale = viewportData.viewboxViewportSize->height() / viewportData.svgRootCSSBoxSize->height();
+            return verticalScale * length.nonNanCalculatedValue(viewportData.svgRootCSSBoxSize->height());
+        }
+        case SVGLengthMode::Other: {
+            return length.nonNanCalculatedValue(viewportData.viewboxViewportSize->diagonalLength() / sqrtOfTwoFloat);
+        }
         }
         ASSERT_NOT_REACHED();
         return 0;
@@ -311,6 +342,11 @@ std::optional<FloatSize> SVGLengthContext::viewportSize() const
     return m_viewportSize;
 }
 
+ResponsiveViewportData SVGLengthContext::responsiveViewportData() const
+{
+    return { viewportSize(), svgRootCSSBoxSize() };
+}
+
 std::optional<FloatSize> SVGLengthContext::computeViewportSize() const
 {
     ASSERT(m_overriddenViewport.isZero());
@@ -330,11 +366,39 @@ std::optional<FloatSize> SVGLengthContext::computeViewportSize() const
     if (!svg)
         return std::nullopt;
 
+    // FIXME: Get pixel size
+
     auto viewportSize = svg->currentViewBoxRect().size();
     if (viewportSize.isEmpty())
         viewportSize = svg->currentViewportSizeExcludingZoom();
 
     return viewportSize;
+}
+
+std::optional<FloatSize> SVGLengthContext::svgRootCSSBoxSize() const
+{
+/*
+    if (m_context->isOutermostSVGSVGElement()) {
+        RefPtr svgSVGElement = dynamicDowncast<SVGSVGElement>(*protectedContext());
+        if (!svgSVGElement)
+            return std::nullopt;
+
+        CheckedPtr renderer = svgSVGElement->renderer();
+        if (!renderer)
+            return std::nullopt;
+
+        return { };
+    }
+*/
+    RefPtr svgSVGElement = dynamicDowncast<SVGSVGElement>(m_context->viewportElement());
+    if (!svgSVGElement)
+        return std::nullopt;
+
+    CheckedPtr renderBox = dynamicDowncast<RenderBox>(svgSVGElement->renderer());
+    if (!renderBox)
+        return std::nullopt;
+
+    return FloatSize { renderBox->contentBoxRect().size() };
 }
 
 }

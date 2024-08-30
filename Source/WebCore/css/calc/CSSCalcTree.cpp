@@ -107,6 +107,7 @@ Child makeNumeric(double value, CSSUnitType unit)
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
     // <angle>
     case CSSUnitType::CSS_RAD:
     case CSSUnitType::CSS_GRAD:

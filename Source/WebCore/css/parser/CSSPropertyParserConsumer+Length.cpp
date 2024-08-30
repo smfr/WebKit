@@ -123,6 +123,7 @@ std::optional<LengthRaw> LengthKnownTokenTypeDimensionConsumer::consume(CSSParse
     case CSSUnitType::CSS_CQB:
     case CSSUnitType::CSS_CQMIN:
     case CSSUnitType::CSS_CQMAX:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         break;
     default:
         return std::nullopt;

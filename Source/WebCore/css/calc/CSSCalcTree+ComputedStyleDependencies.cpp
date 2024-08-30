@@ -132,6 +132,7 @@ static void collectComputedStyleDependencies(CSSUnitType unit, ComputedStyleDepe
     case CSSUnitType::CSS_VALUE_ID:
     case CSSUnitType::CSS_CALC:
     case CSSUnitType::CSS_ANCHOR:
+    case CSSUnitType::CSS_SVG_VIEWBOX_RELATIVE:
         break;
     }
 }
