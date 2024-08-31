@@ -3092,8 +3092,14 @@ header: <WebCore/MotionPath.h>
 };
 
 header: <WebCore/TransformOperationData.h>
+[CustomHeader] struct WebCore::TransformContext {
+    WebCore::FloatRect referenceBox;
+    std::optional<WebCore::FloatSize> lengthScale;
+}
+
+header: <WebCore/TransformOperationData.h>
 [CustomHeader] struct WebCore::TransformOperationData {
-    WebCore::FloatRect boundingBox;
+    WebCore::TransformContext transformContext;
     std::optional<WebCore::MotionPathData> motionPathData;
     bool isSVGRenderer;
 }

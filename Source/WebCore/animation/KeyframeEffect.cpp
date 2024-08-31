@@ -2250,7 +2250,7 @@ bool KeyframeEffect::computeTransformedExtentViaTransformList(const FloatRect& r
             floatBounds = boundsOfRotatingRect(floatBounds);
         } else {
             TransformationMatrix transform;
-            operation->apply(transform, rendererBox.size());
+            operation->apply(transform, { rendererBox, std::nullopt });
             if (!transform.isAffine())
                 return false;
 
@@ -2275,7 +2275,7 @@ bool KeyframeEffect::computeTransformedExtentViaTransformList(const FloatRect& r
 bool KeyframeEffect::computeTransformedExtentViaMatrix(const FloatRect& rendererBox, const RenderStyle& style, LayoutRect& bounds) const
 {
     TransformationMatrix transform;
-    style.applyTransform(transform, TransformOperationData(rendererBox, renderer()));
+    style.applyTransform(transform, TransformOperationData({ rendererBox, std::nullopt }, renderer()));
     if (!transform.isAffine())
         return false;
 

@@ -91,47 +91,49 @@ AcceleratedEffectValues AcceleratedEffectValues::clone() const
     };
 }
 
-static LengthPoint nonCalculatedLengthPoint(LengthPoint lengthPoint, const IntSize& borderBoxSize)
+static LengthPoint nonCalculatedLengthPoint(LengthPoint lengthPoint, const FloatSize& borderBoxSize)
 {
     if (!lengthPoint.x().isCalculated() && !lengthPoint.y().isCalculated())
         return lengthPoint;
+
     return {
         { floatValueForLength(lengthPoint.x(), borderBoxSize.width()), LengthType::Fixed },
         { floatValueForLength(lengthPoint.y(), borderBoxSize.height()), LengthType::Fixed }
     };
 }
 
-AcceleratedEffectValues::AcceleratedEffectValues(const RenderStyle& style, const IntRect& borderBoxRect, const RenderLayerModelObject* renderer)
+AcceleratedEffectValues::AcceleratedEffectValues(const RenderStyle& style, const FloatRect& borderBoxRect, const RenderLayerModelObject* renderer)
 {
     opacity = style.opacity();
 
-    auto borderBoxSize = borderBoxRect.size();
+    auto transformContext = TransformContext { borderBoxRect, std::nullopt };
 
     if (renderer)
-        transformOperationData = TransformOperationData(renderer->transformReferenceBoxRect(style), renderer);
+        transformOperationData = TransformOperationData({ renderer->transformReferenceBoxRect(style), std::nullopt }, renderer);
 
     transformBox = style.transformBox();
-    transform = style.transform().selfOrCopyWithResolvedCalculatedValues(borderBoxSize);
+    transform = style.transform().selfOrCopyWithResolvedCalculatedValues(transformContext);
 
     if (auto* srcTranslate = style.translate())
-        translate = srcTranslate->selfOrCopyWithResolvedCalculatedValues(borderBoxSize);
+        translate = srcTranslate->selfOrCopyWithResolvedCalculatedValues(transformContext);
     if (auto* srcScale = style.scale())
-        scale = srcScale->selfOrCopyWithResolvedCalculatedValues(borderBoxSize);
+        scale = srcScale->selfOrCopyWithResolvedCalculatedValues(transformContext);
     if (auto* srcRotate = style.rotate())
-        rotate = srcRotate->selfOrCopyWithResolvedCalculatedValues(borderBoxSize);
-    transformOrigin = nonCalculatedLengthPoint(style.transformOriginXY(), borderBoxSize);
+        rotate = srcRotate->selfOrCopyWithResolvedCalculatedValues(transformContext);
+
+    transformOrigin = nonCalculatedLengthPoint(style.transformOriginXY(), borderBoxRect.size());
 
     offsetPath = style.offsetPath();
-    offsetPosition = nonCalculatedLengthPoint(style.offsetPosition(), borderBoxSize);
-    offsetAnchor = nonCalculatedLengthPoint(style.offsetAnchor(), borderBoxSize);
+    offsetPosition = nonCalculatedLengthPoint(style.offsetPosition(), borderBoxRect.size());
+    offsetAnchor = nonCalculatedLengthPoint(style.offsetAnchor(), borderBoxRect.size());
     offsetRotate = style.offsetRotate();
     offsetDistance = style.offsetDistance();
     if (offsetDistance.isCalculated() && offsetPath) {
-        auto anchor = borderBoxRect.location() + floatPointForLengthPoint(transformOrigin, borderBoxSize);
+        auto anchor = borderBoxRect.location() + floatPointForLengthPoint(transformOrigin, borderBoxRect.size());
         if (!offsetAnchor.x().isAuto())
             anchor = floatPointForLengthPoint(offsetAnchor, borderBoxRect.size()) + borderBoxRect.location();
 
-        auto path = offsetPath->getPath(TransformOperationData(FloatRect(borderBoxRect)));
+        auto path = offsetPath->getPath(TransformOperationData({ borderBoxRect, std::nullopt }));
         offsetDistance = { path ? path->length() : 0.0f, LengthType:: Fixed };
     }
 
@@ -146,20 +148,23 @@ TransformationMatrix AcceleratedEffectValues::computedTransformationMatrix(const
     // 1. Start with the identity matrix.
     TransformationMatrix matrix;
 
+    // FIXME: Need to pass TransformContext down.
+    auto context = TransformContext { boundingBox, std::nullopt };
+
     // 2. Translate by the computed X, Y, and Z values of transform-origin.
     // (not needed, the GraphicsLayer handles that)
 
     // 3. Translate by the computed X, Y, and Z values of translate.
     if (translate)
-        translate->apply(matrix, boundingBox.size());
+        translate->apply(matrix, context);
 
     // 4. Rotate by the computed <angle> about the specified axis of rotate.
     if (rotate)
-        rotate->apply(matrix, boundingBox.size());
+        rotate->apply(matrix, context);
 
     // 5. Scale by the computed X, Y, and Z values of scale.
     if (scale)
-        scale->apply(matrix, boundingBox.size());
+        scale->apply(matrix, context);
 
     // 6. Translate and rotate by the transform specified by offset.
     if (transformOperationData && offsetPath) {
@@ -168,7 +173,7 @@ TransformationMatrix AcceleratedEffectValues::computedTransformationMatrix(const
     }
 
     // 7. Multiply by each of the transform functions in transform from left to right.
-    transform.apply(matrix, boundingBox.size());
+    transform.apply(matrix, context);
 
     // 8. Translate by the negated computed X, Y and Z values of transform-origin.
     // (not needed, the GraphicsLayer handles that)

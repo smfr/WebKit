@@ -2374,7 +2374,7 @@ void RenderStyle::applyTransform(TransformationMatrix& transform, const Transfor
         return;
     }
 
-    auto originTranslate = computeTransformOrigin(transformData.boundingBox);
+    auto originTranslate = computeTransformOrigin(transformData.transformContext.referenceBox);
     applyTransformOrigin(transform, originTranslate);
     applyCSSTransform(transform, transformData, options);
     unapplyTransformOrigin(transform, originTranslate);
@@ -2385,7 +2385,7 @@ void RenderStyle::applyTransform(TransformationMatrix& transform, const Transfor
     applyTransform(transform, transformData, allTransformOperations());
 }
 
-#warning add svg scaling to TransformOperationData.
+//#warning add svg scaling to TransformOperationData.
 void RenderStyle::applyCSSTransform(TransformationMatrix& transform, const TransformOperationData& operationData, OptionSet<RenderStyle::TransformOperationOption> options) const
 {
     // https://www.w3.org/TR/css-transforms-2/#ctm
@@ -2394,24 +2394,22 @@ void RenderStyle::applyCSSTransform(TransformationMatrix& transform, const Trans
 
     // 2. Translate by the computed X, Y, and Z values of transform-origin.
     // (implemented in applyTransformOrigin)
-    auto& boundingBox = operationData.boundingBox;
-
     // 3. Translate by the computed X, Y, and Z values of translate.
     if (options.contains(RenderStyle::TransformOperationOption::Translate)) {
         if (auto* translate = this->translate())
-            translate->apply(transform, boundingBox.size());
+            translate->apply(transform, operationData.transformContext);
     }
 
     // 4. Rotate by the computed <angle> about the specified axis of rotate.
     if (options.contains(RenderStyle::TransformOperationOption::Rotate)) {
         if (auto* rotate = this->rotate())
-            rotate->apply(transform, boundingBox.size());
+            rotate->apply(transform, operationData.transformContext);
     }
 
     // 5. Scale by the computed X, Y, and Z values of scale.
     if (options.contains(RenderStyle::TransformOperationOption::Scale)) {
         if (auto* scale = this->scale())
-            scale->apply(transform, boundingBox.size());
+            scale->apply(transform, operationData.transformContext);
     }
 
     // 6. Translate and rotate by the transform specified by offset.
@@ -2419,7 +2417,7 @@ void RenderStyle::applyCSSTransform(TransformationMatrix& transform, const Trans
         MotionPath::applyMotionPathTransform(*this, operationData, transform);
 
     // 7. Multiply by each of the transform functions in transform from left to right.
-    this->transform().apply(transform, boundingBox.size());
+    this->transform().apply(transform, operationData.transformContext);
 
     // 8. Translate by the negated computed X, Y and Z values of transform-origin.
     // (implemented in unapplyTransformOrigin)

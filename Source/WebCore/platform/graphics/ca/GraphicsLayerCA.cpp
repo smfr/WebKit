@@ -51,6 +51,7 @@
 #include "ScaleTransformOperation.h"
 #include "Settings.h"
 #include "TiledBacking.h"
+#include "TransformContext.h"
 #include "TransformOperationsSharedPrimitivesPrefix.h"
 #include "TransformState.h"
 #include "TranslateTransformOperation.h"
@@ -140,7 +141,7 @@ static bool isTransformTypeNumber(TransformOperation::Type transformType)
     return !isTransformTypeTransformationMatrix(transformType) && !isTransformTypeFloatPoint3D(transformType);
 }
 
-static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const FloatSize& size, float& value)
+static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const TransformContext& context, float& value)
 {
     switch (transformType) {
     case TransformOperation::Type::Rotate:
@@ -158,10 +159,10 @@ static void getTransformFunctionValue(const TransformOperation* transformOp, Tra
         value = transformOp ? narrowPrecisionToFloat(downcast<ScaleTransformOperation>(*transformOp).z()) : 1;
         break;
     case TransformOperation::Type::TranslateX:
-        value = transformOp ? downcast<TranslateTransformOperation>(*transformOp).xAsFloat(size) : 0;
+        value = transformOp ? downcast<TranslateTransformOperation>(*transformOp).xAsFloat(context) : 0;
         break;
     case TransformOperation::Type::TranslateY:
-        value = transformOp ? downcast<TranslateTransformOperation>(*transformOp).yAsFloat(size) : 0;
+        value = transformOp ? downcast<TranslateTransformOperation>(*transformOp).yAsFloat(context) : 0;
         break;
     case TransformOperation::Type::TranslateZ:
         value = transformOp ? downcast<TranslateTransformOperation>(*transformOp).zAsFloat() : 0;
@@ -171,7 +172,7 @@ static void getTransformFunctionValue(const TransformOperation* transformOp, Tra
     }
 }
 
-static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const FloatSize& size, FloatPoint3D& value)
+static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const TransformContext& context, FloatPoint3D& value)
 {
     switch (transformType) {
     case TransformOperation::Type::Scale:
@@ -185,8 +186,8 @@ static void getTransformFunctionValue(const TransformOperation* transformOp, Tra
     case TransformOperation::Type::Translate:
     case TransformOperation::Type::Translate3D: {
         const auto* translateTransformOp = downcast<TranslateTransformOperation>(transformOp);
-        value.setX(translateTransformOp ? translateTransformOp->xAsFloat(size) : 0);
-        value.setY(translateTransformOp ? translateTransformOp->yAsFloat(size) : 0);
+        value.setX(translateTransformOp ? translateTransformOp->xAsFloat(context) : 0);
+        value.setY(translateTransformOp ? translateTransformOp->yAsFloat(context) : 0);
         value.setZ(translateTransformOp ? translateTransformOp->zAsFloat() : 0);
         break;
     }
@@ -195,7 +196,7 @@ static void getTransformFunctionValue(const TransformOperation* transformOp, Tra
     }
 }
 
-static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const FloatSize& size, TransformationMatrix& value)
+static void getTransformFunctionValue(const TransformOperation* transformOp, TransformOperation::Type transformType, const TransformContext& context, TransformationMatrix& value)
 {
     switch (transformType) {
     case TransformOperation::Type::SkewX:
@@ -208,7 +209,7 @@ static void getTransformFunctionValue(const TransformOperation* transformOp, Tra
     case TransformOperation::Type::Identity:
     case TransformOperation::Type::None:
         if (transformOp)
-            transformOp->apply(value, size);
+            transformOp->apply(value, context);
         else
             value.makeIdentity();
         break;
@@ -3848,10 +3849,13 @@ bool GraphicsLayerCA::setTransformAnimationEndpoints(const KeyframeValueList& va
     const auto& startValue = transformationAnimationValueAt(valueList, fromIndex);
     const auto& endValue = transformationAnimationValueAt(valueList, toIndex);
 
+    // FIXME: Need to pass TransformContext down.
+    auto context = TransformContext { FloatRect({ }, boxSize ), std::nullopt };
+
     if (isMatrixAnimation) {
         TransformationMatrix fromTransform, toTransform;
-        startValue.apply(fromTransform, boxSize);
-        endValue.apply(toTransform, boxSize);
+        startValue.apply(fromTransform, context);
+        endValue.apply(toTransform, context);
 
         // If any matrix is singular, CA won't animate it correctly. So fall back to software animation
         if (!fromTransform.isInvertible() || !toTransform.isInvertible())
@@ -3862,27 +3866,27 @@ bool GraphicsLayerCA::setTransformAnimationEndpoints(const KeyframeValueList& va
     } else {
         if (isTransformTypeNumber(transformOpType)) {
             float fromValue;
-            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, boxSize, fromValue);
+            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, context, fromValue);
             basicAnim->setFromValue(fromValue);
             
             float toValue;
-            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, boxSize, toValue);
+            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, context, toValue);
             basicAnim->setToValue(toValue);
         } else if (isTransformTypeFloatPoint3D(transformOpType)) {
             FloatPoint3D fromValue;
-            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, boxSize, fromValue);
+            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, context, fromValue);
             basicAnim->setFromValue(fromValue);
             
             FloatPoint3D toValue;
-            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, boxSize, toValue);
+            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, context, toValue);
             basicAnim->setToValue(toValue);
         } else {
             TransformationMatrix fromValue;
-            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, boxSize, fromValue);
+            getTransformFunctionValue(startValue.at(functionIndex), transformOpType, context, fromValue);
             basicAnim->setFromValue(fromValue);
 
             TransformationMatrix toValue;
-            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, boxSize, toValue);
+            getTransformFunctionValue(endValue.at(functionIndex), transformOpType, context, toValue);
             basicAnim->setToValue(toValue);
         }
     }
@@ -3909,9 +3913,12 @@ bool GraphicsLayerCA::setTransformAnimationKeyframes(const KeyframeValueList& va
         const TransformAnimationValue& curValue = static_cast<const TransformAnimationValue&>(valueList.at(index));
         keyTimes.append(forwards ? curValue.keyTime() : (1 - curValue.keyTime()));
 
+        // FIXME: Need to pass TransformContext down.
+        auto context = TransformContext { FloatRect({ }, boxSize ), std::nullopt };
+
         if (isMatrixAnimation) {
             TransformationMatrix transform;
-            curValue.value().apply(transform, boxSize, functionIndex);
+            curValue.value().apply(transform, context, functionIndex);
 
             // If any matrix is singular, CA won't animate it correctly. So fall back to software animation
             if (!transform.isInvertible())
@@ -3922,15 +3929,15 @@ bool GraphicsLayerCA::setTransformAnimationKeyframes(const KeyframeValueList& va
             const TransformOperation* transformOp = curValue.value().at(functionIndex);
             if (isTransformTypeNumber(transformOpType)) {
                 float value;
-                getTransformFunctionValue(transformOp, transformOpType, boxSize, value);
+                getTransformFunctionValue(transformOp, transformOpType, context, value);
                 floatValues.append(value);
             } else if (isTransformTypeFloatPoint3D(transformOpType)) {
                 FloatPoint3D value;
-                getTransformFunctionValue(transformOp, transformOpType, boxSize, value);
+                getTransformFunctionValue(transformOp, transformOpType, context, value);
                 floatPoint3DValues.append(value);
             } else {
                 TransformationMatrix value;
-                getTransformFunctionValue(transformOp, transformOpType, boxSize, value);
+                getTransformFunctionValue(transformOp, transformOpType, context, value);
                 transformationMatrixValues.append(value);
             }
         }

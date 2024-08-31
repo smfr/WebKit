@@ -50,7 +50,7 @@ private:
     bool operator==(const SkewTransformOperation& other) const { return operator==(static_cast<const TransformOperation&>(other)); }
     bool operator==(const TransformOperation&) const override;
 
-    bool apply(TransformationMatrix& transform, const FloatSize&) const override
+    bool apply(TransformationMatrix& transform, const TransformContext&) const override
     {
         transform.skew(m_angleX, m_angleY);
         return false;

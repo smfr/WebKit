@@ -903,7 +903,7 @@ RefPtr<CSSFunctionValue> transformOperationAsCSSValue(const TransformOperation& 
     case TransformOperation::Type::Matrix:
     case TransformOperation::Type::Matrix3D: {
         TransformationMatrix transform;
-        operation.apply(transform, { });
+        operation.apply(transform, { FloatRect(), std::nullopt });
         return ComputedStyleExtractor::matrixTransformValue(transform, style);
     }
     case TransformOperation::Type::Identity:
@@ -922,7 +922,7 @@ static Ref<CSSValue> computedTransform(RenderElement* renderer, const RenderStyl
 
     if (renderer) {
         TransformationMatrix transform;
-        style.applyTransform(transform, TransformOperationData(renderer->transformReferenceBoxRect(style), renderer), { });
+        style.applyTransform(transform, TransformOperationData({ renderer->transformReferenceBoxRect(style), std::nullopt }, renderer), { });
         return CSSTransformListValue::create(ComputedStyleExtractor::matrixTransformValue(transform, style));
     }
 

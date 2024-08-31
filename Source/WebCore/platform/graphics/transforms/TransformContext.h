@@ -2,7 +2,7 @@
  * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
  *           (C) 2000 Antti Koivisto (koivisto@kde.org)
  *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003, 2005-2008, 2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2005, 2006, 2007, 2008 Apple Inc. All rights reserved.
  * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
  *
  * This library is free software; you can redistribute it and/or
@@ -19,50 +19,23 @@
  * along with this library; see the file COPYING.LIB.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
- *
  */
 
 #pragma once
 
-#include "TransformOperation.h"
-#include <wtf/Ref.h>
+#include "FloatSize.h"
 
 namespace WebCore {
 
-struct BlendingContext;
-
-class IdentityTransformOperation final : public TransformOperation {
-public:
-    WEBCORE_EXPORT static Ref<IdentityTransformOperation> create();
-
-    Ref<TransformOperation> clone() const override
+struct TransformContext {
+    TransformContext(const FloatRect& referenceBox, std::optional<FloatSize> lengthScale)
+        : referenceBox(referenceBox)
+        , lengthScale(lengthScale)
     {
-        return create();
     }
 
-private:
-    bool isIdentity() const override { return true; }
-
-    bool operator==(const TransformOperation& o) const override
-    {
-        return isSameType(o);
-    }
-
-    bool apply(TransformationMatrix&, const TransformContext&) const override
-    {
-        return false;
-    }
-
-    Ref<TransformOperation> blend(const TransformOperation*, const BlendingContext&, bool = false) override
-    {
-        return *this;
-    }
-
-    void dump(WTF::TextStream&) const final;
-
-    IdentityTransformOperation();
+    FloatRect referenceBox;
+    std::optional<FloatSize> lengthScale;
 };
 
 } // namespace WebCore
-
-SPECIALIZE_TYPE_TRAITS_TRANSFORMOPERATION(WebCore::IdentityTransformOperation, WebCore::TransformOperation::Type::Identity ==)

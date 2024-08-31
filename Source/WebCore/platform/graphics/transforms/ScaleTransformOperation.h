@@ -62,7 +62,7 @@ public:
 
     bool isAffectedByTransformOrigin() const final { return !isIdentity(); }
 
-    bool apply(TransformationMatrix& transform, const FloatSize&) const final
+    bool apply(TransformationMatrix& transform, const TransformContext&) const final
     {
         transform.scale3d(m_x, m_y, m_z);
         return false;

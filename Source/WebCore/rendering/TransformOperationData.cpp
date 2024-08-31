@@ -31,8 +31,8 @@
 
 namespace WebCore {
 
-TransformOperationData::TransformOperationData(FloatRect boundingBox, const RenderElement* renderer)
-    : boundingBox(boundingBox)
+TransformOperationData::TransformOperationData(const TransformContext& transformContext, const RenderElement* renderer)
+    : transformContext(transformContext)
 {
     if (renderer) {
         motionPathData = MotionPath::motionPathDataForRenderer(*renderer);

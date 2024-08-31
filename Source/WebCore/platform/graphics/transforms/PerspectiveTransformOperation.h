@@ -66,7 +66,7 @@ private:
         return std::max(1.0f, floatValueForLength(*m_p, 1.0));
     }
 
-    bool apply(TransformationMatrix& transform, const FloatSize&) const override
+    bool apply(TransformationMatrix& transform, const TransformContext&) const override
     {
         if (auto value = floatValue())
             transform.applyPerspective(*value);

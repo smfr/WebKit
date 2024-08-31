@@ -23,7 +23,9 @@
 #include "TransformOperations.h"
 
 #include "AnimationUtilities.h"
+#include "FloatRect.h"
 #include "Matrix3DTransformOperation.h"
+#include "TransformContext.h"
 #include <algorithm>
 #include <ranges>
 #include <wtf/TZoneMallocInlines.h>
@@ -55,15 +57,15 @@ TransformOperations TransformOperations::clone() const
     return TransformOperations { m_operations.map([](const auto& op) { return op->clone(); }) };
 }
 
-TransformOperations TransformOperations::selfOrCopyWithResolvedCalculatedValues(const FloatSize& size) const
+TransformOperations TransformOperations::selfOrCopyWithResolvedCalculatedValues(const TransformContext& context) const
 {
-    return TransformOperations { m_operations.map([&size](const auto& op) { return op->selfOrCopyWithResolvedCalculatedValues(size); }) };
+    return TransformOperations { m_operations.map([&context](const auto& op) { return op->selfOrCopyWithResolvedCalculatedValues(context); }) };
 }
 
-void TransformOperations::apply(TransformationMatrix& matrix, const FloatSize& size, unsigned start) const
+void TransformOperations::apply(TransformationMatrix& matrix, const TransformContext& context, unsigned start) const
 {
     for (unsigned i = start; i < m_operations.size(); ++i)
-        m_operations[i]->apply(matrix, size);
+        m_operations[i]->apply(matrix, context);
 }
 
 bool TransformOperations::has3DOperation() const
@@ -81,10 +83,12 @@ bool TransformOperations::affectedByTransformOrigin() const
     return std::ranges::any_of(m_operations, [](auto& op) { return op->isAffectedByTransformOrigin(); });
 }
 
+// FIXME: FloatSize
 bool TransformOperations::isInvertible(const LayoutSize& size) const
 {
     TransformationMatrix transform;
-    apply(transform, size);
+    auto context = TransformContext(FloatRect { { }, FloatSize { size } }, std::nullopt);
+    apply(transform, context);
     return transform.isInvertible();
 }
 
@@ -141,13 +145,15 @@ TransformOperations TransformOperations::blend(const TransformOperations& from, 
     return TransformOperations { WTFMove(operations) };
 }
 
+// FloatSize
 Ref<TransformOperation> TransformOperations::createBlendedMatrixOperationFromOperationsSuffix(const TransformOperations& from, unsigned start, const BlendingContext& context, const LayoutSize& referenceBoxSize) const
 {
     TransformationMatrix fromTransform;
-    from.apply(fromTransform, referenceBoxSize, start);
+    auto transformContext = TransformContext { FloatRect { { }, referenceBoxSize }, std::nullopt };
+    from.apply(fromTransform, transformContext, start);
 
     TransformationMatrix toTransform;
-    apply(toTransform, referenceBoxSize, start);
+    apply(toTransform, transformContext, start);
 
     auto progress = context.progress;
     auto compositeOperation = context.compositeOperation;

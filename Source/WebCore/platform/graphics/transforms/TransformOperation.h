@@ -34,6 +34,7 @@
 namespace WebCore {
 
 struct BlendingContext;
+struct TransformContext;
 
 enum class TransformOperationType : uint8_t {
     ScaleX,
@@ -72,17 +73,17 @@ public:
     virtual ~TransformOperation() = default;
 
     virtual Ref<TransformOperation> clone() const = 0;
-    virtual Ref<TransformOperation> selfOrCopyWithResolvedCalculatedValues(const FloatSize&) { return *this; }
+    virtual Ref<TransformOperation> selfOrCopyWithResolvedCalculatedValues(const TransformContext&) { return *this; }
 
     virtual bool operator==(const TransformOperation&) const = 0;
 
     virtual bool isIdentity() const = 0;
 
     // Return true if the borderBoxSize was used in the computation, false otherwise.
-    virtual bool apply(TransformationMatrix&, const FloatSize& borderBoxSize) const = 0;
-    virtual bool applyUnrounded(TransformationMatrix& transform, const FloatSize& borderBoxSize) const
+    virtual bool apply(TransformationMatrix&, const TransformContext&) const = 0;
+    virtual bool applyUnrounded(TransformationMatrix& transform, const TransformContext& context) const
     {
-        return apply(transform, borderBoxSize);
+        return apply(transform, context);
     }
 
     virtual Ref<TransformOperation> blend(const TransformOperation* from, const BlendingContext&, bool blendToIdentity = false) = 0;

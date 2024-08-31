@@ -431,7 +431,7 @@ void RenderLayerModelObject::applySVGTransform(TransformationMatrix& transform, 
 
     // CSS transforms take precedence over SVG transforms.
     if (hasCSSTransform)
-        style.applyCSSTransform(transform, TransformOperationData(boundingBox, this), options);
+        style.applyCSSTransform(transform, TransformOperationData({ boundingBox, std::nullopt }, this), options);
     else if (!svgTransform.isIdentity())
         transform.multiplyAffineTransform(svgTransform);
 

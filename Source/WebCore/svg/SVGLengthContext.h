@@ -35,6 +35,22 @@ struct Length;
 struct ResponsiveViewportData {
     std::optional<FloatSize> viewboxViewportSize;
     std::optional<FloatSize> svgRootCSSBoxSize;
+
+    float horizontalScale() const
+    {
+        if (viewboxViewportSize && svgRootCSSBoxSize)
+            return viewboxViewportSize->width() / svgRootCSSBoxSize->width();
+
+        return 1;
+    }
+
+    float verticalScale() const
+    {
+        if (viewboxViewportSize && svgRootCSSBoxSize)
+            return viewboxViewportSize->height() / svgRootCSSBoxSize->height();
+
+        return 1;
+    }
 };
 
 class SVGLengthContext {

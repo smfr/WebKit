@@ -63,7 +63,7 @@ public:
 
     bool isAffectedByTransformOrigin() const final { return !isIdentity(); }
 
-    bool apply(TransformationMatrix& transform, const FloatSize& /*borderBoxSize*/) const final
+    bool apply(TransformationMatrix& transform, const TransformContext&) const final
     {
         if (type() == TransformOperation::Type::Rotate)
             transform.rotate(m_angle);
@@ -72,7 +72,7 @@ public:
         return false;
     }
 
-    bool applyUnrounded(TransformationMatrix& transform, const FloatSize& /*borderBoxSize*/) const final
+    bool applyUnrounded(TransformationMatrix& transform, const TransformContext&) const final
     {
         if (type() == TransformOperation::Type::Rotate)
             transform.rotate(m_angle, TransformationMatrix::RotationSnapping::None);

@@ -50,7 +50,7 @@ public:
     bool operator==(const TransformOperations&) const;
 
     WEBCORE_EXPORT TransformOperations clone() const;
-    TransformOperations selfOrCopyWithResolvedCalculatedValues(const FloatSize&) const;
+    TransformOperations selfOrCopyWithResolvedCalculatedValues(const TransformContext&) const;
 
     const_iterator begin() const { return m_operations.begin(); }
     const_iterator end() const { return m_operations.end(); }
@@ -65,7 +65,7 @@ public:
     const Ref<TransformOperation>& first() const { return m_operations.first(); }
     const Ref<TransformOperation>& last() const { return m_operations.last(); }
 
-    void apply(TransformationMatrix&, const FloatSize&, unsigned start = 0) const;
+    void apply(TransformationMatrix&, const TransformContext&, unsigned start = 0) const;
 
     // Return true if any of the operation types are 3D operation types (even if the
     // values describe affine transforms)

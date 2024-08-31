@@ -55,7 +55,7 @@ private:
     bool operator==(const MatrixTransformOperation& other) const { return operator==(static_cast<const TransformOperation&>(other)); }
     bool operator==(const TransformOperation&) const override;
 
-    bool apply(TransformationMatrix& transform, const FloatSize&) const override
+    bool apply(TransformationMatrix& transform, const TransformContext&) const override
     {
         TransformationMatrix matrix(m_a, m_b, m_c, m_d, m_e, m_f);
         transform.multiply(matrix);

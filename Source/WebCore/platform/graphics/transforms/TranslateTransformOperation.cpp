@@ -24,6 +24,7 @@
 
 #include "AnimationUtilities.h"
 #include "FloatConversion.h"
+#include "TransformContext.h"
 #include <wtf/text/TextStream.h>
 
 namespace WebCore {
@@ -50,6 +51,23 @@ bool TranslateTransformOperation::operator==(const TransformOperation& other) co
     return m_x == t.m_x && m_y == t.m_y && m_z == t.m_z;
 }
 
+float TranslateTransformOperation::xAsFloat(const TransformContext& context) const
+{
+    auto result = floatValueForLength(m_x, context.referenceBox.width());
+    if (context.lengthScale)
+        result *= context.lengthScale->width();
+    return result;
+}
+
+float TranslateTransformOperation::yAsFloat(const TransformContext& context) const
+{
+    auto result = floatValueForLength(m_y, context.referenceBox.height());
+    if (context.lengthScale)
+        result *= context.lengthScale->height();
+
+    return result;
+}
+
 Ref<TransformOperation> TranslateTransformOperation::blend(const TransformOperation* from, const BlendingContext& context, bool blendToIdentity)
 {
     Length zeroLength(0, LengthType::Fixed);
@@ -72,13 +90,13 @@ void TranslateTransformOperation::dump(TextStream& ts) const
     ts << type() << "(" << m_x << ", " << m_y << ", " << m_z << ")";
 }
 
-Ref<TransformOperation> TranslateTransformOperation::selfOrCopyWithResolvedCalculatedValues(const FloatSize& borderBoxSize)
+Ref<TransformOperation> TranslateTransformOperation::selfOrCopyWithResolvedCalculatedValues(const TransformContext& context)
 {
     if (!m_x.isCalculated() && !m_y.isCalculated() && !m_z.isCalculated())
-        return TransformOperation::selfOrCopyWithResolvedCalculatedValues(borderBoxSize);
+        return TransformOperation::selfOrCopyWithResolvedCalculatedValues(context);
 
-    Length x = { xAsFloat(borderBoxSize), LengthType::Fixed };
-    Length y = { yAsFloat(borderBoxSize), LengthType::Fixed };
+    Length x = { xAsFloat(context), LengthType::Fixed };
+    Length y = { yAsFloat(context), LengthType::Fixed };
     return create(x, y, m_z, type());
 }
 

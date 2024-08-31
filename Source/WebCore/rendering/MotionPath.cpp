@@ -32,6 +32,7 @@
 #include "PathTraversalState.h"
 #include "RenderBlock.h"
 #include "RenderStyleInlines.h"
+#include "TransformContext.h"
 #include "TransformOperationData.h"
 #include "TransformationMatrix.h"
 
@@ -122,7 +123,7 @@ static PathTraversalState traversalStateAtDistance(const Path& path, const Lengt
 
 void MotionPath::applyMotionPathTransform(TransformationMatrix& matrix, const TransformOperationData& transformData, const FloatPoint& transformOrigin, const PathOperation& offsetPath, const LengthPoint& offsetAnchor, const Length& offsetDistance, const OffsetRotation& offsetRotate, TransformBox transformBox)
 {
-    auto& boundingBox = transformData.boundingBox;
+    auto& boundingBox = transformData.transformContext.referenceBox;
     auto anchor = transformOrigin;
     if (!offsetAnchor.x().isAuto())
         anchor = floatPointForLengthPoint(offsetAnchor, boundingBox.size()) + boundingBox.location();
@@ -161,7 +162,7 @@ void MotionPath::applyMotionPathTransform(const RenderStyle& style, const Transf
     if (!offsetPath)
         return;
 
-    auto transformOrigin = style.computeTransformOrigin(transformData.boundingBox).xy();
+    auto transformOrigin = style.computeTransformOrigin(transformData.transformContext.referenceBox).xy();
     applyMotionPathTransform(matrix, transformData, transformOrigin, *offsetPath, style.offsetAnchor(), style.offsetDistance(), style.offsetRotate(), style.transformBox());
 }
 
@@ -203,7 +204,7 @@ static FloatPoint currentOffsetForData(const MotionPathData& data)
 std::optional<Path> MotionPath::computePathForRay(const RayPathOperation& rayPathOperation, const TransformOperationData& data)
 {
     auto motionPathData = data.motionPathData;
-    auto elementBoundingBox = data.boundingBox;
+    auto elementBoundingBox = data.transformContext.referenceBox;
     if (!motionPathData || motionPathData->containingBlockBoundingRect.rect().isZero())
         return std::nullopt;
 
@@ -250,7 +251,7 @@ std::optional<Path> MotionPath::computePathForShape(const ShapePathOperation& pa
         }
         return pathOperation.pathForReferenceRect(containingBlockRect);
     }
-    return pathOperation.pathForReferenceRect(data.boundingBox);
+    return pathOperation.pathForReferenceRect(data.transformContext.referenceBox);
 
 }
 

@@ -64,7 +64,7 @@ struct AcceleratedEffectValues {
     FilterOperations backdropFilter { };
 
     AcceleratedEffectValues() = default;
-    AcceleratedEffectValues(const RenderStyle&, const IntRect&, const RenderLayerModelObject* = nullptr);
+    AcceleratedEffectValues(const RenderStyle&, const FloatRect&, const RenderLayerModelObject* = nullptr);
     AcceleratedEffectValues(float opacity, std::optional<TransformOperationData>&& transformOperationData, LengthPoint&& transformOrigin, TransformBox transformBox, TransformOperations&& transform, RefPtr<TransformOperation>&& translate, RefPtr<TransformOperation>&& scale, RefPtr<TransformOperation>&& rotate, RefPtr<PathOperation>&& offsetPath, Length&& offsetDistance, LengthPoint&& offsetPosition, LengthPoint&& offsetAnchor, OffsetRotation&& offsetRotate, FilterOperations&& filter, FilterOperations&& backdropFilter)
         : opacity(opacity)
         , transformOperationData(WTFMove(transformOperationData))

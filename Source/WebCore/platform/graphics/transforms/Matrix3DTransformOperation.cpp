@@ -27,6 +27,7 @@
 #include "Matrix3DTransformOperation.h"
 
 #include "AnimationUtilities.h"
+#include "TransformContext.h"
 #include <algorithm>
 #include <wtf/text/TextStream.h>
 
@@ -60,13 +61,13 @@ Ref<TransformOperation> Matrix3DTransformOperation::blend(const TransformOperati
         return *this;
 
     // Convert the TransformOperations into matrices
-    FloatSize size;
+    auto transformContext = TransformContext { { }, std::nullopt  };
     TransformationMatrix fromT;
     TransformationMatrix toT;
     if (from)
-        from->apply(fromT, size);
+        from->apply(fromT, transformContext);
 
-    apply(toT, size);
+    apply(toT, transformContext);
 
     if (blendToIdentity)
         return createOperation(fromT, toT, context);

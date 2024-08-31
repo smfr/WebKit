@@ -47,10 +47,10 @@ public:
         return adoptRef(*new TranslateTransformOperation(m_x, m_y, m_z, type()));
     }
 
-    Ref<TransformOperation> selfOrCopyWithResolvedCalculatedValues(const FloatSize&) override;
+    Ref<TransformOperation> selfOrCopyWithResolvedCalculatedValues(const TransformContext&) override;
 
-    float xAsFloat(const FloatSize& borderBoxSize) const { return floatValueForLength(m_x, borderBoxSize.width()); }
-    float yAsFloat(const FloatSize& borderBoxSize) const { return floatValueForLength(m_y, borderBoxSize.height()); }
+    float xAsFloat(const TransformContext&) const;
+    float yAsFloat(const TransformContext&) const;
     float zAsFloat() const { return floatValueForLength(m_z, 1); }
 
     Length x() const { return m_x; }
@@ -63,9 +63,9 @@ public:
 
     TransformOperation::Type primitiveType() const final { return isRepresentableIn2D() ? Type::Translate : Type::Translate3D; }
 
-    bool apply(TransformationMatrix& transform, const FloatSize& borderBoxSize) const final
+    bool apply(TransformationMatrix& transform, const TransformContext& context) const final
     {
-        transform.translate3d(xAsFloat(borderBoxSize), yAsFloat(borderBoxSize), zAsFloat());
+        transform.translate3d(xAsFloat(context), yAsFloat(context), zAsFloat());
         return m_x.isPercent() || m_y.isPercent();
     }
 

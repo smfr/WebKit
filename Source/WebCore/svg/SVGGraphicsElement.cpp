@@ -32,6 +32,7 @@
 #include "RenderSVGPath.h"
 #include "RenderSVGResourceMasker.h"
 #include "RenderSVGResourcePattern.h"
+#include "SVGLengthContext.h"
 #include "SVGMatrix.h"
 #include "SVGNames.h"
 #include "SVGPathData.h"
@@ -104,8 +105,13 @@ AffineTransform SVGGraphicsElement::animatedLocalTransform() const
     if (hasSpecifiedTransform || (style && (style->translate() || style->scale() || style->rotate()))) {
         // Note: objectBoundingBox is an emptyRect for elements like pattern or clipPath.
         // See the "Object bounding box units" section of http://dev.w3.org/csswg/css3-transforms/
+        auto lengthContext = SVGLengthContext(this);
+        // FIXME: Consult viewport mode.
+        auto viewportData = lengthContext.responsiveViewportData();
+        auto viewportScale = FloatSize { viewportData.horizontalScale(), viewportData.verticalScale() };
+        auto referenceBoxRect = viewportData.svgRootCSSBoxSize ? FloatRect { { }, viewportData.svgRootCSSBoxSize.value() } : renderer->transformReferenceBoxRect();
         TransformationMatrix transform;
-        style->applyTransform(transform, TransformOperationData(renderer->transformReferenceBoxRect(), renderer.get()));
+        style->applyTransform(transform, TransformOperationData({ referenceBoxRect, viewportScale }, renderer.get()));
 
         // Flatten any 3D transform.
         matrix = transform.toAffineTransform();

@@ -4387,8 +4387,10 @@ TransformationMatrix RenderLayerBacking::transformMatrixForProperty(AnimatedProp
     TransformationMatrix matrix;
 
     auto applyTransformOperation = [&](TransformOperation* operation) {
-        if (operation)
-            operation->apply(matrix, snappedIntRect(m_owningLayer.rendererBorderBoxRect()).size());
+        if (operation) {
+            auto snappedRect = snapRectToDevicePixels(m_owningLayer.rendererBorderBoxRect(), deviceScaleFactor()); // This used to use IntRect
+            operation->apply(matrix, { snappedRect, std::nullopt });
+        }
     };
 
     if (property == AnimatedProperty::Translate)
@@ -4397,9 +4399,10 @@ TransformationMatrix RenderLayerBacking::transformMatrixForProperty(AnimatedProp
         applyTransformOperation(renderer().style().scale());
     else if (property == AnimatedProperty::Rotate)
         applyTransformOperation(renderer().style().rotate());
-    else if (property == AnimatedProperty::Transform)
-        renderer().style().transform().apply(matrix, snappedIntRect(m_owningLayer.rendererBorderBoxRect()).size());
-    else
+    else if (property == AnimatedProperty::Transform) {
+        auto snappedRect = snapRectToDevicePixels(m_owningLayer.rendererBorderBoxRect(), deviceScaleFactor()); // This used to use IntRect
+        renderer().style().transform().apply(matrix, { snappedRect, std::nullopt });
+    } else
         ASSERT_NOT_REACHED();
 
     return matrix;

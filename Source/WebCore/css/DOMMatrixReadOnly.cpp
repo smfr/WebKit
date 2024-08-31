@@ -244,7 +244,8 @@ ExceptionOr<DOMMatrixReadOnly::AbstractMatrix> DOMMatrixReadOnly::parseStringInt
 
     AbstractMatrix matrix;
     for (auto& operation : *operations) {
-        if (operation->apply(matrix.matrix, { 0, 0 }))
+        auto context = TransformContext { { }, std::nullopt };
+        if (operation->apply(matrix.matrix, context))
             return Exception { ExceptionCode::SyntaxError };
         if (operation->is3DOperation())
             matrix.is2D = false;

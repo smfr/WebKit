@@ -25,23 +25,23 @@
 
 #pragma once
 
-#include "FloatRect.h"
 #include "MotionPath.h"
+#include "TransformContext.h"
 
 namespace WebCore {
 
 class RenderElement;
 
 struct TransformOperationData {
-    explicit TransformOperationData(FloatRect boundingBox, const RenderElement* renderer = nullptr);
-    explicit TransformOperationData(FloatRect boundingBox, std::optional<MotionPathData> motionPathData, bool isSVGRenderer)
-        : boundingBox(boundingBox)
+    explicit TransformOperationData(const TransformContext& transformContext, const RenderElement* renderer = nullptr);
+    explicit TransformOperationData(const TransformContext& transformContext, std::optional<MotionPathData> motionPathData, bool isSVGRenderer)
+        : transformContext(transformContext)
         , motionPathData(motionPathData)
         , isSVGRenderer(isSVGRenderer)
     {
     }
 
-    FloatRect boundingBox;
+    TransformContext transformContext;
     std::optional<MotionPathData> motionPathData;
     bool isSVGRenderer { false };
 };
