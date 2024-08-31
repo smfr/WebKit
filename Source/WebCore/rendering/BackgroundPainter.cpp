@@ -859,7 +859,7 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
 
             adjustedBorderShape.clipOutOuterShape(context, deviceScaleFactor);
 
-            if (borderShape.isRounded() || borderShape.requiresPathBasedRendering()) {
+            if (borderShape.isRounded()) {
                 auto influenceShape = BorderShape::shapeForBorderRect(style, shadowRect);
                 auto influenceRadii = influenceShape.radii();
                 influenceRadii.expand(2 * shadowPaintingExtent + shadowSpread);
@@ -869,7 +869,9 @@ void BackgroundPainter::paintBoxShadow(const LayoutRect& paintRect, const Render
                     context.fillRect(shadowShape.snappedOuterRect(deviceScaleFactor), Color::black);
                 else
                     shadowShape.fillOuterShape(context, Color::black, deviceScaleFactor);
-            } else
+            } else if (borderShape.requiresPathBasedRendering())
+                shadowShape.fillOuterShape(context, Color::black, deviceScaleFactor);
+            else
                 context.fillRect(pixelSnappedFillRect, Color::black);
         } else {
             // Inset shadow.
