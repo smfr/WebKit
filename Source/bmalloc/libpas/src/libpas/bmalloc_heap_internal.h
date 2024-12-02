@@ -23,11 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#pragma once
+#ifndef BMALLOC_HEAP_INTERNAL_H
+#define BMALLOC_HEAP_INTERNAL_H
 
 #include "pas_platform.h"
-
-PAS_IGNORE_WARNINGS_BEGIN("missing-field-initializers")
 
 #include "bmalloc_heap.h"
 
@@ -322,4 +321,4 @@ PAS_END_EXTERN_C;
 
 #endif /* PAS_ENABLE_BMALLOC */
 
-PAS_IGNORE_WARNINGS_END
+#endif /* BMALLOC_HEAP_INTERNAL_H */
