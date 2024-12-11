@@ -20,6 +20,7 @@
 #include "config.h"
 #include "Page.h"
 
+#include "AXObjectCache.h"
 #include "ActivityStateChangeObserver.h"
 #include "AdvancedPrivacyProtections.h"
 #include "AlternativeTextClient.h"
@@ -135,6 +136,7 @@
 #include "Range.h"
 #include "RemoteFrame.h"
 #include "RenderDescendantIterator.h"
+#include "RenderElementInlines.h"
 #include "RenderImage.h"
 #include "RenderLayerCompositor.h"
 #include "RenderTheme.h"

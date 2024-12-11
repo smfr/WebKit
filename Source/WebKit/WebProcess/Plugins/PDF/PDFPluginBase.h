@@ -61,6 +61,7 @@ OBJC_CLASS WKAccessibilityPDFDocumentObject;
 #endif
 
 namespace WebCore {
+class AXObjectCache;
 class FragmentedSharedBuffer;
 class GraphicsContext;
 class Element;
@@ -70,6 +71,7 @@ class ResourceResponse;
 class Scrollbar;
 class ShareableBitmap;
 class SharedBuffer;
+class WeakPtrImplWithEventTargetData;
 enum class PlatformCursorType : uint8_t;
 struct DictionaryPopupInfo;
 }
@@ -213,10 +215,10 @@ public:
     WebCore::AXObjectCache* axObjectCache() const;
 
     WebCore::ScrollPosition scrollPositionForTesting() const { return scrollPosition(); }
-    WebCore::Scrollbar* horizontalScrollbar() const override { return m_horizontalScrollbar.get(); }
-    WebCore::Scrollbar* verticalScrollbar() const override { return m_verticalScrollbar.get(); }
-    RefPtr<WebCore::Scrollbar> protectedHorizontalScrollbar() const { return horizontalScrollbar(); }
-    RefPtr<WebCore::Scrollbar> protectedVerticalScrollbar() const { return verticalScrollbar(); }
+    WebCore::Scrollbar* horizontalScrollbar() const override;
+    WebCore::Scrollbar* verticalScrollbar() const override;
+    RefPtr<WebCore::Scrollbar> protectedHorizontalScrollbar() const;
+    RefPtr<WebCore::Scrollbar> protectedVerticalScrollbar() const;
     void setScrollOffset(const WebCore::ScrollOffset&) final;
 
     virtual void willAttachScrollingNode() { }

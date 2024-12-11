@@ -32,6 +32,7 @@
 #include "CSSValuePool.h"
 #include "DocumentInlines.h"
 #include "Element.h"
+#include "RenderElementInlines.h"
 #include "RenderLayerScrollableArea.h"
 #include "RenderView.h"
 #include "WebAnimation.h"
