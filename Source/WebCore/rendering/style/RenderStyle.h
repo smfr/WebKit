@@ -344,6 +344,8 @@ public:
 
     bool operator==(const RenderStyle&) const;
 
+    void deduplicate(const RenderStyle&);
+
     void inheritFrom(const RenderStyle&);
     void inheritIgnoringCustomPropertiesFrom(const RenderStyle&);
     void fastPathInheritFrom(const RenderStyle&);
@@ -378,7 +380,6 @@ public:
     const CSSCustomPropertyValue* customPropertyValue(const AtomString&) const;
     bool customPropertyValueEqual(const RenderStyle&, const AtomString&) const;
 
-    void deduplicateCustomProperties(const RenderStyle&);
     void setCustomPropertyValue(Ref<const CSSCustomPropertyValue>&&, bool isInherited);
     bool customPropertiesEqual(const RenderStyle&) const;
 

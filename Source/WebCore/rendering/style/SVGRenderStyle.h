@@ -53,6 +53,8 @@ public:
 
     bool operator==(const SVGRenderStyle&) const;
 
+    DataAreDifferent deduplicate(const SVGRenderStyle&);
+
 #if !LOG_DISABLED
     void dumpDifferences(TextStream&, const SVGRenderStyle&) const;
 #endif
@@ -496,5 +498,7 @@ inline void SVGRenderStyle::setBitDefaults()
     m_nonInheritedFlags.flagBits.bufferedRendering = static_cast<unsigned>(initialBufferedRendering());
     m_nonInheritedFlags.flagBits.maskType = static_cast<unsigned>(initialMaskType());
 }
+
+DataAreDifferent deduplicateData(DataRef<SVGRenderStyle>&, const DataRef<SVGRenderStyle>&);
 
 } // namespace WebCore
