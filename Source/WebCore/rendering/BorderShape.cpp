@@ -93,13 +93,14 @@ BorderShape BorderShape::shapeForBorderRect(const RenderStyle& style, const Layo
             radii.setTopLeft({ });
         }
 
+        // FIXME: Need to further contrain radii based on cornerShapes.
         if (!radii.areRenderableInRect(borderRect))
             radii.makeRenderableInRect(borderRect);
 
-        return BorderShape { borderRect, usedBorderWidths, radii };
+        return BorderShape { borderRect, usedBorderWidths, radii, style.cornerShapes() };
     }
 
-    return BorderShape { borderRect, usedBorderWidths };
+    return BorderShape { borderRect, usedBorderWidths, style.cornerShapes() };
 }
 
 BorderShape BorderShape::shapeForOutlineRect(const RenderStyle& style, const LayoutRect& borderRect, const LayoutRect& outlineBoxRect, const RectEdges<LayoutUnit>& outlineWidths, RectEdges<bool> closedEdges)
@@ -140,26 +141,29 @@ BorderShape BorderShape::shapeForOutlineRect(const RenderStyle& style, const Lay
             radii.setTopLeft({ });
         }
 
+        // FIXME: Need to further contrain radii based on cornerShapes.
         if (!radii.areRenderableInRect(outlineBoxRect))
             radii.makeRenderableInRect(outlineBoxRect);
 
-        return BorderShape { outlineBoxRect, usedOutlineWidths, radii };
+        return BorderShape { outlineBoxRect, usedOutlineWidths, radii, style.cornerShapes() };
     }
 
-    return BorderShape { outlineBoxRect, usedOutlineWidths };
+    return BorderShape { outlineBoxRect, usedOutlineWidths, style.cornerShapes() };
 }
 
-BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths)
+BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, RectCorners<CornerShape> cornerShapes)
     : m_borderRect(borderRect)
     , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths))
     , m_borderWidths(borderWidths)
+    , m_cornerShapes(cornerShapes)
 {
 }
 
-BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii)
+BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, RectCorners<CornerShape> cornerShapes)
     : m_borderRect(borderRect, radii)
     , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths))
     , m_borderWidths(borderWidths)
+    , m_cornerShapes(cornerShapes)
 {
     // The caller should have adjusted the radii already.
     ASSERT(m_borderRect.isRenderable());
@@ -225,19 +229,238 @@ void BorderShape::inflate(LayoutUnit amount)
     m_borderRect.inflateWithRadii(amount);
 }
 
-static void addRoundedRectToPath(const FloatRoundedRect& roundedRect, Path& path)
+// FIXME: Needs to preserve border width.
+static void addLinesForBeveledRect(const FloatRoundedRect& roundedRect, Path& path)
 {
-    if (roundedRect.isRounded())
-        path.addRoundedRect(roundedRect);
-    else
+    const auto& radii = roundedRect.radii();
+    const auto& rect = roundedRect.rect();
+
+    const auto& topLeftRadius = radii.topLeft();
+    const auto& topRightRadius = radii.topRight();
+    const auto& bottomLeftRadius = radii.bottomLeft();
+    const auto& bottomRightRadius = radii.bottomRight();
+
+    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
+
+    path.addLineTo( { rect.maxX() - topRightRadius.width(), rect.y() });
+    if (topRightRadius.width() > 0 || topRightRadius.height() > 0)
+        path.addLineTo({ rect.maxX(), rect.y() + topRightRadius.height() });
+
+    path.addLineTo({ rect.maxX(), rect.maxY() - bottomRightRadius.height() });
+    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0)
+        path.addLineTo({ rect.maxX() - bottomRightRadius.width(), rect.maxY() });
+
+    path.addLineTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() });
+    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0)
+        path.addLineTo({ rect.x(), rect.maxY() - bottomLeftRadius.height() });
+
+    path.addLineTo({ rect.x(), rect.y() + topLeftRadius.height() });
+    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0)
+        path.addLineTo({ rect.x() + topLeftRadius.width(), rect.y() });
+
+    path.closeSubpath();
+}
+
+static void addLinesForNotchedRect(const FloatRoundedRect& roundedRect, Path& path)
+{
+    const auto& radii = roundedRect.radii();
+    const auto& rect = roundedRect.rect();
+
+    const auto& topLeftRadius = radii.topLeft();
+    const auto& topRightRadius = radii.topRight();
+    const auto& bottomLeftRadius = radii.bottomLeft();
+    const auto& bottomRightRadius = radii.bottomRight();
+
+    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
+
+    auto x = rect.maxX() - topRightRadius.width();
+    path.addLineTo( { x, rect.y() });
+    if (topRightRadius.width() > 0 || topRightRadius.height() > 0) {
+        auto y = rect.y() + topRightRadius.height();
+        path.addLineTo({ x, y });
+        path.addLineTo({ rect.maxX(), y });
+    }
+
+    auto y = rect.maxY() - bottomRightRadius.height();
+    path.addLineTo({ rect.maxX(), y });
+    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0) {
+        x = rect.maxX() - bottomRightRadius.width();
+        path.addLineTo({ x, y });
+        path.addLineTo({ x, rect.maxY() });
+    }
+
+    x = rect.x() + bottomLeftRadius.width();
+    path.addLineTo({ x, rect.maxY() });
+    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0) {
+        y = rect.maxY() - bottomLeftRadius.height();
+        path.addLineTo({ x, y });
+        path.addLineTo({ rect.x(), y });
+    }
+
+    y = rect.y() + topLeftRadius.height();
+    path.addLineTo({ rect.x(), y });
+    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0) {
+        x = rect.x() + topLeftRadius.width();
+        path.addLineTo({ x, y });
+        path.addLineTo({ rect.x() + topLeftRadius.width(), rect.y() });
+    }
+
+    path.closeSubpath();
+}
+
+static void addLinesForScoopedRect(const FloatRoundedRect& roundedRect, Path& path)
+{
+    const auto& radii = roundedRect.radii();
+    const auto& rect = roundedRect.rect();
+
+    const auto& topLeftRadius = radii.topLeft();
+    const auto& topRightRadius = radii.topRight();
+    const auto& bottomLeftRadius = radii.bottomLeft();
+    const auto& bottomRightRadius = radii.bottomRight();
+
+    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
+
+    path.addLineTo({ rect.maxX() - topRightRadius.width(), rect.y() });
+    if (topRightRadius.width() > 0 || topRightRadius.height() > 0) {
+        path.addBezierCurveTo({ rect.maxX() - topRightRadius.width(), rect.y() + topRightRadius.height() * Path::circleControlPoint() },
+            { rect.maxX() - topRightRadius.width() * Path::circleControlPoint(), rect.y() + topRightRadius.height() },
+            { rect.maxX(), rect.y() + topRightRadius.height() });
+    }
+
+    path.addLineTo( { rect.maxX(), rect.maxY() - bottomRightRadius.height() });
+    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0) {
+        path.addBezierCurveTo({ rect.maxX() - bottomRightRadius.width() * Path::circleControlPoint(), rect.maxY() - bottomRightRadius.height() },
+            { rect.maxX() - bottomRightRadius.width(), rect.maxY() - bottomRightRadius.height() * Path::circleControlPoint() },
+            { rect.maxX() - bottomRightRadius.width(), rect.maxY() });
+    }
+
+    path.addLineTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() });
+    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0) {
+        path.addBezierCurveTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() - bottomLeftRadius.height() * Path::circleControlPoint() },
+            { rect.x() + bottomLeftRadius.width() * Path::circleControlPoint(), rect.maxY() - bottomLeftRadius.height() },
+            { rect.x(), rect.maxY() - bottomLeftRadius.height() });
+    }
+
+    path.addLineTo( { rect.x(), rect.y() + topLeftRadius.height() });
+    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0) {
+        path.addBezierCurveTo({ rect.x() + topLeftRadius.width() * Path::circleControlPoint(), rect.y() + topLeftRadius.height() },
+            { rect.x() + topLeftRadius.width(), rect.y() + topLeftRadius.height() * Path::circleControlPoint() },
+            { rect.x() + topLeftRadius.width(), rect.y() });
+    }
+
+    path.closeSubpath();
+}
+
+static void addShapeToPath(const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners, Path& path)
+{
+    if (!roundedRect.isRounded()) {
         path.addRect(roundedRect.rect());
+        return;
+    }
+
+    if (corners.areEqual()) {
+        switch (corners.topLeft()) {
+        case CornerShape::Round:
+            path.addRoundedRect(roundedRect);
+            return;
+        case CornerShape::Scoop:
+            addLinesForScoopedRect(roundedRect, path);
+            return;
+        case CornerShape::Bevel:
+            addLinesForBeveledRect(roundedRect, path);
+            return;
+        case CornerShape::Notch:
+            addLinesForNotchedRect(roundedRect, path);
+            return;
+        case CornerShape::Straight:
+            path.addRect(roundedRect.rect());
+            return;
+        }
+    }
+
+    // Uneven corners.
+}
+
+static void clipToShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners)
+{
+    if (!roundedRect.isRounded()) {
+        context.clip(roundedRect.rect());
+        return;
+    }
+
+    if (corners.areEqual()) {
+        if (corners.topLeft() == CornerShape::Round) {
+            context.clipRoundedRect(roundedRect);
+            return;
+        }
+
+        if (corners.topLeft() == CornerShape::Straight) {
+            context.clip(roundedRect.rect());
+            return;
+        }
+    }
+
+    Path path;
+    addShapeToPath(roundedRect, corners, path);
+    context.clipPath(path);
+}
+
+static void clipOutShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners)
+{
+    if (!roundedRect.isRounded()) {
+        context.clip(roundedRect.rect());
+        return;
+    }
+
+    if (corners.areEqual()) {
+        if (corners.topLeft() == CornerShape::Round) {
+            context.clipOutRoundedRect(roundedRect);
+            return;
+        }
+
+        if (corners.topLeft() == CornerShape::Straight) {
+            context.clipOut(roundedRect.rect());
+            return;
+        }
+    }
+
+    Path path;
+    addShapeToPath(roundedRect, corners, path);
+    context.clipOut(path);
+}
+
+static void fillShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners, const Color& color)
+{
+    if (!roundedRect.isRounded()) {
+        context.fillRect(roundedRect.rect(), color);
+        return;
+    }
+
+    if (corners.areEqual()) {
+        if (corners.topLeft() == CornerShape::Round) {
+            context.fillRoundedRect(roundedRect, color);
+            return;
+        }
+
+        if (corners.topLeft() == CornerShape::Straight) {
+            context.fillRect(roundedRect.rect(), color);
+            return;
+        }
+    }
+
+    Path path;
+    addShapeToPath(roundedRect, corners, path);
+    auto oldColor = context.fillColor();
+    context.setFillColor(color);
+    context.fillPath(path);
+    context.setFillColor(oldColor);
 }
 
 Path BorderShape::pathForOuterShape(float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     Path path;
-    addRoundedRectToPath(pixelSnappedRect, path);
+    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
     return path;
 }
 
@@ -247,21 +470,21 @@ Path BorderShape::pathForInnerShape(float deviceScaleFactor) const
     ASSERT(pixelSnappedRect.isRenderable());
 
     Path path;
-    addRoundedRectToPath(pixelSnappedRect, path);
+    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
     return path;
 }
 
 void BorderShape::addOuterShapeToPath(Path& path, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    addRoundedRectToPath(pixelSnappedRect, path);
+    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
 }
 
 void BorderShape::addInnerShapeToPath(Path& path, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
-    addRoundedRectToPath(pixelSnappedRect, path);
+    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
 }
 
 Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
@@ -272,28 +495,22 @@ Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
     ASSERT(pixelSnappedInnerRect.isRenderable());
 
     Path path;
-    addRoundedRectToPath(pixelSnappedOuterRect, path);
-    addRoundedRectToPath(pixelSnappedInnerRect, path);
+    addShapeToPath(pixelSnappedOuterRect, m_cornerShapes, path);
+    addShapeToPath(pixelSnappedInnerRect, m_cornerShapes, path);
     return path;
 }
 
 void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    if (pixelSnappedRect.isRounded())
-        context.clipRoundedRect(pixelSnappedRect);
-    else
-        context.clip(pixelSnappedRect.rect());
+    clipToShape(context, pixelSnappedRect, m_cornerShapes);
 }
 
 void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
-    if (pixelSnappedRect.isRounded())
-        context.clipRoundedRect(pixelSnappedRect);
-    else
-        context.clip(pixelSnappedRect.rect());
+    clipToShape(context, pixelSnappedRect, m_cornerShapes);
 }
 
 void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleFactor) const
@@ -302,10 +519,7 @@ void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleF
     if (pixelSnappedRect.isEmpty())
         return;
 
-    if (pixelSnappedRect.isRounded())
-        context.clipOutRoundedRect(pixelSnappedRect);
-    else
-        context.clipOut(pixelSnappedRect.rect());
+    clipOutShape(context, pixelSnappedRect, m_cornerShapes);
 }
 
 void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleFactor) const
@@ -314,29 +528,20 @@ void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleF
     if (pixelSnappedRect.isEmpty())
         return;
 
-    if (pixelSnappedRect.isRounded())
-        context.clipOutRoundedRect(pixelSnappedRect);
-    else
-        context.clipOut(pixelSnappedRect.rect());
+    clipOutShape(context, pixelSnappedRect, m_cornerShapes);
 }
 
 void BorderShape::fillOuterShape(GraphicsContext& context, const Color& color, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    if (pixelSnappedRect.isRounded())
-        context.fillRoundedRect(pixelSnappedRect, color);
-    else
-        context.fillRect(pixelSnappedRect.rect(), color);
+    fillShape(context, pixelSnappedRect, m_cornerShapes, color);
 }
 
 void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
-    if (pixelSnappedRect.isRounded())
-        context.fillRoundedRect(pixelSnappedRect, color);
-    else
-        context.fillRect(pixelSnappedRect.rect(), color);
+    fillShape(context, pixelSnappedRect, m_cornerShapes, color);
 }
 
 RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths)

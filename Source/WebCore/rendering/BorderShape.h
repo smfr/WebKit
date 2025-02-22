@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "RectCorners.h"
 #include "RectEdges.h"
 #include "RenderStyleConstants.h"
 #include "RoundedRect.h"
@@ -54,8 +55,8 @@ public:
     // Create a BorderShape suitable for rendering an outline. borderRect is provided to allow for scaling the corner radii.
     static BorderShape shapeForOutlineRect(const RenderStyle&, const LayoutRect& borderRect, const LayoutRect& outlineBoxRect, const RectEdges<LayoutUnit>& outlineWidths, RectEdges<bool> closedEdges = { true });
 
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths);
-    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii&);
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, RectCorners<CornerShape>);
+    BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii&, RectCorners<CornerShape>);
 
     BorderShape(const BorderShape&) = default;
 
@@ -114,6 +115,7 @@ private:
     RoundedRect m_borderRect;
     RoundedRect m_innerEdgeRect;
     RectEdges<LayoutUnit> m_borderWidths;
+    RectCorners<CornerShape> m_cornerShapes;
 };
 
 } // namespace WebCore

@@ -27,6 +27,7 @@
 #include "BorderValue.h"
 #include "LengthSize.h"
 #include "NinePieceImage.h"
+#include "RectCorners.h"
 
 namespace WebCore {
 
@@ -123,6 +124,7 @@ public:
     CornerShape topRightCornerShape() const { return m_topRightCornerShape; }
     CornerShape bottomLeftCornerShape() const { return m_bottomLeftCornerShape; }
     CornerShape bottomRightCornerShape() const { return m_bottomRightCornerShape; }
+    RectCorners<CornerShape> cornerShapes() const { return { m_topLeftCornerShape, m_topRightCornerShape, m_bottomLeftCornerShape, m_bottomRightCornerShape }; }
 
     const NinePieceImage& image() const { return m_image; }
 

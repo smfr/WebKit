@@ -27,6 +27,7 @@
 
 #include "BoxExtents.h"
 #include "PseudoElementIdentifier.h"
+#include "RectCorners.h"
 #include "WritingMode.h"
 #include <unicode/utypes.h>
 #include <wtf/CheckedRef.h>
@@ -553,6 +554,7 @@ public:
     inline CornerShape cornerBottomRightShape() const;
     inline CornerShape cornerTopLeftShape() const;
     inline CornerShape cornerTopRightShape() const;
+    inline RectCorners<CornerShape> cornerShapes() const;
 
     void setCornerBottomLeftShape(CornerShape);
     void setCornerBottomRightShape(CornerShape);

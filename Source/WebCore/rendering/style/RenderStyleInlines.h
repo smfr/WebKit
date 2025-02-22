@@ -824,6 +824,7 @@ inline CornerShape RenderStyle::cornerBottomLeftShape() const { return border().
 inline CornerShape RenderStyle::cornerBottomRightShape() const { return border().bottomRightCornerShape(); }
 inline CornerShape RenderStyle::cornerTopLeftShape() const { return border().topLeftCornerShape(); }
 inline CornerShape RenderStyle::cornerTopRightShape() const { return border().topRightCornerShape(); }
+inline RectCorners<CornerShape> RenderStyle::cornerShapes() const { return border().cornerShapes(); }
 
 // ignore non-standard ::-webkit-scrollbar when standard properties are in use
 inline bool RenderStyle::usesStandardScrollbarStyle() const { return scrollbarWidth() != ScrollbarWidth::Auto || scrollbarColor().has_value(); }
