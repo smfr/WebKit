@@ -32,6 +32,7 @@
 
 #include "BorderData.h"
 #include "FloatRoundedRect.h"
+#include "GeometryUtilities.h"
 #include "GraphicsContext.h"
 #include "LayoutRect.h"
 #include "LengthFunctions.h"
@@ -40,6 +41,509 @@
 #include "RoundedRect.h"
 
 namespace WebCore {
+
+enum class ShapeType : bool {
+    Outer,
+    Inner
+};
+
+template<CornerShape T> struct CornerTreatment {
+    // For uniform corner shapes.
+    static RoundedRect computeInnerRoundedRect(const RoundedRect&, const LayoutRect& innerRect, const RectEdges<LayoutUnit>& borderWidths);
+    static LayoutSize computeSingleCornerInnerRadius(LayoutSize outerRadius, LayoutUnit verticalEdgeWidh, LayoutUnit horizontalEdgeWidth);
+
+    // For uniform corner shapes.
+    static void addShapeToPath(const FloatRoundedRect&, Path&);
+    static void addInnerShapeToPath(const FloatRoundedRect& outerRect, const FloatRoundedRect& roundedRect, Path& path)
+    {
+        UNUSED_PARAM(outerRect);
+        addShapeToPath(roundedRect, path);
+    }
+
+    static void addSingleCornerToPath(BoxCorner, FloatPoint cornerPoint, FloatSize radius, Path&);
+    static void addSingleInnerCornerToPath(BoxCorner corner, FloatPoint outerCorner, FloatPoint innerCorner, FloatSize outerRadius, FloatSize innerRadius, Path& path)
+    {
+        UNUSED_PARAM(outerCorner);
+        UNUSED_PARAM(outerRadius);
+        addSingleCornerToPath(corner, innerCorner, innerRadius, path);
+    }
+};
+
+// MARK: - Corner radius computation
+
+template <> LayoutSize CornerTreatment<CornerShape::Round>::computeSingleCornerInnerRadius(LayoutSize outerRadius, LayoutUnit verticalEdgeWidth, LayoutUnit horizontalEdgeWidth)
+{
+    return {
+        std::max(outerRadius.width() - verticalEdgeWidth, 0_lu),
+        std::max(outerRadius.height() - horizontalEdgeWidth, 0_lu)
+    };
+}
+
+template <> LayoutSize CornerTreatment<CornerShape::Scoop>::computeSingleCornerInnerRadius(LayoutSize outerRadius, LayoutUnit verticalEdgeWidth, LayoutUnit horizontalEdgeWidth)
+{
+    // A scoop renders as an arced line around the corner point (we'll render with arcs).
+    // So we need to find the intersection of the given ellipse and the border edges.
+    auto ellipseRadius = FloatSize {
+        outerRadius.width() + horizontalEdgeWidth,
+        outerRadius.height() + verticalEdgeWidth
+    };
+
+    // Ellipse formula is x^2/a^2 + y^2/b^2 = 1
+    // Solve for x, given y: x = sqrt(a^2 * (1 - y^2 / b^2))
+    auto radiusSq = ellipseRadius * ellipseRadius;
+
+    auto y = static_cast<float>(horizontalEdgeWidth);
+    auto topIntersectionPoint = FloatPoint {
+        sqrt(radiusSq.width() * (1.0f - (y * y) / radiusSq.height())),
+        y
+    };
+
+    auto x = static_cast<float>(verticalEdgeWidth);
+    auto sideIntersectionPoint = FloatPoint {
+        x,
+        sqrt(radiusSq.height() * (1.0f - (x * x) / radiusSq.width()))
+    };
+
+    return {
+        std::max(LayoutUnit(topIntersectionPoint.x()) - verticalEdgeWidth, 0_lu),
+        std::max(LayoutUnit(sideIntersectionPoint.y()) - horizontalEdgeWidth, 0_lu)
+    };
+}
+
+template <> LayoutSize CornerTreatment<CornerShape::Bevel>::computeSingleCornerInnerRadius(LayoutSize outerRadius, LayoutUnit verticalEdgeWidth, LayoutUnit horizontalEdgeWidth)
+{
+    if (outerRadius.isEmpty())
+        return { };
+
+    // The goal is to compute an inner radius that gives the corner section a width equal to the border width.
+    // Assume the corner is at 0,0
+    // Compute points perpendicular to the bevel, with a distance from the bevel line equal to the border width on that side,
+    // by mapping triangles (cheaper than trig).
+    auto floatRadius = FloatSize { outerRadius };
+    auto bevelLength = floatRadius.diagonalLength();
+
+    float horizontalEdgeWidthFloat = horizontalEdgeWidth.toFloat();
+    float verticalEdgeWidthFloat = verticalEdgeWidth.toFloat();
+
+    auto topInsetOffset = FloatSize {
+        floatRadius.height() * horizontalEdgeWidthFloat / bevelLength,
+        floatRadius.width() * horizontalEdgeWidthFloat / bevelLength
+    };
+    auto topInsetPoint = FloatPoint { outerRadius.width(), 0 } + topInsetOffset;
+
+    auto sideInsetOffset = FloatSize {
+        floatRadius.height() * verticalEdgeWidthFloat / bevelLength,
+        floatRadius.width() * verticalEdgeWidthFloat / bevelLength
+    };
+    auto sideInsetPoint = FloatPoint { 0, outerRadius.height() } + sideInsetOffset;
+
+    // Compute the intersection of the line passing through these two points, and the inner left edge.
+    FloatPoint sideIntersection;
+    bool intersected = findIntersection({ verticalEdgeWidthFloat, 0 }, { verticalEdgeWidthFloat, 100 }, sideInsetPoint, topInsetPoint, sideIntersection);
+    ASSERT_UNUSED(intersected, intersected);
+
+    FloatPoint topIntersection;
+    intersected = findIntersection({ 0, horizontalEdgeWidthFloat }, { 100, horizontalEdgeWidthFloat }, sideInsetPoint, topInsetPoint, topIntersection);
+    ASSERT(intersected);
+
+    return {
+        std::max(LayoutUnit { topIntersection.x() } - verticalEdgeWidth, 0_lu),
+        std::max(LayoutUnit { sideIntersection.y() } - horizontalEdgeWidth, 0_lu)
+    };
+}
+
+template <> LayoutSize CornerTreatment<CornerShape::Notch>::computeSingleCornerInnerRadius(LayoutSize outerRadius, LayoutUnit verticalEdgeWidth, LayoutUnit horizontalEdgeWidth)
+{
+    // Each side of the notch has the thickness of the adjacent side.
+    return {
+        std::max(outerRadius.width() + horizontalEdgeWidth - verticalEdgeWidth, 0_lu),
+        std::max(outerRadius.height() + verticalEdgeWidth - horizontalEdgeWidth, 0_lu)
+    };
+}
+
+template <> LayoutSize CornerTreatment<CornerShape::Straight>::computeSingleCornerInnerRadius(LayoutSize, LayoutUnit, LayoutUnit)
+{
+    // No radius.
+    return { };
+}
+
+// MARK: - Corner Paths
+
+template <> void CornerTreatment<CornerShape::Round>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
+{
+    if (radius.isZero())
+        return;
+
+    // This is the offset of the control point from the corner, not the distance between the control point and the point it's related to.
+    auto controlPointOffset = radius.scaled(Path::circleControlPoint());
+
+    FloatPoint controlPoint1;
+    FloatPoint controlPoint2;
+    FloatPoint destPoint;
+    switch (corner) {
+    case BoxCorner::TopLeft:
+        controlPoint1 = { cornerPoint.x(), cornerPoint.y() + controlPointOffset.height() };
+        controlPoint2 = { cornerPoint.x() + controlPointOffset.width(), cornerPoint.y() };
+        destPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() };
+        break;
+    case BoxCorner::TopRight:
+        controlPoint1 = { cornerPoint.x() - controlPointOffset.width(), cornerPoint.y() };
+        controlPoint2 = { cornerPoint.x(), cornerPoint.y() + controlPointOffset.height() };
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() + radius.height() };
+        break;
+    case BoxCorner::BottomLeft:
+        controlPoint1 = { cornerPoint.x() + controlPointOffset.width(), cornerPoint.y() };
+        controlPoint2 = { cornerPoint.x(), cornerPoint.y() - controlPointOffset.height() };
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() - radius.height() };
+        break;
+    case BoxCorner::BottomRight:
+        controlPoint1 = { cornerPoint.x(), cornerPoint.y() - controlPointOffset.height() };
+        controlPoint2 = { cornerPoint.x() - controlPointOffset.width(), cornerPoint.y() };
+        destPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() };
+        break;
+    }
+
+    path.addBezierCurveTo(controlPoint1, controlPoint2, destPoint);
+}
+
+template <> void CornerTreatment<CornerShape::Scoop>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
+{
+    if (radius.isZero())
+        return;
+
+    // Offset of the control points from the corner.
+    auto controlPointDistance = radius.scaled(1.0f - Path::circleControlPoint());
+    FloatPoint controlPoint1;
+    FloatPoint controlPoint2;
+    FloatPoint destPoint;
+    switch (corner) {
+    case BoxCorner::TopLeft:
+        controlPoint1 = { cornerPoint.x() + controlPointDistance.width(), cornerPoint.y() + radius.height() };
+        controlPoint2 = { cornerPoint.x() + radius.width(), cornerPoint.y() + controlPointDistance.height() };
+        destPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() };
+        break;
+    case BoxCorner::TopRight:
+        controlPoint1 = { cornerPoint.x() - radius.width(), cornerPoint.y() + controlPointDistance.height() };
+        controlPoint2 = { cornerPoint.x() - controlPointDistance.width(), cornerPoint.y() + radius.height() };
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() + radius.height() };
+        break;
+    case BoxCorner::BottomLeft:
+        controlPoint1 = { cornerPoint.x() + radius.width(), cornerPoint.y() - controlPointDistance.height() };
+        controlPoint2 = { cornerPoint.x() + controlPointDistance.width(), cornerPoint.y() - radius.height() };
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() - radius.height() };
+        break;
+    case BoxCorner::BottomRight:
+        controlPoint1 = { cornerPoint.x() - controlPointDistance.width(), cornerPoint.y() - radius.height() };
+        controlPoint2 = { cornerPoint.x() - radius.width(), cornerPoint.y() - controlPointDistance.height() };
+        destPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() };
+        break;
+    }
+
+    path.addBezierCurveTo(controlPoint1, controlPoint2, destPoint);
+}
+
+template <> void CornerTreatment<CornerShape::Scoop>::addSingleInnerCornerToPath(BoxCorner corner, FloatPoint outerCorner, FloatPoint innerCorner, FloatSize outerRadius, FloatSize innerRadius, Path& path)
+{
+    if (innerRadius.isZero())
+        return;
+
+    // In order to maintain a consistent stroke width around the curve, we trace an ellipse around the *outside* corner point,
+    // computing where that ellipse intersects the inner border.
+
+    // Angles are relative to the x axis.
+    float startAngleRad = 0;
+    float endAngleRad = 0;
+
+    auto horizontalSideThickness = std::abs(outerCorner.y() - innerCorner.y());
+    auto verticalSideThickness = std::abs(outerCorner.x() - innerCorner.x());
+
+    switch (corner) {
+    case BoxCorner::TopLeft: {
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        startAngleRad = piOverTwoFloat - std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
+
+        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        endAngleRad = std::atan(topOffsetFromOuterCorner.height() / topOffsetFromOuterCorner.width());
+        break;
+    }
+    case BoxCorner::TopRight: {
+        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        startAngleRad = piFloat - std::atan(topOffsetFromOuterCorner.height() / topOffsetFromOuterCorner.width());
+
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        endAngleRad = piOverTwoFloat + std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
+        break;
+    }
+    case BoxCorner::BottomLeft: {
+        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        startAngleRad = -std::atan(bottomOffsetFromOuterCorner.height() / bottomOffsetFromOuterCorner.width());
+
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        endAngleRad = 3.0f * piOverTwoFloat + std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
+        break;
+    }
+    case BoxCorner::BottomRight:
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        startAngleRad = 3.0f * piOverTwoFloat - std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
+
+        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        endAngleRad = piFloat + std::atan(bottomOffsetFromOuterCorner.height() / bottomOffsetFromOuterCorner.width());
+        break;
+    }
+
+    path.addEllipse(outerCorner, verticalSideThickness + outerRadius.width(), horizontalSideThickness + outerRadius.height(), 0, startAngleRad, endAngleRad, RotationDirection::Counterclockwise);
+}
+
+template <> void CornerTreatment<CornerShape::Bevel>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
+{
+    if (radius.isZero())
+        return;
+
+    FloatPoint destPoint;
+    switch (corner) {
+    case BoxCorner::TopLeft:
+        destPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() };
+        break;
+    case BoxCorner::TopRight:
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() + radius.height() };
+        break;
+    case BoxCorner::BottomLeft:
+        destPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() - radius.height() };
+        break;
+    case BoxCorner::BottomRight:
+        destPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() };
+        break;
+    }
+    path.addLineTo(destPoint);
+}
+
+template <> void CornerTreatment<CornerShape::Notch>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
+{
+    FloatPoint innerCornerPoint;
+    FloatPoint lastPoint;
+
+    switch (corner) {
+    case BoxCorner::TopLeft:
+        innerCornerPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() + radius.height() };
+        lastPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() };
+        break;
+    case BoxCorner::TopRight:
+        innerCornerPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() + radius.height() };
+        lastPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() + radius.height() };
+        break;
+    case BoxCorner::BottomLeft:
+        innerCornerPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() - radius.height() };
+        lastPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() - radius.height() };
+        break;
+    case BoxCorner::BottomRight:
+        innerCornerPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() - radius.height() };
+        lastPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() };
+        break;
+    }
+
+    path.addLineTo(innerCornerPoint);
+    path.addLineTo(lastPoint);
+}
+
+template <> void CornerTreatment<CornerShape::Straight>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
+{
+    FloatPoint lastPoint;
+
+    switch (corner) {
+    case BoxCorner::TopLeft:
+        lastPoint = FloatPoint { cornerPoint.x() + radius.width(), cornerPoint.y() };
+        break;
+    case BoxCorner::TopRight:
+        lastPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() + radius.height() };
+        break;
+    case BoxCorner::BottomLeft:
+        lastPoint = FloatPoint { cornerPoint.x(), cornerPoint.y() - radius.height() };
+        break;
+    case BoxCorner::BottomRight:
+        lastPoint = FloatPoint { cornerPoint.x() - radius.width(), cornerPoint.y() };
+        break;
+    }
+
+    path.addLineTo(cornerPoint);
+    path.addLineTo(lastPoint);
+}
+
+// MARK: - Path building
+
+template<ShapeType T>
+void addComplexShapeToPath(const FloatRoundedRect& outerRoundedRect, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> cornerShapes, Path& path)
+{
+    auto addOneCorner = [&](BoxCorner corner, CornerShape cornerShape, FloatPoint outerCornerPoint, FloatPoint cornerPoint, FloatSize outerRadius, FloatSize innerRadius) {
+        // std::visit?
+        switch (cornerShape) {
+        case CornerShape::Round:
+            CornerTreatment<CornerShape::Round>::addSingleCornerToPath(corner, cornerPoint, innerRadius, path);
+            return;
+        case CornerShape::Scoop:
+            if (T == ShapeType::Inner)
+                CornerTreatment<CornerShape::Scoop>::addSingleInnerCornerToPath(corner, outerCornerPoint, cornerPoint, outerRadius, innerRadius, path);
+            else
+                CornerTreatment<CornerShape::Scoop>::addSingleCornerToPath(corner, cornerPoint, innerRadius, path);
+            return;
+        case CornerShape::Bevel:
+            CornerTreatment<CornerShape::Bevel>::addSingleCornerToPath(corner, cornerPoint, innerRadius, path);
+            return;
+        case CornerShape::Notch:
+            CornerTreatment<CornerShape::Notch>::addSingleCornerToPath(corner, cornerPoint, innerRadius, path);
+            return;
+        case CornerShape::Straight:
+            CornerTreatment<CornerShape::Straight>::addSingleCornerToPath(corner, cornerPoint, innerRadius, path);
+            return;
+        }
+    };
+
+    auto outerRect = outerRoundedRect.rect();
+    auto rect = roundedRect.rect();
+
+    auto topLeftRadius = roundedRect.radii().topLeft();
+    auto topRightRadius = roundedRect.radii().topRight();
+    auto bottomLeftRadius = roundedRect.radii().bottomLeft();
+    auto bottomRightRadius = roundedRect.radii().bottomRight();
+
+    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
+
+    auto x = rect.maxX() - topRightRadius.width();
+    path.addLineTo( { x, rect.y() });
+    addOneCorner(BoxCorner::TopRight, cornerShapes.topRight(), outerRect.maxXMinYCorner(), rect.maxXMinYCorner(), outerRoundedRect.radii().topRight(), topRightRadius);
+
+    auto y = rect.maxY() - bottomRightRadius.height();
+    path.addLineTo({ rect.maxX(), y });
+    addOneCorner(BoxCorner::BottomRight, cornerShapes.bottomRight(), outerRect.maxXMaxYCorner(), rect.maxXMaxYCorner(), outerRoundedRect.radii().bottomRight(), bottomRightRadius);
+
+    x = rect.x() + bottomLeftRadius.width();
+    path.addLineTo({ x, rect.maxY() });
+    addOneCorner(BoxCorner::BottomLeft, cornerShapes.bottomLeft(), outerRect.minXMaxYCorner(), rect.minXMaxYCorner(), outerRoundedRect.radii().bottomLeft(), bottomLeftRadius);
+
+    y = rect.y() + topLeftRadius.height();
+    path.addLineTo({ rect.x(), y });
+    addOneCorner(BoxCorner::TopLeft, cornerShapes.topLeft(), outerRect.minXMinYCorner(), rect.minXMinYCorner(), outerRoundedRect.radii().topLeft(), topLeftRadius);
+
+    path.closeSubpath();
+}
+
+template <> void CornerTreatment<CornerShape::Round>::addShapeToPath(const FloatRoundedRect& roundedRect, Path& path)
+{
+    path.addRoundedRect(roundedRect);
+}
+
+template <> void CornerTreatment<CornerShape::Scoop>::addShapeToPath(const FloatRoundedRect& roundedRect, Path& path)
+{
+    addComplexShapeToPath<ShapeType::Outer>(FloatRoundedRect { }, roundedRect, { CornerShape::Scoop }, path);
+}
+
+template <> void CornerTreatment<CornerShape::Scoop>::addInnerShapeToPath(const FloatRoundedRect& outerRect, const FloatRoundedRect& roundedRect, Path& path)
+{
+    addComplexShapeToPath<ShapeType::Inner>(outerRect, roundedRect, { CornerShape::Scoop }, path);
+}
+
+template <> void CornerTreatment<CornerShape::Bevel>::addShapeToPath(const FloatRoundedRect& roundedRect, Path& path)
+{
+    addComplexShapeToPath<ShapeType::Outer>(FloatRoundedRect { }, roundedRect, { CornerShape::Bevel }, path);
+}
+
+template <> void CornerTreatment<CornerShape::Notch>::addShapeToPath(const FloatRoundedRect& roundedRect, Path& path)
+{
+    addComplexShapeToPath<ShapeType::Outer>(FloatRoundedRect { }, roundedRect, { CornerShape::Notch }, path);
+}
+
+template <> void CornerTreatment<CornerShape::Notch>::addInnerShapeToPath(const FloatRoundedRect&, const FloatRoundedRect& roundedRect, Path& path)
+{
+    addComplexShapeToPath<ShapeType::Outer>(FloatRoundedRect { }, roundedRect, { CornerShape::Notch }, path);
+}
+
+template <> void CornerTreatment<CornerShape::Straight>::addShapeToPath(const FloatRoundedRect& roundedRect, Path& path)
+{
+    path.addRect(roundedRect.rect());
+}
+
+// MARK: - Uniform corner inner rect computation
+
+template<> RoundedRect CornerTreatment<CornerShape::Round>::computeInnerRoundedRect(const RoundedRect& outerRoundedRect, const LayoutRect& innerRect, const RectEdges<LayoutUnit>& borderWidths)
+{
+    auto innerRadii = outerRoundedRect.radii();
+    innerRadii.shrink(borderWidths.top(), borderWidths.bottom(), borderWidths.left(), borderWidths.right());
+    auto result = RoundedRect { innerRect, innerRadii };
+
+    if (!result.isRenderable())
+        result.adjustRadii();
+
+    return result;
+}
+
+template<> RoundedRect CornerTreatment<CornerShape::Scoop>::computeInnerRoundedRect(const RoundedRect& outerRoundedRect, const LayoutRect& innerRect, const RectEdges<LayoutUnit>& borderWidths)
+{
+    auto innerRadii = RoundedRect::Radii {
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topLeft(), borderWidths.left(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topRight(), borderWidths.right(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomLeft(), borderWidths.left(), borderWidths.bottom()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomRight(), borderWidths.right(), borderWidths.bottom()),
+    };
+
+    auto result = RoundedRect { innerRect, innerRadii };
+
+    if (!result.isRenderable())
+        result.adjustRadii();
+
+    return result;
+}
+
+template<> RoundedRect CornerTreatment<CornerShape::Bevel>::computeInnerRoundedRect(const RoundedRect& outerRoundedRect, const LayoutRect& innerRect, const RectEdges<LayoutUnit>& borderWidths)
+{
+    auto innerRadii = RoundedRect::Radii {
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topLeft(), borderWidths.left(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topRight(), borderWidths.right(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomLeft(), borderWidths.left(), borderWidths.bottom()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomRight(), borderWidths.right(), borderWidths.bottom()),
+    };
+
+    auto result = RoundedRect { innerRect, innerRadii };
+
+    if (!result.isRenderable())
+        result.adjustRadii();
+
+    return result;
+}
+
+template<> RoundedRect CornerTreatment<CornerShape::Notch>::computeInnerRoundedRect(const RoundedRect& outerRoundedRect, const LayoutRect& innerRect, const RectEdges<LayoutUnit>& borderWidths)
+{
+    auto innerRadii = RoundedRect::Radii {
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topLeft(), borderWidths.left(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().topRight(), borderWidths.right(), borderWidths.top()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomLeft(), borderWidths.left(), borderWidths.bottom()),
+        computeSingleCornerInnerRadius(outerRoundedRect.radii().bottomRight(), borderWidths.right(), borderWidths.bottom()),
+    };
+
+    auto result = RoundedRect { innerRect, innerRadii };
+
+    if (!result.isRenderable())
+        result.adjustRadii();
+
+    return result;
+}
+
+// MARK: -
+
+static LayoutSize computeSingleCornerInnerRadius(CornerShape cornerShape, LayoutSize outerRadius, LayoutUnit verticalEdgeWidth, LayoutUnit horizontalEdgeWidth)
+{
+    switch (cornerShape) {
+    case CornerShape::Round:
+        return CornerTreatment<CornerShape::Round>::computeSingleCornerInnerRadius(outerRadius, verticalEdgeWidth, horizontalEdgeWidth);
+    case CornerShape::Scoop:
+        return CornerTreatment<CornerShape::Scoop>::computeSingleCornerInnerRadius(outerRadius, verticalEdgeWidth, horizontalEdgeWidth);
+    case CornerShape::Bevel:
+        return CornerTreatment<CornerShape::Bevel>::computeSingleCornerInnerRadius(outerRadius, verticalEdgeWidth, horizontalEdgeWidth);
+    case CornerShape::Notch:
+        return CornerTreatment<CornerShape::Notch>::computeSingleCornerInnerRadius(outerRadius, verticalEdgeWidth, horizontalEdgeWidth);
+    case CornerShape::Straight:
+        // No radii
+        return { };
+    }
+}
 
 static RoundedRect::Radii calcRadiiFor(const BorderData::Radii& radii, const LayoutSize& size)
 {
@@ -50,6 +554,8 @@ static RoundedRect::Radii calcRadiiFor(const BorderData::Radii& radii, const Lay
         sizeForLengthSize(radii.bottomRight, size)
     };
 }
+
+// MARK: -
 
 BorderShape BorderShape::shapeForBorderRect(const RenderStyle& style, const LayoutRect& borderRect, RectEdges<bool> closedEdges)
 {
@@ -153,7 +659,7 @@ BorderShape BorderShape::shapeForOutlineRect(const RenderStyle& style, const Lay
 
 BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, RectCorners<CornerShape> cornerShapes)
     : m_borderRect(borderRect)
-    , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths))
+    , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths, cornerShapes))
     , m_borderWidths(borderWidths)
     , m_cornerShapes(cornerShapes)
 {
@@ -161,7 +667,7 @@ BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUni
 
 BorderShape::BorderShape(const LayoutRect& borderRect, const RectEdges<LayoutUnit>& borderWidths, const RoundedRectRadii& radii, RectCorners<CornerShape> cornerShapes)
     : m_borderRect(borderRect, radii)
-    , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths))
+    , m_innerEdgeRect(computeInnerEdgeRoundedRect(m_borderRect, borderWidths, cornerShapes))
     , m_borderWidths(borderWidths)
     , m_cornerShapes(cornerShapes)
 {
@@ -229,128 +735,6 @@ void BorderShape::inflate(LayoutUnit amount)
     m_borderRect.inflateWithRadii(amount);
 }
 
-// FIXME: Needs to preserve border width.
-static void addLinesForBeveledRect(const FloatRoundedRect& roundedRect, Path& path)
-{
-    const auto& radii = roundedRect.radii();
-    const auto& rect = roundedRect.rect();
-
-    const auto& topLeftRadius = radii.topLeft();
-    const auto& topRightRadius = radii.topRight();
-    const auto& bottomLeftRadius = radii.bottomLeft();
-    const auto& bottomRightRadius = radii.bottomRight();
-
-    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
-
-    path.addLineTo( { rect.maxX() - topRightRadius.width(), rect.y() });
-    if (topRightRadius.width() > 0 || topRightRadius.height() > 0)
-        path.addLineTo({ rect.maxX(), rect.y() + topRightRadius.height() });
-
-    path.addLineTo({ rect.maxX(), rect.maxY() - bottomRightRadius.height() });
-    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0)
-        path.addLineTo({ rect.maxX() - bottomRightRadius.width(), rect.maxY() });
-
-    path.addLineTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() });
-    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0)
-        path.addLineTo({ rect.x(), rect.maxY() - bottomLeftRadius.height() });
-
-    path.addLineTo({ rect.x(), rect.y() + topLeftRadius.height() });
-    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0)
-        path.addLineTo({ rect.x() + topLeftRadius.width(), rect.y() });
-
-    path.closeSubpath();
-}
-
-static void addLinesForNotchedRect(const FloatRoundedRect& roundedRect, Path& path)
-{
-    const auto& radii = roundedRect.radii();
-    const auto& rect = roundedRect.rect();
-
-    const auto& topLeftRadius = radii.topLeft();
-    const auto& topRightRadius = radii.topRight();
-    const auto& bottomLeftRadius = radii.bottomLeft();
-    const auto& bottomRightRadius = radii.bottomRight();
-
-    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
-
-    auto x = rect.maxX() - topRightRadius.width();
-    path.addLineTo( { x, rect.y() });
-    if (topRightRadius.width() > 0 || topRightRadius.height() > 0) {
-        auto y = rect.y() + topRightRadius.height();
-        path.addLineTo({ x, y });
-        path.addLineTo({ rect.maxX(), y });
-    }
-
-    auto y = rect.maxY() - bottomRightRadius.height();
-    path.addLineTo({ rect.maxX(), y });
-    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0) {
-        x = rect.maxX() - bottomRightRadius.width();
-        path.addLineTo({ x, y });
-        path.addLineTo({ x, rect.maxY() });
-    }
-
-    x = rect.x() + bottomLeftRadius.width();
-    path.addLineTo({ x, rect.maxY() });
-    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0) {
-        y = rect.maxY() - bottomLeftRadius.height();
-        path.addLineTo({ x, y });
-        path.addLineTo({ rect.x(), y });
-    }
-
-    y = rect.y() + topLeftRadius.height();
-    path.addLineTo({ rect.x(), y });
-    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0) {
-        x = rect.x() + topLeftRadius.width();
-        path.addLineTo({ x, y });
-        path.addLineTo({ rect.x() + topLeftRadius.width(), rect.y() });
-    }
-
-    path.closeSubpath();
-}
-
-static void addLinesForScoopedRect(const FloatRoundedRect& roundedRect, Path& path)
-{
-    const auto& radii = roundedRect.radii();
-    const auto& rect = roundedRect.rect();
-
-    const auto& topLeftRadius = radii.topLeft();
-    const auto& topRightRadius = radii.topRight();
-    const auto& bottomLeftRadius = radii.bottomLeft();
-    const auto& bottomRightRadius = radii.bottomRight();
-
-    path.moveTo({ rect.x() + topLeftRadius.width(), rect.y() });
-
-    path.addLineTo({ rect.maxX() - topRightRadius.width(), rect.y() });
-    if (topRightRadius.width() > 0 || topRightRadius.height() > 0) {
-        path.addBezierCurveTo({ rect.maxX() - topRightRadius.width(), rect.y() + topRightRadius.height() * Path::circleControlPoint() },
-            { rect.maxX() - topRightRadius.width() * Path::circleControlPoint(), rect.y() + topRightRadius.height() },
-            { rect.maxX(), rect.y() + topRightRadius.height() });
-    }
-
-    path.addLineTo( { rect.maxX(), rect.maxY() - bottomRightRadius.height() });
-    if (bottomRightRadius.width() > 0 || bottomRightRadius.height() > 0) {
-        path.addBezierCurveTo({ rect.maxX() - bottomRightRadius.width() * Path::circleControlPoint(), rect.maxY() - bottomRightRadius.height() },
-            { rect.maxX() - bottomRightRadius.width(), rect.maxY() - bottomRightRadius.height() * Path::circleControlPoint() },
-            { rect.maxX() - bottomRightRadius.width(), rect.maxY() });
-    }
-
-    path.addLineTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() });
-    if (bottomLeftRadius.width() > 0 || bottomLeftRadius.height() > 0) {
-        path.addBezierCurveTo({ rect.x() + bottomLeftRadius.width(), rect.maxY() - bottomLeftRadius.height() * Path::circleControlPoint() },
-            { rect.x() + bottomLeftRadius.width() * Path::circleControlPoint(), rect.maxY() - bottomLeftRadius.height() },
-            { rect.x(), rect.maxY() - bottomLeftRadius.height() });
-    }
-
-    path.addLineTo( { rect.x(), rect.y() + topLeftRadius.height() });
-    if (topLeftRadius.width() > 0 || topLeftRadius.height() > 0) {
-        path.addBezierCurveTo({ rect.x() + topLeftRadius.width() * Path::circleControlPoint(), rect.y() + topLeftRadius.height() },
-            { rect.x() + topLeftRadius.width(), rect.y() + topLeftRadius.height() * Path::circleControlPoint() },
-            { rect.x() + topLeftRadius.width(), rect.y() });
-    }
-
-    path.closeSubpath();
-}
-
 static void addShapeToPath(const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners, Path& path)
 {
     if (!roundedRect.isRounded()) {
@@ -361,24 +745,57 @@ static void addShapeToPath(const FloatRoundedRect& roundedRect, RectCorners<Corn
     if (corners.areEqual()) {
         switch (corners.topLeft()) {
         case CornerShape::Round:
-            path.addRoundedRect(roundedRect);
+            CornerTreatment<CornerShape::Round>::addShapeToPath(roundedRect, path);
             return;
         case CornerShape::Scoop:
-            addLinesForScoopedRect(roundedRect, path);
+            CornerTreatment<CornerShape::Scoop>::addShapeToPath(roundedRect, path);
             return;
         case CornerShape::Bevel:
-            addLinesForBeveledRect(roundedRect, path);
+            CornerTreatment<CornerShape::Bevel>::addShapeToPath(roundedRect, path);
             return;
         case CornerShape::Notch:
-            addLinesForNotchedRect(roundedRect, path);
+            CornerTreatment<CornerShape::Notch>::addShapeToPath(roundedRect, path);
             return;
         case CornerShape::Straight:
-            path.addRect(roundedRect.rect());
+            CornerTreatment<CornerShape::Straight>::addShapeToPath(roundedRect, path);
             return;
         }
     }
 
     // Uneven corners.
+    addComplexShapeToPath<ShapeType::Outer>(FloatRoundedRect { }, roundedRect, corners, path);
+}
+
+static void addInnerShapeToPath(const FloatRoundedRect& outerRect, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners, Path& path)
+{
+    if (!roundedRect.isRounded()) {
+        path.addRect(roundedRect.rect());
+        return;
+    }
+
+    if (corners.areEqual()) {
+        // Only Scoop needs to know about the outerRect.
+        switch (corners.topLeft()) {
+        case CornerShape::Round:
+            CornerTreatment<CornerShape::Round>::addShapeToPath(roundedRect, path);
+            return;
+        case CornerShape::Scoop:
+            CornerTreatment<CornerShape::Scoop>::addInnerShapeToPath(outerRect, roundedRect, path);
+            return;
+        case CornerShape::Bevel:
+            CornerTreatment<CornerShape::Bevel>::addShapeToPath(roundedRect, path);
+            return;
+        case CornerShape::Notch:
+            CornerTreatment<CornerShape::Notch>::addShapeToPath(roundedRect, path);
+            return;
+        case CornerShape::Straight:
+            CornerTreatment<CornerShape::Straight>::addShapeToPath(roundedRect, path);
+            return;
+        }
+    }
+
+    // Uneven corners.
+    addComplexShapeToPath<ShapeType::Inner>(outerRect, roundedRect, corners, path);
 }
 
 static void clipToShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners)
@@ -470,7 +887,13 @@ Path BorderShape::pathForInnerShape(float deviceScaleFactor) const
     ASSERT(pixelSnappedRect.isRenderable());
 
     Path path;
-    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
+    if (m_cornerShapes.contains(CornerShape::Scoop)) {
+        auto pixelSnappedOuterRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+        WebCore::addInnerShapeToPath(pixelSnappedOuterRect, pixelSnappedRect, m_cornerShapes, path);
+        return path;
+    }
+
+    WebCore::addInnerShapeToPath(FloatRoundedRect { }, pixelSnappedRect, m_cornerShapes, path);
     return path;
 }
 
@@ -483,8 +906,15 @@ void BorderShape::addOuterShapeToPath(Path& path, float deviceScaleFactor) const
 void BorderShape::addInnerShapeToPath(Path& path, float deviceScaleFactor) const
 {
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
-    ASSERT(pixelSnappedRect.isRenderable());
-    addShapeToPath(pixelSnappedRect, m_cornerShapes, path);
+    //ASSERT(pixelSnappedRect.isRenderable());
+
+    if (m_cornerShapes.contains(CornerShape::Scoop)) {
+        auto pixelSnappedOuterRect = m_borderRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+        WebCore::addInnerShapeToPath(pixelSnappedOuterRect, pixelSnappedRect, m_cornerShapes, path);
+        return;
+    }
+
+    WebCore::addInnerShapeToPath(FloatRoundedRect { }, pixelSnappedRect, m_cornerShapes, path);
 }
 
 Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
@@ -496,7 +926,7 @@ Path BorderShape::pathForBorderArea(float deviceScaleFactor) const
 
     Path path;
     addShapeToPath(pixelSnappedOuterRect, m_cornerShapes, path);
-    addShapeToPath(pixelSnappedInnerRect, m_cornerShapes, path);
+    WebCore::addInnerShapeToPath(pixelSnappedOuterRect, pixelSnappedInnerRect, m_cornerShapes, path);
     return path;
 }
 
@@ -508,8 +938,16 @@ void BorderShape::clipToOuterShape(GraphicsContext& context, float deviceScaleFa
 
 void BorderShape::clipToInnerShape(GraphicsContext& context, float deviceScaleFactor) const
 {
+    if (m_cornerShapes.contains(CornerShape::Scoop)) {
+        // Scoop needs to know the outer rect to render the corners correctly.
+        auto path = pathForInnerShape(deviceScaleFactor);
+        context.clipPath(path);
+        return;
+    }
+
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
+
     clipToShape(context, pixelSnappedRect, m_cornerShapes);
 }
 
@@ -524,6 +962,12 @@ void BorderShape::clipOutOuterShape(GraphicsContext& context, float deviceScaleF
 
 void BorderShape::clipOutInnerShape(GraphicsContext& context, float deviceScaleFactor) const
 {
+    if (m_cornerShapes.contains(CornerShape::Scoop)) {
+        auto path = pathForInnerShape(deviceScaleFactor);
+        context.clipOut(path);
+        return;
+    }
+
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     if (pixelSnappedRect.isEmpty())
         return;
@@ -539,12 +983,21 @@ void BorderShape::fillOuterShape(GraphicsContext& context, const Color& color, f
 
 void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, float deviceScaleFactor) const
 {
+    if (m_cornerShapes.contains(CornerShape::Scoop)) {
+        auto path = pathForInnerShape(deviceScaleFactor);
+        auto oldColor = context.fillColor();
+        context.setFillColor(color);
+        context.fillPath(path);
+        context.setFillColor(oldColor);
+        return;
+    }
+
     auto pixelSnappedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
     ASSERT(pixelSnappedRect.isRenderable());
     fillShape(context, pixelSnappedRect, m_cornerShapes, color);
 }
 
-RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths)
+RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths, const RectCorners<CornerShape>& cornerShapes)
 {
     auto borderRect = borderRoundedRect.rect();
     auto width = std::max(0_lu, borderRect.width() - borderWidths.left() - borderWidths.right());
@@ -556,17 +1009,36 @@ RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRo
         height
     };
 
-    auto innerEdgeRect = RoundedRect { innerRect };
     if (borderRoundedRect.isRounded()) {
-        auto innerRadii = borderRoundedRect.radii();
-        innerRadii.shrink(borderWidths.top(), borderWidths.bottom(), borderWidths.left(), borderWidths.right());
-        innerEdgeRect.setRadii(innerRadii);
+        if (cornerShapes.areEqual()) {
+            // There's probably a std::variant way to do this.
+            switch (cornerShapes.topLeft()) {
+            case CornerShape::Round:
+                return CornerTreatment<CornerShape::Round>::computeInnerRoundedRect(borderRoundedRect, innerRect, borderWidths);
+            case CornerShape::Scoop:
+                return CornerTreatment<CornerShape::Scoop>::computeInnerRoundedRect(borderRoundedRect, innerRect, borderWidths);
+            case CornerShape::Bevel:
+                return CornerTreatment<CornerShape::Bevel>::computeInnerRoundedRect(borderRoundedRect, innerRect, borderWidths);
+            case CornerShape::Notch:
+                return CornerTreatment<CornerShape::Notch>::computeInnerRoundedRect(borderRoundedRect, innerRect, borderWidths);
+            case CornerShape::Straight:
+                // No radii
+                return RoundedRect { innerRect };
+            }
+        }
 
-        if (!innerEdgeRect.isRenderable())
-            innerEdgeRect.adjustRadii();
+        // Unequal corners.
+        auto radii = RoundedRect::Radii {
+            computeSingleCornerInnerRadius(cornerShapes.topLeft(), borderRoundedRect.radii().topLeft(), borderWidths.left(), borderWidths.top()),
+            computeSingleCornerInnerRadius(cornerShapes.topRight(), borderRoundedRect.radii().topRight(), borderWidths.right(), borderWidths.top()),
+            computeSingleCornerInnerRadius(cornerShapes.bottomLeft(), borderRoundedRect.radii().bottomLeft(), borderWidths.left(), borderWidths.bottom()),
+            computeSingleCornerInnerRadius(cornerShapes.bottomRight(), borderRoundedRect.radii().bottomRight(), borderWidths.right(), borderWidths.bottom()),
+        };
+
+        return RoundedRect { innerRect, radii };
     }
 
-    return innerEdgeRect;
+    return RoundedRect { innerRect };
 }
 
 LayoutRect BorderShape::innerEdgeRect() const

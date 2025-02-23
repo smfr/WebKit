@@ -110,7 +110,7 @@ public:
 
 private:
     LayoutRect innerEdgeRect() const;
-    static RoundedRect computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths);
+    static RoundedRect computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths, const RectCorners<CornerShape>&);
 
     RoundedRect m_borderRect;
     RoundedRect m_innerEdgeRect;

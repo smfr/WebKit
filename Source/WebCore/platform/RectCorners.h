@@ -61,6 +61,7 @@ public:
     }
 
     bool areEqual() const { return m_corners[1] == m_corners[0] && m_corners[2] == m_corners[0] && m_corners[3] == m_corners[0]; }
+    bool contains(const T& value) const { return m_corners[0] == value || m_corners[1] == value || m_corners[2] == value || m_corners[3] == value; }
 
     T& at(BoxCorner corner) { return m_corners[static_cast<size_t>(corner)]; }
     T& operator[](BoxCorner corner) { return m_corners[static_cast<size_t>(corner)]; }
