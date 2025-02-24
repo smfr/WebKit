@@ -65,6 +65,7 @@ public:
     void addArcTo(const FloatPoint& point1, const FloatPoint& point2, float radius);
 
     void addArc(const FloatPoint&, float radius, float startAngle, float endAngle, RotationDirection);
+    // The angles, in radians, are eccentric angles, i.e. computed in terms of a circular arc.
     void addEllipse(const FloatPoint&, float radiusX, float radiusY, float rotation, float startAngle, float endAngle, RotationDirection);
     void addEllipseInRect(const FloatRect&);
     WEBCORE_EXPORT void addRect(const FloatRect&);

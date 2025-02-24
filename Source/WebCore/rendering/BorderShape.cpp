@@ -257,41 +257,46 @@ template <> void CornerTreatment<CornerShape::Scoop>::addSingleInnerCornerToPath
     auto horizontalSideThickness = std::abs(outerCorner.y() - innerCorner.y());
     auto verticalSideThickness = std::abs(outerCorner.x() - innerCorner.x());
 
+    auto ellipseSize = FloatSize { horizontalSideThickness + outerRadius.width(), verticalSideThickness + outerRadius.height() };
+    // The angles passed to Path::addEllipse() are "eccentric angles", i.e. computed on the basis of a circle, before the stretch resulting from unequal radii,
+    // so we need to apply a normalizationScale when computing angles.
+    auto normalizationScale = FloatSize { 1.0f, ellipseSize.aspectRatio() };
+
     switch (corner) {
     case BoxCorner::TopLeft: {
-        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() } * normalizationScale;
         startAngleRad = piOverTwoFloat - std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
 
-        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness } * normalizationScale;
         endAngleRad = std::atan(topOffsetFromOuterCorner.height() / topOffsetFromOuterCorner.width());
         break;
     }
     case BoxCorner::TopRight: {
-        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        auto topOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness } * normalizationScale;
         startAngleRad = piFloat - std::atan(topOffsetFromOuterCorner.height() / topOffsetFromOuterCorner.width());
 
-        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() } * normalizationScale;
         endAngleRad = piOverTwoFloat + std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
         break;
     }
     case BoxCorner::BottomLeft: {
-        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness } * normalizationScale;
         startAngleRad = -std::atan(bottomOffsetFromOuterCorner.height() / bottomOffsetFromOuterCorner.width());
 
-        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() } * normalizationScale;
         endAngleRad = 3.0f * piOverTwoFloat + std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
         break;
     }
     case BoxCorner::BottomRight:
-        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() };
+        auto sideOffsetFromOuterCorner = FloatSize { verticalSideThickness, horizontalSideThickness + innerRadius.height() } * normalizationScale;
         startAngleRad = 3.0f * piOverTwoFloat - std::atan(sideOffsetFromOuterCorner.width() / sideOffsetFromOuterCorner.height());
 
-        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness };
+        auto bottomOffsetFromOuterCorner = FloatSize { verticalSideThickness + innerRadius.width(), horizontalSideThickness } * normalizationScale;
         endAngleRad = piFloat + std::atan(bottomOffsetFromOuterCorner.height() / bottomOffsetFromOuterCorner.width());
         break;
     }
 
-    path.addEllipse(outerCorner, verticalSideThickness + outerRadius.width(), horizontalSideThickness + outerRadius.height(), 0, startAngleRad, endAngleRad, RotationDirection::Counterclockwise);
+    path.addEllipse(outerCorner, ellipseSize.width(), ellipseSize.height(), 0, startAngleRad, endAngleRad, RotationDirection::Counterclockwise);
 }
 
 template <> void CornerTreatment<CornerShape::Bevel>::addSingleCornerToPath(BoxCorner corner, FloatPoint cornerPoint, FloatSize radius, Path& path)
