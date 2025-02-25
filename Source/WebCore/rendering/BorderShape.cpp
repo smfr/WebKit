@@ -738,11 +738,13 @@ bool BorderShape::innerShapeIsRectangular() const
 void BorderShape::move(LayoutSize offset)
 {
     m_borderRect.move(offset);
+    m_innerEdgeRect.move(offset);
 }
 
 void BorderShape::inflate(LayoutUnit amount)
 {
     m_borderRect.inflateWithRadii(amount);
+    // FIXME: Fix up m_innerEdgeRect.
 }
 
 static void addShapeToPath(const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners, Path& path)
@@ -835,7 +837,7 @@ static void clipToShape(GraphicsContext& context, const FloatRoundedRect& rounde
 static void clipOutShape(GraphicsContext& context, const FloatRoundedRect& roundedRect, RectCorners<CornerShape> corners)
 {
     if (!roundedRect.isRounded()) {
-        context.clip(roundedRect.rect());
+        context.clipOut(roundedRect.rect());
         return;
     }
 
@@ -1007,6 +1009,33 @@ void BorderShape::fillInnerShape(GraphicsContext& context, const Color& color, f
     fillShape(context, pixelSnappedRect, m_cornerShapes, color);
 }
 
+void BorderShape::fillRectWithInnerHoleShape(GraphicsContext& context, const LayoutRect& outerRect, const Color& color, float deviceScaleFactor) const
+{
+    auto pixelSnappedOuterRect = snapRectToDevicePixels(outerRect, deviceScaleFactor);
+
+    if (m_cornerShapes.areEqual() && m_cornerShapes.topLeft() == CornerShape::Round) {
+        auto innerSnappedRoundedRect = m_innerEdgeRect.pixelSnappedRoundedRectForPainting(deviceScaleFactor);
+        ASSERT(innerSnappedRoundedRect.isRenderable());
+        context.fillRectWithRoundedHole(pixelSnappedOuterRect, innerSnappedRoundedRect, color);
+        return;
+    }
+
+    Path path;
+    path.addRect(pixelSnappedOuterRect);
+    addInnerShapeToPath(path, deviceScaleFactor);
+
+    auto oldFillRule = context.fillRule();
+    auto oldFillColor = context.fillColor();
+
+    context.setFillRule(WindRule::EvenOdd);
+    context.setFillColor(color);
+
+    context.fillPath(path);
+
+    context.setFillRule(oldFillRule);
+    context.setFillColor(oldFillColor);
+}
+
 RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRoundedRect, const RectEdges<LayoutUnit>& borderWidths, const RectCorners<CornerShape>& cornerShapes)
 {
     auto borderRect = borderRoundedRect.rect();
@@ -1049,11 +1078,6 @@ RoundedRect BorderShape::computeInnerEdgeRoundedRect(const RoundedRect& borderRo
     }
 
     return RoundedRect { innerRect };
-}
-
-LayoutRect BorderShape::innerEdgeRect() const
-{
-    return m_innerEdgeRect.rect();
 }
 
 } // namespace WebCore
