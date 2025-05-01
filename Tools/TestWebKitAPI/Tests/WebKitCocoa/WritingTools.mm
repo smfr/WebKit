@@ -3243,7 +3243,7 @@ TEST(WritingTools, CompositionAnimationSizing)
         for (NSView *subview in [webView subviews]) {
             if ([subview isKindOfClass:[_WTTextEffectView class]]) {
                 foundEffectView = true;
-                EXPECT_EQ(subview.frame, NSMakeRect(0, 0, 800, 568));
+                EXPECT_TRUE(NSEqualRects(subview.frame, NSMakeRect(0, 0, 800, 568)));
                 break;
             }
         }
