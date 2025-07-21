@@ -49,6 +49,8 @@
 #import <pal/cg/CoreGraphicsSoftLink.h>
 #import <pal/cocoa/QuartzCoreSoftLink.h>
 
+#define USE_CORE_VIDEO_FOR_IOSUFACE_ALLOCATION 1
+
 namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(IOSurface);
@@ -147,6 +149,8 @@ void IOSurface::moveToPool(std::unique_ptr<IOSurface>&& surface, IOSurfacePool* 
         pool->addSurface(WTFMove(surface));
 }
 
+#if !USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
+
 static NSDictionary *optionsForBiplanarSurface(IntSize size, unsigned pixelFormat, size_t firstPlaneBytesPerPixel, size_t secondPlaneBytesPerPixel, IOSurface::Name name)
 {
     int width = size.width();
@@ -232,6 +236,8 @@ static NSDictionary *optionsFor64BitSurface(IntSize size, unsigned pixelFormat, 
 }
 #endif
 
+#endif // !USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
+
 IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, bool& success)
     : m_format(format)
     , m_colorSpace(colorSpace)
@@ -241,6 +247,58 @@ IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSu
     ASSERT(!success);
     ASSERT(!size.isEmpty());
 
+#if USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
+    OSType pixelBufferFormat = 0;
+    switch (format) {
+    case Format::BGRX:
+    case Format::BGRA:
+        pixelBufferFormat = kCVPixelFormatType_32BGRA;
+        break;
+    case Format::YUV422:
+        pixelBufferFormat = kCVPixelFormatType_422YpCbCr8BiPlanarFullRange;
+        break;
+    case Format::RGBX:
+    case Format::RGBA:
+        pixelBufferFormat = kCVPixelFormatType_32RGBA;
+        break;
+#if ENABLE(PIXEL_FORMAT_RGB10)
+    case Format::RGB10:
+        pixelBufferFormat = kCVPixelFormatType_30RGBLEPackedWideGamut;
+        break;
+#endif
+#if ENABLE(PIXEL_FORMAT_RGB10A8)
+    case Format::RGB10A8:
+        pixelBufferFormat = 'b3a8'; // FIXME: Use API
+        break;
+#endif
+#if ENABLE(PIXEL_FORMAT_RGBA16F)
+    case Format::RGBA16F:
+        pixelBufferFormat = kCVPixelFormatType_64RGBAHalf;
+        break;
+#endif
+    }
+
+    NSDictionary *additionalProperties = @{
+        (id)kCVPixelBufferIOSurfacePropertiesKey: @{
+#if PLATFORM(IOS_FAMILY)
+            // FIXME: Determine what hardware/platforms this should be used on.
+            (id)kIOSurfaceCacheMode: @(kIOMapWriteCombineCache),
+#endif
+            (id)kIOSurfaceName: surfaceNameToNSString(name)
+        }
+    };
+
+    CVPixelBufferRef rawPixelBuffer = nullptr;
+    CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, size.width(), size.height(), pixelBufferFormat, (CFDictionaryRef)additionalProperties, &rawPixelBuffer);
+    RetainPtr cvBuffer = adoptCF(rawPixelBuffer);
+    if (status != kCVReturnSuccess) {
+        RELEASE_LOG_ERROR(Layers, "IOSurface creation via CVPixelBufferCreate failed for size: (%d %d) and format: (%d) - error %d", size.width(), size.height(), enumToUnderlyingType(*m_format), status);
+        return;
+    }
+
+    m_surface = CVPixelBufferGetIOSurface(cvBuffer.get());
+
+#else
     NSDictionary *options;
 
     switch (format) {
@@ -271,7 +329,10 @@ IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSu
         break;
 #endif
     }
+
     m_surface = adoptCF(IOSurfaceCreate((CFDictionaryRef)options));
+#endif // USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
+
     success = !!m_surface;
     if (success) {
         setColorSpaceProperty();
