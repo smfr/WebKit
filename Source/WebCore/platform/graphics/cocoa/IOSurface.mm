@@ -85,7 +85,7 @@ static auto surfaceNameToNSString(IOSurface::Name name)
     }
 }
 
-std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format pixelFormat)
+std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format pixelFormat, UseCompression useCompression)
 {
     ASSERT(ProcessCapabilities::canUseAcceleratedBuffers());
 
@@ -101,7 +101,7 @@ std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, 
     }
 
     bool success = false;
-    auto surface = std::unique_ptr<IOSurface>(new IOSurface(size, colorSpace, name, pixelFormat, success));
+    auto surface = std::unique_ptr<IOSurface>(new IOSurface(size, colorSpace, name, pixelFormat, useCompression, success));
     if (!success) {
         LOG(IOSurface, "IOSurface::create failed to create %dx%d surface", size.width(), size.height());
         return nullptr;
@@ -238,21 +238,28 @@ static NSDictionary *optionsFor64BitSurface(IntSize size, unsigned pixelFormat, 
 
 #endif // !USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
 
-IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, bool& success)
+IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, UseCompression useCompression, bool& success)
     : m_format(format)
     , m_colorSpace(colorSpace)
     , m_size(size)
     , m_name(name)
+#if ASSERT_ENABLED
+    , m_useCompression(useCompression)
+#endif
 {
     ASSERT(!success);
     ASSERT(!size.isEmpty());
+
+    // FIXME: Avoid compression on some older hardware.
+    if (useCompression == UseCompression::Yes && (size.width() < 32 || size.height() < 32))
+        useCompression = UseCompression::No;
 
 #if USE(CORE_VIDEO_FOR_IOSUFACE_ALLOCATION)
     OSType pixelBufferFormat = 0;
     switch (format) {
     case Format::BGRX:
     case Format::BGRA:
-        pixelBufferFormat = kCVPixelFormatType_32BGRA;
+        pixelBufferFormat = useCompression == UseCompression::Yes  ? static_cast<OSType>(kCVPixelFormatType_Lossless_32BGRA) : static_cast<OSType>(kCVPixelFormatType_32BGRA);
         break;
     case Format::YUV422:
         pixelBufferFormat = kCVPixelFormatType_422YpCbCr8BiPlanarFullRange;
@@ -263,17 +270,17 @@ IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSu
         break;
 #if ENABLE(PIXEL_FORMAT_RGB10)
     case Format::RGB10:
-        pixelBufferFormat = kCVPixelFormatType_30RGBLEPackedWideGamut;
+        pixelBufferFormat = useCompression == UseCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut) : static_cast<OSType>(kCVPixelFormatType_30RGBLEPackedWideGamut);
         break;
 #endif
 #if ENABLE(PIXEL_FORMAT_RGB10A8)
     case Format::RGB10A8:
-        pixelBufferFormat = 'b3a8'; // FIXME: Use API
+        pixelBufferFormat = useCompression == UseCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar) ? static_cast<OSType>(kCVPixelFormatType_30RGBLE_8A_BiPlanar);
         break;
 #endif
 #if ENABLE(PIXEL_FORMAT_RGBA16F)
     case Format::RGBA16F:
-        pixelBufferFormat = kCVPixelFormatType_64RGBAHalf;
+        pixelBufferFormat = useCompression == UseCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_64RGBAHalf) : static_cast<OSType>(kCVPixelFormatType_64RGBAHalf);
         break;
 #endif
     }
@@ -588,6 +595,8 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 std::optional<IOSurface::LockAndContext> IOSurface::createBitmapPlatformContext()
 {
+    ASSERT(m_useCompression == UseCompression::No);
+
     auto locker = lock<AccessMode::ReadWrite>();
     if (!locker)
         return std::nullopt;

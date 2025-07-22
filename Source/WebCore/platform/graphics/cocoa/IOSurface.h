@@ -84,6 +84,11 @@ public:
 #endif
     };
 
+    enum class UseCompression : bool {
+        No,
+        Yes
+    };
+
     enum class AccessMode : uint32_t {
         ReadWrite = 0,
         ReadOnly = kIOSurfaceLockReadOnly
@@ -138,7 +143,7 @@ public:
         RetainPtr<IOSurfaceRef> m_surface;
     };
 
-    WEBCORE_EXPORT static std::unique_ptr<IOSurface> create(IOSurfacePool*, IntSize, const DestinationColorSpace&, Name = Name::Default, Format = Format::BGRA);
+    WEBCORE_EXPORT static std::unique_ptr<IOSurface> create(IOSurfacePool*, IntSize, const DestinationColorSpace&, Name = Name::Default, Format = Format::BGRA, UseCompression = UseCompression::No);
     WEBCORE_EXPORT static std::unique_ptr<IOSurface> createFromImage(IOSurfacePool*, CGImageRef);
 
     WEBCORE_EXPORT static std::unique_ptr<IOSurface> createFromSendRight(const WTF::MachSendRight&&);
@@ -220,7 +225,7 @@ public:
     RetainPtr<CGContextRef> createCompatibleBitmap(unsigned width, unsigned height);
 
 private:
-    IOSurface(IntSize, const DestinationColorSpace&, Name, Format, bool& success);
+    IOSurface(IntSize, const DestinationColorSpace&, Name, Format, UseCompression, bool& success);
     IOSurface(IOSurfaceRef, std::optional<DestinationColorSpace>&&);
 
     void setColorSpaceProperty();
@@ -251,6 +256,9 @@ private:
     static std::optional<IntSize> s_maximumSize;
 
     Name m_name;
+#if ASSERT_ENABLED
+    UseCompression m_useCompression { UseCompression::No };
+#endif
 
     WEBCORE_EXPORT friend WTF::TextStream& operator<<(WTF::TextStream&, const WebCore::IOSurface&);
 };
@@ -258,6 +266,8 @@ private:
 template<IOSurface::AccessMode Mode>
 std::optional<IOSurface::Locker<Mode>> IOSurface::lock()
 {
+    ASSERT(m_useCompression == UseCompression::No);
+
     if (IOSurfaceLock(m_surface.get(), static_cast<uint32_t>(Mode), nullptr) != kIOReturnSuccess)
         return std::nullopt;
     return IOSurface::Locker<Mode>::adopt(m_surface);

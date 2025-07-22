@@ -35,9 +35,15 @@ DECLARE_SYSTEM_HEADER
 
 #if HAVE(COREVIDEO_COMPRESSED_PIXEL_FORMAT_TYPES)
 enum {
-    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarVideoRange = '&8v0',
-    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarFullRange = '&8f0',
+    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarVideoRange = '&8v0', // FIXME: Use kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarVideoRange.
+    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarFullRange = '&8f0', // FIXME: Use kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange.
 };
+
+enum OSType {
+    kCVPixelFormatType_30RGBLE_8A_BiPlanar = 'b3a8',
+    kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar = '&b38',
+    kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut = '&w3r',
+}
 #endif
 
 #endif

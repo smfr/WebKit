@@ -47,7 +47,23 @@ std::unique_ptr<ImageBufferShareableMappedIOSurfaceBackend> ImageBufferShareable
     if (backendSize.isEmpty())
         return nullptr;
 
-    auto surface = IOSurface::create(RefPtr { creationContext.surfacePool }.get(), backendSize, parameters.colorSpace, IOSurface::nameForRenderingPurpose(parameters.purpose), convertToIOSurfaceFormat(parameters.pixelFormat));
+    auto useCompression = IOSurface::UseCompression::No;
+
+    // We could possibly use compressed surfaces in more cases (other than canvas, which allows readback).
+    switch (parameters.purpose) {
+    case RenderingPurpose::LayerBacking:
+        useCompression = IOSurface::UseCompression::Yes;
+        break;
+    case RenderingPurpose::Unspecified:
+    case RenderingPurpose::Canvas:
+    case RenderingPurpose::DOM:
+    case RenderingPurpose::Snapshot:
+    case RenderingPurpose::ShareableSnapshot:
+    case RenderingPurpose::ShareableLocalSnapshot:
+    case RenderingPurpose::MediaPainting:
+    }
+
+    auto surface = IOSurface::create(RefPtr { creationContext.surfacePool }.get(), backendSize, parameters.colorSpace, IOSurface::nameForRenderingPurpose(parameters.purpose), convertToIOSurfaceFormat(parameters.pixelFormat), useCompression);
     if (!surface)
         return nullptr;
     if (creationContext.resourceOwner)
