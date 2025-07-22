@@ -3394,6 +3394,19 @@ IFrameResourceMonitoringTestingSettingsEnabled:
     WebCore:
       default: false
 
+IOSurfaceCompressionEnabled:
+  type: bool
+  status: internal
+  humanReadableName: "IOSurface Compression"
+  humanReadableDescription: "Used compressed IOSurfaces"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 IPAddressAndLocalhostMixedContentUpgradeTestingEnabled:
   type: bool
   status: testable
