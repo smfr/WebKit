@@ -35,6 +35,7 @@
 #import "ProcessCapabilities.h"
 #import "ProcessIdentity.h"
 #import "SharedMemory.h"
+#import <pal/spi/cf/CoreVideoSPI.h>
 #import <pal/spi/cg/CoreGraphicsSPI.h>
 #import <wtf/Assertions.h>
 #import <wtf/EnumTraits.h>
@@ -147,91 +148,6 @@ void IOSurface::moveToPool(std::unique_ptr<IOSurface>&& surface, IOSurfacePool* 
         pool->addSurface(WTFMove(surface));
 }
 
-static NSDictionary *optionsForBiplanarSurface(IntSize size, unsigned pixelFormat, size_t firstPlaneBytesPerPixel, size_t secondPlaneBytesPerPixel, IOSurface::Name name)
-{
-    int width = size.width();
-    int height = size.height();
-
-    size_t firstPlaneBytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, width * firstPlaneBytesPerPixel);
-    size_t firstPlaneTotalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, height * firstPlaneBytesPerRow);
-
-    size_t secondPlaneBytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, width * secondPlaneBytesPerPixel);
-    size_t secondPlaneTotalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, height * secondPlaneBytesPerRow);
-    
-    size_t totalBytes = firstPlaneTotalBytes + secondPlaneTotalBytes;
-    ASSERT(totalBytes);
-
-    NSArray *planeInfo = @[
-        @{
-            (id)kIOSurfacePlaneWidth: @(width),
-            (id)kIOSurfacePlaneHeight: @(height),
-            (id)kIOSurfacePlaneBytesPerRow: @(firstPlaneBytesPerRow),
-            (id)kIOSurfacePlaneOffset: @(0),
-            (id)kIOSurfacePlaneSize: @(firstPlaneTotalBytes)
-        },
-        @{
-            (id)kIOSurfacePlaneWidth: @(width),
-            (id)kIOSurfacePlaneHeight: @(height),
-            (id)kIOSurfacePlaneBytesPerRow: @(secondPlaneBytesPerRow),
-            (id)kIOSurfacePlaneOffset: @(firstPlaneTotalBytes),
-            (id)kIOSurfacePlaneSize: @(secondPlaneTotalBytes)
-        }
-    ];
-
-    return @{
-        (id)kIOSurfaceWidth: @(width),
-        (id)kIOSurfaceHeight: @(height),
-        (id)kIOSurfacePixelFormat: @(pixelFormat),
-        (id)kIOSurfaceAllocSize: @(totalBytes),
-#if PLATFORM(IOS_FAMILY)
-        (id)kIOSurfaceCacheMode: @(kIOMapWriteCombineCache),
-#endif
-        (id)kIOSurfacePlaneInfo: planeInfo,
-        (id)kIOSurfaceName: surfaceNameToNSString(name)
-    };
-}
-
-static NSDictionary *optionsForSurface(IntSize size, unsigned bitsPerPixel, unsigned pixelFormat, IOSurface::Name name)
-{
-    int width = size.width();
-    int height = size.height();
-
-    unsigned bytesPerElement = 4 * (bitsPerPixel / 32);
-    unsigned bytesPerPixel = bytesPerElement;
-
-    size_t bytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, width * bytesPerPixel);
-    ASSERT(bytesPerRow);
-
-    size_t totalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, height * bytesPerRow);
-    ASSERT(totalBytes);
-
-    return @{
-        (id)kIOSurfaceWidth: @(width),
-        (id)kIOSurfaceHeight: @(height),
-        (id)kIOSurfacePixelFormat: @(pixelFormat),
-        (id)kIOSurfaceBytesPerElement: @(bytesPerElement),
-        (id)kIOSurfaceBytesPerRow: @(bytesPerRow),
-        (id)kIOSurfaceAllocSize: @(totalBytes),
-#if PLATFORM(IOS_FAMILY)
-        (id)kIOSurfaceCacheMode: @(kIOMapWriteCombineCache),
-#endif
-        (id)kIOSurfaceElementHeight: @(1),
-        (id)kIOSurfaceName: surfaceNameToNSString(name)
-    };
-}
-
-static NSDictionary *optionsFor32BitSurface(IntSize size, unsigned pixelFormat, IOSurface::Name name)
-{
-    return optionsForSurface(size, 32, pixelFormat, name);
-}
-
-#if ENABLE(PIXEL_FORMAT_RGBA16F)
-static NSDictionary *optionsFor64BitSurface(IntSize size, unsigned pixelFormat, IOSurface::Name name)
-{
-    return optionsForSurface(size, 64, pixelFormat, name);
-}
-#endif
-
 IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, bool& success)
     : m_format(format)
     , m_colorSpace(colorSpace)
@@ -241,37 +157,57 @@ IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSu
     ASSERT(!success);
     ASSERT(!size.isEmpty());
 
-    NSDictionary *options;
-
+    OSType pixelBufferFormat = 0;
     switch (format) {
     case Format::BGRX:
     case Format::BGRA:
-        options = optionsFor32BitSurface(size, 'BGRA', name);
+        pixelBufferFormat = kCVPixelFormatType_32BGRA;
         break;
     case Format::YUV422:
-        options = optionsForBiplanarSurface(size, '422f', 1, 1, name);
+        pixelBufferFormat = kCVPixelFormatType_422YpCbCr8BiPlanarFullRange;
         break;
     case Format::RGBX:
     case Format::RGBA:
-        options = optionsFor32BitSurface(size, 'RGBA', name);
+        pixelBufferFormat = kCVPixelFormatType_32RGBA;
         break;
 #if ENABLE(PIXEL_FORMAT_RGB10)
     case Format::RGB10:
-        options = optionsFor32BitSurface(size, 'w30r', name);
+        pixelBufferFormat = kCVPixelFormatType_30RGBLEPackedWideGamut;
         break;
 #endif
 #if ENABLE(PIXEL_FORMAT_RGB10A8)
     case Format::RGB10A8:
-        options = optionsForBiplanarSurface(size, 'b3a8', 4, 1, name);
+        pixelBufferFormat = kCVPixelFormatType_30RGBLE_8A_BiPlanar;
         break;
 #endif
 #if ENABLE(PIXEL_FORMAT_RGBA16F)
     case Format::RGBA16F:
-        options = optionsFor64BitSurface(size, 'RGhA', name);
+        pixelBufferFormat = kCVPixelFormatType_64RGBAHalf;
         break;
 #endif
     }
-    m_surface = adoptCF(IOSurfaceCreate((CFDictionaryRef)options));
+
+    NSDictionary *additionalProperties = @{
+        (id)kCVPixelBufferIOSurfacePropertiesKey: @{
+#if PLATFORM(IOS_FAMILY)
+            // FIXME: Determine what hardware/platforms this should be used on.
+            (id)kIOSurfaceCacheMode: @(kIOMapWriteCombineCache),
+#endif
+            (id)kIOSurfaceName: surfaceNameToNSString(name)
+        },
+        (id)kCVPixelBufferIOSurfacePurgeableKey : @YES
+    };
+
+    CVPixelBufferRef rawPixelBuffer = nullptr;
+    CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, size.width(), size.height(), pixelBufferFormat, (CFDictionaryRef)additionalProperties, &rawPixelBuffer);
+    RetainPtr cvBuffer = adoptCF(rawPixelBuffer);
+    if (status != kCVReturnSuccess) {
+        RELEASE_LOG_ERROR(Layers, "IOSurface creation via CVPixelBufferCreate failed for size: (%d %d) and format: (%d) - error %d", size.width(), size.height(), enumToUnderlyingType(*m_format), status);
+        return;
+    }
+
+    m_surface = CVPixelBufferGetIOSurface(cvBuffer.get());
+
     success = !!m_surface;
     if (success) {
         setColorSpaceProperty();

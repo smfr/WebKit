@@ -41,3 +41,14 @@ enum {
 #endif
 
 #endif
+
+// rdar://156450702
+#define kCVPixelBufferIOSurfacePurgeableKey CFSTR("IOSurfacePurgeable")
+
+#if !HAVE(CVPIXELFORMATTYPE_30RGBLE_8A_BIPLANAR)
+
+enum {
+    kCVPixelFormatType_30RGBLE_8A_BiPlanar = 'b3a8',
+};
+
+#endif
