@@ -43,8 +43,8 @@ struct RemoteImageBufferSetConfiguration {
     WebCore::FloatSize logicalSize;
     float resolutionScale { 1.0f };
     WebCore::DestinationColorSpace colorSpace { WebCore::DestinationColorSpace::SRGB() };
-    WebCore::ContentsFormat contentsFormat { WebCore::ContentsFormat::RGBA8 };
-    WebCore::ImageBufferPixelFormat pixelFormat { WebCore::ImageBufferPixelFormat::BGRA8 };
+    WebCore::ContentsFormat contentsFormat { WebCore::ContentsFormat::RGBA8 }; // FIXME: Is this used?
+    WebCore::ImageBufferFormat bufferFormat { WebCore::ImageBufferPixelFormat::BGRA8, WebCore::UseLosslessCompression::No };
     WebCore::RenderingMode renderingMode { WebCore::RenderingMode::Unaccelerated };
     WebCore::RenderingPurpose renderingPurpose { WebCore::RenderingPurpose::Unspecified };
 

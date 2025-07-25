@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,37 +25,16 @@
 
 #pragma once
 
-DECLARE_SYSTEM_HEADER
+#include "ImageBufferPixelFormat.h"
+#include "PixelFormat.h"
 
-#include <CoreVideo/CoreVideo.h>
+#include <wtf/Forward.h>
 
-#if USE(APPLE_INTERNAL_SDK)
-#include <CoreVideo/CVPixelBufferPrivate.h>
-#else
+namespace WebCore {
 
-#if HAVE(COREVIDEO_COMPRESSED_PIXEL_FORMAT_TYPES)
-enum {
-    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarVideoRange = '&8v0', // FIXME: Use kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarVideoRange.
-    kCVPixelFormatType_AGX_420YpCbCr8BiPlanarFullRange = '&8f0', // FIXME: Use kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange.
+struct ImageBufferFormat {
+    ImageBufferPixelFormat pixelFormat;
+    UseLosslessCompression useLosslessCompression { UseLosslessCompression::No };
 };
 
-enum {
-    kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar = '&b38',
-    kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut = '&w3r',
-}
-#endif // HAVE(COREVIDEO_COMPRESSED_PIXEL_FORMAT_TYPES)
-
-#if !HAVE(CVPIXELFORMATTYPE_30RGBLE_8A_BIPLANAR)
-enum {
-    kCVPixelFormatType_30RGBLE_8A_BiPlanar = 'b3a8',
-};
-#endif
-
-#endif // USE(APPLE_INTERNAL_SDK)
-
-#if HAVE(COREVIDEO_COMPRESSED_PIXEL_FORMAT_TYPES) && !HAVE(CVPIXELFORMATTYPE_30RGBLE_8A_BIPLANAR)
-enum {
-	kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar                  = '&b38', /* Lossless-compressed form of kCVPixelFormatType_30RGBLE_8A_BiPlanar. */
-	kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut               = '&w3r', /* Lossless-compressed form of kCVPixelFormatType_30RGBLEPackedWideGamut. */
-};
-#endif
+} // namespace WebCore

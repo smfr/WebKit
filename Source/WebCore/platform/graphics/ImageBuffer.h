@@ -29,7 +29,7 @@
 
 #include "ImageBufferAllocator.h"
 #include "ImageBufferBackend.h"
-#include "ImageBufferPixelFormat.h"
+#include "ImageBufferFormat.h"
 #include "PlatformScreen.h"
 #include "ProcessIdentity.h"
 #include "RenderingMode.h"
@@ -84,7 +84,7 @@ struct ImageBufferParameters {
     FloatSize logicalSize;
     float resolutionScale;
     DestinationColorSpace colorSpace;
-    ImageBufferPixelFormat pixelFormat;
+    ImageBufferFormat pixelFormat;
     RenderingPurpose purpose;
 };
 
@@ -92,10 +92,16 @@ class ImageBuffer : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<Image
     WTF_MAKE_TZONE_ALLOCATED_EXPORT(ImageBuffer, WEBCORE_EXPORT);
 public:
     using Parameters = ImageBufferParameters;
-    WEBCORE_EXPORT static RefPtr<ImageBuffer> create(const FloatSize&, RenderingMode, RenderingPurpose, float resolutionScale, const DestinationColorSpace&, ImageBufferPixelFormat, GraphicsClient* = nullptr);
+
+    static RefPtr<ImageBuffer> create(const FloatSize& size, RenderingMode mode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat pixelFormat, GraphicsClient* client = nullptr)
+    {
+        return create(size, mode, purpose, resolutionScale, colorSpace, ImageBufferFormat { pixelFormat }, client);
+    }
+
+    WEBCORE_EXPORT static RefPtr<ImageBuffer> create(const FloatSize&, RenderingMode, RenderingPurpose, float resolutionScale, const DestinationColorSpace&, ImageBufferFormat, GraphicsClient* = nullptr);
 
     template<typename BackendType, typename ImageBufferType = ImageBuffer, typename... Arguments>
-    static RefPtr<ImageBufferType> create(const FloatSize& size, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat pixelFormat, RenderingPurpose purpose, const ImageBufferCreationContext& creationContext, Arguments&&... arguments)
+    static RefPtr<ImageBufferType> create(const FloatSize& size, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferFormat pixelFormat, RenderingPurpose purpose, const ImageBufferCreationContext& creationContext, Arguments&&... arguments)
     {
         Parameters parameters { size, resolutionScale, colorSpace, pixelFormat, purpose };
         auto backendParameters = ImageBuffer::backendParameters(parameters);
@@ -167,7 +173,7 @@ public:
     DestinationColorSpace colorSpace() const { return m_parameters.colorSpace; }
     
     RenderingPurpose renderingPurpose() const { return m_parameters.purpose; }
-    ImageBufferPixelFormat pixelFormat() const { return m_parameters.pixelFormat; }
+    ImageBufferPixelFormat pixelFormat() const { return m_parameters.pixelFormat.pixelFormat; }
     const Parameters& parameters() const { return m_parameters; }
 
     RenderingMode renderingMode() const { return m_backendInfo.renderingMode; }

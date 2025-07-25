@@ -48,6 +48,7 @@
 #import "CoreVideoSoftLink.h"
 #import <pal/cg/CoreGraphicsSoftLink.h>
 #import <pal/cocoa/QuartzCoreSoftLink.h>
+#import <pal/spi/cf/CoreVideoSPI.h>
 
 namespace WebCore {
 
@@ -83,12 +84,12 @@ static auto surfaceNameToNSString(IOSurface::Name name)
     }
 }
 
-std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format pixelFormat)
+std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format pixelFormat, UseLosslessCompression useLosslessCompression)
 {
     ASSERT(ProcessCapabilities::canUseAcceleratedBuffers());
 
     if (pool) {
-        if (auto cachedSurface = pool->takeSurface(size, colorSpace, pixelFormat)) {
+        if (auto cachedSurface = pool->takeSurface(size, colorSpace, pixelFormat, useLosslessCompression)) {
             LOG_WITH_STREAM(IOSurface, stream << "IOSurface::create took from pool: " << *cachedSurface);
             if (cachedSurface->name() != name) {
                 IOSurfaceSetValue(cachedSurface->surface(), kIOSurfaceName, surfaceNameToNSString(name));
@@ -99,7 +100,7 @@ std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, 
     }
 
     bool success = false;
-    auto surface = std::unique_ptr<IOSurface>(new IOSurface(size, colorSpace, name, pixelFormat, success));
+    auto surface = std::unique_ptr<IOSurface>(new IOSurface(size, colorSpace, name, pixelFormat, useLosslessCompression, success));
     if (!success) {
         LOG(IOSurface, "IOSurface::create failed to create %dx%d surface", size.width(), size.height());
         return nullptr;
@@ -145,6 +146,75 @@ void IOSurface::moveToPool(std::unique_ptr<IOSurface>&& surface, IOSurfacePool* 
 {
     if (pool)
         pool->addSurface(WTFMove(surface));
+}
+
+// MARK: -
+
+static OSType coreVideoFormatFromIOSurfaceFormat(IOSurface::Format format, UseLosslessCompression useLosslessCompression)
+{
+    switch (format) {
+    case IOSurface::Format::BGRX:
+    case IOSurface::Format::BGRA:
+        return useLosslessCompression == UseLosslessCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_32BGRA) : static_cast<OSType>(kCVPixelFormatType_32BGRA);
+    case IOSurface::Format::YUV422:
+        return static_cast<OSType>(kCVPixelFormatType_422YpCbCr8BiPlanarFullRange);
+    case IOSurface::Format::RGBA:
+    case IOSurface::Format::RGBX:
+        // CoreVideo does not support allocation of RGBA surfaces: rdar://156609776.
+        ASSERT_NOT_REACHED();
+        return kCVPixelFormatType_32RGBA;
+#if ENABLE(PIXEL_FORMAT_RGB10)
+    case IOSurface::Format::RGB10:
+        return useLosslessCompression == UseLosslessCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut) : static_cast<OSType>(kCVPixelFormatType_30RGBLEPackedWideGamut);
+#endif
+#if ENABLE(PIXEL_FORMAT_RGB10A8)
+    case IOSurface::Format::RGB10A8:
+        return useLosslessCompression == UseLosslessCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar) : static_cast<OSType>(kCVPixelFormatType_30RGBLE_8A_BiPlanar);
+#endif
+#if ENABLE(PIXEL_FORMAT_RGBA16F)
+    case IOSurface::Format::RGBA16F:
+        return useLosslessCompression == UseLosslessCompression::Yes ? static_cast<OSType>(kCVPixelFormatType_Lossless_64RGBAHalf) : static_cast<OSType>(kCVPixelFormatType_64RGBAHalf);
+#endif
+    }
+
+    ASSERT_NOT_REACHED();
+    return 0;
+}
+
+static RetainPtr<IOSurfaceRef> createSurfaceViaCoreVideo(IntSize size, IOSurface::Name name, IOSurface::Format format, UseLosslessCompression& useLosslessCompression)
+{
+    if (useLosslessCompression == UseLosslessCompression::Yes) {
+        if (size.width() < 64 || size.height() < 64)
+            useLosslessCompression =  UseLosslessCompression::No;
+    }
+
+    auto coreVideoFormat = coreVideoFormatFromIOSurfaceFormat(format, useLosslessCompression);
+
+    if (useLosslessCompression == UseLosslessCompression::Yes && !CVIsCompressedPixelFormatAvailable(coreVideoFormat)) {
+        useLosslessCompression = UseLosslessCompression::No;
+        coreVideoFormat = coreVideoFormatFromIOSurfaceFormat(format, useLosslessCompression);
+    }
+
+    NSDictionary *additionalProperties = @{
+        (id)kCVPixelBufferIOSurfacePropertiesKey: @{
+#if PLATFORM(IOS_FAMILY)
+            // FIXME: Determine what hardware/platforms this should be used on.
+            (id)kIOSurfaceCacheMode: @(kIOMapWriteCombineCache),
+#endif
+            (id)kIOSurfaceName: surfaceNameToNSString(name)
+        },
+        @"IOSurfacePurgeable" : @YES, // FIXME: Need _kCVPixelBufferIOSurfacePurgeableKey
+    };
+
+    CVPixelBufferRef rawPixelBuffer = nullptr;
+    CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, size.width(), size.height(), coreVideoFormat, (CFDictionaryRef)additionalProperties, &rawPixelBuffer);
+    if (status != kCVReturnSuccess) {
+        RELEASE_LOG_ERROR(Layers, "IOSurface creation via CVPixelBufferCreate failed for size: (%d %d) and format: (%d) - error %d", size.width(), size.height(), enumToUnderlyingType(format), status);
+        return nullptr;
+    }
+    RetainPtr cvBuffer = adoptCF(rawPixelBuffer);
+
+    return CVPixelBufferGetIOSurface(cvBuffer.get());
 }
 
 static NSDictionary *optionsForBiplanarSurface(IntSize size, unsigned pixelFormat, size_t firstPlaneBytesPerPixel, size_t secondPlaneBytesPerPixel, IOSurface::Name name)
@@ -232,8 +302,46 @@ static NSDictionary *optionsFor64BitSurface(IntSize size, unsigned pixelFormat, 
 }
 #endif
 
-IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, bool& success)
-    : m_format(format)
+static RetainPtr<IOSurfaceRef> createSurface(IntSize size, IOSurface::Name name, IOSurface::Format format)
+{
+    NSDictionary *options = nil;
+
+    switch (format) {
+    case IOSurface::Format::BGRX:
+    case IOSurface::Format::BGRA:
+        options = optionsFor32BitSurface(size, 'BGRA', name);
+        break;
+    case IOSurface::Format::YUV422:
+        options = optionsForBiplanarSurface(size, '422f', 1, 1, name);
+        break;
+    case IOSurface::Format::RGBX:
+    case IOSurface::Format::RGBA:
+        options = optionsFor32BitSurface(size, 'RGBA', name);
+        break;
+#if ENABLE(PIXEL_FORMAT_RGB10)
+    case IOSurface::Format::RGB10:
+        options = optionsFor32BitSurface(size, 'w30r', name);
+        break;
+#endif
+#if ENABLE(PIXEL_FORMAT_RGB10A8)
+    case IOSurface::Format::RGB10A8:
+        options = optionsForBiplanarSurface(size, 'b3a8', 4, 1, name);
+        break;
+#endif
+#if ENABLE(PIXEL_FORMAT_RGBA16F)
+    case IOSurface::Format::RGBA16F:
+        options = optionsFor64BitSurface(size, 'RGhA', name);
+        break;
+#endif
+    }
+
+    return adoptCF(IOSurfaceCreate((CFDictionaryRef)options));
+}
+
+// MARK: -
+
+IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSurface::Name name, Format format, UseLosslessCompression useLosslessCompression, bool& success)
+    : m_format({ format, useLosslessCompression })
     , m_colorSpace(colorSpace)
     , m_size(size)
     , m_name(name)
@@ -241,65 +349,61 @@ IOSurface::IOSurface(IntSize size, const DestinationColorSpace& colorSpace, IOSu
     ASSERT(!success);
     ASSERT(!size.isEmpty());
 
-    NSDictionary *options;
-
-    switch (format) {
-    case Format::BGRX:
-    case Format::BGRA:
-        options = optionsFor32BitSurface(size, 'BGRA', name);
-        break;
-    case Format::YUV422:
-        options = optionsForBiplanarSurface(size, '422f', 1, 1, name);
-        break;
-    case Format::RGBX:
-    case Format::RGBA:
-        options = optionsFor32BitSurface(size, 'RGBA', name);
-        break;
-#if ENABLE(PIXEL_FORMAT_RGB10)
-    case Format::RGB10:
-        options = optionsFor32BitSurface(size, 'w30r', name);
-        break;
-#endif
-#if ENABLE(PIXEL_FORMAT_RGB10A8)
-    case Format::RGB10A8:
-        options = optionsForBiplanarSurface(size, 'b3a8', 4, 1, name);
-        break;
-#endif
-#if ENABLE(PIXEL_FORMAT_RGBA16F)
-    case Format::RGBA16F:
-        options = optionsFor64BitSurface(size, 'RGhA', name);
-        break;
-#endif
+    // We could allocate more formats via CoreVideo in future.
+    if (useLosslessCompression == UseLosslessCompression::Yes) {
+        m_surface = createSurfaceViaCoreVideo(size, name, format, useLosslessCompression);
+        if (useLosslessCompression == UseLosslessCompression::No)
+            m_format = { format, useLosslessCompression };
     }
-    m_surface = adoptCF(IOSurfaceCreate((CFDictionaryRef)options));
+
+    if (!m_surface)
+        m_surface = createSurface(size, name, format);
+
     success = !!m_surface;
     if (success) {
         setColorSpaceProperty();
         m_totalBytes = IOSurfaceGetAllocSize(m_surface.get());
     } else
-        RELEASE_LOG_ERROR(Layers, "IOSurface creation failed for size: (%d %d) and format: (%d)", size.width(), size.height(), enumToUnderlyingType(*m_format));
+        RELEASE_LOG_ERROR(Layers, "IOSurface creation failed for size: (%d %d) and format: (%d)", size.width(), size.height(), enumToUnderlyingType(format));
 }
 
-static std::optional<IOSurface::Format> formatFromSurface(IOSurfaceRef surface)
+static std::optional<IOSurface::UsedFormat> formatFromSurface(IOSurfaceRef surface)
 {
     unsigned pixelFormat = IOSurfaceGetPixelFormat(surface);
-    if (pixelFormat == 'BGRA')
-        return IOSurface::Format::BGRA;
-    if (pixelFormat == '422f')
-        return IOSurface::Format::YUV422;
-    if (pixelFormat == 'RGBA')
-        return IOSurface::Format::RGBA;
+    if (pixelFormat == kCVPixelFormatType_32BGRA)
+        return IOSurface::UsedFormat { IOSurface::Format::BGRA, UseLosslessCompression::No };
+
+    if (pixelFormat == kCVPixelFormatType_Lossless_32BGRA)
+        return IOSurface::UsedFormat { IOSurface::Format::BGRA, UseLosslessCompression::Yes };
+
+    if (pixelFormat == kCVPixelFormatType_422YpCbCr8BiPlanarFullRange)
+        return IOSurface::UsedFormat { IOSurface::Format::YUV422, UseLosslessCompression::No };
+
+    if (pixelFormat == kCVPixelFormatType_32RGBA)
+        return IOSurface::UsedFormat { IOSurface::Format::RGBA, UseLosslessCompression::No };
+
 #if ENABLE(PIXEL_FORMAT_RGB10)
-    if (pixelFormat == 'w30r')
-        return IOSurface::Format::RGB10;
+    if (pixelFormat == kCVPixelFormatType_30RGBLEPackedWideGamut)
+        return IOSurface::UsedFormat { IOSurface::Format::RGB10, UseLosslessCompression::No };
+
+    if (pixelFormat == kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut)
+        return IOSurface::UsedFormat { IOSurface::Format::RGB10, UseLosslessCompression::Yes };
 #endif
+
 #if ENABLE(PIXEL_FORMAT_RGB10A8)
-    if (pixelFormat == 'b3a8')
-        return IOSurface::Format::RGB10A8;
+    if (pixelFormat == kCVPixelFormatType_30RGBLE_8A_BiPlanar)
+        return IOSurface::UsedFormat { IOSurface::Format::RGB10A8, UseLosslessCompression::No };
+
+    if (pixelFormat == kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar)
+        return IOSurface::UsedFormat { IOSurface::Format::RGB10A8, UseLosslessCompression::Yes };
 #endif
+
 #if ENABLE(PIXEL_FORMAT_RGBA16F)
-    if (pixelFormat == 'RGhA')
-        return IOSurface::Format::RGBA16F;
+    if (pixelFormat == kCVPixelFormatType_64RGBAHalf)
+        return IOSurface::UsedFormat { IOSurface::Format::RGBA16F, UseLosslessCompression::No };
+
+    if (pixelFormat == kCVPixelFormatType_Lossless_64RGBAHalf)
+        return IOSurface::UsedFormat { IOSurface::Format::RGBA16F, UseLosslessCompression::Yes };
 #endif
 
     return { };
@@ -446,7 +550,7 @@ IOSurface::BitmapConfiguration IOSurface::bitmapConfiguration() const
 
     ASSERT(m_format);
 
-    switch (m_format.value_or(Format::BGRA)) {
+    switch (m_format ? m_format->format : Format::BGRA) {
     case Format::BGRX:
         bitmapInfo = static_cast<CGBitmapInfo>(kCGImageAlphaNoneSkipFirst) | static_cast<CGBitmapInfo>(kCGBitmapByteOrder32Host);
         break;
@@ -623,7 +727,7 @@ void IOSurface::convertToFormat(IOSurfacePool* pool, std::unique_ptr<IOSurface>&
         CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopDefaultMode);
     }
 
-    if (inSurface->hasFormat(format)) {
+    if (inSurface->pixelFormat() == format) {
         callback(WTFMove(inSurface));
         return;
     }
@@ -817,7 +921,8 @@ static TextStream& operator<<(TextStream& ts, SetNonVolatileResult state)
 
 TextStream& operator<<(TextStream& ts, const IOSurface& surface)
 {
-    return ts << "IOSurface "_s << surface.surfaceID() << " name "_s << [surfaceNameToNSString(surface.name()) UTF8String] << " size "_s << surface.size() << " format "_s << surface.m_format << " state "_s << surface.state();
+    return ts << "IOSurface "_s << surface.surfaceID() << " name "_s << [surfaceNameToNSString(surface.name()) UTF8String] << " size "_s << surface.size() << " format "_s << (surface.m_format ? surface.m_format->format : IOSurface::Format::BGRX)
+        << " compressed " << (surface.m_format ? (surface.m_format->useLosslessCompression == UseLosslessCompression::Yes) : false) << " state "_s << surface.state();
 }
 
 } // namespace WebCore

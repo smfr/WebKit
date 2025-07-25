@@ -1297,6 +1297,8 @@ public:
 
     bool isStoppingLoadingDueToProcessSwap() const { return m_isStoppingLoadingDueToProcessSwap; }
 
+    bool isLosslessCompressionEnabled() const;
+
     bool isSmartInsertDeleteEnabled();
     void setSmartInsertDeleteEnabled(bool);
 

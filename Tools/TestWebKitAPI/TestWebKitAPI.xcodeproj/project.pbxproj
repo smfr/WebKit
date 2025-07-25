@@ -886,8 +886,8 @@
 		A17C46F62C98E54B0023F3C7 /* test-without-audio-track.mp4 in Copy Resources */ = {isa = PBXBuildFile; fileRef = C95984F61E36BCD7002C0D45 /* test-without-audio-track.mp4 */; };
 		A17C46F72C98E54B0023F3C7 /* test.mp4 in Copy Resources */ = {isa = PBXBuildFile; fileRef = 524BBCA019E30C63002F1AF1 /* test.mp4 */; };
 		A17C46F82C98E54B0023F3C7 /* test.pdf in Copy Resources */ = {isa = PBXBuildFile; fileRef = 7AE9E5081AE5AE8B00CF874B /* test.pdf */; };
-		A17C46F92C98E54B0023F3C8 /* test_form.pdf in Copy Resources */ = {isa = PBXBuildFile; fileRef = 7AE9E5091AE5AE8B00CF874C /* test_form.pdf */; };
 		A17C46F92C98E54B0023F3C7 /* test.xml in Copy Resources */ = {isa = PBXBuildFile; fileRef = 44D3F8422BE1DAD800BE0218 /* test.xml */; };
+		A17C46F92C98E54B0023F3C8 /* test_form.pdf in Copy Resources */ = {isa = PBXBuildFile; fileRef = 7AE9E5091AE5AE8B00CF874C /* test_form.pdf */; };
 		A17C46FA2C98E54B0023F3C7 /* UserInstalledAhem.html in Copy Resources */ = {isa = PBXBuildFile; fileRef = 1C51534B261596BD00FBC4FE /* UserInstalledAhem.html */; };
 		A17C46FB2C98E54B0023F3C7 /* video-with-play-button.html in Copy Resources */ = {isa = PBXBuildFile; fileRef = C9C9A91C21DED79400FDE96E /* video-with-play-button.html */; };
 		A17C46FC2C98E54B0023F3C7 /* video.html in Copy Resources */ = {isa = PBXBuildFile; fileRef = 07CD32F72065B72A0064A4BE /* video.html */; };
