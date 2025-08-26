@@ -60,6 +60,8 @@ public:
     void save(GraphicsContextState::Purpose = GraphicsContextState::Purpose::SaveRestore) final;
     void restore(GraphicsContextState::Purpose = GraphicsContextState::Purpose::SaveRestore) final;
 
+    void flush() final;
+
     void drawRect(const FloatRect&, float borderThickness = 1) final;
     void drawLine(const FloatPoint&, const FloatPoint&) final;
     void drawEllipse(const FloatRect&) final;
@@ -168,7 +170,7 @@ private:
     // Returns the platform context for purposes of context state change, not draws.
     CGContextRef contextForState() const;
 
-    const RetainPtr<RBDrawable> m_drawable;
+    RetainPtr<RBDrawable> m_drawable;
     RetainPtr<RBDisplayList> m_displayList;
     RetainPtr<CGContextRef> m_currentContext;
 

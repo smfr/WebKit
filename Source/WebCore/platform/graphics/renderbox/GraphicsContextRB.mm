@@ -183,7 +183,16 @@ GraphicsContextRB::GraphicsContextRB(RBDrawingTarget&& drawingTarget, CGContextS
     didUpdateState(m_state);
 }
 
-GraphicsContextRB::~GraphicsContextRB() = default;
+GraphicsContextRB::~GraphicsContextRB()
+{
+    if (m_currentContext) {
+        [m_displayList endCGContext];
+        m_currentContext = nil;
+    }
+
+    m_displayList = nil;
+    m_drawable = nil;
+}
 
 bool GraphicsContextRB::hasPlatformContext() const
 {
@@ -213,6 +222,17 @@ CGContextRef GraphicsContextRB::contextForDraw()
 CGContextRef GraphicsContextRB::contextForState() const
 {
     return const_cast<GraphicsContextRB*>(this)->ensureContext();
+}
+
+void GraphicsContextRB::flush()
+{
+    if (m_currentContext) {
+        [m_displayList endCGContext];
+        m_currentContext = nil;
+    }
+
+    [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsSynchronize];
+    m_displayList = nil;
 }
 
 const DestinationColorSpace& GraphicsContextRB::colorSpace() const

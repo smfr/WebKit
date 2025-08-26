@@ -40,13 +40,14 @@ class RBDrawingTarget {
 public:
     static RBDrawingTarget drawingTargetFromIOSurface(IOSurface&);
 
+    ~RBDrawingTarget();
+
     bool isValid() const { return !!m_drawable; }
 
     RetainPtr<RBDrawable> takeDrawable();
 
 private:
     explicit RBDrawingTarget(RetainPtr<RBDrawable>&& drawable = nil);
-    ~RBDrawingTarget();
 
     RetainPtr<RBDrawable> m_drawable;
 };

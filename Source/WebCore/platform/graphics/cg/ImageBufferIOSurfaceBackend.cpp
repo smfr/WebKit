@@ -43,6 +43,11 @@
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
 
+#if USE(RENDERBOX)
+#include "RBDrawingTarget.h"
+#include "GraphicsContextRB.h"
+#endif
+
 namespace WebCore {
 
 WTF_MAKE_TZONE_OR_ISO_ALLOCATED_IMPL(ImageBufferIOSurfaceBackend);
@@ -112,8 +117,12 @@ ImageBufferIOSurfaceBackend::~ImageBufferIOSurfaceBackend()
 GraphicsContext& ImageBufferIOSurfaceBackend::context()
 {
     if (!m_context) {
-        // FIXME RB here.
+#if USE(RENDERBOX)
+        auto drawingTarget = RBDrawingTarget::drawingTargetFromIOSurface(*m_surface);
+        m_context = makeUnique<GraphicsContextRB>(WTFMove(drawingTarget));
+#else
         m_context = makeUnique<GraphicsContextCG>(ensurePlatformContext());
+#endif
         applyBaseTransform(*m_context);
     }
     return *m_context;
@@ -121,7 +130,12 @@ GraphicsContext& ImageBufferIOSurfaceBackend::context()
 
 std::unique_ptr<ThreadSafeImageBufferFlusher> ImageBufferIOSurfaceBackend::createFlusher()
 {
+#if USE(RENDERBOX)
+    // FIXME: RB flushing.
+    return nullptr;
+#else
     return makeUnique<ThreadSafeImageBufferFlusherCG>(context().platformContext());
+#endif
 }
 
 void ImageBufferIOSurfaceBackend::flushContext()
