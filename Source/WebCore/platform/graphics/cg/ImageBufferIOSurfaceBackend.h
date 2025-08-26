@@ -64,13 +64,13 @@ protected:
     RefPtr<NativeImage> createNativeImageReference() override;
     RefPtr<NativeImage> sinkIntoNativeImage() override;
 
-    std::unique_ptr<ThreadSafeImageBufferFlusher> createFlusher() override;
-
     void getPixelBuffer(const IntRect&, PixelBuffer&) override;
     void putPixelBuffer(const PixelBufferSourceView&, const IntRect& srcRect, const IntPoint& destPoint, AlphaPremultiplication destFormat) override;
 
     bool isInUse() const override;
     void releaseGraphicsContext() override;
+
+    std::unique_ptr<ThreadSafeImageBufferFlusher> createFlusher() override;
 
     void applyBaseTransform(GraphicsContext&) const;
 

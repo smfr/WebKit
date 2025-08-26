@@ -61,6 +61,7 @@ private:
     void applyBaseTransform(WebCore::GraphicsContext&) const;
 
     // WebCore::ImageBufferBackend
+    std::unique_ptr<ThreadSafeImageBufferFlusher> createFlusher() override;
     unsigned bytesPerRow() const final;
     RefPtr<WebCore::NativeImage> copyNativeImage() final;
     RefPtr<WebCore::NativeImage> createNativeImageReference() final;

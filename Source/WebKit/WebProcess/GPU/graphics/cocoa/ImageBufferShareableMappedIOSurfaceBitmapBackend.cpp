@@ -85,6 +85,11 @@ void ImageBufferShareableMappedIOSurfaceBitmapBackend::applyBaseTransform(Graphi
     context.setCTM(calculateBaseTransform(m_parameters));
 }
 
+std::unique_ptr<ThreadSafeImageBufferFlusher> ImageBufferShareableMappedIOSurfaceBitmapBackend::createFlusher()
+{
+    return nullptr; // makeUnique<ThreadSafeImageBufferFlusherCG>(context().platformContext());
+}
+
 std::optional<ImageBufferBackendHandle> ImageBufferShareableMappedIOSurfaceBitmapBackend::createBackendHandle(SharedMemory::Protection) const
 {
     return ImageBufferBackendHandle(m_surface->createSendRight());
