@@ -227,6 +227,11 @@ CGContextRef GraphicsContextCG::contextForState() const
     return m_cgContext.get();
 }
 
+void GraphicsContextCG::flush()
+{
+    CGContextFlush(m_cgContext.get());
+}
+
 const DestinationColorSpace& GraphicsContextCG::colorSpace() const
 {
     if (m_colorSpace)

@@ -88,6 +88,8 @@ public:
     virtual bool hasPlatformContext() const { return false; }
     virtual PlatformGraphicsContext* platformContext() const { return nullptr; }
 
+    virtual void flush() { }
+
     virtual const DestinationColorSpace& colorSpace() const { return DestinationColorSpace::SRGB(); }
 
     virtual bool paintingDisabled() const { return false; }

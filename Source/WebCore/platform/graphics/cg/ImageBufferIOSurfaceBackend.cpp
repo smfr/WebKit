@@ -127,10 +127,10 @@ bool ImageBufferIOSurfaceBackend::flushContextDraws()
     bool contextNeedsFlush = m_context && m_context->consumeHasDrawn();
     if (!contextNeedsFlush && !m_needsFirstFlush)
         return false;
+
     m_needsFirstFlush = false;
 
-    // FIXME: RB
-    CGContextFlush(ensurePlatformContext());
+    m_context->flush();
     return true;
 }
 
@@ -308,10 +308,8 @@ void ImageBufferIOSurfaceBackend::prepareForExternalWrite()
     if (flushContextDraws())
         needFlush = false;
 
-    // FIXME: RB
-
-    if (needFlush)
-        CGContextFlush(ensurePlatformContext());
+    if (needFlush && m_context)
+        m_context->flush();
 }
 
 RetainPtr<CGImageRef> ImageBufferIOSurfaceBackend::createImage()

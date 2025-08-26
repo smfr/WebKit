@@ -49,6 +49,8 @@ public:
     // Returns the platform context for any purpose, including draws. Conservative estimate.
     CGContextRef platformContext() const final { return const_cast<GraphicsContextCG*>(this)->contextForDraw(); }
 
+    void flush() final;
+
     const DestinationColorSpace& colorSpace() const final;
 
     void save(GraphicsContextState::Purpose = GraphicsContextState::Purpose::SaveRestore) final;

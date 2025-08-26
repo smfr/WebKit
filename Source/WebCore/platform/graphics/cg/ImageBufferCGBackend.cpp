@@ -36,6 +36,7 @@
 
 namespace WebCore {
 
+// FIXME: Write in terms of GraphicsContext.
 class ThreadSafeImageBufferFlusherCG : public ThreadSafeImageBufferFlusher {
     WTF_MAKE_TZONE_ALLOCATED_INLINE(ThreadSafeImageBufferFlusherCG);
 public:
