@@ -128,6 +128,7 @@ protected:
     const DestinationColorSpace& colorSpace() const final { return m_colorSpace; }
 
 private:
+    bool isDisplayListRecorder() const final { return true; }
     bool hasPlatformContext() const final { return false; }
     PlatformGraphicsContext* platformContext() const final { ASSERT_NOT_REACHED(); return nullptr; }
 
@@ -174,3 +175,6 @@ inline Recorder::ContextState& Recorder::currentState()
 
 } // namespace DisplayList
 } // namespace WebCore
+
+SPECIALIZE_TYPE_TRAITS_GRAPHICS_CONTEXT(DisplayList::Recorder, isDisplayListRecorder)
+

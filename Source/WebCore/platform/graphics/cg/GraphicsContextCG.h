@@ -161,6 +161,8 @@ protected:
     void setCGStyle(const std::optional<GraphicsStyle>&, bool shadowsIgnoreTransforms);
 
 private:
+    bool isGraphicsContextCG() const final { return true; }
+
     void drawNativeImageInternal(NativeImage&, const FloatRect& destRect, const FloatRect& srcRect, ImagePaintingOptions = { }) final;
 
     void clearCGShadow();
@@ -182,6 +184,8 @@ private:
 CGAffineTransform getUserToBaseCTM(CGContextRef);
 
 } // namespace WebCore
+
+SPECIALIZE_TYPE_TRAITS_GRAPHICS_CONTEXT(GraphicsContextCG, isGraphicsContextCG)
 
 #include <WebCore/CGContextStateSaver.h>
 

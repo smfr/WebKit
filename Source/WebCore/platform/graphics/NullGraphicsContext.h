@@ -50,6 +50,8 @@ public:
     }
 
 private:
+    bool isNullGraphicsContext() const final { return true; }
+
 #if USE(CG)
     bool isCALayerContext() const final { return false; }
 #endif

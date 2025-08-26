@@ -154,6 +154,8 @@ public:
     void didUpdateState(GraphicsContextState&) final;
 
 private:
+    bool isBifurcatedGraphicsContext() const final { return true; }
+
     void verifyStateSynchronization();
 
     bool m_hasLoggedAboutDesynchronizedState { false };
@@ -162,5 +164,6 @@ private:
     GraphicsContext& m_secondaryContext;
 };
 
-}
+} // namespace WebCore
 
+SPECIALIZE_TYPE_TRAITS_GRAPHICS_CONTEXT(BifurcatedGraphicsContext, isBifurcatedGraphicsContext)

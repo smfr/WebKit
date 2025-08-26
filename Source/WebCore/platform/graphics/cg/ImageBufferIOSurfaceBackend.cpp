@@ -35,6 +35,8 @@
 #include "IntRect.h"
 #include "NativeImage.h"
 #include "PixelBuffer.h"
+#include "ImageBufferCGBackend.h" // for the flusher
+
 #include <CoreGraphics/CoreGraphics.h>
 #include <pal/cg/CoreGraphicsSoftLink.h>
 #include <pal/spi/cg/CoreGraphicsSPI.h>
@@ -60,7 +62,7 @@ IntSize ImageBufferIOSurfaceBackend::calculateSafeBackendSize(const Parameters& 
 
 unsigned ImageBufferIOSurfaceBackend::calculateBytesPerRow(const IntSize& backendSize, ImageBufferPixelFormat imageBufferPixelFormat)
 {
-    unsigned bytesPerRow = ImageBufferCGBackend::calculateBytesPerRow(backendSize, imageBufferPixelFormat);
+    unsigned bytesPerRow = CheckedUint32(backendSize.width()) * PixelBuffer::bytesPerPixel(convertToPixelFormat(imageBufferPixelFormat));
     size_t alignmentMask = IOSurface::bytesPerRowAlignment() - 1;
     return (bytesPerRow + alignmentMask) & ~alignmentMask;
 }
@@ -90,11 +92,11 @@ std::unique_ptr<ImageBufferIOSurfaceBackend> ImageBufferIOSurfaceBackend::create
 }
 
 ImageBufferIOSurfaceBackend::ImageBufferIOSurfaceBackend(const Parameters& parameters, std::unique_ptr<IOSurface> surface, RetainPtr<CGContextRef> platformContext, PlatformDisplayID displayID, IOSurfacePool* ioSurfacePool)
-    : ImageBufferCGBackend(parameters)
+    : ImageBufferBackend(parameters)
     , m_surface(WTFMove(surface))
+    , m_ioSurfacePool(ioSurfacePool)
     , m_platformContext(WTFMove(platformContext))
     , m_displayID(displayID)
-    , m_ioSurfacePool(ioSurfacePool)
 {
     ASSERT(m_surface);
     ASSERT(!m_surface->isVolatile());
@@ -117,6 +119,11 @@ GraphicsContext& ImageBufferIOSurfaceBackend::context()
     return *m_context;
 }
 
+std::unique_ptr<ThreadSafeImageBufferFlusher> ImageBufferIOSurfaceBackend::createFlusher()
+{
+    return makeUnique<ThreadSafeImageBufferFlusherCG>(context().platformContext());
+}
+
 void ImageBufferIOSurfaceBackend::flushContext()
 {
     flushContextDraws();
@@ -124,7 +131,10 @@ void ImageBufferIOSurfaceBackend::flushContext()
 
 bool ImageBufferIOSurfaceBackend::flushContextDraws()
 {
-    bool contextNeedsFlush = m_context && m_context->consumeHasDrawn();
+    bool contextNeedsFlush = false;
+    if (auto* contextCG = dynamicDowncast<GraphicsContextCG>(m_context.get()))
+        contextNeedsFlush = contextCG->consumeHasDrawn();
+
     if (!contextNeedsFlush && !m_needsFirstFlush)
         return false;
 
@@ -132,6 +142,12 @@ bool ImageBufferIOSurfaceBackend::flushContextDraws()
 
     m_context->flush();
     return true;
+}
+
+void ImageBufferIOSurfaceBackend::applyBaseTransform(GraphicsContext& context) const
+{
+    context.applyDeviceScaleFactor(m_parameters.resolutionScale);
+    context.setCTM(calculateBaseTransform(m_parameters));
 }
 
 // FIXME: RB
@@ -330,6 +346,14 @@ RetainPtr<CGImageRef> ImageBufferIOSurfaceBackend::createImageReference()
     // This also skips WebKit GraphicsContext subimage cache.
     CGImageSetCachingFlags(image.get(), kCGImageCachingTransient);
     return image;
+}
+
+String ImageBufferIOSurfaceBackend::debugDescription() const
+{
+    TextStream stream;
+    stream << "ImageBufferIOSurfaceBackend " << this;
+    // FIXME: "using CG" etc.
+    return stream.release();
 }
 
 } // namespace WebCore

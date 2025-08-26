@@ -37,22 +37,6 @@
 namespace WebCore {
 
 // FIXME: Write in terms of GraphicsContext.
-class ThreadSafeImageBufferFlusherCG : public ThreadSafeImageBufferFlusher {
-    WTF_MAKE_TZONE_ALLOCATED_INLINE(ThreadSafeImageBufferFlusherCG);
-public:
-    ThreadSafeImageBufferFlusherCG(CGContextRef context)
-        : m_context(context)
-    {
-    }
-
-    void flush() override
-    {
-        CGContextFlush(m_context.get());
-    }
-
-private:
-    RetainPtr<CGContextRef> m_context;
-};
 
 ImageBufferCGBackend::ImageBufferCGBackend(const Parameters& parameters, std::unique_ptr<GraphicsContextCG>&& context)
     : ImageBufferBackend(parameters)

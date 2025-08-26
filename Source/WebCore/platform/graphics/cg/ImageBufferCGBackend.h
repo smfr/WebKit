@@ -33,6 +33,23 @@
 
 namespace WebCore {
 
+class ThreadSafeImageBufferFlusherCG : public ThreadSafeImageBufferFlusher {
+    WTF_MAKE_TZONE_ALLOCATED_INLINE(ThreadSafeImageBufferFlusherCG);
+public:
+    ThreadSafeImageBufferFlusherCG(CGContextRef context)
+        : m_context(context)
+    {
+    }
+
+    void flush() override
+    {
+        CGContextFlush(m_context.get());
+    }
+
+private:
+    RetainPtr<CGContextRef> m_context;
+};
+
 class WEBCORE_EXPORT ImageBufferCGBackend : public ImageBufferBackend {
 public:
     ~ImageBufferCGBackend() override;

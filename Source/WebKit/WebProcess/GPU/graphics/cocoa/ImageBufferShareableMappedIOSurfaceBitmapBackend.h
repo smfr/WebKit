@@ -39,7 +39,7 @@ class ProcessIdentity;
 namespace WebKit {
 
 // ImageBufferBackend for small LayerBacking stores.
-class ImageBufferShareableMappedIOSurfaceBitmapBackend final : public WebCore::ImageBufferCGBackend, public ImageBufferBackendHandleSharing {
+class ImageBufferShareableMappedIOSurfaceBitmapBackend final : public WebCore::ImageBufferBackend, public ImageBufferBackendHandleSharing {
     WTF_MAKE_TZONE_OR_ISO_ALLOCATED(ImageBufferShareableMappedIOSurfaceBitmapBackend);
     WTF_MAKE_NONCOPYABLE(ImageBufferShareableMappedIOSurfaceBitmapBackend);
 public:
@@ -58,7 +58,9 @@ private:
     // ImageBufferBackendSharing
     ImageBufferBackendSharing* toBackendSharing() final { return this; }
 
-    // WebCore::ImageBufferCGBackend
+    void applyBaseTransform(WebCore::GraphicsContext&) const;
+
+    // WebCore::ImageBufferBackend
     unsigned bytesPerRow() const final;
     RefPtr<WebCore::NativeImage> copyNativeImage() final;
     RefPtr<WebCore::NativeImage> createNativeImageReference() final;
@@ -73,11 +75,13 @@ private:
     void getPixelBuffer(const WebCore::IntRect&, WebCore::PixelBuffer&) final;
     void putPixelBuffer(const WebCore::PixelBufferSourceView&, const WebCore::IntRect&, const WebCore::IntPoint&, WebCore::AlphaPremultiplication) final;
     void flushContext() final;
+    String debugDescription() const final;
 
+    std::unique_ptr<GraphicsContext> m_context;
     std::unique_ptr<WebCore::IOSurface> m_surface;
     std::optional<WebCore::IOSurface::Locker<WebCore::IOSurface::AccessMode::ReadWrite>> m_lock;
-    WebCore::VolatilityState m_volatilityState { WebCore::VolatilityState::NonVolatile };
     RefPtr<WebCore::IOSurfacePool> m_ioSurfacePool;
+    WebCore::VolatilityState m_volatilityState { WebCore::VolatilityState::NonVolatile };
 };
 
 } // namespace WebKit

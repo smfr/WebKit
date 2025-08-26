@@ -30,12 +30,12 @@
 #include <WebCore/IOSurface.h>
 #include <WebCore/IOSurfacePool.h>
 #include <WebCore/ImageBuffer.h>
-#include <WebCore/ImageBufferCGBackend.h>
+#include <WebCore/ImageBufferBackend.h>
 #include <wtf/TZoneMalloc.h>
 
 namespace WebCore {
 
-class WEBCORE_EXPORT ImageBufferIOSurfaceBackend : public ImageBufferCGBackend {
+class WEBCORE_EXPORT ImageBufferIOSurfaceBackend : public ImageBufferBackend {
     WTF_MAKE_TZONE_OR_ISO_ALLOCATED_EXPORT(ImageBufferIOSurfaceBackend, WEBCORE_EXPORT);
     WTF_MAKE_NONCOPYABLE(ImageBufferIOSurfaceBackend);
 public:
@@ -64,11 +64,15 @@ protected:
     RefPtr<NativeImage> createNativeImageReference() override;
     RefPtr<NativeImage> sinkIntoNativeImage() override;
 
+    std::unique_ptr<ThreadSafeImageBufferFlusher> createFlusher() override;
+
     void getPixelBuffer(const IntRect&, PixelBuffer&) override;
     void putPixelBuffer(const PixelBufferSourceView&, const IntRect& srcRect, const IntPoint& destPoint, AlphaPremultiplication destFormat) override;
 
     bool isInUse() const override;
     void releaseGraphicsContext() override;
+
+    void applyBaseTransform(GraphicsContext&) const;
 
     bool setVolatile() final;
     SetNonVolatileResult setNonVolatile() final;
@@ -89,12 +93,17 @@ protected:
     RetainPtr<CGImageRef> createImage();
     RetainPtr<CGImageRef> createImageReference();
 
+    String debugDescription() const override;
+
     std::unique_ptr<IOSurface> m_surface;
-    RetainPtr<CGContextRef> m_platformContext;
-    const PlatformDisplayID m_displayID;
-    bool m_mayHaveOutstandingBackingStoreReferences { false };
-    VolatilityState m_volatilityState { VolatilityState::NonVolatile };
     RefPtr<IOSurfacePool> m_ioSurfacePool;
+
+    std::unique_ptr<GraphicsContext> m_context;
+    RetainPtr<CGContextRef> m_platformContext;
+
+    const PlatformDisplayID m_displayID;
+    VolatilityState m_volatilityState { VolatilityState::NonVolatile };
+    bool m_mayHaveOutstandingBackingStoreReferences { false };
     bool m_needsFirstFlush { true };
 };
 

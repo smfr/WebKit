@@ -85,6 +85,12 @@ public:
     WEBCORE_EXPORT GraphicsContext(IsDeferred, const GraphicsContextState&);
     WEBCORE_EXPORT virtual ~GraphicsContext();
 
+    virtual bool isNullGraphicsContext() const { return false; }
+    virtual bool isGraphicsContextCG() const { return false; }
+    virtual bool isGraphicsContextRB() const { return false; }
+    virtual bool isBifurcatedGraphicsContext() const { return false; }
+    virtual bool isDisplayListRecorder() const { return false; }
+
     virtual bool hasPlatformContext() const { return false; }
     virtual PlatformGraphicsContext* platformContext() const { return nullptr; }
 
@@ -421,5 +427,10 @@ private:
 };
 
 } // namespace WebCore
+
+#define SPECIALIZE_TYPE_TRAITS_GRAPHICS_CONTEXT(ToClassName, predicate) \
+SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::ToClassName) \
+    static bool isType(const WebCore::GraphicsContext& context) { return context.predicate(); } \
+SPECIALIZE_TYPE_TRAITS_END()
 
 #include <WebCore/GraphicsContextStateSaver.h>
