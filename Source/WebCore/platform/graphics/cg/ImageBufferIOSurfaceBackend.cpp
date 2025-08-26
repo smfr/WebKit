@@ -107,10 +107,10 @@ ImageBufferIOSurfaceBackend::~ImageBufferIOSurfaceBackend()
     IOSurface::moveToPool(WTFMove(m_surface), m_ioSurfacePool.get());
 }
 
-
 GraphicsContext& ImageBufferIOSurfaceBackend::context()
 {
     if (!m_context) {
+        // FIXME RB here.
         m_context = makeUnique<GraphicsContextCG>(ensurePlatformContext());
         applyBaseTransform(*m_context);
     }
@@ -128,10 +128,13 @@ bool ImageBufferIOSurfaceBackend::flushContextDraws()
     if (!contextNeedsFlush && !m_needsFirstFlush)
         return false;
     m_needsFirstFlush = false;
+
+    // FIXME: RB
     CGContextFlush(ensurePlatformContext());
     return true;
 }
 
+// FIXME: RB
 CGContextRef ImageBufferIOSurfaceBackend::ensurePlatformContext()
 {
     if (!m_platformContext) {
@@ -165,6 +168,7 @@ bool ImageBufferIOSurfaceBackend::invalidateCachedNativeImage()
         return false;
     }
 
+    // FIXME: RB
     CGContextFillRect(ensurePlatformContext(), CGRect { });
     return true;
 }
@@ -246,6 +250,9 @@ SetNonVolatileResult ImageBufferIOSurfaceBackend::setNonVolatile()
 
         auto previousState = m_surface->setVolatile(false);
         if (previousState == SetNonVolatileResult::Empty) {
+
+            // FIXME: RB
+
             RetainPtr context = ensurePlatformContext();
             ASSERT(CGAffineTransformIsIdentity(CGContextGetCTM(context.get())));
             CGContextClearRect(context.get(), FloatRect({ }, size()));
@@ -300,6 +307,9 @@ void ImageBufferIOSurfaceBackend::prepareForExternalWrite()
     // the invalidation marker completes.
     if (flushContextDraws())
         needFlush = false;
+
+    // FIXME: RB
+
     if (needFlush)
         CGContextFlush(ensurePlatformContext());
 }

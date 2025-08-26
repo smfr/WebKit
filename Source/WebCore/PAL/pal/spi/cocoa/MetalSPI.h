@@ -32,7 +32,9 @@ DECLARE_SYSTEM_HEADER
 #if USE(APPLE_INTERNAL_SDK)
 
 #import <Metal/MTLDevice_Private.h>
+
 #import <Metal/MTLRasterizationRate_Private.h>
+#import <Metal/MTLPixelFormat_Private.h>
 #import <Metal/MTLTexture_Private.h>
 #import <Metal/MetalPrivate.h>
 
@@ -41,6 +43,10 @@ DECLARE_SYSTEM_HEADER
 #import <Foundation/NSObject.h>
 
 typedef struct __IOSurface *IOSurfaceRef;
+
+typedef NS_ENUM(NSUInteger, MTLPixelFormatSPI) {
+    MTLPixelFormatRGB10A8_2P_XR10          = 550, // Layout: B10 G10 R10 X2 | A8
+}
 
 @protocol MTLDeviceSPI <MTLDevice>
 - (NSString*)vendorName;

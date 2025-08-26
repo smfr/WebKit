@@ -6150,6 +6150,19 @@ RemoveBackgroundEnabled:
     WebKit:
       default: defaultRemoveBackgroundEnabled()
 
+RenderBoxEnabled:
+  type: bool
+  status: internal
+  humanReadableName: "RenderBox Rendering"
+  humanReadableDescription: "Use the SwiftUI RenderBox renderer"
+  defaultValue:
+     WebKitLegacy:
+       default: false
+     WebKit:
+       default: false
+     WebCore:
+       default: false
+
 ReplayCGDisplayListsIntoBackingStore:
   type: bool
   status: internal
