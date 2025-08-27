@@ -118,8 +118,19 @@ void ImageBufferSet::prepareBufferForDisplay(const FloatRect& layerBounds, const
             WebCore::Region copyRegion(enclosingCopyRect);
             copyRegion.subtract(dirtyRegion);
             copyRect = intersection(copyRegion.bounds(), layerBounds);
+
+#if USE(RENDERBOX)
+            if (!copyRect.isEmpty()) {
+                auto* backSurface = backBuffer->surface();
+                auto* frontSurface = frontBuffer->surface();
+
+                if (backSurface && frontSurface)
+                    frontSurface->copyFromSurface(*backSurface, { });
+            }
+#else
             if (!copyRect.isEmpty())
-                frontBuffer->context().drawImageBuffer(*backBuffer, copyRect, copyRect, { WebCore::CompositeOperator::Copy });
+                frontBuffer->context().drawImageBuffer(*backBuffer, copyRect, copyRect, { WebCore::CompositeOperator::Copy }); // FIXME: This is this image copy.
+#endif
         }
     }
 

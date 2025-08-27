@@ -88,7 +88,7 @@ std::unique_ptr<IOSurface> IOSurface::create(IOSurfacePool* pool, IntSize size, 
 {
     ASSERT(ProcessCapabilities::canUseAcceleratedBuffers());
 
-    if (pool) {
+    if (false && pool) {
         if (auto cachedSurface = pool->takeSurface(size, colorSpace, pixelFormat, useLosslessCompression)) {
             LOG_WITH_STREAM(IOSurface, stream << "IOSurface::create took from pool: " << *cachedSurface);
             if (cachedSurface->name() != name) {
@@ -707,6 +707,35 @@ bool IOSurface::isInUse() const
     return IOSurfaceIsInUse(m_surface.get());
 }
 
+void IOSurface::copyFromSurface(IOSurface& sourceSurface, const FloatRect&)
+{
+#if HAVE(IOSURFACE_ACCELERATOR)
+    static IOSurfaceAcceleratorRef accelerator;
+    if (!accelerator) {
+        IOSurfaceAcceleratorCreate(nullptr, nullptr, &accelerator);
+
+        if (!accelerator)
+            return;
+
+        auto runLoopSource = IOSurfaceAcceleratorGetRunLoopSource(accelerator);
+        CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, kCFRunLoopDefaultMode);
+    }
+
+    if (sourceSurface.pixelFormat() != pixelFormat()) {
+        WTFLogAlways("IOSurface::copyFromSurface - mismatched pixel formats");
+        return;
+    }
+
+    NSDictionary *options = @{ (id)kIOSurfaceAcceleratorUnwireSurfaceKey : @YES };
+
+    // FIXME: Do this via RenderBox so it doesn't have to be sync.
+    IOReturn ret = IOSurfaceAcceleratorTransformSurface(accelerator, sourceSurface.surface(), surface(), (CFDictionaryRef)options, nullptr, nullptr, nullptr, nullptr);
+    ASSERT_UNUSED(ret, ret == kIOReturnSuccess);
+#else
+    UNUSED_PARAM(sourceSurface);
+#endif
+}
+
 #if HAVE(IOSURFACE_ACCELERATOR)
 
 bool IOSurface::allowConversionFromFormatToFormat(Format sourceFormat, Format destFormat)
@@ -720,6 +749,8 @@ bool IOSurface::allowConversionFromFormatToFormat(Format sourceFormat, Format de
         return false;
 #endif
 
+    UNUSED_PARAM(sourceFormat);
+    UNUSED_PARAM(destFormat);
     return true;
 }
 

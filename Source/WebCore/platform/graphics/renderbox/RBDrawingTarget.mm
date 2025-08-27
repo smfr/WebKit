@@ -111,7 +111,7 @@ RBDrawingTarget RBDrawingTarget::drawingTargetFromIOSurface(IOSurface& ioSurface
     [drawable setSize:CGSizeMake(width, height)];
     [drawable setScale:2]; // FIXME
 //    [drawable setPixelFormat:(OSType)pixelFormat];
-    [drawable setInitialState:RBDrawableInitialStateCleared];
+    [drawable setInitialState:RBDrawableInitialStateCleared]; // RBDrawableInitialStatePreserved
     [drawable setTexture:metalTexture.get()];
 
     return RBDrawingTarget(WTFMove(drawable));

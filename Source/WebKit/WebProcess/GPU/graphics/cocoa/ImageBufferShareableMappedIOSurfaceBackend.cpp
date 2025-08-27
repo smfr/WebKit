@@ -53,6 +53,7 @@ std::unique_ptr<ImageBufferShareableMappedIOSurfaceBackend> ImageBufferShareable
     if (creationContext.resourceOwner)
         surface->setOwnershipIdentity(creationContext.resourceOwner);
 
+    // FIXME: RB
     RetainPtr<CGContextRef> cgContext = surface->createPlatformContext();
     if (!cgContext)
         return nullptr;

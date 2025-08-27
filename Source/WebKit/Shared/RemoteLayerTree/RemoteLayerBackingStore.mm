@@ -343,6 +343,10 @@ bool RemoteLayerBackingStore::supportsPartialRepaint() const
     auto checkedArea = ImageBuffer::calculateBackendSize(m_parameters.size, m_parameters.scale).area<RecordOverflow>();
     if (!checkedArea.hasOverflowed() && checkedArea <= maxSmallLayerBackingArea)
         return false;
+
+#if USE(RENDERBOX)
+    return false;
+#endif
     return true;
 }
 

@@ -204,8 +204,13 @@ CGContextRef GraphicsContextRB::ensureContext()
     if (m_currentContext)
         return m_currentContext.get();
 
-    if (!m_displayList)
+    if (!m_displayList) {
         m_displayList = adoptNS([[RBDisplayList alloc] init]);
+
+        auto size = [m_drawable size];
+        [m_displayList translateByX:0 Y:size.height];
+        [m_displayList scaleByX:1 Y:-1];
+    }
 
     if (!m_currentContext)
         m_currentContext = [m_displayList beginCGContextWithAlpha:1];
