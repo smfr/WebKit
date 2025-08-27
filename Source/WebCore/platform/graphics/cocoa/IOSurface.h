@@ -243,6 +243,8 @@ public:
 
     RetainPtr<CGContextRef> createCompatibleBitmap(unsigned width, unsigned height);
 
+    RetainPtr<id> metalTexture(); // Really id<MTLTexture>
+
 private:
     IOSurface(IntSize, const DestinationColorSpace&, Name, Format, UseLosslessCompression, bool& success);
     IOSurface(IOSurfaceRef, std::optional<DestinationColorSpace>&&);
@@ -252,6 +254,8 @@ private:
     std::optional<DestinationColorSpace> surfaceColorSpace() const;
 
     void setName(Name name) { m_name = name; }
+
+    void clearMetalTexture();
 
     struct BitmapConfiguration {
         CGBitmapInfo bitmapInfo;
@@ -271,6 +275,7 @@ private:
     ProcessIdentity m_resourceOwner;
 
     RetainPtr<IOSurfaceRef> m_surface;
+    RetainPtr<id> m_texture; // Really id<MTLTexture>.
 
     static std::optional<IntSize> s_maximumSize;
 

@@ -38,81 +38,30 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(RBDrawingTarget);
 
-static OSType pixelFormatToUncompressedPixelFormat(OSType format)
-{
-    switch (format) {
-    case kCVPixelFormatType_Lossless_32BGRA: return kCVPixelFormatType_32BGRA;
-    case kCVPixelFormatType_AGX_30RGBLEPackedWideGamut: return kCVPixelFormatType_30RGBLEPackedWideGamut;
-    case kCVPixelFormatType_AGX_30RGBLE_8A_BiPlanar: return kCVPixelFormatType_30RGBLE_8A_BiPlanar;
-    case kCVPixelFormatType_Lossless_64RGBAHalf: return kCVPixelFormatType_64RGBAHalf;
-    };
-
-    return format;
-}
-
-static MTLPixelFormat pixelFormatToTextureFormat(OSType format)
-{
-    switch (pixelFormatToUncompressedPixelFormat(format)) {
-    case kCVPixelFormatType_32BGRA: // 'BGRA'
-        return MTLPixelFormatBGRA8Unorm;
-    case kCVPixelFormatType_30RGBLEPackedWideGamut: // 'w30r'
-        return MTLPixelFormatBGR10_XR;
-    case kCVPixelFormatType_30RGBLE_8A_BiPlanar: // 'b3a8'
-        return (MTLPixelFormat)MTLPixelFormatRGB10A8_2P_XR10;
-    case kCVPixelFormatType_64RGBAHalf: // 'RGhA'
-        return MTLPixelFormatRGBA16Float;
-    default:
-        ASSERT_NOT_REACHED();
-    };
-
-    return MTLPixelFormatBGRA8Unorm;
-}
-
 RBDrawingTarget RBDrawingTarget::drawingTargetFromIOSurface(IOSurface& ioSurface)
 {
-    // FIXME: Get the appropriate device (for Intel).
-    RetainPtr metalDevice = adoptNS(MTLCreateSystemDefaultDevice());
-
-    RetainPtr surface = ioSurface.surface();
-
-    size_t width = IOSurfaceGetWidth(surface.get());
-    size_t height = IOSurfaceGetHeight(surface.get());
-    OSType pixelFormat = IOSurfaceGetPixelFormat(surface.get());
-
-    // Map IOSurface pixel format to Metal pixel format
-    auto metalPixelFormat = pixelFormatToTextureFormat(pixelFormat);
-
-    // Create Metal texture descriptor
-    RetainPtr textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:metalPixelFormat
-                                                                                                 width:width
-                                                                                                height:height
-                                                                                             mipmapped:NO];
-    [textureDescriptor setUsage:MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite | MTLTextureUsageRenderTarget];
-    [textureDescriptor setStorageMode:MTLStorageModeShared];
-
-    // Create the Metal texture from the IOSurface
-    RetainPtr metalTexture = adoptNS([metalDevice.get() newTextureWithDescriptor:textureDescriptor.get()
-                                                                    iosurface:surface.get()
-                                                                        plane:0]);
-    if (!metalTexture) {
+    RetainPtr texture = ioSurface.metalTexture();
+    if (!texture) {
         WTFLogAlways("Failed to create Metal texture from IOSurface");
-        return RBDrawingTarget();
     }
 
+    auto size = ioSurface.size();
     // FIXME: Probably need to soft-link RenderBox.
+    // FIXME: Don't fetch the device again.
+    RetainPtr metalDevice = adoptNS(MTLCreateSystemDefaultDevice());
     RetainPtr device = [RBDevice sharedDevice:metalDevice.get()];
     RetainPtr drawable = adoptNS([[RBDrawable alloc] initWithDevice:device.get()]);
 
     if (!drawable) {
-        NSLog(@"Failed to create RBDrawable from Metal texture");
+        WTFLogAlways("Failed to create RBDrawable from Metal texture");
         return RBDrawingTarget();
     }
 
-    [drawable setSize:CGSizeMake(width, height)];
+    [drawable setSize:CGSizeMake(size.width(), size.height())];
     [drawable setScale:2]; // FIXME
 //    [drawable setPixelFormat:(OSType)pixelFormat];
     [drawable setInitialState:RBDrawableInitialStateCleared]; // RBDrawableInitialStatePreserved
-    [drawable setTexture:metalTexture.get()];
+    [drawable setTexture:texture.get()];
 
     return RBDrawingTarget(WTFMove(drawable));
 }

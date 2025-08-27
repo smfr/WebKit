@@ -49,6 +49,7 @@
 #import "CoreVideoSoftLink.h"
 #import <pal/cg/CoreGraphicsSoftLink.h>
 #import <pal/cocoa/QuartzCoreSoftLink.h>
+#import <pal/spi/cocoa/MetalSPI.h>
 
 namespace WebCore {
 
@@ -144,6 +145,7 @@ std::unique_ptr<IOSurface> IOSurface::createFromImage(IOSurfacePool* pool, CGIma
 
 void IOSurface::moveToPool(std::unique_ptr<IOSurface>&& surface, IOSurfacePool* pool)
 {
+    surface->clearMetalTexture();
     if (pool)
         pool->addSurface(WTFMove(surface));
 }
@@ -878,6 +880,73 @@ std::optional<DestinationColorSpace> IOSurface::surfaceColorSpace() const
         return { };
     
     return DestinationColorSpace { colorSpaceCF };
+}
+
+static OSType pixelFormatToUncompressedPixelFormat(OSType format)
+{
+    switch (format) {
+    case kCVPixelFormatType_Lossless_32BGRA: return kCVPixelFormatType_32BGRA;
+    case kCVPixelFormatType_AGX_30RGBLEPackedWideGamut: return kCVPixelFormatType_30RGBLEPackedWideGamut;
+    case kCVPixelFormatType_AGX_30RGBLE_8A_BiPlanar: return kCVPixelFormatType_30RGBLE_8A_BiPlanar;
+    case kCVPixelFormatType_Lossless_64RGBAHalf: return kCVPixelFormatType_64RGBAHalf;
+    };
+
+    return format;
+}
+
+static MTLPixelFormat pixelFormatToTextureFormat(OSType format)
+{
+    switch (pixelFormatToUncompressedPixelFormat(format)) {
+    case kCVPixelFormatType_32BGRA: // 'BGRA'
+        return MTLPixelFormatBGRA8Unorm;
+    case kCVPixelFormatType_30RGBLEPackedWideGamut: // 'w30r'
+        return MTLPixelFormatBGR10_XR;
+    case kCVPixelFormatType_30RGBLE_8A_BiPlanar: // 'b3a8'
+        return (MTLPixelFormat)MTLPixelFormatRGB10A8_2P_XR10;
+    case kCVPixelFormatType_64RGBAHalf: // 'RGhA'
+        return MTLPixelFormatRGBA16Float;
+    default:
+        ASSERT_NOT_REACHED();
+    };
+
+    return MTLPixelFormatBGRA8Unorm;
+}
+
+RetainPtr<id> IOSurface::metalTexture()
+{
+    if (m_texture)
+        return m_texture;
+
+    // FIXME: Get the appropriate device (for Intel).
+    RetainPtr metalDevice = adoptNS(MTLCreateSystemDefaultDevice());
+
+    size_t width = IOSurfaceGetWidth(m_surface.get());
+    size_t height = IOSurfaceGetHeight(m_surface.get());
+    OSType pixelFormat = IOSurfaceGetPixelFormat(m_surface.get());
+
+    // Map IOSurface pixel format to Metal pixel format
+    auto metalPixelFormat = pixelFormatToTextureFormat(pixelFormat);
+
+    // Create Metal texture descriptor
+    RetainPtr textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:metalPixelFormat
+                                                                                                 width:width
+                                                                                                height:height
+                                                                                             mipmapped:NO];
+    // FIXME: Check these.
+    [textureDescriptor setUsage:MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite | MTLTextureUsageRenderTarget];
+    [textureDescriptor setStorageMode:MTLStorageModeShared];
+
+    m_texture = adoptNS([metalDevice.get() newTextureWithDescriptor:textureDescriptor.get()
+                                                                    iosurface:m_surface.get()
+                                                                        plane:0]);
+
+    return m_texture;
+}
+
+
+void IOSurface::clearMetalTexture()
+{
+    m_texture = nil;
 }
 
 IOSurface::Name IOSurface::nameForRenderingPurpose(RenderingPurpose purpose)
