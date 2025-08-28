@@ -42,6 +42,12 @@ public:
 
     ~RBDrawingTarget();
 
+    float deviceScaleFactor() const { return m_deviceScaleFactor; }
+    void setDeviceScaleFactor(float scale) { m_deviceScaleFactor = scale; }
+
+    const AffineTransform& baseTransform() const { return m_baseTransform; }
+    void setBaseTransform(AffineTransform&& transform) { m_baseTransform = WTFMove(transform); }
+
     bool isValid() const { return !!m_drawable; }
 
     RetainPtr<RBDrawable> takeDrawable();
@@ -50,6 +56,8 @@ private:
     explicit RBDrawingTarget(RetainPtr<RBDrawable>&& drawable = nil);
 
     RetainPtr<RBDrawable> m_drawable;
+    AffineTransform m_baseTransform;
+    float m_deviceScaleFactor { 1 };
 };
 
 } // namespace WebCore

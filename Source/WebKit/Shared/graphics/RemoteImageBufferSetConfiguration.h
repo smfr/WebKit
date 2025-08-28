@@ -47,6 +47,7 @@ struct RemoteImageBufferSetConfiguration {
     WebCore::ImageBufferFormat bufferFormat { WebCore::ImageBufferPixelFormat::BGRA8, WebCore::UseLosslessCompression::No };
     WebCore::RenderingMode renderingMode { WebCore::RenderingMode::Unaccelerated };
     WebCore::RenderingPurpose renderingPurpose { WebCore::RenderingPurpose::Unspecified };
+    WebCore::GraphicsRenderer renderer { WebCore::GraphicsRenderer::CoreGraphics };
 
 #if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
     WebCore::IncludeDynamicContentScalingDisplayList includeDisplayList { WebCore::IncludeDynamicContentScalingDisplayList::No };

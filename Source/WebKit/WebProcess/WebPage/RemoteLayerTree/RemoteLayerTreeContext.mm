@@ -103,6 +103,11 @@ UseLosslessCompression RemoteLayerTreeContext::useIOSurfaceLosslessCompression()
     return m_webPage->isIOSurfaceLosslessCompressionEnabled() ? UseLosslessCompression::Yes : UseLosslessCompression::No;
 }
 
+GraphicsRenderer RemoteLayerTreeContext::graphicsRenderer() const
+{
+    return m_webPage->isRenderBoxEnabled() ? GraphicsRenderer::RenderBox : GraphicsRenderer::CoreGraphics;
+}
+
 #if PLATFORM(IOS_FAMILY)
 bool RemoteLayerTreeContext::canShowWhileLocked() const
 {

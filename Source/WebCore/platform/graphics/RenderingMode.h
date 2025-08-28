@@ -49,6 +49,11 @@ enum class RenderingMode : uint8_t {
     DisplayList,
 };
 
+enum class GraphicsRenderer : uint8_t {
+    CoreGraphics,
+    RenderBox,
+};
+
 enum class RenderingMethod : bool { Local };
 
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, RenderingPurpose);

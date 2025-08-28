@@ -32,6 +32,7 @@ header: "RemoteImageBufferSetConfiguration.h"
     WebCore::ImageBufferFormat bufferFormat;
     WebCore::RenderingMode renderingMode;
     WebCore::RenderingPurpose renderingPurpose;
+    WebCore::GraphicsRenderer renderer;
 
 #if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
     WebCore::IncludeDynamicContentScalingDisplayList includeDisplayList;

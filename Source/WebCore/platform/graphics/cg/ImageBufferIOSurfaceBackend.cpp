@@ -117,13 +117,17 @@ ImageBufferIOSurfaceBackend::~ImageBufferIOSurfaceBackend()
 GraphicsContext& ImageBufferIOSurfaceBackend::context()
 {
     if (!m_context) {
-#if USE(RENDERBOX)
-        auto drawingTarget = RBDrawingTarget::drawingTargetFromIOSurface(*m_surface);
-        m_context = makeUnique<GraphicsContextRB>(WTFMove(drawingTarget));
-#else
-        m_context = makeUnique<GraphicsContextCG>(ensurePlatformContext());
-#endif
-        applyBaseTransform(*m_context);
+        if (m_parameters.renderer == GraphicsRenderer::RenderBox) {
+            auto drawingTarget = RBDrawingTarget::drawingTargetFromIOSurface(*m_surface);
+
+            drawingTarget.setDeviceScaleFactor(m_parameters.resolutionScale);
+            drawingTarget.setBaseTransform(calculateBaseTransform(m_parameters));
+
+            m_context = makeUnique<GraphicsContextRB>(WTFMove(drawingTarget));
+        } else {
+            m_context = makeUnique<GraphicsContextCG>(ensurePlatformContext());
+            applyBaseTransform(*m_context);
+        }
     }
     return *m_context;
 }
@@ -148,6 +152,10 @@ bool ImageBufferIOSurfaceBackend::flushContextDraws()
     bool contextNeedsFlush = false;
     if (auto* contextCG = dynamicDowncast<GraphicsContextCG>(m_context.get()))
         contextNeedsFlush = contextCG->consumeHasDrawn();
+    else if (auto* contextRB = dynamicDowncast<GraphicsContextRB>(m_context.get()))
+        contextNeedsFlush = contextRB->consumeHasDrawn();
+
+    WTF_ALWAYS_LOG("ImageBufferIOSurfaceBackend::flushContextDraws - contextNeedsFlush " << contextNeedsFlush);
 
     if (!contextNeedsFlush && !m_needsFirstFlush)
         return false;

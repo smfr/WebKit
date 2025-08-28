@@ -7747,6 +7747,11 @@ bool WebPage::isIOSurfaceLosslessCompressionEnabled() const
     return m_page->settings().iOSurfaceLosslessCompressionEnabled();
 }
 
+bool WebPage::isRenderBoxEnabled() const
+{
+    return m_page->settings().renderBoxEnabled();
+}
+
 bool WebPage::isSmartInsertDeleteEnabled()
 {
     return m_page->settings().smartInsertDeleteEnabled();

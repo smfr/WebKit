@@ -173,6 +173,8 @@ static void drawPathWithCGContext(CGContextRef context, CGPathDrawingMode drawin
 GraphicsContextRB::GraphicsContextRB(RBDrawingTarget&& drawingTarget, CGContextSource source, std::optional<RenderingMode> knownRenderingMode)
     : GraphicsContext(GraphicsContext::IsDeferred::Yes, GraphicsContextState::basicChangeFlags, InterpolationQuality::Default)
     , m_drawable(drawingTarget.takeDrawable())
+    , m_deviceScaleFactor(drawingTarget.deviceScaleFactor())
+    , m_baseTransform(drawingTarget.baseTransform())
     , m_renderingMode(knownRenderingMode.value_or(RenderingMode::Accelerated))
     , m_isLayerCGContext(source == GraphicsContextRB::CGContextFromCALayer)
 {
@@ -205,11 +207,12 @@ CGContextRef GraphicsContextRB::ensureContext()
         return m_currentContext.get();
 
     if (!m_displayList) {
+        WTF_ALWAYS_LOG("GraphicsContextRB::ensureContext() - drawable " << m_drawable.get() << " making new RBDisplayList");
         m_displayList = adoptNS([[RBDisplayList alloc] init]);
 
-        auto size = [m_drawable size];
-        [m_displayList translateByX:0 Y:size.height];
-        [m_displayList scaleByX:1 Y:-1];
+        // Because we start with a new display list every time, we have to apply the initial context state here instead of at context creation time.
+        applyDeviceScaleFactor(m_deviceScaleFactor);
+        setCTM(m_baseTransform);
     }
 
     if (!m_currentContext)
@@ -231,12 +234,14 @@ CGContextRef GraphicsContextRB::contextForState() const
 
 void GraphicsContextRB::flush()
 {
+    WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " dispay list " << [m_displayList debugDescription]);
     if (m_currentContext) {
         [m_displayList endCGContext];
         m_currentContext = nil;
     }
 
     [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsSynchronize];
+    [m_drawable finish]; // FIXME: Do async.
     m_displayList = nil;
 }
 
@@ -852,6 +857,8 @@ void GraphicsContextRB::fillRect(const FloatRect& rect, RequiresClipToRect requi
     }
 
     CGContextFillRect(context, rect);
+
+    WTF_ALWAYS_LOG("GraphicsContextRB::fillRect " << rect << " drawable " << m_drawable.get());
 }
 
 void GraphicsContextRB::fillRect(const FloatRect& rect, Gradient& gradient, const AffineTransform& gradientSpaceTransform, RequiresClipToRect requiresClipToRect)
@@ -1557,6 +1564,7 @@ RenderingMode GraphicsContextRB::renderingMode() const
 
 void GraphicsContextRB::applyDeviceScaleFactor(float deviceScaleFactor)
 {
+    WTF_ALWAYS_LOG("GraphicsContextRB::applyDeviceScaleFactor " << deviceScaleFactor);
     GraphicsContext::applyDeviceScaleFactor(deviceScaleFactor);
 
     // CoreGraphics expects the base CTM of a HiDPI context to have the scale factor applied to it.

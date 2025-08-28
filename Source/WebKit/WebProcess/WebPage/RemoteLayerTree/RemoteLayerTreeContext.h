@@ -80,6 +80,7 @@ public:
     std::optional<DrawingAreaIdentifier> drawingAreaIdentifier() const;
 
     WebCore::UseLosslessCompression useIOSurfaceLosslessCompression() const;
+    WebCore::GraphicsRenderer graphicsRenderer() const;
 
     void buildTransaction(RemoteLayerTreeTransaction&, WebCore::PlatformCALayer& rootLayer, WebCore::FrameIdentifier);
 

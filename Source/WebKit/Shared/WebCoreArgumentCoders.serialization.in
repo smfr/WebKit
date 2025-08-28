@@ -1855,6 +1855,11 @@ enum class WebCore::ContentsFormat : uint8_t {
 #endif
 };
 
+enum class WebCore::GraphicsRenderer : uint8_t {
+    CoreGraphics,
+    RenderBox
+};
+
 header: <WebCore/PlatformDynamicRangeLimit.h>
 [CustomHeader, AdditionalEncoder=StreamConnectionEncoder] class WebCore::PlatformDynamicRangeLimit {
     float m_value;

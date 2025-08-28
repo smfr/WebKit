@@ -177,11 +177,14 @@ RefPtr<SharedBuffer> ImageBufferBackend::sinkIntoPDFDocument()
 AffineTransform ImageBufferBackend::calculateBaseTransform(const Parameters& parameters)
 {
     AffineTransform baseTransform;
+
 #if USE(CG)
-    // CoreGraphics origin is at bottom left corner. GraphicsContext origin is at top left corner. Flip the drawing with GraphicsContext base
-    // transform.
-    baseTransform.scale(1, -1);
-    baseTransform.translate(0, -parameters.backendSize.height());
+    if (parameters.renderer == GraphicsRenderer::CoreGraphics) {
+        // CoreGraphics origin is at bottom left corner. GraphicsContext origin is at top left corner. Flip the drawing with GraphicsContext base
+        // transform.
+        baseTransform.scale(1, -1);
+        baseTransform.translate(0, -parameters.backendSize.height());
+    }
 #endif
     baseTransform.scale(parameters.resolutionScale);
     return baseTransform;

@@ -1303,6 +1303,7 @@ public:
     bool isStoppingLoadingDueToProcessSwap() const { return m_isStoppingLoadingDueToProcessSwap; }
 
     bool isIOSurfaceLosslessCompressionEnabled() const;
+    bool isRenderBoxEnabled() const;
 
     bool isSmartInsertDeleteEnabled();
     void setSmartInsertDeleteEnabled(bool);

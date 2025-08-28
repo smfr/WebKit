@@ -58,10 +58,12 @@ RBDrawingTarget RBDrawingTarget::drawingTargetFromIOSurface(IOSurface& ioSurface
     }
 
     [drawable setSize:CGSizeMake(size.width(), size.height())];
-    [drawable setScale:2]; // FIXME
+//    [drawable setScale:2]; // FIXME
 //    [drawable setPixelFormat:(OSType)pixelFormat];
     [drawable setInitialState:RBDrawableInitialStateCleared]; // RBDrawableInitialStatePreserved
     [drawable setTexture:texture.get()];
+
+    WTF_ALWAYS_LOG("RBDrawingTarget::drawingTargetFromIOSurface - drawable " << drawable.get() << " from texture " << (void*)texture.get() << " from IOSurface " << ioSurface.surfaceID());
 
     return RBDrawingTarget(WTFMove(drawable));
 }

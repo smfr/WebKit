@@ -96,6 +96,7 @@ public:
         WebCore::FloatSize size;
         WebCore::DestinationColorSpace colorSpace { WebCore::DestinationColorSpace::SRGB() };
         WebCore::ContentsFormat contentsFormat { WebCore::ContentsFormat::RGBA8 };
+        WebCore::GraphicsRenderer renderer { WebCore::GraphicsRenderer::CoreGraphics };
         float scale { 1.0f };
         bool isOpaque { false };
 

@@ -174,6 +174,9 @@ private:
     RetainPtr<RBDisplayList> m_displayList;
     RetainPtr<CGContextRef> m_currentContext;
 
+    float m_deviceScaleFactor { 1 };
+    AffineTransform m_baseTransform;
+
     mutable std::optional<DestinationColorSpace> m_colorSpace;
 #if HAVE(SUPPORT_HDR_DISPLAY)
     std::optional<float> m_maxEDRHeadroom;
