@@ -63,13 +63,14 @@ RBDrawingTarget RBDrawingTarget::drawingTargetFromIOSurface(IOSurface& ioSurface
     [drawable setInitialState:RBDrawableInitialStateCleared]; // RBDrawableInitialStatePreserved
     [drawable setTexture:texture.get()];
 
-    WTF_ALWAYS_LOG("RBDrawingTarget::drawingTargetFromIOSurface - drawable " << drawable.get() << " from texture " << (void*)texture.get() << " from IOSurface " << ioSurface.surfaceID());
+//    WTF_ALWAYS_LOG("RBDrawingTarget::drawingTargetFromIOSurface - drawable " << drawable.get() << " from texture " << (void*)texture.get() << " from IOSurface " << ioSurface.surfaceID());
 
-    return RBDrawingTarget(WTFMove(drawable));
+    return RBDrawingTarget(WTFMove(drawable), size);
 }
 
-RBDrawingTarget::RBDrawingTarget(RetainPtr<RBDrawable>&& drawable)
+RBDrawingTarget::RBDrawingTarget(RetainPtr<RBDrawable>&& drawable, FloatSize size)
     : m_drawable(WTFMove(drawable))
+    , m_size(size)
 {
 }
 

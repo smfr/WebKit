@@ -56,16 +56,18 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(GraphicsContextRB);
 
+static RBColor RBColorFromColor(const Color& color)
+{
+    auto [red, green, blue, alpha] = color.toResolvedColorComponentsInColorSpace(WebCore::ColorSpace::SRGB); // FIXME: Colorspace
+    return RBColor { red, green, blue, alpha };
+}
+
 static void setCGFillColor(CGContextRef context, const Color& color, const DestinationColorSpace& colorSpace)
 {
     CGContextSetFillColorWithColor(context, cachedSDRCGColorForColorspace(color, colorSpace).get());
 }
 
-inline CGAffineTransform getUserToBaseCTM(CGContextRef context)
-{
-    return CGAffineTransformConcat(CGContextGetCTM(context), CGAffineTransformInvert(CGContextGetBaseCTM(context)));
-}
-
+/*
 static CGTextDrawingMode cgTextDrawingMode(TextDrawingModeFlags mode)
 {
     bool fill = mode.contains(TextDrawingMode::Fill);
@@ -76,6 +78,7 @@ static CGTextDrawingMode cgTextDrawingMode(TextDrawingModeFlags mode)
         return kCGTextFill;
     return kCGTextStroke;
 }
+*/
 
 static CGBlendMode selectCGBlendMode(CompositeOperator compositeOperator, BlendMode blendMode)
 {
@@ -151,22 +154,6 @@ static CGBlendMode selectCGBlendMode(CompositeOperator compositeOperator, BlendM
     return kCGBlendModeNormal;
 }
 
-static void setCGBlendMode(CGContextRef context, CompositeOperator op, BlendMode blendMode)
-{
-    CGContextSetBlendMode(context, selectCGBlendMode(op, blendMode));
-}
-
-static void setCGContextPath(CGContextRef context, const Path& path)
-{
-    CGContextBeginPath(context);
-    addToCGContextPath(context, path);
-}
-
-static void drawPathWithCGContext(CGContextRef context, CGPathDrawingMode drawingMode, const Path& path)
-{
-    CGContextDrawPathDirect(context, drawingMode, path.platformPath(), nullptr);
-}
-
 // FIXME: GraphicsContext::IsDeferred::Yes
 // FIXME: InterpolationQuality::Default
 // FIXME: RenderingMode::Accelerated
@@ -182,16 +169,15 @@ GraphicsContextRB::GraphicsContextRB(RBDrawingTarget&& drawingTarget, CGContextS
         return;
 
     // Make sure the context starts in sync with our state.
-    didUpdateState(m_state);
+    auto initialState = GraphicsContextState { };
+    auto initialClip = FloatRect { { }, drawingTarget.size() };
+    auto initialCTM = m_baseTransform;
+
+    m_stateStack.append({ initialState, initialCTM, initialCTM.mapRect(initialClip) });
 }
 
 GraphicsContextRB::~GraphicsContextRB()
 {
-    if (m_currentContext) {
-        [m_displayList endCGContext];
-        m_currentContext = nil;
-    }
-
     m_displayList = nil;
     m_drawable = nil;
 }
@@ -201,48 +187,47 @@ bool GraphicsContextRB::hasPlatformContext() const
     return true;
 }
 
-CGContextRef GraphicsContextRB::ensureContext()
+CGContextRef GraphicsContextRB::platformContext() const
 {
-    if (m_currentContext)
-        return m_currentContext.get();
+    if (m_cgContext)
+        return m_cgContext.get();
 
+    WTFLogAlways("Trying to get platform context");
+    return nullptr;
+}
+
+RBDisplayList *GraphicsContextRB::ensureDisplayList()
+{
     if (!m_displayList) {
-        WTF_ALWAYS_LOG("GraphicsContextRB::ensureContext() - drawable " << m_drawable.get() << " making new RBDisplayList");
         m_displayList = adoptNS([[RBDisplayList alloc] init]);
+        m_itemCount = 0;
 
         // Because we start with a new display list every time, we have to apply the initial context state here instead of at context creation time.
-        applyDeviceScaleFactor(m_deviceScaleFactor);
-        setCTM(m_baseTransform);
+        //applyDeviceScaleFactor(m_deviceScaleFactor);
+        setCTM(m_baseTransform); // FIXME: Not sure what RB equivalent of "base CTM" is
     }
 
-    if (!m_currentContext)
-        m_currentContext = [m_displayList beginCGContextWithAlpha:1];
-
-    return m_currentContext.get();
-}
-
-CGContextRef GraphicsContextRB::contextForDraw()
-{
-    m_hasDrawn = true;
-    return ensureContext();
-}
-
-CGContextRef GraphicsContextRB::contextForState() const
-{
-    return const_cast<GraphicsContextRB*>(this)->ensureContext();
+    return m_displayList.get();
 }
 
 void GraphicsContextRB::flush()
 {
-    WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " dispay list " << [m_displayList debugDescription]);
-    if (m_currentContext) {
-        [m_displayList endCGContext];
-        m_currentContext = nil;
-    }
+    //WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " dispay list " << [m_displayList debugDescription]);
 
     [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsSynchronize];
     [m_drawable finish]; // FIXME: Do async.
     m_displayList = nil;
+    m_itemCount = 0;
+}
+
+void GraphicsContextRB::didDrawItem()
+{
+    m_hasDrawn = true;
+    ++m_itemCount;
+    const unsigned flushLimit = 100;
+    if (m_itemCount >= flushLimit) {
+        // Do partial draws.
+    }
 }
 
 const DestinationColorSpace& GraphicsContextRB::colorSpace() const
@@ -250,26 +235,16 @@ const DestinationColorSpace& GraphicsContextRB::colorSpace() const
     if (m_colorSpace)
         return *m_colorSpace;
 
-    auto context = platformContext();
-    RetainPtr<CGColorSpaceRef> colorSpace;
-
-    // FIXME: Need to handle kCGContextTypePDF.
-    if (CGContextGetType(context) == kCGContextTypeIOSurface)
-        colorSpace = CGIOSurfaceContextGetColorSpace(context);
-    else if (CGContextGetType(context) == kCGContextTypeBitmap)
-        colorSpace = CGBitmapContextGetColorSpace(context);
-    else
-        colorSpace = adoptCF(CGContextCopyDeviceColorSpace(context));
-
-    // FIXME: Need to ASSERT(colorSpace). For now fall back to sRGB if colorSpace is nil.
-    m_colorSpace = colorSpace ? DestinationColorSpace(colorSpace) : DestinationColorSpace::SRGB();
+    // FIXME: Get from the IOSurface.
+    m_colorSpace = DestinationColorSpace::SRGB();
     return *m_colorSpace;
 }
 
 void GraphicsContextRB::save(GraphicsContextState::Purpose purpose)
 {
+    updateStateForSave(purpose);
     GraphicsContext::save(purpose);
-    CGContextSaveGState(contextForState());
+    [ensureDisplayList() save];
 }
 
 void GraphicsContextRB::restore(GraphicsContextState::Purpose purpose)
@@ -277,13 +252,23 @@ void GraphicsContextRB::restore(GraphicsContextState::Purpose purpose)
     if (!stackSize())
         return;
 
+    if (!updateStateForRestore(purpose))
+        return;
+
+    [ensureDisplayList() restore];
     GraphicsContext::restore(purpose);
-    CGContextRestoreGState(contextForState());
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
 void GraphicsContextRB::drawNativeImageInternal(NativeImage& nativeImage, const FloatRect& destRect, const FloatRect& srcRect, ImagePaintingOptions options)
 {
+    appendStateChangeItemIfNecessary();
+
+    UNUSED_PARAM(nativeImage);
+    UNUSED_PARAM(destRect);
+    UNUSED_PARAM(srcRect);
+    UNUSED_PARAM(options);
+/*
     auto image = nativeImage.platformImage();
     if (!image)
         return;
@@ -447,18 +432,7 @@ void GraphicsContextRB::drawNativeImageInternal(NativeImage& nativeImage, const 
     }
 
     LOG_WITH_STREAM(Images, stream << "GraphicsContextRB::drawNativeImageInternal " << image.get() << " size " << imageSize << " into " << destRect << " took " << (MonotonicTime::now() - startTime).milliseconds() << "ms");
-}
-
-static void drawPatternCallback(void* info, CGContextRef context)
-{
-    CGImageRef image = (CGImageRef)info;
-    auto rect = cgRoundToDevicePixels(CGContextGetUserSpaceToDeviceSpaceTransform(context), cgImageRect(image));
-    CGContextDrawImage(context, rect, image);
-}
-
-static void patternReleaseCallback(void* info)
-{
-    callOnMainThread([image = adoptCF(static_cast<CGImageRef>(info))] { });
+*/
 }
 
 void GraphicsContextRB::drawPattern(NativeImage& nativeImage, const FloatRect& destRect, const FloatRect& tileRect, const AffineTransform& patternTransform, const FloatPoint& phase, const FloatSize& spacing, ImagePaintingOptions options)
@@ -466,6 +440,16 @@ void GraphicsContextRB::drawPattern(NativeImage& nativeImage, const FloatRect& d
     if (!patternTransform.isInvertible())
         return;
 
+    appendStateChangeItemIfNecessary();
+
+    UNUSED_PARAM(nativeImage);
+    UNUSED_PARAM(destRect);
+    UNUSED_PARAM(tileRect);
+    UNUSED_PARAM(phase);
+    UNUSED_PARAM(spacing);
+    UNUSED_PARAM(options);
+
+/*
     auto image = nativeImage.platformImage();
     auto imageSize = nativeImage.size();
 
@@ -533,41 +517,50 @@ void GraphicsContextRB::drawPattern(NativeImage& nativeImage, const FloatRect& d
         CGContextSetFillColorWithColor(context, color.get());
         CGContextFillRect(context, CGContextGetClipBoundingBox(context)); // FIXME: we know the clip; we set it above.
     }
+*/
 }
 
 // Draws a filled rectangle with a stroked border.
 void GraphicsContextRB::drawRect(const FloatRect& rect, float borderThickness)
 {
+    appendStateChangeItemIfNecessary();
+
     // FIXME: this function does not handle patterns and gradients like drawPath does, it probably should.
     ASSERT(!rect.isEmpty());
 
-    CGContextRef context = platformContext();
+    auto fillColor = this->fillColor();
 
-    CGContextFillRect(context, rect);
+    fillRect(rect, fillColor);
 
     if (strokeStyle() != StrokeStyle::NoStroke) {
         // We do a fill of four rects to simulate the stroke of a border.
-        Color oldFillColor = fillColor();
-        if (oldFillColor != strokeColor())
-            setCGFillColor(context, strokeColor(), colorSpace());
-        CGRect rects[4] = {
+        FloatRect rects[4] = {
             FloatRect(rect.x(), rect.y(), rect.width(), borderThickness),
             FloatRect(rect.x(), rect.maxY() - borderThickness, rect.width(), borderThickness),
             FloatRect(rect.x(), rect.y() + borderThickness, borderThickness, rect.height() - 2 * borderThickness),
             FloatRect(rect.maxX() - borderThickness, rect.y() + borderThickness, borderThickness, rect.height() - 2 * borderThickness)
         };
-        CGContextFillRects(context, rects, 4);
-        if (oldFillColor != strokeColor())
-            setCGFillColor(context, oldFillColor, colorSpace());
+
+        auto strokeColor = this->strokeColor();
+        fillRect(rects[0], strokeColor);
+        fillRect(rects[1], strokeColor);
+        fillRect(rects[2], strokeColor);
+        fillRect(rects[3], strokeColor);
     }
 }
 
 // This is only used to draw borders.
 void GraphicsContextRB::drawLine(const FloatPoint& point1, const FloatPoint& point2)
 {
+    appendStateChangeItemIfNecessary();
+
     if (strokeStyle() == StrokeStyle::NoStroke)
         return;
 
+    UNUSED_PARAM(point1);
+    UNUSED_PARAM(point2);
+
+/*
     float thickness = strokeThickness();
     bool isVerticalLine = (point1.x() + thickness == point2.x());
     float strokeWidth = isVerticalLine ? point2.y() - point1.y() : point2.x() - point1.x();
@@ -621,10 +614,14 @@ void GraphicsContextRB::drawLine(const FloatPoint& point1, const FloatPoint& poi
     CGContextStrokePath(context);
     if (shouldAntialias())
         CGContextSetShouldAntialias(context, true);
+    didDrawItem();
+*/
 }
 
 void GraphicsContextRB::drawEllipse(const FloatRect& rect)
 {
+    appendStateChangeItemIfNecessary();
+
     Path path;
     path.addEllipseInRect(rect);
     drawPath(path);
@@ -632,6 +629,7 @@ void GraphicsContextRB::drawEllipse(const FloatRect& rect)
 
 void GraphicsContextRB::applyStrokePattern()
 {
+/*
     RefPtr strokePattern = this->strokePattern();
     if (!strokePattern)
         return;
@@ -648,10 +646,12 @@ void GraphicsContextRB::applyStrokePattern()
 
     const CGFloat patternAlpha = 1;
     CGContextSetStrokePattern(cgContext, platformPattern.get(), &patternAlpha);
+*/
 }
 
 void GraphicsContextRB::applyFillPattern()
 {
+/*
     RefPtr fillPattern = this->fillPattern();
     if (!fillPattern)
         return;
@@ -668,6 +668,7 @@ void GraphicsContextRB::applyFillPattern()
 
     const CGFloat patternAlpha = 1;
     CGContextSetFillPattern(cgContext, platformPattern.get(), &patternAlpha);
+*/
 }
 
 static inline bool calculateDrawingMode(const GraphicsContext& context, CGPathDrawingMode& mode)
@@ -702,6 +703,12 @@ void GraphicsContextRB::drawPath(const Path& path)
     if (path.isEmpty())
         return;
 
+    appendStateChangeItemIfNecessary();
+
+    fillPath(path);
+    strokePath(path);
+
+/*
     CGContextRef context = platformContext();
 
     if (fillGradient() || strokeGradient()) {
@@ -718,8 +725,11 @@ void GraphicsContextRB::drawPath(const Path& path)
         applyStrokePattern();
 
     CGPathDrawingMode drawingMode;
-    if (calculateDrawingMode(*this, drawingMode))
+    if (calculateDrawingMode(*this, drawingMode)) {
         drawPathWithCGContext(context, drawingMode, path);
+        didDrawItem();
+    }
+*/
 }
 
 void GraphicsContextRB::fillPath(const Path& path)
@@ -727,6 +737,7 @@ void GraphicsContextRB::fillPath(const Path& path)
     if (path.isEmpty())
         return;
 
+/*
     CGContextRef context = platformContext();
 
     if (RefPtr fillGradient = this->fillGradient()) {
@@ -761,7 +772,7 @@ void GraphicsContextRB::fillPath(const Path& path)
 
             fillGradient->paint(*this);
         }
-
+        didDrawItem();
         return;
     }
 
@@ -769,6 +780,45 @@ void GraphicsContextRB::fillPath(const Path& path)
         applyFillPattern();
 
     drawPathWithCGContext(context, fillRule() == WindRule::EvenOdd ? kCGPathEOFill : kCGPathFill, path);
+*/
+
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+    [shape setPath:path.platformPath()];
+    [shape setEOFill:fillRule() == WindRule::EvenOdd];
+
+    RetainPtr fill = adoptNS([[RBFill alloc] init]);
+
+    if (RefPtr fillGradient = this->fillGradient()) {
+        Vector<RBColor, 4> colors;
+        Vector<CGFloat, 4> locations;
+
+        colors.reserveInitialCapacity(fillGradient->stops().size());
+        locations.reserveInitialCapacity(fillGradient->stops().size());
+
+        for (const auto& stop : fillGradient->stops()) {
+            colors.append(RBColorFromColor(stop.color));
+            locations.append(stop.offset);
+        }
+
+        WTF::switchOn(fillGradient->data(),
+            [&] (const Gradient::LinearData& data) {
+                [fill setAxialGradientStartPoint:data.point0 endPoint:data.point1 stopCount:fillGradient->stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+            },
+            [&] (const Gradient::RadialData& data) {
+                [fill setRadialGradientStartCenter:data.point0 startRadius:data.startRadius endCenter:data.point1 endRadius:data.endRadius stopCount:fillGradient->stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+            },
+            [&] (const Gradient::ConicData& data) {
+                [fill setConicGradientCenter:data.point0 angle:data.angleRadians stopCount:fillGradient->stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+            }
+        );
+    } else {
+        [fill setColor:RBColorFromColor(fillColor())];
+    }
+
+    auto compositeMode = state().compositeMode();
+    auto blendMode = selectCGBlendMode(compositeMode.operation, compositeMode.blendMode);
+    [ensureDisplayList() drawShape:shape.get() fill:fill.get() alpha:1.0f blendMode:(RBBlendMode)blendMode];
+    didDrawItem();
 }
 
 void GraphicsContextRB::strokePath(const Path& path)
@@ -776,6 +826,9 @@ void GraphicsContextRB::strokePath(const Path& path)
     if (path.isEmpty())
         return;
 
+    UNUSED_PARAM(path);
+
+/*
     CGContextRef context = platformContext();
 
     if (RefPtr strokeGradient = this->strokeGradient()) {
@@ -817,6 +870,7 @@ void GraphicsContextRB::strokePath(const Path& path)
             CGContextConcatCTM(context, strokeGradientSpaceTransform());
             strokeGradient->paint(*this);
         }
+        didDrawItem();
         return;
     }
 
@@ -830,10 +884,25 @@ void GraphicsContextRB::strokePath(const Path& path)
     }
 
     drawPathWithCGContext(context, kCGPathStroke, path);
+    didDrawItem();
+*/
 }
 
 void GraphicsContextRB::fillRect(const FloatRect& rect, RequiresClipToRect requiresClipToRect)
 {
+    UNUSED_PARAM(requiresClipToRect);
+
+    if (RefPtr fillGradient = this->fillGradient()) {
+        fillRect(rect, *fillGradient, fillGradientSpaceTransform(), requiresClipToRect);
+        return;
+    }
+
+    if (fillPattern())
+        applyFillPattern();
+
+    fillRect(rect, fillColor());
+
+/*
     CGContextRef context = platformContext();
 
     if (RefPtr fillGradient = this->fillGradient()) {
@@ -857,12 +926,52 @@ void GraphicsContextRB::fillRect(const FloatRect& rect, RequiresClipToRect requi
     }
 
     CGContextFillRect(context, rect);
+*/
+    didDrawItem();
+}
 
-    WTF_ALWAYS_LOG("GraphicsContextRB::fillRect " << rect << " drawable " << m_drawable.get());
+void GraphicsContextRB::fillRect(const FloatRect& rect, Gradient& gradient)
+{
+    fillRect(rect, gradient, { }, RequiresClipToRect::Yes);
 }
 
 void GraphicsContextRB::fillRect(const FloatRect& rect, Gradient& gradient, const AffineTransform& gradientSpaceTransform, RequiresClipToRect requiresClipToRect)
 {
+    UNUSED_PARAM(gradientSpaceTransform);
+    UNUSED_PARAM(requiresClipToRect);
+
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+    [shape setRect:rect];
+
+    RetainPtr fill = adoptNS([[RBFill alloc] init]);
+    Vector<RBColor, 4> colors;
+    Vector<CGFloat, 4> locations;
+
+    colors.reserveInitialCapacity(gradient.stops().size());
+    locations.reserveInitialCapacity(gradient.stops().size());
+
+    for (const auto& stop : gradient.stops()) {
+        colors.append(RBColorFromColor(stop.color));
+        locations.append(stop.offset);
+    }
+
+    WTF::switchOn(gradient.data(),
+        [&] (const Gradient::LinearData& data) {
+            [fill setAxialGradientStartPoint:data.point0 endPoint:data.point1 stopCount:gradient.stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+        },
+        [&] (const Gradient::RadialData& data) {
+            [fill setRadialGradientStartCenter:data.point0 startRadius:data.startRadius endCenter:data.point1 endRadius:data.endRadius stopCount:gradient.stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+        },
+        [&] (const Gradient::ConicData& data) {
+            [fill setConicGradientCenter:data.point0 angle:data.angleRadians stopCount:gradient.stops().size() colors:colors.span().data() locations:locations.span().data() flags:0];
+        }
+    );
+
+    auto compositeMode = state().compositeMode();
+    auto blendMode = selectCGBlendMode(compositeMode.operation, compositeMode.blendMode);
+    [ensureDisplayList() drawShape:shape.get() fill:fill.get() alpha:1.0f blendMode:(RBBlendMode)blendMode];
+
+/*
     CGContextRef context = platformContext();
 
     CGContextStateSaver stateSaver(context);
@@ -887,10 +996,24 @@ void GraphicsContextRB::fillRect(const FloatRect& rect, Gradient& gradient, cons
         CGContextConcatCTM(context, gradientSpaceTransform);
         gradient.paint(*this);
     }
+*/
+    didDrawItem();
 }
 
 void GraphicsContextRB::fillRect(const FloatRect& rect, const Color& color)
 {
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+    [shape setRect:rect];
+
+    RetainPtr fill = adoptNS([[RBFill alloc] init]);
+    [fill setColor:RBColorFromColor(color)];
+
+    auto compositeMode = state().compositeMode();
+    auto blendMode = selectCGBlendMode(compositeMode.operation, compositeMode.blendMode);
+    [ensureDisplayList() drawShape:shape.get() fill:fill.get() alpha:1.0f blendMode:(RBBlendMode)blendMode];
+    didDrawItem();
+
+/*
     CGContextRef context = platformContext();
     Color oldFillColor = fillColor();
 
@@ -910,16 +1033,42 @@ void GraphicsContextRB::fillRect(const FloatRect& rect, const Color& color)
     }
 
     CGContextFillRect(context, rect);
+    didDrawItem();
 
     if (drawOwnShadow)
         stateSaver.restore();
 
     if (oldFillColor != color)
         setCGFillColor(context, oldFillColor, colorSpace());
+*/
 }
 
 void GraphicsContextRB::fillRoundedRectImpl(const FloatRoundedRect& rect, const Color& color)
 {
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+
+    if (rect.radii().hasEvenCorners()) {
+        if (rect.radii().isUniformCornerRadius())
+            [shape setRoundedRect:rect.rect() cornerRadius:rect.radii().topLeft().width() cornerStyle:RBRoundedCornerStyleCircular];
+        else
+            [shape setRoundedRect:rect.rect() cornerSize:rect.radii().topLeft() cornerStyle:RBRoundedCornerStyleCircular];
+    } else {
+        // FIXME: RB can't do uneven corner rects.
+        Path rectPath;
+        rectPath.addRoundedRect(rect);
+
+        [shape setPath:rectPath.platformPath()];
+    }
+
+    RetainPtr fill = adoptNS([[RBFill alloc] init]);
+    [fill setColor:RBColorFromColor(color)];
+
+    auto compositeMode = state().compositeMode();
+    auto blendMode = selectCGBlendMode(compositeMode.operation, compositeMode.blendMode);
+    [ensureDisplayList() drawShape:shape.get() fill:fill.get() alpha:1.0f blendMode:(RBBlendMode)blendMode];
+    didDrawItem();
+
+/*
     CGContextRef context = platformContext();
     Color oldFillColor = fillColor();
 
@@ -943,9 +1092,10 @@ void GraphicsContextRB::fillRoundedRectImpl(const FloatRoundedRect& rect, const 
     bool equalWidths = (radii.topLeft().width() == radii.topRight().width() && radii.topRight().width() == radii.bottomLeft().width() && radii.bottomLeft().width() == radii.bottomRight().width());
     bool equalHeights = (radii.topLeft().height() == radii.bottomLeft().height() && radii.bottomLeft().height() == radii.topRight().height() && radii.topRight().height() == radii.bottomRight().height());
     bool hasCustomFill = fillGradient() || fillPattern();
-    if (!hasCustomFill && equalWidths && equalHeights && radii.topLeft().width() * 2 == r.width() && radii.topLeft().height() * 2 == r.height())
+    if (!hasCustomFill && equalWidths && equalHeights && radii.topLeft().width() * 2 == r.width() && radii.topLeft().height() * 2 == r.height()) {
         CGContextFillEllipseInRect(context, r);
-    else {
+        didDrawItem();
+    } else {
         Path path;
         path.addRoundedRect(rect);
         fillPath(path);
@@ -956,10 +1106,15 @@ void GraphicsContextRB::fillRoundedRectImpl(const FloatRoundedRect& rect, const 
 
     if (oldFillColor != color)
         setCGFillColor(context, oldFillColor, colorSpace());
+*/
 }
 
 void GraphicsContextRB::fillRectWithRoundedHole(const FloatRect& rect, const FloatRoundedRect& roundedHoleRect, const Color& color)
 {
+    UNUSED_PARAM(rect);
+    UNUSED_PARAM(roundedHoleRect);
+    UNUSED_PARAM(color);
+/*
     CGContextRef context = platformContext();
 
     Path path;
@@ -990,26 +1145,65 @@ void GraphicsContextRB::fillRectWithRoundedHole(const FloatRect& rect, const Flo
     }
 
     fillPath(path);
+    didDrawItem();
 
     if (drawOwnShadow)
         stateSaver.restore();
 
     setFillRule(oldFillRule);
     setFillColor(oldFillColor);
+*/
+}
+
+void GraphicsContextRB::drawGlyphs(const Font& font, std::span<const GlyphBufferGlyph> glyphs, std::span<const GlyphBufferAdvance> advances, const FloatPoint& point, FontSmoothingMode fontSmoothingMode)
+{
+    m_cgContext = [ensureDisplayList() beginCGContextWithAlpha:currentState().state.alpha()];
+
+    // FIXME: Set more state (antialiasing etc)
+    setCGFillColor(m_cgContext.get(), fillColor(), colorSpace());
+
+    FontCascade::drawGlyphs(*this, font, glyphs, advances, point, fontSmoothingMode);
+
+    [ensureDisplayList() endCGContext];
+    m_cgContext = nullptr;
+}
+
+void GraphicsContextRB::drawDecomposedGlyphs(const Font& font, const DecomposedGlyphs& decomposedGlyphs)
+{
+    m_cgContext = [ensureDisplayList() beginCGContextWithAlpha:currentState().state.alpha()];
+
+    // FIXME: Set more state (antialiasing etc)
+    setCGFillColor(m_cgContext.get(), fillColor(), colorSpace());
+
+    // Needs platform context.
+    FontCascade::drawGlyphs(*this, font, decomposedGlyphs.glyphs(), decomposedGlyphs.advances(), decomposedGlyphs.localAnchor(), decomposedGlyphs.fontSmoothingMode());
+
+    [ensureDisplayList() endCGContext];
+    m_cgContext = nullptr;
 }
 
 void GraphicsContextRB::resetClip()
 {
-    CGContextResetClip(platformContext());
+    updateStateForResetClip();
+
 }
 
 void GraphicsContextRB::clip(const FloatRect& rect)
 {
-    CGContextClipToRect(platformContext(), rect);
+    updateStateForClip(rect);
+
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+    [shape setRect:rect];
+
+    [ensureDisplayList() clipShape:shape.get() mode:RBClipModeNormal];
 }
 
 void GraphicsContextRB::clipOut(const FloatRect& rect)
 {
+    updateStateForClipOut(rect);
+
+
+/*
     // FIXME: Using CGRectInfinite is much faster than getting the clip bounding box. However, due
     // to <rdar://problem/12584492>, CGRectInfinite can't be used with an accelerated context that
     // has certain transforms that aren't just a translation or a scale. And due to <rdar://problem/14634453>
@@ -1021,34 +1215,40 @@ void GraphicsContextRB::clipOut(const FloatRect& rect)
     CGContextBeginPath(context);
     CGContextAddRects(context, rects, 2);
     CGContextEOClip(context);
+*/
 }
 
 void GraphicsContextRB::clipOut(const Path& path)
 {
+    updateStateForClipOut(path);
+/*
     CGContextRef context = platformContext();
     CGContextBeginPath(context);
     CGContextAddRect(context, CGContextGetClipBoundingBox(context));
     if (!path.isEmpty())
         addToCGContextPath(context, path);
     CGContextEOClip(context);
+*/
 }
 
+// Could override clipRoundedRect() for efficiency.
 void GraphicsContextRB::clipPath(const Path& path, WindRule clipRule)
 {
-    CGContextRef context = platformContext();
-    if (path.isEmpty())
-        CGContextClipToRect(context, CGRectZero);
-    else {
-        setCGContextPath(context, path);
-        if (clipRule == WindRule::EvenOdd)
-            CGContextEOClip(context);
-        else
-            CGContextClip(context);
-    }
+    updateStateForClipPath(path);
+
+    RetainPtr shape = adoptNS([[RBShape alloc] init]);
+    [shape setPath:path.platformPath()];
+    [shape setEOFill:clipRule == WindRule::EvenOdd];
+
+    [ensureDisplayList() clipShape:shape.get() mode:RBClipModeNormal];
 }
 
 void GraphicsContextRB::clipToImageBuffer(ImageBuffer& imageBuffer, const FloatRect& destRect)
 {
+    updateStateForClipToImageBuffer(destRect);
+
+    UNUSED_PARAM(imageBuffer);
+/*
     auto nativeImage = imageBuffer.createNativeImageReference();
     if (!nativeImage)
         return;
@@ -1061,45 +1261,49 @@ void GraphicsContextRB::clipToImageBuffer(ImageBuffer& imageBuffer, const FloatR
     CGContextClipToMask(context, { { }, destRect.size() }, nativeImage->platformImage().get());
     CGContextScaleCTM(context, 1, -1);
     CGContextTranslateCTM(context, -destRect.x(), -destRect.maxY());
+*/
 }
 
 IntRect GraphicsContextRB::clipBounds() const
 {
-    return enclosingIntRect(CGContextGetClipBoundingBox(platformContext()));
+    if (auto inverse = currentState().ctm.inverse())
+        return enclosingIntRect(inverse->mapRect(currentState().clipBounds));
+
+    // If the CTM is not invertible, return the original rect.
+    // This matches CGRectApplyInverseAffineTransform behavior.
+    return enclosingIntRect(currentState().clipBounds);
 }
 
 void GraphicsContextRB::beginTransparencyLayer(float opacity)
 {
-    GraphicsContext::beginTransparencyLayer(opacity);
+    updateStateForBeginTransparencyLayer(opacity);
 
-    save(GraphicsContextState::Purpose::TransparencyLayer);
-
-    CGContextRef context = platformContext();
-    CGContextSetAlpha(context, opacity);
-    CGContextBeginTransparencyLayer(context, 0);
+    [ensureDisplayList() beginLayer];
 
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
-void GraphicsContextRB::beginTransparencyLayer(CompositeOperator, BlendMode)
+void GraphicsContextRB::beginTransparencyLayer(CompositeOperator compositeOperator, BlendMode blendMode)
 {
-    // Passing state().alpha() to beginTransparencyLayer(opacity) will
-    // preserve the current global alpha.
-    beginTransparencyLayer(state().alpha());
+    updateStateForBeginTransparencyLayer(compositeOperator, blendMode);
+    [ensureDisplayList() beginLayer];
 }
 
 void GraphicsContextRB::endTransparencyLayer()
 {
-    GraphicsContext::endTransparencyLayer();
-
-    CGContextRef context = platformContext();
-    CGContextEndTransparencyLayer(context);
-
-    restore(GraphicsContextState::Purpose::TransparencyLayer);
+    if (updateStateForEndTransparencyLayer()) {
+        auto compositeMode = state().compositeMode();
+        auto blendMode = selectCGBlendMode(compositeMode.operation, compositeMode.blendMode); // Share code
+        [ensureDisplayList() drawLayerWithAlpha:currentState().state.alpha() blendMode:(RBBlendMode)blendMode];
+    }
 }
 
-void GraphicsContextRB::setCGShadow(const std::optional<GraphicsDropShadow>& shadow, bool shadowsIgnoreTransforms)
+void GraphicsContextRB::setShadowStyle(const std::optional<GraphicsDropShadow>& shadow, bool shadowsIgnoreTransforms)
 {
+    UNUSED_PARAM(shadow);
+    UNUSED_PARAM(shadowsIgnoreTransforms);
+
+/*
     if (!shadow || !shadow->color.isValid() || (shadow->offset.isZero() && !shadow->radius)) {
         clearCGShadow();
         return;
@@ -1135,15 +1339,16 @@ void GraphicsContextRB::setCGShadow(const std::optional<GraphicsDropShadow>& sha
 
     auto style = adoptCF(CGStyleCreateShadow2(CGSizeMake(xOffset, yOffset), blurRadius, cachedSDRCGColorForColorspace(shadow->color, colorSpace()).get()));
     CGContextSetStyle(context, style.get());
+
+*/
 }
 
-void GraphicsContextRB::clearCGShadow()
+void GraphicsContextRB::setGraphicsStyle(const std::optional<GraphicsStyle>& style, bool shadowsIgnoreTransforms)
 {
-    CGContextSetStyle(platformContext(), nullptr);
-}
+    UNUSED_PARAM(style);
+    UNUSED_PARAM(shadowsIgnoreTransforms);
 
-void GraphicsContextRB::setCGStyle(const std::optional<GraphicsStyle>& style, bool shadowsIgnoreTransforms)
-{
+/*
     auto context = platformContext();
 
     if (!style) {
@@ -1153,14 +1358,14 @@ void GraphicsContextRB::setCGStyle(const std::optional<GraphicsStyle>& style, bo
 
     WTF::switchOn(*style,
         [&] (const GraphicsDropShadow& dropShadow) {
-            setCGShadow(dropShadow, shadowsIgnoreTransforms);
+            setShadowStyle(dropShadow, shadowsIgnoreTransforms);
         },
         [&] (const GraphicsGaussianBlur& gaussianBlur) {
 #if HAVE(CGSTYLE_COLORMATRIX_BLUR)
             ASSERT(gaussianBlur.radius.width() == gaussianBlur.radius.height());
 
             CGGaussianBlurStyle gaussianBlurStyle = { 1, gaussianBlur.radius.width() };
-            auto style = adoptCF(CGStyleCreateGaussianBlur(&gaussianBlurStyle));
+            auto style = adoptCF(CGStyleCreateGaussianBlur(&gaussianBlurStyfle));
             CGContextSetStyle(context, style.get());
 #else
             ASSERT_NOT_REACHED();
@@ -1180,6 +1385,7 @@ void GraphicsContextRB::setCGStyle(const std::optional<GraphicsStyle>& style, bo
 #endif
         }
     );
+*/
 }
 
 void GraphicsContextRB::didUpdateState(GraphicsContextState& state)
@@ -1187,74 +1393,30 @@ void GraphicsContextRB::didUpdateState(GraphicsContextState& state)
     if (!state.changes())
         return;
 
-    auto context = platformContext();
-
-    for (auto change : state.changes()) {
-        switch (change) {
-        case GraphicsContextState::Change::FillBrush:
-            setCGFillColor(context, state.fillBrush().color(), colorSpace());
-            break;
-
-        case GraphicsContextState::Change::StrokeThickness:
-            CGContextSetLineWidth(context, std::max(state.strokeThickness(), 0.f));
-            break;
-
-        case GraphicsContextState::Change::StrokeBrush:
-            CGContextSetStrokeColorWithColor(context, cachedSDRCGColorForColorspace(state.strokeBrush().color(), colorSpace()).get());
-            break;
-
-        case GraphicsContextState::Change::CompositeMode:
-            setCGBlendMode(context, state.compositeMode().operation, state.compositeMode().blendMode);
-            break;
-
-        case GraphicsContextState::Change::DropShadow:
-            setCGShadow(state.dropShadow(), state.shadowsIgnoreTransforms());
-            break;
-
-        case GraphicsContextState::Change::Style:
-            setCGStyle(state.style(), state.shadowsIgnoreTransforms());
-            break;
-
-        case GraphicsContextState::Change::Alpha:
-            CGContextSetAlpha(context, state.alpha());
-            break;
-
-        case GraphicsContextState::Change::ImageInterpolationQuality:
-            CGContextSetInterpolationQuality(context, toCGInterpolationQuality(state.imageInterpolationQuality()));
-            break;
-
-        case GraphicsContextState::Change::TextDrawingMode:
-            CGContextSetTextDrawingMode(context, cgTextDrawingMode(state.textDrawingMode()));
-            break;
-
-        case GraphicsContextState::Change::ShouldAntialias:
-            CGContextSetShouldAntialias(context, state.shouldAntialias());
-            break;
-
-        case GraphicsContextState::Change::ShouldSmoothFonts:
-            CGContextSetShouldSmoothFonts(context, state.shouldSmoothFonts());
-            break;
-
-        default:
-            break;
-        }
-    }
-
+    currentState().state.mergeLastChanges(state, currentState().lastDrawingState);
     state.didApplyChanges();
 }
 
 void GraphicsContextRB::setMiterLimit(float limit)
 {
-    CGContextSetMiterLimit(platformContext(), limit);
+    UNUSED_PARAM(limit);
+    // CGContextSetMiterLimit(platformContext(), limit);
 }
 
 void GraphicsContextRB::clearRect(const FloatRect& r)
 {
-    CGContextClearRect(platformContext(), r);
+    // CGContextClearRect(platformContext(), r);
+
+    // FIXME: Should this use the Copy blend mode?
+    fillRect(r, Color::transparentBlack);
 }
 
 void GraphicsContextRB::strokeRect(const FloatRect& rect, float lineWidth)
 {
+    UNUSED_PARAM(rect);
+    UNUSED_PARAM(lineWidth);
+
+/*
     CGContextRef context = platformContext();
 
     if (RefPtr strokeGradient = this->strokeGradient()) {
@@ -1311,10 +1473,15 @@ void GraphicsContextRB::strokeRect(const FloatRect& rect, float lineWidth)
 
     CGContextAddRect(context, rect);
     CGContextStrokePath(context);
+*/
+    didDrawItem();
 }
 
 void GraphicsContextRB::setLineCap(LineCap cap)
 {
+    UNUSED_PARAM(cap);
+
+/*
     switch (cap) {
     case LineCap::Butt:
         CGContextSetLineCap(platformContext(), kCGLineCapButt);
@@ -1326,10 +1493,15 @@ void GraphicsContextRB::setLineCap(LineCap cap)
         CGContextSetLineCap(platformContext(), kCGLineCapSquare);
         break;
     }
+*/
 }
 
 void GraphicsContextRB::setLineDash(const DashArray& dashes, float dashOffset)
 {
+    UNUSED_PARAM(dashes);
+    UNUSED_PARAM(dashOffset);
+
+/*
     if (dashOffset < 0) {
         float length = 0;
         for (size_t i = 0; i < dashes.size(); ++i)
@@ -1339,10 +1511,14 @@ void GraphicsContextRB::setLineDash(const DashArray& dashes, float dashOffset)
     }
     auto dashesSpan = dashes.span();
     CGContextSetLineDash(platformContext(), dashOffset, dashesSpan.data(), dashesSpan.size());
+*/
 }
 
 void GraphicsContextRB::setLineJoin(LineJoin join)
 {
+    UNUSED_PARAM(join);
+
+/*
     switch (join) {
     case LineJoin::Miter:
         CGContextSetLineJoin(platformContext(), kCGLineJoinMiter);
@@ -1354,60 +1530,76 @@ void GraphicsContextRB::setLineJoin(LineJoin join)
         CGContextSetLineJoin(platformContext(), kCGLineJoinBevel);
         break;
     }
+*/
 }
 
-void GraphicsContextRB::scale(const FloatSize& size)
+void GraphicsContextRB::scale(const FloatSize& scale)
 {
-    CGContextScaleCTM(platformContext(), size.width(), size.height());
+    if (!updateStateForScale(scale))
+        return;
+
+    [ensureDisplayList() addScaleStyleWithScale:scale anchor:CGPointZero];
+//    CGContextScaleCTM(platformContext(), size.width(), size.height());
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
-void GraphicsContextRB::rotate(float angle)
+void GraphicsContextRB::rotate(float angleInRadians)
 {
-    CGContextRotateCTM(platformContext(), angle);
+    if (!updateStateForRotate(angleInRadians))
+        return;
+
+    [ensureDisplayList() rotateBy:angleInRadians]; // FIXME: Units?
+//    CGContextRotateCTM(platformContext(), angle);
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
 void GraphicsContextRB::translate(float x, float y)
 {
-    CGContextTranslateCTM(platformContext(), x, y);
+    if (!updateStateForTranslate(x, y))
+        return;
+
+    [ensureDisplayList() translateByX:x Y:y];
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
 void GraphicsContextRB::concatCTM(const AffineTransform& transform)
 {
-    CGContextConcatCTM(platformContext(), transform);
+    if (!updateStateForConcatCTM(transform))
+        return;
+
+    [ensureDisplayList() concat:transform];
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
 void GraphicsContextRB::setCTM(const AffineTransform& transform)
 {
-    CGContextSetCTM(platformContext(), transform);
+    updateStateForSetCTM(transform);
+
+    [ensureDisplayList() setCTM:transform];
     m_userToDeviceTransformKnownToBeIdentity = false;
 }
 
-AffineTransform GraphicsContextRB::getCTM(IncludeDeviceScale includeScale) const
+AffineTransform GraphicsContextRB::getCTM(IncludeDeviceScale) const
 {
-    // The CTM usually includes the deviceScaleFactor except in WebKit 1 when the
-    // content is non-composited, since the scale factor is integrated at a lower
-    // level. To guarantee the deviceScale is included, we can use this CG API.
-    if (includeScale == DefinitelyIncludeDeviceScale)
-        return CGContextGetUserSpaceToDeviceSpaceTransform(platformContext());
-
-    return CGContextGetCTM(platformContext());
+    return currentState().ctm;
 }
 
 FloatRect GraphicsContextRB::roundToDevicePixels(const FloatRect& rect) const
 {
+/*
     CGAffineTransform deviceMatrix;
     if (!m_userToDeviceTransformKnownToBeIdentity) {
         deviceMatrix = CGContextGetUserSpaceToDeviceSpaceTransform(contextForState());
         if (CGAffineTransformIsIdentity(deviceMatrix))
             m_userToDeviceTransformKnownToBeIdentity = true;
     }
+
     if (m_userToDeviceTransformKnownToBeIdentity)
         return roundedIntRect(rect);
+
     return cgRoundToDevicePixelsNonIdentity(deviceMatrix, rect);
+*/
+    return rect;
 }
 
 void GraphicsContextRB::drawFocusRing(const Path& path, float, const Color& color)
@@ -1415,6 +1607,12 @@ void GraphicsContextRB::drawFocusRing(const Path& path, float, const Color& colo
     if (path.isEmpty())
         return;
 
+    appendStateChangeItemIfNecessary();
+
+    UNUSED_PARAM(path);
+    UNUSED_PARAM(color);
+
+/*
     CGFocusRingStyle focusRingStyle;
 #if USE(APPKIT)
     NSInitializeCGFocusRingStyleForTime(NSFocusRingOnly, &focusRingStyle, std::numeric_limits<double>::max());
@@ -1444,6 +1642,8 @@ void GraphicsContextRB::drawFocusRing(const Path& path, float, const Color& colo
     CGContextAddPath(platformContext, path.platformPath());
 
     CGContextFillPath(platformContext);
+*/
+    didDrawItem();
 }
 
 void GraphicsContextRB::drawFocusRing(const Vector<FloatRect>& rects, float outlineOffset, float outlineWidth, const Color& color)
@@ -1459,97 +1659,44 @@ void GraphicsContextRB::drawFocusRing(const Vector<FloatRect>& rects, float outl
 
 void GraphicsContextRB::drawLinesForText(const FloatPoint& origin, float thickness, std::span<const FloatSegment> lineSegments, bool isPrinting, bool doubleLines, StrokeStyle strokeStyle)
 {
+    appendStateChangeItemIfNecessary();
+
     auto [rects, color] = computeRectsAndStrokeColorForLinesForText(origin, thickness, lineSegments, isPrinting, doubleLines, strokeStyle);
     if (rects.isEmpty())
         return;
+
+/*
     bool changeFillColor = fillColor() != color;
     if (changeFillColor)
         setCGFillColor(platformContext(), color, colorSpace());
     CGContextFillRects(platformContext(), rects.span().data(), rects.size());
     if (changeFillColor)
         setCGFillColor(platformContext(), fillColor(), colorSpace());
+*/
+    didDrawItem();
 }
-
-// FIXME: Duplicated.
-static inline void drawDotsForDocumentMarkerRB(CGContextRef context, const FloatRect& rect, DocumentMarkerLineStyle style)
-{
-    // We want to find the number of full dots, so we're solving the equations:
-    // dotDiameter = height
-    // dotDiameter / dotGap = 13.247 / 9.457
-    // numberOfGaps = numberOfDots - 1
-    // dotDiameter * numberOfDots + dotGap * numberOfGaps = width
-
-    auto width = rect.width();
-    auto dotDiameter = rect.height();
-    auto dotGap = dotDiameter * 9.457 / 13.247;
-    auto numberOfDots = (width + dotGap) / (dotDiameter + dotGap);
-    auto numberOfWholeDots = static_cast<unsigned>(numberOfDots);
-    auto numberOfWholeGaps = numberOfWholeDots - 1;
-
-    // Center the dots
-    auto offset = (width - (dotDiameter * numberOfWholeDots + dotGap * numberOfWholeGaps)) / 2;
-
-    CGContextStateSaver stateSaver { context };
-    CGContextSetFillColorWithColor(context, cachedCGColor(style.color).get());
-    for (unsigned i = 0; i < numberOfWholeDots; ++i) {
-        auto location = rect.location();
-        location.move(offset + i * (dotDiameter + dotGap), 0);
-        auto size = FloatSize(dotDiameter, dotDiameter);
-        CGContextAddEllipseInRect(context, FloatRect(location, size));
-    }
-    CGContextSetCompositeOperation(context, kCGCompositeSover);
-    CGContextFillPath(context);
-}
-
-#if HAVE(AUTOCORRECTION_ENHANCEMENTS)
-
-static inline void drawRoundedRectForDocumentMarkerRB(CGContextRef context, const FloatRect& rect, DocumentMarkerLineStyle style)
-{
-    CGContextStateSaver stateSaver { context };
-    CGContextSetFillColorWithColor(context, cachedCGColor(style.color).get());
-    CGContextSetCompositeOperation(context, kCGCompositeSover);
-
-    auto radius = rect.height() / 2.0;
-    auto minX = rect.x();
-    auto maxX = rect.maxX();
-    auto minY = rect.y();
-    auto maxY = rect.maxY();
-    auto midY = std::midpoint(minY, maxY);
-
-    CGContextMoveToPoint(context, minX + radius, maxY);
-    CGContextAddArc(context, minX + radius, midY, radius, piOverTwoDouble, 3 * piOverTwoDouble, 0);
-    CGContextAddLineToPoint(context, maxX - radius, minY);
-    CGContextAddArc(context, maxX - radius, midY, radius, 3 * piOverTwoDouble, piOverTwoDouble, 0);
-    CGContextClosePath(context);
-    CGContextFillPath(context);
-}
-
-#endif
 
 void GraphicsContextRB::drawDotsForDocumentMarker(const FloatRect& rect, DocumentMarkerLineStyle style)
 {
+    appendStateChangeItemIfNecessary();
+
+    UNUSED_PARAM(rect);
+    UNUSED_PARAM(style);
+/*
 #if HAVE(AUTOCORRECTION_ENHANCEMENTS)
     if (style.mode == DocumentMarkerLineStyleMode::AutocorrectionReplacement) {
         drawRoundedRectForDocumentMarkerRB(this->platformContext(), rect, style);
+        didDrawItem();
         return;
     }
 #endif
     WebCore::drawDotsForDocumentMarkerRB(this->platformContext(), rect, style);
+*/
+    didDrawItem();
 }
 
-void GraphicsContextRB::setURLForRect(const URL& link, const FloatRect& destRect)
+void GraphicsContextRB::setURLForRect(const URL&, const FloatRect&)
 {
-    RetainPtr<CFURLRef> urlRef = link.createCFURL();
-    if (!urlRef)
-        return;
-
-    CGContextRef context = platformContext();
-
-    FloatRect rect = destRect;
-    // Get the bounding box to handle clipping.
-    rect.intersect(CGContextGetClipBoundingBox(context));
-
-    CGPDFContextSetURLForRect(context, urlRef.get(), CGRectApplyAffineTransform(rect, CGContextGetCTM(context)));
 }
 
 bool GraphicsContextRB::isCALayerContext() const
@@ -1564,13 +1711,14 @@ RenderingMode GraphicsContextRB::renderingMode() const
 
 void GraphicsContextRB::applyDeviceScaleFactor(float deviceScaleFactor)
 {
-    WTF_ALWAYS_LOG("GraphicsContextRB::applyDeviceScaleFactor " << deviceScaleFactor);
     GraphicsContext::applyDeviceScaleFactor(deviceScaleFactor);
 
+/*
     // CoreGraphics expects the base CTM of a HiDPI context to have the scale factor applied to it.
     // Failing to change the base level CTM will cause certain CG features, such as focus rings,
     // to draw with a scale factor of 1 rather than the actual scale factor.
     CGContextSetBaseCTM(platformContext(), CGAffineTransformScale(CGContextGetBaseCTM(platformContext()), deviceScaleFactor, deviceScaleFactor));
+*/
 }
 
 void GraphicsContextRB::fillEllipse(const FloatRect& ellipse)
@@ -1581,8 +1729,11 @@ void GraphicsContextRB::fillEllipse(const FloatRect& ellipse)
         return;
     }
 
+/*
     CGContextRef context = platformContext();
     CGContextFillEllipseInRect(context, ellipse);
+*/
+    didDrawItem();
 }
 
 void GraphicsContextRB::strokeEllipse(const FloatRect& ellipse)
@@ -1593,39 +1744,19 @@ void GraphicsContextRB::strokeEllipse(const FloatRect& ellipse)
         return;
     }
 
+/*
     CGContextRef context = platformContext();
     CGContextStrokeEllipseInRect(context, ellipse);
+*/
+    didDrawItem();
 }
 
-void GraphicsContextRB::beginPage(const IntSize& pageSize)
+void GraphicsContextRB::beginPage(const IntSize&)
 {
-    CGContextRef context = platformContext();
-
-    if (CGContextGetType(context) != kCGContextTypePDF) {
-        ASSERT_NOT_REACHED();
-        return;
-    }
-
-    auto mediaBox = CGRectMake(0, 0, pageSize.width(), pageSize.height());
-    auto mediaBoxData = adoptCF(CFDataCreate(nullptr, (const UInt8 *)&mediaBox, sizeof(CGRect)));
-
-    const void* key = kCGPDFContextMediaBox;
-    const void* value = mediaBoxData.get();
-    auto pageInfo = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, &key, &value, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-
-    CGPDFContextBeginPage(context, pageInfo.get());
 }
 
 void GraphicsContextRB::endPage()
 {
-    CGContextRef context = platformContext();
-
-    if (CGContextGetType(context) != kCGContextTypePDF) {
-        ASSERT_NOT_REACHED();
-        return;
-    }
-
-    CGPDFContextEndPage(context);
 }
 
 bool GraphicsContextRB::supportsInternalLinks() const
@@ -1633,22 +1764,12 @@ bool GraphicsContextRB::supportsInternalLinks() const
     return true;
 }
 
-void GraphicsContextRB::setDestinationForRect(const String& name, const FloatRect& destRect)
+void GraphicsContextRB::setDestinationForRect(const String&, const FloatRect&)
 {
-    CGContextRef context = platformContext();
-
-    FloatRect rect = destRect;
-    rect.intersect(CGContextGetClipBoundingBox(context));
-
-    CGRect transformedRect = CGRectApplyAffineTransform(rect, CGContextGetCTM(context));
-    CGPDFContextSetDestinationForRect(context, name.createCFString().get(), transformedRect);
 }
 
-void GraphicsContextRB::addDestinationAtPoint(const String& name, const FloatPoint& position)
+void GraphicsContextRB::addDestinationAtPoint(const String&, const FloatPoint&)
 {
-    CGContextRef context = platformContext();
-    CGPoint transformedPoint = CGPointApplyAffineTransform(position, CGContextGetCTM(context));
-    CGPDFContextAddDestinationAtPoint(context, name.createCFString().get(), transformedPoint);
 }
 
 bool GraphicsContextRB::canUseShadowBlur() const
@@ -1670,7 +1791,236 @@ void GraphicsContextRB::setMaxEDRHeadroom(std::optional<float> headroom)
 }
 #endif
 
+// MARK: State update
 
+void GraphicsContextRB::appendStateChangeItemIfNecessary()
+{
+    auto& state = currentState().state;
+    auto changes = state.changes();
+    if (!changes)
+        return;
+
+    auto recordFullItem = [&] {
+        //m_items.append(SetState(state));
+        state.didApplyChanges();
+        currentState().lastDrawingState = state;
+    };
+
+    if (!changes.containsOnly({ GraphicsContextState::Change::FillBrush, GraphicsContextState::Change::StrokeBrush, GraphicsContextState::Change::StrokeThickness })) {
+        recordFullItem();
+        return;
+    }
+    std::optional<PackedColor::RGBA> fillColor;
+    if (changes.contains(GraphicsContextState::Change::FillBrush)) {
+        fillColor = state.fillBrush().packedColor();
+        if (!fillColor) {
+            recordFullItem();
+            return;
+        }
+    }
+    std::optional<PackedColor::RGBA> strokeColor;
+    if (changes.contains(GraphicsContextState::Change::StrokeBrush)) {
+        strokeColor = state.strokeBrush().packedColor();
+        if (!strokeColor) {
+            recordFullItem();
+            return;
+        }
+    }
+    std::optional<float> strokeThickness;
+    if (changes.contains(GraphicsContextState::Change::StrokeThickness))
+        strokeThickness = state.strokeThickness();
+
+//    if (fillColor)
+//        m_items.append(SetInlineFillColor(*fillColor));
+//
+//    if (strokeColor || strokeThickness)
+//        m_items.append(SetInlineStroke(strokeColor, strokeThickness));
+
+    state.didApplyChanges();
+    currentState().lastDrawingState = state;
 }
+
+void GraphicsContextRB::updateStateForSave(GraphicsContextState::Purpose purpose)
+{
+    ASSERT(purpose == GraphicsContextState::Purpose::SaveRestore);
+    appendStateChangeItemIfNecessary();
+    GraphicsContext::save(purpose);
+    m_stateStack.append(m_stateStack.last());
+}
+
+bool GraphicsContextRB::updateStateForRestore(GraphicsContextState::Purpose purpose)
+{
+    if (m_stateStack.size() <= 1)
+        return false;
+
+    ASSERT(purpose == GraphicsContextState::Purpose::SaveRestore);
+    appendStateChangeItemIfNecessary();
+    GraphicsContext::restore(purpose);
+
+    m_stateStack.removeLast();
+    return true;
+}
+
+bool GraphicsContextRB::updateStateForTranslate(float x, float y)
+{
+    if (!x && !y)
+        return false;
+    currentState().translate(x, y);
+    return true;
+}
+
+bool GraphicsContextRB::updateStateForRotate(float angleInRadians)
+{
+    if (WTF::areEssentiallyEqual(0.f, fmodf(angleInRadians, std::numbers::pi_v<float> * 2.f)))
+        return false;
+    currentState().rotate(angleInRadians);
+    return true;
+}
+
+bool GraphicsContextRB::updateStateForScale(const FloatSize& size)
+{
+    if (areEssentiallyEqual(size, FloatSize { 1.f, 1.f }))
+        return false;
+    currentState().scale(size);
+    return true;
+}
+
+bool GraphicsContextRB::updateStateForConcatCTM(const AffineTransform& transform)
+{
+    if (transform.isIdentity())
+        return false;
+
+    currentState().concatCTM(transform);
+    return true;
+}
+
+void GraphicsContextRB::updateStateForSetCTM(const AffineTransform& transform)
+{
+    currentState().setCTM(transform);
+}
+
+void GraphicsContextRB::updateStateForBeginTransparencyLayer(float opacity)
+{
+    GraphicsContext::beginTransparencyLayer(opacity);
+    appendStateChangeItemIfNecessary();
+    GraphicsContext::save(GraphicsContextState::Purpose::TransparencyLayer);
+    m_stateStack.append(m_stateStack.last().cloneForTransparencyLayer());
+}
+
+void GraphicsContextRB::updateStateForBeginTransparencyLayer(CompositeOperator compositeOperator, BlendMode blendMode)
+{
+    GraphicsContext::beginTransparencyLayer(compositeOperator, blendMode);
+    appendStateChangeItemIfNecessary();
+    GraphicsContext::save(GraphicsContextState::Purpose::TransparencyLayer);
+    m_stateStack.append(m_stateStack.last().cloneForTransparencyLayer());
+}
+
+bool GraphicsContextRB::updateStateForEndTransparencyLayer()
+{
+    if (stateStack().size() <= 1)
+        return false;
+
+    GraphicsContext::endTransparencyLayer();
+    appendStateChangeItemIfNecessary();
+    m_stateStack.removeLast();
+    GraphicsContext::restore(GraphicsContextState::Purpose::TransparencyLayer);
+    return true;
+}
+
+void GraphicsContextRB::updateStateForResetClip()
+{
+    // FIXME
+    currentState().clipBounds = FloatRect(0, 0, 99999999, 99999999); //  m_initialClip;
+}
+
+void GraphicsContextRB::updateStateForClip(const FloatRect& rect)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    currentState().clipBounds.intersect(currentState().ctm.mapRect(rect));
+}
+
+void GraphicsContextRB::updateStateForClipRoundedRect(const FloatRoundedRect& rect)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    currentState().clipBounds.intersect(currentState().ctm.mapRect(rect.rect()));
+}
+
+void GraphicsContextRB::updateStateForClipOut(const FloatRect&)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    // FIXME: Should we update the clip bounds?
+}
+
+void GraphicsContextRB::updateStateForClipOutRoundedRect(const FloatRoundedRect&)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    // FIXME: Should we update the clip bounds?
+}
+
+void GraphicsContextRB::updateStateForClipOut(const Path&)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    // FIXME: Should we update the clip bounds?
+}
+
+void GraphicsContextRB::updateStateForClipPath(const Path& path)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    currentState().clipBounds.intersect(currentState().ctm.mapRect(path.fastBoundingRect()));
+}
+
+void GraphicsContextRB::updateStateForClipToImageBuffer(const FloatRect& rect)
+{
+    appendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use state such as antialiasing.
+    currentState().clipBounds.intersect(currentState().ctm.mapRect(rect));
+}
+
+void GraphicsContextRB::updateStateForApplyDeviceScaleFactor(float deviceScaleFactor)
+{
+    // We modify the state directly here instead of calling GraphicsContext::scale()
+    // because the recorded item will scale() when replayed.
+    currentState().scale({ deviceScaleFactor, deviceScaleFactor });
+
+    // FIXME: this changes the baseCTM, which will invalidate all of our cached extents.
+    // Assert that it's only called early on?
+}
+
+const AffineTransform& GraphicsContextRB::ctm() const
+{
+    return currentState().ctm;
+}
+
+// MARK: ContextState
+
+void GraphicsContextRB::ContextState::translate(float x, float y)
+{
+    ctm.translate(x, y);
+}
+
+void GraphicsContextRB::ContextState::rotate(float angleInRadians)
+{
+    double angleInDegrees = rad2deg(static_cast<double>(angleInRadians));
+    ctm.rotate(angleInDegrees);
+
+    AffineTransform rotation;
+    rotation.rotate(angleInDegrees);
+}
+
+void GraphicsContextRB::ContextState::scale(const FloatSize& size)
+{
+    ctm.scale(size);
+}
+
+void GraphicsContextRB::ContextState::setCTM(const AffineTransform& matrix)
+{
+    ctm = matrix;
+}
+
+void GraphicsContextRB::ContextState::concatCTM(const AffineTransform& matrix)
+{
+    ctm *= matrix;
+}
+
+} // namespace WebCore
 
 #endif

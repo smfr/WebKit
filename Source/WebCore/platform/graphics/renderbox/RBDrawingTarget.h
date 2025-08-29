@@ -48,15 +48,18 @@ public:
     const AffineTransform& baseTransform() const { return m_baseTransform; }
     void setBaseTransform(AffineTransform&& transform) { m_baseTransform = WTFMove(transform); }
 
+    FloatSize size() const { return m_size; }
+
     bool isValid() const { return !!m_drawable; }
 
     RetainPtr<RBDrawable> takeDrawable();
 
 private:
-    explicit RBDrawingTarget(RetainPtr<RBDrawable>&& drawable = nil);
+    explicit RBDrawingTarget(RetainPtr<RBDrawable>&& drawable = nil, FloatSize = { });
 
     RetainPtr<RBDrawable> m_drawable;
     AffineTransform m_baseTransform;
+    FloatSize m_size;
     float m_deviceScaleFactor { 1 };
 };
 
