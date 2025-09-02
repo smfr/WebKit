@@ -33,6 +33,9 @@
 
 OBJC_CLASS RBDrawable;
 OBJC_CLASS RBDisplayList;
+OBJC_CLASS RBFrame;
+OBJC_CLASS RBShape;
+OBJC_CLASS RBSurface;
 
 namespace WebCore {
 
@@ -224,8 +227,14 @@ private:
 
     RetainPtr<RBDrawable> m_drawable;
     RetainPtr<RBDisplayList> m_displayList;
+
+    RetainPtr<RBSurface> m_surface;
+    RetainPtr<RBFrame> m_currentFrame;
+    RetainPtr<RBDisplayList> m_drawSurfaceDisplayList;
+
     RetainPtr<CGContextRef> m_cgContext; // Only short-lived for text drawing.
 
+    FloatSize m_destinationSize;
     float m_deviceScaleFactor { 1 };
     AffineTransform m_baseTransform;
     unsigned m_itemCount { 0 };

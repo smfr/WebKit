@@ -134,7 +134,6 @@ void ImageBufferSet::prepareBufferForDisplay(const FloatRect& layerBounds, const
         }
     }
 
-    WTF_ALWAYS_LOG("ImageBufferSet::prepareBufferForDisplay - paintingRects " << paintingRects);
     if (paintingRects.size() == 1) {
         context.clip(paintingRects[0]);
         if (copyRect.intersects(paintingRects[0]))
