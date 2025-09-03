@@ -214,8 +214,7 @@ void GraphicsContextRB::flush()
 {
     //WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " dispay list " << [m_displayList debugDescription]);
 
-    [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsSynchronize];
-    [m_drawable finish]; // FIXME: Do async.
+    [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsWaitUntilScheduled];
     m_displayList = nil;
     m_itemCount = 0;
 }
