@@ -99,6 +99,7 @@ void RemoteImageBufferSet::endPrepareForDisplay(RenderingUpdateID renderingUpdat
     m_context.reset();
 
     RefPtr frontBuffer = m_frontBuffer;
+    WTF_ALWAYS_LOG("RemoteImageBufferSet::endPrepareForDisplay - frontBuffer " << frontBuffer);
     if (frontBuffer)
         frontBuffer->flushDrawingContext();
 

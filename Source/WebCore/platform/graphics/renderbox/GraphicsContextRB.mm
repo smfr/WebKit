@@ -52,14 +52,6 @@
 #import <wtf/URL.h>
 #import <wtf/text/TextStream.h>
 
-
-@interface RBFrame : NSObject
-@end
-
-@interface RBSurface(IncrementalRendering)
-- (RBFrame *)updateUsingDevice:(RBDevice *)device frame:(RBFrame *)frame NS_RETURNS_NOT_RETAINED;
-@end
-
 namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(GraphicsContextRB);
@@ -176,29 +168,9 @@ GraphicsContextRB::GraphicsContextRB(RBDrawingTarget&& drawingTarget, CGContextS
     if (!m_drawable)
         return;
 
-    m_destinationSize = drawingTarget.size();
-    auto destinationRect = FloatRect { { }, m_destinationSize };
-
-    m_surface = adoptNS([[RBSurface alloc] init]);
-    [m_surface setSize:m_destinationSize];
-    [m_surface setColorMode:RBColorModeNonLinear];
-
-    auto primaryImage = RBImageMakeRBSurface(m_surface.get());
-
-    auto primaryFill = adoptNS([[RBFill alloc] init]);
-    auto whiteColor = RBColor { 1.0f, 1.0f, 1.0f, 1.0f };
-    auto transform = RBImageSimpleTransform(destinationRect);
-    [primaryFill setRBImage:primaryImage transform:transform interpolation:RBInterpolationNone tintColor:whiteColor colorSpace:RBColorSpaceSRGB flags:0]; // RBImageUncached ?
-
-    auto primaryShape = adoptNS([[RBShape alloc] init]);
-    [primaryShape setRect:destinationRect];
-
-    m_drawSurfaceDisplayList = adoptNS([[RBDisplayList alloc] init]);
-    [m_drawSurfaceDisplayList drawShape:primaryShape.get() fill:primaryFill.get() alpha:1.0f blendMode:RBBlendModeNormal];
-
     // Make sure the context starts in sync with our state.
     auto initialState = GraphicsContextState { };
-    auto initialClip = destinationRect;
+    auto initialClip = FloatRect { { }, drawingTarget.size() };
     auto initialCTM = m_baseTransform;
 
     m_stateStack.append({ initialState, initialCTM, initialCTM.mapRect(initialClip) });
@@ -233,8 +205,6 @@ RBDisplayList *GraphicsContextRB::ensureDisplayList()
         // Because we start with a new display list every time, we have to apply the initial context state here instead of at context creation time.
         //applyDeviceScaleFactor(m_deviceScaleFactor);
         setCTM(m_baseTransform); // FIXME: Not sure what RB equivalent of "base CTM" is
-
-        [m_surface setDisplayList:m_displayList.get()];
     }
 
     return m_displayList.get();
@@ -242,13 +212,10 @@ RBDisplayList *GraphicsContextRB::ensureDisplayList()
 
 void GraphicsContextRB::flush()
 {
-//    WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " display list " << [m_displayList debugDescription]);
-//    WTF_ALWAYS_LOG("GraphicsContextRB::flush() - draw surface display list " << [m_drawSurfaceDisplayList debugDescription]);
+    //WTF_ALWAYS_LOG("GraphicsContextRB::flush() - drawable " << m_drawable.get() << " dispay list " << [m_displayList debugDescription]);
 
-    m_currentFrame = nil;
-    [m_drawable renderDisplayList:m_drawSurfaceDisplayList.get() flags:RBDrawableRenderFlagsSynchronize];
+    [m_drawable renderDisplayList:m_displayList.get() flags:RBDrawableRenderFlagsSynchronize];
     [m_drawable finish]; // FIXME: Do async.
-
     m_displayList = nil;
     m_itemCount = 0;
 }
@@ -259,15 +226,7 @@ void GraphicsContextRB::didDrawItem()
     ++m_itemCount;
     const unsigned flushLimit = 100;
     if (m_itemCount >= flushLimit) {
-
-        // FIXME: Get from the target.
-        RetainPtr metalDevice = adoptNS(MTLCreateSystemDefaultDevice());
-        RetainPtr device = [RBDevice sharedDevice:metalDevice.get()];
-
-        @autoreleasepool {
-            m_currentFrame = [m_surface updateUsingDevice:device.get() frame:m_currentFrame.get()];
-        }
-        m_itemCount = 0;
+        // Do partial draws.
     }
 }
 

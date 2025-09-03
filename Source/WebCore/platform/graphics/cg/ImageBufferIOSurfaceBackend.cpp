@@ -155,6 +155,8 @@ bool ImageBufferIOSurfaceBackend::flushContextDraws()
     else if (auto* contextRB = dynamicDowncast<GraphicsContextRB>(m_context.get()))
         contextNeedsFlush = contextRB->consumeHasDrawn();
 
+    WTF_ALWAYS_LOG("ImageBufferIOSurfaceBackend::flushContextDraws - contextNeedsFlush " << contextNeedsFlush);
+
     if (!contextNeedsFlush && !m_needsFirstFlush)
         return false;
 
