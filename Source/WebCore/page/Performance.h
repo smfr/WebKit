@@ -55,6 +55,7 @@ class Document;
 class DocumentLoadTiming;
 class DocumentLoader;
 class EventCounts;
+class LargestContentfulPaint;
 class NetworkLoadMetrics;
 class PerformanceUserTiming;
 class PerformanceEntry;
@@ -114,6 +115,7 @@ public:
     void addResourceTiming(ResourceTiming&&);
 
     void reportFirstContentfulPaint();
+    void reportLargestContentfulPaint(Ref<LargestContentfulPaint>&&);
 
     void removeAllObservers();
     void registerPerformanceObserver(PerformanceObserver&);

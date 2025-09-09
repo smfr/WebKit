@@ -188,6 +188,10 @@ void EventDispatcher::dispatchEvent(Node& node, Event& event)
     bool shouldDispatchEventToScripts = hasRelevantEventListener(document, event);
 
     RefPtr window = document->window();
+
+    if (event.isTrusted() && typeInfo.type() == EventType::scroll && window)
+        window->setHasDispatchedScrollEvent();
+
     std::optional<PerformanceEventTimingCandidate> pendingEventTiming;
     if (typeInfo.isInCategory(EventCategory::EventTimingEligible) && window && document->settings().eventTimingEnabled() && event.isTrusted())
         pendingEventTiming = window->initializeEventTimingEntry(event, typeInfo.type());

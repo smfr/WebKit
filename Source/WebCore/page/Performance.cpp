@@ -41,6 +41,7 @@
 #include "EventLoop.h"
 #include "EventNames.h"
 #include "ExceptionOr.h"
+#include "LargestContentfulPaint.h"
 #include "LocalFrame.h"
 #include "Logging.h"
 #include "PerformanceEntry.h"
@@ -356,6 +357,11 @@ void Performance::reportFirstContentfulPaint()
     ASSERT(!m_firstContentfulPaint);
     m_firstContentfulPaint = PerformancePaintTiming::createFirstContentfulPaint(now());
     queueEntry(*m_firstContentfulPaint);
+}
+
+void Performance::reportLargestContentfulPaint(Ref<LargestContentfulPaint>&& paintEntry)
+{
+    queueEntry(paintEntry.get());
 }
 
 void Performance::addNavigationTiming(DocumentLoader& documentLoader, Document& document, CachedResource& resource, const DocumentLoadTiming& timing, const NetworkLoadMetrics& metrics)

@@ -297,6 +297,9 @@ public:
     void dispatchPendingEventTimingEntries();
     uint64_t interactionCount() { return m_interactionCount; }
 
+    void setHasDispatchedScrollEvent() { m_hasDispatchedScrollEvent = true; }
+    bool hasDispatchedScrollEvent() const { return m_hasDispatchedScrollEvent; }
+
     // HTML 5 key/value storage
     ExceptionOr<Storage*> sessionStorage();
     ExceptionOr<Storage*> localStorage();
@@ -510,6 +513,8 @@ private:
     bool m_wasWrappedWithoutInitializedSecurityOrigin { false };
     bool m_mayReuseForNavigation { true };
     bool m_isStopping { false };
+    bool m_hasDispatchedScrollEvent { false };
+
 #if ENABLE(USER_MESSAGE_HANDLERS)
     mutable RefPtr<WebKitNamespace> m_webkitNamespace;
 #endif

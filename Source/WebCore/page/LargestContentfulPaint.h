@@ -39,7 +39,7 @@ public:
         return adoptRef(*new LargestContentfulPaint(timeStamp));
     }
 
-    ~LargestContentfulPaint() = default;
+    ~LargestContentfulPaint();
 
     // PaintTimingMixin
     DOMHighResTimeStamp paintTime() const;

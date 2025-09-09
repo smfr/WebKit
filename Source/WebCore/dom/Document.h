@@ -38,6 +38,7 @@
 #include <WebCore/FrameDestructionObserver.h>
 #include <WebCore/FrameIdentifier.h>
 #include <WebCore/HitTestSource.h>
+#include <WebCore/LargestContentfulPaintData.h>
 #include <WebCore/MutationObserverOptions.h>
 #include <WebCore/PageIdentifier.h>
 #include <WebCore/PlaybackTargetClientContextIdentifier.h>
@@ -1475,6 +1476,9 @@ public:
     WEBCORE_EXPORT double monotonicTimestamp() const;
     const DocumentEventTiming& eventTiming() const { return m_eventTiming; }
 
+    const LargestContentfulPaintData& largestContentfulPaintData() const { return m_largestContentfulPaintData; }
+    LargestContentfulPaintData& largestContentfulPaintData() { return m_largestContentfulPaintData; }
+
     int requestAnimationFrame(Ref<RequestAnimationFrameCallback>&&);
     void cancelAnimationFrame(int id);
 
@@ -2386,6 +2390,7 @@ private:
     ViewportArguments m_viewportArguments;
 
     DocumentEventTiming m_eventTiming;
+    LargestContentfulPaintData m_largestContentfulPaintData;
 
     RefPtr<MediaQueryMatcher> m_mediaQueryMatcher;
     

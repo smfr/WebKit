@@ -33,6 +33,8 @@ LargestContentfulPaint::LargestContentfulPaint(DOMHighResTimeStamp timeStamp)
 {
 }
 
+LargestContentfulPaint::~LargestContentfulPaint() = default;
+
 DOMHighResTimeStamp LargestContentfulPaint::paintTime() const
 {
     return 0;

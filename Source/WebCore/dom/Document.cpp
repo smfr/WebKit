@@ -168,6 +168,7 @@
 #include "JSViewTransitionUpdateCallback.h"
 #include "KeyboardEvent.h"
 #include "KeyframeEffect.h"
+#include "LargestContentfulPaint.h"
 #include "LayoutDisallowedScope.h"
 #include "LazyLoadImageObserver.h"
 #include "LegacySchemeRegistry.h"
@@ -4352,9 +4353,6 @@ bool Document::supportsLargestContentfulPaint() const
 // https://w3c.github.io/paint-timing/#ref-for-mark-paint-timing
 void Document::enqueuePaintTimingEntryIfNeeded()
 {
-    if (m_didEnqueueFirstContentfulPaint)
-        return;
-
     if (!supportsPaintTiming())
         return;
 
@@ -4368,13 +4366,30 @@ void Document::enqueuePaintTimingEntryIfNeeded()
     if (!view()->hasContentfulDescendants())
         return;
 
-    if (!ContentfulPaintChecker::qualifiesForContentfulPaint(*view()))
-        return;
+    auto enqueuePaintTimingIfNecessary = [&]() {
+        if (m_didEnqueueFirstContentfulPaint)
+            return;
 
-    WTFEmitSignpost(this, NavigationAndPaintTiming, "firstContentfulPaint");
+        if (!ContentfulPaintChecker::qualifiesForContentfulPaint(*view()))
+            return;
 
-    protectedWindow()->performance().reportFirstContentfulPaint();
-    m_didEnqueueFirstContentfulPaint = true;
+        WTFEmitSignpost(this, NavigationAndPaintTiming, "firstContentfulPaint");
+
+        protectedWindow()->performance().reportFirstContentfulPaint();
+        m_didEnqueueFirstContentfulPaint = true;
+    };
+
+    auto enqueueLargestContentfulPaintIfNecessary = [&]() {
+        WTFEmitSignpost(this, NavigationAndPaintTiming, "largestContentfulPaint");
+
+        if (RefPtr entry = m_largestContentfulPaintData.takePendingEntry()) {
+            Ref entryRef = entry.releaseNonNull();
+            protectedWindow()->performance().reportLargestContentfulPaint(WTFMove(entryRef));
+        }
+    };
+
+    enqueuePaintTimingIfNecessary();
+    enqueueLargestContentfulPaintIfNecessary();
 }
 
 void Document::enqueueEventTimingEntriesIfNeeded()
