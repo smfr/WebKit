@@ -48,6 +48,7 @@ public:
     static bool isContentfulForPaintTiming(const Element&);
     static bool isTimingEligible(const Node&);
 
+    static bool isExposedForPaintTiming(const Element&);
     static bool isPaintable(const Element&);
 
     static LayoutRect paintableBoundingRect(const Element&);
@@ -58,10 +59,11 @@ public:
 
 private:
 
+    static FloatSize effectiveVisualSize(const Element&);
     void potentiallyAddLargestContentfulPaintEntry(Element&, const URL&);
 
 
-    LayoutSize m_largestPaintSize;
+    FloatSize m_largestPaintSize;
 
     WeakHashMap<Element, Vector<URL>, WeakPtrImplWithEventTargetData> m_contentSet;
     RefPtr<LargestContentfulPaint> m_pendingEntry;

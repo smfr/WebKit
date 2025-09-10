@@ -53,6 +53,9 @@ public:
     String url() const;
     Element* element() const;
 
+    void setID(const String&);
+    void setURLString(const String&);
+
     ASCIILiteral entryType() const final { return "largest-contentful-paint"_s; }
 
 protected:
@@ -60,6 +63,8 @@ protected:
 
 private:
     Type performanceEntryType() const final { return Type::LargestContentfulPaint; }
+    String m_urlString;
+    String m_id;
 };
 
 } // namespace WebCore

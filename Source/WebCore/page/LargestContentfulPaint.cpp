@@ -65,9 +65,19 @@ String LargestContentfulPaint::id() const
     return emptyString();
 }
 
+void LargestContentfulPaint::setID(const String& idString)
+{
+    m_id = idString;
+}
+
 String LargestContentfulPaint::url() const
 {
-    return emptyString();
+    return m_urlString;
+}
+
+void LargestContentfulPaint::setURLString(const String& urlString)
+{
+    m_urlString = urlString;
 }
 
 Element* LargestContentfulPaint::element() const

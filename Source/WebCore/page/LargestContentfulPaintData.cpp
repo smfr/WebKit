@@ -53,6 +53,19 @@ bool LargestContentfulPaintData::isTimingEligible(const Node&)
     return false;
 }
 
+
+// https://w3c.github.io/paint-timing/#exposed-for-paint-timing
+bool LargestContentfulPaintData::isExposedForPaintTiming(const Element& element)
+{
+    if (!element.document().isFullyActive())
+        return false;
+
+    if (!element.isInDocumentTree()) // Also checks isConnected().
+        return false;
+
+    return true;
+}
+
 bool LargestContentfulPaintData::isPaintable(const Element&)
 {
     /*
@@ -72,10 +85,16 @@ LayoutRect LargestContentfulPaintData::paintableBoundingRect(const Element&)
     return { };
 }
 
+// https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
+FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element&)
+{
+    // get the natural size of the image etc.
+    return { 10, 10 };
+}
+
 // https://w3c.github.io/largest-contentful-paint/#sec-add-lcp-entry
 void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, const URL& url)
 {
-
     // If document’s content set contains candidate, return.
     auto it = m_contentSet.find(element);
     if (it != m_contentSet.end() && it->value.contains(url))
@@ -91,11 +110,20 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     }
 
     auto* window = element.document().window();
-    if (window && window->hasDispatchedScrollEvent())
+    if (window && (window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
+    auto elementSize = effectiveVisualSize(element);
+    if (elementSize.area() <= m_largestPaintSize.area())
+        return;
 
     m_pendingEntry = LargestContentfulPaint::create(0);
+    m_pendingEntry->setURLString(url.string());
+
+    if (element.hasID())
+        m_pendingEntry->setID(element.getIdAttribute().string());
+
+    // FIXME: Set loadTime.
 }
 
 
@@ -107,6 +135,10 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
 
 void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element)
 {
+    if (!isExposedForPaintTiming(element))
+        return;
+
+
     potentiallyAddLargestContentfulPaintEntry(element, element.currentURL());
 }
 
