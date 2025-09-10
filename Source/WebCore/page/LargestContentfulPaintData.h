@@ -46,6 +46,7 @@ public:
     ~LargestContentfulPaintData();
 
     static bool isContentfulForPaintTiming(const Element&);
+    static bool isLargestContentfulPaintCandidate(const Element&);
     static bool isTimingEligible(const Node&);
 
     static bool isExposedForPaintTiming(const Element&);

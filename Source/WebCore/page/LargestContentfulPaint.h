@@ -27,6 +27,7 @@
 
 #include "DOMHighResTimeStamp.h"
 #include "PerformanceEntry.h"
+#include <wtf/RefPtr.h>
 
 namespace WebCore {
 
@@ -63,6 +64,8 @@ protected:
 
 private:
     Type performanceEntryType() const final { return Type::LargestContentfulPaint; }
+
+    RefPtr<Element> m_element;
     String m_urlString;
     String m_id;
 };

@@ -609,6 +609,8 @@ void CachedImage::finishLoading(const FragmentedSharedBuffer* data, const Networ
         return;
     }
 
+    // store loadTime for LCP? Get from SubresourceLoader.m_loadTiming
+
     setLoading(false);
     setAllowsOrientationOverride(isCORSSameOrigin() || m_image->sourceURL().protocolIsData());
 

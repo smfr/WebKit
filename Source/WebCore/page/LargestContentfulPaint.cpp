@@ -26,6 +26,9 @@
 #include "config.h"
 #include "LargestContentfulPaint.h"
 
+#include "Element.h"
+#include "LargestContentfulPaintData.h"
+
 namespace WebCore {
 
 LargestContentfulPaint::LargestContentfulPaint(DOMHighResTimeStamp timeStamp)
@@ -82,7 +85,13 @@ void LargestContentfulPaint::setURLString(const String& urlString)
 
 Element* LargestContentfulPaint::element() const
 {
-    return nullptr;
+    if (!m_element)
+        return nullptr;
+
+    if (!LargestContentfulPaintData::isExposedForPaintTiming(*m_element))
+        return nullptr;
+
+    return m_element.get();
 }
 
 } // namespace WebCore

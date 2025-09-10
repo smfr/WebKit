@@ -53,6 +53,14 @@ bool LargestContentfulPaintData::isTimingEligible(const Node&)
     return false;
 }
 
+// https://w3c.github.io/largest-contentful-paint/#largest-contentful-paint-candidate
+bool LargestContentfulPaintData::isLargestContentfulPaintCandidate(const Element&)
+{
+    // opacity > 0
+    // text node, or candidate’s request’s response’s content length in bytes is >= candidate’s element’s effective visual size * 0.004
+
+    // CachedResource::expectedContentLength().
+}
 
 // https://w3c.github.io/paint-timing/#exposed-for-paint-timing
 bool LargestContentfulPaintData::isExposedForPaintTiming(const Element& element)
