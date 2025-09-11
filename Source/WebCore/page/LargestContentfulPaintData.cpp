@@ -128,12 +128,38 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
         return { };
 
     auto visualViewportSize = FloatSize { frameView->visualViewportRect().size() };
-
-    WTF_ALWAYS_LOG("LargestContentfulPaintData::effectiveVisualSize - intersection size " << intersectionRect.size() << " visual viewport size " << visualViewportSize);
-
-    // or >= ?
-    if (intersectionRect.area() == visualViewportSize.area())
+    if (intersectionRect.area() >= visualViewportSize.area())
         return { };
+
+    bool isImage = true;
+
+    if (isImage) {
+        CheckedPtr renderer = element.renderer();
+        if (!renderer)
+            return { };
+
+        if (CheckedPtr renderReplaced = dynamicDowncast<renderReplaced>(*renderer)) {
+            // replacedContentRect() takes object-fit and object-position into account, so contentRect's size is visibleDimensions.
+            auto contentRect = renderReplaced->replacedContentRect();
+
+            // This is going to be costly.
+            // FIXME: This takes ancestor transforms into account; should it? https://github.com/w3c/largest-contentful-paint/issues/144
+            auto absoluteContentRect = renderer->localToAbsoluteQuad(FloatRect(contentRect)).boundingBox();
+            auto clientContentRect = frameView->contentsToView(absoluteContentRect);
+
+            auto intersectingClientContentRect = intersection(clientContentRect, intersectionRect);
+            auto intersectionArea = intersectingClientContentRect.area();
+
+            // get image natural size etc.
+            UNUSED_PARAM(intersectionArea);
+
+
+        }
+
+
+
+    }
+
 
     // get the natural size of the image etc.
     return { 10, 10 };
