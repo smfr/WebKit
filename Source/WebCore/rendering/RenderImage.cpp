@@ -661,6 +661,9 @@ void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
             page().addRelevantUnpaintedObject(*this, visibleRect);
         else
             page().addRelevantRepaintedObject(*this, visibleRect);
+
+        if (RefPtr imageElement = dynamicDowncast<HTMLImageElement>(element()))
+            document().largestContentfulPaintData().didPaintImage(*imageElement, cachedImage());
     }
 }
 
@@ -670,11 +673,6 @@ void RenderImage::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 
     if (paintInfo.phase == PaintPhase::Outline)
         paintAreaElementFocusRing(paintInfo, paintOffset);
-
-    if (RefPtr imageElement = dynamicDowncast<HTMLImageElement>(element())) {
-        document().largestContentfulPaintData().didPaintImage(*imageElement);
-    }
-
 }
 
 void RenderImage::paintAreaElementFocusRing(PaintInfo& paintInfo, const LayoutPoint& paintOffset)

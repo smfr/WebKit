@@ -26,6 +26,7 @@
 #include "config.h"
 #include "LargestContentfulPaintData.h"
 
+#include "CachedImage.h"
 #include "Element.h"
 #include "LargestContentfulPaint.h"
 
@@ -121,7 +122,7 @@ bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Eleme
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
-FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element, FloatRect intersectionRect)
+FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element, CachedImage* image, FloatRect intersectionRect)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
@@ -138,7 +139,7 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
         if (!renderer)
             return { };
 
-        if (CheckedPtr renderReplaced = dynamicDowncast<renderReplaced>(*renderer)) {
+        if (CheckedPtr renderReplaced = dynamicDowncast<RenderReplaced>(*renderer)) {
             // replacedContentRect() takes object-fit and object-position into account, so contentRect's size is visibleDimensions.
             auto contentRect = renderReplaced->replacedContentRect();
 
@@ -152,6 +153,7 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
 
             // get image natural size etc.
             UNUSED_PARAM(intersectionArea);
+            UNUSED_PARAM(image);
 
 
         }
@@ -166,27 +168,25 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-add-lcp-entry
-void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, const URL& url, LayoutRect intersectionRect)
+void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, CachedImage* image, LayoutRect intersectionRect)
 {
     // If document’s content set contains candidate, return.
-    auto it = m_contentSet.find(element);
-    if (it != m_contentSet.end() && it->value.contains(url))
-        return;
+    bool isNewCandidate = false;
+    if (image) {
+        isNewCandidate = m_imageContentSet.ensure(element, [] {
+            return WeakHashSet<CachedImage> { };
+        }).iterator->value.add(*image).isNewEntry;
+    } else
+        isNewCandidate = m_textContentSet.add(element).isNewEntry;
 
-    auto addResult = m_contentSet.ensure(element, [url] {
-        return Vector<URL> { url };
-    });
-    if (!addResult.isNewEntry) {
-        auto& urls = addResult.iterator->value;
-        if (!urls.contains(url))
-            urls.append(url);
-    }
+    if (!isNewCandidate)
+        return;
 
     auto* window = element.document().window();
     if (window && (window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
-    auto elementSize = effectiveVisualSize(element, intersectionRect);
+    auto elementSize = effectiveVisualSize(element, image, intersectionRect);
     if (elementSize.area() <= m_largestPaintSize.area())
         return;
 
@@ -194,17 +194,53 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
         return;
 
     m_pendingEntry = LargestContentfulPaint::create(0);
-    m_pendingEntry->setURLString(url.string());
+
+    if (image) {
+        m_pendingEntry->setURLString(image->url().string());
+        m_pendingEntry->setLoadTime(0); // FIXME.
+    }
 
     if (element.hasID())
         m_pendingEntry->setID(element.getIdAttribute().string());
-
-    // FIXME: Set loadTime.
 }
 
 
 RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
 {
+
+    // FIXME: Is this copying the value?
+    for (auto [weakElement, images] : m_pendingImageRecords) {
+        RefPtr element = weakElement;
+        if (!element)
+            continue;
+
+        auto intersectionRect = computeViewportIntersectionRect(*element);
+        for (WeakPtr image : images) {
+            if (!image)
+                continue;
+            potentiallyAddLargestContentfulPaintEntry(*element, image.get(), intersectionRect);
+        }
+    }
+
+    // FIXME: Is this copying the value?
+    for (auto [weakElement, textNodes] : m_paintedTextRecords) {
+        RefPtr element = weakElement;
+        if (!element)
+            continue;
+
+        auto intersectionRect = computeViewportIntersectionRectForTextContainer(*element, textNodes);
+        potentiallyAddLargestContentfulPaintEntry(*element, nullptr, intersectionRect);
+    }
+
+
+    // FIXME: Clear?
+
+
+
+
+
+
+
     return std::exchange(m_pendingEntry, nullptr);
 }
 
@@ -257,14 +293,42 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     return intersectionRect;
 }
 
-void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element)
+LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextContainer(Element&, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>& textNodes)
+{
+
+    for (RefPtr node : textNodes) {
+
+    }
+
+    return { };
+}
+
+// FIXME: This should be done on loads, not paints.
+void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element, CachedImage* image)
 {
     if (!isExposedForPaintTiming(element))
         return;
 
-    auto intersectionRect = computeViewportIntersectionRect(element);
-    potentiallyAddLargestContentfulPaintEntry(element, element.currentURL(), intersectionRect);
+    if (!image)
+        return;
+
+    m_pendingImageRecords.ensure(element, [] {
+        return WeakHashSet<CachedImage> { };
+    }).iterator->value.add(*image);
 }
 
+void LargestContentfulPaintData::didPaintText(Text& textNode)
+{
+    RefPtr element = textNode.parentElement();
+    if (!element)
+        return;
+
+    if (!isExposedForPaintTiming(*element))
+        return;
+
+    m_paintedTextRecords.ensure(*element, [] {
+        return WeakHashSet<Text, WeakPtrImplWithEventTargetData> { };
+    }).iterator->value.add(textNode);
+}
 
 } // namespace WebCore

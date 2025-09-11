@@ -53,6 +53,11 @@ DOMHighResTimeStamp LargestContentfulPaint::loadTime() const
     return 0;
 }
 
+void LargestContentfulPaint::setLoadTime(DOMHighResTimeStamp loadTime)
+{
+    m_loadTime = loadTime;
+}
+
 DOMHighResTimeStamp LargestContentfulPaint::renderTime() const
 {
     return 0;

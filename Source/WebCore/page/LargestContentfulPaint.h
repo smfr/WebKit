@@ -48,6 +48,8 @@ public:
 
     // LargestContentfulPaint
     DOMHighResTimeStamp loadTime() const;
+    void setLoadTime(DOMHighResTimeStamp);
+
     DOMHighResTimeStamp renderTime() const;
     unsigned size() const;
     String id() const;
@@ -66,6 +68,7 @@ private:
     Type performanceEntryType() const final { return Type::LargestContentfulPaint; }
 
     RefPtr<Element> m_element;
+    DOMHighResTimeStamp m_loadTime { 0 };
     String m_urlString;
     String m_id;
 };

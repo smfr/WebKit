@@ -28,6 +28,7 @@
 #include "FloatRect.h"
 #include "LayoutSize.h"
 #include <wtf/WeakHashMap.h>
+#include <wtf/WeakHashSet.h>
 
 namespace WTF {
 class URL;
@@ -35,10 +36,12 @@ class URL;
 
 namespace WebCore {
 
+class CachedImage;
 class Element;
 class HTMLImageElement;
 class LargestContentfulPaint;
 class Node;
+class Text;
 class WeakPtrImplWithEventTargetData;
 
 class LargestContentfulPaintData {
@@ -54,23 +57,31 @@ public:
 
     static LayoutRect paintableBoundingRect(const Element&);
 
-    void didPaintImage(HTMLImageElement&);
+    void didPaintImage(HTMLImageElement&, CachedImage*);
+    void didPaintText(Text&);
 
     RefPtr<LargestContentfulPaint> takePendingEntry();
 
 private:
 
-    static FloatSize effectiveVisualSize(const Element&, FloatRect intersectionRect);
+    static FloatSize effectiveVisualSize(const Element&, CachedImage*, FloatRect intersectionRect);
 
     static LayoutRect computeViewportIntersectionRect(Element&);
+    static LayoutRect computeViewportIntersectionRectForTextContainer(Element&, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>&);
 
     static bool isEligibleForLargestContentfulPaint(const Element&, FloatSize effectiveVisualSize);
 
-    void potentiallyAddLargestContentfulPaintEntry(Element&, const URL&, LayoutRect);
+    void potentiallyAddLargestContentfulPaintEntry(Element&, CachedImage*, LayoutRect);
 
     FloatSize m_largestPaintSize;
 
-    WeakHashMap<Element, Vector<URL>, WeakPtrImplWithEventTargetData> m_contentSet;
+    WeakHashMap<Element, WeakHashSet<CachedImage>, WeakPtrImplWithEventTargetData> m_imageContentSet;
+    WeakHashSet<Element, WeakPtrImplWithEventTargetData> m_textContentSet;
+
+
+    WeakHashMap<Element, WeakHashSet<CachedImage>, WeakPtrImplWithEventTargetData> m_pendingImageRecords;
+    WeakHashMap<Element, WeakHashSet<Text, WeakPtrImplWithEventTargetData>, WeakPtrImplWithEventTargetData> m_paintedTextRecords;
+
     RefPtr<LargestContentfulPaint> m_pendingEntry;
 };
 
