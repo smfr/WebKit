@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "FloatRect.h"
 #include "LayoutSize.h"
 #include <wtf/WeakHashMap.h>
 
@@ -46,7 +47,6 @@ public:
     ~LargestContentfulPaintData();
 
     static bool isContentfulForPaintTiming(const Element&);
-    static bool isLargestContentfulPaintCandidate(const Element&);
     static bool isTimingEligible(const Node&);
 
     static bool isExposedForPaintTiming(const Element&);
@@ -60,9 +60,13 @@ public:
 
 private:
 
-    static FloatSize effectiveVisualSize(const Element&);
-    void potentiallyAddLargestContentfulPaintEntry(Element&, const URL&);
+    static FloatSize effectiveVisualSize(const Element&, FloatRect intersectionRect);
 
+    static LayoutRect computeViewportIntersectionRect(Element&);
+
+    static bool isEligibleForLargestContentfulPaint(const Element&, FloatSize effectiveVisualSize);
+
+    void potentiallyAddLargestContentfulPaintEntry(Element&, const URL&, LayoutRect);
 
     FloatSize m_largestPaintSize;
 

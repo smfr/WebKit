@@ -28,7 +28,16 @@
 
 #include "Element.h"
 #include "LargestContentfulPaint.h"
+
+#include "LocalFrameView.h"
+#include "Logging.h"
+
+#include "RenderBox.h"
+#include "RenderInline.h"
+#include "RenderLineBreak.h"
+
 #include <wtf/Ref.h>
+#include <wtf/text/TextStream.h>
 
 namespace WebCore {
 
@@ -51,15 +60,6 @@ bool LargestContentfulPaintData::isTimingEligible(const Node&)
     a text node.
      */
     return false;
-}
-
-// https://w3c.github.io/largest-contentful-paint/#largest-contentful-paint-candidate
-bool LargestContentfulPaintData::isLargestContentfulPaintCandidate(const Element&)
-{
-    // opacity > 0
-    // text node, or candidate’s request’s response’s content length in bytes is >= candidate’s element’s effective visual size * 0.004
-
-    // CachedResource::expectedContentLength().
 }
 
 // https://w3c.github.io/paint-timing/#exposed-for-paint-timing
@@ -93,15 +93,54 @@ LayoutRect LargestContentfulPaintData::paintableBoundingRect(const Element&)
     return { };
 }
 
-// https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
-FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element&)
+
+// https://w3c.github.io/largest-contentful-paint/#largest-contentful-paint-candidate
+bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Element& element, FloatSize effectiveVisualSize)
 {
+    CheckedPtr renderer = element.renderer();
+    if (!renderer)
+        return false;
+
+    // FIXME: Maybe this should be used opacity: https://github.com/w3c/largest-contentful-paint/issues/141.
+    if (!renderer->opacity())
+        return false;
+
+/*
+    if (isTexty) {
+
+        return true;
+    }
+*/
+
+    // FIXME: Need to get response length.
+    // check content-length with area.
+    UNUSED_PARAM(effectiveVisualSize);
+
+
+    return true;
+}
+
+// https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
+FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element, FloatRect intersectionRect)
+{
+    RefPtr frameView = element.document().view();
+    if (!frameView)
+        return { };
+
+    auto visualViewportSize = FloatSize { frameView->visualViewportRect().size() };
+
+    WTF_ALWAYS_LOG("LargestContentfulPaintData::effectiveVisualSize - intersection size " << intersectionRect.size() << " visual viewport size " << visualViewportSize);
+
+    // or >= ?
+    if (intersectionRect.area() == visualViewportSize.area())
+        return { };
+
     // get the natural size of the image etc.
     return { 10, 10 };
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-add-lcp-entry
-void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, const URL& url)
+void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, const URL& url, LayoutRect intersectionRect)
 {
     // If document’s content set contains candidate, return.
     auto it = m_contentSet.find(element);
@@ -121,8 +160,11 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     if (window && (window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
-    auto elementSize = effectiveVisualSize(element);
+    auto elementSize = effectiveVisualSize(element, intersectionRect);
     if (elementSize.area() <= m_largestPaintSize.area())
+        return;
+
+    if (!isEligibleForLargestContentfulPaint(element, elementSize))
         return;
 
     m_pendingEntry = LargestContentfulPaint::create(0);
@@ -140,14 +182,62 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
     return std::exchange(m_pendingEntry, nullptr);
 }
 
+// This is a simplified version of IntersectionObserver::computeIntersectionState(). Some code should be shared.
+LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& element)
+{
+    RefPtr frameView = element.document().view();
+    if (!frameView)
+        return { };
+
+    CheckedPtr targetRenderer = element.renderer();
+    if (!targetRenderer)
+        return { };
+
+    if (targetRenderer->isSkippedContent())
+        return { };
+
+    CheckedPtr rootRenderer = frameView->renderView();
+    auto rootBounds = frameView->layoutViewportRect();
+
+    auto localTargetBounds = [&]() -> LayoutRect {
+        if (CheckedPtr renderBox = dynamicDowncast<RenderBox>(*targetRenderer))
+            return renderBox->borderBoundingBox();
+
+        if (is<RenderInline>(targetRenderer)) {
+            Vector<LayoutRect> rects;
+            targetRenderer->boundingRects(rects, { });
+            return unionRect(rects);
+        }
+
+        if (CheckedPtr renderLineBreak = dynamicDowncast<RenderLineBreak>(*targetRenderer))
+            return renderLineBreak->linesBoundingBox();
+
+        // FIXME: Implement for SVG etc.
+        return { };
+    }();
+
+    auto visibleRectOptions = OptionSet {
+        RenderObject::VisibleRectContextOption::UseEdgeInclusiveIntersection,
+        RenderObject::VisibleRectContextOption::ApplyCompositedClips,
+        RenderObject::VisibleRectContextOption::ApplyCompositedContainerScrolls
+    };
+
+    auto absoluteRects = targetRenderer->computeVisibleRectsInContainer({ localTargetBounds }, &targetRenderer->view(), { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
+    if (!absoluteRects)
+        return { };
+
+    auto intersectionRect = rootBounds;
+    intersectionRect.edgeInclusiveIntersect(absoluteRects->clippedOverflowRect);
+    return intersectionRect;
+}
 
 void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element)
 {
     if (!isExposedForPaintTiming(element))
         return;
 
-
-    potentiallyAddLargestContentfulPaintEntry(element, element.currentURL());
+    auto intersectionRect = computeViewportIntersectionRect(element);
+    potentiallyAddLargestContentfulPaintEntry(element, element.currentURL(), intersectionRect);
 }
 
 
