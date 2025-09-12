@@ -1,0 +1,6 @@
+
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT Same origin animated image is observable and has a first frame. Test timed out
+

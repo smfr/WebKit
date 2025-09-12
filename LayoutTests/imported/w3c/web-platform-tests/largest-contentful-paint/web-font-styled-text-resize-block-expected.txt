@@ -1,0 +1,6 @@
+LCP: Web Font Styled Text Resize
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT LCP should be not updated if the web font styled text resize occurs during the block period. Test timed out
+

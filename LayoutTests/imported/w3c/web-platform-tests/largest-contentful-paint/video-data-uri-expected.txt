@@ -1,0 +1,6 @@
+
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT Video of data URI src should trigger an LCP entry to be emitted. Test timed out
+

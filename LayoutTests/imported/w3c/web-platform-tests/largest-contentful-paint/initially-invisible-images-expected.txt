@@ -1,0 +1,4 @@
+
+
+FAIL Image visibility: out-of-viewport images are observable by LargestContentfulPaint once they become visible. assert_unreached: The image should have become visible by now, which should have triggered an LCP entry. Reached unreachable code
+

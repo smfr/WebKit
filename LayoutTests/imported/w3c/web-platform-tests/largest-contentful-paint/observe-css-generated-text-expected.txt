@@ -1,0 +1,5 @@
+
+FAIL CSS generated text is observable as a LargestContentfulPaint candidate promise_test: Unhandled rejection with value: object "Error: timeout, LCP candidate not detected"
+FAIL Text generated with CSS using content:attr() is observable as a LargestContentfulPaint candidate promise_test: Unhandled rejection with value: object "Error: timeout, LCP candidate not detected"
+FAIL CSS generated text on a inline element is observable as a LargestContentfulPaint candidate promise_test: Unhandled rejection with value: object "Error: timeout, LCP candidate not detected"
+

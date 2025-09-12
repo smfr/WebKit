@@ -1,0 +1,8 @@
+CONSOLE MESSAGE: Blocked access to external URL http://www.localhost:8801/images/blue.png
+CONSOLE MESSAGE: Blocked access to external URL http://www.localhost:8801/images/blue.png
+
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT Cross-origin image is observable, with renderTime equal to 0. Test timed out
+

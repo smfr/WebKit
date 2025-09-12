@@ -1,0 +1,7 @@
+CONSOLE MESSAGE: Blocked access to external URL http://www.localhost:8801/element-timing/resources/TAOImage.py?origin=http://localhost:8800&tao=wildcard
+
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT Cross-origin elements with valid TAO have correct renderTime, with invalid TAO have renderTime set to 0. Test timed out
+

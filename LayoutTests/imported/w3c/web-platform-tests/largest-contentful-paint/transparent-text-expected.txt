@@ -1,0 +1,6 @@
+fake LCP
+
+Harness Error (TIMEOUT), message = null
+
+TIMEOUT Transparent text should not be LCP. Test timed out
+

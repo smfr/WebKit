@@ -1,0 +1,3 @@
+
+FAIL Data-URI background SVG image is observable. assert_unreached: The image should have triggered an LCP entry. Reached unreachable code
+
