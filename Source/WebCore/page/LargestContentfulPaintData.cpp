@@ -40,8 +40,7 @@
 #include "RenderBox.h"
 #include "RenderInline.h"
 #include "RenderLineBreak.h"
-
-#include "SubresourceLoader.h"
+#include "RenderReplaced.h"
 
 #include <wtf/Ref.h>
 #include <wtf/text/TextStream.h>
@@ -102,7 +101,7 @@ LayoutRect LargestContentfulPaintData::paintableBoundingRect(const Element&)
 
 
 // https://w3c.github.io/largest-contentful-paint/#largest-contentful-paint-candidate
-bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Element& element, FloatSize effectiveVisualSize)
+bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Element& element, float effectiveVisualArea)
 {
     CheckedPtr renderer = element.renderer();
     if (!renderer)
@@ -121,14 +120,14 @@ bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Eleme
 
     // FIXME: Need to get response length.
     // check content-length with area.
-    UNUSED_PARAM(effectiveVisualSize);
+    UNUSED_PARAM(effectiveVisualArea);
 
 
     return true;
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
-FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element, CachedImage* image, FloatRect intersectionRect)
+std::optional<float> LargestContentfulPaintData::effectiveVisualArea(const Element& element, CachedImage* image, FloatRect intersectionRect)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
@@ -139,6 +138,7 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
         return { };
 
     bool isImage = true;
+    auto area = intersectionRect.area();
 
     if (isImage) {
         CheckedPtr renderer = element.renderer();
@@ -152,29 +152,28 @@ FloatSize LargestContentfulPaintData::effectiveVisualSize(const Element& element
             // This is going to be costly.
             // FIXME: This takes ancestor transforms into account; should it? https://github.com/w3c/largest-contentful-paint/issues/144
             auto absoluteContentRect = renderer->localToAbsoluteQuad(FloatRect(contentRect)).boundingBox();
-            auto clientContentRect = frameView->contentsToView(absoluteContentRect);
 
-            auto intersectingClientContentRect = intersection(clientContentRect, intersectionRect);
-            auto intersectionArea = intersectingClientContentRect.area();
+            auto intersectingContentRect = intersection(absoluteContentRect, intersectionRect);
+            area = intersectingContentRect.area();
 
-            // get image natural size etc.
-            UNUSED_PARAM(intersectionArea);
-            UNUSED_PARAM(image);
+            auto naturalSize = image->imageSizeForRenderer(renderReplaced.get(), 1);
+            if (naturalSize.isEmpty())
+                return { };
 
+            auto scaleFactor = absoluteContentRect.area() / FloatSize { naturalSize }.area();
+            if (scaleFactor > 1)
+                area /= scaleFactor;
 
+            return area;
         }
-
-
-
     }
 
 
-    // get the natural size of the image etc.
-    return { 10, 10 };
+    return area;
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-add-lcp-entry
-void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, CachedImage* image, LayoutRect intersectionRect)
+void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, CachedImage* image, LayoutRect intersectionRect, DOMHighResTimeStamp paintTimestamp)
 {
     // If document’s content set contains candidate, return.
     bool isNewCandidate = false;
@@ -197,32 +196,41 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     if ((window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
-    auto elementSize = effectiveVisualSize(element, image, intersectionRect);
-    if (elementSize.area() <= m_largestPaintSize.area())
+    auto elementArea = effectiveVisualArea(element, image, intersectionRect);
+    if (!elementArea)
         return;
 
-    if (!isEligibleForLargestContentfulPaint(element, elementSize))
+    if (*elementArea <= m_largestPaintArea) {
+        LOG_WITH_STREAM(LargestContentfulPaint, stream << " element area " << elementArea << " less than LCP " << m_largestPaintArea);
         return;
+    }
+
+    if (!isEligibleForLargestContentfulPaint(element, *elementArea))
+        return;
+
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << " element area " << elementArea << " larger than " << m_largestPaintArea << ", becoming LCP");
+    m_largestPaintArea = *elementArea;
 
     m_pendingEntry = LargestContentfulPaint::create(0);
+    m_pendingEntry->setElement(&element);
+    m_pendingEntry->setSize(std::round<unsigned>(m_largestPaintArea));
 
     if (image) {
         m_pendingEntry->setURLString(image->url().string());
 
-        // FIXME: We don't have this here.
-        if (RefPtr resourceLoader = image->loader()) {
-            auto loadTime = resourceLoader->loadTiming().endTime();
-            auto timeStamp = window->performance().relativeTimeFromTimeOriginInReducedResolution(loadTime);
+        if (auto loadTime = image->loadTime()) {
+            auto timeStamp = window->performance().relativeTimeFromTimeOriginInReducedResolution(*loadTime);
             m_pendingEntry->setLoadTime(timeStamp);
         }
     }
 
     if (element.hasID())
         m_pendingEntry->setID(element.getIdAttribute().string());
+
+    m_pendingEntry->setRenderTime(paintTimestamp);
 }
 
-
-RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
+RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMHighResTimeStamp paintTimestamp)
 {
     LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " takePendingEntry()");
 
@@ -236,7 +244,7 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
         for (WeakPtr image : images) {
             if (!image)
                 continue;
-            potentiallyAddLargestContentfulPaintEntry(*element, image.get(), intersectionRect);
+            potentiallyAddLargestContentfulPaintEntry(*element, image.get(), intersectionRect, paintTimestamp);
         }
     }
 
@@ -247,7 +255,7 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
             continue;
 
         auto intersectionRect = computeViewportIntersectionRectForTextContainer(*element, textNodes);
-        potentiallyAddLargestContentfulPaintEntry(*element, nullptr, intersectionRect);
+        potentiallyAddLargestContentfulPaintEntry(*element, nullptr, intersectionRect, paintTimestamp);
     }
 
 
@@ -277,7 +285,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
         return { };
 
     CheckedPtr rootRenderer = frameView->renderView();
-    auto rootBounds = frameView->layoutViewportRect();
+    auto layoutViewport = frameView->layoutViewportRect();
 
     auto localTargetBounds = [&]() -> LayoutRect {
         if (CheckedPtr renderBox = dynamicDowncast<RenderBox>(*targetRenderer))
@@ -306,7 +314,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     if (!absoluteRects)
         return { };
 
-    auto intersectionRect = rootBounds;
+    auto intersectionRect = layoutViewport;
     intersectionRect.edgeInclusiveIntersect(absoluteRects->clippedOverflowRect);
     return intersectionRect;
 }

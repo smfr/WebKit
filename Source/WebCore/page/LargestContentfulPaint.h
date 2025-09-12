@@ -51,13 +51,21 @@ public:
     void setLoadTime(DOMHighResTimeStamp);
 
     DOMHighResTimeStamp renderTime() const;
-    unsigned size() const;
-    String id() const;
-    String url() const;
-    Element* element() const;
+    void setRenderTime(DOMHighResTimeStamp);
 
+    DOMHighResTimeStamp startTime() const final;
+
+    unsigned size() const;
+    void setSize(unsigned);
+
+    String id() const;
     void setID(const String&);
+
+    String url() const;
     void setURLString(const String&);
+
+    Element* element() const;
+    void setElement(Element*);
 
     ASCIILiteral entryType() const final { return "largest-contentful-paint"_s; }
 
@@ -69,8 +77,10 @@ private:
 
     RefPtr<Element> m_element;
     DOMHighResTimeStamp m_loadTime { 0 };
+    DOMHighResTimeStamp m_renderTime { 0 };
     String m_urlString;
     String m_id;
+    unsigned m_size; // Really area.
 };
 
 } // namespace WebCore

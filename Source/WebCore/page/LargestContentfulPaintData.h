@@ -44,6 +44,8 @@ class Node;
 class Text;
 class WeakPtrImplWithEventTargetData;
 
+using DOMHighResTimeStamp = double;
+
 class LargestContentfulPaintData {
 public:
     LargestContentfulPaintData();
@@ -60,20 +62,20 @@ public:
     void didPaintImage(HTMLImageElement&, CachedImage*);
     void didPaintText(Text&);
 
-    RefPtr<LargestContentfulPaint> takePendingEntry();
+    RefPtr<LargestContentfulPaint> takePendingEntry(DOMHighResTimeStamp);
 
 private:
 
-    static FloatSize effectiveVisualSize(const Element&, CachedImage*, FloatRect intersectionRect);
+    static std::optional<float> effectiveVisualArea(const Element&, CachedImage*, FloatRect intersectionRect);
 
     static LayoutRect computeViewportIntersectionRect(Element&);
     static LayoutRect computeViewportIntersectionRectForTextContainer(Element&, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>&);
 
-    static bool isEligibleForLargestContentfulPaint(const Element&, FloatSize effectiveVisualSize);
+    static bool isEligibleForLargestContentfulPaint(const Element&, float effectiveVisualArea);
 
-    void potentiallyAddLargestContentfulPaintEntry(Element&, CachedImage*, LayoutRect);
+    void potentiallyAddLargestContentfulPaintEntry(Element&, CachedImage*, LayoutRect, DOMHighResTimeStamp);
 
-    FloatSize m_largestPaintSize;
+    float m_largestPaintArea { 0 };
 
     WeakHashMap<Element, WeakHashSet<CachedImage>, WeakPtrImplWithEventTargetData> m_imageContentSet;
     WeakHashSet<Element, WeakPtrImplWithEventTargetData> m_textContentSet;

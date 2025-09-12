@@ -2289,6 +2289,9 @@ void Page::updateRendering()
         document.updateIntersectionObservations();
     });
 
+    // frame timing
+    // mark paint timing
+
     runProcessingStep(RenderingUpdateStep::Images, [] (Document& document) {
         for (auto& image : document.protectedCachedResourceLoader()->allCachedSVGImages()) {
             if (RefPtr page = image->internalPage())

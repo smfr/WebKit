@@ -32,7 +32,7 @@
 namespace WebCore {
 
 LargestContentfulPaint::LargestContentfulPaint(DOMHighResTimeStamp timeStamp)
-    : PerformanceEntry(emptyString(), timeStamp, timeStamp) // FIXME: Timestamps
+    : PerformanceEntry(emptyString(), timeStamp, timeStamp)
 {
 }
 
@@ -40,7 +40,8 @@ LargestContentfulPaint::~LargestContentfulPaint() = default;
 
 DOMHighResTimeStamp LargestContentfulPaint::paintTime() const
 {
-    return 0;
+    // https://github.com/w3c/largest-contentful-paint/issues/145
+    return m_renderTime;
 }
 
 std::optional<DOMHighResTimeStamp> LargestContentfulPaint::presentationTime() const
@@ -50,7 +51,7 @@ std::optional<DOMHighResTimeStamp> LargestContentfulPaint::presentationTime() co
 
 DOMHighResTimeStamp LargestContentfulPaint::loadTime() const
 {
-    return 0;
+    return m_loadTime;
 }
 
 void LargestContentfulPaint::setLoadTime(DOMHighResTimeStamp loadTime)
@@ -60,17 +61,32 @@ void LargestContentfulPaint::setLoadTime(DOMHighResTimeStamp loadTime)
 
 DOMHighResTimeStamp LargestContentfulPaint::renderTime() const
 {
-    return 0;
+    return m_renderTime;
+}
+
+void LargestContentfulPaint::setRenderTime(DOMHighResTimeStamp renderTime)
+{
+    m_renderTime = renderTime;
+}
+
+DOMHighResTimeStamp LargestContentfulPaint::startTime() const
+{
+    return m_renderTime ? m_renderTime : m_loadTime;
 }
 
 unsigned LargestContentfulPaint::size() const
 {
-    return 0;
+    return m_size;
+}
+
+void LargestContentfulPaint::setSize(unsigned size)
+{
+    m_size = size;
 }
 
 String LargestContentfulPaint::id() const
 {
-    return emptyString();
+    return m_id;
 }
 
 void LargestContentfulPaint::setID(const String& idString)
@@ -97,6 +113,11 @@ Element* LargestContentfulPaint::element() const
         return nullptr;
 
     return m_element.get();
+}
+
+void LargestContentfulPaint::setElement(Element* element)
+{
+    m_element = element;
 }
 
 } // namespace WebCore
