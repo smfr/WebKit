@@ -259,6 +259,9 @@ public:
     RefPtr<SecurityOrigin> protectedOrigin() const;
     AtomString initiatorType() const { return m_initiatorType; }
 
+    std::optional<MonotonicTime> loadTime() const;
+    void setLoadTime(MonotonicTime time) { m_loadTime = time; }
+
     bool canDelete() const { return !hasClients() && !m_loader && !m_preloadCount && !m_handleCount && !m_resourceToRevalidate && !m_proxyResource; }
     bool hasOneHandle() const { return m_handleCount == 1; }
 
@@ -401,6 +404,7 @@ private:
     PAL::SessionID m_sessionID;
     RefPtr<const CookieJar> m_cookieJar;
     WallTime m_responseTimestamp { WallTime::now() };
+    Markable<MonotonicTime> m_loadTime;
     Markable<ResourceLoaderIdentifier> m_identifierForLoadWithoutResourceLoader;
 
     SingleThreadWeakHashMap<CachedResourceClient, std::unique_ptr<Callback>> m_clientsAwaitingCallback;

@@ -922,6 +922,8 @@ void SubresourceLoader::reportResourceTiming(const NetworkLoadMetrics& networkLo
     if (!resource || !ResourceTimingInformation::shouldAddResourceTiming(*resource))
         return;
 
+    m_resource->setLoadTime(m_loadTiming.endTime());
+
     RefPtr documentLoader = this->documentLoader();
     RefPtr document = documentLoader->cachedResourceLoader().document();
     if (!document)

@@ -300,6 +300,11 @@ RefPtr<SecurityOrigin> CachedResource::protectedOrigin() const
     return m_origin;
 }
 
+std::optional<MonotonicTime> CachedResource::loadTime() const
+{
+    return m_loadTime;
+}
+
 void CachedResource::setBodyDataFrom(const CachedResource& resource)
 {
     m_data = resource.m_data;
