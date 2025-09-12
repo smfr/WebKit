@@ -4366,6 +4366,9 @@ void Document::enqueuePaintTimingEntryIfNeeded()
     if (!view()->hasContentfulDescendants())
         return;
 
+    // Should this use frozenNowTimestamp()?
+    auto nowTime = protectedWindow()->performance().now();
+
     auto enqueuePaintTimingIfNecessary = [&]() {
         if (m_didEnqueueFirstContentfulPaint)
             return;
@@ -4375,14 +4378,14 @@ void Document::enqueuePaintTimingEntryIfNeeded()
 
         WTFEmitSignpost(this, NavigationAndPaintTiming, "firstContentfulPaint");
 
-        protectedWindow()->performance().reportFirstContentfulPaint();
+        protectedWindow()->performance().reportFirstContentfulPaint(nowTime);
         m_didEnqueueFirstContentfulPaint = true;
     };
 
     auto enqueueLargestContentfulPaintIfNecessary = [&]() {
         WTFEmitSignpost(this, NavigationAndPaintTiming, "largestContentfulPaint");
 
-        if (RefPtr entry = m_largestContentfulPaintData.takePendingEntry()) {
+        if (RefPtr entry = m_largestContentfulPaintData.takePendingEntry(nowTime)) {
             Ref entryRef = entry.releaseNonNull();
             protectedWindow()->performance().reportLargestContentfulPaint(WTFMove(entryRef));
         }

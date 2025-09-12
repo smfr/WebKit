@@ -352,10 +352,10 @@ void Performance::setResourceTimingBufferSize(unsigned size)
     m_resourceTimingBufferFullFlag = false;
 }
 
-void Performance::reportFirstContentfulPaint()
+void Performance::reportFirstContentfulPaint(DOMHighResTimeStamp timestamp)
 {
     ASSERT(!m_firstContentfulPaint);
-    m_firstContentfulPaint = PerformancePaintTiming::createFirstContentfulPaint(now());
+    m_firstContentfulPaint = PerformancePaintTiming::createFirstContentfulPaint(timestamp);
     queueEntry(*m_firstContentfulPaint);
 }
 

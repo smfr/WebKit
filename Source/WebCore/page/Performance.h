@@ -114,7 +114,7 @@ public:
     void navigationFinished(MonotonicTime loadEventEnd);
     void addResourceTiming(ResourceTiming&&);
 
-    void reportFirstContentfulPaint();
+    void reportFirstContentfulPaint(DOMHighResTimeStamp);
     void reportLargestContentfulPaint(Ref<LargestContentfulPaint>&&);
 
     void removeAllObservers();
