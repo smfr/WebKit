@@ -1,4 +1,4 @@
 
 
-FAIL Same-origin image is observable. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 53 and less than or equal to 68 but got 0
+FAIL Same-origin image is observable. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 53 and less than or equal to 72.00000000000001 but got 0
 

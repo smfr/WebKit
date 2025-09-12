@@ -1,6 +1,6 @@
 
 
-FAIL idl_test setup promise_test: Unhandled rejection with value: "Timed out waiting for LargestContentfulPaint entry"
+PASS idl_test setup
 PASS idl_test validation
 PASS LargestContentfulPaint includes PaintTimingMixin: member names are unique
 PASS Element includes ParentNode: member names are unique
@@ -19,13 +19,13 @@ PASS LargestContentfulPaint interface: attribute id
 PASS LargestContentfulPaint interface: attribute url
 PASS LargestContentfulPaint interface: attribute element
 PASS LargestContentfulPaint interface: operation toJSON()
-FAIL LargestContentfulPaint must be primary interface of lcp assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL Stringification of lcp assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "loadTime" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "size" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "id" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "url" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "element" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: lcp must inherit property "toJSON()" with the proper type assert_equals: Unexpected exception when evaluating object expected null but got object "ReferenceError: Can't find variable: lcp"
-FAIL LargestContentfulPaint interface: default toJSON operation on lcp undefined is not an object (evaluating 'memberHolderObject.toJSON')
+PASS LargestContentfulPaint must be primary interface of lcp
+PASS Stringification of lcp
+PASS LargestContentfulPaint interface: lcp must inherit property "loadTime" with the proper type
+PASS LargestContentfulPaint interface: lcp must inherit property "size" with the proper type
+PASS LargestContentfulPaint interface: lcp must inherit property "id" with the proper type
+PASS LargestContentfulPaint interface: lcp must inherit property "url" with the proper type
+PASS LargestContentfulPaint interface: lcp must inherit property "element" with the proper type
+PASS LargestContentfulPaint interface: lcp must inherit property "toJSON()" with the proper type
+FAIL LargestContentfulPaint interface: default toJSON operation on lcp assert_true: property "navigationId" should be present in the output of LargestContentfulPaint.prototype.toJSON() expected true got false
 
