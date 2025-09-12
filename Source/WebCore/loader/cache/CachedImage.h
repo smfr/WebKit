@@ -37,9 +37,11 @@ class CachedImage;
 }
 
 namespace WTF {
+class TextStream;
 template<typename T> struct IsDeprecatedWeakRefSmartPointerException;
 template<> struct IsDeprecatedWeakRefSmartPointerException<WebCore::CachedImage> : std::true_type { };
 }
+
 
 namespace WebCore {
 

@@ -329,6 +329,8 @@ public:
     void setIsHashReportingNeeded() { m_isHashReportingNeeded = true; }
     bool isHashReportingNeeded() const { return m_isHashReportingNeeded; }
 
+    virtual String debugDescription() const;
+
 protected:
     // CachedResource constructor that may be used when the CachedResource can already be filled with response data.
     CachedResource(const URL&, Type, PAL::SessionID, const CookieJar*);
@@ -476,6 +478,8 @@ inline bool CachedResource::isMainOrMediaOrIconOrRawResource() const
         || type() == Type::Beacon
         || type() == Type::Ping;
 }
+
+WTF::TextStream& operator<<(WTF::TextStream&, WebCore::CachedResource&);
 
 } // namespace WebCore
 

@@ -1068,7 +1068,30 @@ RefPtr<FragmentedSharedBuffer> CachedResource::protectedResourceBuffer() const
     return m_data;
 }
 
+static String statusString(CachedResource::Status status)
+{
+    switch (status) {
+    case CachedResource::Unknown: return "unknown"_s;
+    case CachedResource::Pending: return "pending"_s;
+    case CachedResource::Cached: return "cached"_s;
+    case CachedResource::LoadError: return "loadError"_s;
+    case CachedResource::DecodeError: return "decodeError"_s;
+    }
+    return ""_s;
 }
+
+String CachedResource::debugDescription() const
+{
+    return makeString("CachedResource "_s, hex(reinterpret_cast<uintptr_t>(this), Lowercase), " "_s, url().string(), " isLoading "_s, isLoading(), " "_s, statusString(status()));
+}
+
+TextStream& operator<<(TextStream& ts, CachedResource& resource)
+{
+    ts << resource.debugDescription();
+    return ts;
+}
+
+} // namespace WebCore
 
 #undef PAGE_ID
 #undef FRAME_ID

@@ -179,6 +179,8 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     } else
         isNewCandidate = m_textContentSet.add(element).isNewEntry;
 
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " potentiallyAddLargestContentfulPaintEntry() " << element << " image " << ValueOrNull(image) << " rect " << intersectionRect << " - isNewCandidate " << isNewCandidate);
+
     if (!isNewCandidate)
         return;
 
@@ -207,6 +209,7 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
 
 RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry()
 {
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " takePendingEntry()");
 
     // FIXME: Is this copying the value?
     for (auto [weakElement, images] : m_pendingImageRecords) {
@@ -312,6 +315,8 @@ void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element, Cached
     if (!image)
         return;
 
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintImage() " << element << " image " << ValueOrNull(image));
+
     m_pendingImageRecords.ensure(element, [] {
         return WeakHashSet<CachedImage> { };
     }).iterator->value.add(*image);
@@ -325,6 +330,8 @@ void LargestContentfulPaintData::didPaintText(Text& textNode)
 
     if (!isExposedForPaintTiming(*element))
         return;
+
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintText() " << textNode);
 
     m_paintedTextRecords.ensure(*element, [] {
         return WeakHashSet<Text, WeakPtrImplWithEventTargetData> { };
