@@ -30,12 +30,18 @@
 #include "Element.h"
 #include "LargestContentfulPaint.h"
 
+#include "LocalDOMWindow.h"
+
 #include "LocalFrameView.h"
 #include "Logging.h"
+
+#include "Performance.h"
 
 #include "RenderBox.h"
 #include "RenderInline.h"
 #include "RenderLineBreak.h"
+
+#include "SubresourceLoader.h"
 
 #include <wtf/Ref.h>
 #include <wtf/text/TextStream.h>
@@ -184,8 +190,11 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     if (!isNewCandidate)
         return;
 
-    auto* window = element.document().window();
-    if (window && (window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
+    RefPtr window = element.document().window();
+    if (!window)
+        return;
+
+    if ((window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
     auto elementSize = effectiveVisualSize(element, image, intersectionRect);
@@ -199,7 +208,13 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
 
     if (image) {
         m_pendingEntry->setURLString(image->url().string());
-        m_pendingEntry->setLoadTime(0); // FIXME.
+
+        // FIXME: We don't have this here.
+        if (RefPtr resourceLoader = image->loader()) {
+            auto loadTime = resourceLoader->loadTiming().endTime();
+            auto timeStamp = window->performance().relativeTimeFromTimeOriginInReducedResolution(loadTime);
+            m_pendingEntry->setLoadTime(timeStamp);
+        }
     }
 
     if (element.hasID())
