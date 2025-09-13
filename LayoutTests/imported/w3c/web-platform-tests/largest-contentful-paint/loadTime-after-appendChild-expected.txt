@@ -1,4 +1,4 @@
 
 
-FAIL Image loadTime occurs after appendChild is called. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 267 and less than or equal to 568.0000000000001 but got 66
+FAIL Image loadTime occurs after appendChild is called. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 261 and less than or equal to 559 but got 56
 

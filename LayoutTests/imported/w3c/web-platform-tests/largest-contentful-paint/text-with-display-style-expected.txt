@@ -1,7 +1,5 @@
-I am a title!
+I am the third and last title!
 
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Text with display style is observable. Test timed out
+PASS Text with display style is observable.
 

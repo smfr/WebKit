@@ -1,5 +1,5 @@
 
 
 
-FAIL Repeated image produces different timestamps. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 102.00000000000001 and less than or equal to 579 but got 75
+FAIL Repeated image produces different timestamps. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 89 and less than or equal to 576.0000000000001 but got 72.00000000000001
 

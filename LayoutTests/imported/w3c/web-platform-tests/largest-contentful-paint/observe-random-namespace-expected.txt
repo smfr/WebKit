@@ -1,6 +1,4 @@
 This is important text! :)
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Element created with different namespace is observable Test timed out
+PASS Element created with different namespace is observable
 

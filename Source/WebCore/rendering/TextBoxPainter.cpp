@@ -191,6 +191,8 @@ void TextBoxPainter::paint()
             paintCompositionUnderlines();
 
         m_renderer.page().addRelevantRepaintedObject(m_renderer, enclosingLayoutRect(m_paintRect));
+        if (RefPtr text = m_renderer.textNode())
+            const_cast<Document&>(m_document).largestContentfulPaintData().didPaintText(*text);
     }
 
     if (glyphRotation) {

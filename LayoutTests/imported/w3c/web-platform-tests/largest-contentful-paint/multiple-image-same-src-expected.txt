@@ -1,4 +1,4 @@
 
 
-FAIL Largest Contentful Paint:dynamically appended image with different dimensions but same src triggers new entry. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 94 and less than or equal to 569.0000000000001 but got 64
+FAIL Largest Contentful Paint:dynamically appended image with different dimensions but same src triggers new entry. assert_between_inclusive: loadTime should occur between the lower bound and the renderTime expected a number greater than or equal to 68 and less than or equal to 560 but got 56
 

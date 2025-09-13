@@ -261,12 +261,6 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
 
     // FIXME: Clear?
 
-
-
-
-
-
-
     return std::exchange(m_pendingEntry, nullptr);
 }
 
@@ -310,6 +304,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
         RenderObject::VisibleRectContextOption::ApplyCompositedContainerScrolls
     };
 
+    // FIXME: This clips for ancestors, which maybe isn't what we want.
     auto absoluteRects = targetRenderer->computeVisibleRectsInContainer({ localTargetBounds }, &targetRenderer->view(), { false /* hasPositionFixedDescendant */, false /* dirtyRectIsFlipped */, visibleRectOptions });
     if (!absoluteRects)
         return { };
@@ -319,14 +314,36 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     return intersectionRect;
 }
 
-LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextContainer(Element&, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>& textNodes)
+LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextContainer(Element& element, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>& textNodes)
 {
+    RefPtr frameView = element.document().view();
+    if (!frameView)
+        return { };
 
+    CheckedPtr rootRenderer = frameView->renderView();
+    auto layoutViewport = frameView->layoutViewportRect();
+
+    IntRect absoluteTextBounds;
     for (RefPtr node : textNodes) {
+        if (!node)
+            continue;
 
+        CheckedPtr renderer = node->checkedRenderer();
+        if (!renderer)
+            continue;
+
+        if (renderer->isSkippedContent())
+            continue;
+
+        static constexpr bool useTransforms = true;
+        auto absoluteBounds = renderer->absoluteBoundingBoxRect(useTransforms);
+        absoluteTextBounds.unite(absoluteBounds);
     }
 
-    return { };
+    auto intersectionRect = layoutViewport;
+    intersectionRect.edgeInclusiveIntersect(absoluteTextBounds);
+
+    return intersectionRect;
 }
 
 // FIXME: This should be done on loads, not paints.

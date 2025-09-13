@@ -2,7 +2,5 @@
 This is some text.
 This is more text so it will be the Largest Contentful Paint!
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Largest Contentful Paint: largest text is reported. Test timed out
+PASS Largest Contentful Paint: largest text is reported.
 
