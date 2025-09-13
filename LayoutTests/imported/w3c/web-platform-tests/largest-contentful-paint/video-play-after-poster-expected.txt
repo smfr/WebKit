@@ -1,6 +1,4 @@
 
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Video with poster should not emit a second LCP entry after playing. Test timed out
+PASS Video with poster should not emit a second LCP entry after playing.
 

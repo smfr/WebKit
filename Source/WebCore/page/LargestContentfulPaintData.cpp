@@ -347,7 +347,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextCon
 }
 
 // FIXME: This should be done on loads, not paints.
-void LargestContentfulPaintData::didPaintImage(HTMLImageElement& element, CachedImage* image)
+void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* image)
 {
     if (!isExposedForPaintTiming(element))
         return;

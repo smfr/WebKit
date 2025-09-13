@@ -38,6 +38,7 @@
 #include "HTMLNames.h"
 #include "ImageBuffer.h"
 #include "JSDOMPromiseDeferred.h"
+#include "LargestContentfulPaintData.h"
 #include "LocalFrame.h"
 #include "Logging.h"
 #include "MediaPlayerPrivate.h"
@@ -346,6 +347,8 @@ void HTMLVideoElement::mediaPlayerFirstVideoFrameAvailable()
 
     if (CheckedPtr renderer = this->renderer())
         renderer->updateFromElement();
+
+    document().largestContentfulPaintData().didPaintImage(*this, nullptr);
 }
 
 std::optional<DestinationColorSpace> HTMLVideoElement::colorSpace() const

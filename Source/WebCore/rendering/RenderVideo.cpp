@@ -33,6 +33,7 @@
 #include "GraphicsContext.h"
 #include "HTMLNames.h"
 #include "HTMLVideoElement.h"
+#include "LargestContentfulPaintData.h"
 #include "LayoutIntegrationLineLayout.h"
 #include "LocalFrame.h"
 #include "LocalFrameView.h"
@@ -239,8 +240,11 @@ void RenderVideo::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
     }
     rect.moveBy(paintOffset);
 
-    if (paintInfo.phase == PaintPhase::Foreground)
+    if (paintInfo.phase == PaintPhase::Foreground) {
         page->addRelevantRepaintedObject(*this, rect);
+        if (displayingPoster)
+            document().largestContentfulPaintData().didPaintImage(videoElement.get(), cachedImage());
+    }
 
     LayoutRect contentRect = contentBoxRect();
     contentRect.moveBy(paintOffset);
