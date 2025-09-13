@@ -1,0 +1,5 @@
+
+LCP: Web Font Styled Text Resize
+
+FAIL LCP should be not updated if the web font styled text resize occurs after an interaction happens assert_equals: Web font should be downloaded. expected 1 but got 0
+
