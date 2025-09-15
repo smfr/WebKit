@@ -1,5 +1,5 @@
 fallback
 
 
-FAIL Background image-set images should be eligible for LCP candidates promise_test: Unhandled rejection with value: object "Error: Timed out waiting for LCP entry for background image-set image."
+PASS Background image-set images should be eligible for LCP candidates
 

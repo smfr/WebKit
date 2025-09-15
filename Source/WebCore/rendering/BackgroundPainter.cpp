@@ -233,6 +233,12 @@ template<typename Layer> void BackgroundPainter::paintFillLayerImpl(const Color&
         return;
     }
 
+    if (shouldPaintBackgroundImage && bgImage->cachedImage()) {
+        if (RefPtr element = m_renderer.element()) {
+            const_cast<Document&>(document()).largestContentfulPaintData().didPaintImage(*element, bgImage->cachedImage());
+        }
+    }
+
     bool forceBackgroundToWhite = false;
     if (document().printing()) {
         if (style.printColorAdjust() == PrintColorAdjust::Economy)

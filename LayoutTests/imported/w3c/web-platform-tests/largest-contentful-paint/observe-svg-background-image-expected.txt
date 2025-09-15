@@ -1,3 +1,3 @@
 
-FAIL Same-origin SVG background image is observable. assert_unreached: The image should have triggered an LCP entry. Reached unreachable code
+PASS Same-origin SVG background image is observable.
 

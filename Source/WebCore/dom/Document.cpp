@@ -4363,13 +4363,13 @@ void Document::enqueuePaintTimingEntryIfNeeded()
     if (!view()->isVisuallyNonEmpty() || view()->needsLayout())
         return;
 
-    if (!view()->hasContentfulDescendants())
-        return;
-
     // Should this use frozenNowTimestamp()?
     auto nowTime = protectedWindow()->performance().now();
 
     auto enqueuePaintTimingIfNecessary = [&]() {
+        if (!view()->hasContentfulDescendants())
+            return;
+
         if (m_didEnqueueFirstContentfulPaint)
             return;
 

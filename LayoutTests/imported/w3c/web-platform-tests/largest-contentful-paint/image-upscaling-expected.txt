@@ -1,6 +1,4 @@
 
-Harness Error (TIMEOUT), message = null
-
 PASS Non-scaled image should report the natural size
 PASS A downscaled image (width/height) should report the displayed size
 FAIL A downscaled image (using scale) should report the displayed size assert_equals: expected 3524 but got 3525
@@ -8,7 +6,7 @@ PASS An upscaled image (width/height) should report the natural size
 PASS An upscaled image (using scale) should report the natural size
 PASS An upscaled image (using object-size) should report the natural size
 PASS Intersecting element with partial-intersecting image to report image intersection
-TIMEOUT A background image larger than the container should report the container size Test timed out
-NOTRUN A background image smaller than the container should report the natural size
-NOTRUN A scaled-down background image should report the background size
+PASS A background image larger than the container should report the container size
+FAIL A background image smaller than the container should report the natural size assert_equals: expected 14098 but got 90000
+FAIL A scaled-down background image should report the background size assert_equals: expected 100 but got 90000
 
