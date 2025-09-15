@@ -29,7 +29,7 @@
 #include "CachedImage.h"
 #include "Element.h"
 #include "LargestContentfulPaint.h"
-
+#include "LegacyRenderSVGImage.h"
 #include "LocalDOMWindow.h"
 
 #include "LocalFrameView.h"
@@ -41,6 +41,7 @@
 #include "RenderInline.h"
 #include "RenderLineBreak.h"
 #include "RenderReplaced.h"
+#include "RenderSVGImage.h"
 
 #include <wtf/Ref.h>
 #include <wtf/text/TextStream.h>
@@ -282,6 +283,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     auto layoutViewport = frameView->layoutViewportRect();
 
     auto localTargetBounds = [&]() -> LayoutRect {
+        // FIXME: Should this be using replacedContentRect?
         if (CheckedPtr renderBox = dynamicDowncast<RenderBox>(*targetRenderer))
             return renderBox->borderBoundingBox();
 
@@ -294,7 +296,19 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
         if (CheckedPtr renderLineBreak = dynamicDowncast<RenderLineBreak>(*targetRenderer))
             return renderLineBreak->linesBoundingBox();
 
-        // FIXME: Implement for SVG etc.
+        if (CheckedPtr svgImageRenderer = dynamicDowncast<RenderSVGImage>(*targetRenderer))
+            return svgImageRenderer->borderBoxRectEquivalent();
+
+        if (CheckedPtr svgImageRenderer = dynamicDowncast<LegacyRenderSVGImage>(*targetRenderer)) {
+            Vector<LayoutRect> rects;
+            svgImageRenderer->boundingRects(rects, { });
+            if (!rects.size())
+                return { };
+            return rects[0];
+        }
+
+        // FIXME: Text in SVG
+
         return { };
     }();
 

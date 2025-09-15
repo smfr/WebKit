@@ -225,6 +225,8 @@ void RenderSVGImage::paintForeground(PaintInfo& paintInfo, const LayoutPoint& pa
             page().addRelevantUnpaintedObject(*this, enclosingLayoutRect(visibleRect));
         else
             page().addRelevantRepaintedObject(*this, enclosingLayoutRect(visibleRect));
+
+        document().largestContentfulPaintData().didPaintImage(protectedImageElement().get(), cachedImage());
     }
 }
 

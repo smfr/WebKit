@@ -229,6 +229,9 @@ void LegacyRenderSVGImage::paintForeground(PaintInfo& paintInfo)
     };
 
     paintInfo.context().drawImage(*image, destRect, srcRect, options);
+
+    if (auto* cachedImage = imageResource().cachedImage())
+        document().largestContentfulPaintData().didPaintImage(imageElement(), cachedImage);
 }
 
 void LegacyRenderSVGImage::invalidateBufferedForeground()

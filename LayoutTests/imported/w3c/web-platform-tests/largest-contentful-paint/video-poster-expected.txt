@@ -1,6 +1,4 @@
 
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Able to observe a video's poster image. Test timed out
+PASS Able to observe a video's poster image.
 

@@ -1,4 +1,4 @@
 
 
-FAIL Same origin animated image is observable and has a first frame. assert_less_than: renderTime should be smaller than the delay applied to the second frame expected a number less than 2000 but got 2173
+FAIL Same origin animated image is observable and has a first frame. assert_less_than: renderTime should be smaller than the delay applied to the second frame expected a number less than 2000 but got 2090
 

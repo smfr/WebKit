@@ -1,5 +1,3 @@
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Image inside SVG is observable. Test timed out
+PASS Image inside SVG is observable.
 
