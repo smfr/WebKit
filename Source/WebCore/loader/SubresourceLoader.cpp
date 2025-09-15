@@ -755,6 +755,7 @@ void SubresourceLoader::didFinishLoading(const NetworkLoadMetrics& networkLoadMe
     logResourceLoaded(protectedFrame().get(), resource->type());
 
     m_loadTiming.markEndTime();
+    resource->setLoadTime(m_loadTiming.endTime());
 
     if (networkLoadMetrics.isComplete())
         reportResourceTiming(networkLoadMetrics);
@@ -921,8 +922,6 @@ void SubresourceLoader::reportResourceTiming(const NetworkLoadMetrics& networkLo
     ASSERT(resource);
     if (!resource || !ResourceTimingInformation::shouldAddResourceTiming(*resource))
         return;
-
-    m_resource->setLoadTime(m_loadTiming.endTime());
 
     RefPtr documentLoader = this->documentLoader();
     RefPtr document = documentLoader->cachedResourceLoader().document();
