@@ -234,8 +234,9 @@ template<typename Layer> void BackgroundPainter::paintFillLayerImpl(const Color&
     }
 
     if (shouldPaintBackgroundImage && bgImage->cachedImage()) {
-        if (RefPtr element = m_renderer.element()) {
-            const_cast<Document&>(document()).largestContentfulPaintData().didPaintImage(*element, bgImage->cachedImage());
+        auto styleable = Styleable::fromRenderer(m_renderer);
+        if (styleable) {
+            const_cast<Document&>(document()).largestContentfulPaintData().didPaintImage(styleable->element, bgImage->cachedImage());
         }
     }
 

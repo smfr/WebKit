@@ -68,6 +68,13 @@ namespace WebCore {
 const std::optional<const Styleable> Styleable::fromRenderer(const RenderElement& renderer)
 {
     switch (renderer.style().pseudoElementType()) {
+    case PseudoId::FirstLetter: {
+        if (auto* generatingRenderer = renderer.isAnonymous() ? renderer.firstNonAnonymousAncestor() : &renderer) {
+            if (auto* element = generatingRenderer->element())
+                return Styleable(*element, Style::PseudoElementIdentifier { PseudoId::FirstLetter });
+        }
+        return std::nullopt;
+    }
     case PseudoId::Backdrop:
         for (auto& topLayerElement : renderer.document().topLayerElements()) {
             if (topLayerElement->renderer() && topLayerElement->renderer()->backdropRenderer() == &renderer)

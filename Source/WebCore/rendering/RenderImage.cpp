@@ -662,8 +662,9 @@ void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
         else
             page().addRelevantRepaintedObject(*this, visibleRect);
 
-        if (RefPtr imageElement = dynamicDowncast<HTMLImageElement>(element()))
-            document().largestContentfulPaintData().didPaintImage(*imageElement, cachedImage());
+        auto styleable = Styleable::fromRenderer(*this);
+        if (styleable)
+            document().largestContentfulPaintData().didPaintImage(styleable->element, cachedImage());
     }
 }
 
