@@ -28,20 +28,19 @@
 
 #include "CachedImage.h"
 #include "Element.h"
+#include "FloatQuad.h"
 #include "LargestContentfulPaint.h"
 #include "LegacyRenderSVGImage.h"
 #include "LocalDOMWindow.h"
-
 #include "LocalFrameView.h"
 #include "Logging.h"
-
 #include "Performance.h"
-
 #include "RenderBox.h"
 #include "RenderInline.h"
 #include "RenderLineBreak.h"
 #include "RenderReplaced.h"
 #include "RenderSVGImage.h"
+#include "RenderView.h"
 
 #include <wtf/Ref.h>
 #include <wtf/text/TextStream.h>

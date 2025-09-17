@@ -26,7 +26,7 @@
 #pragma once
 
 #include "FloatRect.h"
-#include "LayoutSize.h"
+#include "LayoutRect.h"
 #include <wtf/WeakHashMap.h>
 #include <wtf/WeakHashSet.h>
 
