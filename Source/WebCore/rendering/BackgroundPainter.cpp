@@ -233,13 +233,6 @@ template<typename Layer> void BackgroundPainter::paintFillLayerImpl(const Color&
         return;
     }
 
-    if (shouldPaintBackgroundImage && bgImage->cachedImage()) {
-        auto styleable = Styleable::fromRenderer(m_renderer);
-        if (styleable) {
-            const_cast<Document&>(document()).largestContentfulPaintData().didPaintImage(styleable->element, bgImage->cachedImage(), rect);
-        }
-    }
-
     bool forceBackgroundToWhite = false;
     if (document().printing()) {
         if (style.printColorAdjust() == PrintColorAdjust::Economy)
@@ -540,6 +533,13 @@ template<typename Layer> void BackgroundPainter::paintFillLayerImpl(const Color&
 
             if (m_renderer.element() && !context.paintingDisabled())
                 m_renderer.element()->setHasEverPaintedImages(true);
+
+            if (bgImage->cachedImage()) {
+                auto styleable = Styleable::fromRenderer(m_renderer);
+                if (styleable) {
+                    const_cast<Document&>(document()).largestContentfulPaintData().didPaintImage(styleable->element, bgImage->cachedImage(), geometry.destinationRect);
+                }
+            }
         }
     }
 }

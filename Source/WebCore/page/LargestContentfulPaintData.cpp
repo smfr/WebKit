@@ -236,23 +236,19 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
 RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMHighResTimeStamp paintTimestamp)
 {
     auto imageRecords = std::exchange(m_pendingImageRecords, { });
-    // FIXME: Is this copying the value?
-    for (auto weakElement : imageRecords.keys()) {
+    for (auto [weakElement, imageAndRects] : imageRecords) {
         RefPtr element = weakElement;
         if (!element)
             continue;
-#warnign fixme
-        auto imagesAndRects = imageRecords
-        auto intersectionRect = computeViewportIntersectionRect(*element);
-        for (WeakPtr image : images) {
-            if (!image)
-                continue;
-            potentiallyAddLargestContentfulPaintEntry(*element, image.get(), intersectionRect, paintTimestamp);
+
+        // FIXME: This is doing multiple localToAbsolute on the same element.
+        for (auto [image, rect] : imageAndRects) {
+            auto intersectionRect = computeViewportIntersectionRect(*element, rect);
+            potentiallyAddLargestContentfulPaintEntry(*element, &image, intersectionRect, paintTimestamp);
         }
     }
 
     auto textRecords = std::exchange(m_paintedTextRecords, { });
-    // FIXME: Is this copying the value?
     for (auto [weakElement, textNodes] : textRecords) {
         RefPtr element = weakElement;
         if (!element)
@@ -266,7 +262,7 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
 }
 
 // This is a simplified version of IntersectionObserver::computeIntersectionState(). Some code should be shared.
-LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& element)
+LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& element, const FloatRect& localRect)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
@@ -282,35 +278,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     CheckedPtr rootRenderer = frameView->renderView();
     auto layoutViewport = frameView->layoutViewportRect();
 
-    auto localTargetBounds = [&]() -> LayoutRect {
-        // FIXME: Should this be using replacedContentRect?
-        if (CheckedPtr renderBox = dynamicDowncast<RenderBox>(*targetRenderer))
-            return renderBox->borderBoundingBox();
-
-        if (is<RenderInline>(targetRenderer)) {
-            Vector<LayoutRect> rects;
-            targetRenderer->boundingRects(rects, { });
-            return unionRect(rects);
-        }
-
-        if (CheckedPtr renderLineBreak = dynamicDowncast<RenderLineBreak>(*targetRenderer))
-            return renderLineBreak->linesBoundingBox();
-
-        if (CheckedPtr svgImageRenderer = dynamicDowncast<RenderSVGImage>(*targetRenderer))
-            return svgImageRenderer->borderBoxRectEquivalent();
-
-        if (CheckedPtr svgImageRenderer = dynamicDowncast<LegacyRenderSVGImage>(*targetRenderer)) {
-            Vector<LayoutRect> rects;
-            svgImageRenderer->boundingRects(rects, { });
-            if (!rects.size())
-                return { };
-            return rects[0];
-        }
-
-        // FIXME: Text in SVG
-
-        return { };
-    }();
+    auto localTargetBounds = LayoutRect { localRect };
 
     auto visibleRectOptions = OptionSet {
         RenderObject::VisibleRectContextOption::UseEdgeInclusiveIntersection,
@@ -382,11 +350,11 @@ void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* im
     });
 
     auto& imageRectMap = addResult.iterator->value;
-    auto imageAddResult = imageRectMap.add(image, localRect);
+    auto imageAddResult = imageRectMap.add(*image, localRect);
     if (!addResult.isNewEntry) {
-        auto& existingRect = imageAddResult.iterator->value.localRect;
+        auto& existingRect = imageAddResult.iterator->value;
         if (localRect.area() > existingRect.area())
-            imageAddResult.iterator->value.localRect = localRect;
+            imageAddResult.iterator->value = localRect;
     }
 }
 

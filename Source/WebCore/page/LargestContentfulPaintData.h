@@ -68,7 +68,7 @@ private:
 
     static std::optional<float> effectiveVisualArea(const Element&, CachedImage*, FloatRect intersectionRect);
 
-    static LayoutRect computeViewportIntersectionRect(Element&);
+    static LayoutRect computeViewportIntersectionRect(Element&, const FloatRect& localRect);
     static LayoutRect computeViewportIntersectionRectForTextContainer(Element&, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>&);
 
     static bool isEligibleForLargestContentfulPaint(const Element&, float effectiveVisualArea);
