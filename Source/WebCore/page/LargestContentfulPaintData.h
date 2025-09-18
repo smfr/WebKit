@@ -59,7 +59,7 @@ public:
 
     static LayoutRect paintableBoundingRect(const Element&);
 
-    void didPaintImage(Element&, CachedImage*);
+    void didPaintImage(Element&, CachedImage*, const FloatRect& localRect);
     void didPaintText(Text&);
 
     RefPtr<LargestContentfulPaint> takePendingEntry(DOMHighResTimeStamp);
@@ -80,7 +80,7 @@ private:
     WeakHashMap<Element, WeakHashSet<CachedImage>, WeakPtrImplWithEventTargetData> m_imageContentSet;
     WeakHashSet<Element, WeakPtrImplWithEventTargetData> m_textContentSet;
 
-    WeakHashMap<Element, WeakHashSet<CachedImage>, WeakPtrImplWithEventTargetData> m_pendingImageRecords;
+    WeakHashMap<Element, WeakHashMap<CachedImage, FloatRect>, WeakPtrImplWithEventTargetData> m_pendingImageRecords;
     WeakHashMap<Element, WeakHashSet<Text, WeakPtrImplWithEventTargetData>, WeakPtrImplWithEventTargetData> m_paintedTextRecords;
 
     RefPtr<LargestContentfulPaint> m_pendingEntry;

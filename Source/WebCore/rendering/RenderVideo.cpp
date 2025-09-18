@@ -232,18 +232,20 @@ void RenderVideo::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
         return;
     }
 
-    LayoutRect rect = videoBox();
-    if (rect.isEmpty()) {
+    LayoutRect videoBoxRect = videoBox();
+    if (videoBoxRect.isEmpty()) {
         if (paintInfo.phase == PaintPhase::Foreground)
             page->addRelevantUnpaintedObject(*this, visualOverflowRect());
         return;
     }
+
+    auto rect = videoBoxRect;
     rect.moveBy(paintOffset);
 
     if (paintInfo.phase == PaintPhase::Foreground) {
         page->addRelevantRepaintedObject(*this, rect);
         if (displayingPoster)
-            document().largestContentfulPaintData().didPaintImage(videoElement.get(), cachedImage());
+            document().largestContentfulPaintData().didPaintImage(videoElement.get(), cachedImage(), videoBoxRect);
     }
 
     LayoutRect contentRect = contentBoxRect();

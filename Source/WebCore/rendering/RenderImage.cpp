@@ -663,8 +663,11 @@ void RenderImage::paintReplaced(PaintInfo& paintInfo, const LayoutPoint& paintOf
             page().addRelevantRepaintedObject(*this, visibleRect);
 
         auto styleable = Styleable::fromRenderer(*this);
-        if (styleable)
-            document().largestContentfulPaintData().didPaintImage(styleable->element, cachedImage());
+        if (styleable) {
+            auto localVisibleRect = visibleRect;
+            localVisibleRect.moveBy(-paintOffset);
+            document().largestContentfulPaintData().didPaintImage(styleable->element, cachedImage(), localVisibleRect);
+        }
     }
 }
 

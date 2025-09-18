@@ -345,10 +345,10 @@ void HTMLVideoElement::mediaPlayerFirstVideoFrameAvailable()
     if (RefPtr player = this->player())
         player->prepareForRendering();
 
-    if (CheckedPtr renderer = this->renderer())
+    if (CheckedPtr renderer = this->renderer()) {
         renderer->updateFromElement();
-
-    document().largestContentfulPaintData().didPaintImage(*this, nullptr);
+        document().largestContentfulPaintData().didPaintImage(*this, nullptr, renderer->videoBox());
+    }
 }
 
 std::optional<DestinationColorSpace> HTMLVideoElement::colorSpace() const

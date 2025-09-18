@@ -237,11 +237,12 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
 {
     auto imageRecords = std::exchange(m_pendingImageRecords, { });
     // FIXME: Is this copying the value?
-    for (auto [weakElement, images] : imageRecords) {
+    for (auto weakElement : imageRecords.keys()) {
         RefPtr element = weakElement;
         if (!element)
             continue;
-
+#warnign fixme
+        auto imagesAndRects = imageRecords
         auto intersectionRect = computeViewportIntersectionRect(*element);
         for (WeakPtr image : images) {
             if (!image)
@@ -360,7 +361,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextCon
 }
 
 // FIXME: This should be done on loads, not paints.
-void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* image)
+void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* image, const FloatRect& localRect)
 {
     if (!isExposedForPaintTiming(element))
         return;
@@ -368,16 +369,25 @@ void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* im
     if (!image)
         return;
 
-    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintImage() " << element << " image " << ValueOrNull(image));
+    if (localRect.isEmpty())
+        return;
 
     if (m_pendingImageRecords.isEmptyIgnoringNullReferences()) {
         if (RefPtr page = element.document().page())
             page->scheduleRenderingUpdate(RenderingUpdateStep::CursorUpdate); // FIXME: Need the step.
     }
 
-    m_pendingImageRecords.ensure(element, [] {
-        return WeakHashSet<CachedImage> { };
-    }).iterator->value.add(*image);
+    auto addResult = m_pendingImageRecords.ensure(element, [] {
+        return WeakHashMap<CachedImage, FloatRect> { };
+    });
+
+    auto& imageRectMap = addResult.iterator->value;
+    auto imageAddResult = imageRectMap.add(image, localRect);
+    if (!addResult.isNewEntry) {
+        auto& existingRect = imageAddResult.iterator->value.localRect;
+        if (localRect.area() > existingRect.area())
+            imageAddResult.iterator->value.localRect = localRect;
+    }
 }
 
 void LargestContentfulPaintData::didPaintText(Text& textNode)
@@ -388,8 +398,6 @@ void LargestContentfulPaintData::didPaintText(Text& textNode)
 
     if (!isExposedForPaintTiming(*element))
         return;
-
-    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintText() " << textNode);
 
     if (m_paintedTextRecords.isEmptyIgnoringNullReferences()) {
         if (RefPtr page = element->document().page())
