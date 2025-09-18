@@ -1,6 +1,5 @@
 A
+long text will now be LCP
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Largest Contentful Paint: first-letter is observable. Test timed out
+PASS Largest Contentful Paint: first-letter is observable.
 

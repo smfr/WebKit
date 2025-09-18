@@ -128,7 +128,7 @@ bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Eleme
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-effective-visual-size
-std::optional<float> LargestContentfulPaintData::effectiveVisualArea(const Element& element, CachedImage* image, FloatRect intersectionRect)
+std::optional<float> LargestContentfulPaintData::effectiveVisualArea(const Element& element, CachedImage* image, FloatRect imageLocalRect, FloatRect intersectionRect)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
@@ -138,43 +138,36 @@ std::optional<float> LargestContentfulPaintData::effectiveVisualArea(const Eleme
     if (intersectionRect.area() >= visualViewportSize.area())
         return { };
 
-    bool isImage = true;
     auto area = intersectionRect.area();
 
-    if (isImage) {
+    if (image) {
         CheckedPtr renderer = element.renderer();
         if (!renderer)
             return { };
 
-        if (CheckedPtr renderReplaced = dynamicDowncast<RenderReplaced>(*renderer)) {
-            // replacedContentRect() takes object-fit and object-position into account, so contentRect's size is visibleDimensions.
-            auto contentRect = renderReplaced->replacedContentRect();
+        // This is going to be costly.
+        // FIXME: This takes ancestor transforms into account; should it? https://github.com/w3c/largest-contentful-paint/issues/144
+        auto absoluteContentRect = renderer->localToAbsoluteQuad(FloatRect(imageLocalRect)).boundingBox();
 
-            // This is going to be costly.
-            // FIXME: This takes ancestor transforms into account; should it? https://github.com/w3c/largest-contentful-paint/issues/144
-            auto absoluteContentRect = renderer->localToAbsoluteQuad(FloatRect(contentRect)).boundingBox();
+        auto intersectingContentRect = intersection(absoluteContentRect, intersectionRect);
+        area = intersectingContentRect.area();
 
-            auto intersectingContentRect = intersection(absoluteContentRect, intersectionRect);
-            area = intersectingContentRect.area();
+        auto naturalSize = image->imageSizeForRenderer(renderer.get(), 1);
+        if (naturalSize.isEmpty())
+            return { };
 
-            auto naturalSize = image->imageSizeForRenderer(renderReplaced.get(), 1);
-            if (naturalSize.isEmpty())
-                return { };
+        auto scaleFactor = absoluteContentRect.area() / FloatSize { naturalSize }.area();
+        if (scaleFactor > 1)
+            area /= scaleFactor;
 
-            auto scaleFactor = absoluteContentRect.area() / FloatSize { naturalSize }.area();
-            if (scaleFactor > 1)
-                area /= scaleFactor;
-
-            return area;
-        }
+        return area;
     }
-
 
     return area;
 }
 
 // https://w3c.github.io/largest-contentful-paint/#sec-add-lcp-entry
-void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, CachedImage* image, LayoutRect intersectionRect, DOMHighResTimeStamp paintTimestamp)
+void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Element& element, CachedImage* image, FloatRect imageLocalRect, FloatRect intersectionRect, DOMHighResTimeStamp paintTimestamp)
 {
     // If document’s content set contains candidate, return.
     bool isNewCandidate = false;
@@ -197,7 +190,7 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     if ((window->hasDispatchedScrollEvent() /* || window->hasDispatchedInputEvent() */))
         return;
 
-    auto elementArea = effectiveVisualArea(element, image, intersectionRect);
+    auto elementArea = effectiveVisualArea(element, image, imageLocalRect, intersectionRect);
     if (!elementArea)
         return;
 
@@ -244,7 +237,7 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
         // FIXME: This is doing multiple localToAbsolute on the same element.
         for (auto [image, rect] : imageAndRects) {
             auto intersectionRect = computeViewportIntersectionRect(*element, rect);
-            potentiallyAddLargestContentfulPaintEntry(*element, &image, intersectionRect, paintTimestamp);
+            potentiallyAddLargestContentfulPaintEntry(*element, &image, rect, intersectionRect, paintTimestamp);
         }
     }
 
@@ -255,14 +248,14 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
             continue;
 
         auto intersectionRect = computeViewportIntersectionRectForTextContainer(*element, textNodes);
-        potentiallyAddLargestContentfulPaintEntry(*element, nullptr, intersectionRect, paintTimestamp);
+        potentiallyAddLargestContentfulPaintEntry(*element, nullptr, { }, intersectionRect, paintTimestamp);
     }
 
     return std::exchange(m_pendingEntry, nullptr);
 }
 
 // This is a simplified version of IntersectionObserver::computeIntersectionState(). Some code should be shared.
-LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& element, const FloatRect& localRect)
+FloatRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& element, FloatRect localRect)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
@@ -296,7 +289,7 @@ LayoutRect LargestContentfulPaintData::computeViewportIntersectionRect(Element& 
     return intersectionRect;
 }
 
-LayoutRect LargestContentfulPaintData::computeViewportIntersectionRectForTextContainer(Element& element, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>& textNodes)
+FloatRect LargestContentfulPaintData::computeViewportIntersectionRectForTextContainer(Element& element, const WeakHashSet<Text, WeakPtrImplWithEventTargetData>& textNodes)
 {
     RefPtr frameView = element.document().view();
     if (!frameView)
