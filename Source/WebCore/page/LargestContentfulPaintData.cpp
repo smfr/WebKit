@@ -34,6 +34,7 @@
 #include "LocalDOMWindow.h"
 #include "LocalFrameView.h"
 #include "Logging.h"
+#include "Page.h"
 #include "Performance.h"
 #include "RenderBox.h"
 #include "RenderInline.h"
@@ -208,7 +209,6 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
     if (!isEligibleForLargestContentfulPaint(element, *elementArea))
         return;
 
-    LOG_WITH_STREAM(LargestContentfulPaint, stream << " element area " << elementArea << " larger than " << m_largestPaintArea << ", becoming LCP");
     m_largestPaintArea = *elementArea;
 
     m_pendingEntry = LargestContentfulPaint::create(0);
@@ -228,14 +228,16 @@ void LargestContentfulPaintData::potentiallyAddLargestContentfulPaintEntry(Eleme
         m_pendingEntry->setID(element.getIdAttribute().string());
 
     m_pendingEntry->setRenderTime(paintTimestamp);
+
+    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " potentiallyAddLargestContentfulPaintEntry() " << element << " image " << ValueOrNull(image) << (image ? image->url().string() : emptyString()) << " id " << m_pendingEntry->id() <<
+        ": entry size " << m_pendingEntry->size() << ", loadTime " << m_pendingEntry->loadTime() << ", renderTime " << m_pendingEntry->renderTime());
 }
 
 RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMHighResTimeStamp paintTimestamp)
 {
-    LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " takePendingEntry()");
-
+    auto imageRecords = std::exchange(m_pendingImageRecords, { });
     // FIXME: Is this copying the value?
-    for (auto [weakElement, images] : m_pendingImageRecords) {
+    for (auto [weakElement, images] : imageRecords) {
         RefPtr element = weakElement;
         if (!element)
             continue;
@@ -248,8 +250,9 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
         }
     }
 
+    auto textRecords = std::exchange(m_paintedTextRecords, { });
     // FIXME: Is this copying the value?
-    for (auto [weakElement, textNodes] : m_paintedTextRecords) {
+    for (auto [weakElement, textNodes] : textRecords) {
         RefPtr element = weakElement;
         if (!element)
             continue;
@@ -257,9 +260,6 @@ RefPtr<LargestContentfulPaint> LargestContentfulPaintData::takePendingEntry(DOMH
         auto intersectionRect = computeViewportIntersectionRectForTextContainer(*element, textNodes);
         potentiallyAddLargestContentfulPaintEntry(*element, nullptr, intersectionRect, paintTimestamp);
     }
-
-
-    // FIXME: Clear?
 
     return std::exchange(m_pendingEntry, nullptr);
 }
@@ -370,6 +370,11 @@ void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* im
 
     LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintImage() " << element << " image " << ValueOrNull(image));
 
+    if (m_pendingImageRecords.isEmptyIgnoringNullReferences()) {
+        if (RefPtr page = element.document().page())
+            page->scheduleRenderingUpdate(RenderingUpdateStep::CursorUpdate); // FIXME: Need the step.
+    }
+
     m_pendingImageRecords.ensure(element, [] {
         return WeakHashSet<CachedImage> { };
     }).iterator->value.add(*image);
@@ -385,6 +390,11 @@ void LargestContentfulPaintData::didPaintText(Text& textNode)
         return;
 
     LOG_WITH_STREAM(LargestContentfulPaint, stream << "LargestContentfulPaintData " << this << " didPaintText() " << textNode);
+
+    if (m_paintedTextRecords.isEmptyIgnoringNullReferences()) {
+        if (RefPtr page = element->document().page())
+            page->scheduleRenderingUpdate(RenderingUpdateStep::CursorUpdate); // FIXME: Need the step.
+    }
 
     m_paintedTextRecords.ensure(*element, [] {
         return WeakHashSet<Text, WeakPtrImplWithEventTargetData> { };
