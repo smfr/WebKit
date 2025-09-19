@@ -52,23 +52,6 @@ LargestContentfulPaintData::LargestContentfulPaintData() = default;
 
 LargestContentfulPaintData::~LargestContentfulPaintData() = default;
 
-bool LargestContentfulPaintData::isContentfulForPaintTiming(const Element&)
-{
-    return false;
-}
-
-bool LargestContentfulPaintData::isTimingEligible(const Node&)
-{
-    /*
-    an img element.
-    an image element inside an svg element.
-    a video element with a poster frame.
-    an element with a contentful background-image.
-    a text node.
-     */
-    return false;
-}
-
 // https://w3c.github.io/paint-timing/#exposed-for-paint-timing
 bool LargestContentfulPaintData::isExposedForPaintTiming(const Element& element)
 {
@@ -81,26 +64,6 @@ bool LargestContentfulPaintData::isExposedForPaintTiming(const Element& element)
     return true;
 }
 
-bool LargestContentfulPaintData::isPaintable(const Element&)
-{
-    /*
-    el is being rendered.
-    el’s used visibility is visible.
-    el and all of its ancestors' used opacity is greater than zero.
-
-    NOTE: there could be cases where a paintable element would not be visible to the user, for example in the case of text that has the same color as its background. Those elements would still considered as paintable for the purpose of computing first contentful paint.
-    el’s paintable bounding rect intersects with the scrolling area of the document.
-     */
-
-    return true;
-}
-
-LayoutRect LargestContentfulPaintData::paintableBoundingRect(const Element&)
-{
-    return { };
-}
-
-
 // https://w3c.github.io/largest-contentful-paint/#largest-contentful-paint-candidate
 bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Element& element, float effectiveVisualArea)
 {
@@ -108,7 +71,7 @@ bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Eleme
     if (!renderer)
         return false;
 
-    // FIXME: Maybe this should be used opacity: https://github.com/w3c/largest-contentful-paint/issues/141.
+    // FIXME: Maybe this should be used opacity: https://github.com/w3c/largest-contentful-paint/issues/141
     if (!renderer->opacity())
         return false;
 

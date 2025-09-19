@@ -51,18 +51,12 @@ public:
     LargestContentfulPaintData();
     ~LargestContentfulPaintData();
 
-    static bool isContentfulForPaintTiming(const Element&);
-    static bool isTimingEligible(const Node&);
-
-    static bool isExposedForPaintTiming(const Element&);
-    static bool isPaintable(const Element&);
-
-    static LayoutRect paintableBoundingRect(const Element&);
-
     void didPaintImage(Element&, CachedImage*, const FloatRect& localRect);
     void didPaintText(Text&);
 
     RefPtr<LargestContentfulPaint> takePendingEntry(DOMHighResTimeStamp);
+
+    static bool isExposedForPaintTiming(const Element&);
 
 private:
 
