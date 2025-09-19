@@ -72,7 +72,7 @@ bool LargestContentfulPaintData::isEligibleForLargestContentfulPaint(const Eleme
         return false;
 
     // FIXME: Maybe this should be used opacity: https://github.com/w3c/largest-contentful-paint/issues/141
-    if (!renderer->opacity())
+    if (renderer->style().effectivelyTransparent())
         return false;
 
 /*
