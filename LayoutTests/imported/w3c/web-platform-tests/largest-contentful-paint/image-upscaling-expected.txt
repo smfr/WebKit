@@ -7,6 +7,6 @@ PASS An upscaled image (using scale) should report the natural size
 PASS An upscaled image (using object-size) should report the natural size
 PASS Intersecting element with partial-intersecting image to report image intersection
 PASS A background image larger than the container should report the container size
-FAIL A background image smaller than the container should report the natural size assert_equals: expected 14098 but got 90000
-FAIL A scaled-down background image should report the background size assert_equals: expected 100 but got 90000
+PASS A background image smaller than the container should report the natural size
+PASS A scaled-down background image should report the background size
 

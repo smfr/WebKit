@@ -1,4 +1,4 @@
 
 
-FAIL Resized image should not be reconsidered as LCP func.apply is not a function. (In 'func.apply(test_this, args)', 'func.apply' is undefined)
+PASS Resized image should not be reconsidered as LCP
 
