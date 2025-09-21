@@ -180,6 +180,7 @@ private:
 
     RefPtr<PerformanceNavigationTiming> m_navigationTiming;
     RefPtr<PerformancePaintTiming> m_firstContentfulPaint;
+    RefPtr<PerformanceEntry> m_largestContentfulPaint;
     std::unique_ptr<PerformanceUserTiming> m_userTiming;
 
     ListHashSet<RefPtr<PerformanceObserver>> m_observers;
