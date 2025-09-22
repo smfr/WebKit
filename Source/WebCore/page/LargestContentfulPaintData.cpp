@@ -343,6 +343,9 @@ void LargestContentfulPaintData::didPaintText(const RenderText& textRenderer, co
     if (!element)
         return;
 
+    if (m_textContentSet.contains(*element))
+        return;
+
     if (!isExposedForPaintTiming(*element))
         return;
 
