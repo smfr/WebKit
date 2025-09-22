@@ -290,14 +290,21 @@ FloatRect LargestContentfulPaintData::computeViewportIntersectionRectForTextCont
 // FIXME: This should be done on loads, not paints.
 void LargestContentfulPaintData::didPaintImage(Element& element, CachedImage* image, const FloatRect& localRect)
 {
-    if (!isExposedForPaintTiming(element))
-        return;
-
     if (!image)
         return;
 
     if (localRect.isEmpty())
         return;
+
+    if (!isExposedForPaintTiming(element))
+        return;
+
+    auto it = m_imageContentSet.find(element);
+    if (it != m_imageContentSet.end()) {
+        auto& imageSet = it->value;
+        if (imageSet.contains(*image))
+            return;
+    }
 
     if (m_pendingImageRecords.isEmptyIgnoringNullReferences()) {
         if (RefPtr page = element.document().page())
