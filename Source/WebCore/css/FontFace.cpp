@@ -35,6 +35,7 @@
 #include "DOMPromiseProxy.h"
 #include "JSFontFace.h"
 #include "TrustedFonts.h"
+#include "WebCoreOpaqueRoot.h"
 #include <JavaScriptCore/ArrayBuffer.h>
 #include <JavaScriptCore/ArrayBufferView.h>
 #include <JavaScriptCore/JSCInlines.h>
@@ -143,6 +144,7 @@ Ref<FontFace> FontFace::create(ScriptExecutionContext& context, const String& fa
     }
 
     if (!dataRequiresAsynchronousLoading) {
+        // FIXME: Need to add to FontFaceSet.loading
         result->backing().load();
         auto status = result->backing().status();
         ASSERT_UNUSED(status, status == CSSFontFace::Status::Success || status == CSSFontFace::Status::Failure);
@@ -332,6 +334,18 @@ void FontFace::adopt(CSSFontFace& newFace)
     newFace.setWrapper(*this);
 }
 
+void FontFace::willMoveToNewDocument(ScriptExecutionContext& newContext)
+{
+    m_backing->willMoveToNewDocument(newContext);
+
+    RefPtr fontSelector = newContext.cssFontSelector();
+    RELEASE_ASSERT(fontSelector);
+    // FIXME: This doesn't preserve the font data. Moving fonts between documents is generally unspecified:
+    // https://github.com/w3c/csswg-drafts/issues/13251
+    auto newCSSFace = CSSFontFace::create(*fontSelector);
+    adopt(newCSSFace);
+}
+
 void FontFace::fontStateChanged(CSSFontFace& face, CSSFontFace::Status, CSSFontFace::Status newState)
 {
     ASSERT_UNUSED(face, &face == m_backing.ptr());
@@ -379,6 +393,11 @@ FontFace& FontFace::loadedPromiseResolve()
 bool FontFace::virtualHasPendingActivity() const
 {
     return m_mayLoadedPromiseBeScriptObservable && !m_loadedPromise->isFulfilled();
+}
+
+WebCoreOpaqueRoot root(FontFace* port)
+{
+    return WebCoreOpaqueRoot { port };
 }
 
 }

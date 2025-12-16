@@ -43,12 +43,14 @@
 #include "FontDescription.h"
 #include "FontFace.h"
 #include "FontPaletteValues.h"
+#include "Logging.h"
 #include "SVGFontFaceElement.h"
 #include "Settings.h"
 #include "SharedBuffer.h"
 #include "StyleProperties.h"
 #include "StyleResolveForFont.h"
 #include "StyleRule.h"
+#include <wtf/text/TextStream.h>
 
 namespace WebCore {
 
@@ -157,9 +159,16 @@ void CSSFontFace::setFamily(CSSValue& family)
     });
 }
 
-FontFace* CSSFontFace::existingWrapper()
+FontFace* CSSFontFace::existingWrapper() const
 {
     return m_wrapper.get();
+}
+
+void CSSFontFace::willMoveToNewDocument(ScriptExecutionContext&)
+{
+    iterateClients(m_clients, [&](CSSFontFaceClient& client) {
+        client.fontWillMoveToNewDocument(*this);
+    });
 }
 
 static FontSelectionRange calculateWeightRange(CSSValue& value)
@@ -614,7 +623,9 @@ void CSSFontFace::setStatus(Status newStatus)
 void CSSFontFace::fontLoaded(CSSFontFaceSource&)
 {
     Ref<CSSFontFace> protectedThis(*this);
-    
+
+    LOG_WITH_STREAM(Fonts, stream << "CSSFontFace::fontLoaded - " << family() << " " << style() << " " << weight());
+
     fontLoadEventOccurred();
 }
 
@@ -684,6 +695,8 @@ size_t CSSFontFace::pump(ExternalResourceDownloadPolicy policy)
 
 void CSSFontFace::load()
 {
+    LOG_WITH_STREAM(Fonts, stream << "CSSFontFace::load - " << family() << " " << style() << " " << weight());
+
     pump(ExternalResourceDownloadPolicy::Allow);
 }
 

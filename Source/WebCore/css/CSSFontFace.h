@@ -138,7 +138,9 @@ public:
     // We don't guarantee that the FontFace wrapper will be the same every time you ask for it.
     Ref<FontFace> wrapper(ScriptExecutionContext*);
     void setWrapper(FontFace&);
-    FontFace* existingWrapper();
+    FontFace* existingWrapper() const;
+
+    void willMoveToNewDocument(ScriptExecutionContext&);
 
     struct FontLoadTiming {
         Seconds blockPeriod;
@@ -206,6 +208,7 @@ public:
     virtual void fontStateChanged(CSSFontFace&, CSSFontFace::Status /*oldState*/, CSSFontFace::Status /*newState*/) { }
     virtual void fontPropertyChanged(CSSFontFace&, CSSValue* /*oldFamily*/ = nullptr) { }
     virtual void updateStyleIfNeeded(CSSFontFace&) { }
+    virtual void fontWillMoveToNewDocument(CSSFontFace&) { }
 };
 
 }

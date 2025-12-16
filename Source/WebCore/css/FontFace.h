@@ -39,6 +39,8 @@ class ArrayBufferView;
 
 namespace WebCore {
 
+class Document;
+
 template<typename IDLType> class DOMPromiseProxyWithResolveCallback;
 template<typename> class ExceptionOr;
 
@@ -94,6 +96,8 @@ public:
 
     void adopt(CSSFontFace&);
 
+    void willMoveToNewDocument(ScriptExecutionContext&);
+
     CSSFontFace& backing() { return m_backing; }
 
     void fontStateChanged(CSSFontFace&, CSSFontFace::Status oldState, CSSFontFace::Status newState) final;
@@ -113,5 +117,7 @@ private:
     const UniqueRef<LoadedPromise> m_loadedPromise;
     bool m_mayLoadedPromiseBeScriptObservable { false };
 };
+
+WebCoreOpaqueRoot root(FontFace*);
 
 }
