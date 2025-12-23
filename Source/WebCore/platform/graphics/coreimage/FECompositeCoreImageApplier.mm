@@ -50,14 +50,14 @@ bool FECompositeCoreImageApplier::supportsCoreImageRendering(const FEComposite& 
 bool FECompositeCoreImageApplier::apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
 {
     ASSERT(inputs.size() == 2);
-    Ref input1 = inputs[0];
-    Ref input2 = inputs[1];
+    Ref input1 = inputs[0].get();
+    Ref input2 = inputs[1].get();
 
-    auto inputImage1 = input1->ciImage();
+    RetainPtr inputImage1 = input1->ciImage();
     if (!inputImage1)
         return false;
 
-    auto inputImage2 = input2->ciImage();
+    RetainPtr inputImage2 = input2->ciImage();
     if (!inputImage2)
         return false;
 
