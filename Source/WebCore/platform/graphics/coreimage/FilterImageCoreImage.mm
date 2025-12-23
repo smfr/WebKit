@@ -35,6 +35,8 @@
 #import <wtf/NeverDestroyed.h>
 #import <wtf/cocoa/TypeCastsCocoa.h>
 
+#define DEBUG_WASH_COLOR 1
+
 namespace WebCore {
 
 static RetainPtr<CIContext> sharedLinearSRGBCIContext()
@@ -86,9 +88,16 @@ ImageBuffer* FilterImage::filterResultImageBuffer(FloatRect absoluteFilterRegion
     RetainPtr destination = adoptNS([[CIRenderDestination alloc] initWithIOSurface:(__bridge id)imageBuffer->surface()->surface()]);
     [destination setColorSpace:m_colorSpace.platformColorSpace()];
 
+    RetainPtr image = m_ciImage;
+
+#if DEBUG_WASH_COLOR
+    RetainPtr washColorImage = [CIImage imageWithColor:[CIColor colorWithRed:0 green:0 blue:128 alpha:0.05]];
+    image = [m_ciImage imageByCompositingOverImage:washColorImage.get()];
+#endif
+
     auto sourceRect = FloatRect { { }, absoluteFilterRegion.size() };
     auto location = FloatPoint { m_absoluteImageRect.x() - absoluteFilterRegion.x(), absoluteFilterRegion.maxY() - m_absoluteImageRect.maxY() };
-    RetainPtr task = [context startTaskToRender:m_ciImage.get()
+    RetainPtr task = [context startTaskToRender:image.get()
                                        fromRect:sourceRect
                                   toDestination:destination.get()
                                         atPoint:-location

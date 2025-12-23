@@ -73,6 +73,14 @@ FloatRect Filter::clipToMaxEffectRect(const FloatRect& imageRect, const FloatRec
     return intersection(imageRect, maxEffectRect);
 }
 
+#if USE(CORE_IMAGE)
+FloatRect Filter::flippedRectRelativeToAbsoluteFilterRegion(const FloatRect& absoluteRect) const
+{
+    auto absoluteFilterRegion = scaledByFilterScale(filterRegion());
+    return FloatRect(absoluteRect.x() - absoluteFilterRegion.x(), absoluteFilterRegion.maxY() - absoluteRect.maxY(), absoluteRect.width(), absoluteRect.height());
+}
+#endif
+
 bool Filter::clampFilterRegionIfNeeded()
 {
     auto scaledFilterRegion = scaledByFilterScale(m_geometry.filterRegion);

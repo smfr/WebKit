@@ -23,50 +23,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "config.h"
-#import "FEFloodCoreImageApplier.h"
+#pragma once
 
 #if USE(CORE_IMAGE)
 
-#import "ColorSpaceCG.h"
-#import "FEFlood.h"
-#import "Filter.h"
-#import "Logging.h"
-#import <CoreImage/CoreImage.h>
-#import <wtf/NeverDestroyed.h>
-#import <wtf/TZoneMallocInlines.h>
+#import "FilterEffectApplier.h"
+#import <wtf/TZoneMalloc.h>
 
 namespace WebCore {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(FEFloodCoreImageApplier);
+class FEGaussianBlur;
 
-FEFloodCoreImageApplier::FEFloodCoreImageApplier(const FEFlood& effect)
-    : Base(effect)
-{
-}
+class FEGaussianBlurCoreImageApplier final : public FilterEffectConcreteApplier<FEGaussianBlur> {
+    WTF_MAKE_TZONE_ALLOCATED(FEGaussianBlurCoreImageApplier);
+    using Base = FilterEffectConcreteApplier<FEGaussianBlur>;
 
-bool FEFloodCoreImageApplier::supportsCoreImageRendering(const FEFlood&)
-{
-    return true;
-}
+public:
+    FEGaussianBlurCoreImageApplier(const FEGaussianBlur&);
 
-bool FEFloodCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>>, FilterImage& result) const
-{
-    auto color = m_effect->floodColor().colorWithAlphaMultipliedBy(m_effect->floodOpacity());
-    auto [r, g, b, a] = color.toResolvedColorComponentsInColorSpace(m_effect->operatingColorSpace());
+    static bool supportsCoreImageRendering(const FEGaussianBlur&);
 
-    RetainPtr colorSpace = m_effect->operatingColorSpace() == DestinationColorSpace::SRGB() ? sRGBColorSpaceSingleton() : linearSRGBColorSpaceSingleton();
-    RetainPtr ciColor = [CIColor colorWithRed:r green:g blue:b alpha:a colorSpace:colorSpace.get()];
-
-    RetainPtr image = [CIImage imageWithColor:ciColor.get()];
-    if (!image)
-        return false;
-
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
-    image = [image imageByCroppingToRect:cropRect];
-    result.setCIImage(WTF::move(image));
-    return true;
-}
+private:
+    bool apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const final;
+};
 
 } // namespace WebCore
 

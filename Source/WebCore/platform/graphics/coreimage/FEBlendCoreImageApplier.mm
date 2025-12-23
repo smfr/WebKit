@@ -67,8 +67,8 @@ bool FEBlendCoreImageApplier::apply(const Filter&, std::span<const Ref<FilterIma
     RetainPtr<CIFilter> filter;
     switch (m_effect->blendMode()) {
     case BlendMode::Normal:
-        result.setCIImage(inputImage1.get());
-        return true;
+        filter = [CIFilter sourceOverCompositingFilter];
+        break;
     case BlendMode::Multiply:
         filter = [CIFilter multiplyBlendModeFilter];
         break;

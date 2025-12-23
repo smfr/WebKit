@@ -39,7 +39,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(SourceGraphicCoreImageApplier);
 
-bool SourceGraphicCoreImageApplier::apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
+bool SourceGraphicCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
 {
     auto& input = inputs[0].get();
 
@@ -55,6 +55,10 @@ bool SourceGraphicCoreImageApplier::apply(const Filter&, std::span<const Ref<Fil
 
     if (!image)
         return false;
+
+    auto offset = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect()).location();
+    if (!offset.isZero())
+        image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
 
     result.setCIImage(WTF::move(image));
     return true;

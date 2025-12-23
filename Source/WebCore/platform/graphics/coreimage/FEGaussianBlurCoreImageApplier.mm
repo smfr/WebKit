@@ -24,46 +24,53 @@
  */
 
 #import "config.h"
-#import "FEFloodCoreImageApplier.h"
+#import "FEGaussianBlurCoreImageApplier.h"
 
 #if USE(CORE_IMAGE)
 
 #import "ColorSpaceCG.h"
-#import "FEFlood.h"
+#import "FEGaussianBlur.h"
 #import "Filter.h"
 #import "Logging.h"
+#import <CoreImage/CIFilterBuiltins.h>
 #import <CoreImage/CoreImage.h>
 #import <wtf/NeverDestroyed.h>
 #import <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(FEFloodCoreImageApplier);
+WTF_MAKE_TZONE_ALLOCATED_IMPL(FEGaussianBlurCoreImageApplier);
 
-FEFloodCoreImageApplier::FEFloodCoreImageApplier(const FEFlood& effect)
+FEGaussianBlurCoreImageApplier::FEGaussianBlurCoreImageApplier(const FEGaussianBlur& effect)
     : Base(effect)
 {
 }
 
-bool FEFloodCoreImageApplier::supportsCoreImageRendering(const FEFlood&)
+bool FEGaussianBlurCoreImageApplier::supportsCoreImageRendering(const FEGaussianBlur&)
 {
     return true;
 }
 
-bool FEFloodCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>>, FilterImage& result) const
+bool FEGaussianBlurCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
 {
-    auto color = m_effect->floodColor().colorWithAlphaMultipliedBy(m_effect->floodOpacity());
-    auto [r, g, b, a] = color.toResolvedColorComponentsInColorSpace(m_effect->operatingColorSpace());
+    ASSERT(inputs.size() == 1);
+    auto& input = inputs[0].get();
 
-    RetainPtr colorSpace = m_effect->operatingColorSpace() == DestinationColorSpace::SRGB() ? sRGBColorSpaceSingleton() : linearSRGBColorSpaceSingleton();
-    RetainPtr ciColor = [CIColor colorWithRed:r green:g blue:b alpha:a colorSpace:colorSpace.get()];
-
-    RetainPtr image = [CIImage imageWithColor:ciColor.get()];
-    if (!image)
+    RetainPtr inputImage = input.ciImage();
+    if (!inputImage)
         return false;
 
+    // FIXME: Support edge modes.
+    auto absoluteStdDeviation = filter.scaledByFilterScale(FloatSize(m_effect->stdDeviationX(), m_effect->stdDeviationY()));
+
+    auto ciFilter = [CIFilter filterWithName:@"CIGaussianBlurXY"];
+    [ciFilter setValue:inputImage.get() forKey:kCIInputImageKey];
+    [ciFilter setValue:@(absoluteStdDeviation.width()) forKey:@"inputSigmaX"];
+    [ciFilter setValue:@(absoluteStdDeviation.height()) forKey:@"inputSigmaY"];
+
     auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
-    image = [image imageByCroppingToRect:cropRect];
+    RetainPtr image = [[ciFilter outputImage] imageByCroppingToRect:cropRect];
+
     result.setCIImage(WTF::move(image));
     return true;
 }

@@ -71,6 +71,10 @@ public:
     FloatRect maxEffectRect(const FloatRect& primitiveSubregion) const;
     FloatRect clipToMaxEffectRect(const FloatRect& imageRect, const FloatRect& primitiveSubregion) const;
 
+#if USE(CORE_IMAGE)
+    FloatRect flippedRectRelativeToAbsoluteFilterRegion(const FloatRect&) const;
+#endif
+
     virtual FilterEffectVector effectsOfType(FilterFunction::Type) const = 0;
 
     bool clampFilterRegionIfNeeded();
