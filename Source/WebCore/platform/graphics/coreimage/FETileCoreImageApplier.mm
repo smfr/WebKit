@@ -58,8 +58,22 @@ bool FETileCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fil
     if (!inputImage)
         return false;
 
+    auto tileRect = input.maxEffectRect(filter);
+    tileRect.scale(filter.filterScale());
+    tileRect = filter.flippedRectRelativeToAbsoluteFilterRegion(tileRect);
+
+    auto imageExtent = FloatRect { [inputImage extent] };
+    RetainPtr<CIImage> tileImage;
+    if (imageExtent.contains(tileRect))
+        tileImage = [inputImage imageByCroppingToRect:tileRect];
+    else {
+        // Extend the image by compositing over the clear color.
+        RetainPtr clearImage = [[CIImage imageWithColor:[CIColor clearColor]] imageByCroppingToRect:tileRect];
+        tileImage = [[inputImage imageByCompositingOverImage:clearImage.get()] imageByCroppingToRect:tileRect];
+    }
+
     RetainPtr tileFilter = [CIFilter filterWithName:@"CIAffineTile"];
-    [tileFilter setValue:inputImage.get() forKey:kCIInputImageKey];
+    [tileFilter setValue:tileImage.get() forKey:kCIInputImageKey];
     // This identity transform is necessary, otherwise the tiling is half scale when filterScale is not one.
     [tileFilter setValue:[NSValue valueWithBytes:&CGAffineTransformIdentity objCType:@encode(CGAffineTransform)] forKey:kCIInputTransformKey];
 
