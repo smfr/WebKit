@@ -72,7 +72,7 @@ bool FECompositeCoreImageApplier::apply(const Filter&, std::span<const Ref<Filte
         kernel = [CIBlendKernel sourceIn];
         break;
     case CompositeOperationType::FECOMPOSITE_OPERATOR_OUT:
-        kernel = [CIBlendKernel destinationOut];
+        kernel = [CIBlendKernel sourceOut];
         break;
     case CompositeOperationType::FECOMPOSITE_OPERATOR_ATOP:
         kernel = [CIBlendKernel sourceAtop];
