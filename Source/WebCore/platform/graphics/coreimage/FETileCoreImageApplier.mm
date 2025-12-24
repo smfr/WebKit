@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,42 +24,47 @@
  */
 
 #import "config.h"
-#import "SourceGraphicCoreImageApplier.h"
+#import "FETileCoreImageApplier.h"
 
 #if USE(CORE_IMAGE)
 
-#import "Filter.h"
-#import "FilterImage.h"
-#import "IOSurface.h"
-#import "ImageBuffer.h"
-#import "NativeImage.h"
+#import "AffineTransform.h"
+#import "FETile.h"
+#import "Logging.h"
 #import <CoreImage/CoreImage.h>
+#import <wtf/NeverDestroyed.h>
 #import <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(SourceGraphicCoreImageApplier);
+WTF_MAKE_TZONE_ALLOCATED_IMPL(FETileCoreImageApplier);
 
-bool SourceGraphicCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
+FETileCoreImageApplier::FETileCoreImageApplier(const FETile& effect)
+    : Base(effect)
 {
+}
+
+bool FETileCoreImageApplier::supportsCoreImageRendering(const FETile&)
+{
+    return true;
+}
+
+bool FETileCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
+{
+    ASSERT(inputs.size() == 1);
     auto& input = inputs[0].get();
 
-    RefPtr sourceImage = input.imageBuffer();
-    if (!sourceImage)
+    RetainPtr inputImage = input.ciImage();
+    if (!inputImage)
         return false;
 
-    RetainPtr<CIImage> image;
-    if (auto surface = sourceImage->surface())
-        image = [CIImage imageWithIOSurface:surface->surface()];
-    else
-        image = [CIImage imageWithCGImage:sourceImage->copyNativeImage()->platformImage().get()];
+    RetainPtr tileFilter = [CIFilter filterWithName:@"CIAffineTile"];
+    [tileFilter setValue:inputImage.get() forKey:kCIInputImageKey];
+    // This identity transform is necessary, otherwise the tiling is half scale when filterScale is not one.
+    [tileFilter setValue:[NSValue valueWithBytes:&CGAffineTransformIdentity objCType:@encode(CGAffineTransform)] forKey:kCIInputTransformKey];
 
-    if (!image)
-        return false;
-
-    auto offset = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect()).location();
-    if (!offset.isZero())
-        image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
+    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    RetainPtr image = [[tileFilter outputImage] imageByCroppingToRect:cropRect];
 
     result.setCIImage(WTF::move(image));
     return true;

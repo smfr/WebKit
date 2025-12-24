@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,47 +23,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "config.h"
-#import "SourceGraphicCoreImageApplier.h"
+#pragma once
 
 #if USE(CORE_IMAGE)
 
-#import "Filter.h"
-#import "FilterImage.h"
-#import "IOSurface.h"
-#import "ImageBuffer.h"
-#import "NativeImage.h"
-#import <CoreImage/CoreImage.h>
-#import <wtf/TZoneMallocInlines.h>
+#import "FilterEffectApplier.h"
+#import <wtf/TZoneMalloc.h>
 
 namespace WebCore {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(SourceGraphicCoreImageApplier);
+class FETile;
 
-bool SourceGraphicCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
-{
-    auto& input = inputs[0].get();
+class FETileCoreImageApplier final : public FilterEffectConcreteApplier<FETile> {
+    WTF_MAKE_TZONE_ALLOCATED(FETileCoreImageApplier);
+    using Base = FilterEffectConcreteApplier<FETile>;
 
-    RefPtr sourceImage = input.imageBuffer();
-    if (!sourceImage)
-        return false;
+public:
+    FETileCoreImageApplier(const FETile&);
 
-    RetainPtr<CIImage> image;
-    if (auto surface = sourceImage->surface())
-        image = [CIImage imageWithIOSurface:surface->surface()];
-    else
-        image = [CIImage imageWithCGImage:sourceImage->copyNativeImage()->platformImage().get()];
+    static bool supportsCoreImageRendering(const FETile&);
 
-    if (!image)
-        return false;
-
-    auto offset = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect()).location();
-    if (!offset.isZero())
-        image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
-
-    result.setCIImage(WTF::move(image));
-    return true;
-}
+private:
+    bool apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const final;
+};
 
 } // namespace WebCore
 
