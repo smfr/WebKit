@@ -70,6 +70,7 @@ static CIKernel* gammaKernel()
 
     std::call_once(onceFlag, [] {
         NSError *error = nil;
+        // FIXME: Why not a CIColorKernel?
         NSArray<CIKernel *> *kernels = [CIKernel kernelsWithMetalString:@R"( /* NOLINT */
             [[stitchable]] float4 gammaFilter(coreimage::sampler src, float ampR, float expR, float offR,
                 float ampG, float expG, float offG,
