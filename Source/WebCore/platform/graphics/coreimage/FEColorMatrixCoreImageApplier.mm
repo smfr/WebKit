@@ -31,6 +31,7 @@
 #import "FEColorMatrix.h"
 #import "FilterImage.h"
 #import <CoreImage/CoreImage.h>
+#import <CoreImage/CIFilterBuiltins.h>
 #import <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -106,7 +107,12 @@ bool FEColorMatrixCoreImageApplier::apply(const Filter&, std::span<const Ref<Fil
         return false;
     }
 
-    result.setCIImage([colorMatrixFilter outputImage]);
+    RetainPtr clampFilter = [CIFilter filterWithName:@"CIColorClamp"];
+    [clampFilter setValue:[colorMatrixFilter outputImage] forKey:kCIInputImageKey];
+    [clampFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputMinComponents"];
+    [clampFilter setValue:[CIVector vectorWithX:1 Y:1 Z:1 W:1] forKey:@"inputMaxComponents"];
+
+    result.setCIImage([clampFilter outputImage]);
     return true;
 }
 
