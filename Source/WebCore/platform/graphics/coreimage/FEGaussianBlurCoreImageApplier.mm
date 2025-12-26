@@ -69,7 +69,7 @@ bool FEGaussianBlurCoreImageApplier::apply(const Filter& filter, std::span<const
     [ciFilter setValue:@(absoluteStdDeviation.width()) forKey:@"inputSigmaX"];
     [ciFilter setValue:@(absoluteStdDeviation.height()) forKey:@"inputSigmaY"];
 
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     RetainPtr image = [[ciFilter outputImage] imageByCroppingToRect:cropRect];
 
     result.setCIImage(WTF::move(image));

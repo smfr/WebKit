@@ -65,7 +65,7 @@ bool FEOffsetCoreImageApplier::apply(const Filter& filter, std::span<const Ref<F
 
     RetainPtr image = [inputImage imageByApplyingTransform:CGAffineTransformMakeTranslation(absoluteOffset.width(), -absoluteOffset.height())];
 
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     image = [image imageByCroppingToRect:cropRect];
 
     result.setCIImage(WTF::move(image));

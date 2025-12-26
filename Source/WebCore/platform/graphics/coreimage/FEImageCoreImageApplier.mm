@@ -93,7 +93,7 @@ bool FEImageCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fi
         image = [CIImage imageWithCGImage:nativeImage->platformImage().get()];
         image = [image imageByCroppingToRect:srcRect];
 
-        auto destRect = filter.flippedRectRelativeToAbsoluteFilterRegion(imageRect);
+        auto destRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(imageRect);
 
         auto transform = makeMapBetweenRects(srcRect, destRect);
         image = [image imageByApplyingTransform:transform];

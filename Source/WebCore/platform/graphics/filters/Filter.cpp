@@ -42,6 +42,7 @@ Filter::Filter(Filter::Type filterType, std::optional<RenderingResourceIdentifie
 Filter::Filter(Filter::Type filterType, const FilterGeometry& geometry, std::optional<RenderingResourceIdentifier> renderingResourceIdentifier)
     : FilterFunction(filterType, renderingResourceIdentifier)
     , m_geometry(geometry)
+    , m_enclosingFilterRegion(geometry.filterRegion)
 {
 }
 
@@ -74,9 +75,14 @@ FloatRect Filter::clipToMaxEffectRect(const FloatRect& imageRect, const FloatRec
 }
 
 #if USE(CORE_IMAGE)
-FloatRect Filter::flippedRectRelativeToAbsoluteFilterRegion(const FloatRect& absoluteRect) const
+FloatRect Filter::absoluteEnclosingFilterRegion() const
 {
-    auto absoluteFilterRegion = scaledByFilterScale(filterRegion());
+    return scaledByFilterScale(m_enclosingFilterRegion);
+}
+
+FloatRect Filter::flippedRectRelativeToAbsoluteEnclosingFilterRegion(const FloatRect& absoluteRect) const
+{
+    auto absoluteFilterRegion = absoluteEnclosingFilterRegion();
     return FloatRect(absoluteRect.x() - absoluteFilterRegion.x(), absoluteFilterRegion.maxY() - absoluteRect.maxY(), absoluteRect.width(), absoluteRect.height());
 }
 #endif
@@ -143,8 +149,7 @@ FilterStyleVector Filter::createFilterStyles(GraphicsContext& context, const Flo
 ImageBuffer* Filter::filterResultBuffer(FilterImage& filterImage) const
 {
 #if USE(CORE_IMAGE)
-    auto absoluteFilterRegion = scaledByFilterScale(filterRegion());
-    return filterImage.filterResultImageBuffer(absoluteFilterRegion);
+    return filterImage.filterResultImageBuffer(absoluteEnclosingFilterRegion());
 #endif
 
     return filterImage.imageBuffer();

@@ -69,7 +69,7 @@ bool FEMergeCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fi
             accumulatedImage = [layerImage imageByCompositingOverImage:accumulatedImage.get()];
     }
 
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     accumulatedImage = [accumulatedImage imageByCroppingToRect:cropRect];
 
     result.setCIImage(WTF::move(accumulatedImage));

@@ -324,7 +324,7 @@ bool FETurbulenceCoreImageApplier::apply(const Filter& filter, std::span<const R
 
     auto origin = FloatPoint { result.absoluteImageRect().location() };
     auto scale = filter.filterScale();
-    auto extent = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto extent = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     // Work around a bug where the extent of the kernel is too large after compositing with other CIImages (TODO: file the radar).
     extent.shiftMaxXEdgeBy(1);
 

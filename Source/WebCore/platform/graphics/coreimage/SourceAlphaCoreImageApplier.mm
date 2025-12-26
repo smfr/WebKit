@@ -57,7 +57,7 @@ bool SourceAlphaCoreImageApplier::apply(const Filter& filter, std::span<const Re
     [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputBiasVector"];
 
     RetainPtr image = [alphaFilter outputImage];
-    auto offset = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect()).location();
+    auto offset = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect()).location();
     if (!offset.isZero())
         image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
 

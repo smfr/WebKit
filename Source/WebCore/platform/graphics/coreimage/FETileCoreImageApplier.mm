@@ -60,7 +60,7 @@ bool FETileCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fil
 
     auto tileRect = input.maxEffectRect(filter);
     tileRect.scale(filter.filterScale());
-    tileRect = filter.flippedRectRelativeToAbsoluteFilterRegion(tileRect);
+    tileRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(tileRect);
 
     auto imageExtent = FloatRect { [inputImage extent] };
     RetainPtr<CIImage> tileImage;
@@ -77,7 +77,7 @@ bool FETileCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fil
     // This identity transform is necessary, otherwise the tiling is half scale when filterScale is not one.
     [tileFilter setValue:[NSValue valueWithBytes:&CGAffineTransformIdentity objCType:@encode(CGAffineTransform)] forKey:kCIInputTransformKey];
 
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     RetainPtr image = [[tileFilter outputImage] imageByCroppingToRect:cropRect];
 
     result.setCIImage(WTF::move(image));

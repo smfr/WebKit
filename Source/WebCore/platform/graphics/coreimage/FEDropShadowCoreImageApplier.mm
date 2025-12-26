@@ -97,7 +97,7 @@ bool FEDropShadowCoreImageApplier::apply(const Filter& filter, std::span<const R
     [compositeFilter setValue:shadowImage.get() forKey:kCIInputBackgroundImageKey];
 
     RetainPtr shadowedImage = [inputImage imageByCompositingOverImage:[compositeFilter outputImage]];
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     shadowedImage = [shadowedImage imageByCroppingToRect:cropRect];
 
     result.setCIImage(shadowedImage.get());

@@ -62,7 +62,7 @@ bool FEFloodCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fi
     if (!image)
         return false;
 
-    auto cropRect = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto cropRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     image = [image imageByCroppingToRect:cropRect];
     result.setCIImage(WTF::move(image));
     return true;

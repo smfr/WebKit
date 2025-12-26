@@ -113,7 +113,7 @@ bool FEDisplacementMapCoreImageApplier::apply(const Filter& filter, std::span<co
     if (!kernel)
         return false;
 
-    auto extent = filter.flippedRectRelativeToAbsoluteFilterRegion(result.absoluteImageRect());
+    auto extent = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
     auto scale = filter.resolvedSize({ m_effect->scale(), m_effect->scale() });
     scale = filter.scaledByFilterScale(scale);
 
