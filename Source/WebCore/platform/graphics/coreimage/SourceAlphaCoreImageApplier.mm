@@ -38,7 +38,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(SourceAlphaCoreImageApplier);
 
-bool SourceAlphaCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
+bool SourceAlphaCoreImageApplier::apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
 {
     ASSERT(inputs.size() == 1);
     Ref input = inputs[0].get();
@@ -57,10 +57,6 @@ bool SourceAlphaCoreImageApplier::apply(const Filter& filter, std::span<const Re
     [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputBiasVector"];
 
     RetainPtr image = [alphaFilter outputImage];
-    auto offset = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect()).location();
-    if (!offset.isZero())
-        image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
-
     result.setCIImage(image.get());
 
     return true;
