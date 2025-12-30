@@ -29,6 +29,8 @@
 #if USE(CORE_IMAGE)
 
 #import "FEComponentTransfer.h"
+#import "Filter.h"
+#import "FilterImage.h"
 #import "Logging.h"
 #import <CoreImage/CoreImage.h>
 #import <wtf/NeverDestroyed.h>
@@ -62,7 +64,6 @@ static bool allChannelsMatch(const FEComponentTransfer& effect, Predicate predic
         && predicate(effect.alphaFunction());
 }
 
-#if HAVE(CI_KERNEL)
 static CIKernel* gammaKernel()
 {
     static NeverDestroyed<RetainPtr<CIKernel>> kernel;
@@ -97,35 +98,14 @@ static CIKernel* gammaKernel()
 
     return kernel.get().get();
 }
-#endif
 
 bool FEComponentTransferCoreImageApplier::supportsCoreImageRendering(const FEComponentTransfer& effect)
 {
-#if HAVE(CI_KERNEL)
     return allChannelsMatch(effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>)
         || allChannelsMatch(effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA>);
-#else
-    return allChannelsMatch(effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>);
-#endif
 }
 
-bool FEComponentTransferCoreImageApplier::apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
-{
-    ASSERT(inputs.size() == 1);
-    auto& input = inputs[0].get();
-
-    auto inputImage = input.ciImage();
-    if (!inputImage)
-        return false;
-
-#if HAVE(CI_KERNEL)
-    if (allChannelsMatch(m_effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA>))
-        return applyGamma(inputImage, result);
-#endif
-    return applyLinear(inputImage, result);
-}
-
-bool FEComponentTransferCoreImageApplier::applyLinear(RetainPtr<CIImage> inputImage, FilterImage& result) const
+RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyLinear(RetainPtr<CIImage>&& inputImage) const
 {
     auto componentTransferFilter = [CIFilter filterWithName:@"CIColorPolynomial"];
     [componentTransferFilter setValue:inputImage.get() forKey:kCIInputImageKey];
@@ -140,16 +120,14 @@ bool FEComponentTransferCoreImageApplier::applyLinear(RetainPtr<CIImage> inputIm
     setCoefficients(@"inputBlueCoefficients", m_effect->blueFunction());
     setCoefficients(@"inputAlphaCoefficients", m_effect->alphaFunction());
 
-    result.setCIImage(componentTransferFilter.outputImage);
-    return true;
+    return componentTransferFilter.outputImage;
 }
 
-#if HAVE(CI_KERNEL)
-bool FEComponentTransferCoreImageApplier::applyGamma(RetainPtr<CIImage> inputImage, FilterImage& result) const
+RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyGamma(RetainPtr<CIImage>&& inputImage) const
 {
     RetainPtr kernel = gammaKernel();
     if (!kernel)
-        return false;
+        return nil;
 
     RetainPtr<NSArray> arguments = @[
         inputImage.get(),
@@ -164,10 +142,33 @@ bool FEComponentTransferCoreImageApplier::applyGamma(RetainPtr<CIImage> inputIma
         }
         arguments:arguments.get()];
 
-    result.setCIImage(WTF::move(outputImage));
+    return outputImage;
+}
+
+bool FEComponentTransferCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const
+{
+    ASSERT(inputs.size() == 1);
+    auto& input = inputs[0].get();
+
+    RetainPtr inputImage = input.ciImage();
+    if (!inputImage)
+        return false;
+
+    RetainPtr<CIImage> resultImage;
+    if (allChannelsMatch(m_effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA>))
+        resultImage = applyGamma(WTF::move(inputImage));
+    else
+        resultImage = applyLinear(WTF::move(inputImage));
+
+    if (!resultImage)
+        return false;
+
+    auto extent = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
+    resultImage = [resultImage imageByCroppingToRect:extent];
+
+    result.setCIImage(WTF::move(resultImage));
     return true;
 }
-#endif
 
 } // namespace WebCore
 
