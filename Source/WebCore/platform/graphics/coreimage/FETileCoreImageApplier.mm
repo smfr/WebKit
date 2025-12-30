@@ -30,6 +30,7 @@
 
 #import "AffineTransform.h"
 #import "FETile.h"
+#import "Filter.h"
 #import "Logging.h"
 #import <CoreImage/CoreImage.h>
 #import <wtf/NeverDestroyed.h>
