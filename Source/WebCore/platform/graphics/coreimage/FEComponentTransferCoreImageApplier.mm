@@ -55,6 +55,12 @@ static bool isNullOr(const ComponentTransferFunction& function)
     return ((function.type == Types) || ...);
 }
 
+template<ComponentTransferType... Types>
+static bool isType(const ComponentTransferFunction& function)
+{
+    return ((function.type == Types) || ...);
+}
+
 template<typename Predicate>
 static bool allChannelsMatch(const FEComponentTransfer& effect, Predicate predicate)
 {
@@ -142,7 +148,7 @@ float applyTransferFunction(float component, constant TransferFunction& function
     destination dest)
 {
     float2 samplePosition = src.transform(dest.coord());
-    float4 srcPixel = src.sample(samplePosition);
+    float4 srcPixel = unpremultiply(src.sample(samplePosition));
 
     float4 resultPixel = { };
 
@@ -151,7 +157,7 @@ float applyTransferFunction(float component, constant TransferFunction& function
     resultPixel.b = applyTransferFunction(srcPixel.b, constants->data[2], tables);
     resultPixel.a = applyTransferFunction(srcPixel.a, constants->data[3], tables);
 
-    return clamp(resultPixel, 0, 1);
+    return premultiply(clamp(resultPixel, 0, 1));
 }
 
 } // namespace coreimage {
@@ -307,7 +313,7 @@ bool FEComponentTransferCoreImageApplier::apply(const Filter& filter, std::span<
         return false;
 
     RetainPtr<CIImage> resultImage;
-    if (allChannelsMatch(m_effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>))
+    if (allChannelsMatch(m_effect, isType<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>))
         resultImage = applyLinear(WTF::move(inputImage));
     else
         resultImage = applyOther(WTF::move(inputImage));
