@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2020-2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -64,32 +64,103 @@ static bool allChannelsMatch(const FEComponentTransfer& effect, Predicate predic
         && predicate(effect.alphaFunction());
 }
 
-static CIKernel* gammaKernel()
+static CIKernel* compontentTransferKernel()
 {
     static NeverDestroyed<RetainPtr<CIKernel>> kernel;
     static std::once_flag onceFlag;
 
     std::call_once(onceFlag, [] {
         NSError *error = nil;
-        // FIXME: Why not a CIColorKernel?
         NSArray<CIKernel *> *kernels = [CIKernel kernelsWithMetalString:@R"( /* NOLINT */
-            [[stitchable]] float4 gammaFilter(coreimage::sampler src, float ampR, float expR, float offR,
-                float ampG, float expG, float offG,
-                float ampB, float expB, float offB) {
-                    float4 pixel = src.sample(src.coord());
+extern "C" {
+namespace coreimage {
 
-                    float3 color = pixel.a > 0.0 ? pixel.rgb / pixel.a : pixel.rgb;
+enum class TransferType : uint32_t {
+    Identity,
+    Table,
+    Discrete,
+    Linear,
+    Gamma,
+};
 
-                    pixel.r = ampR * pow(pixel.r, expR) + offR;
-                    pixel.g = ampG * pow(pixel.g, expG) + offG;
-                    pixel.b = ampB * pow(pixel.b, expB) + offB;
+enum ParamIndex {
+    LinearSlope = 0,
+    LinearIntercept = 1,
+    
+    GammaAmplitude = 0,
+    GammaExponent = 1,
+    GammaOffset = 2,
+};
 
-                    return pixel;
-            }
+struct TransferFunction {
+    TransferType functionType;
+    unsigned tableLength; // For table and discrete, number of entries in table.
+    unsigned tableStart; // For table and discrete, start of table in the table buffer.
+
+    float params[3];
+};
+
+struct ComponentTransferConstants {
+    TransferFunction data[4];
+};
+
+float applyTransferFunction(float component, constant TransferFunction& function, constant float* tables)
+{
+    switch (function.functionType) {
+    case TransferType::Identity:
+        return component;
+
+    case TransferType::Table: {
+        constant float* tableStart = tables + function.tableStart;
+        int tableLength = function.tableLength;
+        int n = tableLength - 1;
+
+        int k = min((int)(component * n), n);
+        float v1 = tableStart[k];
+        float v2 = tableStart[min(k + 1, n)];
+        return v1 + ((component * n) - k) * (v2 - v1);
+    }
+    case TransferType::Discrete: {
+        constant float* tableStart = tables + function.tableStart;
+        int n = function.tableLength;
+        int k = min((int)(component * n), n - 1);
+        return tableStart[k];
+    }
+    case TransferType::Linear:
+        return component * function.params[ParamIndex::LinearSlope] + function.params[ParamIndex::LinearIntercept];
+
+    case TransferType::Gamma:
+        return function.params[ParamIndex::GammaAmplitude] * pow(component, function.params[ParamIndex::GammaExponent]) + function.params[ParamIndex::GammaOffset];
+    }
+
+    return component;
+}
+
+[[stitchable]] float4 componentTransfer(sampler src,
+    constant ComponentTransferConstants* constants,
+    constant float* tables,
+    destination dest)
+{
+    float2 samplePosition = src.transform(dest.coord());
+    float4 srcPixel = src.sample(samplePosition);
+
+    float4 resultPixel = { };
+
+    resultPixel.r = applyTransferFunction(srcPixel.r, constants->data[0], tables);
+    resultPixel.g = applyTransferFunction(srcPixel.g, constants->data[1], tables);
+    resultPixel.b = applyTransferFunction(srcPixel.b, constants->data[2], tables);
+    resultPixel.a = applyTransferFunction(srcPixel.a, constants->data[3], tables);
+
+    return clamp(resultPixel, 0, 1);
+}
+
+} // namespace coreimage {
+} // extern "C"
+
         )" error:&error]; /* NOLINT */
 
         if (error || !kernels || !kernels.count) {
-            LOG(Filters, "Gamma kernel compilation failed: %@", error);
+            LOG(Filters, "ComponentTransfer kernel compilation failed: %@", error);
             return;
         }
 
@@ -99,10 +170,9 @@ static CIKernel* gammaKernel()
     return kernel.get().get();
 }
 
-bool FEComponentTransferCoreImageApplier::supportsCoreImageRendering(const FEComponentTransfer& effect)
+bool FEComponentTransferCoreImageApplier::supportsCoreImageRendering(const FEComponentTransfer&)
 {
-    return allChannelsMatch(effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>)
-        || allChannelsMatch(effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA>);
+    return true;
 }
 
 RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyLinear(RetainPtr<CIImage>&& inputImage) const
@@ -123,17 +193,99 @@ RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyLinear(RetainPtr<CI
     return componentTransferFilter.outputImage;
 }
 
-RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyGamma(RetainPtr<CIImage>&& inputImage) const
+RetainPtr<CIImage> FEComponentTransferCoreImageApplier::applyOther(RetainPtr<CIImage>&& inputImage) const
 {
-    RetainPtr kernel = gammaKernel();
+    RetainPtr kernel = compontentTransferKernel();
     if (!kernel)
         return nil;
 
+    enum class TransferType : uint32_t {
+        Identity,
+        Table,
+        Discrete,
+        Linear,
+        Gamma,
+    };
+
+    auto transferType = [](ComponentTransferType type) {
+        switch (type) {
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_UNKNOWN: return TransferType::Identity;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_IDENTITY: return TransferType::Identity;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_TABLE: return TransferType::Table;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_DISCRETE: return TransferType::Discrete;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR: return TransferType::Linear;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA: return TransferType::Gamma;
+        }
+    };
+
+    struct TransferFunction {
+        TransferType functionType;
+        unsigned tableLength; // For table and discrete, number of entries in table.
+        unsigned tableStart; // For table and discrete, start of table in the table buffer.
+
+        float params[3];
+
+        // linear
+        float slope() const{ return params[0]; }
+        float intercept() const{ return params[1]; }
+
+        // gamma
+        float amplitude() const{ return params[0]; }
+        float exponent() const{ return params[1]; }
+        float offset() const{ return params[2]; }
+    };
+
+    struct ComponentTransferConstants {
+        TransferFunction data[4];
+    };
+
+    auto transferFunction = [&](const ComponentTransferFunction& function, Vector<float>& tableData) -> TransferFunction {
+        auto result = TransferFunction {
+            transferType(function.type),
+            0,
+            0,
+            { 0, 0, 0}
+        };
+
+        switch (function.type) {
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_UNKNOWN:
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_IDENTITY:
+            break;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR:
+            result.params[0] = function.slope;
+            result.params[1] = function.intercept;
+            break;
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA:
+            result.params[0] = function.amplitude;
+            result.params[1] = function.exponent;
+            result.params[2] = function.offset;
+            break;
+
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_TABLE:
+        case ComponentTransferType::FECOMPONENTTRANSFER_TYPE_DISCRETE:
+            result.tableLength = function.tableValues.size();
+            result.tableStart = tableData.size();
+            tableData.appendVector(function.tableValues);
+            break;
+        }
+
+        return result;
+    };
+
+    Vector<float> tableData;
+    auto constants = ComponentTransferConstants {
+        {
+            transferFunction(m_effect->redFunction(), tableData),
+            transferFunction(m_effect->greenFunction(), tableData),
+            transferFunction(m_effect->blueFunction(), tableData),
+            transferFunction(m_effect->alphaFunction(), tableData),
+        }
+    };
+
     RetainPtr<NSArray> arguments = @[
         inputImage.get(),
-        @(m_effect->redFunction().amplitude),   @(m_effect->redFunction().exponent),   @(m_effect->redFunction().offset),
-        @(m_effect->greenFunction().amplitude), @(m_effect->greenFunction().exponent), @(m_effect->greenFunction().offset),
-        @(m_effect->blueFunction().amplitude),  @(m_effect->blueFunction().exponent),  @(m_effect->blueFunction().offset)
+        [NSData dataWithBytes:&constants length:sizeof(ComponentTransferConstants)],
+        [NSData dataWithBytes:tableData.span().data() length:tableData.sizeInBytes()],
     ];
 
     RetainPtr<CIImage> outputImage = [kernel applyWithExtent:inputImage.get().extent
@@ -155,10 +307,10 @@ bool FEComponentTransferCoreImageApplier::apply(const Filter& filter, std::span<
         return false;
 
     RetainPtr<CIImage> resultImage;
-    if (allChannelsMatch(m_effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_GAMMA>))
-        resultImage = applyGamma(WTF::move(inputImage));
-    else
+    if (allChannelsMatch(m_effect, isNullOr<ComponentTransferType::FECOMPONENTTRANSFER_TYPE_LINEAR>))
         resultImage = applyLinear(WTF::move(inputImage));
+    else
+        resultImage = applyOther(WTF::move(inputImage));
 
     if (!resultImage)
         return false;

@@ -46,7 +46,7 @@ public:
 private:
     bool apply(const Filter&, std::span<const Ref<FilterImage>> inputs, FilterImage& result) const final;
     RetainPtr<CIImage> applyLinear(RetainPtr<CIImage>&&) const;
-    RetainPtr<CIImage> applyGamma(RetainPtr<CIImage>&&) const;
+    RetainPtr<CIImage> applyOther(RetainPtr<CIImage>&&) const;
 };
 
 } // namespace WebCore
