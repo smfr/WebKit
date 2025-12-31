@@ -31,11 +31,13 @@
 #import "ColorSpaceCG.h"
 #import "DestinationColorSpace.h"
 #import "Logging.h"
+#import <CoreImage/CIFilterBuiltins.h>
 #import <CoreImage/CoreImage.h>
+#import <wtf/MathExtras.h>
 #import <wtf/NeverDestroyed.h>
 #import <wtf/cocoa/TypeCastsCocoa.h>
 
-#define DEBUG_WASH_COLOR 0
+#define DEBUG_WASH_COLOR 1
 
 namespace WebCore {
 
@@ -91,8 +93,14 @@ ImageBuffer* FilterImage::filterResultImageBuffer(FloatRect absoluteFilterRegion
     RetainPtr image = m_ciImage;
 
 #if DEBUG_WASH_COLOR
-    RetainPtr washColorImage = [CIImage imageWithColor:[CIColor colorWithRed:0 green:0 blue:128 alpha:0.05]];
-    image = [m_ciImage imageByCompositingOverImage:washColorImage.get()];
+    RetainPtr stripesFilter = [CIFilter stripesGeneratorFilter];
+    [stripesFilter setWidth:30];
+    [stripesFilter setColor0:[CIColor clearColor]];
+    [stripesFilter setColor1:[CIColor colorWithRed:1.f green:0.95f blue:0 alpha:0.35]];
+    [stripesFilter setSharpness:0.9];
+    RetainPtr rotatedStripes = [[stripesFilter outputImage] imageByApplyingTransform:CGAffineTransformMakeRotation(deg2rad(45.f))];
+
+    image = [rotatedStripes imageByCompositingOverImage:image.get()];
 #endif
 
     auto sourceRect = FloatRect { { }, absoluteFilterRegion.size() };
