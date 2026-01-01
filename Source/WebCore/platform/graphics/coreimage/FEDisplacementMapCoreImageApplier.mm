@@ -57,7 +57,9 @@ namespace coreimage {
     
     float2 sc = dest.coord();
     float2 mapCoord = map.transform(sc);
-    float4 mapPixel = unpremultiply(map.sample(mapCoord));
+    float4 mapPixel = map.sample(mapCoord);
+    // According to spec (https://drafts.csswg.org/filter-effects/#feDisplacementMapElement) we should unpremultiply mapPixel,
+    // but that doesn't match implementations: https://github.com/w3c/fxtf-drafts/issues/113
     
     float2 offset = {
         scale.x * (mapPixel[xChannelIndex] - 0.5),
@@ -66,10 +68,6 @@ namespace coreimage {
     
     float2 positionInInputTexture = sc + offset;
     float2 srcPosition = src.transform(positionInInputTexture);
-
-    if (srcPosition.x < src.extent().x || srcPosition.x >= (src.extent().x + src.extent().z)
-        || srcPosition.y < src.extent().y || srcPosition.y >= (src.extent().y + src.extent().w))
-        return 0;
 
     return src.sample(srcPosition);
 }
