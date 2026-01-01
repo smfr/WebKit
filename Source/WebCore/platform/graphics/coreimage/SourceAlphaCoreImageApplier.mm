@@ -50,9 +50,9 @@ bool SourceAlphaCoreImageApplier::apply(const Filter&, std::span<const Ref<Filte
     RetainPtr alphaFilter = [CIFilter filterWithName:@"CIColorMatrix"];
     [alphaFilter setValue:inputImage.get() forKey:kCIInputImageKey];
 
-    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:1] forKey:@"inputRVector"];
-    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:1] forKey:@"inputGVector"];
-    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:1] forKey:@"inputBVector"];
+    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputRVector"];
+    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputGVector"];
+    [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputBVector"];
     [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:1] forKey:@"inputAVector"];
     [alphaFilter setValue:[CIVector vectorWithX:0 Y:0 Z:0 W:0] forKey:@"inputBiasVector"];
 
