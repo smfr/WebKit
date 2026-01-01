@@ -47,29 +47,36 @@ static CIKernel* displacementMapKernel()
         // FIXME: Why not a CIColorKernel?
         NSArray<CIKernel *> *kernels = [CIKernel kernelsWithMetalString:@R"( /* NOLINT */
 extern "C" {
-[[stitchable]] float4 displacement_map(coreimage::sampler src, coreimage::sampler map,
-                                        float2 scale, float2 channelIndex, coreimage::destination dest)
+namespace coreimage {
+
+[[stitchable]] float4 displacement_map(sampler src, sampler map,
+                                        float2 scale, float2 channelIndex, destination dest)
 {
     unsigned xChannelIndex = (unsigned)channelIndex.x;
     unsigned yChannelIndex = (unsigned)channelIndex.y;
     
     float2 sc = dest.coord();
-    // FIXME: Coordinate conversion
-
     float2 mapCoord = map.transform(sc);
-    float4 mapPixel = map.sample(mapCoord);
+    float4 mapPixel = unpremultiply(map.sample(mapCoord));
     
-    float xOffset = scale.x * (mapPixel[xChannelIndex] - 0.5);
-    float yOffset = scale.y * (mapPixel[yChannelIndex] - 0.5);
+    float2 offset = {
+        scale.x * (mapPixel[xChannelIndex] - 0.5),
+        scale.y * (mapPixel[yChannelIndex] - 0.5)
+    };
     
-    float2 positionInInputTexture = { sc.x + xOffset, sc.y + yOffset }; 
-
+    float2 positionInInputTexture = sc + offset;
     float2 srcPosition = src.transform(positionInInputTexture);
-    float4 resultPixel = src.sample(srcPosition);
-    return resultPixel;
+
+    if (srcPosition.x < src.extent().x || srcPosition.x >= (src.extent().x + src.extent().z)
+        || srcPosition.y < src.extent().y || srcPosition.y >= (src.extent().y + src.extent().w))
+        return 0;
+
+    return src.sample(srcPosition);
 }
 
+} // namespace coreimage
 } // extern "C"
+
         )" error:&error]; /* NOLINT */
 
         if (error || !kernels || !kernels.count) {
