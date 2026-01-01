@@ -56,12 +56,11 @@ enum EdgeMode : uint8_t {
 };
 
 struct ConvolveMatrixConstants {
-    vector_float2 textureOrigin;
     vector_int2 kernelSize;
     vector_int2 target;
     float divisor;
     float bias;
-    EdgeMode edgeMode;\
+    EdgeMode edgeMode;
     bool preserveAlpha;
 };
 
@@ -89,18 +88,22 @@ struct ConvolveMatrixConstants {
             float2 samplePosition = srcPosition + sampleOffset; 
 
             float4 nearbyPixel = src.sample(samplePosition);
-            
             nearbyPixel *= convolveKernel[kernelSize.x * flippedRow + col];
             pixelSum += nearbyPixel;
         }
     }
 
-    float4 resultPixel = pixelSum / constants->divisor + constants->bias;
+    float alpha = constants->preserveAlpha ? srcPixel.a : clamp(pixelSum.a / constants->divisor + constants->bias, 0.f, 1.f);
+    float4 resultPixel = pixelSum / constants->divisor + constants->bias * alpha;
+
+    resultPixel.a = alpha;
     
     if (constants->preserveAlpha)
-        resultPixel.a = srcPixel.a;
+        resultPixel = premultiply(clamp(resultPixel, 0, 1));
+    else
+        resultPixel = premultiply(clamp(resultPixel, 0, alpha)); 
 
-    return clamp(resultPixel, 0, 1);
+    return resultPixel;
 }
 
 } // namespace coreimage
@@ -151,7 +154,6 @@ bool FEConvolveMatrixCoreImageApplier::apply(const Filter& filter, std::span<con
         None,
     };
     struct ConvolveMatrixConstants {
-        vector_float2 textureOrigin;
         vector_int2 kernelSize;
         vector_int2 target;
         float divisor;
@@ -173,7 +175,6 @@ bool FEConvolveMatrixCoreImageApplier::apply(const Filter& filter, std::span<con
     };
 
     auto constants = ConvolveMatrixConstants {
-        .textureOrigin = { 0, 0 },
         .kernelSize = { m_effect->kernelSize().width(), m_effect->kernelSize().height() },
         .target = { m_effect->targetOffset().x(), m_effect->kernelSize().height() - m_effect->targetOffset().y() - 1 }, // Flipped y coordinates.
         .divisor = m_effect->divisor(),
@@ -185,6 +186,10 @@ bool FEConvolveMatrixCoreImageApplier::apply(const Filter& filter, std::span<con
     auto kernelValues = m_effect->kernel().map([](const auto& value) {
         return normalizedFloat(value);
     });
+
+//    // https://drafts.csswg.org/filter-effects/#element-attrdef-feconvolvematrix-preservealpha
+    if (constants.preserveAlpha)
+        inputImage = [inputImage imageByUnpremultiplyingAlpha];
 
     RetainPtr<NSArray> arguments = @[
         inputImage.get(),
