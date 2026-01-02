@@ -37,7 +37,7 @@
 #import <wtf/NeverDestroyed.h>
 #import <wtf/cocoa/TypeCastsCocoa.h>
 
-#define DEBUG_WASH_COLOR 1
+#define DEBUG_WASH_COLOR 0
 
 namespace WebCore {
 
