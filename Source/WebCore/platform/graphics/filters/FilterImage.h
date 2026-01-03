@@ -72,6 +72,8 @@ public:
     size_t memoryCost() const;
 
     WEBCORE_EXPORT ImageBuffer* imageBuffer();
+    RefPtr<ImageBuffer> takeImageBuffer();
+
     PixelBuffer* pixelBuffer(AlphaPremultiplication);
 
     RefPtr<PixelBuffer> getPixelBuffer(AlphaPremultiplication, const IntRect& sourceRect, std::optional<DestinationColorSpace> = std::nullopt);
@@ -82,6 +84,7 @@ public:
 
 #if USE(CORE_IMAGE)
     ImageBuffer* filterResultImageBuffer(FloatRect absoluteFilterRegion);
+    RefPtr<ImageBuffer> takeFilterResultImageBuffer(FloatRect absoluteFilterRegion);
 
     RetainPtr<CIImage> ciImage() const { return m_ciImage; }
     void setCIImage(RetainPtr<CIImage>&&);

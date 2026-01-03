@@ -121,6 +121,13 @@ ImageBuffer* FilterImage::imageBuffer()
     return imageBufferFromPixelBuffer();
 }
 
+RefPtr<ImageBuffer> FilterImage::takeImageBuffer()
+{
+    RefPtr result = imageBufferFromPixelBuffer();
+    m_imageBuffer = nullptr;
+    return result;
+}
+
 ImageBuffer* FilterImage::imageBufferFromPixelBuffer()
 {
     if (m_imageBuffer)

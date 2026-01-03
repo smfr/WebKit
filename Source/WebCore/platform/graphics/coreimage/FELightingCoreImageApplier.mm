@@ -538,7 +538,6 @@ bool FELightingCoreImageApplier::apply(const Filter& filter, std::span<const Ref
         [NSData dataWithBytes:&lightSourceConstants length:sizeof(LightSourceConstants)],
     ];
 
-    WTF_ALWAYS_LOG("FELightingCoreImageApplier::apply - extent " << extent);
     RetainPtr<CIImage> outputImage = [kernel applyWithExtent:extent
         roiCallback:^CGRect(int, CGRect destRect) {
             return destRect;

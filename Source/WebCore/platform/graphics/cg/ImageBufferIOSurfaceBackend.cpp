@@ -104,7 +104,8 @@ ImageBufferIOSurfaceBackend::~ImageBufferIOSurfaceBackend()
 {
     ensureNativeImagesHaveCopiedBackingStore();
     releaseGraphicsContext();
-    IOSurface::moveToPool(WTF::move(m_surface), m_ioSurfacePool.get());
+    if (m_surface)
+        IOSurface::moveToPool(WTF::move(m_surface), m_ioSurfacePool.get());
 }
 
 

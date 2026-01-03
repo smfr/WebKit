@@ -118,6 +118,13 @@ ImageBuffer* FilterImage::filterResultImageBuffer(FloatRect absoluteFilterRegion
     return m_imageBuffer.get();
 }
 
+RefPtr<ImageBuffer> FilterImage::takeFilterResultImageBuffer(FloatRect absoluteFilterRegion)
+{
+    RefPtr result = filterResultImageBuffer(absoluteFilterRegion);
+    m_imageBuffer = nullptr;
+    return result;
+}
+
 } // namespace WebCore
 
 #endif // USE(CORE_IMAGE)

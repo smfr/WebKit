@@ -417,12 +417,12 @@ void GraphicsContext::drawFilteredImageBuffer(ImageBuffer* sourceImage, const Fl
     if (!result)
         return;
 
-    RefPtr imageBuffer = filter.filterResultBuffer(*result);
+    RefPtr imageBuffer = filter.takeFilterResultBuffer(*result);
     if (!imageBuffer)
         return;
 
     scale({ 1 / filter.filterScale().width(), 1 / filter.filterScale().height() });
-    drawImageBuffer(*imageBuffer, result->absoluteImageRect());
+    drawConsumingImageBuffer(WTF::move(imageBuffer), result->absoluteImageRect());
     scale(filter.filterScale());
 }
 

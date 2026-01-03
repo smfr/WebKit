@@ -90,6 +90,7 @@ public:
     WEBCORE_EXPORT FilterStyleVector createFilterStyles(GraphicsContext&, const FloatRect& sourceImageRect) const;
 
     ImageBuffer* filterResultBuffer(FilterImage&) const;
+    RefPtr<ImageBuffer> takeFilterResultBuffer(FilterImage&) const;
 
 protected:
     Filter(Filter::Type, std::optional<RenderingResourceIdentifier> = std::nullopt);

@@ -155,4 +155,13 @@ ImageBuffer* Filter::filterResultBuffer(FilterImage& filterImage) const
     return filterImage.imageBuffer();
 }
 
+RefPtr<ImageBuffer> Filter::takeFilterResultBuffer(FilterImage& filterImage) const
+{
+#if USE(CORE_IMAGE)
+    return filterImage.takeFilterResultImageBuffer(absoluteEnclosingFilterRegion());
+#endif
+
+    return filterImage.takeImageBuffer();
+}
+
 } // namespace WebCore
