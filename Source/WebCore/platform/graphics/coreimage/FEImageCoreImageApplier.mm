@@ -45,39 +45,8 @@ FEImageCoreImageApplier::FEImageCoreImageApplier(const FEImage& effect)
 {
 }
 
-bool FEImageCoreImageApplier::supportsCoreImageRendering(const FEImage&)
-{
-    return true;
-}
-
 bool FEImageCoreImageApplier::apply(const Filter& filter, std::span<const Ref<FilterImage>>, FilterImage& result) const
 {
-/*
-    auto& sourceImage = m_effect->sourceImage();
-    auto primitiveSubregion = result.primitiveSubregion();
-    auto& context = resultImage->context();
-
-    if (RefPtr nativeImage = sourceImage.nativeImageIfExists()) {
-        auto imageRect = primitiveSubregion;
-        auto srcRect = m_effect->sourceImageRect();
-        m_effect->preserveAspectRatio().transformRect(imageRect, srcRect);
-        imageRect.scale(filter.filterScale());
-        imageRect = IntRect(imageRect) - result.absoluteImageRect().location();
-        context.drawNativeImage(*nativeImage, imageRect, srcRect);
-        return true;
-    }
-
-    if (auto imageBuffer = sourceImage.imageBufferIfExists()) {
-        auto imageRect = primitiveSubregion;
-        imageRect.moveBy(m_effect->sourceImageRect().location());
-        imageRect.scale(filter.filterScale());
-        imageRect = IntRect(imageRect) - result.absoluteImageRect().location();
-        context.drawImageBuffer(*imageBuffer, imageRect.location());
-        return true;
-    }
-
- */
-
     auto& sourceImage = m_effect->sourceImage();
 
     auto primitiveSubregion = result.primitiveSubregion();
@@ -106,23 +75,17 @@ bool FEImageCoreImageApplier::apply(const Filter& filter, std::span<const Ref<Fi
         if (!image)
             return false;
 
-        auto imageRect = primitiveSubregion;
-        imageRect.moveBy(m_effect->sourceImageRect().location());
-        imageRect.scale(filter.filterScale());
-        imageRect.moveBy(-result.absoluteImageRect().location());
 
-        image = [image imageByCroppingToRect:imageRect];
+        auto sourceRect = m_effect->sourceImageRect();
+        sourceRect.moveBy(primitiveSubregion.location());
+        auto scaledSourceRect = filter.scaledByFilterScale(sourceRect);
 
-//
-//        auto destRect = filter.flippedRectRelativeToAbsoluteFilterRegion(imageRect);
-//
-//        auto offset = destRect.location();
-//        if (!offset.isZero())
-//            image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(offset.x(), offset.y())];
-//
+        auto absoluteSourceRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(scaledSourceRect);
+        image = [image imageByApplyingTransform:CGAffineTransformMakeTranslation(absoluteSourceRect.x(), absoluteSourceRect.y())];
 
+        auto resultRect = filter.flippedRectRelativeToAbsoluteEnclosingFilterRegion(result.absoluteImageRect());
+        image = [image imageByCroppingToRect:resultRect];
     }
-
 
     if (!image)
         return false;
