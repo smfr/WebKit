@@ -49,7 +49,12 @@ void Gradient::fill(GraphicsContext& context, const FloatRect& rect)
 
 void Gradient::paint(GraphicsContext& context)
 {
-    paint(context.platformContext(), context.colorSpace());
+    std::optional<DestinationColorSpace> colorSpace;
+    // FIXME: When we support `color-interpolation` (webkit.org/b/234783) it would be OK to convert the colors to linearRGB when interpolation is linear.
+    if (context.colorSpace() != DestinationColorSpace::LinearSRGB())
+        colorSpace = context.colorSpace();
+
+    paint(context.platformContext(), colorSpace);
 }
 
 void Gradient::paint(CGContextRef platformContext, std::optional<DestinationColorSpace> colorSpace)
