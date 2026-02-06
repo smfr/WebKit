@@ -567,6 +567,10 @@ messages -> WebPageProxy {
     RemovePDFPageNumberIndicator(WebKit::PDFPluginIdentifier identifier)
 #endif
 
+#if PLATFORM(IOS_FAMILY) && ENABLE(UNIFIED_PDF)
+    SetPDFDisplayMode(enum:uint8_t WebKit::PDFDisplayMode mode)
+#endif
+
     ConfigureLoggingChannel(String channelName, enum:uint8_t WTFLogChannelState state, enum:uint8_t WTFLogLevel level)
 
 #if PLATFORM(GTK)

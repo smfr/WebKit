@@ -351,7 +351,7 @@ private:
     void performCopyLinkOperation(const WebCore::IntPoint& contextMenuEventRootViewPoint) const;
 
     void setDisplayMode(PDFDisplayMode);
-    void setDisplayModeAndUpdateLayout(PDFDisplayMode);
+    void setDisplayModeAndUpdateLayout(PDFDisplayMode) final;
 
     // Context Menu
 #if ENABLE(CONTEXT_MENUS)

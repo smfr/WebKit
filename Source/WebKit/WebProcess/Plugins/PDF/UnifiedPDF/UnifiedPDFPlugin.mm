@@ -4335,6 +4335,13 @@ void UnifiedPDFPlugin::setPDFDisplayModeForTesting(const String& mode)
 
 void UnifiedPDFPlugin::setDisplayMode(PDFDisplayMode mode)
 {
+#if PLATFORM(IOS_FAMILY)
+    if (RefPtr frame = m_frame.get()) {
+        if (RefPtr webPage = frame->page())
+            webPage->setPDFDisplayMode(mode);
+    }
+#endif
+
     m_documentLayout.setDisplayMode(mode);
 
     if (RefPtr presentationController = m_presentationController; presentationController && presentationController->supportsDisplayMode(mode)) {

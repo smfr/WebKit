@@ -8349,6 +8349,20 @@ TrustedTypesEnabled:
     WebCore:
       default: true
 
+TwoUpPDFDisplayModeSupportEnabled:
+  type: bool
+  status: internal
+  humanReadableName: "Two-Up PDF Display Mode Support"
+  humanReadableDescription: "Enable support for two-up PDF display on iOS"
+  condition: ENABLE(UNIFIED_PDF) && PLATFORM(IOS_FAMILY)
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 UAVisualTransitionDetectionEnabled:
   type: bool
   status: stable

@@ -1146,6 +1146,11 @@ PDFPluginIdentifier PluginView::pdfPluginIdentifier() const
     return m_plugin->identifier();
 }
 
+void PluginView::setPDFDisplayMode(PDFDisplayMode mode)
+{
+    m_plugin->setDisplayModeAndUpdateLayout(mode);
+}
+
 void PluginView::openWithPreview(CompletionHandler<void(const String&, std::optional<FrameInfoData>&&, std::span<const uint8_t>)>&& completionHandler)
 {
     m_plugin->openWithPreview(WTF::move(completionHandler));

@@ -483,6 +483,9 @@ enum class FindDecorationStyle : uint8_t;
 enum class ImageOption : uint8_t;
 enum class NavigatingToAppBoundDomain : bool;
 enum class MediaPlaybackState : uint8_t;
+#if ENABLE(UNIFIED_PDF)
+enum class PDFDisplayMode : uint8_t;
+#endif
 enum class SnapshotOption : uint16_t;
 enum class SyntheticEditingCommandType : uint8_t;
 enum class TextInteractionSource : uint8_t;
@@ -640,6 +643,11 @@ public:
     void updatePDFPageNumberIndicatorLocation(PDFPluginBase&, const WebCore::IntRect&);
     void updatePDFPageNumberIndicatorCurrentPage(PDFPluginBase&, size_t pageIndex);
     void removePDFPageNumberIndicator(PDFPluginBase&);
+#endif
+
+#if PLATFORM(IOS_FAMILY) && ENABLE(UNIFIED_PDF)
+    void setPDFDisplayMode(PDFDisplayMode);
+    void requestPDFDisplayMode(PDFDisplayMode);
 #endif
 
 #if ENABLE(PDF_PLUGIN) && PLATFORM(MAC)

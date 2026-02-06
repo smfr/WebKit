@@ -45,6 +45,7 @@
 #import "MessageSenderInlines.h"
 #import "NativeWebKeyboardEvent.h"
 #import "NavigationState.h"
+#import "PDFDisplayMode.h"
 #import "PDFPluginIdentifier.h"
 #import "PageClient.h"
 #import "PaymentAuthorizationController.h"
@@ -1901,6 +1902,28 @@ void WebPageProxy::updatePDFPageNumberIndicatorCurrentPage(PDFPluginIdentifier i
 {
     if (RefPtr pageClient = this->pageClient())
         pageClient->updatePDFPageNumberIndicatorCurrentPage(identifier, pageIndex);
+}
+
+#endif
+
+#if ENABLE(UNIFIED_PDF)
+
+PDFDisplayMode WebPageProxy::pdfDisplayMode() const
+{
+    return internals().pdfDisplayMode;
+}
+
+void WebPageProxy::setPDFDisplayMode(PDFDisplayMode mode)
+{
+    internals().pdfDisplayMode = mode;
+}
+
+void WebPageProxy::requestPDFDisplayMode(PDFDisplayMode mode)
+{
+    if (!hasRunningProcess())
+        return;
+
+    legacyMainFrameProcess().send(Messages::WebPage::RequestPDFDisplayMode(mode), webPageIDInMainFrameProcess());
 }
 
 #endif

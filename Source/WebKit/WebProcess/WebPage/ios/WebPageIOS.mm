@@ -6265,6 +6265,21 @@ void WebPage::removePDFPageNumberIndicator(PDFPluginBase& plugin)
 
 #endif
 
+#if ENABLE(UNIFIED_PDF)
+
+void WebPage::setPDFDisplayMode(PDFDisplayMode mode)
+{
+    send(Messages::WebPageProxy::SetPDFDisplayMode(mode));
+}
+
+void WebPage::requestPDFDisplayMode(PDFDisplayMode mode)
+{
+    if (RefPtr pluginView = mainFramePlugIn())
+        return pluginView->setPDFDisplayMode(mode);
+}
+
+#endif
+
 } // namespace WebKit
 
 #undef WEBPAGE_RELEASE_LOG
