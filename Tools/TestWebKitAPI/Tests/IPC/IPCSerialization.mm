@@ -29,6 +29,7 @@
 #import "CoreIPCCFDictionary.h"
 #import "CoreIPCError.h"
 #import "CoreIPCPKPaymentSetupFeature.h"
+#import "CoreIPCPKShippingMethod.h"
 #import "CoreIPCPlistDictionary.h"
 #import "Encoder.h"
 #import "MessageSenderInlines.h"
@@ -2018,6 +2019,43 @@ TEST(IPCSerialization, SecureCoding)
 
     runTestNS({ payment.get() });
 }
+
+#if USE(PASSKIT) && HAVE(WK_SECURE_CODING_PKSHIPPINGMETHOD)
+TEST(IPCSerialization, PKShippingMethod)
+{
+    RetainPtr<NSDateComponents> startComponents = adoptNS([NSDateComponents new]);
+    startComponents.get().day = 15;
+    startComponents.get().month = 6;
+    startComponents.get().year = 2026;
+    startComponents.get().calendar = NSCalendar.currentCalendar;
+
+    RetainPtr<NSDateComponents> endComponents = adoptNS([NSDateComponents new]);
+    endComponents.get().day = 20;
+    endComponents.get().month = 6;
+    endComponents.get().year = 2026;
+    endComponents.get().calendar = NSCalendar.currentCalendar;
+
+    RetainPtr<PKDateComponentsRange> dateRange = adoptNS([[PAL::getPKDateComponentsRangeClassSingleton() alloc] initWithStartDateComponents:startComponents.get() endDateComponents:endComponents.get()]);
+
+    WebKit::CoreIPCPKShippingMethodData data;
+    data.label = @"Standard Shipping";
+    data.amount = [NSDecimalNumber decimalNumberWithString:@"5.99"];
+    data.type = WebKit::PKPaymentSummaryItemType::Final;
+    data.localizedTitle = @"Standard";
+    data.localizedAmount = @"$5.99";
+    data.useDarkColor = false;
+    data.useLargeFont = false;
+    data.identifier = @"standard-shipping";
+    data.detail = @"Arrives in 3-5 business days";
+    data.dateComponentsRange = dateRange;
+
+    WebKit::CoreIPCPKShippingMethod shippingMethod { std::optional { WTF::move(data) } };
+    RetainPtr<PKShippingMethod> method = shippingMethod.toID();
+
+    runTestNS({ method.get() });
+}
+
+#endif
 
 #endif // PLATFORM(MAC)
 

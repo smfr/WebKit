@@ -2609,6 +2609,8 @@
 		F4E727232A547F0400CE34FD /* WKTouchEventsGestureRecognizerTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F4E727222A547E2100CE34FD /* WKTouchEventsGestureRecognizerTypes.h */; };
 		F4E89F5C2EFC702000E4D96E /* TextExtractionURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = F4E89F5A2EFC702000E4D96E /* TextExtractionURLCache.h */; };
 		F4EB4AFD269CD7F300D297AE /* OSStateSPI.h in Headers */ = {isa = PBXBuildFile; fileRef = F4EB4AFC269CD23600D297AE /* OSStateSPI.h */; };
+		F4EBCF642F33E87800BFAC3C /* CoreIPCPKShippingMethod.h in Headers */ = {isa = PBXBuildFile; fileRef = F4EBCF612F33E86F00BFAC3C /* CoreIPCPKShippingMethod.h */; };
+		F4EBCF652F33E87E00BFAC3C /* CoreIPCPKShippingMethod.mm in Sources */ = {isa = PBXBuildFile; fileRef = F4EBCF622F33E86F00BFAC3C /* CoreIPCPKShippingMethod.mm */; };
 		F4EC69CC2D0D1E3A001F903E /* CursorContext.h in Headers */ = {isa = PBXBuildFile; fileRef = F4EC69C92D0D001A001F903E /* CursorContext.h */; };
 		F4EC94E32356CC57000BB614 /* ApplicationServicesSPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 29D04E2821F7C73D0076741D /* ApplicationServicesSPI.h */; };
 		F4ED2BBD29B9803E00B8AE22 /* PrivateClickMeasurementPersistentStore.h in Headers */ = {isa = PBXBuildFile; fileRef = F4ED2BBB29B9803E00B8AE22 /* PrivateClickMeasurementPersistentStore.h */; };
@@ -8867,6 +8869,9 @@
 		F4E89F5A2EFC702000E4D96E /* TextExtractionURLCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextExtractionURLCache.h; sourceTree = "<group>"; };
 		F4E89F5B2EFC702000E4D96E /* TextExtractionURLCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextExtractionURLCache.cpp; sourceTree = "<group>"; };
 		F4EB4AFC269CD23600D297AE /* OSStateSPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSStateSPI.h; sourceTree = "<group>"; };
+		F4EBCF612F33E86F00BFAC3C /* CoreIPCPKShippingMethod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreIPCPKShippingMethod.h; sourceTree = "<group>"; };
+		F4EBCF622F33E86F00BFAC3C /* CoreIPCPKShippingMethod.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CoreIPCPKShippingMethod.mm; sourceTree = "<group>"; };
+		F4EBCF632F33E86F00BFAC3C /* CoreIPCPKShippingMethod.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoreIPCPKShippingMethod.serialization.in; sourceTree = "<group>"; };
 		F4EC69C92D0D001A001F903E /* CursorContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CursorContext.h; path = ios/CursorContext.h; sourceTree = "<group>"; };
 		F4EC69CB2D0D001A001F903E /* CursorContext.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; name = CursorContext.serialization.in; path = ios/CursorContext.serialization.in; sourceTree = "<group>"; };
 		F4ED2BBB29B9803E00B8AE22 /* PrivateClickMeasurementPersistentStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrivateClickMeasurementPersistentStore.h; sourceTree = "<group>"; };
@@ -13099,6 +13104,9 @@
 				F4AF72482F22CE2B00861236 /* CoreIPCPKPaymentToken.serialization.in */,
 				FAF27D2E2D2850D400F1F0BB /* CoreIPCPKSecureElementPass.h */,
 				FAF27D2F2D2850D400F1F0BB /* CoreIPCPKSecureElementPass.mm */,
+				F4EBCF612F33E86F00BFAC3C /* CoreIPCPKShippingMethod.h */,
+				F4EBCF622F33E86F00BFAC3C /* CoreIPCPKShippingMethod.mm */,
+				F4EBCF632F33E86F00BFAC3C /* CoreIPCPKShippingMethod.serialization.in */,
 				F4B63E162C49586700BC59EF /* CoreIPCPlist.serialization.in */,
 				F4F12CB12C48B8BB00BC1254 /* CoreIPCPlistArray.h */,
 				F4F12CB22C48B8BB00BC1254 /* CoreIPCPlistArray.mm */,
@@ -17890,6 +17898,7 @@
 				F458B8EA2E8F46E900948328 /* CoreIPCPKDateComponentsRange.h in Headers */,
 				F4AF77882F27CFC800861236 /* CoreIPCPKPaymentSetupFeature.h in Headers */,
 				F4AF724A2F23025700861236 /* CoreIPCPKPaymentToken.h in Headers */,
+				F4EBCF642F33E87800BFAC3C /* CoreIPCPKShippingMethod.h in Headers */,
 				564599992B71C3D100BC59E6 /* CoreIPCPresentationIntent.h in Headers */,
 				5C5786922B6EFFFF005D51D5 /* CoreIPCRetainPtr.h in Headers */,
 				561A54532B61E49E00073A72 /* CoreIPCSecCertificate.h in Headers */,
@@ -21514,6 +21523,7 @@
 				F4AF77892F27CFCF00861236 /* CoreIPCPKPaymentSetupFeature.mm in Sources */,
 				F4AF72492F22FCC400861236 /* CoreIPCPKPaymentToken.mm in Sources */,
 				FAF27D302D2851EB00F1F0BB /* CoreIPCPKSecureElementPass.mm in Sources */,
+				F4EBCF652F33E87E00BFAC3C /* CoreIPCPKShippingMethod.mm in Sources */,
 				F4F12CB32C48B8C100BC1254 /* CoreIPCPlistArray.mm in Sources */,
 				F4F12CB02C48B2C800BC1254 /* CoreIPCPlistDictionary.mm in Sources */,
 				F4F12CAD2C485BE200BC1254 /* CoreIPCPlistObject.mm in Sources */,

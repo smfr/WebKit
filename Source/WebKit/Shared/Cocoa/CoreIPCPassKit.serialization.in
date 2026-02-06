@@ -84,6 +84,7 @@ webkit_platform_headers: "CoreIPCPKSecureElementPass.h"
 }
 #endif
 
+#if !HAVE(WK_SECURE_CODING_PKSHIPPINGMETHOD)
 [WebKitSecureCodingClass=PAL::getPKShippingMethodClassSingleton(), SupportWKKeyedCoder, WebKitPlatform] webkit_secure_coding PKShippingMethod {
     label: String
     amount: Number
@@ -96,6 +97,7 @@ webkit_platform_headers: "CoreIPCPKSecureElementPass.h"
     detail: String
     dateComponentsRange: PKDateComponentsRange
 }
+#endif
 
 #if !HAVE(WK_SECURE_CODING_PKDATECOMPONENTSRANGE)
 [WebKitSecureCodingClass=PAL::getPKDateComponentsRangeClassSingleton(), SupportWKKeyedCoder, WebKitPlatform] webkit_secure_coding PKDateComponentsRange {

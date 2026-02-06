@@ -39,6 +39,9 @@
 #if HAVE(WK_SECURE_CODING_PKPAYMENTSETUPFEATURE)
 #include "CoreIPCPKPaymentSetupFeature.h"
 #endif
+#if HAVE(WK_SECURE_CODING_PKSHIPPINGMETHOD)
+#include "CoreIPCPKShippingMethod.h"
+#endif
 #endif
 #include <wtf/RetainPtr.h>
 #include <wtf/UniqueRef.h>
@@ -62,7 +65,9 @@ class CoreIPCPKPayment;
 #if !HAVE(WK_SECURE_CODING_PKPAYMENTTOKEN)
 class CoreIPCPKPaymentToken;
 #endif
+#if !HAVE(WK_SECURE_CODING_PKSHIPPINGMETHOD)
 class CoreIPCPKShippingMethod;
+#endif
 class CoreIPCCNContact;
 class CoreIPCCNPhoneNumber;
 class CoreIPCCNPostalAddress;
