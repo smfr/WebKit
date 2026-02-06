@@ -36,6 +36,10 @@
 #import <wtf/CrossThreadCopier.h>
 #import <wtf/WorkQueue.h>
 
+#if USE(APPLE_INTERNAL_SDK)
+#import <WebKitAdditions/BEKAdditions.h>
+#endif
+
 namespace WebKit {
 
 Ref<WebParentalControlsURLFilter> WebParentalControlsURLFilter::create()
@@ -69,11 +73,13 @@ void WebParentalControlsURLFilter::isURLAllowedImpl(const URL& mainDocumentURL, 
             return;
         }
 
+        auto filter = ensureWebContentFilter();
 #if HAVE(WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST)
-        [ensureWebContentFilter() evaluateURL:url.createNSURL().get() mainDocumentURL:mainDocumentURL.createNSURL().get() completionHandler:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
-#else
-        [protect(ensureWebContentFilter()) evaluateURL:url.createNSURL().get() completionHandler:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
+#if __has_include(<WebKitAdditions/BEKAdditions.h>)
+        MAYBE_EVALUATE_URL_WITH_TRANSITIVE_TRUST
 #endif
+#endif
+        [filter evaluateURL:url.createNSURL().get() completionHandler:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
             completionHandler(!shouldBlock, replacementData);
         }).get()];
     });
