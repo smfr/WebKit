@@ -1550,6 +1550,10 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationSetWasmTableElement, UCPUStrictInt32,
 
 JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationWasmTableInit, UCPUStrictInt32, (JSWebAssemblyInstance* instance, unsigned elementIndex, unsigned tableIndex, uint32_t dstOffset, uint32_t srcOffset, uint32_t length))
 {
+    CallFrame* callFrame = DECLARE_WASM_CALL_FRAME(instance);
+    assertCalleeIsReferenced(callFrame, instance);
+    VM& vm = instance->vm();
+    WasmOperationPrologueCallFrameTracer tracer(vm, callFrame, OUR_RETURN_ADDRESS);
     return toUCPUStrictInt32(tableInit(instance, elementIndex, tableIndex, dstOffset, srcOffset, length));
 }
 

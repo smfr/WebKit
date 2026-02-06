@@ -531,6 +531,7 @@ WASM_IPINT_EXTERN_CPP_DECL(table_init, IPIntStackEntry* sp, TableInitMetadata* m
     int32_t src = sp[1].i32;
     int32_t dst = sp[2].i32;
 
+    WasmSlowPathWithoutCallFrameTracer tracer(instance->vm());
     if (!Wasm::tableInit(instance, metadata->elementIndex, metadata->tableIndex, dst, src, n))
         IPINT_THROW(Wasm::ExceptionType::OutOfBoundsTableAccess);
     IPINT_END();
