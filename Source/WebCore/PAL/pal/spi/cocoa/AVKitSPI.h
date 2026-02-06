@@ -279,6 +279,10 @@ NS_ASSUME_NONNULL_END
 #endif // PLATFORM(IOS_FAMILY)
 
 #if PLATFORM(MAC)
+
+#import <AppKit/AppKit.h>
+
+#if !__has_feature(modules)
 #import <AVKit/AVPlayerView.h>
 
 @class AVPlayerController;
@@ -293,6 +297,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+#else
+@class AVPlayerView;
+#endif // !__has_feature(modules)
+
 #endif // PLATFORM(MAC)
 
 #endif // USE(APPLE_INTERNAL_SDK)
