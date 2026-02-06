@@ -124,7 +124,7 @@ void HTMLOptionElement::removedFromAncestor(RemovalType removalType, ContainerNo
 bool HTMLOptionElement::isFocusable() const
 {
     RefPtr select = ownerSelectElement();
-    if (select && select->usesMenuList())
+    if (select && select->usesMenuListDeprecated())
         return false;
     return HTMLElement::isFocusable();
 }
@@ -151,7 +151,7 @@ void HTMLOptionElement::setText(String&& text)
     // index to the first item if the select is single selection with a menu list. We attempt to
     // preserve the selected item.
     RefPtr select = ownerSelectElement();
-    bool selectIsMenuList = select && select->usesMenuList();
+    bool selectIsMenuList = select && select->usesMenuListDeprecated();
     int oldSelectedIndex = selectIsMenuList ? select->selectedIndex() : -1;
 
     setTextContent(WTF::move(text));

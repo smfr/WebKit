@@ -173,7 +173,7 @@ void HTMLSelectElement::optionSelectedByUser(int optionIndex, bool fireOnChangeN
 {
     // User interaction such as mousedown events can cause list box select elements to send change events.
     // This produces that same behavior for changes triggered by other code running on behalf of the user.
-    if (!usesMenuList()) {
+    if (!usesMenuListDeprecated()) {
         updateSelectedState(optionToListIndex(optionIndex), allowMultipleSelection, false);
         updateValidity();
         if (CheckedPtr renderer = this->renderer())
@@ -240,6 +240,15 @@ bool HTMLSelectElement::valueMissing() const
 }
 
 bool HTMLSelectElement::usesMenuList() const
+{
+#if !PLATFORM(IOS_FAMILY)
+    return !m_multiple && m_size <= 1;
+#else
+    return true;
+#endif
+}
+
+bool HTMLSelectElement::usesMenuListDeprecated() const
 {
 #if !PLATFORM(IOS_FAMILY)
     return !m_multiple && m_size <= 1;
@@ -386,13 +395,9 @@ bool HTMLSelectElement::canSelectAll() const
 
 RenderPtr<RenderElement> HTMLSelectElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
 {
-#if !PLATFORM(IOS_FAMILY)
     if (usesMenuList())
         return createRenderer<RenderMenuList>(*this, WTF::move(style));
     return createRenderer<RenderListBox>(*this, WTF::move(style));
-#else
-    return createRenderer<RenderMenuList>(*this, WTF::move(style));
-#endif
 }
 
 bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
@@ -400,7 +405,7 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
     if (!HTMLFormControlElement::childShouldCreateRenderer(child))
         return false;
 #if !PLATFORM(IOS_FAMILY)
-    if (!usesMenuList())
+    if (!usesMenuListDeprecated())
         return is<HTMLOptionElement>(child) || is<HTMLOptGroupElement>(child) || validationMessageShadowTreeContains(child);
 #endif
     if (child.isInShadowTree() && child.containingShadowRoot() == userAgentShadowRoot())
@@ -692,7 +697,7 @@ void HTMLSelectElement::selectAll()
 
 void HTMLSelectElement::saveLastSelection()
 {
-    if (usesMenuList()) {
+    if (usesMenuListDeprecated()) {
         m_lastOnChangeIndex = selectedIndex();
         return;
     }
@@ -756,7 +761,7 @@ void HTMLSelectElement::updateListBoxSelection(bool deselectOtherOptions)
 
 void HTMLSelectElement::listBoxOnChange()
 {
-    ASSERT(!usesMenuList() || m_multiple);
+    ASSERT(!usesMenuListDeprecated() || m_multiple);
 
     auto& items = listItems();
 
@@ -787,7 +792,7 @@ void HTMLSelectElement::listBoxOnChange()
 
 void HTMLSelectElement::dispatchChangeEventForMenuList()
 {
-    ASSERT(usesMenuList());
+    ASSERT(usesMenuListDeprecated());
 
     int selected = selectedIndex();
     if (m_lastOnChangeIndex != selected && m_isProcessingUserDrivenChange) {
@@ -801,7 +806,7 @@ void HTMLSelectElement::dispatchChangeEventForMenuList()
 void HTMLSelectElement::scrollToSelection()
 {
 #if !PLATFORM(IOS_FAMILY)
-    if (usesMenuList())
+    if (usesMenuListDeprecated())
         return;
 
     if (CheckedPtr renderer = dynamicDowncast<RenderListBox>(this->renderer()))
@@ -979,7 +984,7 @@ void HTMLSelectElement::optionSelectionStateChanged(HTMLOptionElement& option, b
     ASSERT(option.ownerSelectElement() == this);
     if (optionIsSelected)
         selectOption(option.index());
-    else if (!usesMenuList())
+    else if (!usesMenuListDeprecated())
         selectOption(-1);
     else
         selectOption(nextSelectableListIndex(-1));
@@ -1016,7 +1021,7 @@ void HTMLSelectElement::selectOption(int optionIndex, SelectOptionFlags flags)
 
     scrollToSelection();
 
-    if (usesMenuList()) {
+    if (usesMenuListDeprecated()) {
         m_isProcessingUserDrivenChange = flags & UserDriven;
         if (flags & DispatchChangeEvent)
             dispatchChangeEventForMenuList();
@@ -1063,7 +1068,7 @@ void HTMLSelectElement::dispatchFocusEvent(RefPtr<Element>&& oldFocusedElement, 
 {
     // Save the selection so it can be compared to the new selection when
     // dispatching change events during blur event dispatch.
-    if (usesMenuList())
+    if (usesMenuListDeprecated())
         saveLastSelection();
     HTMLFormControlElement::dispatchFocusEvent(WTF::move(oldFocusedElement), options);
 }
@@ -1073,7 +1078,7 @@ void HTMLSelectElement::dispatchBlurEvent(RefPtr<Element>&& newFocusedElement)
     // We only need to fire change events here for menu lists, because we fire
     // change events for list boxes whenever the selection change is actually made.
     // This matches other browsers' behavior.
-    if (usesMenuList())
+    if (usesMenuListDeprecated())
         dispatchChangeEventForMenuList();
     HTMLFormControlElement::dispatchBlurEvent(WTF::move(newFocusedElement));
 }
@@ -1157,12 +1162,12 @@ void HTMLSelectElement::restoreFormControlState(const FormControlState& state)
 
 void HTMLSelectElement::parseMultipleAttribute(const AtomString& value)
 {
-    bool oldUsesMenuList = usesMenuList();
+    bool oldUsesMenuList = usesMenuListDeprecated();
     bool oldMultiple = m_multiple;
     int oldSelectedIndex = selectedIndex();
     m_multiple = !value.isNull();
     updateValidity();
-    if (oldUsesMenuList != usesMenuList())
+    if (oldUsesMenuList != usesMenuListDeprecated())
         invalidateStyleAndRenderersForSubtree();
     if (oldMultiple != m_multiple) {
         if (oldSelectedIndex >= 0)
@@ -1717,7 +1722,7 @@ void HTMLSelectElement::typeAheadFind(KeyboardEvent& event)
     if (index < 0)
         return;
     selectOption(listToOptionIndex(index), DeselectOtherOptions | DispatchChangeEvent | UserDriven);
-    if (!usesMenuList())
+    if (!usesMenuListDeprecated())
         listBoxOnChange();
 }
 
@@ -1739,7 +1744,7 @@ void HTMLSelectElement::accessKeySetSelectedIndex(int index)
         }
     }
 
-    if (usesMenuList())
+    if (usesMenuListDeprecated())
         dispatchChangeEventForMenuList();
     else
         listBoxOnChange();
