@@ -109,7 +109,7 @@ bool AccessibilityMenuList::isCollapsed() const
 
 #if !PLATFORM(IOS_FAMILY)
     RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(element());
-    return !(selectElement && selectElement->usesMenuListDeprecated() && selectElement->popupIsVisible());
+    return !(selectElement && selectElement->usesMenuList() && selectElement->popupIsVisible());
 #else
     return true;
 #endif

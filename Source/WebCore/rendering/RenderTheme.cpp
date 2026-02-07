@@ -439,7 +439,7 @@ StyleAppearance RenderTheme::autoAppearanceForElement(RenderStyle& style, const 
 #if PLATFORM(IOS_FAMILY)
         return StyleAppearance::MenulistButton;
 #else
-        return select->usesMenuListDeprecated() ? StyleAppearance::Menulist : StyleAppearance::Listbox;
+        return select->usesMenuList() ? StyleAppearance::Menulist : StyleAppearance::Listbox;
 #endif
     }
 

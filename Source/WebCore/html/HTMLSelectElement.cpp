@@ -405,7 +405,7 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
     if (!HTMLFormControlElement::childShouldCreateRenderer(child))
         return false;
 #if !PLATFORM(IOS_FAMILY)
-    if (!usesMenuListDeprecated())
+    if (!usesMenuList())
         return is<HTMLOptionElement>(child) || is<HTMLOptGroupElement>(child) || validationMessageShadowTreeContains(child);
 #endif
     if (child.isInShadowTree() && child.containingShadowRoot() == userAgentShadowRoot())
@@ -806,7 +806,7 @@ void HTMLSelectElement::dispatchChangeEventForMenuList()
 void HTMLSelectElement::scrollToSelection()
 {
 #if !PLATFORM(IOS_FAMILY)
-    if (usesMenuListDeprecated())
+    if (usesMenuList())
         return;
 
     if (CheckedPtr renderer = dynamicDowncast<RenderListBox>(this->renderer()))
@@ -1162,12 +1162,12 @@ void HTMLSelectElement::restoreFormControlState(const FormControlState& state)
 
 void HTMLSelectElement::parseMultipleAttribute(const AtomString& value)
 {
-    bool oldUsesMenuList = usesMenuListDeprecated();
+    bool oldUsesMenuList = usesMenuList();
     bool oldMultiple = m_multiple;
     int oldSelectedIndex = selectedIndex();
     m_multiple = !value.isNull();
     updateValidity();
-    if (oldUsesMenuList != usesMenuListDeprecated())
+    if (oldUsesMenuList != usesMenuList())
         invalidateStyleAndRenderersForSubtree();
     if (oldMultiple != m_multiple) {
         if (oldSelectedIndex >= 0)
