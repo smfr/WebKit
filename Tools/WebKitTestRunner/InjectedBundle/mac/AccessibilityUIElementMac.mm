@@ -38,6 +38,7 @@
 #import <WebCore/CocoaAccessibilityConstants.h>
 #import <WebCore/DateComponents.h>
 #import <WebKit/WKBundleFrame.h>
+#import <pal/spi/cocoa/NSAccessibilitySPI.h>
 #import <wtf/RetainPtr.h>
 #import <wtf/Vector.h>
 #import <wtf/cocoa/VectorCocoa.h>
@@ -3080,11 +3081,18 @@ bool AccessibilityUIElementMac::isLastItemInSuggestion() const
 bool AccessibilityUIElementMac::isRemoteFrame() const
 {
     BEGIN_AX_OBJC_EXCEPTIONS
-    auto value = attributeValue(@"AXIsRemoteFrame");
+    RetainPtr value = attributeValue(@"AXIsRemoteFrame");
     if ([value isKindOfClass:[NSNumber class]])
         return [value boolValue];
     END_AX_OBJC_EXCEPTIONS
     return false;
+}
+
+bool AccessibilityUIElementMac::isRemotePlatformElement() const
+{
+    BEGIN_AX_OBJC_EXCEPTIONS
+    return [m_element isKindOfClass:NSAccessibilityRemoteUIElement.class];
+    END_AX_OBJC_EXCEPTIONS
 }
 
 } // namespace WTR

@@ -184,6 +184,7 @@ bool isDefaultValue(AXProperty property, AXPropertyValueVariant& value)
         [](DateComponentsType& typedValue) { return typedValue == DateComponentsType::Invalid; },
         [](AccessibilityOrientation) { return false; },
         [](Style::SpeakAs& typedValue) { return typedValue.isNormal(); },
+        [](FrameIdentifier&) { return false; },
         [](auto&) {
             AX_ASSERT_NOT_REACHED();
             return false;
@@ -1706,6 +1707,7 @@ AXIsolatedObject* AXIsolatedObject::crossFrameParentObject() const
 
     auto parentObjectID = *markableParentObjectID;
 
+    // FIXME: We don't actually hold the lock here.
     RefPtr parentTree = AXIsolatedTree::treeForFrameIDAlreadyLocked(*parentFrameID);
     if (!parentTree)
         return nullptr;
@@ -1723,6 +1725,7 @@ AXIsolatedObject* AXIsolatedObject::crossFrameChildObject() const
         return nullptr;
 
     RefPtr<AXIsolatedTree> childTree;
+    // FIXME: We don't actually hold the lock here.
     childTree = AXIsolatedTree::treeForFrameIDAlreadyLocked(*frameID);
     if (!childTree)
         return nullptr;

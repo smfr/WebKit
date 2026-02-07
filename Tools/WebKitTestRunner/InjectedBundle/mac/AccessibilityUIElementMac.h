@@ -328,6 +328,7 @@ public:
     bool isFirstItemInSuggestion() const override;
     bool isLastItemInSuggestion() const override;
     bool isRemoteFrame() const override;
+    bool isRemotePlatformElement() const final;
 
 private:
     AccessibilityUIElementMac(PlatformUIElement);

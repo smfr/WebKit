@@ -126,6 +126,7 @@ interface AccessibilityUIElement {
     readonly attribute boolean isFirstItemInSuggestion;
     readonly attribute boolean isLastItemInSuggestion;
     readonly attribute boolean isRemoteFrame;
+    readonly attribute boolean isRemotePlatformElement;
 
     readonly attribute long pageX;
     readonly attribute long pageY;

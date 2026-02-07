@@ -630,6 +630,12 @@ TextStream& operator<<(TextStream& stream, AXNotification notification)
     return stream;
 }
 
+TextStream& operator<<(TextStream& stream, const AXNotificationWithData& notification)
+{
+    stream << notification.debugDescription();
+    return stream;
+}
+
 #if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
 WTF::TextStream& operator<<(WTF::TextStream& stream, const AXPropertyVector& properties)
 {

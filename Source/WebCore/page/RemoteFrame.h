@@ -91,6 +91,8 @@ public:
 
     void updateScrollingMode() final;
     void reportMixedContentViolation(bool blocked, const URL& target) const final;
+
+    String debugDescription() const final;
     const SecurityOrigin& frameDocumentSecurityOriginOrOpaque() const;
 
 private:

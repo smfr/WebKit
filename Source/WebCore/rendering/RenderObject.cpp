@@ -94,7 +94,9 @@
 #include <algorithm>
 #include <stdio.h>
 #include <wtf/HexNumber.h>
+#include <wtf/Seconds.h>
 #include <wtf/TZoneMallocInlines.h>
+#include <wtf/WeakRandomNumber.h>
 #include <wtf/text/TextStream.h>
 
 namespace WebCore {
@@ -3137,6 +3139,17 @@ void printLayerTreeForLiveDocuments()
     }
 }
 
+void printAccessibilityTreeForLiveDocumentsAfterDelay()
+{
+    // This is useful when debugging pages with frames and site isolation enabled. If all processes
+    // dump their tree at once, they will interleave in stderr, making it hard to understand.
+    // It's still possible for this to happen with this random delay, but is much less likely.
+    auto randomSeconds = Seconds { static_cast<double>(weakRandomNumber<unsigned>() % 21) };
+    sleep(randomSeconds);
+
+    printAccessibilityTreeForLiveDocuments();
+}
+
 void printAccessibilityTreeForLiveDocuments()
 {
     for (auto& document : Document::allDocuments()) {
@@ -3144,9 +3157,9 @@ void printAccessibilityTreeForLiveDocuments()
             continue;
         if (document->frame()) {
             if (document->frame()->isRootFrame())
-                WTFLogAlways("Accessibility tree for root document %p %s", document.ptr(), document->url().string().utf8().data());
+                WTFLogAlways("\nPID %d: Accessibility tree for root document %p %s", getpid(), document.ptr(), document->url().string().utf8().data());
             else
-                WTFLogAlways("Accessibility tree for non-root document %p %s", document.ptr(), document->url().string().utf8().data());
+                WTFLogAlways("\nPID %d: Accessibility tree for non-root document %p %s", getpid(), document.ptr(), document->url().string().utf8().data());
             dumpAccessibilityTreeToStderr(document.get());
         }
     }

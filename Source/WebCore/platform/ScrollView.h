@@ -89,6 +89,8 @@ public:
 
     USING_CAN_MAKE_WEAKPTR(Widget);
 
+    String debugDescription() const override;
+
     // ScrollableArea functions.
     WEBCORE_EXPORT void setScrollOffset(const ScrollOffset&) final;
     bool isScrollCornerVisible() const final;
@@ -491,7 +493,6 @@ private:
     bool setHasScrollbarInternal(RefPtr<Scrollbar>&, ScrollbarOrientation, bool hasBar, bool* contentSizeAffected);
 
     bool isScrollView() const final { return true; }
-    String debugDescription() const override;
 
     void init();
     void destroy();

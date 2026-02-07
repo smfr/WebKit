@@ -3192,12 +3192,7 @@ AccessibilityObject* AccessibilityObject::focusedUIElementInAnyLocalFrame() cons
     CheckedPtr axObjectCache = focusedDocument->axObjectCache();
     if (!axObjectCache)
         return nullptr;
-
-#if ENABLE_ACCESSIBILITY_LOCAL_FRAME
-    return axObjectCache->focusedObjectForLocalFrame();
-#else
     return axObjectCache->focusedObjectForPage(page.get());
-#endif
 }
 
 void AccessibilityObject::setSelectedRows(AccessibilityChildrenVector&& selectedRows)

@@ -196,7 +196,7 @@ public:
 
     bool requestDOMPasteAccess(DOMPasteAccessCategory = DOMPasteAccessCategory::General);
 
-    String debugDescription() const;
+    String debugDescription() const override;
 
     WEBCORE_EXPORT static LocalFrame* fromJSContext(JSContextRef);
     WEBCORE_EXPORT static LocalFrame* contentFrameFromWindowOrFrameElement(JSContextRef, JSValueRef);

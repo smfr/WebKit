@@ -283,14 +283,14 @@ id WebProcess::accessibilityFocusedUIElement()
         }
 
         RefPtr object = (*isolatedTree)->focusedNode();
-        RetainPtr objectWrapper = object ? object->wrapper() : nil;
-        if (objectWrapper) {
+        RetainPtr platformElement = object ? object->platformElement() : nil;
+        if (platformElement) {
             ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-            if (RetainPtr associatedParent = [objectWrapper accessibilityAttributeValue:@"_AXAssociatedPluginParent"])
-                objectWrapper = WTF::move(associatedParent);
+            if (RetainPtr associatedParent = [platformElement accessibilityAttributeValue:@"_AXAssociatedPluginParent"])
+                platformElement = WTF::move(associatedParent);
             ALLOW_DEPRECATED_DECLARATIONS_END
         }
-        return objectWrapper.autorelease();
+        return platformElement.autorelease();
     }
 #endif
 

@@ -1493,6 +1493,7 @@ WTF::TextStream& operator<<(WTF::TextStream&, const RenderObject::RepaintRects&)
 
 #if ENABLE(TREE_DEBUGGING)
 void printAccessibilityTreeForLiveDocuments();
+void printAccessibilityTreeForLiveDocumentsAfterDelay();
 void printPaintOrderTreeForLiveDocuments();
 void printRenderTreeForLiveDocuments();
 void printLayerTreeForLiveDocuments();

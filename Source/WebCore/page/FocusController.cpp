@@ -504,6 +504,10 @@ void FocusController::setFocusedFrame(Frame* frame, BroadcastFocusedFrame broadc
                 localFrame->document()->updateServiceWorkerClientData();
             frame = frame->tree().parent();
         } while (frame);
+    } else if (RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(frame)) {
+        RefPtr focusedOrMainFrame = this->focusedOrMainFrame();
+        if (CheckedPtr cache = focusedOrMainFrame ? focusedOrMainFrame->document()->existingAXObjectCache() : nullptr)
+            cache->onRemoteFrameGainedFocus(*remoteFrame);
     }
 
     if (shouldBroadcast)

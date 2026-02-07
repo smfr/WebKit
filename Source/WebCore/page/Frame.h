@@ -147,6 +147,8 @@ public:
 
     virtual void reportMixedContentViolation(bool blocked, const URL& target) const = 0;
 
+    virtual String debugDescription() const = 0;
+
     void stopForBackForwardCache();
 
     WEBCORE_EXPORT void updateFrameTreeSyncData(Ref<FrameTreeSyncData>&&);

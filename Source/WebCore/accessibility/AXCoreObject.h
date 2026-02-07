@@ -1279,6 +1279,7 @@ public:
 
     AccessibilityObjectWrapper* wrapper() const { return m_wrapper.get(); }
 #if PLATFORM(COCOA)
+    WEBCORE_EXPORT RetainPtr<id> platformElement() const;
     WEBCORE_EXPORT RetainPtr<AccessibilityObjectWrapper> protectedWrapper() const;
 #endif
     void setWrapper(AccessibilityObjectWrapper* wrapper) { m_wrapper = wrapper; }

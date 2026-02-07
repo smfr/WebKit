@@ -1886,8 +1886,8 @@ static void appendStringToResult(NSMutableString *result, NSString *string)
     if (![self _prepareAccessibilityCall])
         return nil;
 
-    auto* focus = self.axBackingObject->focusedUIElementInAnyLocalFrame();
-    return focus ? focus->wrapper() : nil;
+    RefPtr focus = self.axBackingObject->focusedUIElementInAnyLocalFrame();
+    return focus ? focus->platformElement().autorelease() : nil;
 }
 
 - (id)_accessibilityWebDocumentView

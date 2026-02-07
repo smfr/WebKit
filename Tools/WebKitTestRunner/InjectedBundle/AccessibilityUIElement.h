@@ -404,7 +404,10 @@ public:
     virtual bool isDeletion() const;
     virtual bool isFirstItemInSuggestion() const;
     virtual bool isLastItemInSuggestion() const;
+    // True if the element backing |this| is the WebAccessibilityObjectWrapper associated with an AXRemoteFrame.
     virtual bool isRemoteFrame() const;
+    // True if the element backing |this| is a platform remote element (e.g. NSAccessibilityRemoteUIElement on macOS).
+    virtual bool isRemotePlatformElement() const { return false; }
 
     virtual bool isMarkAnnotation() const;
 protected:

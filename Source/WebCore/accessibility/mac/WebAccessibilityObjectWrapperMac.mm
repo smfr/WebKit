@@ -2090,7 +2090,7 @@ id attributeValueForTesting(const RefPtr<AXCoreObject>& backingObject, NSString 
         return nil;
 
     RefPtr focusedObject = backingObject->focusedUIElementInAnyLocalFrame();
-    return focusedObject ? focusedObject->wrapper() : nil;
+    return focusedObject ? focusedObject->platformElement().autorelease() : nil;
 }
 
 - (id)accessibilityHitTest:(NSPoint)point
@@ -3703,10 +3703,11 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 - (NSString *)debugDescription
 {
+    String backingObjectDescription = "null backingObject"_s;
     RefPtr<AXCoreObject> backingObject = self.updateObjectBackingStore;
-    if (!backingObject)
-        return nil;
-    return backingObject->debugDescription().createNSString().autorelease();
+    if (backingObject)
+        backingObjectDescription = backingObject->debugDescription();
+    return makeString("PID: "_s, getpid(), ", "_s, backingObjectDescription).createNSString().autorelease();
 }
 @end
 

@@ -178,12 +178,7 @@ RefPtr<AXIsolatedTree> AXIsolatedTree::create(AXObjectCache& axObjectCache)
     if (axRoot)
         tree->generateSubtree(*axRoot);
 
-#if ENABLE_ACCESSIBILITY_LOCAL_FRAME
-    RefPtr axFocus = axObjectCache.focusedObjectForLocalFrame();
-#else
-    RefPtr axFocus = axObjectCache.focusedObjectForPage(document->page());
-#endif
-    if (axFocus)
+    if (RefPtr axFocus = axObjectCache.focusedObjectForPage(document->page()))
         tree->setFocusedNodeID(axFocus->objectID());
     tree->setSelectedTextMarkerRange(document->selection().selection());
     tree->setInitialSortedLiveRegions(axIDs(axObjectCache.sortedLiveRegions()));
@@ -295,6 +290,8 @@ RefPtr<AXIsolatedTree> AXIsolatedTree::treeForFrameID(FrameIdentifier frameID)
 
 RefPtr<AXIsolatedTree> AXIsolatedTree::treeForFrameIDAlreadyLocked(FrameIdentifier frameID)
 {
+    AX_BROKEN_ASSERT(s_storeLock.isHeld());
+
     return treeFrameCache().get(frameID);
 }
 

@@ -74,6 +74,7 @@ class HTMLTableElement;
 class HTMLTextFormControlElement;
 class Node;
 class Page;
+class RemoteFrame;
 class RenderBlock;
 class RenderBlockFlow;
 class RenderImage;
@@ -137,8 +138,8 @@ struct AXTreeData {
     void dumpToStderr() const
     {
         for (const String& warning : warnings)
-            SAFE_FPRINTF(stderr, "%s\n", warning.utf8());
-        SAFE_FPRINTF(stderr, "==AX Trees==\n%s\n%s\n", liveTree.utf8(), isolatedTree.utf8());
+            SAFE_FPRINTF(stderr, "WARNING: %s\n", warning.utf8());
+        SAFE_FPRINTF(stderr, "==AX Trees (PID %d)==\n%s\n%s\n", getpid(), liveTree.utf8(), isolatedTree.utf8());
     }
 };
 
@@ -165,6 +166,31 @@ struct AriaNotifyData {
     NotifyPriority priority { NotifyPriority::Normal };
     InterruptBehavior interrupt { InterruptBehavior::None };
     String language;
+
+    String debugDescription() const
+    {
+        auto priorityString = [&] {
+            switch (priority) {
+            case NotifyPriority::Normal:
+                return "normal"_s;
+            case NotifyPriority::High:
+                return "high"_s;
+            }
+            return "unknown"_s;
+        };
+        auto interruptString = [&] {
+            switch (interrupt) {
+            case InterruptBehavior::None:
+                return "none"_s;
+            case InterruptBehavior::All:
+                return "all"_s;
+            case InterruptBehavior::Pending:
+                return "pending"_s;
+            }
+            return "unknown"_s;
+        };
+        return makeString("AriaNotifyData { message: \""_s, message, "\", priority: "_s, priorityString(), ", interrupt: "_s, interruptString(), ", language: \""_s, language, "\" }"_s);
+    }
 };
 
 struct AccessibilityRemoteToken {
@@ -198,6 +224,22 @@ struct AccessibilityRemoteToken {
 struct LiveRegionAnnouncementData {
     AttributedString message;
     LiveRegionStatus status { LiveRegionStatus::Polite };
+
+    String debugDescription() const
+    {
+        auto statusString = [&] {
+            switch (status) {
+            case LiveRegionStatus::Off:
+                return "off"_s;
+            case LiveRegionStatus::Polite:
+                return "polite"_s;
+            case LiveRegionStatus::Assertive:
+                return "assertive"_s;
+            }
+            return "unknown"_s;
+        };
+        return makeString("LiveRegionAnnouncementData { message: \""_s, message.string, "\", status: "_s, statusString(), " }"_s);
+    }
 };
 
 struct AXTextChangeContext {
@@ -238,6 +280,8 @@ struct AXNotificationWithData {
     AXNotificationWithData(AXNotification notification, const LiveRegionAnnouncementData& data)
         : notification(notification), data(data) { }
 #endif
+
+    String debugDescription() const;
 };
 
 class AccessibilityReplacedText {
@@ -422,6 +466,7 @@ public:
     void onInertOrVisibilityChange(RenderElement&);
     void onPopoverToggle(const HTMLElement&);
     void onRadioGroupMembershipChanged(HTMLElement&);
+    void onRemoteFrameGainedFocus(RemoteFrame&);
     void onScrollbarFrameRectChange(const Scrollbar&);
     void onSelectedOptionChanged(Element&);
     void onSelectedOptionChanged(HTMLSelectElement&, int optionIndex);
@@ -481,6 +526,10 @@ public:
         QualifiedName attrName;
         AtomString oldValue;
         AtomString newValue;
+    };
+    struct DeferredRemoteFrameFocus {
+        WeakPtr<RemoteFrame> remoteFrame;
+        WeakPtr<Element, WeakPtrImplWithEventTargetData> oldFocusedElement;
     };
     using DeferredCollection = Variant<HashMap<Element*, String>
         , HashSet<AXID>
@@ -730,7 +779,7 @@ private:
 
 protected:
     void postPlatformNotification(AccessibilityObject&, AXNotification);
-    void platformHandleFocusedUIElementChanged(Element* oldFocus, Element* newFocus);
+    void platformHandleFocusedUIElementChanged(AccessibilityObject* oldFocus, AccessibilityObject* newFocus);
 
     void platformPerformDeferredCacheUpdate();
 
@@ -844,6 +893,7 @@ private:
     void handleAriaExpandedChange(Element&);
     enum class UpdateModal : bool { No, Yes };
     void handleFocusedUIElementChanged(Element* oldFocus, Element* newFocus, UpdateModal = UpdateModal::Yes);
+    void handleRemoteFrameGainedFocus(RemoteFrame&, Element* oldFocusedElement);
     void handleMenuListValueChanged(Element&);
     void handleTextChanged(AccessibilityObject*);
     void handleRecomputeCellSlots(AccessibilityNodeObject&);
@@ -990,6 +1040,7 @@ private:
     WeakHashMap<Element, String, WeakPtrImplWithEventTargetData> m_deferredTextFormControlValue;
     Vector<AttributeChange> m_deferredAttributeChange;
     std::optional<std::pair<WeakPtr<Element, WeakPtrImplWithEventTargetData>, WeakPtr<Element, WeakPtrImplWithEventTargetData>>> m_deferredFocusedNodeChange;
+    std::optional<DeferredRemoteFrameFocus> m_deferredRemoteFrameFocus;
     WeakHashSet<AccessibilityObject> m_deferredUnconnectedObjects;
 #if PLATFORM(MAC)
     HashMap<PreSortedObjectType, Vector<Ref<AccessibilityObject>>, IntHash<PreSortedObjectType>, WTF::StrongEnumHashTraits<PreSortedObjectType>> m_deferredUnsortedObjects;

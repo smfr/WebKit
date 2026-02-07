@@ -63,6 +63,13 @@ SOFT_LINK_CONSTANT(AXRuntime, UIAccessibilityTokenAttachment, NSString *);
 
 namespace WebCore {
 
+RetainPtr<id> AXCoreObject::platformElement() const
+{
+    if (isRemoteFrame()) [[unlikely]]
+        return remoteFramePlatformElement();
+    return wrapper();
+}
+
 String AXCoreObject::speechHint() const
 {
     auto speakAs = this->speakAs();
