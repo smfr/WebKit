@@ -1,4 +1,3 @@
-[ iOS ] Platform/IPC/ArgumentCoders.h
 [ iOS ] UIProcess/API/ios/WKWebViewIOS.mm
 [ iOS ] UIProcess/API/ios/WKWebViewTestingIOS.mm
 [ iOS ] UIProcess/RemoteLayerTree/ios/RemoteLayerTreeDrawingAreaProxyIOS.mm
