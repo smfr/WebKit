@@ -3177,11 +3177,6 @@ auto Document::updateLayout(OptionSet<LayoutOptions> layoutOptions, const Elemen
     if (layoutOptions.contains(LayoutOptions::RunPostLayoutTasksSynchronously) && view())
         protect(view())->flushAnyPendingPostLayoutTasks();
 
-    if (layoutOptions.contains(LayoutOptions::IgnorePendingStylesheets)) {
-        if (RefPtr frameView = view())
-            frameView->adjustScrollAnchoringPositionForScrollableAreas();
-    }
-
     m_ignorePendingStylesheets = oldIgnore;
     return result;
 }
@@ -5953,7 +5948,6 @@ void Document::runScrollSteps()
         if (scrollAnimationsInProgress)
             protect(page())->scheduleRenderingUpdate({ RenderingUpdateStep::Scroll });
 
-        frameView->updateScrollAnchoringElementsForScrollableAreas();
         frameView->adjustScrollAnchoringPositionForScrollableAreas();
     }
 

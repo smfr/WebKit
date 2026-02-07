@@ -261,7 +261,9 @@ void ScrollableArea::scrollPositionChanged(const ScrollPosition& position)
     if (scrollPosition() != oldPosition) {
         scrollbarsController().notifyContentAreaScrolled(scrollPosition() - oldPosition);
 
-        updateScrollAnchoringElement();
+        LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollableArea::scrollPositionChanged() from " << oldPosition << " to " << scrollPosition() << " - clearing scroll anchor");
+        clearScrollAnchor();
+
         updateAnchorPositionedAfterScroll();
     }
 }
@@ -282,16 +284,10 @@ void ScrollableArea::stopKeyboardScrollAnimation()
     scrollAnimator().stopKeyboardScrollAnimation();
 }
 
-void ScrollableArea::updateScrollAnchoringElement(ComputeNewScrollAnchor computeNewScrollAnchor)
+void ScrollableArea::clearScrollAnchor(IncludeAncestors includeAncestors)
 {
-    CheckedPtr controller = scrollAnchoringController();
-    if (!controller)
-        return;
-
-    if (computeNewScrollAnchor == ComputeNewScrollAnchor::Yes)
-        controller->invalidateAnchorElement();
-
-    controller->updateAnchorElement();
+    if (CheckedPtr controller = scrollAnchoringController())
+        controller->clearAnchor(includeAncestors == IncludeAncestors::Yes);
 }
 
 void ScrollableArea::adjustScrollAnchoringPosition()

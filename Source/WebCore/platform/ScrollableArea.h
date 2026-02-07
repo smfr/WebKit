@@ -441,7 +441,12 @@ public:
         No,
         Yes
     };
-    void updateScrollAnchoringElement(ComputeNewScrollAnchor = ComputeNewScrollAnchor::Yes);
+
+    enum class IncludeAncestors : bool {
+        No,
+        Yes
+    };
+    void clearScrollAnchor(IncludeAncestors = IncludeAncestors::No);
     void adjustScrollAnchoringPosition();
     virtual ScrollAnchoringController* scrollAnchoringController() const { return nullptr; }
 

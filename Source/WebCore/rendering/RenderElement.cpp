@@ -1129,12 +1129,9 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
         issueRepaintForOutlineAuto(hasOutlineAuto ? outlineStyleForRepaint().usedOutlineSize() : oldStyle->usedOutlineSize());
     }
 
-    bool shouldCheckIfInAncestorChain = false;
-    if (settings().cssScrollAnchoringEnabled() && (style().outOfFlowPositionStyleDidChange(oldStyle) || (shouldCheckIfInAncestorChain = style().scrollAnchoringSuppressionStyleDidChange(oldStyle)))) {
-        LOG_WITH_STREAM(ScrollAnchoring, stream << "RenderElement::styleDidChange() " << diff << " found node with style change: " << *this << " from: " << oldStyle->position() <<" to: " << style().position());
-        auto* controller = searchParentChainForScrollAnchoringController(*this);
-        if (controller && (!shouldCheckIfInAncestorChain || (shouldCheckIfInAncestorChain && controller->isInScrollAnchoringAncestorChain(*this))))
-            controller->notifyChildHadSuppressingStyleChange();
+    if (settings().cssScrollAnchoringEnabled() && style().scrollAnchoringSuppressionStyleDidChange(oldStyle)) {
+        // FIXME: Need to set a bit to store whether this change should suppress scroll anchoring.
+        LOG_WITH_STREAM(ScrollAnchoring, stream << "RenderElement::styleDidChange: scroll anchoring suppression style change on " << *this);
     }
 
     // FIXME: First line change on the block comes in as equal on inline boxes.

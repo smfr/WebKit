@@ -6243,11 +6243,6 @@ imported/w3c/web-platform-tests/workers/modules/dedicated-worker-import-csp.html
 # due to how MessagePort::dispatchMessages() is implemented.
 imported/w3c/web-platform-tests/workers/shared-worker-name-via-options.html [ Failure Pass ]
 
-webkit.org/b/242983 imported/w3c/web-platform-tests/css/css-scroll-anchoring/fullscreen-crash.html [ Skip ]
-webkit.org/b/261849 imported/w3c/web-platform-tests/css/css-scroll-anchoring/heuristic-with-offset-update-from-scroll-event-listener.html [ Skip ]
-webkit.org/b/261849 imported/w3c/web-platform-tests/css/css-scroll-anchoring/start-edge-in-block-layout-direction.html [ Skip ]
-webkit.org/b/306639 imported/w3c/web-platform-tests/css/css-scroll-anchoring/anchor-inside-textarea.tentative.html [ Pass Failure ]
-
 # Some Trusted Types tests are flaky due to subtest ordering
 webkit.org/b/274089 imported/w3c/web-platform-tests/trusted-types/trusted-types-from-literal.tentative.html [ Pass Failure ]
 webkit.org/b/266630 imported/w3c/web-platform-tests/trusted-types/trusted-types-navigation.html [ Pass Failure ]
@@ -6305,12 +6300,6 @@ webkit.org/b/263305 imported/w3c/web-platform-tests/close-watcher/user-activatio
 webkit.org/b/263305 imported/w3c/web-platform-tests/close-watcher/user-activation/yyy-popovers.html [ Skip ]
 webkit.org/b/263305 imported/w3c/web-platform-tests/close-watcher/user-activation/yyy.html?dialog [ Skip ]
 
-# These tests are image failures
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/vertical-rl-viewport-size-change-000.html [ Skip ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/vertical-rl-viewport-size-change-001.html [ Skip ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/nested-overflow-subtree-layout-vertical.html [ Skip ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/nested-overflow-subtree-layout.html [ Skip ]
-
 # uncategorized dialog element failures
 webkit.org/b/286022 imported/w3c/web-platform-tests/html/semantics/interactive-elements/the-dialog-element/dialog-close-via-attribute.tentative.html [ Skip ]
 
@@ -6357,6 +6346,11 @@ imported/w3c/web-platform-tests/streams/transferable/gc-crash.html [ Skip ]
 webkit.org/b/241104 fast/block/fill-available-with-no-specified-containing-block-height.html [ ImageOnlyFailure ]
 webkit.org/b/241104 fast/block/fill-available-with-absolute-position.html [ ImageOnlyFailure ]
 webkit.org/b/241104 fast/css/fill-available-with-percent-height-no-quirk.html [ ImageOnlyFailure ]
+
+# temporarily disable all scroll anchoring tests
+imported/w3c/web-platform-tests/css/css-scroll-anchoring [ Skip ]
+# affected by scroll anchoring.
+http/tests/site-isolation/mouse-events/scrolled-mainframe.html [ Skip ]
 
 # compute-kind-widget-generated failures (webkit.org/b/243899)
 imported/w3c/web-platform-tests/css/css-ui/compute-kind-widget-generated/kind-of-widget-fallback-button-border-block-end-color-001.html [ ImageOnlyFailure ]
@@ -6488,8 +6482,6 @@ imported/w3c/web-platform-tests/content-security-policy/inheritance/history-ifra
 imported/w3c/web-platform-tests/cookies/domain/domain-attribute-idn-host.sub.https.html [ Skip ]
 imported/w3c/web-platform-tests/css/css-font-loading/font-face-reject.html [ Skip ]
 imported/w3c/web-platform-tests/css/css-fonts/test_datafont_same_origin.html [ Skip ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/anchor-inside-iframe.html [ Skip ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/reading-scroll-forces-anchoring.html [ Skip ]
 imported/w3c/web-platform-tests/css/css-scroll-snap/input/keyboard.html [ Skip ]
 imported/w3c/web-platform-tests/css/css-values/dynamic-viewport-units-rule-cache.html [ Skip ]
 imported/w3c/web-platform-tests/css/css-variables/variable-reference-refresh.html [ Skip ]

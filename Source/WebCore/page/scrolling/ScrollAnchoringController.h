@@ -36,12 +36,11 @@
 namespace WebCore {
 
 class Element;
+class RenderBox;
+class RenderElement;
+class RenderObject;
 class ScrollableArea;
 class WeakPtrImplWithEventTargetData;
-
-enum class CandidateExaminationResult {
-    Exclude, Select, Descend, Skip
-};
 
 class ScrollAnchoringController : public CanMakeCheckedPtr<ScrollAnchoringController> {
     WTF_MAKE_TZONE_ALLOCATED(ScrollAnchoringController);
@@ -50,36 +49,32 @@ public:
     explicit ScrollAnchoringController(ScrollableArea&);
     ~ScrollAnchoringController();
 
+    bool shouldMaintainScrollAnchor() const;
+
+    void clearAnchor(bool includeAncestors = false);
+    void updateBeforeLayout();
     void adjustScrollPositionForAnchoring();
 
-    void invalidateAnchorElement();
-    void updateAnchorElement();
+    void notifyChildHadSuppressingStyleChange(RenderElement&);
 
-    void notifyChildHadSuppressingStyleChange();
-    bool isInScrollAnchoringAncestorChain(const RenderObject&);
-
-    bool hasAnchorElement() const { return !!m_anchorElement; }
-
-    CandidateExaminationResult examineAnchorCandidate(Element&);
-    Element* anchorElement() const { return m_anchorElement.get(); }
+    bool hasAnchorElement() const { return !!m_anchorObject; }
 
 private:
-    void chooseAnchorElement(Document&);
-
-    Element* findAnchorElementRecursive(Element*);
-    bool didFindPriorityCandidate(Document&);
-
-    FloatPoint computeOffsetFromOwningScroller(RenderObject&);
-
     LocalFrameView& frameView();
 
-    CheckedRef<ScrollableArea> m_owningScrollableArea;
-    WeakPtr<Element, WeakPtrImplWithEventTargetData> m_anchorElement;
-    FloatPoint m_lastOffsetForAnchorElement;
+    RenderBox* scrollableAreaBox() const;
+    void invalidate();
+    void chooseAnchorElement(Document&);
+    bool anchoringSuppressedByStyleChange() const;
 
-    bool m_midUpdatingScrollPositionForAnchorElement { false };
+    CheckedRef<ScrollableArea> m_owningScrollableArea;
+    SingleThreadWeakPtr<RenderObject> m_anchorObject;
+    FloatPoint m_lastAnchorOffset;
+
+    bool m_isUpdatingScrollPositionForAnchoring { false };
     bool m_isQueuedForScrollPositionUpdate { false };
-    bool m_shouldSuppressScrollPositionUpdate { false };
+    bool m_anchoringSuppressedByStyleChange { false };
+    bool m_shouldSuppressScrollPositionUpdate { false }; // May need to be a count
 };
 
 } // namespace WebCore
