@@ -36,7 +36,7 @@ class MockMediaDeviceRouteURLCallback;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface WebMockMediaDeviceRoute : NSObject <WebMediaDevicePlatformRoute>
+@interface WebMockMediaDeviceRoute : NSObject <AVMediaSource, WebMediaDevicePlatformRoute>
 @property (nonatomic, nullable, setter=setURLCallback:) WebCore::MockMediaDeviceRouteURLCallback* urlCallback;
 @end
 

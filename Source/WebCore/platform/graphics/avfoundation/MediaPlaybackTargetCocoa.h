@@ -49,6 +49,10 @@ public:
 
     RetainPtr<AVOutputContext> outputContext() const { return m_outputContext.get(); }
 
+#if HAVE(AVROUTING_FRAMEWORK)
+    bool hasAirPlayDevice() const;
+#endif
+
 private:
     explicit MediaPlaybackTargetCocoa(RetainPtr<AVOutputContext>&&);
 

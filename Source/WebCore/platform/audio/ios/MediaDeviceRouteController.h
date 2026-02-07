@@ -38,7 +38,7 @@
 #include <wtf/ThreadSafeWeakPtr.h>
 #include <wtf/Vector.h>
 
-OBJC_CLASS WebMediaDeviceRouteController;
+OBJC_CLASS WebMediaDeviceRouteObserver;
 
 namespace WebCore {
 
@@ -70,10 +70,10 @@ public:
 private:
     MediaDeviceRouteController();
 
-    RetainPtr<WebMediaDeviceRouteController> m_controller;
     ThreadSafeWeakPtr<MediaDeviceRouteControllerClient> m_client;
     Vector<Ref<MediaDeviceRoute>> m_activeRoutes;
 #if HAVE(AVROUTING_FRAMEWORK)
+    RetainPtr<WebMediaDeviceRouteObserver> m_routeObserver;
     RetainPtr<WebMediaDevicePlatformRouteController> m_platformController;
 #endif
 };

@@ -172,7 +172,7 @@ void MediaPlayerPrivateWirelessPlayback::updateURLIfNeeded()
     if (!playbackTarget)
         return;
 
-    playbackTarget->loadURL(m_url, [weakThis = ThreadSafeWeakPtr { *this }](const MediaDeviceRouteLoadURLResult& result) {
+    Ref { *playbackTarget->route() }->loadURL(m_url, [weakThis = ThreadSafeWeakPtr { *this }](const MediaDeviceRouteLoadURLResult& result) {
         RefPtr protectedThis = weakThis.get();
         if (!protectedThis)
             return;

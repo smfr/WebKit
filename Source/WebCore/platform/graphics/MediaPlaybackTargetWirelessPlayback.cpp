@@ -74,15 +74,6 @@ String MediaPlaybackTargetWirelessPlayback::deviceName() const
     return { };
 }
 
-void MediaPlaybackTargetWirelessPlayback::loadURL(const URL& url, CompletionHandler<void(const MediaDeviceRouteLoadURLResult&)>&& completionHandler)
-{
-    RefPtr route = m_route;
-    if (!route)
-        return completionHandler(makeUnexpected(MediaDeviceRouteLoadURLError::NoRoute));
-
-    route->loadURL(url, WTF::move(completionHandler));
-}
-
 } // namespace WebCore
 
 #endif // ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)
