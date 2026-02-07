@@ -1280,7 +1280,7 @@ static WKDragSessionContext *ensureLocalDragSessionContext(id <UIDragSession> se
             @protocol(UITextInputMultiDocument),
             @protocol(_UITextInputTranslationSupport),
         };
-        for (auto protocol : legacyProtocols)
+        for (RetainPtr protocol : legacyProtocols)
             class_addProtocol(self.class, protocol);
     }
 
@@ -13309,20 +13309,20 @@ static BOOL shouldUseMachineReadableCodeMenuFromImageAnalysisResult(CocoaImageAn
         auto newItems = adoptNS([NSMutableArray<UIMenuElement *> new]);
 
         for (UIMenuElement *child in adjustedChildren.get()) {
-            UIAction *action = dynamic_objc_cast<UIAction>(child);
+            RetainPtr action = dynamic_objc_cast<UIAction>(child);
             if (!action)
                 continue;
 
-            if ([action.identifier isEqual:protect(elementActionTypeToUIActionIdentifier(_WKElementActionTypeCopyCroppedImage)).get()]) {
+            if ([action.get().identifier isEqual:protect(elementActionTypeToUIActionIdentifier(_WKElementActionTypeCopyCroppedImage)).get()]) {
                 if (self.subjectResultForImageContextMenu)
-                    action.attributes &= ~UIMenuElementAttributesDisabled;
+                    action.get().attributes &= ~UIMenuElementAttributesDisabled;
 
                 continue;
             }
 
-            if ([action.identifier isEqual:revealImageIdentifier.get()]) {
+            if ([action.get().identifier isEqual:revealImageIdentifier.get()]) {
                 if (self.hasVisualSearchResultsForImageContextMenu)
-                    action.attributes &= ~UIMenuElementAttributesDisabled;
+                    action.get().attributes &= ~UIMenuElementAttributesDisabled;
 
                 continue;
             }
@@ -15605,14 +15605,16 @@ ALLOW_DEPRECATED_DECLARATIONS_END
             dataForPreview.get()[UIPreviewDataLink] = linkURL.createNSURL().get();
 #if ENABLE(DATA_DETECTION)
         if (isDataDetectorLink) {
-            NSDictionary *context = nil;
+            RetainPtr<NSDictionary> context;
             if ([uiDelegate respondsToSelector:@selector(_dataDetectionContextForWebView:)])
                 context = [uiDelegate _dataDetectionContextForWebView:self.webView];
 
             DDDetectionController *controller = [PAL::getDDDetectionControllerClassSingleton() sharedController];
-            NSDictionary *newContext = nil;
+            // We cannot use a RetainPtr since this is an out-parameter for [DDDetectionController resultForURL:].
+            SUPPRESS_UNRETAINED_LOCAL NSDictionary *rawNewContext = nil;
             RetainPtr<NSMutableDictionary> extendedContext;
-            RetainPtr ddResult = [controller resultForURL:dataForPreview.get()[UIPreviewDataLink] identifier:_positionInformation.dataDetectorIdentifier.createNSString().get() selectedText:[self selectedText] results:_positionInformation.dataDetectorResults.get() context:context extendedContext:&newContext];
+            RetainPtr ddResult = [controller resultForURL:dataForPreview.get()[UIPreviewDataLink] identifier:_positionInformation.dataDetectorIdentifier.createNSString().get() selectedText:[self selectedText] results:_positionInformation.dataDetectorResults.get() context:context extendedContext:&rawNewContext];
+            RetainPtr newContext = rawNewContext;
             if (ddResult)
                 dataForPreview.get()[UIPreviewDataDDResult] = (__bridge id)ddResult.get();
             if (!_positionInformation.textBefore.isEmpty() || !_positionInformation.textAfter.isEmpty()) {
@@ -15626,7 +15628,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
                 newContext = extendedContext.get();
             }
             if (newContext)
-                dataForPreview.get()[UIPreviewDataDDContext] = newContext;
+                dataForPreview.get()[UIPreviewDataDDContext] = newContext.get();
         }
 #endif // ENABLE(DATA_DETECTION)
     } else if (canShowImagePreview) {

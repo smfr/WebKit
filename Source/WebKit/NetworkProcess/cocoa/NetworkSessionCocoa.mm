@@ -1410,7 +1410,7 @@ SessionWrapper& NetworkSessionCocoa::appBoundSession(std::optional<WebPageProxyI
         sessionSet->appBoundSession->checkedSessionWithCredentialStorage()->initialize(sessionSet->sessionWithCredentialStorage->session.get().configuration, *this, WebCore::StoredCredentialsPolicy::Use, NavigatingToAppBoundDomain::Yes);
     }
 
-    auto& sessionWrapper = [&](auto storedCredentialsPolicy) -> SessionWrapper& {
+    return [&](auto storedCredentialsPolicy) -> SessionWrapper& {
         switch (storedCredentialsPolicy) {
         case WebCore::StoredCredentialsPolicy::Use:
         case WebCore::StoredCredentialsPolicy::DoNotUse:
@@ -1420,8 +1420,6 @@ SessionWrapper& NetworkSessionCocoa::appBoundSession(std::optional<WebPageProxyI
             return initializeEphemeralStatelessSessionIfNeeded(webPageProxyID, NavigatingToAppBoundDomain::Yes);
         }
     } (storedCredentialsPolicy);
-
-    return sessionWrapper;
 }
 
 bool NetworkSessionCocoa::hasAppBoundSession() const

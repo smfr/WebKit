@@ -445,9 +445,9 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
             // rather than the focused element. This causes caret colors in editable children to be
             // ignored in favor of the editing host's caret color. See: <https://webkit.org/b/229809>.
             if (RefPtr editableRoot = selection.rootEditableElement(); editableRoot && editableRoot->renderer()) {
-                auto& style = protect(editableRoot->renderer())->style();
+                CheckedRef style = protect(editableRoot->renderer())->style();
                 postLayoutData.caretColor = CaretBase::computeCaretColor(style, editableRoot.get());
-                postLayoutData.hasCaretColorAuto = style.caretColor().isAuto();
+                postLayoutData.hasCaretColorAuto = style->caretColor().isAuto();
                 postLayoutData.hasGrammarDocumentMarkers = editableRoot->document().markers().hasMarkers(makeRangeSelectingNodeContents(*editableRoot), DocumentMarkerType::Grammar);
             }
         }
@@ -3509,8 +3509,8 @@ static void selectionPositionInformation(WebPage& page, const InteractionInforma
         if (!renderer)
             continue;
 
-        auto& style = renderer->style();
-        if (style.usedUserSelect() == UserSelect::None && style.userDrag() == UserDrag::Element) {
+        CheckedRef style = renderer->style();
+        if (style->usedUserSelect() == UserSelect::None && style->userDrag() == UserDrag::Element) {
             info.prefersDraggingOverTextSelection = true;
             break;
         }
@@ -3548,7 +3548,7 @@ static bool canForceCaretForPosition(const VisiblePosition& position)
         return false;
 
     CheckedPtr renderer = node->renderer();
-    auto* style = renderer ? &renderer->style() : nullptr;
+    CheckedPtr style = renderer ? &renderer->style() : nullptr;
     auto cursorType = style ? style->cursorType() : CursorType::Auto;
 
     if (cursorType == CursorType::Text)
@@ -5027,7 +5027,7 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
     if (!isChangingObscuredInsetsInteractively)
         frameView->setCustomSizeForResizeEvent(expandedIntSize(visibleContentRectUpdateInfo.unobscuredRectInScrollViewCoordinates().size()));
 
-    if (auto* scrollingCoordinator = this->scrollingCoordinator()) {
+    if (RefPtr scrollingCoordinator = this->scrollingCoordinator()) {
         auto viewportStability = ViewportRectStability::Stable;
         auto layerAction = ScrollingLayerPositionAction::Sync;
         
@@ -5083,12 +5083,12 @@ void WebPage::updateLayoutViewportHeightExpansionTimerFired()
             return false;
 
         HashSet<Ref<Element>> largeViewportConstrainedElements;
-        for (auto& renderer : *view->viewportConstrainedObjects()) {
-            RefPtr element = renderer.element();
+        for (CheckedRef renderer : *view->viewportConstrainedObjects()) {
+            RefPtr element = renderer->element();
             if (!element)
                 continue;
 
-            auto bounds = renderer.absoluteBoundingBoxRect();
+            auto bounds = renderer->absoluteBoundingBoxRect();
             if (intersection(viewportRect, bounds).height() > 0.9 * viewportRect.height())
                 largeViewportConstrainedElements.add(element.releaseNonNull());
         }
