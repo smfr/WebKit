@@ -125,7 +125,7 @@ WebMouseEvent WebEventFactory::createWebMouseEvent(NSEvent *event, NSEvent *last
 
     auto unadjustedMovementDelta = WebCore::unadjustedMovementForEvent(event);
 
-    return WebMouseEvent({ type, modifiers, timestamp, WTF::UUID::createVersion4() }, button, buttons, WebCore::DoublePoint(position), WebCore::DoublePoint(globalPosition), deltaX, deltaY, deltaZ, clickCount, force, WebMouseEventSyntheticClickType::NoTap, eventNumber, menuTypeForEvent, GestureWasCancelled::No, unadjustedMovementDelta);
+    return WebMouseEvent({ type, modifiers, timestamp, WTF::UUID::createVersion4() }, button, buttons, WebCore::DoublePoint(position), WebCore::DoublePoint(globalPosition), deltaX, deltaY, deltaZ, clickCount, force, WebMouseEventInputSource::Hardware, WebMouseEventSyntheticClickType::NoTap, eventNumber, menuTypeForEvent, GestureWasCancelled::No, unadjustedMovementDelta);
 }
 
 WebWheelEvent WebEventFactory::createWebWheelEvent(NSEvent *event, NSView *windowView)
