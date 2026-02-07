@@ -354,8 +354,8 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
         if (freeSpaceScenario == FreeSpaceScenario::MinContent)
             return;
 
-        // Otherwise, if the free space is an indefinite length:
-        if (freeSpaceScenario == FreeSpaceScenario::Indefinite) {
+        // Otherwise, if sizing the grid container under a max-content constraint:
+        if (freeSpaceScenario == FreeSpaceScenario::MaxContent) {
             // FIXME: Implement indefinite free space (spec §11.7 Scenario 3).
             // Compute flex fraction based on max-content contributions.
             ASSERT(!availableGridSpace);

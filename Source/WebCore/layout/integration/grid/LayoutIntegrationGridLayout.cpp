@@ -83,15 +83,41 @@ static inline Layout::GridLayoutConstraints constraintsForGridContent(const Layo
     CheckedRef gridContainerStyle = gridContainerRenderer->style();
     auto gridContainerZoom = gridContainerStyle->usedZoomForLength();
 
-    return {
-        availableInlineSpace,
-        sizeValue(gridContainerStyle->minWidth(), gridContainerZoom),
-        sizeValue(gridContainerStyle->maxWidth(), gridContainerZoom),
+    auto inlineAxisMinMaxSizes = [&]() -> std::pair<std::optional<LayoutUnit>, std::optional<LayoutUnit>> {
+        return {
+            sizeValue(gridContainerStyle->minWidth(), gridContainerZoom),
+            sizeValue(gridContainerStyle->maxWidth(), gridContainerZoom)
+        };
+    }();
 
-        availableBlockSpace,
-        sizeValue(gridContainerStyle->minHeight(), gridContainerZoom),
-        sizeValue(gridContainerStyle->maxHeight(), gridContainerZoom)
-    };
+    auto blockAxisMinMaxSizes = [&]() -> std::pair<std::optional<LayoutUnit>, std::optional<LayoutUnit>> {
+        return {
+            sizeValue(gridContainerStyle->minHeight(), gridContainerZoom),
+            sizeValue(gridContainerStyle->maxHeight(), gridContainerZoom)
+        };
+    }();
+
+    auto inlineAxisConstraint = Layout::AxisConstraint::definite(
+        availableInlineSpace,
+        inlineAxisMinMaxSizes.first,
+        inlineAxisMinMaxSizes.second
+    );
+
+    auto blockAxisConstraint = [&]() -> Layout::AxisConstraint {
+        if (availableBlockSpace.has_value()) {
+            return Layout::AxisConstraint::definite(
+                *availableBlockSpace,
+                blockAxisMinMaxSizes.first,
+                blockAxisMinMaxSizes.second
+            );
+        }
+        return Layout::AxisConstraint::maxContent(
+            blockAxisMinMaxSizes.first,
+            blockAxisMinMaxSizes.second
+        );
+    }();
+
+    return { inlineAxisConstraint, blockAxisConstraint };
 }
 
 void GridLayout::updateGridItemRenderers()

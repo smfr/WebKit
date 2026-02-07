@@ -169,7 +169,6 @@ static Style::GridTemplateList gridTemplateListWithPercentagesConvertedToAuto(co
 void GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
 {
     auto unplacedGridItems = constructUnplacedGridItems();
-
     CheckedRef gridStyle = root().style();
 
     GridAutoFlowOptions autoFlowOptions {
