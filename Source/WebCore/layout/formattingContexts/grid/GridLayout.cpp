@@ -416,29 +416,33 @@ UsedTrackSizes GridLayout::performGridSizingAlgorithm(const PlacedGridItems& pla
     return { columnSizes, rowSizes };
 }
 
+// Helper to compute margins from axis sizes
+static UsedMargins computeMarginsForAxis(const auto& axisSizes, const Style::ZoomFactor& zoomFactor)
+{
+    auto marginStart = [&] -> LayoutUnit {
+        if (auto fixedMarginStart = axisSizes.marginStart.tryFixed())
+            return LayoutUnit { fixedMarginStart->resolveZoom(zoomFactor) };
+
+        ASSERT_NOT_IMPLEMENTED_YET();
+        return { };
+    };
+
+    auto marginEnd = [&] -> LayoutUnit {
+        if (auto fixedMarginEnd = axisSizes.marginEnd.tryFixed())
+            return LayoutUnit { fixedMarginEnd->resolveZoom(zoomFactor) };
+
+        ASSERT_NOT_IMPLEMENTED_YET();
+        return { };
+    };
+
+    return UsedMargins { marginStart(), marginEnd() };
+}
+
 // https://drafts.csswg.org/css-grid-1/#auto-margins
 Vector<UsedMargins> GridLayout::computeInlineMargins(const PlacedGridItems& placedGridItems, const Style::ZoomFactor& zoomFactor)
 {
     return placedGridItems.map([&zoomFactor](const PlacedGridItem& placedGridItem) {
-        auto& inlineAxisSizes = placedGridItem.inlineAxisSizes();
-
-        auto marginStart = [&] -> LayoutUnit {
-            if (auto fixedMarginStart = inlineAxisSizes.marginStart.tryFixed())
-                return LayoutUnit { fixedMarginStart->resolveZoom(zoomFactor) };
-
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        };
-
-        auto marginEnd = [&] -> LayoutUnit {
-            if (auto fixedMarginEnd = inlineAxisSizes.marginEnd.tryFixed())
-                return LayoutUnit { fixedMarginEnd->resolveZoom(zoomFactor) };
-
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        };
-
-        return UsedMargins { marginStart(), marginEnd() };
+        return computeMarginsForAxis(placedGridItem.inlineAxisSizes(), zoomFactor);
     });
 }
 
@@ -446,25 +450,7 @@ Vector<UsedMargins> GridLayout::computeInlineMargins(const PlacedGridItems& plac
 Vector<UsedMargins> GridLayout::computeBlockMargins(const PlacedGridItems& placedGridItems, const Style::ZoomFactor& zoomFactor)
 {
     return placedGridItems.map([&zoomFactor](const PlacedGridItem& placedGridItem) {
-        auto& blockAxisSizes = placedGridItem.blockAxisSizes();
-
-        auto marginStart = [&] -> LayoutUnit {
-            if (auto fixedMarginStart = blockAxisSizes.marginStart.tryFixed())
-                return LayoutUnit { fixedMarginStart->resolveZoom(zoomFactor) };
-
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        };
-
-        auto marginEnd = [&] -> LayoutUnit {
-            if (auto fixedMarginEnd = blockAxisSizes.marginEnd.tryFixed())
-                return LayoutUnit { fixedMarginEnd->resolveZoom(zoomFactor) };
-
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        };
-
-        return UsedMargins { marginStart(), marginEnd() };
+        return computeMarginsForAxis(placedGridItem.blockAxisSizes(), zoomFactor);
     });
 }
 
