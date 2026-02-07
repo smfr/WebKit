@@ -3555,7 +3555,7 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForCurrentSelection(OptionS
     return textIndicatorForSelection(selection.get(), options, transition);
 }
 
-std::optional<TextIndicatorData> UnifiedPDFPlugin::textIndicatorDataForPageRect(FloatRect pageRect, PDFDocumentLayout::PageIndex pageIndex, const std::optional<Color>& highlightColor)
+RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForPageRect(FloatRect pageRect, PDFDocumentLayout::PageIndex pageIndex, const std::optional<Color>& highlightColor)
 {
     auto mainFrameScaleForTextIndicator = [this] {
         if (handlesPageScaleFactor())
@@ -3600,7 +3600,7 @@ std::optional<TextIndicatorData> UnifiedPDFPlugin::textIndicatorDataForPageRect(
     data.textBoundingRectInRootViewCoordinates = rectInRootViewCoordinates;
     data.textRectsInBoundingRectCoordinates = { { { 0, 0, }, rectInRootViewCoordinates.size() } };
 
-    return data;
+    return TextIndicator::create(data);
 }
 
 Color UnifiedPDFPlugin::selectionTextIndicatorHighlightColor()
@@ -3621,13 +3621,13 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForSelection(PDFSelection *
 
     LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: creating text indicator for selection with page coverage " << selectionPageCoverage);
 
-    auto data { textIndicatorDataForPageRect(selectionPageCoverage[0].pageBounds, selectionPageCoverage[0].pageIndex, selectionTextIndicatorHighlightColor()) };
-    if (!data)
+    RefPtr textIndicator = textIndicatorForPageRect(selectionPageCoverage[0].pageBounds, selectionPageCoverage[0].pageIndex, selectionTextIndicatorHighlightColor());
+    if (!textIndicator)
         return nullptr;
 
-    data->presentationTransition = transition;
-    data->options = options;
-    return TextIndicator::create(*data);
+    textIndicator->setPresentationTransition(transition);
+    textIndicator->setOptions(options);
+    return textIndicator;
 }
 
 RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForAnnotation(PDFAnnotation *annotation)
@@ -3644,11 +3644,7 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForAnnotation(PDFAnnotation
 
     LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: creating text indicator for annotation at page index " << pageIndex << " with bounds " << pageBounds);
 
-    auto data { textIndicatorDataForPageRect(pageBounds, pageIndex) };
-    if (!data)
-        return nullptr;
-
-    return TextIndicator::create(*data);
+    return textIndicatorForPageRect(pageBounds, pageIndex);
 }
 
 WebCore::DictionaryPopupInfo UnifiedPDFPlugin::dictionaryPopupInfoForSelection(PDFSelection *selection, WebCore::TextIndicatorPresentationTransition presentationTransition)
