@@ -82,6 +82,8 @@ enum class GridAvoidanceReason : uint8_t {
     GridItemHasContainsSize,
     GridItemHasUnsupportedColumnPlacement,
     GridItemHasUnsupportedRowPlacement,
+    GridItemHasUnsupportedWidthValue,
+    GridItemHasUnsupportedAutomaticInlineSizing,
     NotAGrid,
     GridFormattingContextIntegrationDisabled,
 };
@@ -106,7 +108,7 @@ static bool hasValidColumnEnd(const Style::GridPositionExplicit& explicitColumnS
     UNUSED_PARAM(explicitColumnStart);
 
     return WTF::switchOn(columnEnd,
-        [&](const CSS::Keyword::Auto&) {
+        [](const CSS::Keyword::Auto&) {
             return false;
         },
         [&](const Style::GridPositionExplicit&) {
@@ -161,6 +163,26 @@ static bool hasValidRowEnd(const Style::GridPositionExplicit&, const Style::Grid
             return false;
         }
     );
+}
+
+static bool gridItemHasValidWidth(const Style::PreferredSize& width)
+{
+    return WTF::switchOn(width,
+        [&](const CSS::Keyword::Auto&) {
+            return true;
+        },
+        [](const Style::PreferredSize::Fixed&) {
+            return true;
+        },
+        [](const auto&) {
+            return false;
+        }
+    );
+}
+
+static bool canComputeAutomaticInlineSize(const RenderBox& gridItem, const StyleSelfAlignmentData& usedJustifySelf)
+{
+    return usedJustifySelf.position() == ItemPosition::Normal && !gridItem.protectedElement()->isReplaced() && !gridItem.style().hasAspectRatio();
 }
 
 static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& renderGrid, ReasonCollectionMode reasonCollectionMode)
@@ -340,8 +362,18 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
 
         CheckedRef gridItemStyle = gridItem->style();
 
-        if (!gridItemStyle->width().isFixed())
-            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasNonFixedWidth, reasons, reasonCollectionMode);
+        auto usedJustifySelf = gridItemStyle->justifySelf().resolve(renderGridStyle.ptr());
+
+        if ((usedJustifySelf.position() != ItemPosition::Start && usedJustifySelf.position() != ItemPosition::Normal)
+            && usedJustifySelf.overflow() != OverflowAlignment::Default && usedJustifySelf.positionType() != ItemPositionType::NonLegacy)
+            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasUnsupportedInlineAxisAlignment, reasons, reasonCollectionMode);
+
+        auto& gridItemWidth = gridItemStyle->width();
+        if (!gridItemHasValidWidth(gridItemWidth))
+            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasUnsupportedWidthValue, reasons, reasonCollectionMode);
+
+        if (gridItemWidth.isAuto() && !canComputeAutomaticInlineSize(gridItem, usedJustifySelf))
+            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasUnsupportedAutomaticInlineSizing, reasons, reasonCollectionMode);
 
         if (!gridItemStyle->height().isFixed())
             ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasNonFixedHeight, reasons, reasonCollectionMode);
@@ -376,11 +408,6 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
         };
         if (gridItemHasMargins())
             ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasMargin, reasons, reasonCollectionMode);
-
-        auto justifySelf = gridItemStyle->justifySelf().resolve();
-        if (justifySelf.position() != ItemPosition::Start && justifySelf.overflow() != OverflowAlignment::Default
-            && justifySelf.positionType() != ItemPositionType::NonLegacy)
-            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasUnsupportedInlineAxisAlignment, reasons, reasonCollectionMode);
 
         auto alignSelf = gridItemStyle->alignSelf().resolve();
         if (alignSelf.position() != ItemPosition::Start && alignSelf.overflow() != OverflowAlignment::Default
@@ -576,8 +603,8 @@ static void printReason(GridAvoidanceReason reason, TextStream& stream)
     case GridAvoidanceReason::GridHasUnsupportedGridTemplateRows:
         stream << "grid has unsupported grid-template-rows";
         break;
-    case GridAvoidanceReason::GridItemHasNonFixedWidth:
-        stream << "grid item has non-fixed width";
+    case GridAvoidanceReason::GridItemHasUnsupportedWidthValue:
+        stream << "grid item has unsupported width value";
         break;
     case GridAvoidanceReason::GridItemHasNonFixedHeight:
         stream << "grid item has non-fixed height";
