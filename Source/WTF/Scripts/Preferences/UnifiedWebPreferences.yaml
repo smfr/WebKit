@@ -3405,7 +3405,7 @@ HTMLEnhancedSelectParsingEnabled:
 
 HTMLEnhancedSelectPseudoElementsEnabled:
    type: bool
-   status: unstable
+   status: testable
    category: css
    humanReadableName: "Enhanced HTML select element pseudo-elements"
    humanReadableDescription: "Enable enhanced HTML select element pseudo-elements"
