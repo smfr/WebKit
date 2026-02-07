@@ -124,7 +124,7 @@ void HTMLOptionElement::removedFromAncestor(RemovalType removalType, ContainerNo
 bool HTMLOptionElement::isFocusable() const
 {
     RefPtr select = ownerSelectElement();
-    if (select && select->usesMenuListDeprecated())
+    if (select && select->usesMenuList())
         return false;
     return HTMLElement::isFocusable();
 }

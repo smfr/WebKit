@@ -94,7 +94,7 @@ bool HTMLOptGroupElement::isDisabledFormControl() const
 bool HTMLOptGroupElement::isFocusable() const
 {
     RefPtr select = ownerSelectElement();
-    if (select && select->usesMenuListDeprecated())
+    if (select && select->usesMenuList())
         return false;
     return HTMLElement::isFocusable();
 }
