@@ -870,6 +870,7 @@ runtime/IntlNumberFormat.cpp @no-unify // Confine U_HIDE_DRAFT_API's effect in t
 runtime/IntlNumberFormatConstructor.cpp
 runtime/IntlNumberFormatPrototype.cpp
 runtime/IntlObject.cpp
+runtime/IntlPartObject.cpp
 runtime/IntlPluralRules.cpp @no-unify // Confine U_HIDE_DRAFT_API's effect to this file.
 runtime/IntlPluralRulesConstructor.cpp
 runtime/IntlPluralRulesPrototype.cpp

@@ -942,6 +942,7 @@
 		37C738D21EDB56E4003F2B0B /* ParseInt.h in Headers */ = {isa = PBXBuildFile; fileRef = 37C738D11EDB5672003F2B0B /* ParseInt.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3910AB742F3087FD00BAA633 /* LexerUnicodeProperties.h in Headers */ = {isa = PBXBuildFile; fileRef = 3910AB732F3087FD00BAA633 /* LexerUnicodeProperties.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3910AB842F3203AD00BAA633 /* IntlSegmentDataObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3910AB832F3203AD00BAA633 /* IntlSegmentDataObject.h */; };
+		39E4D7252F32F0DB00F3045F /* IntlPartObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 39E4D7242F32F0DB00F3045F /* IntlPartObject.h */; };
 		412952771D2CF6BC00E78B89 /* builtins_generate_internals_wrapper_header.py in Headers */ = {isa = PBXBuildFile; fileRef = 412952731D2CF6AC00E78B89 /* builtins_generate_internals_wrapper_header.py */; settings = {ATTRIBUTES = (Private, ); }; };
 		412952781D2CF6BC00E78B89 /* builtins_generate_internals_wrapper_implementation.py in Headers */ = {isa = PBXBuildFile; fileRef = 412952741D2CF6AC00E78B89 /* builtins_generate_internals_wrapper_implementation.py */; settings = {ATTRIBUTES = (Private, ); }; };
 		412952791D2CF6BC00E78B89 /* builtins_generate_wrapper_header.py in Headers */ = {isa = PBXBuildFile; fileRef = 412952751D2CF6AC00E78B89 /* builtins_generate_wrapper_header.py */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -4157,6 +4158,8 @@
 		3910AB732F3087FD00BAA633 /* LexerUnicodeProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LexerUnicodeProperties.h; sourceTree = "<group>"; };
 		3910AB822F3203A200BAA633 /* IntlSegmentDataObject.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IntlSegmentDataObject.cpp; sourceTree = "<group>"; };
 		3910AB832F3203AD00BAA633 /* IntlSegmentDataObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IntlSegmentDataObject.h; sourceTree = "<group>"; };
+		39E4D7232F32F0D500F3045F /* IntlPartObject.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IntlPartObject.cpp; sourceTree = "<group>"; };
+		39E4D7242F32F0DB00F3045F /* IntlPartObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IntlPartObject.h; sourceTree = "<group>"; };
 		412952731D2CF6AC00E78B89 /* builtins_generate_internals_wrapper_header.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = builtins_generate_internals_wrapper_header.py; sourceTree = "<group>"; };
 		412952741D2CF6AC00E78B89 /* builtins_generate_internals_wrapper_implementation.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = builtins_generate_internals_wrapper_implementation.py; sourceTree = "<group>"; };
 		412952751D2CF6AC00E78B89 /* builtins_generate_wrapper_header.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = builtins_generate_wrapper_header.py; sourceTree = "<group>"; };
@@ -8681,6 +8684,8 @@
 				A12BBFF31B044A9800664B69 /* IntlObject.cpp */,
 				A12BBFF11B044A8B00664B69 /* IntlObject.h */,
 				708EBE231CE8F35000453146 /* IntlObjectInlines.h */,
+				39E4D7232F32F0D500F3045F /* IntlPartObject.cpp */,
+				39E4D7242F32F0DB00F3045F /* IntlPartObject.h */,
 				7D5FB18F20744BF1005DDF64 /* IntlPluralRules.cpp */,
 				7D5FB19220744BF2005DDF64 /* IntlPluralRules.h */,
 				7D5FB18E20744BF0005DDF64 /* IntlPluralRulesConstructor.cpp */,
@@ -11620,6 +11625,7 @@
 				A1D793011B43864B004516F5 /* IntlNumberFormatPrototype.h in Headers */,
 				A12BBFF21B044A8B00664B69 /* IntlObject.h in Headers */,
 				708EBE241CE8F35800453146 /* IntlObjectInlines.h in Headers */,
+				39E4D7252F32F0DB00F3045F /* IntlPartObject.h in Headers */,
 				E307178B24C7828F00DF0644 /* IntlPluralRules.h in Headers */,
 				E307178A24C7828C00DF0644 /* IntlPluralRulesConstructor.h in Headers */,
 				E307178924C7828600DF0644 /* IntlPluralRulesPrototype.h in Headers */,

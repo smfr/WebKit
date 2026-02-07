@@ -274,6 +274,10 @@ public:
     LazyProperty<JSGlobalObject, Structure> m_segmentsStructure;
     LazyProperty<JSGlobalObject, Structure> m_segmentDataObjectStructure;
     LazyProperty<JSGlobalObject, Structure> m_segmentDataObjectWithIsWordLikeStructure;
+    LazyProperty<JSGlobalObject, Structure> m_intlPartObjectStructure;
+    LazyProperty<JSGlobalObject, Structure> m_intlPartObjectWithSourceStructure;
+    LazyProperty<JSGlobalObject, Structure> m_intlPartObjectWithUnitStructure;
+    LazyProperty<JSGlobalObject, Structure> m_intlPartObjectWithUnitAndSourceStructure;
     LazyClassStructure m_dateTimeFormatStructure;
     LazyClassStructure m_numberFormatStructure;
 
@@ -970,6 +974,10 @@ public:
     Structure* segmentsStructure() { return m_segmentsStructure.get(this); }
     Structure* segmentDataObjectStructure() { return m_segmentDataObjectStructure.get(this); }
     Structure* segmentDataObjectWithIsWordLikeStructure() { return m_segmentDataObjectWithIsWordLikeStructure.get(this); }
+    Structure* intlPartObjectStructure() { return m_intlPartObjectStructure.get(this); }
+    Structure* intlPartObjectWithSourceStructure() { return m_intlPartObjectWithSourceStructure.get(this); }
+    Structure* intlPartObjectWithUnitStructure() { return m_intlPartObjectWithUnitStructure.get(this); }
+    Structure* intlPartObjectWithUnitAndSourceStructure() { return m_intlPartObjectWithUnitAndSourceStructure.get(this); }
     Structure* trustedScriptStructure() { return m_trustedScriptStructure.get(); }
 
     JSObject* dateTimeFormatConstructor() { return m_dateTimeFormatStructure.constructor(this); }
