@@ -1245,7 +1245,7 @@ bool HTMLSelectElement::platformHandleKeydownEvent(KeyboardEvent* event)
             // Calling focus() may cause us to lose our renderer. Return true so
             // that our caller doesn't process the event further, but don't set
             // the event as handled.
-            if (!is<RenderMenuList>(renderer()))
+            if (!renderer() || !usesMenuList())
                 return true;
 
             // Save the selection so it can be compared to the new selection
@@ -1267,7 +1267,7 @@ bool HTMLSelectElement::platformHandleKeydownEvent(KeyboardEvent* event)
 void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
 {
     ASSERT(renderer());
-    ASSERT(renderer()->isRenderMenuList());
+    ASSERT(usesMenuList());
 
     auto& eventNames = WebCore::eventNames();
     if (event.type() == eventNames.keydownEvent) {
@@ -1343,7 +1343,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
                 protect(document())->updateStyleIfNeeded();
 
                 // Calling focus() may remove the renderer or change the renderer type.
-                if (!is<RenderMenuList>(renderer()))
+                if (!renderer() || !usesMenuList())
                     return;
 
                 // Save the selection so it can be compared to the new selection
@@ -1360,7 +1360,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
                 protect(document())->updateStyleIfNeeded();
 
                 // Calling focus() may remove the renderer or change the renderer type.
-                if (!is<RenderMenuList>(renderer()))
+                if (!renderer() || !usesMenuList())
                     return;
 
                 // Save the selection so it can be compared to the new selection
@@ -1387,7 +1387,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
 #if !PLATFORM(IOS_FAMILY)
         protect(document())->updateStyleIfNeeded();
 
-        if (is<RenderMenuList>(renderer())) {
+        if (renderer() && usesMenuList()) {
             ASSERT(!m_popupIsVisible);
             // Save the selection so it can be compared to the new
             // selection when we call onChange during selectOption,
@@ -1667,7 +1667,7 @@ void HTMLSelectElement::defaultEventHandler(Event& event)
         return;
     }
 
-    if (is<RenderMenuList>(renderer))
+    if (usesMenuList())
         menuListDefaultEventHandler(event);
     else 
         listBoxDefaultEventHandler(event);
@@ -1777,8 +1777,8 @@ void HTMLSelectElement::showPopup()
     if (m_popupIsVisible)
         return;
 
-    CheckedPtr renderer = dynamicDowncast<RenderMenuList>(this->renderer());
-    if (!renderer)
+    CheckedPtr renderer = this->renderer();
+    if (!renderer || !usesMenuList())
         return;
 
     RefPtr frame = document().frame();
@@ -2042,8 +2042,8 @@ FontSelector* HTMLSelectElement::fontSelector() const
 
 HostWindow* HTMLSelectElement::hostWindow() const
 {
-    if (CheckedPtr renderer = dynamicDowncast<RenderMenuList>(this->renderer()))
-        return renderer->hostWindow();
+    if (renderer() && usesMenuList())
+        return renderer()->hostWindow();
     return nullptr;
 }
 #endif
