@@ -77,6 +77,9 @@ RenderBlock& RenderTreeBuilder::FormControls::findOrCreateParentForChild(RenderB
 
 void RenderTreeBuilder::FormControls::updateAfterDescendants(RenderElement& renderer)
 {
+    if (!renderer.document().settings().cssAppearanceBaseEnabled())
+        return;
+
     if (RefPtr inputElement = dynamicDowncast<HTMLInputElement>(renderer.element())) {
         RefPtr inputType = inputElement->inputType();
         if (!inputType)
