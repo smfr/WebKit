@@ -761,7 +761,7 @@ void WebPage::performImmediateActionHitTestAtLocation(WebCore::FrameIdentifier f
 
     WebHitTestResultData immediateActionResult(hitTestResult, { });
 
-    auto subframe = EventHandler::subframeForTargetNode(hitTestResult.protectedTargetNode().get());
+    auto subframe = EventHandler::subframeForTargetNode(protect(hitTestResult.targetNode()).get());
     if (RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(subframe).get()) {
         if (RefPtr remoteFrameView = remoteFrame->view()) {
             immediateActionResult.remoteUserInputEventData = RemoteUserInputEventData {

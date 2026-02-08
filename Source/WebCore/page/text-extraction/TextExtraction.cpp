@@ -1221,7 +1221,7 @@ static void extractRenderedTokens(Vector<TokenAndBlockOffset>& tokensAndOffsets,
     };
 
     if (CheckedPtr frameRenderer = dynamicDowncast<RenderIFrame>(*renderer)) {
-        if (RefPtr contentDocument = frameRenderer->protectedIframeElement()->contentDocument())
+        if (RefPtr contentDocument = protect(frameRenderer->iframeElement())->contentDocument())
             extractRenderedTokens(tokensAndOffsets, *contentDocument, direction);
         return;
     }
@@ -1264,7 +1264,7 @@ static void extractRenderedTokens(Vector<TokenAndBlockOffset>& tokensAndOffsets,
         }
 
         if (CheckedPtr frameRenderer = dynamicDowncast<RenderIFrame>(descendant)) {
-            if (RefPtr contentDocument = frameRenderer->protectedIframeElement()->contentDocument())
+            if (RefPtr contentDocument = protect(frameRenderer->iframeElement())->contentDocument())
                 extractRenderedTokens(tokensAndOffsets, *contentDocument, direction);
             continue;
         }

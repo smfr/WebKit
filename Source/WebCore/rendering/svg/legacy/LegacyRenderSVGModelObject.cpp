@@ -232,9 +232,4 @@ void LegacyRenderSVGModelObject::addFocusRingRects(Vector<LayoutRect>&, const La
 {
 }
 
-Ref<SVGElement> LegacyRenderSVGModelObject::protectedElement() const
-{
-    return element();
-}
-
 } // namespace WebCore

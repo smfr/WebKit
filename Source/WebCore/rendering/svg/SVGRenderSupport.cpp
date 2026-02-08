@@ -514,7 +514,7 @@ bool SVGRenderSupport::pointInClippingArea(const RenderElement& renderer, const 
 
 void SVGRenderSupport::applyStrokeStyleToContext(GraphicsContext& context, const RenderStyle& style, const RenderElement& renderer)
 {
-    auto element = dynamicDowncast<SVGElement>(renderer.protectedElement());
+    auto element = dynamicDowncast<SVGElement>(protect(renderer.element()));
     if (!element) {
         ASSERT_NOT_REACHED();
         return;

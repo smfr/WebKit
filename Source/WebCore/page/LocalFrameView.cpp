@@ -4560,21 +4560,21 @@ void LocalFrameView::scrollToPendingTextFragmentRange()
 
         static constexpr OptionSet hitType { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::AllowVisibleChildFrameContentOnly };
         auto result = localMainFrame->eventHandler().hitTestResultAtPoint(LayoutPoint(textRects.first().center()), hitType);
-        if (!intersects(range, *result.protectedTargetNode()))
+        if (!intersects(range, *protect(result.targetNode())))
             return;
 
         if (textRects.size() >= 2) {
             result = localMainFrame->eventHandler().hitTestResultAtPoint(LayoutPoint(textRects[1].center()), hitType);
-            if (!intersects(range, *result.protectedTargetNode()))
+            if (!intersects(range, *protect(result.targetNode())))
                 return;
         }
 
         if (textRects.size() >= 4) {
             result = localMainFrame->eventHandler().hitTestResultAtPoint(LayoutPoint(textRects.last().center()), hitType);
-            if (!intersects(range, *result.protectedTargetNode()))
+            if (!intersects(range, *protect(result.targetNode())))
                 return;
             result = localMainFrame->eventHandler().hitTestResultAtPoint(LayoutPoint(textRects[textRects.size() - 2].center()), hitType);
-            if (!intersects(range, *result.protectedTargetNode()))
+            if (!intersects(range, *protect(result.targetNode())))
                 return;
         }
         if (m_haveCreatedTextIndicator)

@@ -1353,7 +1353,7 @@ bool LineLayout::hitTest(const HitTestRequest& request, HitTestResult& result, c
             continue;
         
         renderer.updateHitTestResult(result, flow().flipForWritingMode(locationInContainer.point() - toLayoutSize(accumulatedOffset)));
-        if (result.addNodeToListBasedTestResult(renderer.protectedNodeForHitTest().get(), request, locationInContainer, boxRect) == HitTestProgress::Stop)
+        if (result.addNodeToListBasedTestResult(protect(renderer.nodeForHitTest()).get(), request, locationInContainer, boxRect) == HitTestProgress::Stop)
             return true;
     }
 

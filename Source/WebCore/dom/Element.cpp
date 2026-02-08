@@ -1867,7 +1867,7 @@ static bool layoutOverflowRectContainsAllDescendants(const RenderBox& renderBox)
         for (CheckedRef viewPositionedOutOfFlowBox : *viewPositionedOutOfFlowBoxes) {
             if (viewPositionedOutOfFlowBox.ptr() == &renderBox)
                 continue;
-            if (viewPositionedOutOfFlowBox->isFixedPositioned() && renderBox.element()->contains(viewPositionedOutOfFlowBox->protectedElement().get()))
+            if (viewPositionedOutOfFlowBox->isFixedPositioned() && renderBox.element()->contains(protect(viewPositionedOutOfFlowBox->element()).get()))
                 return false;
         }
     }
@@ -1883,7 +1883,7 @@ static bool layoutOverflowRectContainsAllDescendants(const RenderBox& renderBox)
             for (CheckedRef outOfFlowBox : *outOfFlowBoxes) {
                 if (outOfFlowBox.ptr() == &renderBox)
                     continue;
-                if (renderBox.protectedElement()->contains(outOfFlowBox->protectedElement().get()))
+                if (protect(renderBox.element())->contains(protect(outOfFlowBox->element()).get()))
                     return false;
             }
         }

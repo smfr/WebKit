@@ -267,7 +267,7 @@ DragEventTargetData DragController::performDragOperation(DragData&& dragData, Lo
     if (RefPtr document = m_documentUnderMouse)
         shouldOpenExternalURLsPolicy = document->shouldOpenExternalURLsPolicyToPropagate();
 
-    if (RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(EventHandler::subframeForTargetNode(hitTestResult.protectedTargetNode().get())))
+    if (RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(EventHandler::subframeForTargetNode(protect(hitTestResult.targetNode()).get())))
         return { remoteFrame->frameID() };
 
     if (m_dragDestinationActionMask.contains(DragDestinationAction::DHTML) && dragIsHandledByDocument(m_dragHandlingMethod) && frame.view()) {

@@ -111,7 +111,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(RenderSliderContainer);
 RenderBox::LogicalExtentComputedValues RenderSliderContainer::computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const
 {
     ASSERT(element()->shadowHost());
-    Ref input = downcast<HTMLInputElement>(*protectedElement()->shadowHost());
+    Ref input = downcast<HTMLInputElement>(*protect(element())->shadowHost());
     bool isVertical = hasVerticalAppearance(input);
 
     if (input->renderer()->isRenderSlider() && !isVertical && input->hasDataList()) {
@@ -137,7 +137,7 @@ RenderBox::LogicalExtentComputedValues RenderSliderContainer::computeLogicalHeig
 void RenderSliderContainer::layout()
 {
     ASSERT(element()->shadowHost());
-    Ref input = downcast<HTMLInputElement>(*protectedElement()->shadowHost());
+    Ref input = downcast<HTMLInputElement>(*protect(element())->shadowHost());
     bool isVertical = hasVerticalAppearance(input);
     CheckedRef mutableStyle = this->mutableStyle();
     mutableStyle->setFlexDirection(isVertical && writingMode().isHorizontal() ? FlexDirection::Column : FlexDirection::Row);

@@ -61,7 +61,6 @@ public:
     const Layout::InlineTextBox* layoutBox() const;
 
     WEBCORE_EXPORT Text* textNode() const;
-    RefPtr<Text> protectedTextNode() const { return textNode(); }
 
     const RenderStyle& style() const;
     // FIXME: Remove checkedStyle once https://github.com/llvm/llvm-project/pull/142485 lands. This is a false positive.

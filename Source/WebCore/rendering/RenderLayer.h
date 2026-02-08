@@ -187,7 +187,6 @@ public:
     String name() const;
 
     inline Page& page() const; // Defined in RenderLayerInlines.h
-    inline Ref<Page> protectedPage() const; // Defined in RenderLayerInlines.h
     RenderLayerModelObject& renderer() const { return m_renderer; }
     RenderBox* renderBox() const { return dynamicDowncast<RenderBox>(renderer()); }
 

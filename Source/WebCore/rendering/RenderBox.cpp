@@ -1665,7 +1665,7 @@ bool RenderBox::nodeAtPoint(const HitTestRequest& request, HitTestResult& result
             return false;
 
         updateHitTestResult(result, locationInContainer.point() - toLayoutSize(adjustedLocation));
-        if (result.addNodeToListBasedTestResult(protectedNodeForHitTest().get(), request, locationInContainer, boundsRect) == HitTestProgress::Stop)
+        if (result.addNodeToListBasedTestResult(protect(nodeForHitTest()).get(), request, locationInContainer, boundsRect) == HitTestProgress::Stop)
             return true;
     }
 
@@ -2109,7 +2109,7 @@ void RenderBox::imageChanged(WrappedImagePtr image, const IntRect*)
     if (styleImage && isNonEmpty) {
         incrementVisuallyNonEmptyPixelCountIfNeeded(flooredIntSize(styleImage->imageSize(this, style().usedZoom())));
         if (auto styleable = Styleable::fromRenderer(*this))
-            protect(document())->didLoadImage(styleable->protectedElement().get(), styleImage->cachedImage());
+            protect(document())->didLoadImage(protect(styleable->element).get(), styleImage->cachedImage());
     }
 
     if (!isComposited())

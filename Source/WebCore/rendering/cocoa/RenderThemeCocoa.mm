@@ -3693,7 +3693,7 @@ bool RenderThemeCocoa::paintSearchFieldCancelButtonForVectorBasedControls(const 
     glyphPath.transform(transform);
 
     auto isEnabled = true;
-    if (RefPtr input = dynamicDowncast<HTMLInputElement>(box.protectedNode().get()->shadowHost()))
+    if (RefPtr input = dynamicDowncast<HTMLInputElement>(protect(box.element())->shadowHost()))
         isEnabled = !input->isDisabledFormControl();
 
     const auto styleColorOptions = box.styleColorOptions();

@@ -824,7 +824,7 @@ void RenderObject::collectSelectionGeometries(Vector<SelectionGeometry>& geometr
     }
 
     for (auto& quad : quads)
-        geometries.append(SelectionGeometry(quad, HTMLElement::selectionRenderingBehavior(protectedNode().get()), isHorizontalWritingMode(), checkedView()->pageNumberForBlockProgressionOffset(quad.enclosingBoundingBox().x())));
+        geometries.append(SelectionGeometry(quad, HTMLElement::selectionRenderingBehavior(protect(node()).get()), isHorizontalWritingMode(), checkedView()->pageNumberForBlockProgressionOffset(quad.enclosingBoundingBox().x())));
 }
 
 IntRect RenderObject::absoluteBoundingBoxRect(bool useTransforms, bool* wasFixed) const
@@ -1877,11 +1877,6 @@ Node* RenderObject::nodeForHitTest() const
             node = renderer->element();
     }
     return node;
-}
-
-RefPtr<Node> RenderObject::protectedNodeForHitTest() const
-{
-    return nodeForHitTest();
 }
 
 void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint& point) const

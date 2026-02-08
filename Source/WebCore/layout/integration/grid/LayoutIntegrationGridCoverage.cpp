@@ -182,7 +182,7 @@ static bool gridItemHasValidWidth(const Style::PreferredSize& width)
 
 static bool canComputeAutomaticInlineSize(const RenderBox& gridItem, const StyleSelfAlignmentData& usedJustifySelf)
 {
-    return usedJustifySelf.position() == ItemPosition::Normal && !gridItem.protectedElement()->isReplaced() && !gridItem.style().hasAspectRatio();
+    return usedJustifySelf.position() == ItemPosition::Normal && !protect(gridItem.element())->isReplaced() && !gridItem.style().hasAspectRatio();
 }
 
 static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& renderGrid, ReasonCollectionMode reasonCollectionMode)

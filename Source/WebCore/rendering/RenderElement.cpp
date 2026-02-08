@@ -567,7 +567,7 @@ bool RenderElement::repaintBeforeStyleChange(Style::Difference diff, const Rende
 
 void RenderElement::initializeStyle()
 {
-    Style::loadPendingResources(m_style, protect(document()), protectedElement().get());
+    Style::loadPendingResources(m_style, protect(document()), protect(element()).get());
 
     styleWillChange(Style::DifferenceResult::NewStyle, style());
     m_hasInitializedStyle = true;
@@ -615,7 +615,7 @@ void RenderElement::setStyle(RenderStyle&& style, Style::DifferenceResult minima
     diff.result = std::max(diff.result, minimalStyleDifference);
     diff = adjustStyleDifference(diff);
 
-    Style::loadPendingResources(style, protect(document()), protectedElement().get());
+    Style::loadPendingResources(style, protect(document()), protect(element()).get());
 
     auto didRepaint = repaintBeforeStyleChange(diff, m_style, style);
     styleWillChange(diff, style);
@@ -823,9 +823,9 @@ void RenderElement::moveLayers(RenderLayer& newParent)
 
 RenderLayer* RenderElement::layerParent() const
 {
-    ASSERT_IMPLIES(isInTopLayerOrBackdrop(style(), protectedElement().get()), hasLayer());
+    ASSERT_IMPLIES(isInTopLayerOrBackdrop(style(), protect(element()).get()), hasLayer());
 
-    if (hasLayer() && isInTopLayerOrBackdrop(style(), protectedElement().get()))
+    if (hasLayer() && isInTopLayerOrBackdrop(style(), protect(element()).get()))
         return view().layer();
 
     return parent()->enclosingLayer();
@@ -919,13 +919,13 @@ void RenderElement::styleWillChange(Style::Difference diff, const RenderStyle& n
         bool contentVisibilityChanged = oldStyle && oldStyle->contentVisibility() != newStyle.contentVisibility();
         if (contentVisibilityChanged) {
             if (oldStyle->contentVisibility() == ContentVisibility::Auto)
-                ContentVisibilityDocumentState::unobserve(*protectedElement());
+                ContentVisibilityDocumentState::unobserve(*protect(element()));
             auto wasSkippedContent = oldStyle->contentVisibility() == ContentVisibility::Hidden ? IsSkippedContent::Yes : IsSkippedContent::No;
             auto isSkippedContent = newStyle.contentVisibility() == ContentVisibility::Hidden ? IsSkippedContent::Yes : IsSkippedContent::No;
             ContentVisibilityDocumentState::updateAnimations(*element(), wasSkippedContent, isSkippedContent);
         }
         if ((contentVisibilityChanged || !oldStyle) && newStyle.contentVisibility() == ContentVisibility::Auto)
-            ContentVisibilityDocumentState::observe(*protectedElement());
+            ContentVisibilityDocumentState::observe(*protect(element()));
     };
 
     if (oldStyle) {
@@ -1119,7 +1119,7 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
 
 #if !PLATFORM(IOS_FAMILY)
     if (oldStyle && oldStyle->cursor() != style().cursor())
-        protectedFrame()->eventHandler().scheduleCursorUpdate();
+        protect(frame())->eventHandler().scheduleCursorUpdate();
 #endif
 
     bool hadOutlineAuto = oldStyle && oldStyle->outlineStyle() == OutlineStyle::Auto;
@@ -1239,7 +1239,7 @@ void RenderElement::willBeDestroyed()
         checkedView()->removeRendererWithPausedImageAnimations(*this);
 
     if (style().contentVisibility() == ContentVisibility::Auto && element())
-        ContentVisibilityDocumentState::unobserve(*protectedElement());
+        ContentVisibilityDocumentState::unobserve(*protect(element()));
 }
 
 void RenderElement::setNeedsOutOfFlowMovementLayout(const RenderStyle* oldStyle)
@@ -1714,7 +1714,7 @@ VisibleInViewportState RenderElement::imageFrameAvailable(CachedImage& image, Im
         imageChanged(&image, changeRect);
 
     if (element() && image.image()->isBitmapImage())
-        protectedElement()->dispatchWebKitImageReadyEventForTesting();
+        protect(element())->dispatchWebKitImageReadyEventForTesting();
 
     return isVisible ? VisibleInViewportState::Yes : VisibleInViewportState::No;
 }

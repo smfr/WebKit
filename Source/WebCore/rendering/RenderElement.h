@@ -97,9 +97,7 @@ public:
 
     // This is null for anonymous renderers.
     inline Element* element() const; // Defined in RenderElementInlines.h
-    inline RefPtr<Element> protectedElement() const; // Defined in RenderElementInlines.h
     inline Element* nonPseudoElement() const; // Defined in RenderElementInlines.h
-    inline RefPtr<Element> protectedNonPseudoElement() const; // Defined in RenderElementInlines.h
     inline Element* generatingElement() const; // Defined in RenderElementInlines.h
 
     RenderObject* firstChild() const { return m_firstChild.get(); }

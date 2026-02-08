@@ -198,7 +198,7 @@ bool LegacyRenderSVGShape::setupNonScalingStrokeContext(AffineTransform& strokeT
 
 AffineTransform LegacyRenderSVGShape::nonScalingStrokeTransform() const
 {
-    return protectedGraphicsElement()->getScreenCTM(SVGLocatable::DisallowStyleUpdate);
+    return protect(graphicsElement())->getScreenCTM(SVGLocatable::DisallowStyleUpdate);
 }
 
 void LegacyRenderSVGShape::fillShape(const RenderStyle& style, GraphicsContext& originalContext)
@@ -362,7 +362,7 @@ bool LegacyRenderSVGShape::nodeAtFloatPoint(const HitTestRequest& request, HitTe
             || (hitRules.canHitFill && (style().hasFill() || !hitRules.requireFill) && fillContains(localPoint, hitRules.requireFill, fillRule))
             || (hitRules.canHitBoundingBox && objectBoundingBox().contains(localPoint))) {
             updateHitTestResult(result, LayoutPoint(localPoint));
-            if (result.addNodeToListBasedTestResult(protectedNodeForHitTest().get(), request, flooredLayoutPoint(localPoint)) == HitTestProgress::Stop)
+            if (result.addNodeToListBasedTestResult(protect(nodeForHitTest()).get(), request, flooredLayoutPoint(localPoint)) == HitTestProgress::Stop)
                 return true;
         }
     }
@@ -495,7 +495,7 @@ Path& LegacyRenderSVGShape::ensurePath()
 
 std::unique_ptr<Path> LegacyRenderSVGShape::createPath() const
 {
-    return makeUnique<Path>(pathFromGraphicsElement(protectedGraphicsElement()));
+    return makeUnique<Path>(pathFromGraphicsElement(protect(graphicsElement())));
 }
 
 }

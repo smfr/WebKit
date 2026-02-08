@@ -245,7 +245,7 @@ LayoutUnit RenderView::clientLogicalWidthForFixedPosition() const
 {
     Ref frameView = this->frameView();
     if (frameView->fixedElementsLayoutRelativeToFrame())
-        return LayoutUnit((isHorizontalWritingMode() ? frameView->visibleWidth() : frameView->visibleHeight()) / frameView->protectedFrame()->frameScaleFactor());
+        return LayoutUnit((isHorizontalWritingMode() ? frameView->visibleWidth() : frameView->visibleHeight()) / protect(frameView->frame())->frameScaleFactor());
 
 #if PLATFORM(IOS_FAMILY)
     if (frameView->useCustomFixedPositionLayoutRect())
@@ -262,7 +262,7 @@ LayoutUnit RenderView::clientLogicalHeightForFixedPosition() const
 {
     Ref frameView = this->frameView();
     if (frameView->fixedElementsLayoutRelativeToFrame())
-        return LayoutUnit((isHorizontalWritingMode() ? frameView->visibleHeight() : frameView->visibleWidth()) / frameView->protectedFrame()->frameScaleFactor());
+        return LayoutUnit((isHorizontalWritingMode() ? frameView->visibleHeight() : frameView->visibleWidth()) / protect(frameView->frame())->frameScaleFactor());
 
 #if PLATFORM(IOS_FAMILY)
     if (frameView->useCustomFixedPositionLayoutRect())

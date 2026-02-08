@@ -1419,7 +1419,7 @@ HitTestResult EventHandler::hitTestResultAtPoint(const LayoutPoint& point, Optio
     HitTestRequest request(hitType);
     document->hitTest(request, result);
     if (!request.readOnly())
-        protect(frame->document())->updateHoverActiveState(request, result.protectedTargetElement().get());
+        protect(frame->document())->updateHoverActiveState(request, protect(result.targetElement()).get());
 
     RefPtr innerNode = result.innerNode();
     if (request.disallowsUserAgentShadowContent()
@@ -2885,7 +2885,7 @@ DragEventTargetData EventHandler::performDragAndDrop(const PlatformMouseEvent& e
     });
 
     Ref frame = m_frame.get();
-    RefPtr subframe = EventHandler::subframeForTargetNode(result.protectedTargetNode().get());
+    RefPtr subframe = EventHandler::subframeForTargetNode(protect(result.targetNode()).get());
     bool preventedDefault = false;
 #if PLATFORM(COCOA) && ENABLE(DRAG_SUPPORT)
     if (RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(subframe)) {
@@ -3576,7 +3576,7 @@ HandleUserInputEventResult EventHandler::handleWheelEventInternal(const Platform
 
     if (element) {
         if (isOverWidget) {
-            if (RefPtr remoteSubframe = dynamicDowncast<RemoteFrame>(subframeForTargetNode(result.protectedTargetNode().get()))) {
+            if (RefPtr remoteSubframe = dynamicDowncast<RemoteFrame>(subframeForTargetNode(protect(result.targetNode()).get()))) {
                 if (auto wheelEventDataForRemoteFrame = userInputEventDataForRemoteFrame(remoteSubframe.get(), result.doublePointInInnerNodeFrame()))
                     return *wheelEventDataForRemoteFrame;
             } else if (RefPtr widget = widgetForElement(*element)) {
@@ -4701,7 +4701,7 @@ bool EventHandler::handleDrag(const MouseEventWithHitTestResults& event, CheckDr
         HitTestResult result(m_mouseDownContentsPosition);
         protect(frame->document())->hitTest(OptionSet<HitTestRequest::Type> { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::DisallowUserAgentShadowContent }, result);
         if (RefPtr page = frame->page())
-            setDragStateSource(page->dragController().draggableElement(frame.ptr(), result.protectedTargetElement().get(), m_mouseDownContentsPosition, dragState()).get());
+            setDragStateSource(page->dragController().draggableElement(frame.ptr(), protect(result.targetElement()).get(), m_mouseDownContentsPosition, dragState()).get());
 
         if (!draggedElement())
             m_mouseDownMayStartDrag = false; // no element is draggable

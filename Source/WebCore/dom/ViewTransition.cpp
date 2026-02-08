@@ -366,7 +366,7 @@ static AtomString effectiveViewTransitionName(RenderLayerModelObject& renderer, 
 
             Ref element = *renderer.element();
             if (scope == &Style::Scope::forNode(element) && element->hasID())
-                return makeAtomString("-ua-id-"_s, renderer.protectedElement()->getIdAttribute());
+                return makeAtomString("-ua-id-"_s, protect(renderer.element())->getIdAttribute());
 
             if (isCrossDocument)
                 return nullAtom();

@@ -66,7 +66,6 @@ public:
     static bool checkEnclosure(RenderElement*, const FloatRect&);
 
     SVGElement& element() const { return downcast<SVGElement>(nodeForNonAnonymous()); }
-    Ref<SVGElement> protectedElement() const;
 
     virtual void addFocusRingRects(Vector<LayoutRect>&, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer = nullptr) const;
 

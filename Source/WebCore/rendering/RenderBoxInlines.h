@@ -244,7 +244,7 @@ inline LayoutUnit resolveHeightForRatio(LayoutUnit borderAndPaddingLogicalWidth,
 
 inline bool isSkippedContentRoot(const RenderBox& renderBox)
 {
-    return renderBox.element() && WebCore::isSkippedContentRoot(renderBox.style(), *renderBox.protectedElement());
+    return renderBox.element() && WebCore::isSkippedContentRoot(renderBox.style(), *protect(renderBox.element()));
 }
 
 inline bool RenderBox::backgroundIsKnownToBeObscured(const LayoutPoint& paintOffset)

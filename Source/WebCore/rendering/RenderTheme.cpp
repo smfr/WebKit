@@ -610,7 +610,7 @@ static void updateSliderTrackPartForRenderer(SliderTrackPart& sliderTrackPart, c
 
 static void updateSwitchThumbPartForRenderer(SwitchThumbPart& switchThumbPart, const RenderElement& renderer)
 {
-    Ref input = downcast<HTMLInputElement>(*renderer.protectedNode()->shadowHost());
+    Ref input = downcast<HTMLInputElement>(*protect(renderer.element())->shadowHost());
     ASSERT(input->isSwitch());
 
     switchThumbPart.setIsOn(input->isSwitchVisuallyOn());
@@ -619,7 +619,7 @@ static void updateSwitchThumbPartForRenderer(SwitchThumbPart& switchThumbPart, c
 
 static void updateSwitchTrackPartForRenderer(SwitchTrackPart& switchTrackPart, const RenderElement& renderer)
 {
-    Ref input = downcast<HTMLInputElement>(*renderer.protectedNode()->shadowHost());
+    Ref input = downcast<HTMLInputElement>(*protect(renderer.element())->shadowHost());
     ASSERT(input->isSwitch());
 
     switchTrackPart.setIsOn(input->isSwitchVisuallyOn());
