@@ -107,7 +107,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 - (BOOL)presentSheetFromRect:(CGRect)presentationRect
 {
-    UIView *view = [protect(_sheetDelegate) hostViewForSheet];
+    RetainPtr<UIView> view = [protect(_sheetDelegate) hostViewForSheet];
     if (!view)
         return NO;
 
@@ -122,7 +122,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (_popoverPresentationControllerDelegateWhileRotating)
         presentationController.get().delegate = _popoverPresentationControllerDelegateWhileRotating.get();
 
-    _currentPresentingViewController = view._wk_viewControllerForFullScreenPresentation;
+    _currentPresentingViewController = view.get()._wk_viewControllerForFullScreenPresentation;
     [_currentPresentingViewController presentViewController:presentedViewController.get() animated:YES completion:nil];
 
     return YES;
@@ -160,11 +160,11 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     //    rotation, we take this opportunity to simplify the view controller hierarchy and simply re-present the content
     //    view controller, without re-presenting the alert controller.
 
-    UIView *view = [protect(_sheetDelegate) hostViewForSheet];
+    RetainPtr<UIView> view = [protect(_sheetDelegate) hostViewForSheet];
     if (!view)
         return;
 
-    auto presentingViewController = view._wk_viewControllerForFullScreenPresentation;
+    auto presentingViewController = view.get()._wk_viewControllerForFullScreenPresentation;
 
     // topPresentedViewController is either self (cases (a) and (b) above) or an action's view controller
     // (case (c) above).

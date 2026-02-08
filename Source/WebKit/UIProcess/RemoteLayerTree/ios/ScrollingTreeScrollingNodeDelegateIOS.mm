@@ -283,11 +283,11 @@ ScrollingTreeScrollingNodeDelegateIOS::ScrollingTreeScrollingNodeDelegateIOS(Scr
 ScrollingTreeScrollingNodeDelegateIOS::~ScrollingTreeScrollingNodeDelegateIOS()
 {
     BEGIN_BLOCK_OBJC_EXCEPTIONS
-    if (UIScrollView *scrollView = (UIScrollView *)[protect(scrollLayer()) delegate]) {
+    if (RetainPtr scrollView = dynamic_objc_cast<UIScrollView>([protect(scrollLayer()) delegate])) {
         ASSERT([scrollView isKindOfClass:[UIScrollView class]]);
         // The scrollView may have been adopted by another node, so only clear the delegate if it's ours.
-        if (scrollView.delegate == m_scrollViewDelegate.get())
-            scrollView.delegate = nil;
+        if (scrollView.get().delegate == m_scrollViewDelegate.get())
+            scrollView.get().delegate = nil;
     }
     END_BLOCK_OBJC_EXCEPTIONS
 }
@@ -295,9 +295,9 @@ ScrollingTreeScrollingNodeDelegateIOS::~ScrollingTreeScrollingNodeDelegateIOS()
 void ScrollingTreeScrollingNodeDelegateIOS::resetScrollViewDelegate()
 {
     BEGIN_BLOCK_OBJC_EXCEPTIONS
-    if (UIScrollView *scrollView = (UIScrollView *)[protect(scrollLayer()) delegate]) {
+    if (RetainPtr scrollView = dynamic_objc_cast<UIScrollView>([protect(scrollLayer()) delegate])) {
         ASSERT([scrollView isKindOfClass:[UIScrollView class]]);
-        scrollView.delegate = nil;
+        scrollView.get().delegate = nil;
     }
     END_BLOCK_OBJC_EXCEPTIONS
 }

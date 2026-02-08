@@ -46,6 +46,10 @@
 #include <wtf/ThreadSafeRefCounted.h>
 #include <wtf/Variant.h>
 
+#if USE(CG)
+#include <wtf/cf/CFTypeTraits.h>
+#endif
+
 #if USE(SKIA)
 WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
 #include <skia/core/SkColor.h>
@@ -54,6 +58,8 @@ WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_END
 
 #if USE(CG)
 typedef struct CGColor* CGColorRef;
+extern "C" CFTypeID CGColorGetTypeID();
+WTF_DECLARE_CF_TYPE_TRAIT(CGColor);
 #endif
 
 namespace WebCore {

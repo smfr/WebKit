@@ -170,7 +170,7 @@ SOFT_LINK_CLASS(ContactsUI, CNContactPickerViewController)
     [_contactPickerViewController setDelegate:_contactPickerDelegate.get()];
     [_contactPickerViewController setPrompt:requestData.url.createNSString().get()];
 
-    auto presentationViewController = [_webView.get() _wk_viewControllerForFullScreenPresentation];
+    RetainPtr presentationViewController = [_webView.get() _wk_viewControllerForFullScreenPresentation];
 #if PLATFORM(VISION)
     if (RetainPtr webView = _webView.get())
         [webView _page]->dispatchWillPresentModalUI();

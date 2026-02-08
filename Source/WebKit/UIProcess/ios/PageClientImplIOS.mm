@@ -73,6 +73,7 @@
 #import "WebProcessProxy.h"
 #import "_WKDownloadInternal.h"
 #import <WebCore/AXObjectCache.h>
+#import <WebCore/Color.h>
 #import <WebCore/Cursor.h>
 #import <WebCore/DOMPasteAccess.h>
 #import <WebCore/DictionaryLookup.h>
@@ -360,7 +361,7 @@ void PageClientImpl::didCompleteSyntheticClick()
 void PageClientImpl::decidePolicyForGeolocationPermissionRequest(WebFrameProxy& frame, const FrameInfoData& frameInfo, Function<void(bool)>& completionHandler)
 {
     if (auto webView = this->webView()) {
-        auto* geolocationProvider = [protect(wrapper(webView->_page->configuration().processPool())) _geolocationProvider];
+        RetainPtr geolocationProvider = [protect(wrapper(webView->_page->configuration().processPool())) _geolocationProvider];
         [geolocationProvider decidePolicyForGeolocationRequestFromOrigin:FrameInfoData { frameInfo } completionHandler:std::exchange(completionHandler, nullptr) view:webView.get()];
     }
 }
@@ -1310,10 +1311,10 @@ WebCore::Color PageClientImpl::contentViewBackgroundColor()
 {
     WebCore::Color color;
     [[webView() traitCollection] performAsCurrentTraitCollection:[&, protectedThis = Ref { *this }]() {
-        color = WebCore::roundAndClampToSRGBALossy(protect([protectedThis->contentView() backgroundColor]).get().CGColor);
+        color = WebCore::roundAndClampToSRGBALossy(protect(protect([protectedThis->contentView() backgroundColor]).get().CGColor));
         if (color.isValid())
             return;
-        color = WebCore::roundAndClampToSRGBALossy(protect(UIColor.systemBackgroundColor).get().CGColor);
+        color = WebCore::roundAndClampToSRGBALossy(protect(protect(UIColor.systemBackgroundColor).get().CGColor));
     }];
 
     return color;

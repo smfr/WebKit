@@ -235,13 +235,13 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     if (![newTraitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection])
         return;
 
-    auto doneButtonAttributes = [NSMutableDictionary dictionaryWithObject:protect(WebKit::doneButtonFont()).get() forKey:NSFontAttributeName];
+    RetainPtr doneButtonAttributes = [NSMutableDictionary dictionaryWithObject:protect(WebKit::doneButtonFont()).get() forKey:NSFontAttributeName];
 
     UIColor *tintColor = nil;
 
     if (newTraitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
         tintColor = UIColor.whiteColor;
-        doneButtonAttributes[NSForegroundColorAttributeName] = tintColor;
+        doneButtonAttributes.get()[NSForegroundColorAttributeName] = tintColor;
     }
 
     self.tintColor = tintColor;

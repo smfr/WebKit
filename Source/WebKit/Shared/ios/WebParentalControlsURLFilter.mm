@@ -73,7 +73,7 @@ void WebParentalControlsURLFilter::isURLAllowedImpl(const URL& mainDocumentURL, 
             return;
         }
 
-        auto filter = ensureWebContentFilter();
+        RetainPtr filter = ensureWebContentFilter();
 #if HAVE(WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST)
 #if __has_include(<WebKitAdditions/BEKAdditions.h>)
         MAYBE_EVALUATE_URL_WITH_TRANSITIVE_TRUST

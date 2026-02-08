@@ -70,7 +70,7 @@ static UIActionIdentifier const WKPDFActionTwoPagesIdentifier = @"WKPDFActionPla
 - (void)contextMenuInteraction:(UIContextMenuInteraction *)interaction willDisplayMenuForConfiguration:(UIContextMenuConfiguration *)configuration animator:(id<UIContextMenuInteractionAnimating>)animator
 {
     [super contextMenuInteraction:interaction willDisplayMenuForConfiguration:configuration animator:animator];
-    [_delegate pdfPageNumberIndicatorButtonWillDisplayMenu:self];
+    [protect(_delegate) pdfPageNumberIndicatorButtonWillDisplayMenu:self];
 }
 
 - (void)contextMenuInteraction:(UIContextMenuInteraction *)interaction willEndForConfiguration:(UIContextMenuConfiguration *)configuration animator:(id<UIContextMenuInteractionAnimating>)animator
@@ -82,7 +82,7 @@ static UIActionIdentifier const WKPDFActionTwoPagesIdentifier = @"WKPDFActionPla
         if (!strongSelf)
             return;
 
-        [strongSelf->_delegate pdfPageNumberIndicatorButtonDidDismissMenu:strongSelf.get()];
+        [protect(strongSelf->_delegate) pdfPageNumberIndicatorButtonDidDismissMenu:strongSelf.get()];
     }];
 }
 
@@ -112,7 +112,7 @@ static UIActionIdentifier const WKPDFActionTwoPagesIdentifier = @"WKPDFActionPla
 
     BOOL shouldEnableUserInteraction = NO;
     if (RefPtr page = view->_page)
-        shouldEnableUserInteraction = page->preferences().twoUpPDFDisplayModeSupportEnabled();
+        shouldEnableUserInteraction = protect(page->preferences())->twoUpPDFDisplayModeSupportEnabled();
     self.userInteractionEnabled = shouldEnableUserInteraction;
 
 #if HAVE(UI_GLASS_EFFECT)
