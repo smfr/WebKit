@@ -1589,6 +1589,16 @@ bool AXIsolatedObject::isPressed() const
     return boolAttributeValue(AXProperty::IsPressed);
 }
 
+bool AXIsolatedObject::isFocused() const
+{
+    if (role() == AccessibilityRole::WebArea) {
+        // Matching AccessibilityNodeObject::isFocused, the web area is focused when
+        // the corresponding document's frame selection is focused and active.
+        return boolAttributeValue(AXProperty::IsFocusedWebArea);
+    }
+    return tree()->focusedNodeID() == objectID();
+}
+
 bool AXIsolatedObject::isSelectedOptionActive() const
 {
     AX_ASSERT_NOT_REACHED();

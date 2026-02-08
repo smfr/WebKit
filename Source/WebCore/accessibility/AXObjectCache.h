@@ -463,6 +463,7 @@ public:
     void onEventListenerAdded(Node&, const AtomString& eventType);
     void onEventListenerRemoved(Node&, const AtomString& eventType);
     void onFocusChange(Element* oldElement, Element* newElement);
+    void onFrameSelectionFocusedOrActiveStateChanged(Document&);
     void onInertOrVisibilityChange(RenderElement&);
     void onPopoverToggle(const HTMLElement&);
     void onRadioGroupMembershipChanged(HTMLElement&);

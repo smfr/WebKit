@@ -681,6 +681,10 @@ void AXIsolatedTree::updateNodeProperties(AccessibilityObject& axObject, const A
         case AXProperty::ColumnIndexRange:
             properties.append({ AXProperty::ColumnIndexRange, axObject.columnIndexRange() });
             break;
+        case AXProperty::IsFocusedWebArea:
+            AX_ASSERT(axObject.isWebArea());
+            properties.append({ AXProperty::IsFocusedWebArea, axObject.isFocused() });
+            break;
         case AXProperty::CurrentState:
             properties.append({ AXProperty::CurrentState, static_cast<int>(axObject.currentState()) });
             break;
@@ -2013,8 +2017,10 @@ IsolatedObjectData createIsolatedObjectData(const Ref<AccessibilityObject>& axOb
         } else
             setProperty(AXProperty::InitialLocalRect, object.localRect());
 
-        if (isWebArea)
+        if (isWebArea) {
             setProperty(AXProperty::IsEditableWebArea, object.isEditableWebArea());
+            setProperty(AXProperty::IsFocusedWebArea, object.isFocused());
+        }
 
         if (object.supportsPath()) {
             setProperty(AXProperty::SupportsPath, true);
