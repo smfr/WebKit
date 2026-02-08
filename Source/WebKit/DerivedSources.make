@@ -1049,6 +1049,7 @@ all : JSWebExtensionAPIUnified.mm $(EXTENSION_INTERFACES:%=JS%.h) $(EXTENSION_IN
 ifeq ($(USE_INTERNAL_SDK),YES)
 WEBKIT_ADDITIONS_SWIFT_FILES = \
 	UIWindowScene+Extras.swift \
+	WKWebView+WKBannerViewOverlay.swift \
 	WKWebView+SystemTextExtraction.swift \
 #
 

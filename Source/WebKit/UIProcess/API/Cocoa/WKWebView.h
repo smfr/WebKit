@@ -33,6 +33,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#if 0 // API_WEBKIT_ADDITIONS_REPLACEMENT
+#import <WebKitAdditions/WKWebViewAdditions.h>
+#endif
+
 #if TARGET_OS_IOS
 @class UIFindInteraction;
 @class UIConversationContext;

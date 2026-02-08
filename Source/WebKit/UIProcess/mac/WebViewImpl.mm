@@ -7359,6 +7359,25 @@ void WebViewImpl::unregisterViewAboveScrollPocket(NSView *containerView)
 
 #endif // ENABLE(CONTENT_INSET_BACKGROUND_FILL)
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+
+void WebViewImpl::setBannerView(WKBannerView *bannerView)
+{
+    if (m_bannerView == bannerView)
+        return;
+
+    [m_bannerView.get() removeFromSuperview];
+    [m_view.get() addSubview:bannerView positioned:NSWindowAbove relativeTo:nil];
+
+    m_bannerView = bannerView;
+}
+
+void WebViewImpl::applyBannerViewOverlayHeight(CGFloat, bool)
+{
+}
+
+#endif // ENABLE(BANNER_VIEW_OVERLAYS)
+
 #if ENABLE(VIDEO)
 void WebViewImpl::showCaptionDisplaySettings(WebCore::HTMLMediaElementIdentifier, const WebCore::ResolvedCaptionDisplaySettingsOptions& options, CompletionHandler<void(Expected<void, WebCore::ExceptionData>&&)>&& completionHandler)
 {

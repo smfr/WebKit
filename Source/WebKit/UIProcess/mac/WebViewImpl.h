@@ -61,6 +61,10 @@
 #include <wtf/WorkQueue.h>
 #include <wtf/text/WTFString.h>
 
+#if USE(APPLE_INTERNAL_SDK)
+#include <WebKitAdditions/AppKitSPIAdditions.h>
+#endif
+
 OBJC_CLASS NSAccessibilityRemoteUIElement;
 OBJC_CLASS NSImmediateActionGestureRecognizer;
 OBJC_CLASS NSPanGestureRecognizer;
@@ -833,6 +837,12 @@ public:
     void setClientImplicitlyRequestedTopScrollPocket();
 #endif
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+void setBannerView(WKBannerView *);
+WKBannerView *bannerView() const { return m_bannerView.get(); }
+void applyBannerViewOverlayHeight(CGFloat, bool);
+#endif
+
 #if ENABLE(VIDEO)
     void showCaptionDisplaySettings(WebCore::HTMLMediaElementIdentifier, const WebCore::ResolvedCaptionDisplaySettingsOptions&, CompletionHandler<void(Expected<void, WebCore::ExceptionData>&&)>&&);
 #endif
@@ -1131,6 +1141,10 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     bool m_clientImplicitlyRequestedTopScrollPocket { false };
 #endif
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    RetainPtr<WKBannerView> m_bannerView;
+#endif
+
 #if HAVE(INLINE_PREDICTIONS)
     bool m_inlinePredictionsEnabled { false };
 #endif
@@ -1140,7 +1154,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     RetainPtr<WKAppKitGestureController> m_appKitGestureController;
     RetainPtr<WKTextSelectionController> m_textSelectionController;
 #endif
-};
+} SWIFT_UNSAFE_REFERENCE;
 
 } // namespace WebKit
 

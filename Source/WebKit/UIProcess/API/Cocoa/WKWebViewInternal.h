@@ -670,6 +670,10 @@ struct PerWebProcessState {
 
 @property (nonatomic, readonly) RetainPtr<WKWebView> _horizontallyAttachedInspectorWebView;
 
+#if PLATFORM(MAC)
+- (WebKit::WebViewImpl *)_impl;
+#endif
+
 @end
 
 #endif // !__has_feature(modules) || WK_SUPPORTS_SWIFT_OBJCXX_INTEROP
@@ -681,6 +685,10 @@ struct PerWebProcessState {
 @property (nonatomic, setter=_setAlwaysBounceHorizontal:) BOOL _alwaysBounceHorizontal;
 
 - (void)_setContentOffsetX:(nullable NSNumber *)x y:(nullable NSNumber *)y animated:(BOOL)animated NS_SWIFT_NAME(_setContentOffset(x:y:animated:));
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+@property (nonatomic, readonly) CGFloat _bannerViewOverlayHeight;
+#endif
 #endif // PLATFORM(MAC)
 
 @property (nonatomic, readonly) NSString *_nameForVisualIdentificationOverlay;

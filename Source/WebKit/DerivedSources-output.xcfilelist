@@ -472,6 +472,7 @@ $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentRawRequestValidato
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKPDFPageNumberIndicatorAdditions.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKWebView+SystemTextExtraction.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKWebView+TextExtraction.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKWebView+WKBannerViewOverlay.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WasmDebuggerDispatcherMessageReceiver.cpp
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WasmDebuggerDispatcherMessages.h
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WebAuthenticatorCoordinatorMessageReceiver.cpp

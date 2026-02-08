@@ -1938,6 +1938,10 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
     return nil;
 }
 
+#if USE(APPLE_INTERNAL_SDK)
+#import <WebKitAdditions/WKWebViewAdditions.mm>
+#endif
+
 #endif // PLATFORM(MAC)
 
 #pragma mark - macOS/iOS internal
@@ -3785,6 +3789,15 @@ struct WKWebViewData {
 {
     self._protectedPage->scrollToEdge(toRectEdges(edge), animated ? WebCore::ScrollIsAnimated::Yes : WebCore::ScrollIsAnimated::No);
 }
+
+#if PLATFORM(MAC)
+
+- (WebKit::WebViewImpl *)_impl
+{
+    return _impl.get();
+}
+
+#endif
 
 @end
 
@@ -7525,6 +7538,15 @@ static OptionSet<WebCore::DataDetectorType> coreDataDetectorTypes(_WKTextExtract
         completion(info ? wrapper(API::JSHandle::create(WTF::move(*info))).get() : nil);
     });
 }
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+
+- (CGFloat)_bannerViewOverlayHeight
+{
+    return 0;
+}
+
+#endif
 
 @end
 
