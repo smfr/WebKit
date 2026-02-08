@@ -122,7 +122,6 @@ class Heap;
 
 #define FOR_EACH_JSC_COMMON_ISO_SUBSPACE(v) \
     v(arraySpace, cellHeapCellType, JSArray) \
-    v(bigIntSpace, cellHeapCellType, JSBigInt) \
     v(calleeSpace, cellHeapCellType, JSCallee) \
     v(clonedArgumentsSpace, cellHeapCellType, ClonedArguments) \
     v(customGetterSetterSpace, cellHeapCellType, CustomGetterSetter) \

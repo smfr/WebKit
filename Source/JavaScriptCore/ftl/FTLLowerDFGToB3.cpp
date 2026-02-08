@@ -13893,13 +13893,12 @@ IGNORE_CLANG_WARNINGS_END
                 // and we should attempt to perform constant-folding etc. And also, we can avoid usign this at all for DFG Int64 value.
                 LValue argument = lowCell(m_graph.varArgChild(node, 2 + i));
                 PatchpointValue* patchpoint = m_out.patchpoint(Int64);
-                patchpoint->numGPScratchRegisters = 2;
                 patchpoint->append(ConstrainedValue(argument, ValueRep::SomeLateRegister));
                 patchpoint->clobber(RegisterSetBuilder::macroClobberedGPRs());
                 patchpoint->setGenerator(
                     [=](CCallHelpers& jit, const StackmapGenerationParams& params) {
                         AllowMacroScratchRegisterUsage allowScratch(jit);
-                        jit.toBigInt64(params[1].gpr(), params[0].gpr(), params.gpScratch(0), params.gpScratch(1));
+                        jit.toBigInt64(params[1].gpr(), params[0].gpr());
                     });
                 if (isStack)
                     arguments.append(ConstrainedValue(patchpoint, ValueRep::stackArgument(safeCast<Value::OffsetType>(wasmCallInfo.params[i].location.offsetFromSP()))));

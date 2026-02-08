@@ -64,28 +64,15 @@ namespace JSC {
 
 const ClassInfo JSBigInt::s_info = { "BigInt"_s, nullptr, nullptr, nullptr, CREATE_METHOD_TABLE(JSBigInt) };
 
-JSBigInt::JSBigInt(VM& vm, Structure* structure, Digit* data, unsigned length)
+JSBigInt::JSBigInt(VM& vm, Structure* structure, unsigned length)
     : Base(vm, structure)
     , m_length(length)
-    , m_data(vm, this, data)
 { }
-
-template<typename Visitor>
-void JSBigInt::visitChildrenImpl(JSCell* cell, Visitor& visitor)
-{
-    auto* thisObject = jsCast<JSBigInt*>(cell);
-    ASSERT_GC_OBJECT_INHERITS(thisObject, info());
-    Base::visitChildren(thisObject, visitor);
-    if (auto* data = thisObject->m_data.getUnsafe())
-        visitor.markAuxiliary(data);
-}
-
-DEFINE_VISIT_CHILDREN(JSBigInt);
 
 void JSBigInt::initialize(InitializationType initType)
 {
     if (initType == InitializationType::WithZero)
-        memset(dataStorage(), 0, length() * sizeof(Digit));
+        zeroSpan(digits());
 }
 
 Structure* JSBigInt::createStructure(VM& vm, JSGlobalObject* globalObject, JSValue prototype)
@@ -119,15 +106,16 @@ inline JSBigInt* JSBigInt::createWithLength(JSGlobalObject* nullOrGlobalObjectFo
     }
 
     ASSERT(length <= maxLength);
-    void* data = vm.primitiveGigacageAuxiliarySpace().allocate(vm, length * sizeof(Digit), nullptr, AllocationFailureMode::ReturnNull);
-    if (!data) [[unlikely]] {
+    auto* cell = tryAllocateCell<JSBigInt>(vm, JSBigInt::allocationSize(length));
+    if (!cell) [[unlikely]] {
         if (nullOrGlobalObjectForOOM) {
             auto scope = DECLARE_THROW_SCOPE(vm);
             throwOutOfMemoryError(nullOrGlobalObjectForOOM, scope);
         }
         return nullptr;
     }
-    JSBigInt* bigInt = new (NotNull, allocateCell<JSBigInt>(vm)) JSBigInt(vm, vm.bigIntStructure.get(), reinterpret_cast<Digit*>(data), length);
+
+    JSBigInt* bigInt = new (NotNull, cell) JSBigInt(vm, vm.bigIntStructure.get(), length);
     bigInt->finishCreation(vm);
     return bigInt;
 }
@@ -2867,11 +2855,6 @@ JSBigInt* JSBigInt::rightTrim(JSGlobalObject* globalObject)
 JSBigInt* JSBigInt::tryRightTrim(VM& vm)
 {
     return rightTrim(nullptr, vm);
-}
-
-size_t JSBigInt::estimatedSize(JSCell* cell, VM& vm)
-{
-    return Base::estimatedSize(cell, vm) + jsCast<JSBigInt*>(cell)->m_length * sizeof(Digit);
 }
 
 double JSBigInt::toNumber(JSGlobalObject* globalObject) const

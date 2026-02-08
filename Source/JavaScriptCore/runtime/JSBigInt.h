@@ -52,18 +52,19 @@ public:
     static constexpr unsigned StructureFlags = Base::StructureFlags | StructureIsImmortal | OverridesPut;
     friend class CachedBigInt;
 
-    DECLARE_VISIT_CHILDREN;
-
-    template<typename CellType, SubspaceAccess>
-    static GCClient::IsoSubspace* subspaceFor(VM& vm)
+    template<typename CellType, SubspaceAccess mode>
+    static CompleteSubspace* subspaceFor(VM& vm)
     {
-        return &vm.bigIntSpace();
+        return &vm.heap.cellSpace;
+    }
+
+    static constexpr size_t allocationSize(unsigned length)
+    {
+        return offsetOfData() + length * sizeof(Digit);
     }
 
     enum class InitializationType { None, WithZero };
     void initialize(InitializationType);
-
-    static size_t estimatedSize(JSCell*, VM&);
 
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue prototype);
     JS_EXPORT_PRIVATE static JSBigInt* createZero(JSGlobalObject*);
@@ -95,7 +96,7 @@ public:
 
     static constexpr size_t offsetOfData()
     {
-        return OBJECT_OFFSETOF(JSBigInt, m_data);
+        return WTF::roundUpToMultipleOf<alignof(Digit)>(sizeof(JSBigInt));
     }
 
     DECLARE_EXPORT_INFO;
@@ -499,7 +500,7 @@ public:
 
 
 private:
-    JSBigInt(VM&, Structure*, Digit*, unsigned length);
+    JSBigInt(VM&, Structure*, unsigned length);
 
     std::span<Digit> digits()
     {
@@ -619,14 +620,13 @@ private:
 
     JS_EXPORT_PRIVATE static uint64_t toBigUInt64Heap(JSBigInt*);
 
-    inline Digit* dataStorage() { return m_data.get(); }
-    inline const Digit* dataStorage() const { return m_data.get(); }
-    inline Digit* dataStorageUnsafe() { return m_data.getUnsafe(); }
+    inline Digit* dataStorage() { return std::bit_cast<Digit*>(std::bit_cast<uint8_t*>(this) + offsetOfData()); }
+    inline const Digit* dataStorage() const { return std::bit_cast<const Digit*>(std::bit_cast<const uint8_t*>(this) + offsetOfData()); }
+    inline Digit* dataStorageUnsafe() { return dataStorage(); }
 
     const unsigned m_length;
     unsigned m_hash { 0 };
     uint8_t m_sign { false };
-    CagedBarrierPtr<Gigacage::Primitive, Digit> m_data;
 };
 
 inline JSBigInt* asHeapBigInt(JSValue value)
