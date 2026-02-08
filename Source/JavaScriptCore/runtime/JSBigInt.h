@@ -80,7 +80,8 @@ public:
     JS_EXPORT_PRIVATE static JSBigInt* createFrom(JSGlobalObject*, Int128 value);
     static JSBigInt* createFrom(JSGlobalObject*, bool value);
     static JSBigInt* createFrom(JSGlobalObject*, double value);
-    static JSBigInt* createFrom(JSGlobalObject*, VM&, bool sign, std::span<const Digit>);
+
+    JS_EXPORT_PRIVATE static JSBigInt* tryCreateFrom(JSGlobalObject*, VM&, bool sign, std::span<const Digit>);
 
     static JSBigInt* createFrom(JSGlobalObject*, VM&, int32_t value);
 
@@ -194,6 +195,8 @@ public:
     static ComparisonResult compareToDouble(double x, JSValue y) { return flip(compareToDouble(y, x)); }
 
 private:
+    static JSBigInt* tryCreateFromImpl(JSGlobalObject*, VM&, bool sign, std::span<const Digit>);
+
     ALWAYS_INLINE static ComparisonResult flip(ComparisonResult result)
     {
         switch (result) {
@@ -458,8 +461,6 @@ public:
 
     Digit digit(unsigned);
     void setDigit(unsigned, Digit); // Use only when initializing.
-    JS_EXPORT_PRIVATE JSBigInt* rightTrim(JSGlobalObject*);
-    JS_EXPORT_PRIVATE JSBigInt* tryRightTrim(VM&);
     std::span<const Digit> digits() const
     {
         return { dataStorage(), length() };
@@ -507,11 +508,9 @@ private:
         return { dataStorage(), length() };
     }
 
-    JSBigInt* rightTrim(JSGlobalObject*, VM&);
-
     JS_EXPORT_PRIVATE unsigned hashSlow();
 
-    static JSBigInt* createFromImpl(JSGlobalObject*, uint64_t value, bool sign);
+    static JSBigInt* tryCreateFromImpl(JSGlobalObject*, uint64_t value, bool sign);
 
     static constexpr int maxInt = 0x7FFFFFFF;
 

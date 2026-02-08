@@ -5154,15 +5154,7 @@ private:
                     return jsBigInt32(static_cast<int32_t>(digit64));
             }
             ASSERT(digit64 != 0);
-            JSBigInt* bigInt = JSBigInt::tryCreateWithLength(m_lexicalGlobalObject->vm(), 1);
-            if (!bigInt) {
-                SERIALIZE_TRACE("FAIL deserialize");
-                fail();
-                return JSValue();
-            }
-            bigInt->setDigit(0, digit64);
-            bigInt->setSign(sign);
-            bigInt = bigInt->tryRightTrim(m_lexicalGlobalObject->vm());
+            JSBigInt* bigInt = JSBigInt::tryCreateFrom(nullptr, m_lexicalGlobalObject->vm(), sign, std::span { &digit64, 1 });
             if (!bigInt) {
                 SERIALIZE_TRACE("FAIL deserialize");
                 fail();
@@ -5171,19 +5163,14 @@ private:
             return tryConvertToBigInt32(bigInt);
         }
 #endif
-        JSBigInt* bigInt = nullptr;
+        Vector<JSBigInt::Digit, 16> digits;
         if constexpr (sizeof(JSBigInt::Digit) == sizeof(uint64_t)) {
-            bigInt = JSBigInt::tryCreateWithLength(m_lexicalGlobalObject->vm(), numberOfUint64Elements);
-            if (!bigInt) {
-                SERIALIZE_TRACE("FAIL deserialize");
-                fail();
-                return JSValue();
-            }
+            digits.reserveInitialCapacity(numberOfUint64Elements);
             for (uint32_t index = 0; index < numberOfUint64Elements; ++index) {
                 uint64_t digit64 = 0;
                 if (!read(digit64))
                     return JSValue();
-                bigInt->setDigit(index, digit64);
+                digits.append(digit64);
             }
         } else {
             ASSERT(sizeof(JSBigInt::Digit) == sizeof(uint32_t));
@@ -5193,22 +5180,17 @@ private:
                 fail();
                 return JSValue();
             }
-            bigInt = JSBigInt::tryCreateWithLength(m_lexicalGlobalObject->vm(), actualBigIntLength.value());
-            if (!bigInt) {
-                SERIALIZE_TRACE("FAIL deserialize");
-                fail();
-                return JSValue();
-            }
+            digits.reserveInitialCapacity(actualBigIntLength.value());
             for (uint32_t index = 0; index < numberOfUint64Elements; ++index) {
                 uint64_t digit64 = 0;
                 if (!read(digit64))
                     return JSValue();
-                bigInt->setDigit(index * 2, static_cast<uint32_t>(digit64));
-                bigInt->setDigit(index * 2 + 1, static_cast<uint32_t>(digit64 >> 32));
+                digits.append(static_cast<uint32_t>(digit64));
+                digits.append(static_cast<uint32_t>(digit64 >> 32));
             }
         }
-        bigInt->setSign(sign);
-        bigInt = bigInt->tryRightTrim(m_lexicalGlobalObject->vm());
+
+        auto* bigInt = JSBigInt::tryCreateFrom(nullptr, m_lexicalGlobalObject->vm(), sign, digits.span());
         if (!bigInt) {
             SERIALIZE_TRACE("FAIL deserialize");
             fail();
