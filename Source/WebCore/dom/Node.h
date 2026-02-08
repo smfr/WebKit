@@ -327,8 +327,8 @@ public:
     WEBCORE_EXPORT Element* parentElementInComposedTree() const;
     Element* parentOrShadowHostElement() const;
     inline void setParentNode(ContainerNode*);
-    inline Node& CLANG_NODELETE rootNode() const;
-    WEBCORE_EXPORT Node& CLANG_NODELETE traverseToRootNode() const;
+    inline Node& NODELETE rootNode() const;
+    WEBCORE_EXPORT Node& NODELETE traverseToRootNode() const;
     Node& shadowIncludingRoot() const;
 
     struct GetRootNodeOptions {
