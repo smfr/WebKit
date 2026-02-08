@@ -3357,6 +3357,33 @@ private:
             break;
         }
 
+        case Int52RepUse: {
+            LValue numerator = lowStrictInt52(m_node->child1());
+            LValue denominator = lowStrictInt52(m_node->child2());
+
+            if (shouldCheckOverflow(m_node->arithMode()))
+                speculate(Int52Overflow, noValue(), nullptr, m_out.isZero64(denominator));
+
+            LValue remainder = m_out.chillMod(numerator, denominator);
+
+            if (shouldCheckNegativeZero(m_node->arithMode())) {
+                LBasicBlock negativeNumerator = m_out.newBlock();
+                LBasicBlock continuation = m_out.newBlock();
+
+                m_out.branch(
+                    m_out.lessThan(numerator, m_out.int64Zero),
+                    unsure(negativeNumerator), unsure(continuation));
+
+                LBasicBlock innerLastNext = m_out.appendTo(negativeNumerator, continuation);
+                speculate(NegativeZero, noValue(), nullptr, m_out.isZero64(remainder));
+                m_out.jump(continuation);
+                m_out.appendTo(continuation, innerLastNext);
+            }
+
+            setStrictInt52(remainder);
+            break;
+        }
+
         case DoubleRepUse: {
             setDouble(
                 m_out.doubleMod(lowDouble(m_node->child1()), lowDouble(m_node->child2())));

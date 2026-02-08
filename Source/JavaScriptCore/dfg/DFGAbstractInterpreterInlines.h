@@ -1304,17 +1304,21 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
         case Int32Use:
             setNonCellTypeForNode(node, SpecInt32Only);
             break;
+        case Int52RepUse:
+            ASSERT(node->op() == ArithMod);
+            setNonCellTypeForNode(node, SpecInt52Any);
+            break;
         case DoubleRepUse:
             if (node->op() == ArithDiv) {
-                setNonCellTypeForNode(node, 
+                setNonCellTypeForNode(node,
                     typeOfDoubleQuotient(
                         forNode(node->child1()).m_type, forNode(node->child2()).m_type));
             } else {
-                setNonCellTypeForNode(node, 
+                setNonCellTypeForNode(node,
                     typeOfDoubleBinaryOp(
                         forNode(node->child1()).m_type, forNode(node->child2()).m_type));
             }
-            
+
             break;
         default:
             RELEASE_ASSERT_NOT_REACHED();

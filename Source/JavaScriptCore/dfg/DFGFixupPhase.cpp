@@ -132,7 +132,20 @@ private:
             fixupArithDivInt32(node, leftChild, rightChild);
             return;
         }
-        
+
+        if ((node->op() == ArithMod || node->op() == ValueMod) && m_graph.modShouldSpeculateInt52(node)) {
+            fixEdge<Int52RepUse>(leftChild);
+            fixEdge<Int52RepUse>(rightChild);
+            if (bytecodeCanIgnoreNaNAndInfinity(node->arithNodeFlags()) && bytecodeCanIgnoreNegativeZero(node->arithNodeFlags()))
+                node->setArithMode(Arith::Unchecked);
+            else if (bytecodeCanIgnoreNegativeZero(node->arithNodeFlags()))
+                node->setArithMode(Arith::CheckOverflow);
+            else
+                node->setArithMode(Arith::CheckOverflowAndNegativeZero);
+            node->setResult(NodeResultInt52);
+            return;
+        }
+
         fixDoubleOrBooleanEdge(leftChild);
         fixDoubleOrBooleanEdge(rightChild);
         node->setResult(NodeResultDouble);
