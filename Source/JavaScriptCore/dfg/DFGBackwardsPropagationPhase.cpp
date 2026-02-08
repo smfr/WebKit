@@ -526,8 +526,6 @@ private:
             switch (node->child1()->op()) {
             case ValueMod:
             case ArithMod:
-            case ValueDiv:
-            case ArithDiv:
                 // We can clear this flag since Mod and Div never produces Infinity. It is only NaN.
                 flags &= ~NodeBytecodeNeedsNaNOrInfinity;
                 break;
