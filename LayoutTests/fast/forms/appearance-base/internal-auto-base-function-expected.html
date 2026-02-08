@@ -1,8 +1,22 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        select {
+            all: unset; /* Remove all UA styles */
+            appearance: none;
+            background-color: green;
+            color: white;
+        }
+    </style>
+</head>
 <body>
-    <div style="color: orange">This text should be orange</div>
-    <div style="color: blue">This text should be blue</div>
-    <div style="color: blue">This text should be blue</div>
+    <div style="color: orange">This text should be orange (default)</div>
+    <div style="color: blue">This text should be blue (base-select on non-select)</div>
+    <div style="color: blue">This text should be blue (base)</div>
+
+    <select><option>This select should be green with white text. (base-select)</option></select>
+    <select><option>This select should be green with white text. (base)</option></select>
+    <select style="background-color: red;"><option>This select should be red with white text. (default)</option></select>
 </body>
 </html>

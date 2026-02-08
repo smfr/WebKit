@@ -9,9 +9,21 @@
         div {
             color: -internal-auto-base(orange, blue);
         }
+        select {
+            all: unset; /* Remove all UA styles */
+            background-color: -internal-auto-base(red, green);
+            color: white;
+        }
+        ::picker-icon {
+            display: none;
+        }
     </style>
-    <div>This text should be orange</div>
-    <div style="appearance: base-select">This text should be blue</div>
-    <div style="appearance: base">This text should be blue</div>
+    <div>This text should be orange (default)</div>
+    <div style="appearance: base-select">This text should be blue (base-select on non-select)</div>
+    <div style="appearance: base">This text should be blue (base)</div>
+
+    <select style="appearance: base-select"><option>This select should be green with white text. (base-select)</option></select>
+    <select style="appearance: base"><option>This select should be green with white text. (base)</option></select>
+    <select><option>This select should be red with white text. (default)</option></select>
 </body>
 </html>

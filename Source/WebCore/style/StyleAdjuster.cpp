@@ -805,7 +805,7 @@ void Adjuster::adjust(RenderStyle& style) const
 #endif
 
     // Let the theme also have a crack at adjusting the style.
-    if (style.hasAppearance())
+    if (style.appearance() != StyleAppearance::None && style.appearance() != StyleAppearance::Base)
         adjustThemeStyle(style, m_parentStyle);
 
     // This should be kept in sync with requiresRenderingConsolidationForViewTransition
@@ -1030,13 +1030,16 @@ void Adjuster::adjustAnimatedStyle(RenderStyle& style, OptionSet<AnimationImpact
 
 void Adjuster::adjustThemeStyle(RenderStyle& style, const RenderStyle& parentStyle) const
 {
-    ASSERT(style.hasAppearance());
+    ASSERT(style.appearance() != StyleAppearance::None && style.appearance() != StyleAppearance::Base);
     auto isOldWidthAuto = style.width().isAuto();
     auto isOldMinWidthAuto = style.minWidth().isAuto();
     auto isOldHeightAuto = style.height().isAuto();
     auto isOldMinHeightAuto = style.minHeight().isAuto();
 
     RenderTheme::singleton().adjustStyle(style, parentStyle, m_element.get());
+
+    if (style.usedAppearance() == StyleAppearance::None || style.usedAppearance() == StyleAppearance::Base)
+        return;
 
     if (style.usedContain().contains(Style::ContainValue::Size)) {
         if (!style.containIntrinsicWidth().isNone()) {

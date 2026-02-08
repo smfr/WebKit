@@ -455,7 +455,6 @@ public:
 
     inline bool hasAnimations() const;
     inline bool hasAnimationsOrTransitions() const;
-    inline bool hasAppearance() const;
     inline bool hasAspectRatio() const;
     inline bool hasAutoLengthContainIntrinsicSize() const;
     inline bool hasBackdropFilter() const;

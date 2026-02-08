@@ -1108,12 +1108,6 @@ inline bool RenderStyle::hasAnimationsOrTransitions() const
     return hasAnimations() || hasTransitions();
 }
 
-// FIXME: Rename this function.
-inline bool RenderStyle::hasAppearance() const
-{
-    return appearance() != StyleAppearance::None && appearance() != StyleAppearance::Base;
-}
-
 #if HAVE(CORE_MATERIAL)
 inline bool RenderStyle::hasAppleVisualEffect() const
 {
