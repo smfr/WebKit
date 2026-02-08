@@ -2165,8 +2165,10 @@ void WebProcessPool::processForNavigation(WebPageProxy& page, WebFrameProxy& fra
     Site site { navigation.currentRequest().url() };
 
     bool siteIsolationEnabled = protect(page.preferences())->siteIsolationEnabled();
-    if (siteIsolationEnabled && !m_hasUsedSiteIsolation)
+    if (siteIsolationEnabled && !m_hasUsedSiteIsolation) {
         m_hasUsedSiteIsolation = true;
+        m_webProcessCache->updateCapacity(*this);
+    }
 
     bool isMainFrameNavigation = frame.isMainFrame();
     Ref sourceProcess = frame.process();
