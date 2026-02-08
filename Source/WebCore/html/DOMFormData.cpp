@@ -98,7 +98,7 @@ static auto createFileEntry(const String& name, Blob& blob, const String& filena
     if (RefPtr file = dynamicDowncast<File>(blob)) {
         if (!filename.isNull())
             return { usvName, File::create(protect(blob.scriptExecutionContext()).get(), *file, filename) };
-        return { usvName, WTF::move(file) };
+        return { usvName, file.releaseNonNull() };
     }
     return { usvName, File::create(protect(blob.scriptExecutionContext()).get(), blob, filename.isNull() ? "blob"_s : filename) };
 }

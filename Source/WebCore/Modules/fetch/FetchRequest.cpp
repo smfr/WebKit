@@ -328,7 +328,7 @@ ExceptionOr<Ref<FetchRequest>> FetchRequest::create(ScriptExecutionContext& cont
         if (result.hasException())
             return result.releaseException();
     } else {
-        auto result = request->initializeWith(Ref { *std::get<RefPtr<FetchRequest>>(input) }.get(), WTF::move(init));
+        auto result = request->initializeWith(std::get<Ref<FetchRequest>>(input).get(), WTF::move(init));
         if (result.hasException())
             return result.releaseException();
     }

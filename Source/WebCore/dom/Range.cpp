@@ -725,7 +725,7 @@ String Range::toString() const
 }
 
 // https://w3c.github.io/DOM-Parsing/#widl-Range-createContextualFragment-DocumentFragment-DOMString-fragment
-ExceptionOr<Ref<DocumentFragment>> Range::createContextualFragment(Variant<RefPtr<TrustedHTML>, String>&& markup)
+ExceptionOr<Ref<DocumentFragment>> Range::createContextualFragment(Variant<Ref<TrustedHTML>, String>&& markup)
 {
     Ref node = startContainer();
     auto stringValueHolder = trustedTypeCompliantString(node->document().contextDocument(), WTF::move(markup), "Range createContextualFragment"_s);

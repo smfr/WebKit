@@ -111,7 +111,7 @@ using MutationRecordDeliveryOptions = OptionSet<MutationObserverOptionType>;
 
 enum class IsMutationBySetInnerHTML : uint8_t { No, Yes };
 
-using NodeOrString = Variant<RefPtr<Node>, String>;
+using NodeOrString = Variant<Ref<Node>, String>;
 
 const int initialNodeVectorSize = 11; // Covers 99.5%. See webkit.org/b/80706
 typedef Vector<Ref<Node>, initialNodeVectorSize> NodeVector;

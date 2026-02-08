@@ -1119,11 +1119,7 @@ std::optional<Internals::ResourceLoadPriority> Internals::getResourcePriority(co
 
 bool Internals::isFetchObjectContextStopped(const FetchObject& object)
 {
-    return switchOn(object, [](const RefPtr<FetchRequest>& request) {
-        return request->isContextStopped();
-    }, [](auto& response) {
-        return response->isContextStopped();
-    });
+    return switchOn(object, [](const auto& item) { return item->isContextStopped(); });
 }
 
 void Internals::clearMemoryCache()

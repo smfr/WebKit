@@ -500,10 +500,10 @@ WebGLCanvas WebGLRenderingContextBase::canvas()
 {
     Ref base = canvasBase();
 #if ENABLE(OFFSCREEN_CANVAS)
-    if (RefPtr offscreenCanvas = dynamicDowncast<OffscreenCanvas>(base.get()))
-        return offscreenCanvas;
+    if (RefPtr offscreenCanvas = dynamicDowncast<OffscreenCanvas>(base))
+        return offscreenCanvas.releaseNonNull();
 #endif
-    return &downcast<HTMLCanvasElement>(base.get());
+    return downcast<HTMLCanvasElement>(base);
 }
 
 #if ENABLE(OFFSCREEN_CANVAS)
@@ -1893,7 +1893,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
             return 0;
         return getIntParameter(pname);
     case GraphicsContextGL::ARRAY_BUFFER_BINDING:
-        return m_boundArrayBuffer;
+        return toWebGLAny(m_boundArrayBuffer);
     case GraphicsContextGL::BLEND:
         return getBooleanParameter(pname);
     case GraphicsContextGL::BLEND_COLOR:
@@ -1923,7 +1923,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::CULL_FACE_MODE:
         return getUnsignedIntParameter(pname);
     case GraphicsContextGL::CURRENT_PROGRAM:
-        return m_currentProgram;
+        return toWebGLAny(m_currentProgram);
     case GraphicsContextGL::DEPTH_BITS:
         if (!m_framebufferBinding && !m_attributes.depth)
             return 0;
@@ -1941,9 +1941,9 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::DITHER:
         return getBooleanParameter(pname);
     case GraphicsContextGL::ELEMENT_ARRAY_BUFFER_BINDING:
-        return RefPtr { m_boundVertexArrayObject->getElementArrayBuffer() };
+        return toWebGLAny(m_boundVertexArrayObject->getElementArrayBuffer());
     case GraphicsContextGL::FRAMEBUFFER_BINDING:
-        return m_framebufferBinding;
+        return toWebGLAny(m_framebufferBinding);
     case GraphicsContextGL::FRONT_FACE:
         return getUnsignedIntParameter(pname);
     case GraphicsContextGL::GENERATE_MIPMAP_HINT:
@@ -1996,7 +1996,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::RED_BITS:
         return getIntParameter(pname);
     case GraphicsContextGL::RENDERBUFFER_BINDING:
-        return m_renderbufferBinding;
+        return toWebGLAny(m_renderbufferBinding);
     case GraphicsContextGL::RENDERER:
         return "WebKit WebGL"_str;
     case GraphicsContextGL::SAMPLE_ALPHA_TO_COVERAGE:
@@ -2056,9 +2056,9 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::SUBPIXEL_BITS:
         return getIntParameter(pname);
     case GraphicsContextGL::TEXTURE_BINDING_2D:
-        return m_textureUnits[m_activeTextureUnit].texture2DBinding;
+        return toWebGLAny(m_textureUnits[m_activeTextureUnit].texture2DBinding);
     case GraphicsContextGL::TEXTURE_BINDING_CUBE_MAP:
-        return m_textureUnits[m_activeTextureUnit].textureCubeMapBinding;
+        return toWebGLAny(m_textureUnits[m_activeTextureUnit].textureCubeMapBinding);
     case GraphicsContextGL::UNPACK_ALIGNMENT:
         return m_unpackParameters.alignment;
     case GraphicsContextGL::UNPACK_FLIP_Y_WEBGL:
@@ -2092,7 +2092,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
         if (m_oesVertexArrayObject) {
             if (m_boundVertexArrayObject->isDefaultObject())
                 return nullptr;
-            return RefPtr { downcast<WebGLVertexArrayObjectOES>(m_boundVertexArrayObject.get()) };
+            return toWebGLAny(downcast<WebGLVertexArrayObjectOES>(m_boundVertexArrayObject.get()));
         }
         synthesizeGLError(GraphicsContextGL::INVALID_ENUM, "getParameter"_s, "invalid parameter name, OES_vertex_array_object not enabled"_s);
         return nullptr;
@@ -2641,7 +2641,7 @@ WebGLAny WebGLRenderingContextBase::getVertexAttrib(GCGLuint index, GCGLenum pna
 
     switch (pname) {
     case GraphicsContextGL::VERTEX_ATTRIB_ARRAY_BUFFER_BINDING:
-        return state.bufferBinding;
+        return toWebGLAny(state.bufferBinding);
     case GraphicsContextGL::VERTEX_ATTRIB_ARRAY_ENABLED:
         return state.enabled;
     case GraphicsContextGL::VERTEX_ATTRIB_ARRAY_NORMALIZED:
@@ -3165,7 +3165,7 @@ ExceptionOr<void> WebGLRenderingContextBase::texImageSourceHelper(TexImageFuncti
         return { };
 
     return WTF::visit([this, protectedThis = Ref { *this }, functionID, target, level, internalformat, border, format, type, xoffset, yoffset, zoffset, inputSourceImageRect, depth, unpackImageHeight](auto&& source) {
-        return texImageSource(functionID, target, level, internalformat, border, format, type, xoffset, yoffset, zoffset, inputSourceImageRect, depth, unpackImageHeight, *source);
+        return texImageSource(functionID, target, level, internalformat, border, format, type, xoffset, yoffset, zoffset, inputSourceImageRect, depth, unpackImageHeight, source);
     }, source);
 }
 
@@ -3317,15 +3317,11 @@ ExceptionOr<void> WebGLRenderingContextBase::texImageSource(TexImageFunctionID f
     if (!validateTexFunc(functionID, SourceHTMLCanvasElement, target, level, internalformat, sourceImageRect.width(), sourceImageRect.height(), depth, border, format, type, xoffset, yoffset, zoffset))
         return { };
 
-    RefPtr<ImageData> imageData = source.getImageData();
-    if (imageData) {
-        texImageSourceHelper(functionID, target, level, internalformat, border, format, type, xoffset, yoffset, zoffset, sourceImageRect, depth, unpackImageHeight, TexImageSource(imageData.get()));
-        return { };
+    if (RefPtr imageData = source.getImageData()) {
+        texImageSourceHelper(functionID, target, level, internalformat, border, format, type, xoffset, yoffset, zoffset, sourceImageRect, depth, unpackImageHeight, TexImageSource(imageData.releaseNonNull()));
+    } else if (RefPtr image = source.copiedImage()) {
+        texImageImpl(functionID, target, level, internalformat, xoffset, yoffset, zoffset, format, type, *image, GraphicsContextGL::DOMSource::Canvas, m_unpackFlipY, m_unpackPremultiplyAlpha, false, sourceImageRect, depth, unpackImageHeight);
     }
-    RefPtr image = source.copiedImage();
-    if (!image)
-        return { };
-    texImageImpl(functionID, target, level, internalformat, xoffset, yoffset, zoffset, format, type, *image, GraphicsContextGL::DOMSource::Canvas, m_unpackFlipY, m_unpackPremultiplyAlpha, false, sourceImageRect, depth, unpackImageHeight);
     return { };
 }
 

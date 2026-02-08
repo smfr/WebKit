@@ -423,12 +423,12 @@ enum class ClonedDocumentType : uint8_t { XMLDocument, XHTMLDocument, HTMLDocume
 
 using RenderingContext = Variant<
 #if ENABLE(WEBGL)
-    RefPtr<WebGLRenderingContext>,
-    RefPtr<WebGL2RenderingContext>,
+    Ref<WebGLRenderingContext>,
+    Ref<WebGL2RenderingContext>,
 #endif
-    RefPtr<GPUCanvasContext>,
-    RefPtr<ImageBitmapRenderingContext>,
-    RefPtr<CanvasRenderingContext2D>
+    Ref<GPUCanvasContext>,
+    Ref<ImageBitmapRenderingContext>,
+    Ref<CanvasRenderingContext2D>
 >;
 
 class DocumentParserYieldToken {
@@ -538,7 +538,7 @@ public:
     void setShouldNotFireMutationEvents(bool fire) { m_shouldNotFireMutationEvents = fire; }
 
     void setMarkupUnsafe(const String&, OptionSet<ParserContentPolicy>);
-    static ExceptionOr<Ref<Document>> parseHTMLUnsafe(Document&, Variant<RefPtr<TrustedHTML>, String>&&);
+    static ExceptionOr<Ref<Document>> parseHTMLUnsafe(Document&, Variant<Ref<TrustedHTML>, String>&&);
 
     Element* elementForAccessKey(const String& key);
     inline void invalidateAccessKeyCache(); // Defined in DocumentInlines.h
@@ -871,8 +871,8 @@ public:
     void cancelParsing();
 
     ExceptionOr<void> write(Document* entryDocument, SegmentedString&&);
-    ExceptionOr<void> write(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&&);
-    ExceptionOr<void> writeln(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&&);
+    ExceptionOr<void> write(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&&);
+    ExceptionOr<void> writeln(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&&);
     WEBCORE_EXPORT ExceptionOr<void> write(Document* entryDocument, FixedVector<String>&&);
     WEBCORE_EXPORT ExceptionOr<void> writeln(Document* entryDocument, FixedVector<String>&&);
 
@@ -1276,7 +1276,7 @@ public:
     inline CheckedRef<DocumentMarkerController> checkedMarkers(); // Defined in DocumentMarkers.h.
     inline CheckedRef<const DocumentMarkerController> checkedMarkers() const; // Defined in DocumentMarkers.h.
 
-    WEBCORE_EXPORT ExceptionOr<bool> execCommand(const String& command, bool userInterface = false, const Variant<String, RefPtr<TrustedHTML>>& value = String());
+    WEBCORE_EXPORT ExceptionOr<bool> execCommand(const String& command, bool userInterface = false, const Variant<String, Ref<TrustedHTML>>& value = String());
     WEBCORE_EXPORT ExceptionOr<bool> queryCommandEnabled(const String& command);
     WEBCORE_EXPORT ExceptionOr<bool> queryCommandIndeterm(const String& command);
     WEBCORE_EXPORT ExceptionOr<bool> queryCommandState(const String& command);
@@ -2105,7 +2105,7 @@ private:
 
     void commonTeardown();
 
-    ExceptionOr<void> write(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&&, ASCIILiteral lineFeed);
+    ExceptionOr<void> write(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&&, ASCIILiteral lineFeed);
 
     WEBCORE_EXPORT Quirks& ensureQuirks();
     WEBCORE_EXPORT CachedResourceLoader& ensureCachedResourceLoader();

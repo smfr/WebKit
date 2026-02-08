@@ -351,7 +351,7 @@ ExceptionOr<void> DOMSelection::removeRange(Range& liveRange)
     return { };
 }
 
-Vector<Ref<StaticRange>> DOMSelection::getComposedRanges(Variant<RefPtr<ShadowRoot>, GetComposedRangesOptions>&& firstShadowRootOrOptions, FixedVector<std::reference_wrapper<ShadowRoot>>&& remainingShadowRoots)
+Vector<Ref<StaticRange>> DOMSelection::getComposedRanges(Variant<Ref<ShadowRoot>, GetComposedRangesOptions>&& firstShadowRootOrOptions, FixedVector<std::reference_wrapper<ShadowRoot>>&& remainingShadowRoots)
 {
     RefPtr frame = this->frame();
     if (!frame)
@@ -361,10 +361,10 @@ Vector<Ref<StaticRange>> DOMSelection::getComposedRanges(Variant<RefPtr<ShadowRo
         return { };
 
     auto shadowRootSet = WTF::switchOn(WTF::move(firstShadowRootOrOptions),
-        [&](RefPtr<ShadowRoot>&& firstShadowRoot) {
+        [&](Ref<ShadowRoot>&& firstShadowRoot) {
             HashSet<Ref<ShadowRoot>> shadowRootSet;
             shadowRootSet.reserveInitialCapacity(remainingShadowRoots.size() + 1);
-            shadowRootSet.add(firstShadowRoot.releaseNonNull());
+            shadowRootSet.add(WTF::move(firstShadowRoot));
             for (auto& root : remainingShadowRoots)
                 shadowRootSet.add(root.get());
             return shadowRootSet;

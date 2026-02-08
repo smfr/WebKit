@@ -196,39 +196,41 @@ void ServiceWorkerThread::queueTaskToPostMessage(MessageWithMessagePorts&& messa
     Ref serviceWorkerGlobalScope = downcast<ServiceWorkerGlobalScope>(*globalScope());
     serviceWorkerGlobalScope->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, [weakThis = ThreadSafeWeakPtr { *this }, serviceWorkerGlobalScope, message = WTF::move(message), sourceData = WTF::move(sourceData)]() mutable {
         URL sourceURL;
-        ExtendableMessageEventSource source;
-        if (std::holds_alternative<ServiceWorkerClientData>(sourceData)) {
-            RefPtr<ServiceWorkerClient> sourceClient = ServiceWorkerClient::create(serviceWorkerGlobalScope, WTF::move(std::get<ServiceWorkerClientData>(sourceData)));
+        auto source = WTF::switchOn(WTF::move(sourceData),
+            [&](ServiceWorkerClientData&& sourceData) {
+                Ref<ServiceWorkerClient> sourceClient = ServiceWorkerClient::create(serviceWorkerGlobalScope, WTF::move(sourceData));
 
-            if (sourceClient->url().protocolIsInHTTPFamily() && serviceWorkerGlobalScope->url().protocolIsInHTTPFamily() && !protocolHostAndPortAreEqual(serviceWorkerGlobalScope->url(), sourceClient->url())) {
-                StringBuilder mismatchParts;
-                auto addMismatch = [&](ASCIILiteral partName) {
-                    if (mismatchParts.length())
-                        mismatchParts.append(", "_s);
-                    mismatchParts.append(partName);
-                };
-                if (serviceWorkerGlobalScope->url().protocol() != sourceClient->url().protocol())
-                    addMismatch("protocol"_s);
-                if (serviceWorkerGlobalScope->url().host() != sourceClient->url().host())
-                    addMismatch("host"_s);
-                if (serviceWorkerGlobalScope->url().port() != sourceClient->url().port())
-                    addMismatch("port"_s);
-                RELEASE_LOG_FAULT(ServiceWorker, "ServiceWorkerThread::queueTaskToPostMessage service worker and client mismatch: %s", mismatchParts.toString().utf8().data());
-                ASSERT_NOT_REACHED();
-                return;
+                if (sourceClient->url().protocolIsInHTTPFamily() && serviceWorkerGlobalScope->url().protocolIsInHTTPFamily() && !protocolHostAndPortAreEqual(serviceWorkerGlobalScope->url(), sourceClient->url())) {
+                    StringBuilder mismatchParts;
+                    auto addMismatch = [&](ASCIILiteral partName) {
+                        if (mismatchParts.length())
+                            mismatchParts.append(", "_s);
+                        mismatchParts.append(partName);
+                    };
+                    if (serviceWorkerGlobalScope->url().protocol() != sourceClient->url().protocol())
+                        addMismatch("protocol"_s);
+                    if (serviceWorkerGlobalScope->url().host() != sourceClient->url().host())
+                        addMismatch("host"_s);
+                    if (serviceWorkerGlobalScope->url().port() != sourceClient->url().port())
+                        addMismatch("port"_s);
+                    RELEASE_LOG_FAULT(ServiceWorker, "ServiceWorkerThread::queueTaskToPostMessage service worker and client mismatch: %s", mismatchParts.toString().utf8().data());
+                    ASSERT_NOT_REACHED();
+                    return ExtendableMessageEventSource { WTF::move(sourceClient) };
+                }
+
+                sourceURL = sourceClient->url();
+                return ExtendableMessageEventSource { WTF::move(sourceClient) };
+            },
+            [&](ServiceWorkerData&& sourceData) -> ExtendableMessageEventSource {
+                Ref<ServiceWorker> sourceWorker = ServiceWorker::getOrCreate(serviceWorkerGlobalScope, WTF::move(sourceData));
+
+                RELEASE_ASSERT(!sourceWorker->scriptURL().protocolIsInHTTPFamily() || !serviceWorkerGlobalScope->url().protocolIsInHTTPFamily() || protocolHostAndPortAreEqual(serviceWorkerGlobalScope->url(), sourceWorker->scriptURL()));
+
+                sourceURL = sourceWorker->scriptURL();
+                return ExtendableMessageEventSource { WTF::move(sourceWorker) };
             }
-
-            sourceURL = sourceClient->url();
-            source = WTF::move(sourceClient);
-        } else {
-            RefPtr<ServiceWorker> sourceWorker = ServiceWorker::getOrCreate(serviceWorkerGlobalScope, WTF::move(std::get<ServiceWorkerData>(sourceData)));
-
-            RELEASE_ASSERT(!sourceWorker->scriptURL().protocolIsInHTTPFamily() || !serviceWorkerGlobalScope->url().protocolIsInHTTPFamily() || protocolHostAndPortAreEqual(serviceWorkerGlobalScope->url(), sourceWorker->scriptURL()));
-
-            sourceURL = sourceWorker->scriptURL();
-            source = WTF::move(sourceWorker);
-        }
-        fireMessageEvent(serviceWorkerGlobalScope, WTF::move(message), ExtendableMessageEventSource { source }, sourceURL);
+        );
+        fireMessageEvent(serviceWorkerGlobalScope, WTF::move(message), WTF::move(source), sourceURL);
         callOnMainThread([weakThis = WTF::move(weakThis)] {
             if (RefPtr protectedThis = weakThis.get())
                 protectedThis->finishedFiringMessageEvent();

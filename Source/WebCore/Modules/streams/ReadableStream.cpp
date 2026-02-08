@@ -277,7 +277,7 @@ ExceptionOr<ReadableStreamReader> ReadableStream::getReader(JSDOMGlobalObject& c
         if (readerOrException.hasException())
             return readerOrException.releaseException();
 
-        return ReadableStreamReader { RefPtr { readerOrException.releaseReturnValue() } };
+        return ReadableStreamReader { readerOrException.releaseReturnValue() };
     }
 
     ASSERT(*options.mode == ReaderMode::Byob);
@@ -291,7 +291,7 @@ ExceptionOr<ReadableStreamReader> ReadableStream::getReader(JSDOMGlobalObject& c
     if (readerOrException.hasException())
         return readerOrException.releaseException();
 
-    return ReadableStreamReader { RefPtr { readerOrException.releaseReturnValue() } };
+    return ReadableStreamReader { readerOrException.releaseReturnValue() };
 }
 
 // https://streams.spec.whatwg.org/#rs-tee

@@ -66,7 +66,7 @@ public:
 
     USING_CAN_MAKE_WEAKPTR(AbstractWorker);
 
-    static ExceptionOr<Ref<Worker>> create(ScriptExecutionContext&, JSC::RuntimeFlags, Variant<RefPtr<TrustedScriptURL>, String>&&, WorkerOptions&&);
+    static ExceptionOr<Ref<Worker>> create(ScriptExecutionContext&, JSC::RuntimeFlags, Variant<Ref<TrustedScriptURL>, String>&&, WorkerOptions&&);
     virtual ~Worker();
 
     ExceptionOr<void> postMessage(JSC::JSGlobalObject&, JSC::JSValue message, StructuredSerializeOptions&&);

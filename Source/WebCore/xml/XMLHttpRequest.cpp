@@ -452,28 +452,28 @@ ExceptionOr<void> XMLHttpRequest::send(std::optional<SendTypes>&& sendType)
     if (!sendType)
         result = send();
     else {
-        result = WTF::switchOn(sendType.value(),
-            [this] (const RefPtr<Document>& document) -> ExceptionOr<void> { return send(*document); },
-            [this] (const RefPtr<Blob>& blob) -> ExceptionOr<void> { return send(*blob); },
-            [this] (const RefPtr<JSC::ArrayBufferView>& arrayBufferView) -> ExceptionOr<void> { return send(*arrayBufferView); },
-            [this] (const RefPtr<JSC::ArrayBuffer>& arrayBuffer) -> ExceptionOr<void> { return send(*arrayBuffer); },
-            [this] (const RefPtr<DOMFormData>& formData) -> ExceptionOr<void> { return send(*formData); },
-            [this] (const RefPtr<URLSearchParams>& searchParams) -> ExceptionOr<void> { return send(*searchParams); },
-            [this] (const String& string) -> ExceptionOr<void> { return send(string); }
+        result = WTF::switchOn(WTF::move(*sendType),
+            [this](Ref<Document>&& document) -> ExceptionOr<void> { return send(WTF::move(document)); },
+            [this](Ref<Blob>&& blob) -> ExceptionOr<void> { return send(WTF::move(blob)); },
+            [this](RefPtr<JSC::ArrayBufferView>&& arrayBufferView) -> ExceptionOr<void> { return send(*arrayBufferView); },
+            [this](RefPtr<JSC::ArrayBuffer>&& arrayBuffer) -> ExceptionOr<void> { return send(*arrayBuffer); },
+            [this](Ref<DOMFormData>&& formData) -> ExceptionOr<void> { return send(WTF::move(formData)); },
+            [this](Ref<URLSearchParams>&& searchParams) -> ExceptionOr<void> { return send(WTF::move(searchParams)); },
+            [this](String&& string) -> ExceptionOr<void> { return send(WTF::move(string)); }
         );
     }
 
     return result;
 }
 
-ExceptionOr<void> XMLHttpRequest::send(Document& document)
+ExceptionOr<void> XMLHttpRequest::send(Ref<Document>&& document)
 {
     if (auto result = prepareToSend())
         return WTF::move(result.value());
 
     if (m_method != "GET"_s && m_method != "HEAD"_s) {
         if (!m_requestHeaders.contains(HTTPHeaderName::ContentType))
-            m_requestHeaders.set(HTTPHeaderName::ContentType, document.isHTMLDocument() ? "text/html;charset=UTF-8"_s : "application/xml;charset=UTF-8"_s);
+            m_requestHeaders.set(HTTPHeaderName::ContentType, document->isHTMLDocument() ? "text/html;charset=UTF-8"_s : "application/xml;charset=UTF-8"_s);
         else {
             String contentType = m_requestHeaders.get(HTTPHeaderName::ContentType);
             replaceCharsetInMediaTypeIfNeeded(contentType);
@@ -495,7 +495,7 @@ ExceptionOr<void> XMLHttpRequest::send(Document& document)
     return createRequest();
 }
 
-ExceptionOr<void> XMLHttpRequest::send(const String& body)
+ExceptionOr<void> XMLHttpRequest::send(String&& body)
 {
     if (auto result = prepareToSend())
         return WTF::move(result.value());
@@ -517,7 +517,7 @@ ExceptionOr<void> XMLHttpRequest::send(const String& body)
     return createRequest();
 }
 
-ExceptionOr<void> XMLHttpRequest::send(Blob& body)
+ExceptionOr<void> XMLHttpRequest::send(Ref<Blob>&& body)
 {
     if (auto result = prepareToSend())
         return WTF::move(result.value());
@@ -534,26 +534,26 @@ ExceptionOr<void> XMLHttpRequest::send(Blob& body)
         }
 
         if (!m_requestHeaders.contains(HTTPHeaderName::ContentType)) {
-            const String& blobType = body.type();
+            const String& blobType = body->type();
             if (!blobType.isEmpty() && isValidContentType(blobType))
                 m_requestHeaders.set(HTTPHeaderName::ContentType, blobType);
         }
 
         m_requestEntityBody = FormData::create();
-        Ref { *m_requestEntityBody }->appendBlob(body.url());
+        Ref { *m_requestEntityBody }->appendBlob(body->url());
     }
 
     return createRequest();
 }
 
-ExceptionOr<void> XMLHttpRequest::send(const URLSearchParams& params)
+ExceptionOr<void> XMLHttpRequest::send(Ref<URLSearchParams>&& params)
 {
     if (!m_requestHeaders.contains(HTTPHeaderName::ContentType))
         m_requestHeaders.set(HTTPHeaderName::ContentType, "application/x-www-form-urlencoded;charset=UTF-8"_s);
-    return send(params.toString());
+    return send(params->toString());
 }
 
-ExceptionOr<void> XMLHttpRequest::send(DOMFormData& body)
+ExceptionOr<void> XMLHttpRequest::send(Ref<DOMFormData>&& body)
 {
     if (auto result = prepareToSend())
         return WTF::move(result.value());

@@ -159,7 +159,7 @@ ServiceWorker* ServiceWorkerContainer::controller() const
     return context ? context->activeServiceWorker() : nullptr;
 }
 
-void ServiceWorkerContainer::addRegistration(Variant<RefPtr<TrustedScriptURL>, String>&& relativeScriptURL, const RegistrationOptions& options, Ref<DeferredPromise>&& promise)
+void ServiceWorkerContainer::addRegistration(Variant<Ref<TrustedScriptURL>, String>&& relativeScriptURL, const RegistrationOptions& options, Ref<DeferredPromise>&& promise)
 {
     auto stringValueHolder = trustedTypeCompliantString(*protect(scriptExecutionContext()), WTF::move(relativeScriptURL), "ServiceWorkerContainer register"_s);
 
@@ -487,7 +487,7 @@ void ServiceWorkerContainer::postMessage(MessageWithMessagePorts&& message, Serv
     auto& vm = globalObject->vm();
     auto scope = DECLARE_TOP_EXCEPTION_SCOPE(vm);
 
-    MessageEventSource source = RefPtr<ServiceWorker> { ServiceWorker::getOrCreate(context.get(), WTF::move(sourceData)) };
+    MessageEventSource source = ServiceWorker::getOrCreate(context.get(), WTF::move(sourceData));
 
     auto messageEvent = MessageEvent::create(*globalObject, message.message.releaseNonNull(), WTF::move(sourceOrigin), { }, WTF::move(source), MessagePort::entanglePorts(context.get(), WTF::move(message.transferredPorts)));
     if (scope.exception()) [[unlikely]] {

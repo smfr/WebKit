@@ -184,7 +184,7 @@ String HTMLIFrameElement::srcdoc() const
     return attributeWithoutSynchronization(srcdocAttr);
 }
 
-ExceptionOr<void> HTMLIFrameElement::setSrcdoc(Variant<RefPtr<TrustedHTML>, String>&& value, SubstituteData::SessionHistoryVisibility sessionHistoryVisibility)
+ExceptionOr<void> HTMLIFrameElement::setSrcdoc(Variant<Ref<TrustedHTML>, String>&& value, SubstituteData::SessionHistoryVisibility sessionHistoryVisibility)
 {
     auto stringValueHolder = trustedTypeCompliantString(protect(protect(document())->contextDocument()), WTF::move(value), "HTMLIFrameElement srcdoc"_s);
 

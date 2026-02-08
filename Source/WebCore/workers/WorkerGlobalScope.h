@@ -122,7 +122,7 @@ public:
     WorkerLocation& location() const;
     void close();
 
-    virtual ExceptionOr<void> importScripts(const FixedVector<Variant<RefPtr<TrustedScriptURL>, String>>& urls);
+    virtual ExceptionOr<void> importScripts(const FixedVector<Variant<Ref<TrustedScriptURL>, String>>& urls);
     WorkerNavigator& navigator();
 
     void setIsOnline(bool);

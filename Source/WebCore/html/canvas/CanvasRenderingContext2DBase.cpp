@@ -1569,19 +1569,19 @@ static inline FloatSize size(const WebCodecsVideoFrame& frame)
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasImageSource&& image, float dx, float dy)
 {
     return WTF::switchOn(image,
-        [&] (RefPtr<HTMLImageElement>& imageElement) -> ExceptionOr<void> {
-            LayoutSize destRectSize = size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
-            LayoutSize sourceRectSize = size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
-            return this->drawImage(*imageElement, FloatRect { 0, 0, sourceRectSize.width(), sourceRectSize.height() }, FloatRect { dx, dy, destRectSize.width(), destRectSize.height() });
+        [&](Ref<HTMLImageElement>& imageElement) -> ExceptionOr<void> {
+            LayoutSize destRectSize = size(imageElement, ImageSizeType::AfterDevicePixelRatio);
+            LayoutSize sourceRectSize = size(imageElement, ImageSizeType::BeforeDevicePixelRatio);
+            return this->drawImage(imageElement, FloatRect { 0, 0, sourceRectSize.width(), sourceRectSize.height() }, FloatRect { dx, dy, destRectSize.width(), destRectSize.height() });
         },
-        [&] (RefPtr<SVGImageElement>& imageElement) -> ExceptionOr<void> {
-            LayoutSize destRectSize = size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
-            LayoutSize sourceRectSize = size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
-            return this->drawImage(*imageElement, FloatRect { 0, 0, sourceRectSize.width(), sourceRectSize.height() }, FloatRect { dx, dy, destRectSize.width(), destRectSize.height() });
+        [&](Ref<SVGImageElement>& imageElement) -> ExceptionOr<void> {
+            LayoutSize destRectSize = size(imageElement, ImageSizeType::AfterDevicePixelRatio);
+            LayoutSize sourceRectSize = size(imageElement, ImageSizeType::BeforeDevicePixelRatio);
+            return this->drawImage(imageElement, FloatRect { 0, 0, sourceRectSize.width(), sourceRectSize.height() }, FloatRect { dx, dy, destRectSize.width(), destRectSize.height() });
         },
-        [&] (auto& element) -> ExceptionOr<void> {
-            FloatSize elementSize = size(*element);
-            return this->drawImage(*element, FloatRect { 0, 0, elementSize.width(), elementSize.height() }, FloatRect { dx, dy, elementSize.width(), elementSize.height() });
+        [&](auto& element) -> ExceptionOr<void> {
+            FloatSize elementSize = size(element);
+            return this->drawImage(element, FloatRect { 0, 0, elementSize.width(), elementSize.height() }, FloatRect { dx, dy, elementSize.width(), elementSize.height() });
         }
     );
 }
@@ -1589,9 +1589,9 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasImageSource&& im
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasImageSource&& image, float dx, float dy, float dw, float dh)
 {
     return WTF::switchOn(image,
-        [&] (auto& element) -> ExceptionOr<void> {
-            FloatSize elementSize = size(*element);
-            return this->drawImage(*element, FloatRect { 0, 0, elementSize.width(), elementSize.height() }, FloatRect { dx, dy, dw, dh });
+        [&](auto& element) -> ExceptionOr<void> {
+            FloatSize elementSize = size(element);
+            return this->drawImage(element, FloatRect { 0, 0, elementSize.width(), elementSize.height() }, FloatRect { dx, dy, dw, dh });
         }
     );
 }
@@ -1599,8 +1599,8 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasImageSource&& im
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasImageSource&& image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh)
 {
     return WTF::switchOn(image,
-        [&] (auto& element) -> ExceptionOr<void> {
-            return this->drawImage(*element, FloatRect { sx, sy, sw, sh }, FloatRect { dx, dy, dw, dh });
+        [&](auto& element) -> ExceptionOr<void> {
+            return this->drawImage(element, FloatRect { sx, sy, sw, sh }, FloatRect { dx, dy, dw, dh });
         }
     );
 }
@@ -2066,8 +2066,8 @@ static CanvasRenderingContext2DBase::StyleVariant toStyleVariant(const CanvasSty
 {
     return style.visit(
         [](const String& string) -> CanvasRenderingContext2DBase::StyleVariant { return string; },
-        [](const Ref<CanvasGradient>& gradient) -> CanvasRenderingContext2DBase::StyleVariant { return gradient.ptr(); },
-        [](const Ref<CanvasPattern>& pattern) -> CanvasRenderingContext2DBase::StyleVariant { return pattern.ptr(); }
+        [](const Ref<CanvasGradient>& gradient) -> CanvasRenderingContext2DBase::StyleVariant { return gradient; },
+        [](const Ref<CanvasPattern>& pattern) -> CanvasRenderingContext2DBase::StyleVariant { return pattern; }
     );
 }
 
@@ -2183,7 +2183,9 @@ ExceptionOr<RefPtr<CanvasPattern>> CanvasRenderingContext2DBase::createPattern(C
         return Exception { ExceptionCode::SyntaxError };
 
     return WTF::switchOn(image,
-        [&] (auto& element) -> ExceptionOr<RefPtr<CanvasPattern>> { return this->createPattern(*element, repeatX, repeatY); }
+        [&](auto& element) -> ExceptionOr<RefPtr<CanvasPattern>> {
+            return this->createPattern(element, repeatX, repeatY);
+        }
     );
 }
 

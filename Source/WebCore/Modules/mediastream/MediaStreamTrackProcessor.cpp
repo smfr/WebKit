@@ -47,17 +47,17 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(MediaStreamTrackProcessor);
 
 ExceptionOr<Ref<MediaStreamTrackProcessor>> MediaStreamTrackProcessor::create(ScriptExecutionContext& context, Init&& init)
 {
-    if (!std::holds_alternative<RefPtr<MediaStreamTrack>>(init.track))
+    if (!std::holds_alternative<Ref<MediaStreamTrack>>(init.track))
         return Exception { ExceptionCode::NotSupportedError };
 
-    RefPtr track = std::get<RefPtr<MediaStreamTrack>>(init.track);
+    Ref track = std::get<Ref<MediaStreamTrack>>(init.track);
     if (!track->isVideo())
         return Exception { ExceptionCode::TypeError, "Track is not video"_s };
 
     if (track->ended())
         return Exception { ExceptionCode::TypeError, "Track is ended"_s };
 
-    return adoptRef(*new MediaStreamTrackProcessor(context, track.releaseNonNull(), init.maxBufferSize.value_or(1)));
+    return adoptRef(*new MediaStreamTrackProcessor(context, WTF::move(track), init.maxBufferSize.value_or(1)));
 }
 
 MediaStreamTrackProcessor::MediaStreamTrackProcessor(ScriptExecutionContext& context, Ref<MediaStreamTrack>&& track, unsigned short maxVideoFramesCount)

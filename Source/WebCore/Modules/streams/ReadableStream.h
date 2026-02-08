@@ -56,7 +56,7 @@ class WritableStream;
 struct StreamPipeOptions;
 struct UnderlyingSource;
 
-using ReadableStreamReader = Variant<RefPtr<ReadableStreamDefaultReader>, RefPtr<ReadableStreamBYOBReader>>;
+using ReadableStreamReader = Variant<Ref<ReadableStreamDefaultReader>, Ref<ReadableStreamBYOBReader>>;
 
 struct DetachedReadableStream {
     Ref<MessagePort> readableStreamPort;

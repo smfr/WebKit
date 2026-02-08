@@ -1776,9 +1776,22 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     html/canvas/ImageBitmapRenderingContextSettings.h
     html/canvas/PredefinedColorSpace.h
     html/canvas/WebGLAny.h
+    html/canvas/WebGLBuffer.h
     html/canvas/WebGLContextAttributes.h
     html/canvas/WebGLExtension.h
     html/canvas/WebGLExtensionAny.h
+    html/canvas/WebGLFramebuffer.h
+    html/canvas/WebGLObject.h
+    html/canvas/WebGLProgram.h
+    html/canvas/WebGLQuery.h
+    html/canvas/WebGLRenderbuffer.h
+    html/canvas/WebGLSampler.h
+    html/canvas/WebGLTexture.h
+    html/canvas/WebGLTimerQueryEXT.h
+    html/canvas/WebGLTransformFeedback.h
+    html/canvas/WebGLVertexArrayObject.h
+    html/canvas/WebGLVertexArrayObjectBase.h
+    html/canvas/WebGLVertexArrayObjectOES.h
 
     html/closewatcher/CloseWatcher.h
     html/closewatcher/CloseWatcherManager.h

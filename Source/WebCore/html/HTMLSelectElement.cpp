@@ -277,14 +277,14 @@ ExceptionOr<void> HTMLSelectElement::add(const OptionOrOptGroupElement& element,
     Ref<ContainerNode> parent = *this;
     if (before) {
         beforeElement = WTF::switchOn(before.value(),
-            [](const RefPtr<HTMLElement>& element) -> HTMLElement* { return element.get(); },
-            [this](int index) -> HTMLElement* { return item(index); }
+            [](const Ref<HTMLElement>& element) -> RefPtr<HTMLElement> { return element.ptr(); },
+            [this](int index) -> RefPtr<HTMLElement> { return item(index); }
         );
         if (std::holds_alternative<int>(before.value()) && beforeElement && beforeElement->parentNode())
             parent = *beforeElement->parentNode();
     }
     Ref toInsert = WTF::switchOn(element,
-        [](const auto& htmlElement) -> HTMLElement& { return *htmlElement; }
+        [](const auto& htmlElement) -> HTMLElement& { return htmlElement; }
     );
 
     return parent->insertBefore(toInsert, WTF::move(beforeElement));
@@ -530,7 +530,7 @@ ExceptionOr<void> HTMLSelectElement::setItem(unsigned index, HTMLOptionElement* 
 
     int diff = index - length();
     
-    RefPtr<HTMLOptionElement> before;
+    std::optional<HTMLElementOrInt> before;
     // Out of array bounds? First insert empty dummies.
     if (diff > 0) {
         auto result = setLength(index);
@@ -538,12 +538,13 @@ ExceptionOr<void> HTMLSelectElement::setItem(unsigned index, HTMLOptionElement* 
             return result;
         // Replace an existing entry?
     } else if (diff < 0) {
-        before = item(index + 1);
+        if (RefPtr itemBefore = item(index + 1))
+            before = itemBefore.releaseNonNull();
         remove(index);
     }
 
     // Finally add the new element.
-    auto result = add(option, HTMLElementOrInt { before.get() });
+    auto result = add(*option, before);
     if (result.hasException())
         return result;
 
@@ -565,7 +566,7 @@ ExceptionOr<void> HTMLSelectElement::setLength(unsigned newLength)
 
     if (diff < 0) { // Add dummy elements.
         do {
-            auto result = add(HTMLOptionElement::create(protect(document())).ptr(), std::nullopt);
+            auto result = add(HTMLOptionElement::create(protect(document())), std::nullopt);
             if (result.hasException())
                 return result;
         } while (++diff);

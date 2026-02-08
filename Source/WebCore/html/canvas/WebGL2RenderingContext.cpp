@@ -1846,10 +1846,10 @@ WebGLAny WebGL2RenderingContext::getQuery(GCGLenum target, GCGLenum pname)
         return nullptr;
     }
 
-    auto query = m_activeQueries[*activeQueryKey];
+    RefPtr query = m_activeQueries[*activeQueryKey];
     if (!query || query->target() != target)
         return nullptr;
-    return query;
+    return query.releaseNonNull();
 }
 
 WebGLAny WebGL2RenderingContext::getQueryParameter(WebGLQuery& query, GCGLenum pname)
@@ -2384,7 +2384,7 @@ WebGLAny WebGL2RenderingContext::getIndexedParameter(GCGLenum target, GCGLuint i
             synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "getIndexedParameter"_s, "index out of range"_s);
             return nullptr;
         }
-        return RefPtr { buffer };
+        return toWebGLAny(RefPtr { buffer });
     }
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BUFFER_SIZE:
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BUFFER_START:
@@ -2396,7 +2396,7 @@ WebGLAny WebGL2RenderingContext::getIndexedParameter(GCGLenum target, GCGLuint i
             synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "getIndexedParameter"_s, "index out of range"_s);
             return nullptr;
         }
-        return m_boundIndexedUniformBuffers[index];
+        return toWebGLAny(m_boundIndexedUniformBuffers[index]);
     // OES_draw_buffers_indexed
     case GraphicsContextGL::BLEND_EQUATION_RGB:
     case GraphicsContextGL::BLEND_EQUATION_ALPHA:
@@ -2846,8 +2846,8 @@ WebGLAny WebGL2RenderingContext::getFramebufferAttachmentParameter(GCGLenum targ
         return static_cast<unsigned>(GraphicsContextGL::RENDERBUFFER);
     case GraphicsContextGL::FRAMEBUFFER_ATTACHMENT_OBJECT_NAME:
         if (isTexture)
-            return std::get<RefPtr<WebGLTexture>>(WTF::move(*attachmentObject));
-        return std::get<RefPtr<WebGLRenderbuffer>>(WTF::move(*attachmentObject));
+            return toWebGLAny(std::get<RefPtr<WebGLTexture>>(WTF::move(*attachmentObject)));
+        return toWebGLAny(std::get<RefPtr<WebGLRenderbuffer>>(WTF::move(*attachmentObject)));
     case GraphicsContextGL::FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL:
     case GraphicsContextGL::FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE:
     case GraphicsContextGL::FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER:
@@ -3120,17 +3120,18 @@ WebGLAny WebGL2RenderingContext::getParameter(GCGLenum pname)
 {
     if (isContextLost())
         return nullptr;
+
     switch (pname) {
     case GraphicsContextGL::SHADING_LANGUAGE_VERSION:
         return "WebGL GLSL ES 3.00"_str;
     case GraphicsContextGL::VERSION:
         return "WebGL 2.0"_str;
     case GraphicsContextGL::COPY_READ_BUFFER_BINDING:
-        return m_boundCopyReadBuffer;
+        return toWebGLAny(m_boundCopyReadBuffer);
     case GraphicsContextGL::COPY_WRITE_BUFFER_BINDING:
-        return m_boundCopyWriteBuffer;
+        return toWebGLAny(m_boundCopyWriteBuffer);
     case GraphicsContextGL::DRAW_FRAMEBUFFER_BINDING:
-        return m_framebufferBinding;
+        return toWebGLAny(m_framebufferBinding);
     case GraphicsContextGL::FRAGMENT_SHADER_DERIVATIVE_HINT:
         return getIntParameter(pname);
     case GraphicsContextGL::MAX_3D_TEXTURE_SIZE:
@@ -3196,9 +3197,9 @@ WebGLAny WebGL2RenderingContext::getParameter(GCGLenum pname)
     case GraphicsContextGL::PACK_SKIP_ROWS:
         return m_packParameters.skipRows;
     case GraphicsContextGL::PIXEL_PACK_BUFFER_BINDING:
-        return m_boundPixelPackBuffer;
+        return toWebGLAny(m_boundPixelPackBuffer);
     case GraphicsContextGL::PIXEL_UNPACK_BUFFER_BINDING:
-        return m_boundPixelUnpackBuffer;
+        return toWebGLAny(m_boundPixelUnpackBuffer);
     case GraphicsContextGL::RASTERIZER_DISCARD:
         return getBooleanParameter(pname);
     case GraphicsContextGL::READ_BUFFER: {
@@ -3208,23 +3209,25 @@ WebGLAny WebGL2RenderingContext::getParameter(GCGLenum pname)
         return value;
     }
     case GraphicsContextGL::READ_FRAMEBUFFER_BINDING:
-        return m_readFramebufferBinding;
+        return toWebGLAny(m_readFramebufferBinding);
     case GraphicsContextGL::SAMPLER_BINDING:
-        return m_boundSamplers[m_activeTextureUnit];
+        return toWebGLAny(m_boundSamplers[m_activeTextureUnit]);
     case GraphicsContextGL::TEXTURE_BINDING_2D_ARRAY:
-        return m_textureUnits[m_activeTextureUnit].texture2DArrayBinding;
+        return toWebGLAny(m_textureUnits[m_activeTextureUnit].texture2DArrayBinding);
     case GraphicsContextGL::TEXTURE_BINDING_3D:
-        return m_textureUnits[m_activeTextureUnit].texture3DBinding;
+        return toWebGLAny(m_textureUnits[m_activeTextureUnit].texture3DBinding);
     case GraphicsContextGL::TRANSFORM_FEEDBACK_ACTIVE:
         return getBooleanParameter(pname);
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BUFFER_BINDING:
-        return m_boundTransformFeedbackBuffer;
+        return toWebGLAny(m_boundTransformFeedbackBuffer);
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BINDING:
-        return m_boundTransformFeedback == m_defaultTransformFeedback ? nullptr : RefPtr { m_boundTransformFeedback.get() };
+        if (m_boundTransformFeedback == m_defaultTransformFeedback)
+            return nullptr;
+        return toWebGLAny(m_boundTransformFeedback);
     case GraphicsContextGL::TRANSFORM_FEEDBACK_PAUSED:
         return getBooleanParameter(pname);
     case GraphicsContextGL::UNIFORM_BUFFER_BINDING:
-        return m_boundUniformBuffer;
+        return toWebGLAny(m_boundUniformBuffer);
     case GraphicsContextGL::UNIFORM_BUFFER_OFFSET_ALIGNMENT:
         return getIntParameter(pname);
     case GraphicsContextGL::UNPACK_IMAGE_HEIGHT:
@@ -3240,7 +3243,7 @@ WebGLAny WebGL2RenderingContext::getParameter(GCGLenum pname)
     case GraphicsContextGL::VERTEX_ARRAY_BINDING:
         if (m_boundVertexArrayObject->isDefaultObject())
             return nullptr;
-        return RefPtr { downcast<WebGLVertexArrayObject>(m_boundVertexArrayObject.get()) };
+        return toWebGLAny(downcast<WebGLVertexArrayObject>(m_boundVertexArrayObject.get()));
     case GraphicsContextGL::MAX_CLIP_DISTANCES_ANGLE:
     case GraphicsContextGL::MAX_CULL_DISTANCES_ANGLE:
     case GraphicsContextGL::MAX_COMBINED_CLIP_AND_CULL_DISTANCES_ANGLE:

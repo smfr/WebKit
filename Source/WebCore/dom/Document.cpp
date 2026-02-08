@@ -1218,7 +1218,7 @@ void Document::setMarkupUnsafe(const String& markup, OptionSet<ParserContentPoli
     close();
 }
 
-ExceptionOr<Ref<Document>> Document::parseHTMLUnsafe(Document& context, Variant<RefPtr<TrustedHTML>, String>&& html)
+ExceptionOr<Ref<Document>> Document::parseHTMLUnsafe(Document& context, Variant<Ref<TrustedHTML>, String>&& html)
 {
     auto stringValueHolder = trustedTypeCompliantString(context.contextDocument(), WTF::move(html), "Document parseHTMLUnsafe"_s);
     if (stringValueHolder.hasException())
@@ -4508,7 +4508,7 @@ ExceptionOr<void> Document::write(Document* entryDocument, SegmentedString&& tex
     return { };
 }
 
-ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&& strings, ASCIILiteral lineFeed)
+ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&& strings, ASCIILiteral lineFeed)
 {
     auto isTrusted = true;
     SegmentedString text;
@@ -4518,7 +4518,7 @@ ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<R
                 isTrusted = false;
                 return string;
             },
-            [](const RefPtr<TrustedHTML>& html) {
+            [](const Ref<TrustedHTML>& html) {
                 return html->toString();
             }
         ));
@@ -4538,7 +4538,7 @@ ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<R
     return write(entryDocument, WTF::move(trustedText));
 }
 
-ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&& strings)
+ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&& strings)
 {
     return write(entryDocument, WTF::move(strings), ""_s);
 }
@@ -4551,7 +4551,7 @@ ExceptionOr<void> Document::write(Document* entryDocument, FixedVector<String>&&
     return write(entryDocument, WTF::move(text));
 }
 
-ExceptionOr<void> Document::writeln(Document* entryDocument, FixedVector<Variant<RefPtr<TrustedHTML>, String>>&& strings)
+ExceptionOr<void> Document::writeln(Document* entryDocument, FixedVector<Variant<Ref<TrustedHTML>, String>>&& strings)
 {
     return write(entryDocument, WTF::move(strings), "\n"_s);
 }
@@ -7918,7 +7918,7 @@ static Editor::Command command(Document* document, const String& commandName, bo
         userInterface ? EditorCommandSource::DOMWithUserInterface : EditorCommandSource::DOM);
 }
 
-ExceptionOr<bool> Document::execCommand(const String& commandName, bool userInterface, const Variant<String, RefPtr<TrustedHTML>>& value)
+ExceptionOr<bool> Document::execCommand(const String& commandName, bool userInterface, const Variant<String, Ref<TrustedHTML>>& value)
 {
     if (!isHTMLDocument() && !isXHTMLDocument()) [[unlikely]]
         return Exception { ExceptionCode::InvalidStateError, "execCommand is only supported on HTML documents."_s };
@@ -7929,7 +7929,7 @@ ExceptionOr<bool> Document::execCommand(const String& commandName, bool userInte
                 return String(str);
             return trustedTypeCompliantString(TrustedType::TrustedHTML, contextDocument(), str, "Document execCommand"_s);
         },
-        [](const RefPtr<TrustedHTML>& trustedHtml) -> ExceptionOr<String> {
+        [](const Ref<TrustedHTML>& trustedHtml) -> ExceptionOr<String> {
             return trustedHtml->toString();
         }
     );
@@ -8667,19 +8667,19 @@ std::optional<RenderingContext> Document::getCSSCanvasContext(const String& type
 
 #if ENABLE(WEBGL)
     if (RefPtr renderingContext = dynamicDowncast<WebGLRenderingContext>(*context))
-        return RenderingContext { WTF::move(renderingContext) };
+        return RenderingContext { renderingContext.releaseNonNull() };
 
     if (RefPtr renderingContext = dynamicDowncast<WebGL2RenderingContext>(*context))
-        return RenderingContext { WTF::move(renderingContext) };
+        return RenderingContext { renderingContext.releaseNonNull() };
 #endif
 
     if (RefPtr renderingContext = dynamicDowncast<ImageBitmapRenderingContext>(*context))
-        return RenderingContext { WTF::move(renderingContext) };
+        return RenderingContext { renderingContext.releaseNonNull() };
 
-    if (RefPtr gpuCanvasContext = dynamicDowncast<GPUCanvasContext>(*context))
-        return RenderingContext { WTF::move(gpuCanvasContext) };
+    if (RefPtr renderingContext = dynamicDowncast<GPUCanvasContext>(*context))
+        return RenderingContext { renderingContext.releaseNonNull() };
 
-    return RenderingContext { RefPtr<CanvasRenderingContext2D> { &downcast<CanvasRenderingContext2D>(*context) } };
+    return RenderingContext { downcast<CanvasRenderingContext2D>(*context) };
 }
 
 HTMLCanvasElement* Document::getCSSCanvasElement(const String& name)
@@ -11982,22 +11982,14 @@ RefPtr<ViewTransition> Document::startViewTransition(StartViewTransitionCallback
     if (!globalObject())
         return nullptr;
 
-    RefPtr<ViewTransitionUpdateCallback> updateCallback = nullptr;
-    Vector<AtomString> activeTypes { };
-
-    WTF::switchOn(callbackOptions,
-        [&](RefPtr<JSViewTransitionUpdateCallback>& callback) {
-            updateCallback = WTF::move(callback);
+    Ref viewTransition  = WTF::switchOn(WTF::move(callbackOptions),
+        [&](RefPtr<JSViewTransitionUpdateCallback>&& callback) {
+            return ViewTransition::createSamePage(*this, WTF::move(callback), { });
         },
-        [&](StartViewTransitionOptions& options) {
-            updateCallback = WTF::move(options.update);
-
-            if (options.types)
-                activeTypes = WTF::move(*options.types);
+        [&](StartViewTransitionOptions&& options) {
+            return ViewTransition::createSamePage(*this, WTF::move(options.update), WTF::move(options.types).value_or(Vector<AtomString> { }));
         }
     );
-
-    Ref viewTransition = ViewTransition::createSamePage(*this, WTF::move(updateCallback), WTF::move(activeTypes));
 
     if (hidden()) {
         viewTransition->skipViewTransition(Exception { ExceptionCode::InvalidStateError, "View transition was skipped because document visibility state is hidden."_s });

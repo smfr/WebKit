@@ -88,7 +88,7 @@ public:
     Vector<Ref<TextTrack>> sortedTrackListForMenu(TextTrackList&);
     Vector<Ref<AudioTrack>> sortedTrackListForMenu(AudioTrackList&);
 
-    using TextOrAudioTrack = Variant<RefPtr<TextTrack>, RefPtr<AudioTrack>>;
+    using TextOrAudioTrack = Variant<Ref<TextTrack>, Ref<AudioTrack>>;
     String displayNameForTrack(const std::optional<TextOrAudioTrack>&);
 
     static TextTrack& captionMenuOffItem();

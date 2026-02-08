@@ -50,7 +50,7 @@ class MediaStreamTrackProcessor
     WTF_MAKE_TZONE_ALLOCATED(MediaStreamTrackProcessor);
 public:
     struct Init {
-        Variant<RefPtr<MediaStreamTrack>, RefPtr<MediaStreamTrackHandle>> track;
+        Variant<Ref<MediaStreamTrack>, Ref<MediaStreamTrackHandle>> track;
         std::optional<unsigned short> maxBufferSize;
     };
 
@@ -84,7 +84,6 @@ public:
         void setAsCancelled() { m_isCancelled = true; }
 
     private:
-
         // MediaStreamTrackPrivateObserver
         void trackEnded(MediaStreamTrackPrivate&) final;
         void trackMutedChanged(MediaStreamTrackPrivate&) final { }
@@ -104,7 +103,6 @@ public:
         const WeakRef<MediaStreamTrackProcessor> m_processor;
     };
     using MediaStreamTrackProcessorSource = MediaStreamTrackProcessor::Source;
-
 
 private:
     MediaStreamTrackProcessor(ScriptExecutionContext&, Ref<MediaStreamTrack>&&, unsigned short maxVideoFramesCount);

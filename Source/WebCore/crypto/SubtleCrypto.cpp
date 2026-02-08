@@ -804,20 +804,20 @@ void SubtleCrypto::generateKey(JSC::JSGlobalObject& state, AlgorithmIdentifier&&
     WeakPtr weakThis { *this };
     auto callback = [index, weakThis](KeyOrKeyPair&& keyOrKeyPair) mutable {
         if (auto promise = getPromise(index, weakThis)) {
-            WTF::switchOn(keyOrKeyPair,
-                [&promise] (RefPtr<CryptoKey>& key) {
+            WTF::switchOn(WTF::move(keyOrKeyPair),
+                [&promise](Ref<CryptoKey>&& key) {
                     if ((key->type() == CryptoKeyType::Private || key->type() == CryptoKeyType::Secret) && !key->usagesBitmap()) {
                         rejectWithException(promise.releaseNonNull(), ExceptionCode::SyntaxError);
                         return;
                     }
-                    promise->resolve<IDLInterface<CryptoKey>>(*key);
+                    promise->resolve<IDLInterface<CryptoKey>>(WTF::move(key));
                 },
-                [&promise] (CryptoKeyPair& keyPair) {
+                [&promise](CryptoKeyPair&& keyPair) {
                     if (!keyPair.privateKey->usagesBitmap()) {
                         rejectWithException(promise.releaseNonNull(), ExceptionCode::SyntaxError);
                         return;
                     }
-                    promise->resolve<IDLDictionary<CryptoKeyPair>>(keyPair);
+                    promise->resolve<IDLDictionary<CryptoKeyPair>>(WTF::move(keyPair));
                 }
             );
         }

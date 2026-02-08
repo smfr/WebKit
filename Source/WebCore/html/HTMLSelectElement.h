@@ -81,8 +81,8 @@ public:
     // This method is deprecated because the return value doesn't match the rendering on iOS for multiple selects.
     bool usesMenuListDeprecated() const;
 
-    using OptionOrOptGroupElement = Variant<RefPtr<HTMLOptionElement>, RefPtr<HTMLOptGroupElement>>;
-    using HTMLElementOrInt = Variant<RefPtr<HTMLElement>, int>;
+    using OptionOrOptGroupElement = Variant<Ref<HTMLOptionElement>, Ref<HTMLOptGroupElement>>;
+    using HTMLElementOrInt = Variant<Ref<HTMLElement>, int>;
     WEBCORE_EXPORT ExceptionOr<void> add(const OptionOrOptGroupElement&, const std::optional<HTMLElementOrInt>& before);
 
     using Node::remove;

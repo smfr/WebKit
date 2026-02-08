@@ -21,7 +21,6 @@ css/CSSValue.cpp
 dom/ContentVisibilityDocumentState.cpp
 dom/CustomElementDefaultARIA.cpp
 dom/RejectedPromiseTracker.cpp
-html/FormAssociatedCustomElement.cpp
 inspector/InspectorOverlay.cpp
 inspector/agents/page/PageDOMDebuggerAgent.cpp
 loader/NetscapePlugInStreamLoader.cpp

@@ -1001,7 +1001,7 @@ void LocalDOMWindow::processPostMessage(JSC::JSGlobalObject& lexicalGlobalObject
         InspectorInstrumentation::willDispatchPostMessage(frame, postMessageIdentifier);
 
         auto ports = MessagePort::entanglePorts(*document, WTF::move(message.transferredPorts));
-        auto event = MessageEvent::create(*globalObject, message.message.releaseNonNull(), WTF::move(sourceOrigin), { }, incumbentWindowProxy ? std::make_optional(MessageEventSource(WTF::move(incumbentWindowProxy))) : std::nullopt, WTF::move(ports));
+        auto event = MessageEvent::create(*globalObject, message.message.releaseNonNull(), WTF::move(sourceOrigin), { }, incumbentWindowProxy ? std::optional { MessageEventSource(incumbentWindowProxy.releaseNonNull()) } : std::nullopt, WTF::move(ports));
         if (scope.exception()) [[unlikely]] {
             // Currently, we assume that the only way we can get here is if we have a termination.
             RELEASE_ASSERT(vm.hasPendingTerminationException());

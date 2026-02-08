@@ -812,8 +812,8 @@ HTMLMediaElement::~HTMLMediaElement()
     }
 
 #if ENABLE(MEDIA_SOURCE)
-    if (auto mediaProvider = std::exchange(m_mediaProvider, { }); mediaProvider && std::holds_alternative<RefPtr<MediaSource>>(*mediaProvider))
-        std::get<RefPtr<MediaSource>>(*mediaProvider)->elementIsShuttingDown();
+    if (auto mediaProvider = std::exchange(m_mediaProvider, { }); mediaProvider && std::holds_alternative<Ref<MediaSource>>(*mediaProvider))
+        std::get<Ref<MediaSource>>(*mediaProvider)->elementIsShuttingDown();
     if (RefPtr mediaSource = std::exchange(m_mediaSource, { }))
         mediaSource->elementIsShuttingDown();
 #endif
@@ -1390,7 +1390,7 @@ MediaError* HTMLMediaElement::error() const
     return m_error.get();
 }
 
-void HTMLMediaElement::setSrcObject(MediaProvider&& mediaProvider)
+void HTMLMediaElement::setSrcObject(std::optional<MediaProvider>&& mediaProvider)
 {
     // FIXME: Setting the srcObject attribute may cause other changes to the media element's internal state:
     // Specifically, if srcObject is specified, the UA must use it as the source of media, even if the src
@@ -1415,8 +1415,8 @@ void HTMLMediaElement::setSrcObject(MediaProvider&& mediaProvider)
     m_blob = nullptr;
 
 #if ENABLE(MEDIA_SOURCE)
-    if (m_mediaProvider && std::holds_alternative<RefPtr<MediaSource>>(*m_mediaProvider)) {
-        RefPtr mediaSource = std::get<RefPtr<MediaSource>>(*m_mediaProvider);
+    if (m_mediaProvider && std::holds_alternative<Ref<MediaSource>>(*m_mediaProvider)) {
+        Ref mediaSource = std::get<Ref<MediaSource>>(*m_mediaProvider);
         mediaSource->setAsSrcObject(true);
     }
 #endif
@@ -1732,24 +1732,24 @@ void HTMLMediaElement::selectMediaResource()
             // 3. Run the resource fetch algorithm with the assigned media provider object.
             switchOn(element.m_mediaProvider.value(),
 #if ENABLE(MEDIA_STREAM)
-                [element = Ref { element }](RefPtr<MediaStream> stream) { element->m_mediaStreamSrcObject = stream; },
+                [element = Ref { element }](Ref<MediaStream> stream) { element->m_mediaStreamSrcObject = WTF::move(stream); },
 #endif
 #if ENABLE(MEDIA_SOURCE)
-                [element = Ref { element }](RefPtr<MediaSource> source) { element->m_mediaSource = MediaSourceInterfaceMainThread::create(source.releaseNonNull()); },
+                [element = Ref { element }](Ref<MediaSource> source) { element->m_mediaSource = MediaSourceInterfaceMainThread::create(WTF::move(source)); },
 #endif
 #if ENABLE(MEDIA_SOURCE_IN_WORKERS)
-                [element = Ref { element }](RefPtr<MediaSourceHandle> handle) {
+                [element = Ref { element }](Ref<MediaSourceHandle> handle) {
                     // If the media provider object is a MediaSourceHandle whose [[Detached]] internal slot is true
                     // Run the "If the media data cannot be fetched at all, due to network errors, causing the user agent to give up trying to fetch the resource" steps of the resource fetch algorithm's media data processing steps list.
                     // If the media provider object is a MediaSourceHandle whose underlying MediaSource's [[has ever been attached]] internal slot is true
                     // Run the "If the media data cannot be fetched at all, due to network errors, causing the user agent to give up trying to fetch the resource" steps of the resource fetch algorithm's media data processing steps list.
                     if (!handle->isDetached() && !handle->hasEverBeenAssignedAsSrcObject())
-                        element->m_mediaSource = MediaSourceInterfaceWorker::create(handle.releaseNonNull());
+                        element->m_mediaSource = MediaSourceInterfaceWorker::create(WTF::move(handle));
                     else
                         HTMLMEDIAELEMENT_RELEASE_LOG_WITH_THIS(element, SELECTMEDIARESOURCE_ATTEMPTING_USE_OF_UNATTACHED_MEDIASOURCEHANDLE);
                 },
 #endif
-                [element = Ref { element }](RefPtr<Blob> blob) { element->m_blob = blob; }
+                [element = Ref { element }](Ref<Blob> blob) { element->m_blob = WTF::move(blob); }
             );
 
             ContentType contentType;

@@ -393,6 +393,8 @@ html/canvas/GPUCanvasContextCocoa.mm
 html/canvas/ImageBitmapRenderingContext.cpp
 html/canvas/OffscreenCanvasRenderingContext2D.cpp
 html/canvas/PlaceholderRenderingContext.cpp
+html/canvas/WebGL2RenderingContext.cpp
+html/canvas/WebGLRenderingContextBase.cpp
 html/parser/HTMLConstructionSite.cpp
 html/parser/HTMLConstructionSite.h
 html/parser/HTMLParserScheduler.cpp

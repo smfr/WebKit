@@ -258,7 +258,7 @@ public:
     void setStrictRawResourceValidationPolicyDisabled(bool);
     std::optional<ResourceLoadPriority> getResourcePriority(const String& url);
 
-    using FetchObject = Variant<RefPtr<FetchRequest>, RefPtr<FetchResponse>>;
+    using FetchObject = Variant<Ref<FetchRequest>, Ref<FetchResponse>>;
     bool isFetchObjectContextStopped(const FetchObject&);
 
     void clearMemoryCache();

@@ -139,17 +139,18 @@ class RemotePlayback;
 using CueInterval = PODInterval<MediaTime, TextTrackCue*>;
 using CueList = Vector<CueInterval>;
 
-using MediaProvider = std::optional < Variant <
+using MediaProvider = Variant<
 #if ENABLE(MEDIA_STREAM)
-    RefPtr<MediaStream>,
+    Ref<MediaStream>,
 #endif
 #if ENABLE(MEDIA_SOURCE)
-    RefPtr<MediaSource>,
+    Ref<MediaSource>,
 #endif
 #if ENABLE(MEDIA_SOURCE_IN_WORKERS)
-    RefPtr<MediaSourceHandle>,
+    Ref<MediaSourceHandle>,
 #endif
-    RefPtr<Blob>>>;
+    Ref<Blob>
+>;
 
 class HTMLMediaElementClient
     : public AbstractRefCountedAndCanMakeWeakPtr<HTMLMediaElementClient> {
@@ -254,8 +255,8 @@ public:
 
     const URL& currentSrc() const { return m_currentSrc; }
 
-    const MediaProvider& srcObject() const { return m_mediaProvider; }
-    void setSrcObject(MediaProvider&&);
+    const std::optional<MediaProvider>& srcObject() const { return m_mediaProvider; }
+    void setSrcObject(std::optional<MediaProvider>&&);
 
     WEBCORE_EXPORT String crossOrigin() const;
 
@@ -619,7 +620,7 @@ public:
 
 #if ENABLE(MEDIA_STREAM)
     void mediaStreamCaptureStarted();
-    bool hasMediaStreamSrcObject() const { return m_mediaProvider && std::holds_alternative<RefPtr<MediaStream>>(*m_mediaProvider); }
+    bool hasMediaStreamSrcObject() const { return m_mediaProvider && std::holds_alternative<Ref<MediaStream>>(*m_mediaProvider); }
 #endif
 
     bool supportsSeeking() const override;
@@ -1396,7 +1397,7 @@ private:
 
     RefPtr<Blob> m_blob;
     URLKeepingBlobAlive m_blobURLForReading;
-    MediaProvider m_mediaProvider;
+    std::optional<MediaProvider> m_mediaProvider;
     const Ref<WTF::Observer<WebCoreOpaqueRoot()>> m_opaqueRootProvider;
 
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA)

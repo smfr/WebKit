@@ -73,7 +73,7 @@ public:
     ReadyPromise& ready();
 
     using RegistrationOptions = ServiceWorkerRegistrationOptions;
-    void addRegistration(Variant<RefPtr<TrustedScriptURL>, String>&&, const RegistrationOptions&, Ref<DeferredPromise>&&);
+    void addRegistration(Variant<Ref<TrustedScriptURL>, String>&&, const RegistrationOptions&, Ref<DeferredPromise>&&);
     void unregisterRegistration(ServiceWorkerRegistrationIdentifier, DOMPromiseDeferred<IDLBoolean>&&);
     void updateRegistration(const URL& scopeURL, const URL& scriptURL, WorkerType, Ref<DeferredPromise>&&);
 
