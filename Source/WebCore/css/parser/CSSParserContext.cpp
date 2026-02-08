@@ -102,7 +102,6 @@ CSSParserContext::CSSParserContext(const Settings& settings)
     , cssTextDecorationLineErrorValues { settings.cssTextDecorationLineErrorValues() }
     , cssWordBreakAutoPhraseEnabled { settings.cssWordBreakAutoPhraseEnabled() }
     , popoverAttributeEnabled { settings.popoverAttributeEnabled() }
-    , sidewaysWritingModesEnabled { settings.sidewaysWritingModesEnabled() }
     , cssTextWrapPrettyEnabled { settings.cssTextWrapPrettyEnabled() }
 #if ENABLE(SERVICE_CONTROLS)
     , imageControlsEnabled { settings.imageControlsEnabled() }
@@ -141,7 +140,6 @@ void add(Hasher& hasher, const CSSParserContext& context)
         context.cssPaintingAPIEnabled,
         context.cssWordBreakAutoPhraseEnabled,
         context.popoverAttributeEnabled,
-        context.sidewaysWritingModesEnabled,
         context.cssTextWrapPrettyEnabled,
 #if ENABLE(SERVICE_CONTROLS)
         context.imageControlsEnabled,

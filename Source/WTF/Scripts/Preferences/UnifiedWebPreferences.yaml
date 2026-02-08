@@ -7576,20 +7576,6 @@ ShrinksStandaloneImagesToFit:
     WebCore:
       default: true
 
-SidewaysWritingModesEnabled:
-  type: bool
-  status: stable
-  category: css
-  humanReadableName: "Sideways writing modes"
-  humanReadableDescription: "Enable support for sideways writing modes"
-  defaultValue:
-    WebKitLegacy:
-      default: true
-    WebKit:
-      default: true
-    WebCore:
-      default: true
-
 SiteIsolationEnabled:
   type: bool
   status: unstable

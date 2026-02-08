@@ -1584,14 +1584,8 @@
                 "horizontal-tb",
                 "vertical-lr",
                 "vertical-rl",
-                {
-                    "value": "sideways-lr",
-                    "settings-flag": "sidewaysWritingModesEnabled"
-                },
-                {
-                    "value": "sideways-rl",
-                    "settings-flag": "sidewaysWritingModesEnabled"
-                },
+                "sideways-lr",
+                "sideways-rl",
                 {
                     "value": "lr-tb",
                     "status": "deprecated"
