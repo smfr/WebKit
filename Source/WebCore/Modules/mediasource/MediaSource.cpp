@@ -745,7 +745,7 @@ ExceptionOr<void> MediaSource::endOfStream(std::optional<EndOfStreamError> error
 
     // 2. If the updating attribute equals true on any SourceBuffer in sourceBuffers, then throw an
     // InvalidStateError exception and abort these steps.
-    if (std::any_of(m_sourceBuffers->begin(), m_sourceBuffers->end(), [](auto& sourceBuffer) { return sourceBuffer->updating(); }))
+    if (std::ranges::any_of(m_sourceBuffers.get(), [](auto& sourceBuffer) { return sourceBuffer->updating(); }))
         return Exception { ExceptionCode::InvalidStateError };
 
     // 3. Run the end of stream algorithm with the error parameter set to error.
