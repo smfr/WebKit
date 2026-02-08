@@ -5052,6 +5052,7 @@
         "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/grid-lanes-intrinsic-sizing-rows-004-mix2-ref.html",
         "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/grid-lanes-intrinsic-sizing-rows-005-ref.html",
         "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/grid-lanes-intrinsic-sizing-rows-006-ref.html",
+        "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/grid-lanes-quirks-fill-viewport-ref.html",
         "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/row-defined-height-ref.html",
         "web-platform-tests/css/css-grid/grid-lanes/tentative/intrinsic-sizing/row-intrinsic-inline-container-size-ref.html",
         "web-platform-tests/css/css-grid/grid-lanes/tentative/item-placement/column-auto-placement-001-ref.html",
