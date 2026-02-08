@@ -25,9 +25,7 @@
 
 #pragma once
 
-#include <WebCore/Document.h>
-#include <WebCore/Element.h>
-#include <WebCore/FloatPoint.h>
+#include <WebCore/FloatRect.h>
 #include <WebCore/ScrollTypes.h>
 #include <wtf/CheckedRef.h>
 #include <wtf/TZoneMalloc.h>
@@ -35,12 +33,24 @@
 
 namespace WebCore {
 
-class Element;
+class Document;
+class LocalFrameView;
 class RenderBox;
 class RenderElement;
 class RenderObject;
 class ScrollableArea;
 class WeakPtrImplWithEventTargetData;
+
+enum class AnchorSearchStatus : uint8_t {
+    // Exclude this node from anchoring.
+    Exclude,
+    // Check children; if no anchor found, keep traversing later siblings.
+    Continue,
+    // Check children; if no anchor found, choose this node.
+    Constrain,
+    // Choose this node.
+    Choose,
+};
 
 class ScrollAnchoringController : public CanMakeCheckedPtr<ScrollAnchoringController> {
     WTF_MAKE_TZONE_ALLOCATED(ScrollAnchoringController);
@@ -60,9 +70,32 @@ public:
     bool hasAnchorElement() const { return !!m_anchorObject; }
 
 private:
-    LocalFrameView& frameView();
+    static bool isViableStatus(AnchorSearchStatus status)
+    {
+        return status == AnchorSearchStatus::Constrain || status == AnchorSearchStatus::Choose;
+    }
+
+    LocalFrameView& frameView() const;
+
+    bool findPriorityCandidate(Document&);
+
+    AnchorSearchStatus examineAnchorCandidate(RenderObject&) const;
+    AnchorSearchStatus examinePriorityCandidate(RenderObject&) const;
+
+    AnchorSearchStatus findAnchorInOutOfFlowObjects(RenderObject&);
+    AnchorSearchStatus findAnchorRecursive(RenderObject*);
 
     RenderBox* scrollableAreaBox() const;
+
+    struct Rects {
+        FloatRect boundsRelativeToScrolledContent;
+        FloatRect scrollerContentsVisibleRect; // Takes scroll-padding into account.
+    };
+
+    Rects computeScrollerRelativeRects(RenderObject&) const;
+
+    FloatPoint computeOffsetFromOwningScroller(RenderObject&) const;
+
     void invalidate();
     void chooseAnchorElement(Document&);
     bool anchoringSuppressedByStyleChange() const;

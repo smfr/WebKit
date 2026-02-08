@@ -27,10 +27,9 @@
 #include "ScrollAnchoringController.h"
 
 #include "ContainerNodeInlines.h"
+#include "Document.h"
 #include "Editing.h"
-#include "ElementChildIteratorInlines.h"
-#include "ElementIterator.h"
-#include "HTMLHtmlElement.h"
+#include "FloatRect.h"
 #include "LegacyRenderSVGModelObject.h"
 #include "LocalFrameView.h"
 #include "Logging.h"
@@ -45,7 +44,6 @@
 #include "RenderSVGModelObject.h"
 #include "RenderText.h"
 #include "RenderView.h"
-#include "TypedElementDescendantIteratorInlines.h"
 #include <wtf/SetForScope.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
@@ -70,23 +68,23 @@ bool ScrollAnchoringController::shouldMaintainScrollAnchor() const
     if (!scrollerBox)
         return false;
 
-    // Maybe only check the block direction.
+    // FIXME: Writing modes: only check the block direction.
     if (!scrollerBox->hasScrollableOverflowX() && !scrollerBox->hasScrollableOverflowY())
         return false;
 
     if (scrollerBox->style().overflowAnchor() == OverflowAnchor::None)
         return false;
 
-    // FIXME: RTL: only check the block direction.
+    // FIXME: Writing modes: only check the block direction.
     if (!m_owningScrollableArea->scrollOffset().y())
         return false;
 
     return true;
 }
 
-LocalFrameView& ScrollAnchoringController::frameView()
+LocalFrameView& ScrollAnchoringController::frameView() const
 {
-    if (auto* renderLayerScrollableArea = dynamicDowncast<RenderLayerScrollableArea>(m_owningScrollableArea.get()))
+    if (CheckedPtr renderLayerScrollableArea = dynamicDowncast<RenderLayerScrollableArea>(m_owningScrollableArea.get()))
         return renderLayerScrollableArea->layer().renderer().view().frameView();
 
     return downcast<LocalFrameView>(downcast<ScrollView>(m_owningScrollableArea));
@@ -103,8 +101,29 @@ RenderBox* ScrollAnchoringController::scrollableAreaBox() const
     return nullptr;
 }
 
-void ScrollAnchoringController::clearAnchor(bool)
+void ScrollAnchoringController::clearAnchor(bool includeAncestors)
 {
+    if (m_isUpdatingScrollPositionForAnchoring)
+        return;
+
+    m_anchorObject = nullptr;
+    m_lastAnchorOffset = { };
+
+    if (includeAncestors) {
+        if (is<ScrollView>(m_owningScrollableArea))
+            return;
+
+        CheckedPtr scrollerBox = scrollableAreaBox();
+        if (!scrollerBox)
+            return;
+
+        for (CheckedPtr layer = scrollerBox->layer(); layer; layer = layer->parent()) {
+            if (CheckedPtr scrollableArea = layer->scrollableArea()) {
+                if (CheckedPtr controller = scrollableArea->scrollAnchoringController())
+                    controller->clearAnchor(false);
+            }
+        }
+    }
 }
 
 void ScrollAnchoringController::invalidate()
@@ -120,16 +139,299 @@ void ScrollAnchoringController::invalidate()
     }
 }
 
+static FloatRect candidateLocalRectForAnchoring(RenderObject& renderer)
+{
+    if (CheckedPtr box = dynamicDowncast<RenderBox>(renderer)) {
+        if (box->hasNonVisibleOverflow())
+            return box->borderBoxRect();
+
+        return box->layoutOverflowRect();
+    }
+
+    if (CheckedPtr text = dynamicDowncast<RenderText>(renderer))
+        return text->linesBoundingBox();
+
+    if (CheckedPtr text = dynamicDowncast<RenderText>(renderer))
+        return text->linesBoundingBox();
+
+    if (is<LegacyRenderSVGModelObject>(renderer))
+        return renderer.decoratedBoundingBox();
+
+    if (is<RenderSVGModelObject>(renderer))
+        return renderer.decoratedBoundingBox();
+
+    return { };
+}
+
+auto ScrollAnchoringController::computeScrollerRelativeRects(RenderObject& candidate) const -> Rects
+{
+    // FIXME: This needs to handle writing modes and zooming.
+    CheckedPtr scrollerBox = scrollableAreaBox();
+    if (!scrollerBox)
+        return { };
+
+    auto localAnchoringRect = candidateLocalRectForAnchoring(candidate);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "computeScrollerRelativeRects - candidate " << candidate << " localAnchoringRect " << localAnchoringRect);
+
+    if (scrollerBox->isRenderView()) {
+        RefPtr frameView = dynamicDowncast<LocalFrameView>(downcast<ScrollView>(m_owningScrollableArea.get()));
+        if (!frameView)
+            return { };
+
+        auto scrollViewport = frameView->layoutViewportRect();
+
+        RefPtr documentElement = frameView->frame().document() ? frameView->frame().document()->documentElement() : nullptr;
+        if (!documentElement)
+            return { };
+
+        CheckedPtr docRenderer = documentElement->renderBox();
+        if (!docRenderer)
+            return { };
+
+        scrollViewport.contract(docRenderer->scrollPaddingForViewportRect(scrollViewport));
+
+        // FIXME: Need to clamp negative layout overflow for clamp-negative-overflow.html.
+        return {
+            .boundsRelativeToScrolledContent = candidate.localToAbsoluteQuad(localAnchoringRect).boundingBox(),
+            .scrollerContentsVisibleRect = scrollViewport
+        };
+    }
+
+    auto scrollerRect = LayoutRect { m_owningScrollableArea->visibleContentRect() };
+    scrollerRect.contract(scrollerBox->scrollPaddingForViewportRect(scrollerRect));
+
+    // FIXME: Check for writing modes.
+    // FIXME: This really needs to compute bounds relative to the padding box.
+    auto boundsInScrollerContentCoordinates = candidate.localToContainerQuad(localAnchoringRect, scrollerBox.get()).boundingBox();
+    boundsInScrollerContentCoordinates.moveBy(m_owningScrollableArea->scrollPosition());
+
+    // Ignore layout overflow on the block and inline start edges, since these do not contribute to scrolling overflow.
+    // FIXME: writing modes.
+    if (boundsInScrollerContentCoordinates.x() < 0)
+        boundsInScrollerContentCoordinates.shiftXEdgeTo(0);
+
+    if (boundsInScrollerContentCoordinates.y() < 0)
+        boundsInScrollerContentCoordinates.shiftYEdgeTo(0);
+
+    return {
+        .boundsRelativeToScrolledContent = boundsInScrollerContentCoordinates,
+        .scrollerContentsVisibleRect = scrollerRect
+    };
+}
+
+FloatPoint ScrollAnchoringController::computeOffsetFromOwningScroller(RenderObject& candidate) const
+{
+    auto rects = computeScrollerRelativeRects(candidate);
+    return toFloatPoint(rects.boundsRelativeToScrolledContent.location() - rects.scrollerContentsVisibleRect.location());
+}
+
 void ScrollAnchoringController::notifyChildHadSuppressingStyleChange(RenderElement&)
 {
 }
 
-void ScrollAnchoringController::chooseAnchorElement(Document&)
+// https://drafts.csswg.org/css-scroll-anchoring/#anchor-priority-candidates
+bool ScrollAnchoringController::findPriorityCandidate(Document&)
 {
-    UNUSED_PARAM(m_isUpdatingScrollPositionForAnchoring);
-    UNUSED_PARAM(m_isQueuedForScrollPositionUpdate);
-    UNUSED_PARAM(m_anchoringSuppressedByStyleChange);
-    UNUSED_PARAM(m_shouldSuppressScrollPositionUpdate);
+    // FIXME: Implement, without triggering assertion via isEditableNode() for interleaved layouts.
+    return false;
+}
+
+static bool candidateMayMoveWithScroller(RenderObject& candidate, RenderBox& scrollerBox)
+{
+    CheckedPtr renderElement = dynamicDowncast<RenderElement>(candidate);
+    if (!renderElement)
+        return true;
+
+    if (renderElement->isStickilyPositioned() || renderElement->isFixedPositioned())
+        return false;
+
+    CheckedPtr scrollerBlock = dynamicDowncast<RenderBlock>(scrollerBox);
+    if (!scrollerBlock->isContainingBlockAncestorFor(candidate))
+        return false;
+
+    return true;
+}
+
+AnchorSearchStatus ScrollAnchoringController::examinePriorityCandidate(RenderObject& renderer) const
+{
+    CheckedPtr scrollerBox = scrollableAreaBox();
+
+    RenderObject* ancestor = &renderer;
+    while (ancestor && ancestor != scrollerBox.get()) {
+
+        if (ancestor->style().overflowAnchor() == OverflowAnchor::None)
+            return AnchorSearchStatus::Exclude;
+
+        if (!candidateMayMoveWithScroller(*ancestor, *scrollerBox))
+            return AnchorSearchStatus::Exclude;
+
+        ancestor = ancestor->parent();
+    }
+
+    if (!ancestor)
+        return AnchorSearchStatus::Exclude;
+
+    return examineAnchorCandidate(*ancestor);
+}
+
+// https://drafts.csswg.org/css-scroll-anchoring/#candidate-examination
+AnchorSearchStatus ScrollAnchoringController::examineAnchorCandidate(RenderObject& candidate) const
+{
+    CheckedPtr scrollerBox = scrollableAreaBox();
+
+    if (&candidate == scrollerBox.get())
+        return AnchorSearchStatus::Continue;
+
+    if (candidate.style().overflowAnchor() == OverflowAnchor::None)
+        return AnchorSearchStatus::Exclude;
+
+    if (candidate.isBR())
+        return AnchorSearchStatus::Exclude;
+
+    if (candidate.isAnonymous())
+        return AnchorSearchStatus::Continue;
+
+    if (!candidateMayMoveWithScroller(candidate, *scrollerBox))
+        return AnchorSearchStatus::Exclude;
+
+    bool isScrollableWithAnchor = [&]() {
+        CheckedPtr candidateBox = dynamicDowncast<RenderBox>(candidate);
+        if (candidateBox && candidateBox->canBeScrolledAndHasScrollableArea() && candidateBox->hasLayer()) {
+            if (CheckedPtr scrollableArea = downcast<RenderLayerModelObject>(candidate).layer()->scrollableArea()) {
+                CheckedPtr controller = scrollableArea->scrollAnchoringController();
+                if (controller && controller->shouldMaintainScrollAnchor())
+                    return true;
+            }
+        }
+        return false;
+    }();
+
+    auto shouldDescendIntoObjectWithEmptyLayoutOverflow = [](RenderObject& candidate) {
+        if (candidate.isInline())
+            return true;
+
+        if (CheckedPtr blockFlow = dynamicDowncast<RenderBlockFlow>(candidate))
+            return blockFlow->subtreeContainsFloats();
+
+        return false;
+    };
+
+    auto rects = computeScrollerRelativeRects(candidate);
+    if (rects.boundsRelativeToScrolledContent.isEmpty()) {
+        if (shouldDescendIntoObjectWithEmptyLayoutOverflow(candidate))
+            return AnchorSearchStatus::Continue;
+
+        return AnchorSearchStatus::Exclude;
+    }
+
+    if (rects.scrollerContentsVisibleRect.contains(rects.boundsRelativeToScrolledContent))
+        return AnchorSearchStatus::Choose;
+
+    // This takes scroll padding into account
+    auto intersectionRect = intersection(rects.boundsRelativeToScrolledContent, rects.scrollerContentsVisibleRect);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << " bounds in scrolled content " << rects.boundsRelativeToScrolledContent << " scroller viewport " << rects.scrollerContentsVisibleRect << " intersectionRect " << intersectionRect);
+
+    if (intersectionRect.isEmpty())
+        return AnchorSearchStatus::Exclude;
+
+    return isScrollableWithAnchor ? AnchorSearchStatus::Choose : AnchorSearchStatus::Constrain;
+}
+
+#if !LOG_DISABLED
+static TextStream& operator<<(TextStream& ts, AnchorSearchStatus result)
+{
+    switch (result) {
+    case AnchorSearchStatus::Exclude:
+        ts << "Exclude"_s;
+        break;
+    case AnchorSearchStatus::Continue:
+        ts << "Continue"_s;
+        break;
+    case AnchorSearchStatus::Constrain:
+        ts << "Constrain"_s;
+        break;
+    case AnchorSearchStatus::Choose:
+        ts << "Choose"_s;
+        break;
+    }
+    return ts;
+}
+#endif
+
+// For each absolutely-positioned element A whose containing block is N...
+AnchorSearchStatus ScrollAnchoringController::findAnchorInOutOfFlowObjects(RenderObject& candidate)
+{
+    CheckedPtr block = dynamicDowncast<RenderBlock>(candidate);
+    if (!block)
+        return AnchorSearchStatus::Exclude;
+
+    auto* outOfFlowBoxes = block->outOfFlowBoxes();
+    if (!outOfFlowBoxes)
+        return AnchorSearchStatus::Exclude;
+
+    for (auto& outOfFlowBox : *outOfFlowBoxes) {
+        auto status = findAnchorRecursive(&outOfFlowBox);
+        if (isViableStatus(status))
+            return status;
+    }
+
+    return AnchorSearchStatus::Exclude;
+}
+
+AnchorSearchStatus ScrollAnchoringController::findAnchorRecursive(RenderObject* object)
+{
+    if (!object)
+        return AnchorSearchStatus::Exclude;
+
+    if (!object->everHadLayout())
+        return AnchorSearchStatus::Exclude;
+
+    auto status = examineAnchorCandidate(*object);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " findAnchorRecursive() element: " << *object <<" examination result: " << status);
+
+    if (isViableStatus(status))
+        m_anchorObject = *object;
+
+    if (status == AnchorSearchStatus::Choose || status == AnchorSearchStatus::Exclude)
+        return status;
+
+    CheckedPtr renderElement = dynamicDowncast<RenderElement>(*object);
+    if (!renderElement)
+        return AnchorSearchStatus::Exclude;
+
+    for (CheckedPtr child = renderElement->firstChild(); child; child = child->nextSibling()) {
+        auto childStatus = findAnchorRecursive(child.get());
+        if (childStatus == AnchorSearchStatus::Choose)
+            return childStatus;
+
+        if (childStatus == AnchorSearchStatus::Constrain) {
+            // FIXME: Do something better in fragmented contexts?
+            return childStatus;
+        }
+    }
+
+    auto outOfFlowStatus = findAnchorInOutOfFlowObjects(*object);
+    if (isViableStatus(outOfFlowStatus))
+        return outOfFlowStatus;
+
+    return status;
+}
+
+// https://drafts.csswg.org/css-scroll-anchoring/#anchor-node-selection
+void ScrollAnchoringController::chooseAnchorElement(Document& document)
+{
+    bool foundPriorityObject = findPriorityCandidate(document);
+
+    if (!foundPriorityObject)
+        findAnchorRecursive(scrollableAreaBox());
+
+    if (!m_anchorObject) {
+        LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " chooseAnchorElement() failed to find anchor");
+        return;
+    }
+
+    m_lastAnchorOffset = computeOffsetFromOwningScroller(*m_anchorObject);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController::chooseAnchorElement() found anchor: " << *m_anchorObject << " offset: " << m_lastAnchorOffset);
 }
 
 // https://drafts.csswg.org/css-scroll-anchoring/#suppression-triggers
@@ -140,10 +442,85 @@ bool ScrollAnchoringController::anchoringSuppressedByStyleChange() const
 
 void ScrollAnchoringController::updateBeforeLayout()
 {
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " on " << *scrollableAreaBox() << " updateBeforeLayout() - queued " << m_isQueuedForScrollPositionUpdate);
+
+    if (m_isQueuedForScrollPositionUpdate) {
+        m_anchoringSuppressedByStyleChange |= anchoringSuppressedByStyleChange();
+        return;
+    }
+
+    auto scrollOffset = m_owningScrollableArea->scrollOffset();
+    // FIXME: Writing modes.
+    if (!scrollOffset.y()) {
+        clearAnchor();
+        return;
+    }
+
+    if (!m_anchorObject) {
+        RefPtr document = frameView().frame().document();
+        if (!document)
+            return;
+
+        chooseAnchorElement(*document);
+        if (!m_anchorObject) {
+            LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " updateBeforeLayout() - did not find anchor");
+            return;
+        }
+    }
+
+    m_anchoringSuppressedByStyleChange = anchoringSuppressedByStyleChange();
+
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " updateBeforeLayout() - anchor " << *m_anchorObject << " offset " << m_lastAnchorOffset << " suppressedByStyleChange " << m_anchoringSuppressedByStyleChange);
+
+    frameView().queueScrollableAreaForScrollAnchoringUpdate(m_owningScrollableArea);
+    m_isQueuedForScrollPositionUpdate = true;
 }
 
+// https://drafts.csswg.org/css-scroll-anchoring/#scroll-adjustment
 void ScrollAnchoringController::adjustScrollPositionForAnchoring()
 {
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() - anchor " << m_anchorObject << " offset " << m_lastAnchorOffset << " suppressed  " << m_shouldSuppressScrollPositionUpdate);
+
+    auto suppressed = std::exchange(m_shouldSuppressScrollPositionUpdate, false);
+    if (suppressed)
+        return;
+
+    auto queued = std::exchange(m_isQueuedForScrollPositionUpdate, false);
+    if (!m_anchorObject || !queued)
+        return;
+
+    SetForScope midUpdatingScrollPositionForAnchorElement(m_isUpdatingScrollPositionForAnchoring, true);
+
+    auto currentOffset = computeOffsetFromOwningScroller(*m_anchorObject);
+
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController::adjustScrollPositionForAnchoring() found anchor: " << *m_anchorObject << " offset: " << m_lastAnchorOffset << " suppressedByStyleChange " << m_anchoringSuppressedByStyleChange);
+    if (m_anchoringSuppressedByStyleChange) {
+        clearAnchor();
+        m_anchoringSuppressedByStyleChange = false;
+        return;
+    }
+
+    auto adjustment = currentOffset - m_lastAnchorOffset;
+    if (adjustment.isZero())
+        return;
+
+    // FIXME: Handle content-visibility.
+
+    auto currentPosition = m_owningScrollableArea->scrollPosition();
+    auto newScrollPosition = currentPosition + roundedIntSize(adjustment);
+    RELEASE_LOG(ScrollAnchoring, "ScrollAnchoringController::adjustScrollPositionForAnchoring() is main frame: %d, is main scroller: %d, adjusting from (%d, %d) to (%d, %d)",  frameView().frame().isMainFrame(), !m_owningScrollableArea->isRenderLayer(), currentPosition.x(), currentPosition.y(), newScrollPosition.x(), newScrollPosition.y());
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() for scroller element: " << ValueOrNull(scrollableAreaBox()) << " anchor: " << *m_anchorObject << "adjusting from " << currentPosition << " to " << newScrollPosition);
+
+    auto options = ScrollPositionChangeOptions::createProgrammatic();
+    options.originalScrollDelta = adjustment;
+
+    auto oldScrollType = m_owningScrollableArea->currentScrollType();
+    m_owningScrollableArea->setCurrentScrollType(ScrollType::Programmatic);
+
+    if (!m_owningScrollableArea->requestScrollToPosition(newScrollPosition, options))
+        m_owningScrollableArea->scrollToPositionWithoutAnimation(newScrollPosition);
+
+    m_owningScrollableArea->setCurrentScrollType(oldScrollType);
 }
 
 } // namespace WebCore
