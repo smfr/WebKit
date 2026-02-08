@@ -894,7 +894,7 @@ void XMLDocumentParser::startElementNs(const xmlChar* xmlLocalName, const xmlCha
         return;
 
     if (RefPtr templateElement = dynamicDowncast<HTMLTemplateElement>(newElement))
-        pushCurrentNode(&templateElement->protectedContent().get());
+        pushCurrentNode(&protect(templateElement->content()).get());
     else
         pushCurrentNode(newElement.ptr());
 

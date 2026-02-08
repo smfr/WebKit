@@ -3149,7 +3149,7 @@ RefPtr<HTMLMediaElement> Page::bestMediaElementForRemoteControls(MediaElementSes
         if (!mediaElementSession)
             return false;
 
-        RefPtr element = mediaElementSession->element().get();
+        RefPtr element = mediaElementSession->element();
         if (!element)
             return false;
 
@@ -3157,7 +3157,7 @@ RefPtr<HTMLMediaElement> Page::bestMediaElementForRemoteControls(MediaElementSes
     }, purpose);
 
     if (RefPtr mediaElementSession = dynamicDowncast<MediaElementSession>(selectedSession.get()))
-        return mediaElementSession->protectedElement();
+        return mediaElementSession->element();
 
     return nullptr;
 }

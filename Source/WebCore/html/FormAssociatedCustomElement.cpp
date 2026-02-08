@@ -163,7 +163,7 @@ void FormAssociatedCustomElement::didChangeForm()
     ASSERT(m_element->isDefinedCustomElement());
     ValidatedFormListedElement::didChangeForm();
     if (!belongsToFormThatIsBeingDestroyed())
-        CustomElementReactionQueue::enqueueFormAssociatedCallbackIfNeeded(asProtectedHTMLElement().get(), protectedForm().get());
+        CustomElementReactionQueue::enqueueFormAssociatedCallbackIfNeeded(asProtectedHTMLElement().get(), protect(form()).get());
 }
 
 void FormAssociatedCustomElement::willUpgrade()

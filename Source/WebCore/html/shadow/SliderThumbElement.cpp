@@ -149,8 +149,8 @@ void RenderSliderContainer::layout()
         mutableStyle->setDirection(TextDirection::LTR);
     }
 
-    CheckedPtr thumb = input->sliderThumbElement() ? input->protectedSliderThumbElement()->renderBox() : nullptr;
-    CheckedPtr track = input->sliderTrackElement() ? input->protectedSliderTrackElement()->renderBox() : nullptr;
+    CheckedPtr thumb = input->sliderThumbElement() ? protect(input->sliderThumbElement())->renderBox() : nullptr;
+    CheckedPtr track = input->sliderTrackElement() ? protect(input->sliderTrackElement())->renderBox() : nullptr;
     // Force a layout to reset the position of the thumb so the code below doesn't move the thumb to the wrong place.
     // FIXME: Make a custom Render class for the track and move the thumb positioning code there.
     if (track)
@@ -247,7 +247,7 @@ void SliderThumbElement::setPositionFromPoint(const LayoutPoint& absolutePoint)
         return;
 
     ASSERT(input->sliderTrackElement());
-    CheckedPtr trackRenderer = input->protectedSliderTrackElement()->renderBox();
+    CheckedPtr trackRenderer = protect(input->sliderTrackElement())->renderBox();
     if (!trackRenderer)
         return;
 

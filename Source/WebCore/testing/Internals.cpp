@@ -4689,7 +4689,7 @@ Vector<String> Internals::mediaResponseContentRanges(HTMLMediaElement& media)
 void Internals::simulateAudioInterruption(HTMLMediaElement& element)
 {
 #if USE(GSTREAMER)
-    element.protectedPlayer()->simulateAudioInterruption();
+    protect(element.player())->simulateAudioInterruption();
 #else
     UNUSED_PARAM(element);
 #endif

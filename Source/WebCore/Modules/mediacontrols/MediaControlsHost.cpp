@@ -289,7 +289,7 @@ void MediaControlsHost::updateCaptionDisplaySizes(ForceUpdate force)
 
 bool MediaControlsHost::allowsInlineMediaPlayback() const
 {
-    return !protectedMediaElement()->protectedMediaSession()->requiresFullscreenForVideoPlayback();
+    return !protect(protectedMediaElement()->mediaSession())->requiresFullscreenForVideoPlayback();
 }
 
 bool MediaControlsHost::supportsFullscreen() const
@@ -309,7 +309,7 @@ bool MediaControlsHost::isInMediaDocument() const
 
 bool MediaControlsHost::userGestureRequired() const
 {
-    return !protectedMediaElement()->protectedMediaSession()->playbackStateChangePermitted(MediaPlaybackState::Playing);
+    return !protect(protectedMediaElement()->mediaSession())->playbackStateChangePermitted(MediaPlaybackState::Playing);
 }
 
 bool MediaControlsHost::shouldForceControlsDisplay() const

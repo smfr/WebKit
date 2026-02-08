@@ -296,10 +296,10 @@ RefPtr<WebGLBuffer> WebGL2RenderingContext::validateBufferDataTarget(ASCIILitera
         synthesizeGLError(GraphicsContextGL::INVALID_OPERATION, functionName, "no buffer"_s);
         return nullptr;
     }
-    if (protectedBoundTransformFeedback()->hasBoundIndexedTransformFeedbackBuffer(buffer.get())) {
+    if (protect(m_boundTransformFeedback.get())->hasBoundIndexedTransformFeedbackBuffer(buffer.get())) {
         ASSERT(buffer != m_boundVertexArrayObject->getElementArrayBuffer());
         if (m_boundIndexedUniformBuffers.contains(buffer)
-            || protectedBoundVertexArrayObject()->hasArrayBuffer(buffer.get())
+            || protect(m_boundVertexArrayObject.get())->hasArrayBuffer(buffer.get())
             || buffer == m_boundArrayBuffer
             || buffer == m_boundCopyReadBuffer
             || buffer == m_boundCopyWriteBuffer
@@ -332,7 +332,7 @@ bool WebGL2RenderingContext::validateAndCacheBufferBinding(const AbstractLocker&
         m_boundCopyWriteBuffer = buffer;
         break;
     case GraphicsContextGL::ELEMENT_ARRAY_BUFFER:
-        protectedBoundVertexArrayObject()->setElementArrayBuffer(locker, buffer);
+        protect(m_boundVertexArrayObject.get())->setElementArrayBuffer(locker, buffer);
         break;
     case GraphicsContextGL::PIXEL_PACK_BUFFER:
         m_boundPixelPackBuffer = buffer;
@@ -1558,7 +1558,7 @@ void WebGL2RenderingContext::vertexAttribIPointer(GCGLuint index, GCGLint size, 
     }
     GCGLsizei bytesPerElement = size * typeSize;
 
-    protectedBoundVertexArrayObject()->setVertexAttribState(locker, index, bytesPerElement, size, type, false, stride, static_cast<GCGLintptr>(offset), true, RefPtr { m_boundArrayBuffer.get() }.get());
+    protect(m_boundVertexArrayObject.get())->setVertexAttribState(locker, index, bytesPerElement, size, type, false, stride, static_cast<GCGLintptr>(offset), true, RefPtr { m_boundArrayBuffer.get() }.get());
     graphicsContextGL()->vertexAttribIPointer(index, size, type, stride, offset);
 }
 
@@ -1652,7 +1652,7 @@ void WebGL2RenderingContext::drawBuffers(const Vector<GCGLenum>& buffers)
                 return;
             }
         }
-        protectedFramebufferBinding()->drawBuffers(buffers);
+        protect(m_framebufferBinding.get())->drawBuffers(buffers);
     }
 }
 
@@ -2286,7 +2286,7 @@ void WebGL2RenderingContext::resumeTransformFeedback()
     if (isContextLost())
         return;
 
-    if (!protectedBoundTransformFeedback()->validateProgramForResume(m_currentProgram.get())) {
+    if (!protect(m_boundTransformFeedback.get())->validateProgramForResume(m_currentProgram.get())) {
         synthesizeGLError(GraphicsContextGL::INVALID_OPERATION, "resumeTransformFeedback"_s, "the current program is not the same as when beginTransformFeedback was called"_s);
         return;
     }
@@ -2339,7 +2339,7 @@ bool WebGL2RenderingContext::setIndexedBufferBinding(ASCIILiteral functionName, 
 
     switch (target) {
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BUFFER:
-        protectedBoundTransformFeedback()->setBoundIndexedTransformFeedbackBuffer(locker, index, buffer);
+        protect(m_boundTransformFeedback.get())->setBoundIndexedTransformFeedbackBuffer(locker, index, buffer);
         break;
     case GraphicsContextGL::UNIFORM_BUFFER:
         m_boundIndexedUniformBuffers[index] = buffer;
@@ -2379,7 +2379,7 @@ WebGLAny WebGL2RenderingContext::getIndexedParameter(GCGLenum target, GCGLuint i
     switch (target) {
     case GraphicsContextGL::TRANSFORM_FEEDBACK_BUFFER_BINDING: {
         WebGLBuffer* buffer;
-        bool success = protectedBoundTransformFeedback()->getBoundIndexedTransformFeedbackBuffer(index, &buffer);
+        bool success = protect(m_boundTransformFeedback.get())->getBoundIndexedTransformFeedbackBuffer(index, &buffer);
         if (!success) {
             synthesizeGLError(GraphicsContextGL::INVALID_VALUE, "getIndexedParameter"_s, "index out of range"_s);
             return nullptr;
@@ -3529,7 +3529,7 @@ void WebGL2RenderingContext::uncacheDeletedBuffer(const AbstractLocker& locker, 
     REMOVE_BUFFER_FROM_BINDING(m_boundPixelUnpackBuffer);
     REMOVE_BUFFER_FROM_BINDING(m_boundTransformFeedbackBuffer);
     REMOVE_BUFFER_FROM_BINDING(m_boundUniformBuffer);
-    protectedBoundTransformFeedback()->unbindBuffer(locker, *buffer);
+    protect(m_boundTransformFeedback.get())->unbindBuffer(locker, *buffer);
 
     for (auto& boundBuffer : m_boundIndexedUniformBuffers) {
         if (boundBuffer == buffer)

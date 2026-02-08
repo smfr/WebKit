@@ -138,7 +138,7 @@ void CheckboxInputType::handleMouseMoveEvent(MouseEvent& event)
     ASSERT(element());
     ASSERT(!element()->isDisabledFormControl());
 
-    if (!event.isTrusted() || !isSwitch() || !protectedElement()->renderer()) {
+    if (!event.isTrusted() || !isSwitch() || !protect(element())->renderer()) {
         stopSwitchPointerTracking();
         return;
     }
@@ -293,7 +293,7 @@ void CheckboxInputType::stopSwitchPointerTracking()
     if (!isSwitchPointerTracking())
         return;
 
-    if (RefPtr frame = protect(protectedElement()->document())->frame())
+    if (RefPtr frame = protect(protect(element())->document())->frame())
         frame->eventHandler().setCapturingMouseEventsElement(nullptr);
     m_hasSwitchVisuallyOnChanged = false;
     m_switchPointerTrackingLogicalLeftPositionStart = { };
@@ -316,7 +316,7 @@ void CheckboxInputType::disabledStateChanged()
         return;
 
     ASSERT(element());
-    if (protectedElement()->isDisabledFormControl()) {
+    if (protect(element())->isDisabledFormControl()) {
         stopSwitchAnimation(SwitchAnimationType::VisuallyOn);
         stopSwitchAnimation(SwitchAnimationType::Held);
         stopSwitchPointerTracking();
@@ -324,7 +324,7 @@ void CheckboxInputType::disabledStateChanged()
 
 #if ENABLE(TOUCH_EVENTS)
     if (isSwitch())
-        protectedElement()->updateTouchEventHandler();
+        protect(element())->updateTouchEventHandler();
 #endif
 }
 

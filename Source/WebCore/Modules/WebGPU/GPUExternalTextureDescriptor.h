@@ -57,7 +57,7 @@ struct GPUExternalTextureDescriptor : public GPUObjectDescriptorBase {
                     return playerIdentifier;
                 RefPtr<WebCore::VideoFrame> result;
                 if (videoElement->player())
-                    result = videoElement->protectedPlayer()->videoFrameForCurrentTime();
+                    result = protect(videoElement->player())->videoFrameForCurrentTime();
                 return result;
             },
             [&](const RefPtr<WebCodecsVideoFrame> videoFrame) -> WebGPU::VideoSourceIdentifier {

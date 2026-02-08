@@ -195,7 +195,6 @@ public:
     void deref() const final { HTMLElement::deref(); }
 
     MediaPlayer* player() const { return m_player.get(); }
-    RefPtr<MediaPlayer> protectedPlayer() const { return m_player; }
     WEBCORE_EXPORT std::optional<MediaPlayerIdentifier> playerIdentifier() const;
 
     virtual bool isVideo() const { return false; }
@@ -510,7 +509,7 @@ public:
     // of one of them here.
     using HTMLElement::scriptExecutionContext;
 
-    bool didPassCORSAccessCheck() const { return m_player && protectedPlayer()->didPassCORSAccessCheck(); }
+    bool didPassCORSAccessCheck() const { return m_player && protect(player())->didPassCORSAccessCheck(); }
     bool taintsOrigin(const SecurityOrigin&) const;
     
     WEBCORE_EXPORT bool isFullscreen() const override;
@@ -579,7 +578,6 @@ public:
     MediaPlayer::Preload effectivePreloadValue() const;
     MediaElementSession* mediaSessionIfExists() const { return m_mediaSession.get(); }
     WEBCORE_EXPORT MediaElementSession& mediaSession() const;
-    Ref<MediaElementSession> protectedMediaSession() const { return mediaSession(); }
 
     void pageScaleFactorChanged();
     void userInterfaceLayoutDirectionChanged();
@@ -1502,6 +1500,11 @@ private:
 
 String convertEnumerationToString(HTMLMediaElement::AutoplayEventPlaybackState);
 String convertEnumerationToString(HTMLMediaElement::SpeechSynthesisState);
+
+inline HTMLMediaElement* MediaElementSession::element() const
+{
+    return m_element.get();
+}
 
 } // namespace WebCore
 

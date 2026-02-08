@@ -2115,7 +2115,7 @@ private:
                     return true;
                 }
                 write(dataLength);
-                write(data->data().protectedArrayBufferView()->span());
+                write(protect(data->data().arrayBufferView())->span());
                 write(data->colorSpace());
                 return true;
             }
