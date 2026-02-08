@@ -165,6 +165,7 @@ template <> struct iterator_traits<HashSet<RefPtr<WebCore::MediaSelectionOptionA
 
 #if HAVE(AVPLAYER_PARTICIPATESINAUDIOSESSION)
 @interface AVPlayer (Staging_168303606)
+- (void)setParticipatesInAudioSession:(BOOL)participates completionHandler:(nullable void (^)(void))completionHandler;
 - (void)setDisconnectedFromSystemAudio:(BOOL)disconnected completionHandler:(nullable void (^)(void))completionHandler;
 @end
 #endif
