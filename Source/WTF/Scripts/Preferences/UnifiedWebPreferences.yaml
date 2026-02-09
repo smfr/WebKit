@@ -3403,6 +3403,20 @@ GridLanesEnabled:
     WebCore:
       default: true
 
+HTMLEnhancedSelectEnabled:
+   type: bool
+   status: testable
+   category: css
+   humanReadableName: "Enhanced HTML select element"
+   humanReadableDescription: "Enable enhanced HTML select element"
+   defaultValue:
+     WebKitLegacy:
+       default: false
+     WebKit:
+       default: false
+     WebCore:
+       default: false
+
 HTMLEnhancedSelectParsingEnabled:
    type: bool
    status: stable
@@ -3416,34 +3430,6 @@ HTMLEnhancedSelectParsingEnabled:
        default: true
      WebCore:
        default: true
-
-HTMLEnhancedSelectPseudoElementsEnabled:
-   type: bool
-   status: testable
-   category: css
-   humanReadableName: "Enhanced HTML select element pseudo-elements"
-   humanReadableDescription: "Enable enhanced HTML select element pseudo-elements"
-   defaultValue:
-     WebKitLegacy:
-       default: false
-     WebKit:
-       default: false
-     WebCore:
-       default: false
-
-HTMLEnhancedSelectSelectedContentEnabled:
-   type: bool
-   status: testable
-   category: dom
-   humanReadableName: "Enhanced HTML select: selectedcontent element"
-   humanReadableDescription: "Enable enhanced HTML select: selectedcontent element"
-   defaultValue:
-     WebKitLegacy:
-       default: false
-     WebKit:
-       default: false
-     WebCore:
-       default: false
 
 HTTPEquivEnabled:
   type: bool

@@ -55,7 +55,7 @@ auto HTMLSelectedContentElement::insertedIntoAncestor(InsertionType insertionTyp
     HTMLElement::insertedIntoAncestor(insertionType, parentOfInsertedTree);
 
     ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
-    ASSERT(document().settings().htmlEnhancedSelectSelectedContentEnabled());
+    ASSERT(document().settings().htmlEnhancedSelectEnabled());
     ASSERT(!document().settings().mutationEventsEnabled());
 
     if (insertionType.connectedToDocument)

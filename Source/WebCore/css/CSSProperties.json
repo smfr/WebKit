@@ -9130,7 +9130,7 @@
                 },
                 {
                     "value": "base-select",
-                    "settings-flag": "htmlEnhancedSelectPseudoElementsEnabled"
+                    "settings-flag": "htmlEnhancedSelectEnabled"
                 },
                 "auto",
                 "none",

@@ -1022,7 +1022,7 @@ void HTMLSelectElement::selectOption(int optionIndex, OptionSet<SelectOptionFlag
     // Update the button text element to display the new selection and ensure it picks up the new
     // selection's direction and unicode-bidi.
     updateButtonText();
-    if (document().settings().htmlEnhancedSelectSelectedContentEnabled()
+    if (document().settings().htmlEnhancedSelectEnabled()
         && !document().settings().mutationEventsEnabled())
         updateSelectedContent();
 
@@ -1843,7 +1843,7 @@ ExceptionOr<void> HTMLSelectElement::showPicker()
 void HTMLSelectElement::updateSelectedContent() const
 {
     ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
-    ASSERT(document().settings().htmlEnhancedSelectSelectedContentEnabled());
+    ASSERT(document().settings().htmlEnhancedSelectEnabled());
     ASSERT(!document().settings().mutationEventsEnabled());
 
     if (m_multiple)

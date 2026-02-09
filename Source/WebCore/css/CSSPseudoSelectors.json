@@ -553,7 +553,7 @@
         },
         "picker": {
             "argument": "required",
-            "settings-flag": "htmlEnhancedSelectPseudoElementsEnabled"
+            "settings-flag": "htmlEnhancedSelectEnabled"
         },
         "placeholder": {
             "aliases": [

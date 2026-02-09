@@ -125,7 +125,7 @@ void HTMLOptionElement::removedFromAncestor(RemovalType removalType, ContainerNo
 
 void HTMLOptionElement::finishParsingChildren()
 {
-    if (!document().settings().htmlEnhancedSelectSelectedContentEnabled())
+    if (!document().settings().htmlEnhancedSelectEnabled())
         return;
 
     if (document().settings().mutationEventsEnabled())
@@ -415,7 +415,7 @@ String HTMLOptionElement::collectOptionInnerTextCollapsingWhitespace() const
 void HTMLOptionElement::cloneIntoSelectedContent(HTMLSelectedContentElement& selectedContent)
 {
     ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
-    ASSERT(document().settings().htmlEnhancedSelectSelectedContentEnabled());
+    ASSERT(document().settings().htmlEnhancedSelectEnabled());
     ASSERT(!selectedContent.document().settings().mutationEventsEnabled());
 
     NodeVector newChildren;
