@@ -386,28 +386,28 @@ LayoutUnit gridAreaDimensionSize(size_t startLine, size_t endLine, const TrackSi
     return endPosition - startPosition;
 }
 
-LayoutUnit inlineAxisMinContentContribution(const ElementBox& gridItem, const IntegrationUtils& integrationUtils)
+LayoutUnit inlineAxisMinContentContribution(const PlacedGridItem& gridItem, const IntegrationUtils& integrationUtils)
 {
-    return integrationUtils.preferredMinWidth(gridItem);
+    return integrationUtils.preferredMinWidth(gridItem.layoutBox());
 }
 
-LayoutUnit inlineAxisMaxContentContribution(const ElementBox& gridItem, const IntegrationUtils& integrationUtils)
+LayoutUnit inlineAxisMaxContentContribution(const PlacedGridItem& gridItem, const IntegrationUtils& integrationUtils)
 {
-    return integrationUtils.preferredMaxWidth(gridItem);
+    return integrationUtils.preferredMaxWidth(gridItem.layoutBox());
 }
 
 GridItemSizingFunctions inlineAxisGridItemSizingFunctions()
 {
-    return { inlineAxisMinContentContribution, inlineAxisMaxContentContribution };
+    return { inlineAxisMinContentContribution, inlineAxisMaxContentContribution, usedInlineMinimumSize };
 }
 
-LayoutUnit blockAxisMinContentContribution(const ElementBox&, const IntegrationUtils&)
+LayoutUnit blockAxisMinContentContribution(const PlacedGridItem&, const IntegrationUtils&)
 {
     ASSERT_NOT_IMPLEMENTED_YET();
     return { };
 }
 
-LayoutUnit blockAxisMaxContentContribution(const ElementBox&, const IntegrationUtils&)
+LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem&, const IntegrationUtils&)
 {
     ASSERT_NOT_IMPLEMENTED_YET();
     return { };
@@ -415,7 +415,7 @@ LayoutUnit blockAxisMaxContentContribution(const ElementBox&, const IntegrationU
 
 GridItemSizingFunctions blockAxisGridItemSizingFunctions()
 {
-    return { blockAxisMinContentContribution, blockAxisMaxContentContribution };
+    return { blockAxisMinContentContribution, blockAxisMaxContentContribution, usedBlockMinimumSize };
 }
 
 bool preferredSizeBehavesAsAuto(const Style::PreferredSize& preferredSize)

@@ -47,12 +47,12 @@ LayoutUnit usedBlockMinimumSize(const PlacedGridItem&, const TrackSizingFunction
 LayoutUnit computeGridLinePosition(size_t gridLineIndex, const TrackSizes&, LayoutUnit gap);
 LayoutUnit gridAreaDimensionSize(size_t startLine, size_t endLine, const TrackSizes&, LayoutUnit gap);
 
-LayoutUnit inlineAxisMinContentContribution(const ElementBox& gridItem, const IntegrationUtils&);
-LayoutUnit inlineAxisMaxContentContribution(const ElementBox& gridItem, const IntegrationUtils&);
+LayoutUnit inlineAxisMinContentContribution(const PlacedGridItem&, const IntegrationUtils&);
+LayoutUnit inlineAxisMaxContentContribution(const PlacedGridItem&, const IntegrationUtils&);
 GridItemSizingFunctions inlineAxisGridItemSizingFunctions();
 
-LayoutUnit blockAxisMinContentContribution(const ElementBox& gridItem, const IntegrationUtils&);
-LayoutUnit blockAxisMaxContentContribution(const ElementBox& gridItem, const IntegrationUtils&);
+LayoutUnit blockAxisMinContentContribution(const PlacedGridItem&, const IntegrationUtils&);
+LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem&, const IntegrationUtils&);
 GridItemSizingFunctions blockAxisGridItemSizingFunctions();
 
 bool preferredSizeBehavesAsAuto(const Style::PreferredSize&);

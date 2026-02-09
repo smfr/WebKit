@@ -154,7 +154,7 @@ static Vector<LayoutUnit> minContentContributions(const PlacedGridItems& gridIte
     const IntegrationUtils& integrationUtils, const GridItemSizingFunctions& gridItemSizingFunctions)
 {
     return gridItemIndexes.map([&](size_t gridItemIndex) {
-        return gridItemSizingFunctions.minContentContribution(gridItems[gridItemIndex].layoutBox(), integrationUtils);
+        return gridItemSizingFunctions.minContentContribution(gridItems[gridItemIndex], integrationUtils);
     });
 }
 
@@ -162,7 +162,7 @@ static Vector<LayoutUnit> maxContentContributions(const PlacedGridItems& gridIte
     const IntegrationUtils& integrationUtils, const GridItemSizingFunctions& gridItemSizingFunctions)
 {
     return gridItemIndexes.map([&](size_t gridItemIndex) {
-        return gridItemSizingFunctions.maxContentContribution(gridItems[gridItemIndex].layoutBox(), integrationUtils);
+        return gridItemSizingFunctions.maxContentContribution(gridItems[gridItemIndex], integrationUtils);
     });
 }
 
@@ -180,7 +180,7 @@ static Vector<LayoutUnit> minimumContributions(const PlacedGridItems& gridItems,
             return { };
         }
         // else the item’s minimum contribution is its min-content contribution.
-        return gridItemSizingFunctions.minContentContribution(gridItems[gridItemIndex].layoutBox(), integrationUtils);
+        return gridItemSizingFunctions.minContentContribution(gridItems[gridItemIndex], integrationUtils);
     });
 }
 
