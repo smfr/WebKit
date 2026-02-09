@@ -463,8 +463,10 @@ Vector<UsedMargins> GridLayout::computeBlockMargins(const PlacedGridItems& place
 std::pair<UsedInlineSizes, UsedBlockSizes> GridLayout::layoutGridItems(const PlacedGridItems& placedGridItems, const GridAreaSizes& gridAreaSizes) const
 {
     auto gridItemsCount = placedGridItems.size();
-    UsedInlineSizes usedInlineSizes(gridItemsCount);
-    UsedBlockSizes usedBlockSizes(gridItemsCount);
+    UsedInlineSizes usedInlineSizes;
+    usedInlineSizes.reserveInitialCapacity(gridItemsCount);
+    UsedBlockSizes usedBlockSizes;
+    usedBlockSizes.reserveInitialCapacity(gridItemsCount);
 
     auto& formattingContext = this->formattingContext();
     auto& integrationUtils = formattingContext.integrationUtils();
