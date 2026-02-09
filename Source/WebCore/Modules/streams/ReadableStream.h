@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "ContextDestructionObserver.h"
+#include "ActiveDOMObject.h"
 #include "ExceptionOr.h"
 #include "InternalReadableStream.h"
 #include "JSValueInWrappedObject.h"
@@ -62,7 +62,7 @@ struct DetachedReadableStream {
     Ref<MessagePort> readableStreamPort;
 };
 
-class ReadableStream : public RefCounted<ReadableStream>, public ContextDestructionObserver {
+class ReadableStream : public RefCounted<ReadableStream>, public ActiveDOMObject {
 public:
     enum class ReaderMode { Byob };
     struct GetReaderOptions {
@@ -88,9 +88,10 @@ public:
     ExceptionOr<DetachedReadableStream> runTransferSteps(JSDOMGlobalObject&);
     static ExceptionOr<Ref<ReadableStream>> runTransferReceivingSteps(JSDOMGlobalObject&, DetachedReadableStream&&);
 
-    // ContextDestructionObserver.
+    // ActiveDOMObject.
     void ref() const final { RefCounted::ref(); }
     void deref() const final { RefCounted::deref(); }
+    void stop() final;
 
     Ref<DOMPromise> cancelForBindings(JSDOMGlobalObject&, JSC::JSValue);
     ExceptionOr<ReadableStreamReader> getReader(JSDOMGlobalObject&, const GetReaderOptions&);

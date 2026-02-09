@@ -140,18 +140,22 @@ ExceptionOr<Ref<ReadableStream>> ReadableStream::createFromJSValues(JSC::JSGloba
     if (result.hasException())
         return result.releaseException();
 
-    return adoptRef(*new ReadableStream(protect(jsDOMGlobalObject.scriptExecutionContext()).get(), result.releaseReturnValue()));
+    Ref readableStream = adoptRef(*new ReadableStream(protect(jsDOMGlobalObject.scriptExecutionContext()).get(), result.releaseReturnValue()));
+    readableStream->suspendIfNeeded();
+
+    return { WTF::move(readableStream) };
 }
 
 ExceptionOr<Ref<ReadableStream>> ReadableStream::createFromByteUnderlyingSource(JSDOMGlobalObject& globalObject, JSC::JSValue underlyingSource, UnderlyingSource&& underlyingSourceDict, double highWaterMark)
 {
     Ref readableStream = adoptRef(*new ReadableStream(protect(globalObject.scriptExecutionContext()).get()));
+    readableStream->suspendIfNeeded();
 
     auto exception = readableStream->setupReadableByteStreamControllerFromUnderlyingSource(globalObject, underlyingSource, WTF::move(underlyingSourceDict), highWaterMark);
     if (exception.hasException())
         return exception.releaseException();
 
-    return readableStream;
+    return { WTF::move(readableStream) };
 }
 
 ExceptionOr<Ref<InternalReadableStream>> ReadableStream::createInternalReadableStream(JSDOMGlobalObject& globalObject, Ref<ReadableStreamSource>&& source)
@@ -167,7 +171,10 @@ ExceptionOr<Ref<ReadableStream>> ReadableStream::create(JSDOMGlobalObject& globa
 Ref<ReadableStream> ReadableStream::create(Ref<InternalReadableStream>&& internalReadableStream)
 {
     auto* globalObject = internalReadableStream->globalObject();
-    return adoptRef(*new ReadableStream(protect(globalObject->scriptExecutionContext()).get(), WTF::move(internalReadableStream)));
+    Ref readableStream = adoptRef(*new ReadableStream(protect(globalObject->scriptExecutionContext()).get(), WTF::move(internalReadableStream)));
+    readableStream->suspendIfNeeded();
+
+    return { WTF::move(readableStream) };
 }
 
 class AsyncIteratorSource : public ReadableStreamSource, public RefCountedAndCanMakeWeakPtr<AsyncIteratorSource> {
@@ -244,7 +251,7 @@ ExceptionOr<Ref<ReadableStream>> ReadableStream::from(JSDOMGlobalObject& globalO
 }
 
 ReadableStream::ReadableStream(ScriptExecutionContext* context, RefPtr<InternalReadableStream>&& internalReadableStream, RefPtr<DependencyToVisit>&& dependencyToVisit, IsSourceReachableFromOpaqueRoot isSourceReachableFromOpaqueRoot)
-    : ContextDestructionObserver(context)
+    : ActiveDOMObject(context)
     , m_isSourceReachableFromOpaqueRoot(isSourceReachableFromOpaqueRoot == IsSourceReachableFromOpaqueRoot::Yes)
     , m_internalReadableStream(WTF::move(internalReadableStream))
     , m_dependencyToVisit(WTF::move(dependencyToVisit))
@@ -255,6 +262,12 @@ ReadableStream::~ReadableStream()
 {
     if (RefPtr sourceTeedStream = m_sourceTeedStream.get())
         sourceTeedStream->teedBranchIsDestroyed(*this);
+}
+
+void ReadableStream::stop()
+{
+    if (m_controller)
+        m_controller->stop();
 }
 
 // https://streams.spec.whatwg.org/#rs-cancel
@@ -384,6 +397,8 @@ ReadableStreamDefaultReader* ReadableStream::defaultReader()
 Ref<ReadableStream> ReadableStream::createReadableByteStream(JSDOMGlobalObject& globalObject, ReadableByteStreamController::PullAlgorithm&& pullAlgorithm, ReadableByteStreamController::CancelAlgorithm&& cancelAlgorithm, ByteStreamOptions&& options)
 {
     Ref readableStream = adoptRef(*new ReadableStream(protect(globalObject.scriptExecutionContext()).get(), { }, WTF::move(options.dependencyToVisit), options.isSourceReachableFromOpaqueRoot));
+    readableStream->suspendIfNeeded();
+
     readableStream->setupReadableByteStreamController(globalObject, WTF::move(pullAlgorithm), WTF::move(cancelAlgorithm), options.highwaterMark, options.startSynchronously);
     return readableStream;
 }
@@ -452,7 +467,7 @@ ExceptionOr<void> ReadableStream::setupReadableByteStreamControllerFromUnderlyin
 
     // https://streams.spec.whatwg.org/#set-up-readable-byte-stream-controller
     ASSERT(!m_controller);
-    lazyInitialize(m_controller, std::unique_ptr<ReadableByteStreamController>(new ReadableByteStreamController(*this, underlyingSource, WTF::move(underlyingSourceDict.pull), WTF::move(underlyingSourceDict.cancel), highWaterMark, underlyingSourceDict.autoAllocateChunkSize.value_or(0))));
+    lazyInitialize(m_controller, std::unique_ptr<ReadableByteStreamController>(new ReadableByteStreamController(globalObject, *this, underlyingSource, WTF::move(underlyingSourceDict.pull), WTF::move(underlyingSourceDict.cancel), highWaterMark, underlyingSourceDict.autoAllocateChunkSize.value_or(0))));
 
     return m_controller->start(globalObject, underlyingSourceDict.start.get());
 }
@@ -643,10 +658,8 @@ void ReadableStream::visitAdditionalChildren(JSC::AbstractSlotVisitor& visitor, 
     if (m_dependencyToVisit)
         m_dependencyToVisit->visit(visitor);
 
-    if (m_controller) {
-        m_controller->underlyingSourceConcurrently().visit(visitor);
-        m_controller->storedErrorConcurrently().visit(visitor);
-    }
+    if (m_controller)
+        m_controller->visitDirectChildren(visitor);
 }
 
 void ReadableStream::setTeedBranches(ReadableStream& branch0, ReadableStream& branch1)
