@@ -184,8 +184,6 @@ void ParentalControlsURLFilter::isURLAllowed(const URL& mainDocumentURL, const U
 
 void ParentalControlsURLFilter::isURLAllowedImpl(const URL& mainDocumentURL, const URL& url, CompletionHandler<void(bool, NSData *)>&& completionHandler)
 {
-    // FIXME: rdar://168622817
-    UNUSED_PARAM(mainDocumentURL);
     ASSERT(isMainThread());
 
     RetainPtr wcrBrowserEngineClient = effectiveWCRBrowserEngineClient();
@@ -196,9 +194,15 @@ void ParentalControlsURLFilter::isURLAllowedImpl(const URL& mainDocumentURL, con
         return;
     }
 
-    [wcrBrowserEngineClient evaluateURL:url.createNSURL().get() withCompletion:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
+    if ([wcrBrowserEngineClient respondsToSelector:@selector(evaluateURL:mainDocumentURL:withCompletion:onCompletionQueue:)]) {
+        [wcrBrowserEngineClient evaluateURL:url.createNSURL().get() mainDocumentURL:mainDocumentURL.createNSURL().get() withCompletion:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
         completionHandler(!shouldBlock, replacementData);
-    }).get() onCompletionQueue:workQueueSingleton().dispatchQueue()];
+        }).get() onCompletionQueue:workQueueSingleton().dispatchQueue()];
+    } else {
+        [wcrBrowserEngineClient evaluateURL:url.createNSURL().get() withCompletion:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
+        completionHandler(!shouldBlock, replacementData);
+        }).get() onCompletionQueue:workQueueSingleton().dispatchQueue()];
+    }
 }
 
 void ParentalControlsURLFilter::allowURL(const URL& url, CompletionHandler<void(bool)>&& completionHandler)
