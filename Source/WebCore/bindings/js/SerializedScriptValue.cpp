@@ -1676,7 +1676,7 @@ private:
         else
             write(DOMPointReadOnlyTag);
 
-        dumpDOMPoint(jsCast<JSDOMPointReadOnly*>(obj)->protectedWrapped());
+        dumpDOMPoint(protect(jsCast<JSDOMPointReadOnly*>(obj)->wrapped()));
     }
 
     void dumpDOMRect(JSObject* obj)
@@ -1811,7 +1811,7 @@ private:
         } else if (m_context == SerializationContext::CloneAcrossWorlds) {
             write(InMemoryOffscreenCanvasTag);
             write(static_cast<uint32_t>(m_inMemoryOffscreenCanvases.size()));
-            m_inMemoryOffscreenCanvases.append(jsCast<JSOffscreenCanvas*>(obj)->protectedWrapped());
+            m_inMemoryOffscreenCanvases.append(protect(jsCast<JSOffscreenCanvas*>(obj)->wrapped()));
             return;
         }
 
@@ -2149,7 +2149,7 @@ private:
                 } else if (m_context == SerializationContext::CloneAcrossWorlds) {
                     write(InMemoryMessagePortTag);
                     write(static_cast<uint32_t>(m_inMemoryMessagePorts.size()));
-                    m_inMemoryMessagePorts.append(jsCast<JSMessagePort*>(obj)->protectedWrapped());
+                    m_inMemoryMessagePorts.append(protect(jsCast<JSMessagePort*>(obj)->wrapped()));
                     return true;
                 }
                 // MessagePort object could not be found in transferred message ports

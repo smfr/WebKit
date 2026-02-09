@@ -181,7 +181,7 @@ void JSShadowRealmGlobalScopeOwner::finalize(JSC::Handle<JSC::Unknown> handle, v
 {
     SUPPRESS_MEMORY_UNSAFE_CAST auto* jsShadowRealmGlobalScope = static_cast<JSShadowRealmGlobalScope*>(handle.slot()->asCell());
     auto& world = *static_cast<DOMWrapperWorld*>(context);
-    uncacheWrapper(world, jsShadowRealmGlobalScope->protectedWrapped().ptr(), jsShadowRealmGlobalScope);
+    uncacheWrapper(world, protect(jsShadowRealmGlobalScope->wrapped()).ptr(), jsShadowRealmGlobalScope);
 }
 
 ShadowRealmGlobalScope* JSShadowRealmGlobalScope::toWrapped(JSC::VM&, JSC::JSValue value)

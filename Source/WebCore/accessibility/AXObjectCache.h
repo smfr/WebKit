@@ -702,7 +702,6 @@ public:
     AXComputedObjectAttributeCache* computedObjectAttributeCache() { return m_computedObjectAttributeCache.get(); }
 
     Document* document() const { return m_document; }
-    RefPtr<Document> protectedDocument() const;
     FrameIdentifier frameID() const { return m_frameID; }
 
     RefPtr<Page> page() const;

@@ -994,9 +994,6 @@ public:
     virtual bool isWidget() const = 0;
     virtual Widget* widget() const = 0;
     virtual PlatformWidget platformWidget() const = 0;
-#if PLATFORM(COCOA)
-    virtual RetainPtr<PlatformWidget> protectedPlatformWidget() const;
-#endif
     virtual Widget* widgetForAttachmentView() const = 0;
     virtual bool isPlugin() const = 0;
 
@@ -1280,7 +1277,6 @@ public:
     AccessibilityObjectWrapper* wrapper() const { return m_wrapper.get(); }
 #if PLATFORM(COCOA)
     WEBCORE_EXPORT RetainPtr<id> platformElement() const;
-    WEBCORE_EXPORT RetainPtr<AccessibilityObjectWrapper> protectedWrapper() const;
 #endif
     void setWrapper(AccessibilityObjectWrapper* wrapper) { m_wrapper = wrapper; }
     void detachWrapper(AccessibilityDetachmentType);

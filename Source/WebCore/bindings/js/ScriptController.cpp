@@ -523,11 +523,6 @@ Bindings::RootObject* ScriptController::bindingRootObject()
     return m_bindingRootObject.get();
 }
 
-RefPtr<JSC::Bindings::RootObject> ScriptController::protectedBindingRootObject()
-{
-    return bindingRootObject();
-}
-
 Ref<Bindings::RootObject> ScriptController::createRootObject(void* nativeHandle)
 {
     auto it = m_rootObjects.find(nativeHandle);
@@ -544,7 +539,7 @@ void ScriptController::collectIsolatedContexts(Vector<std::pair<JSC::JSGlobalObj
 {
     for (auto& jsWindowProxy : protect(windowProxy())->jsWindowProxiesAsVector()) {
         auto* lexicalGlobalObject = jsWindowProxy->window();
-        RefPtr origin = downcast<LocalDOMWindow>(jsWindowProxy->protectedWrapped())->protectedDocument()->securityOrigin();
+        RefPtr origin = protect(downcast<LocalDOMWindow>(protect(jsWindowProxy->wrapped()))->document())->securityOrigin();
         result.append(std::make_pair(lexicalGlobalObject, WTF::move(origin)));
     }
 }

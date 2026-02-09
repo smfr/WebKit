@@ -3850,7 +3850,7 @@ bool AccessibilityObject::scrollByPage(ScrollByPageDirection direction) const
 
     if (newScrollPosition != scrollPosition) {
         scrollParent->scrollTo(newScrollPosition);
-        protectedDocument()->updateLayoutIgnorePendingStylesheets();
+        protect(document())->updateLayoutIgnorePendingStylesheets();
         return true;
     }
 

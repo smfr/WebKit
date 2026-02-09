@@ -86,17 +86,6 @@ String AXCoreObject::speechHint() const
     return builder.toString();
 }
 
-// FIXME: We should create an AXCoreObjectInline.h file and move protectedWrapper() and protectedPlatformWidget() into it.
-RetainPtr<AccessibilityObjectWrapper> AXCoreObject::protectedWrapper() const
-{
-    return m_wrapper.get();
-}
-
-RetainPtr<PlatformWidget> AXCoreObject::protectedPlatformWidget() const
-{
-    return platformWidget();
-}
-
 // When modifying attributed strings, the range can come from a source which may provide faulty information (e.g. the spell checker).
 // To protect against such cases, the range should be validated before adding or removing attributes.
 bool attributedStringContainsRange(NSAttributedString *attributedString, const NSRange& range)

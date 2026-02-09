@@ -92,7 +92,7 @@ String AccessibilityScrollView::ownerDebugDescription() const
     }
 
     CheckedPtr renderer = m_frameOwnerElement->renderer();
-    return makeString("owned by: "_s, renderer ? renderer->debugDescription() : protectedFrameOwnerElement()->debugDescription());
+    return makeString("owned by: "_s, renderer ? renderer->debugDescription() : protect(frameOwnerElement())->debugDescription());
 }
 
 String AccessibilityScrollView::extraDebugInfo() const
