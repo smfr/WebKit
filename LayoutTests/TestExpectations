@@ -8352,3 +8352,5 @@ imported/w3c/web-platform-tests/html/browsers/browsing-the-web/history-traversal
 imported/w3c/web-platform-tests/html/browsers/browsing-the-web/history-traversal/pageswap/pageswap-push-navigation-hidden-document.html [ Skip ]
 
 webkit.org/b/307086 http/tests/geolocation/geolocation-watch-position-does-not-leak.https.html [ Pass Failure ]
+
+imported/w3c/web-platform-tests/xml/xslt/encoding-single-chunk.html [ ImageOnlyFailure ]
