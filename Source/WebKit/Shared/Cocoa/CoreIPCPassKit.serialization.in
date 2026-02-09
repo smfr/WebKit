@@ -107,6 +107,7 @@ webkit_platform_headers: "CoreIPCPKSecureElementPass.h"
 #endif
 
 additional_forward_declaration: OBJC_CLASS PKSecureElementPass
+#if !HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
 [WebKitSecureCodingClass=PAL::getPKPaymentMethodClassSingleton(), SupportWKKeyedCoder, WebKitPlatform] webkit_secure_coding PKPaymentMethod {
     type: Number
     displayName: String
@@ -117,6 +118,7 @@ additional_forward_declaration: OBJC_CLASS PKSecureElementPass
     installmentBindToken: String
     usePeerPaymentBalance: Number
 }
+#endif
 
 #if !HAVE(WK_SECURE_CODING_PKPAYMENTSETUPFEATURE)
 additional_forward_declaration: OBJC_CLASS NSSet

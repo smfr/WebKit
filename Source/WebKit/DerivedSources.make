@@ -675,6 +675,7 @@ SERIALIZATION_DESCRIPTION_FILES = \
 	Shared/Cocoa/CoreIPCPersonNameComponents.serialization.in \
 	Shared/Cocoa/CoreIPCPKDateComponentsRange.serialization.in \
 	Shared/Cocoa/CoreIPCPKPaymentMerchantSession.serialization.in \
+	Shared/Cocoa/CoreIPCPKPaymentMethod.serialization.in \
 	Shared/Cocoa/CoreIPCPKPaymentSetupFeature.serialization.in \
 	Shared/Cocoa/CoreIPCPKPaymentToken.serialization.in \
 	Shared/Cocoa/CoreIPCPKShippingMethod.serialization.in \

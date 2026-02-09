@@ -30,6 +30,9 @@
 #include "ArgumentCodersCocoa.h"
 #include "CoreIPCPKDateComponentsRange.h"
 #if USE(PASSKIT)
+#if HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
+#include "CoreIPCPKPaymentMethod.h"
+#endif
 #if HAVE(WK_SECURE_CODING_PKPAYMENTMERCHANTSESSION)
 #include "CoreIPCPKPaymentMerchantSession.h"
 #endif
@@ -52,7 +55,9 @@ class CoreIPCArray;
 class CoreIPCCFType;
 class CoreIPCColor;
 #if USE(PASSKIT)
+#if !HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
 class CoreIPCPKPaymentMethod;
+#endif
 #if !HAVE(WK_SECURE_CODING_PKPAYMENTMERCHANTSESSION)
 class CoreIPCPKPaymentMerchantSession;
 #endif

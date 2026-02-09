@@ -28,6 +28,7 @@
 #import "ArgumentCodersCocoa.h"
 #import "CoreIPCCFDictionary.h"
 #import "CoreIPCError.h"
+#import "CoreIPCPKPaymentMethod.h"
 #import "CoreIPCPKPaymentSetupFeature.h"
 #import "CoreIPCPKShippingMethod.h"
 #import "CoreIPCPlistDictionary.h"
@@ -2360,4 +2361,98 @@ TEST(CoreIPCCFDictionary, InsertDifferentKeyTypes)
     EXPECT_FALSE(CFDictionaryContainsKey(cfDictionary2.get(), socketKey.get()));
 }
 
+#if USE(PASSKIT) && HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
+TEST(IPCSerialization, PKPaymentMethod)
+{
+    RetainPtr<CNPostalAddress> address = postalAddressForTesting();
+    RetainPtr<CNLabeledValue> labeledPostalAddress = adoptNS([[PAL::getCNLabeledValueClassSingleton() alloc] initWithLabel:@"Work" value:address.get()]);
+    RetainPtr<CNLabeledValue> labeledEmailAddress = adoptNS([[PAL::getCNLabeledValueClassSingleton() alloc] initWithLabel:@"WorkSPAM" value:@"spam@webkit.org"]);
+
+    RetainPtr<CNMutableContact> billingContact = adoptNS([PAL::getCNMutableContactClassSingleton() new]);
+    billingContact.get().contactType = CNContactTypePerson;
+    billingContact.get().namePrefix = @"Mrs";
+    billingContact.get().givenName = @"WebKit";
+    billingContact.get().middleName = @"von";
+    billingContact.get().familyName = @"WebKittington";
+    billingContact.get().nameSuffix = @"The Third";
+    billingContact.get().organizationName = @"WebKit";
+    billingContact.get().jobTitle = @"Web Kitten";
+    billingContact.get().note = @"The Coolest Kitten out there";
+    billingContact.get().postalAddresses = @[ labeledPostalAddress.get() ];
+    billingContact.get().emailAddresses = @[ labeledEmailAddress.get() ];
+
+    // Test with all members set via CoreIPCPKPaymentMethodData
+    WebKit::CoreIPCPKPaymentMethodData data1;
+    data1.type = WebKit::PKPaymentMethodType::Credit;
+    data1.displayName = @"WebKitPay";
+    data1.network = @"WebKitCard";
+    data1.billingAddress = billingContact.get();
+    data1.installmentBindToken = @"TestBindToken123";
+    data1.usePeerPaymentBalance = true;
+    data1.peerPaymentQuoteIdentifier = @"TestQuoteID456";
+
+    WebKit::CoreIPCPKPaymentMethod wrapper1(std::optional<WebKit::CoreIPCPKPaymentMethodData>(WTF::move(data1)));
+    RetainPtr<id> reconstructed1 = wrapper1.toID();
+    EXPECT_TRUE([reconstructed1 isKindOfClass:PAL::getPKPaymentMethodClassSingleton()]);
+    PKPaymentMethod *reconstructedMethod1 = (PKPaymentMethod *)reconstructed1.get();
+    EXPECT_TRUE([reconstructedMethod1.displayName isEqualToString:@"WebKitPay"]);
+    EXPECT_TRUE([reconstructedMethod1.network isEqualToString:@"WebKitCard"]);
+    EXPECT_EQ(reconstructedMethod1.type, PKPaymentMethodTypeCredit);
+    runTestNS({ reconstructedMethod1 });
+
+    // Test with different types set
+    for (auto type : { WebKit::PKPaymentMethodType::Debit, WebKit::PKPaymentMethodType::Prepaid, WebKit::PKPaymentMethodType::Store, WebKit::PKPaymentMethodType::EMoney, WebKit::PKPaymentMethodType::Unknown }) {
+        WebKit::CoreIPCPKPaymentMethodData data;
+        data.type = type;
+        data.displayName = @"WebKitPay";
+        data.network = @"WebKitCard";
+        data.billingAddress = billingContact.get();
+        data.installmentBindToken = @"TestBindToken123";
+        data.usePeerPaymentBalance = true;
+        data.peerPaymentQuoteIdentifier = @"TestQuoteID456";
+
+        WebKit::CoreIPCPKPaymentMethod wrapper(std::optional<WebKit::CoreIPCPKPaymentMethodData>(WTF::move(data)));
+        RetainPtr<id> reconstructed = wrapper.toID();
+        EXPECT_TRUE([reconstructed isKindOfClass:PAL::getPKPaymentMethodClassSingleton()]);
+        runTestNS({ (PKPaymentMethod *)reconstructed.get() });
+    }
+
+    // Test with usePeerPaymentBalance set to false
+    WebKit::CoreIPCPKPaymentMethodData data2;
+    data2.type = WebKit::PKPaymentMethodType::Credit;
+    data2.displayName = @"WebKitPay";
+    data2.network = @"WebKitCard";
+    data2.billingAddress = billingContact.get();
+    data2.installmentBindToken = @"TestBindToken123";
+    data2.usePeerPaymentBalance = false;
+    data2.peerPaymentQuoteIdentifier = @"TestQuoteID456";
+
+    WebKit::CoreIPCPKPaymentMethod wrapper2(std::optional<WebKit::CoreIPCPKPaymentMethodData>(WTF::move(data2)));
+    RetainPtr<id> reconstructed2 = wrapper2.toID();
+    EXPECT_TRUE([reconstructed2 isKindOfClass:PAL::getPKPaymentMethodClassSingleton()]);
+    runTestNS({ (PKPaymentMethod *)reconstructed2.get() });
+
+    // Test with nil optional fields
+    WebKit::CoreIPCPKPaymentMethodData data3;
+    data3.type = WebKit::PKPaymentMethodType::Credit;
+    data3.displayName = @"WebKitPay";
+    data3.network = @"WebKitCard";
+
+    WebKit::CoreIPCPKPaymentMethod wrapper3(std::optional<WebKit::CoreIPCPKPaymentMethodData>(WTF::move(data3)));
+    RetainPtr<id> reconstructed3 = wrapper3.toID();
+    EXPECT_TRUE([reconstructed3 isKindOfClass:PAL::getPKPaymentMethodClassSingleton()]);
+    runTestNS({ (PKPaymentMethod *)reconstructed3.get() });
+
+    // Test with nil paymentMethod
+    WebKit::CoreIPCPKPaymentMethod wrapper4(nil);
+    RetainPtr<id> reconstructed4 = wrapper4.toID();
+    EXPECT_TRUE(reconstructed4.get() == nil);
+
+    // Test with empty data
+    WebKit::CoreIPCPKPaymentMethod wrapper5(std::optional<WebKit::CoreIPCPKPaymentMethodData>(WebKit::CoreIPCPKPaymentMethodData { }));
+    RetainPtr<id> reconstructed5 = wrapper5.toID();
+    EXPECT_TRUE([reconstructed5 isKindOfClass:PAL::getPKPaymentMethodClassSingleton()]);
+    runTestNS({ (PKPaymentMethod *)reconstructed5.get() });
+}
+#endif // USE(PASSKIT) && HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
 
