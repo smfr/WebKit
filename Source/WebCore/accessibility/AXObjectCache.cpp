@@ -710,7 +710,7 @@ Ref<AccessibilityRenderObject> AXObjectCache::createObjectFromRenderer(RenderObj
         return AccessibilityMathMLElement::create(AXID::generate(), renderer, *this, isAnonymousOperator);
 #endif
 
-    if (RefPtr select = dynamicDowncast<HTMLSelectElement>(node); select && select->usesMenuListDeprecated())
+    if (RefPtr select = dynamicDowncast<HTMLSelectElement>(node); select && select->usesMenuList())
         return AccessibilityMenuList::create(AXID::generate(), renderer, *this);
 
     // Progress indicator.
@@ -835,7 +835,7 @@ AccessibilityObject* AXObjectCache::getOrCreateSlow(Node& node, IsPartOfRelation
         if (!select)
             return nullptr;
         RefPtr<AccessibilityObject> object;
-        if (select->usesMenuListDeprecated()) {
+        if (select->usesMenuList()) {
             if (!optionElement || !select->renderer())
                 return nullptr;
             object = AccessibilityMenuListOption::create(AXID::generate(), *optionElement, *this);

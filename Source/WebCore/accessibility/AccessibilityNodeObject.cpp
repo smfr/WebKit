@@ -833,7 +833,7 @@ void AccessibilityNodeObject::addChildren()
 #else
     // For listbox selects, use listItems() to get option elements instead of
     // composedTreeChildren which would return shadow DOM content.
-    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node); selectElement && !selectElement->usesMenuListDeprecated()) {
+    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node); selectElement && !selectElement->usesMenuList()) {
         for (const auto& listItem : selectElement->listItems()) {
             if (listItem)
                 addChild(cache->getOrCreate(*listItem));
@@ -911,7 +911,7 @@ AXCoreObject::AccessibilityChildrenVector AccessibilityNodeObject::visibleChildr
     }
 
     // For HTMLSelectElement with arbitrary renderer use the size attribute as approximation.
-    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node()); selectElement && !selectElement->usesMenuListDeprecated()) {
+    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node()); selectElement && !selectElement->usesMenuList()) {
         const auto& children = const_cast<AccessibilityNodeObject*>(this)->unignoredChildren();
         AccessibilityChildrenVector result;
         unsigned visibleCount = selectElement->size();

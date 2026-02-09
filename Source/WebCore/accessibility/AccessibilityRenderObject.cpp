@@ -806,7 +806,7 @@ String AccessibilityRenderObject::stringValue() const
     }
 
     // For menu list select elements, get the selected option's aria-label or label.
-    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node()); selectElement && selectElement->usesMenuListDeprecated()) {
+    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node()); selectElement && selectElement->usesMenuList()) {
         int selectedIndex = selectElement->selectedIndex();
         const auto& listItems = selectElement->listItems();
         if (selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < listItems.size()) {
@@ -1254,7 +1254,7 @@ bool AccessibilityRenderObject::computeIsIgnored() const
     // Ignore popup menu items because AppKit does.
     if (RefPtr node = this->node()) {
         for (Ref ancestor : ancestorsOfType<HTMLSelectElement>(*node)) {
-            if (ancestor->usesMenuListDeprecated())
+            if (ancestor->usesMenuList())
                 return true;
         }
     }
@@ -2403,7 +2403,7 @@ bool AccessibilityRenderObject::renderObjectIsObservable(RenderObject& renderer)
         return true;
 
     // Element-based check for HTMLSelectElement listbox.
-    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(*element); selectElement && !selectElement->usesMenuListDeprecated())
+    if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(*element); selectElement && !selectElement->usesMenuList())
         return true;
 
     // Textboxes should send out notifications.
@@ -2513,7 +2513,7 @@ AccessibilityRole AccessibilityRenderObject::determineAccessibilityRole()
         return AccessibilityRole::TextArea;
     // Element-based check for HTMLSelectElement with any renderer.
     if (RefPtr selectElement = dynamicDowncast<HTMLSelectElement>(node)) {
-        if (selectElement->usesMenuListDeprecated())
+        if (selectElement->usesMenuList())
             return selectElement->multiple() ? AccessibilityRole::ListBox : AccessibilityRole::PopUpButton;
         return AccessibilityRole::ListBox;
     }
