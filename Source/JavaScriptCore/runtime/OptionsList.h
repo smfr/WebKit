@@ -664,6 +664,7 @@ bool hasCapacityToUseLargeGigacage();
     v(Bool, useWasmRelaxedSIMD, false, Normal, "Allow the relaxed simd instructions and types from the wasm relaxed simd spec."_s) \
     v(Bool, useWasmSIMD, true, Normal, "Allow the new simd instructions and types from the wasm simd spec."_s) \
     v(Bool, useWasmTailCalls, true, Normal, "Allow the new instructions from the wasm tail calls spec."_s) \
+    v(Bool, useWasmMultiMemory, false, Normal, "Allow wasm code to access multiple memories") \
 
 
 

@@ -1186,7 +1186,7 @@ public:
             // than the declared 'maximum' will trap, so we can compare against that number. If there was no declared 'maximum' then we still know that
             // any access equal to or greater than 4GiB will trap, no need to add the redzone.
             if (uoffset >= Memory::fastMappedRedzoneBytes()) {
-                uint64_t maximum = m_info.memory.maximum() ? m_info.memory.maximum().bytes() : std::numeric_limits<uint32_t>::max();
+                uint64_t maximum = m_info.theOnlyMemory().maximum() ? m_info.theOnlyMemory().maximum().bytes() : std::numeric_limits<uint32_t>::max();
                 m_jit.zeroExtend32ToWord(pointerLocation.asGPR(), wasmScratchGPR);
                 if (boundary)
                     m_jit.addPtr(TrustedImmPtr(boundary), wasmScratchGPR);

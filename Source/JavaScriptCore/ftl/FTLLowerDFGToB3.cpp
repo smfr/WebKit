@@ -13973,7 +13973,7 @@ IGNORE_CLANG_WARNINGS_END
         bool wasmBaseMemoryPointerConfiguredAsInputContraints = false;
         auto* instance = wasmFunction->instance();
         arguments.append(ConstrainedValue(frozenPointer(m_graph.freeze(instance)), ValueRep::reg(GPRInfo::wasmContextInstancePointer)));
-        if (!!instance->module().moduleInformation().memory) {
+        if (instance->module().moduleInformation().memoryCount()) {
             auto mode = instance->memoryMode();
             if (mode == MemoryMode::Signaling || (mode == MemoryMode::BoundsChecking && instance->memory()->sharingMode() == MemorySharingMode::Shared)) {
                 // Capacity and basePointer will not be changed.
@@ -14057,7 +14057,7 @@ IGNORE_CLANG_WARNINGS_END
                 constexpr GPRReg scratchGPR = GPRInfo::nonPreservedNonArgumentGPR0;
                 static_assert(noOverlap(GPRInfo::wasmBoundsCheckingSizeRegister, GPRInfo::wasmBaseMemoryPointer, scratchGPR));
                 ASSERT(!RegisterSetBuilder::macroClobberedGPRs().contains(scratchGPR, IgnoreVectors));
-                if (!!instance->module().moduleInformation().memory) {
+                if (instance->module().moduleInformation().memoryCount()) {
                     auto mode = instance->memoryMode();
                     if (!(mode == MemoryMode::Signaling || (mode == MemoryMode::BoundsChecking && instance->memory()->sharingMode() == MemorySharingMode::Shared))) {
                         // We always clobber GPRInfo::wasmBoundsCheckingSizeRegister regardless of mode. It is OK since patchpoint already said it is clobbered.

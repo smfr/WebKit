@@ -2978,7 +2978,7 @@ void BBQJIT::emitCatchPrologue()
     m_jit.subPtr(GPRInfo::callFrameRegister, GPRInfo::nonPreservedNonArgumentGPR0, GPRInfo::nonPreservedNonArgumentGPR0);
     m_jit.move(GPRInfo::nonPreservedNonArgumentGPR0, CCallHelpers::stackPointerRegister);
 #endif
-    if (!!m_info.memory)
+    if (m_info.memoryCount())
         loadWebAssemblyGlobalState(wasmBaseMemoryPointer, wasmBoundsCheckingSizeRegister);
     static_assert(noOverlap(GPRInfo::nonPreservedNonArgumentGPR0, GPRInfo::returnValueGPR, GPRInfo::returnValueGPR2));
 }
@@ -3308,13 +3308,13 @@ void BBQJIT::restoreWebAssemblyGlobalState()
 {
     restoreWebAssemblyContextInstance();
     // FIXME: We should just store these registers on stack and load them.
-    if (!!m_info.memory)
+    if (m_info.memoryCount())
         loadWebAssemblyGlobalState(wasmBaseMemoryPointer, wasmBoundsCheckingSizeRegister);
 }
 
 void BBQJIT::restoreWebAssemblyGlobalStateAfterWasmCall()
 {
-    if (!!m_info.memory && (m_mode == MemoryMode::Signaling || m_info.memory.isShared())) {
+    if (m_info.memoryCount() && (m_mode == MemoryMode::Signaling || m_info.theOnlyMemory().isShared())) {
         // If memory is signaling or shared, then memoryBase and memorySize will not change. This means that only thing we should check here is GPRInfo::wasmContextInstancePointer is the same or not.
         // Let's consider the case, this was calling a JS function. So it can grow / modify memory whatever. But memoryBase and memorySize are kept the same in this case.
         m_jit.loadPtr(Address(GPRInfo::callFrameRegister, CallFrameSlot::codeBlock * sizeof(Register)), wasmScratchGPR);
