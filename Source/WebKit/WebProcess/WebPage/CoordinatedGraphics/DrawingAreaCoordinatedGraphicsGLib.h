@@ -115,7 +115,6 @@ private:
     void scheduleDisplay();
     void displayTimerFired();
     void display();
-    void display(UpdateInfo&);
 
     // Whether we're currently processing an UpdateGeometry message.
     bool m_inUpdateGeometry { false };
@@ -136,10 +135,6 @@ private:
 
     // Frame renderer used in non-composited mode.
     std::unique_ptr<NonCompositedFrameRenderer> m_nonCompositedFrameRenderer;
-
-    WebCore::Region m_dirtyRegion;
-    WebCore::IntRect m_scrollRect;
-    WebCore::IntSize m_scrollOffset;
 
     // Whether we're waiting for a DidUpdate message. Used for throttling paints so that the
     // web process won't paint more frequent than the UI process can handle.
