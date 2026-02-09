@@ -182,6 +182,7 @@ static id attributeValue(id element, NSString *attribute)
     static NeverDestroyed<RetainPtr<NSArray>> internalAttributes = @[
         @"AXARIAPressedIsPresent",
         @"AXARIARole",
+        @"_AXActionTargets",
         @"AXAutocompleteValue",
         @"AXClickPoint",
         @"AXControllerFor",
@@ -637,6 +638,11 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElementMac::elementForAttributeAtI
 RefPtr<AccessibilityUIElement> AccessibilityUIElementMac::linkedUIElementAtIndex(unsigned index)
 {
     return elementForAttributeAtIndex(NSAccessibilityLinkedUIElementsAttribute, index);
+}
+
+RefPtr<AccessibilityUIElement> AccessibilityUIElementMac::ariaActionsElementAtIndex(unsigned index)
+{
+    return elementForAttributeAtIndex(@"_AXActionTargets", index);
 }
 
 RefPtr<AccessibilityUIElement> AccessibilityUIElementMac::controllerElementAtIndex(unsigned index)
@@ -1902,6 +1908,16 @@ JSRetainPtr<JSStringRef> AccessibilityUIElementMac::textInputMarkedRange() const
 bool AccessibilityUIElementMac::dismiss()
 {
     return performAction(@"AXDismissAction");
+}
+
+bool AccessibilityUIElementMac::invokeCustomActionAtIndex(unsigned index)
+{
+    NSArray *customActions = [m_element.getAutoreleased() accessibilityCustomActions];
+    if (index >= customActions.count)
+        return false;
+
+    NSAccessibilityCustomAction *action = customActions[index];
+    return action.handler();
 }
 
 bool AccessibilityUIElementMac::setSelectedTextMarkerRange(AccessibilityTextMarkerRange* markerRange)

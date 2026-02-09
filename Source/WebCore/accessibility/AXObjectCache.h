@@ -913,7 +913,7 @@ private:
 
     // Relationships between objects.
     static Vector<QualifiedName>& relationAttributes();
-    static AXRelation attributeToRelationType(const QualifiedName&);
+    AXRelation attributeToRelationType(const QualifiedName&);
     enum class AddSymmetricRelation : bool { No, Yes };
     static AXRelation symmetricRelation(AXRelation);
     bool addRelation(Element&, Element&, AXRelation);

@@ -868,6 +868,9 @@ accessibility/table-ancestry.html [ Skip ]
 # AccessibilityUIElement::speakAs is not implemented.
 accessibility/dynamic-speak-as.html [ Failure ]
 
+# Missing AccessibilityUIElement::{ariaActionsElementAtIndex, invokeCustomActionAtIndex} implementations.
+accessibility/aria-actions.html [ Skip ]
+
 # Failing since introduced, Atspi::State::Visited may not be set / updated properly?
 accessibility/link-becomes-visited.html [ Failure ]
 

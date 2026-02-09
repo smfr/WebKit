@@ -2246,6 +2246,7 @@ bool Element::isElementReflectionAttribute(const Settings& settings, const Quali
 bool Element::isElementsArrayReflectionAttribute(const QualifiedName& name)
 {
     switch (name.nodeName()) {
+    case AttributeNames::aria_actionsAttr:
     case AttributeNames::aria_controlsAttr:
     case AttributeNames::aria_describedbyAttr:
     case AttributeNames::aria_detailsAttr:

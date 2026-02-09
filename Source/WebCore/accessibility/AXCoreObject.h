@@ -362,6 +362,8 @@ enum class CompositionState : uint8_t { Started, InProgress, Ended };
 // Relationships between AX objects.
 enum class AXRelation : uint8_t {
     None,
+    Actions,
+    ActionsOf,
     ActiveDescendant,
     ActiveDescendantOf,
     ControlledBy,
@@ -744,6 +746,8 @@ public:
     // Retrieval of related objects.
     AXCoreObject* activeDescendant() const;
     AccessibilityChildrenVector activeDescendantOfObjects() const { return relatedObjects(AXRelation::ActiveDescendantOf); }
+    AccessibilityChildrenVector associatedActionElements() const { return relatedObjects(AXRelation::Actions); }
+    AccessibilityChildrenVector ariaActionsOfObjects() const { return relatedObjects(AXRelation::ActionsOf); }
     AccessibilityChildrenVector controlledObjects() const { return relatedObjects(AXRelation::ControllerFor); }
     AccessibilityChildrenVector controllers() const { return relatedObjects(AXRelation::ControlledBy); }
     AccessibilityChildrenVector describedByObjects() const { return relatedObjects(AXRelation::DescribedBy); }
@@ -1810,6 +1814,10 @@ String roleToPlatformString(AccessibilityRole);
 std::optional<AXTextMarkerRange> markerRangeFrom(NSRange, const AXCoreObject&);
 #endif
 Color defaultColor();
+
+// Performs a press action on the target object identified by treeID and targetID.
+// Handles the tree lookup and main thread execution. Returns true if the press succeeded.
+bool performCustomActionPress(std::optional<AXID> treeID, AXID targetID);
 
 // Intended to work with size-types (like IntSize) or rect-types (like LayoutRect).
 template <typename SizeOrRectType>

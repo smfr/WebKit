@@ -364,6 +364,11 @@ JSRetainPtr<JSStringRef> AccessibilityUIElement::computedRoleString()
     return nullptr;
 }
 
+RefPtr<AccessibilityUIElement> AccessibilityUIElement::ariaActionsElementAtIndex(unsigned)
+{
+    return nullptr;
+}
+
 RefPtr<AccessibilityUIElement> AccessibilityUIElement::controllerElementAtIndex(unsigned)
 {
     return nullptr;
@@ -428,6 +433,11 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElement::disclosedRowAtIndex(unsig
 }
 
 bool AccessibilityUIElement::dismiss()
+{
+    return false;
+}
+
+bool AccessibilityUIElement::invokeCustomActionAtIndex(unsigned)
 {
     return false;
 }

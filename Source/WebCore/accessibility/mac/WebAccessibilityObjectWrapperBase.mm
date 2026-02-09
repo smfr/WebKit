@@ -768,6 +768,33 @@ std::optional<SimpleRange> makeDOMRange(Document* document, NSRange range)
     return results;
 }
 
+- (Vector<CustomActionData>)baseAccessibilityCustomActionsData
+{
+    RefPtr<AXCoreObject> backingObject = self.axBackingObject;
+    if (!backingObject)
+        return { };
+
+    auto actionElements = backingObject->associatedActionElements();
+    if (actionElements.isEmpty())
+        return { };
+
+    Vector<CustomActionData> result;
+    result.reserveInitialCapacity(actionElements.size());
+
+    for (Ref actionElement : actionElements) {
+        // Per the spec, action targets must have an accessible name.
+        String actionName = actionElement->title();
+        if (actionName.isEmpty())
+            actionName = actionElement->description();
+        if (actionName.isEmpty())
+            continue;
+
+        result.append({ WTF::move(actionName), actionElement->objectID(), backingObject->treeID() });
+    }
+
+    return result;
+}
+
 // This is set by DRT when it wants to listen for notifications.
 static BOOL accessibilityShouldRepostNotifications;
 + (void)accessibilitySetShouldRepostNotifications:(BOOL)repost

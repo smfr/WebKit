@@ -519,6 +519,12 @@ TextStream& operator<<(TextStream& stream, AXRelation relation)
     case AXRelation::None:
         stream << "None";
         break;
+    case AXRelation::Actions:
+        stream << "Actions";
+        break;
+    case AXRelation::ActionsOf:
+        stream << "ActionsOf";
+        break;
     case AXRelation::ActiveDescendant:
         stream << "ActiveDescendant";
         break;

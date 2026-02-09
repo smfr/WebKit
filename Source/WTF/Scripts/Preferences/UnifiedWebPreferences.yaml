@@ -66,6 +66,20 @@
 #  defaults may override a default value at runtime, using the preference
 #  name prefixed with "WebKitDebug".
 
+ARIAActionsSupportEnabled:
+  type: bool
+  status: testable
+  category: dom
+  humanReadableName: "aria-actions"
+  humanReadableDescription: "Enable support for aria-actions"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 AVFoundationEnabled:
   type: bool
   status: embedder

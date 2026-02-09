@@ -77,6 +77,7 @@
 #import "RenderView.h"
 #import "RenderWidget.h"
 #import "ScrollView.h"
+#import "Settings.h"
 #import "TextIterator.h"
 #import "VisibleUnits.h"
 #import "WebCoreFrameView.h"
@@ -1937,6 +1938,9 @@ id attributeValueForTesting(const RefPtr<AXCoreObject>& backingObject, NSString 
     if ([attributeName isEqualToString:NSAccessibilityControllersAttribute])
         return makeNSArray(backingObject->controllers());
 
+    if ([attributeName isEqualToString:NSAccessibilityActionTargetsAttribute])
+        return makeNSArray(backingObject->associatedActionElements());
+
     if ([attributeName isEqualToString:NSAccessibilityControllerForAttribute])
         return makeNSArray(backingObject->controlledObjects());
 
@@ -3699,6 +3703,27 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     }
 
     return subarray;
+}
+
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions
+{
+    RefPtr<AXCoreObject> backingObject = self.updateObjectBackingStore;
+    if (!backingObject)
+        return nil;
+
+    auto actionsData = [self baseAccessibilityCustomActionsData];
+    if (actionsData.isEmpty())
+        return nil;
+
+    RetainPtr<NSMutableArray<NSAccessibilityCustomAction *>> actions = adoptNS([[NSMutableArray alloc] init]);
+    for (auto& actionData : actionsData) {
+        auto action = adoptNS([[NSAccessibilityCustomAction alloc] initWithName:actionData.name.createNSString().autorelease() handler:^BOOL {
+            return Accessibility::performCustomActionPress(actionData.treeID, actionData.targetID);
+        }]);
+        [actions addObject:action.get()];
+    }
+
+    return actions.autorelease();
 }
 
 - (NSString *)debugDescription

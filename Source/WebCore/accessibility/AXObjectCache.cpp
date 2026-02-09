@@ -5607,6 +5607,7 @@ AXTreeData AXObjectCache::treeData(std::optional<OptionSet<AXStreamOptions>> add
 Vector<QualifiedName>& AXObjectCache::relationAttributes()
 {
     static NeverDestroyed<Vector<QualifiedName>> relationAttributes = Vector<QualifiedName> {
+        aria_actionsAttr,
         aria_activedescendantAttr,
         aria_controlsAttr,
         aria_describedbyAttr,
@@ -5626,6 +5627,10 @@ Vector<QualifiedName>& AXObjectCache::relationAttributes()
 AXRelation AXObjectCache::symmetricRelation(AXRelation relation)
 {
     switch (relation) {
+    case AXRelation::Actions:
+        return AXRelation::ActionsOf;
+    case AXRelation::ActionsOf:
+        return AXRelation::Actions;
     case AXRelation::ActiveDescendant:
         return AXRelation::ActiveDescendantOf;
     case AXRelation::ActiveDescendantOf:
@@ -5670,6 +5675,8 @@ AXRelation AXObjectCache::symmetricRelation(AXRelation relation)
 
 AXRelation AXObjectCache::attributeToRelationType(const QualifiedName& attribute)
 {
+    if (attribute == aria_actionsAttr && m_document && m_document->settings().aRIAActionsSupportEnabled())
+        return AXRelation::Actions;
     if (attribute == aria_activedescendantAttr)
         return AXRelation::ActiveDescendant;
     if (attribute == aria_controlsAttr || attribute == commandforAttr || attribute == popovertargetAttr)
