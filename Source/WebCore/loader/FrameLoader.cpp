@@ -1075,15 +1075,23 @@ void FrameLoader::loadURLIntoChildFrame(const URL& url, const String& referer, L
 #endif
 
     // If we're moving in the back/forward list, we might want to replace the content
-    // of this child frame with whatever was there at that point.
+    // of this child frame with whatever was there at that point, though during session
+    // restoration, the child frame should be loaded normally through the frame tree
+    // restoration rather than using the history restoration path.
+    URL childURL { url };
     RefPtr parentItem = history().currentItem();
     if (parentItem && parentItem->children().size() && isBackForwardLoadType(loadType()) && !m_frame->document()->loadEventFinished()) {
-        if (RefPtr childItem = parentItem->childItemWithTarget(childFrame.tree().uniqueName())) {
-            Ref childLoader = childFrame.loader();
-            childItem->setFrameID(childFrame.frameID());
-            childLoader->m_requestedHistoryItem = childItem;
-            childLoader->loadDifferentDocumentItem(*childItem, nullptr, loadType(), MayAttemptCacheOnlyLoadForFormSubmissionItem, ShouldTreatAsContinuingLoad::No);
-            return;
+        if (RefPtr childItem = parentItem->childItemForFrame(childFrame)) {
+            if (!childItem->wasRestoredFromSession()) {
+                Ref childLoader = childFrame.loader();
+                childItem->setFrameID(childFrame.frameID());
+                childLoader->m_requestedHistoryItem = childItem;
+                childLoader->loadDifferentDocumentItem(*childItem, nullptr, loadType(), MayAttemptCacheOnlyLoadForFormSubmissionItem, ShouldTreatAsContinuingLoad::No);
+                return;
+            }
+
+            childItem->setWasRestoredFromSession(false);
+            childURL = URL { childItem->urlString() };
         }
     }
 
@@ -1091,7 +1099,7 @@ void FrameLoader::loadURLIntoChildFrame(const URL& url, const String& referer, L
     auto initiatedByMainFrame = lexicalFrame && lexicalFrame->isMainFrame() ? InitiatedByMainFrame::Yes : InitiatedByMainFrame::Unknown;
 
     RefPtr document = m_frame->document();
-    FrameLoadRequest frameLoadRequest { *document, document->securityOrigin(), { URL { url } }, selfTargetFrameName(), initiatedByMainFrame };
+    FrameLoadRequest frameLoadRequest { *document, document->securityOrigin(), { WTF::move(childURL) }, selfTargetFrameName(), initiatedByMainFrame };
     frameLoadRequest.setNewFrameOpenerPolicy(NewFrameOpenerPolicy::Suppress);
     frameLoadRequest.setLockBackForwardList(LockBackForwardList::Yes);
     frameLoadRequest.setIsInitialFrameSrcLoad(true);
