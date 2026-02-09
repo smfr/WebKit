@@ -300,6 +300,8 @@ public:
     bool shouldRewriteMediaRangeRequestForURL(const URL&) const;
     bool shouldDelayReloadWhenRegisteringServiceWorker() const;
 
+    bool ensureCaptionVisibilityInFullscreenAndPictureInPicture() const;
+
     bool shouldPreventKeyframeEffectAcceleration(const KeyframeEffect&) const;
 
     bool shouldEnterNativeFullscreenWhenCallingElementRequestFullscreenQuirk() const;
