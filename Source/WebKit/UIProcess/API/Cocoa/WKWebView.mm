@@ -7325,6 +7325,7 @@ static OptionSet<WebCore::DataDetectorType> coreDataDetectorTypes(_WKTextExtract
             .includeEventListeners = !!configuration.includeEventListeners,
             .includeAccessibilityAttributes = !!configuration.includeAccessibilityAttributes,
             .includeTextInAutoFilledControls = !!configuration.includeTextInAutoFilledControls,
+            .includeOffscreenPasswordFields = !!configuration.includeOffscreenPasswordFields,
 #if ENABLE(DATA_DETECTION)
             .dataDetectorTypes = coreDataDetectorTypes(configuration.dataDetectorTypes),
 #endif

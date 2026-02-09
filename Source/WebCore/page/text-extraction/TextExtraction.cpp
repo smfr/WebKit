@@ -220,6 +220,8 @@ struct TraversalContext {
     const FrameIdentifier frameIdentifier;
     Vector<WeakPtr<Node, WeakPtrImplWithEventTargetData>> enclosingBlocks;
     WeakHashMap<Node, unsigned, WeakPtrImplWithEventTargetData> enclosingBlockNumberMap;
+    WeakHashSet<Node, WeakPtrImplWithEventTargetData> additionalContainersToCollect;
+    unsigned inAdditionalContainerToCollectCount { 0 };
     Vector<bool, 1> hasOverflowItemsStack;
     unsigned onlyCollectTextAndLinksCount { 0 };
     bool mergeParagraphs { false };
@@ -720,7 +722,13 @@ static inline void extractRecursive(Node& node, Item& parentItem, TraversalConte
     if (isBlock)
         context.pushEnclosingBlock(node);
 
-    auto popEnclosingBlockScope = makeScopeExit([&] {
+    bool isAdditionalContainerToCollect = context.additionalContainersToCollect.contains(node);
+    if (isAdditionalContainerToCollect)
+        context.inAdditionalContainerToCollectCount++;
+
+    auto extractionScope = makeScopeExit([&] {
+        if (isAdditionalContainerToCollect)
+            context.inAdditionalContainerToCollectCount--;
         if (isBlock)
             context.popEnclosingBlock();
     });
@@ -842,7 +850,7 @@ static inline void extractRecursive(Node& node, Item& parentItem, TraversalConte
         },
         [&](ItemData&& result) {
             auto bounds = rootViewBounds(node);
-            if (!context.shouldIncludeNodeWithRect(bounds)) {
+            if (!context.inAdditionalContainerToCollectCount && !context.shouldIncludeNodeWithRect(bounds)) {
                 if (context.hasOverflowItemsStack.isEmpty()) {
                     ASSERT_NOT_REACHED();
                     return;
@@ -1012,6 +1020,27 @@ static Node* nodeFromJSHandle(JSHandleIdentifier identifier)
     return nullptr;
 }
 
+static RefPtr<ContainerNode> findLargeContainerAboveNode(Node& node, Node* belowRootNode = nullptr)
+{
+    // FIXME: Consider making this size threshold client-configurable in the future.
+    static constexpr FloatSize minimumSize { 280, 300 };
+    for (CheckedPtr renderer = node.renderer(); renderer; renderer = renderer->parent()) {
+        bool wasFixed = false;
+        auto bounds = renderer->absoluteBoundingBoxRect(true, &wasFixed);
+        if ((bounds.width() < minimumSize.width() || bounds.height() < minimumSize.height()) && !wasFixed)
+            continue;
+
+        RefPtr node = renderer->node();
+        if (RefPtr containerNode = dynamicDowncast<ContainerNode>(node))
+            return containerNode;
+
+        if (belowRootNode && belowRootNode == node)
+            break;
+    }
+
+    return { };
+}
+
 #if ENABLE(DATA_DETECTION)
 
 static RefPtr<ContainerNode> findContainerNodeForDataDetectorResults(Node& rootNode, OptionSet<DataDetectorType> types)
@@ -1044,23 +1073,7 @@ static RefPtr<ContainerNode> findContainerNodeForDataDetectorResults(Node& rootN
     if (!commonAncestor)
         return { };
 
-    // FIXME: Consider making this size threshold client-configurable in the future.
-    static constexpr FloatSize minimumSize { 280, 300 };
-    for (CheckedPtr renderer = commonAncestor->renderer(); renderer; renderer = renderer->parent()) {
-        bool wasFixed = false;
-        auto bounds = renderer->absoluteBoundingBoxRect(true, &wasFixed);
-        if ((bounds.width() < minimumSize.width() || bounds.height() < minimumSize.height()) && !wasFixed)
-            continue;
-
-        RefPtr node = renderer->node();
-        if (RefPtr containerNode = dynamicDowncast<ContainerNode>(node))
-            return containerNode;
-
-        if (&rootNode == node)
-            break;
-    }
-
-    return { };
+    return findLargeContainerAboveNode(*commonAncestor, &rootNode);
 }
 
 #endif // ENABLE(DATA_DETECTION)
@@ -1135,6 +1148,23 @@ Result extractItem(Request&& request, LocalFrame& frame)
                 nodesToSkip.add(node.releaseNonNull());
         }
 
+        WeakHashSet<Node, WeakPtrImplWithEventTargetData> additionalContainersToCollect;
+        RefPtr extractionRoot = dynamicDowncast<ContainerNode>(*extractionRootNode);
+        if (extractionRoot && request.includeOffscreenPasswordFields && request.collectionRectInRootView) {
+            Vector<Ref<HTMLInputElement>> passwordFields;
+            for (Ref input : descendantsOfType<HTMLInputElement>(*extractionRoot)) {
+                if (input->isPasswordField())
+                    passwordFields.append(input);
+            }
+
+            for (Ref passwordField : passwordFields) {
+                if (RefPtr container = findLargeContainerAboveNode(passwordField)) {
+                    addBoxShadowIfNeeded(*container, "0 0 10px #cb30e0"_s);
+                    additionalContainersToCollect.add(container.releaseNonNull());
+                }
+            }
+        }
+
         TraversalContext context {
             .originalRequest = { request },
             .clientNodeAttributes = WTF::move(clientNodeAttributes),
@@ -1144,6 +1174,8 @@ Result extractItem(Request&& request, LocalFrame& frame)
             .frameIdentifier = WTF::move(frameID),
             .enclosingBlocks = { },
             .enclosingBlockNumberMap = { },
+            .additionalContainersToCollect = WTF::move(additionalContainersToCollect),
+            .inAdditionalContainerToCollectCount = 0,
             .hasOverflowItemsStack = { false },
             .onlyCollectTextAndLinksCount = 0,
             .mergeParagraphs = request.mergeParagraphs,

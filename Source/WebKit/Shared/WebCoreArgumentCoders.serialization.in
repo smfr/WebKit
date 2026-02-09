@@ -6894,6 +6894,7 @@ header: <WebCore/TextExtractionTypes.h>
     bool includeEventListeners;
     bool includeAccessibilityAttributes;
     bool includeTextInAutoFilledControls;
+    bool includeOffscreenPasswordFields;
 #if ENABLE(DATA_DETECTION)
     OptionSet<WebCore::DataDetectorType> dataDetectorTypes;
 #endif
