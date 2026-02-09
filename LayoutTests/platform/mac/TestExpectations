@@ -2518,3 +2518,5 @@ fast/images/page-wide-animation-toggle.html [ Pass Timeout ]
 fast/images/individual-animation-toggle.html [ Pass Timeout ]
 
 webkit.org/b/304523 inspector/unit-tests/iterableweakset.html [ Pass Failure ]
+
+webkit.org/b/307300 [ Debug arm64 ] http/tests/iframe-monitor/blob-resource.html [ Pass Timeout ]
