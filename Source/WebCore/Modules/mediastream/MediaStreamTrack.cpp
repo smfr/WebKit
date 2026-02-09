@@ -209,6 +209,8 @@ bool MediaStreamTrack::enabled() const
 
 void MediaStreamTrack::setEnabled(bool enabled)
 {
+    if (RefPtr keeper = m_keeper.get())
+        keeper->setEnabled(enabled);
     m_private->setEnabled(enabled);
 }
 
@@ -685,7 +687,7 @@ Ref<MediaStreamTrack::Keeper> MediaStreamTrack::keeper()
 {
     RefPtr keeper = m_keeper.get();
     if (!keeper) {
-        keeper = Keeper::create();
+        keeper = Keeper::create(enabled());
         m_keeper = *keeper;
     }
 
