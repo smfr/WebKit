@@ -2628,6 +2628,54 @@ class TestRunTest262Tests(BuildStepMixinAdditions, unittest.TestCase):
         self.expect_outcome(result=FAILURE, state_string='3 Test262 tests failed')
         return self.run_step()
 
+    def test_success_platform_portflag_mac(self):
+        self.setup_step(RunTest262Tests())
+        self.setProperty('platform', 'mac')
+        self.setProperty('fullPlatform', 'mac-sonoma')
+        self.setProperty('configuration', 'release')
+        # The "--${port}" flag is only passed for GTK/WPE
+        self.expectRemoteCommands(
+            ExpectShell(workdir='wkdir',
+                        timeout=3600,
+                        log_environ=True,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'perl Tools/Scripts/test262-runner --verbose --release 2>&1 | python3 Tools/Scripts/filter-test-logs test262'],
+                        )
+            .exit(0),
+        )
+        self.expect_outcome(result=SUCCESS, state_string='test262-test')
+        return self.run_step()
+
+    def test_success_platform_portflag_gtk(self):
+        self.setup_step(RunTest262Tests())
+        self.setProperty('platform', 'gtk')
+        self.setProperty('fullPlatform', 'gtk')
+        self.setProperty('configuration', 'release')
+        self.expectRemoteCommands(
+            ExpectShell(workdir='wkdir',
+                        timeout=3600,
+                        log_environ=True,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'perl Tools/Scripts/test262-runner --verbose --release --gtk 2>&1 | python3 Tools/Scripts/filter-test-logs test262'],
+                        )
+            .exit(0),
+        )
+        self.expect_outcome(result=SUCCESS, state_string='test262-test')
+        return self.run_step()
+
+    def test_success_platform_portflag_wpe(self):
+        self.setup_step(RunTest262Tests())
+        self.setProperty('platform', 'wpe')
+        self.setProperty('fullPlatform', 'wpe')
+        self.setProperty('configuration', 'debug')
+        self.expectRemoteCommands(
+            ExpectShell(workdir='wkdir',
+                        timeout=3600,
+                        log_environ=True,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'perl Tools/Scripts/test262-runner --verbose --debug --wpe 2>&1 | python3 Tools/Scripts/filter-test-logs test262'],
+                        )
+            .exit(0),
+        )
+        self.expect_outcome(result=SUCCESS, state_string='test262-test')
+        return self.run_step()
 
 class TestRunBenchmarkTests(BuildStepMixinAdditions, unittest.TestCase):
     def setUp(self):
