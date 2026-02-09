@@ -2459,3 +2459,5 @@ webkit.org/b/307084 [ Tahoe Release ] webgl/smell-test.html [ ImageOnlyFailure P
 webkit.org/b/307088 [ Tahoe Release ] webgl/webgl-and-dom-in-gpup.html [ ImageOnlyFailure Pass ]
 
 webkit.org/b/307196 http/tests/geolocation/geolocation-get-current-position-does-not-leak.https.html [ Pass Failure ]
+
+webkit.org/b/307351 imported/w3c/web-platform-tests/html/browsers/browsing-the-web/navigating-across-documents/replace-before-load/form-requestsubmit.html [ Pass Failure ]
