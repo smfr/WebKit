@@ -6456,17 +6456,17 @@ ReadableStreamIterableEnabled:
 
 ReadableStreamTransferEnabled:
   type: bool
-  status: testable
+  status: stable
   category: dom
-  humanReadableName: "ReadableStream transfer"
-  humanReadableDescription: "Enable ReadableStream transfer"
+  humanReadableName: "ReadableStream & friends transfer"
+  humanReadableDescription: "Enable ReadableStream & friends transfer"
   defaultValue:
     WebCore:
-      default: false
+      default: true
     WebKitLegacy:
-      default: false
+      default: true
     WebKit:
-      default: false
+      default: true
 
 RemoteMediaSessionManagerEnabled:
   type: bool
