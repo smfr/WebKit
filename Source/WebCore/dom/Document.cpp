@@ -5965,7 +5965,25 @@ void Document::runScrollSteps()
                     return eventNames().scrollendEvent;
                 }
             }();
+
+            WeakPtr<ScrollableArea> targetScrollableArea = [&]() -> ScrollableArea* {
+                if (type != ScrollEventType::Scroll)
+                    return nullptr;
+
+                RefPtr frameView = view();
+                if (!frameView)
+                    return nullptr;
+
+                return frameView->scrollableAreaForNode(target.get());
+            }();
+
+            if (targetScrollableArea)
+                targetScrollableArea->willDispatchScrollEvent();
+
             target->dispatchEvent(Event::create(eventName, bubbles, Event::IsCancelable::No));
+
+            if (targetScrollableArea)
+                targetScrollableArea->didDispatchScrollEvent();
         }
     }
     if (m_needsVisualViewportScrollEvent) {

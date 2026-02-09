@@ -68,6 +68,9 @@ public:
     void updateBeforeLayout();
     void adjustScrollPositionForAnchoring();
 
+    void willDispatchScrollEvent();
+    void didDispatchScrollEvent();
+
     void notifyChildHadSuppressingStyleChange(RenderElement&);
 
     bool hasAnchorElement() const { return !!m_anchorObject; }
@@ -111,7 +114,7 @@ private:
     bool m_isUpdatingScrollPositionForAnchoring { false };
     bool m_isQueuedForScrollPositionUpdate { false };
     bool m_anchoringSuppressedByStyleChange { false };
-    bool m_shouldSuppressScrollPositionUpdate { false }; // May need to be a count
+    unsigned m_inScrollEventCount { 0 };
 };
 
 } // namespace WebCore

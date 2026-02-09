@@ -103,6 +103,7 @@
 #include "RenderLayerBacking.h"
 #include "RenderLayerCompositor.h"
 #include "RenderLayerScrollableArea.h"
+#include "RenderListBox.h"
 #include "RenderObjectInlines.h"
 #include "RenderSVGRoot.h"
 #include "RenderScrollbar.h"
@@ -3181,6 +3182,23 @@ void LocalFrameView::scrollElementToRect(const Element& element, const IntRect& 
     int centeringOffsetX = (rect.width() - bounds.width()) / 2;
     int centeringOffsetY = (rect.height() - bounds.height()) / 2;
     setScrollPosition(IntPoint(bounds.x() - centeringOffsetX - rect.x(), bounds.y() - centeringOffsetY - rect.y()));
+}
+
+ScrollableArea* LocalFrameView::scrollableAreaForNode(ContainerNode& node)
+{
+    if (node.isDocumentNode())
+        return this;
+
+    if (CheckedPtr renderer = node.renderer()) {
+        if (auto* renderListBox = dynamicDowncast<RenderListBox>(*renderer))
+            return renderListBox;
+
+        if (CheckedPtr layer = renderer->enclosingLayer()) {
+            if (CheckedPtr scrollableLayer = layer->enclosingScrollableLayer(IncludeSelfOrNot::IncludeSelf, CrossFrameBoundaries::No))
+                return scrollableLayer->scrollableArea();
+        }
+    }
+    return nullptr;
 }
 
 void LocalFrameView::setScrollOffsetWithOptions(std::optional<int> x, std::optional<int> y, const ScrollPositionChangeOptions& options)

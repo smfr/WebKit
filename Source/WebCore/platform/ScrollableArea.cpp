@@ -268,6 +268,18 @@ void ScrollableArea::scrollPositionChanged(const ScrollPosition& position)
     }
 }
 
+void ScrollableArea::willDispatchScrollEvent()
+{
+    if (CheckedPtr controller = scrollAnchoringController())
+        controller->willDispatchScrollEvent();
+}
+
+void ScrollableArea::didDispatchScrollEvent()
+{
+    if (CheckedPtr controller = scrollAnchoringController())
+        controller->didDispatchScrollEvent();
+}
+
 bool ScrollableArea::handleWheelEventForScrolling(const PlatformWheelEvent& wheelEvent, std::optional<WheelScrollGestureState>)
 {
     if (!isScrollableOrRubberbandable())

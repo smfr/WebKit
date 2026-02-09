@@ -506,6 +506,8 @@ public:
     void maintainScrollPositionAtScrollToTextFragmentRange(SimpleRange&);
     WEBCORE_EXPORT void scrollElementToRect(const Element&, const IntRect&);
 
+    ScrollableArea* scrollableAreaForNode(ContainerNode&);
+
     // Coordinate systems:
     //
     // "View"

@@ -500,27 +500,28 @@ void ScrollAnchoringController::updateBeforeLayout()
 // https://drafts.csswg.org/css-scroll-anchoring/#scroll-adjustment
 void ScrollAnchoringController::adjustScrollPositionForAnchoring()
 {
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() - anchor " << m_anchorObject << " offset " << m_lastAnchorOffset << " suppressed  " << m_shouldSuppressScrollPositionUpdate);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() - anchor " << m_anchorObject << " offset " << m_lastAnchorOffset << " suppressedByStyleChange  " << m_anchoringSuppressedByStyleChange);
 
-    auto suppressed = std::exchange(m_shouldSuppressScrollPositionUpdate, false);
-    if (suppressed)
+    // FIXME: Test for running animated scrolls?
+    if (m_inScrollEventCount) {
+        m_anchoringSuppressedByStyleChange = false;
+        clearAnchor();
         return;
+    }
 
     auto queued = std::exchange(m_isQueuedForScrollPositionUpdate, false);
     if (!m_anchorObject || !queued)
         return;
 
-    SetForScope midUpdatingScrollPositionForAnchorElement(m_isUpdatingScrollPositionForAnchoring, true);
-
-    auto currentOffset = computeOffsetFromOwningScroller(*m_anchorObject);
-
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController::adjustScrollPositionForAnchoring() found anchor: " << *m_anchorObject << " offset: " << m_lastAnchorOffset << " suppressedByStyleChange " << m_anchoringSuppressedByStyleChange);
     if (m_anchoringSuppressedByStyleChange) {
-        clearAnchor();
         m_anchoringSuppressedByStyleChange = false;
+        clearAnchor();
         return;
     }
 
+    SetForScope midUpdatingScrollPositionForAnchorElement(m_isUpdatingScrollPositionForAnchoring, true);
+
+    auto currentOffset = computeOffsetFromOwningScroller(*m_anchorObject);
     auto adjustment = currentOffset - m_lastAnchorOffset;
     if (adjustment.isZero())
         return;
@@ -542,6 +543,17 @@ void ScrollAnchoringController::adjustScrollPositionForAnchoring()
         m_owningScrollableArea->scrollToPositionWithoutAnimation(newScrollPosition);
 
     m_owningScrollableArea->setCurrentScrollType(oldScrollType);
+}
+
+void ScrollAnchoringController::willDispatchScrollEvent()
+{
+    ++m_inScrollEventCount;
+}
+
+void ScrollAnchoringController::didDispatchScrollEvent()
+{
+    ASSERT(m_inScrollEventCount);
+    --m_inScrollEventCount;
 }
 
 } // namespace WebCore
