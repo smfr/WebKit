@@ -6014,120 +6014,16 @@ void SpeculativeJIT::compileArithDiv(Node* node)
 #endif
         break;
     }
-
-#if USE(JSVALUE64)
-    case Int52RepUse: {
-        SpeculateStrictInt52Operand op1(this, node->child1());
-        SpeculateStrictInt52Operand op2(this, node->child2());
-
-        GPRReg op1GPR = op1.gpr();
-        GPRReg op2GPR = op2.gpr();
-
-#if CPU(X86_64)
-        GPRTemporary eax(this, X86Registers::eax);
-        GPRTemporary edx(this, X86Registers::edx);
-
-        GPRReg op1SaveGPR;
-        if (op1GPR == X86Registers::eax || op1GPR == X86Registers::edx) {
-            op1SaveGPR = allocate();
-            move(op1GPR, op1SaveGPR);
-        } else
-            op1SaveGPR = op1GPR;
-
-        GPRReg op2TempGPR = InvalidGPRReg;
-        if (op2GPR == X86Registers::eax || op2GPR == X86Registers::edx) {
-            op2TempGPR = allocate();
-            move(op2GPR, op2TempGPR);
-            op2GPR = op2TempGPR;
-        }
-
-        JumpList doneCases;
-
-        if (shouldCheckOverflow(node->arithMode()))
-            speculationCheck(Int52Overflow, JSValueRegs(), nullptr, branchTest64(Zero, op2GPR));
-        else {
-            Jump notZero = branchTest64(NonZero, op2GPR);
-            move(TrustedImm64(0), X86Registers::eax);
-            doneCases.append(jump());
-
-            notZero.link(this);
-        }
-
-        if (shouldCheckNegativeZero(node->arithMode())) {
-            Jump numeratorNonZero = branchTest64(NonZero, op1SaveGPR);
-            speculationCheck(NegativeZero, JSValueRegs(), nullptr, branch64(LessThan, op2GPR, TrustedImm64(0)));
-            numeratorNonZero.link(this);
-        }
-
-        move(op1GPR, X86Registers::eax);
-        x86ConvertToQuadWord64();
-        x86Div64(op2GPR);
-
-        if (shouldCheckOverflow(node->arithMode()))
-            speculationCheck(Int52Overflow, JSValueRegs(), nullptr, branchTest64(NonZero, X86Registers::edx));
-
-        doneCases.link(this);
-
-        if (op1SaveGPR != op1GPR)
-            unlock(op1SaveGPR);
-        if (op2TempGPR != InvalidGPRReg)
-            unlock(op2TempGPR);
-
-        strictInt52Result(X86Registers::eax, node);
-#elif CPU(ARM64)
-        GPRTemporary quotient(this);
-        GPRTemporary multiplyAnswer(this);
-
-        GPRReg quotientGPR = quotient.gpr();
-        GPRReg multiplyAnswerGPR = multiplyAnswer.gpr();
-
-        JumpList doneCases;
-
-        if (shouldCheckOverflow(node->arithMode()))
-            speculationCheck(Int52Overflow, JSValueRegs(), nullptr, branchTest64(Zero, op2GPR));
-        else {
-            Jump notZero = branchTest64(NonZero, op2GPR);
-            move(TrustedImm64(0), quotientGPR);
-            doneCases.append(jump());
-
-            notZero.link(this);
-        }
-
-        if (shouldCheckNegativeZero(node->arithMode())) {
-            Jump numeratorNonZero = branchTest64(NonZero, op1GPR);
-            speculationCheck(NegativeZero, JSValueRegs(), nullptr, branch64(LessThan, op2GPR, TrustedImm64(0)));
-            numeratorNonZero.link(this);
-        }
-
-        div64(op1GPR, op2GPR, quotientGPR);
-
-        // Check that the division was exact: quotient * denominator must equal numerator.
-        // No need to check for multiplication overflow: both operands are Int52, and
-        // |quotient| <= |numerator| (integer division can't increase magnitude), so
-        // |quotient * denominator| <= |numerator| which fits in Int52, let alone int64.
-        if (shouldCheckOverflow(node->arithMode())) {
-            mul64(quotientGPR, op2GPR, multiplyAnswerGPR);
-            speculationCheck(Int52Overflow, JSValueRegs(), nullptr, branch64(NotEqual, multiplyAnswerGPR, op1GPR));
-        }
-
-        doneCases.link(this);
-        strictInt52Result(quotientGPR, node);
-#else
-        RELEASE_ASSERT_NOT_REACHED();
-#endif
-        break;
-    }
-#endif // USE(JSVALUE64)
-
+        
     case DoubleRepUse: {
         SpeculateDoubleOperand op1(this, node->child1());
         SpeculateDoubleOperand op2(this, node->child2());
         FPRTemporary result(this, op1);
-
+        
         FPRReg reg1 = op1.fpr();
         FPRReg reg2 = op2.fpr();
         divDouble(reg1, reg2, result.fpr());
-
+        
         doubleResult(result.fpr(), node);
         break;
     }

@@ -3217,39 +3217,6 @@ private:
             break;
         }
 
-        case Int52RepUse: {
-            LValue numerator = lowStrictInt52(m_node->child1());
-            LValue denominator = lowStrictInt52(m_node->child2());
-
-            if (shouldCheckNegativeZero(m_node->arithMode())) {
-                LBasicBlock zeroNumerator = m_out.newBlock();
-                LBasicBlock numeratorContinuation = m_out.newBlock();
-
-                m_out.branch(
-                    m_out.isZero64(numerator),
-                    rarely(zeroNumerator), usually(numeratorContinuation));
-
-                LBasicBlock innerLastNext = m_out.appendTo(zeroNumerator, numeratorContinuation);
-
-                speculate(
-                    NegativeZero, noValue(), nullptr, m_out.lessThan(denominator, m_out.int64Zero));
-
-                m_out.jump(numeratorContinuation);
-
-                m_out.appendTo(numeratorContinuation, innerLastNext);
-            }
-
-            if (shouldCheckOverflow(m_node->arithMode())) {
-                speculate(Int52Overflow, noValue(), nullptr, m_out.isZero64(denominator));
-                LValue result = m_out.div(numerator, denominator);
-                speculate(Int52Overflow, noValue(), nullptr, m_out.notEqual(m_out.mul(result, denominator), numerator));
-                setStrictInt52(result);
-            } else
-                setStrictInt52(m_out.chillDiv(numerator, denominator));
-
-            break;
-        }
-
         case DoubleRepUse: {
             setDouble(m_out.doubleDiv(
                 lowDouble(m_node->child1()), lowDouble(m_node->child2())));

@@ -133,15 +133,10 @@ private:
             return;
         }
 
-        if (m_graph.divShouldSpeculateInt52(node)) {
+        if ((node->op() == ArithMod || node->op() == ValueMod) && m_graph.modShouldSpeculateInt52(node)) {
             fixEdge<Int52RepUse>(leftChild);
             fixEdge<Int52RepUse>(rightChild);
-
-            // We need to be careful about skipping overflow check because div / mod can generate non integer values
-            // from (Int52, Int52) inputs. For now, we always check non-zero divisor.
-            if (((node->op() == ArithDiv || node->op() == ValueDiv) && bytecodeCanTruncateInteger(node->arithNodeFlags()))
-                && bytecodeCanIgnoreNaNAndInfinity(node->arithNodeFlags())
-                && bytecodeCanIgnoreNegativeZero(node->arithNodeFlags()))
+            if (bytecodeCanIgnoreNaNAndInfinity(node->arithNodeFlags()) && bytecodeCanIgnoreNegativeZero(node->arithNodeFlags()))
                 node->setArithMode(Arith::Unchecked);
             else if (bytecodeCanIgnoreNegativeZero(node->arithNodeFlags()))
                 node->setArithMode(Arith::CheckOverflow);

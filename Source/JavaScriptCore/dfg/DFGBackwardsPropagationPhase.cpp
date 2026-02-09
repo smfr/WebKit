@@ -529,9 +529,6 @@ private:
                 // We can clear this flag since Mod and Div never produces Infinity. It is only NaN.
                 flags &= ~NodeBytecodeNeedsNaNOrInfinity;
                 break;
-            // NOTE: We intentionally do NOT clear NodeBytecodeNeedsNaNOrInfinity for ArithDiv/ValueDiv.
-            // Division by zero produces ±Infinity (not NaN), and !Infinity is false, while chillDiv
-            // returns 0 for zero-divisor and !0 is true — a different result.
             default:
                 break;
             }

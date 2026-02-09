@@ -528,7 +528,7 @@ private:
                     && isFullNumberOrBooleanSpeculationExpectingDefined(right)) {
                     if (m_graph.binaryArithShouldSpeculateInt32(node, m_pass))
                         changed |= mergePrediction(SpecInt32Only);
-                    else if (m_graph.divShouldSpeculateInt52(node))
+                    else if ((op == ValueMod || op == ArithMod) && m_graph.modShouldSpeculateInt52(node))
                         changed |= mergePrediction(SpecInt52Any);
                     else
                         changed |= mergePrediction(SpecBytecodeDouble);
@@ -861,7 +861,7 @@ private:
             if (isFullNumberSpeculation(left)
                 && isFullNumberSpeculation(right)
                 && !m_graph.binaryArithShouldSpeculateInt32(node, m_pass)
-                && !m_graph.divShouldSpeculateInt52(node))
+                && !((node->op() == ArithMod || node->op() == ValueMod) && m_graph.modShouldSpeculateInt52(node)))
                 ballot = VoteDouble;
             else
                 ballot = VoteValue;

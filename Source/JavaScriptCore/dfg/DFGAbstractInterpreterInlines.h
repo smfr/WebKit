@@ -380,29 +380,12 @@ bool AbstractInterpreter<AbstractStateType>::handleConstantDivOp(Node* node)
             if (isDivOperation) {
                 double doubleResult = left.asNumber() / right.asNumber();
 
-                if (node->child1().useKind() == Int52RepUse) {
-                    if (node->hasArithMode()) {
-                        if (!shouldCheckOverflow(node->arithMode())) {
-                            if (std::isnan(doubleResult) || std::isinf(doubleResult))
-                                doubleResult = 0;
-                            else
-                                doubleResult = trunc(doubleResult);
-                        } else if (!shouldCheckNegativeZero(node->arithMode()))
-                            doubleResult += 0; // Sanitizes zero.
-                    }
-                    if (tryConvertToInt52(doubleResult) != JSValue::notInt52) {
-                        if (isClobbering)
-                            didFoldClobberWorld();
-                        setConstant(node, jsNumber(doubleResult));
-                    }
-                } else {
-                    if (isClobbering)
-                        didFoldClobberWorld();
-                    if (op == ValueDiv)
-                        setConstant(node, jsNumber(doubleResult));
-                    else
-                        setConstant(node, jsDoubleNumber(doubleResult));
-                }
+                if (isClobbering)
+                    didFoldClobberWorld();
+                if (op == ValueDiv)
+                    setConstant(node, jsNumber(doubleResult));
+                else
+                    setConstant(node, jsDoubleNumber(doubleResult));
             } else {
                 double doubleResult = fmod(left.asNumber(), right.asNumber());
 
@@ -1342,6 +1325,7 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
             setNonCellTypeForNode(node, SpecInt32Only);
             break;
         case Int52RepUse:
+            ASSERT(node->op() == ArithMod);
             setNonCellTypeForNode(node, SpecInt52Any);
             break;
         case DoubleRepUse:
