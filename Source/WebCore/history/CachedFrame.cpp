@@ -82,11 +82,6 @@ CachedFrameBase::~CachedFrameBase()
     ASSERT(!m_document);
 }
 
-RefPtr<FrameView> CachedFrameBase::protectedView() const
-{
-    return m_view;
-}
-
 void CachedFrameBase::pruneDetachedChildFrames()
 {
     m_childFrames.removeAllMatching([] (auto& childFrame) {
