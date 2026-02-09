@@ -1138,7 +1138,11 @@ std::optional<AXID> AXIsolatedTree::focusedNodeID()
     // applyPendingChanges can destroy `this` tree, so protect it until the end of this method.
     Ref protectedThis { *this };
     // Apply pending changes in case focus has changed and hasn't been updated.
-    applyPendingChanges();
+    // Use applyPendingChangesUnlessQueuedForDestruction() because this method may be called
+    // while s_storeLock is held (e.g., from findAXTree() callback). If we used applyPendingChanges()
+    // on a tree queued for destruction, it would try to call AXTreeStore::remove() which requires
+    // s_storeLock, causing a deadlock.
+    applyPendingChangesUnlessQueuedForDestruction();
     return m_focusedNodeID;
 }
 
