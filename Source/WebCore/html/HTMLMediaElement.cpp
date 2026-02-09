@@ -1353,14 +1353,22 @@ bool HTMLMediaElement::hasEverNotifiedAboutPlaying() const
 
 void HTMLMediaElement::checkPlaybackTargetCompatibility()
 {
+    Ref player = *m_player;
+
 #if ENABLE(WIRELESS_PLAYBACK_TARGET)
-    if (!m_isPlayingToWirelessTarget)
+    if (!m_isPlayingToWirelessTarget) {
+#if ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)
+        if (player->supportedPlaybackTargetTypes().contains(MediaPlaybackTargetType::WirelessPlayback)) {
+            m_remotePlaybackConfiguration = { currentMediaTime(), playbackRate(), paused() };
+            scheduleRebuildMediaEngineForWirelessPlayback();
+        }
+#endif
         return;
+    }
 
     auto playbackTargetType = protect(mediaSession())->playbackTargetType();
     ASSERT(playbackTargetType != MediaPlaybackTargetType::None);
 
-    Ref player = *m_player;
     if (playbackTargetType == MediaPlaybackTargetType::None || player->supportedPlaybackTargetTypes().contains(playbackTargetType))
         return;
 

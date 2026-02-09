@@ -27,7 +27,6 @@
 
 #if ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)
 
-#import <WebKitAdditions/MediaDeviceRouteAdditions.h>
 #import <WebKitAdditions/WebMockMediaDeviceRouteAdditions.h>
 
 namespace WebCore {
