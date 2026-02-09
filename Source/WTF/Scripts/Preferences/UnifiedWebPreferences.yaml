@@ -6458,8 +6458,8 @@ ReadableStreamTransferEnabled:
   type: bool
   status: stable
   category: dom
-  humanReadableName: "ReadableStream & friends transfer"
-  humanReadableDescription: "Enable ReadableStream & friends transfer"
+  humanReadableName: "ReadableStream/WritableStream/TransformStream transfer"
+  humanReadableDescription: "Enable ReadableStream/WritableStream/TransformStream transfer"
   defaultValue:
     WebCore:
       default: true
