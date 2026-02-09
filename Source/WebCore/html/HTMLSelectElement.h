@@ -97,7 +97,6 @@ public:
     void optionElementChildrenChanged();
 
     void setRecalcListItems();
-    void invalidateSelectedItems();
     void updateListItemSelectedStates(AllowStyleInvalidation = AllowStyleInvalidation::Yes);
 
     WEBCORE_EXPORT const Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>>& listItems() const;
@@ -174,6 +173,8 @@ public:
 
     bool isDevolvableWidget() const override { return true; }
 
+    void updateSelectedContent() const;
+
 protected:
     HTMLSelectElement(const QualifiedName&, Document&, HTMLFormElement*);
 
@@ -214,6 +215,7 @@ private:
 
     void didRecalcStyle(OptionSet<Style::Change>) final;
 
+    void invalidateSelectedItems();
     void recalcListItems(bool updateSelectedStates = true, AllowStyleInvalidation = AllowStyleInvalidation::Yes) const;
 
     void typeAheadFind(KeyboardEvent&);
@@ -260,7 +262,6 @@ private:
     int indexOfSelectedOption() const final;
     int optionCount() const final;
     String optionAtIndex(int index) const final;
-
 
     // m_listItems contains HTMLOptionElement, HTMLOptGroupElement, and HTMLHRElement objects.
     mutable Vector<WeakPtr<HTMLElement, WeakPtrImplWithEventTargetData>> m_listItems;

@@ -51,6 +51,7 @@
 #include "HTMLOptGroupElement.h"
 #include "HTMLOptionsCollectionInlines.h"
 #include "HTMLParserIdioms.h"
+#include "HTMLSelectedContentElement.h"
 #include "HTMLSlotElement.h"
 #include "KeyboardEvent.h"
 #include "LocalDOMWindow.h"
@@ -867,9 +868,8 @@ void HTMLSelectElement::setRecalcListItems()
     if (!isConnected()) {
         if (RefPtr collection = cachedHTMLCollection(CollectionType::SelectOptions))
             collection->invalidateCache();
-    }
-    if (!isConnected())
         invalidateSelectedItems();
+    }
 
     Ref document = this->document();
     if (this == document->focusedElement()) {
@@ -1019,6 +1019,9 @@ void HTMLSelectElement::selectOption(int optionIndex, SelectOptionFlags flags)
     // Update the button text element to display the new selection and ensure it picks up the new
     // selection's direction and unicode-bidi.
     updateButtonText();
+    if (document().settings().htmlEnhancedSelectSelectedContentEnabled()
+        && !document().settings().mutationEventsEnabled())
+        updateSelectedContent();
 
     scrollToSelection();
 
@@ -1832,6 +1835,39 @@ ExceptionOr<void> HTMLSelectElement::showPicker()
 #endif
 
     return { };
+}
+
+void HTMLSelectElement::updateSelectedContent() const
+{
+    ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
+    ASSERT(document().settings().htmlEnhancedSelectSelectedContentEnabled());
+    ASSERT(!document().settings().mutationEventsEnabled());
+
+    if (m_multiple)
+        return;
+
+    RefPtr selectedOption = [&] -> RefPtr<HTMLOptionElement> {
+        for (auto& element : listItems()) {
+            if (RefPtr option = dynamicDowncast<HTMLOptionElement>(*element)) {
+                if (option->selected())
+                    return option;
+            }
+        }
+        return nullptr;
+    }();
+
+    Vector<Ref<HTMLSelectedContentElement>> selectedContentElements;
+    for (Ref selectedContent : descendantsOfType<HTMLSelectedContentElement>(*const_cast<HTMLSelectElement*>(this))) {
+        if (!selectedContent->isDisabled())
+            selectedContentElements.append(selectedContent);
+    }
+
+    for (Ref selectedContent : selectedContentElements) {
+        if (!selectedOption)
+            selectedContent->removeChildren();
+        else
+            selectedOption->cloneIntoSelectedContent(selectedContent);
+    }
 }
 
 // PopupMenuClient methods

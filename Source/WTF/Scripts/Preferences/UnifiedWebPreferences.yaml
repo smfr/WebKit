@@ -3419,7 +3419,7 @@ HTMLEnhancedSelectPseudoElementsEnabled:
 
 HTMLEnhancedSelectSelectedContentEnabled:
    type: bool
-   status: unstable
+   status: testable
    category: dom
    humanReadableName: "Enhanced HTML select: selectedcontent element"
    humanReadableDescription: "Enable enhanced HTML select: selectedcontent element"

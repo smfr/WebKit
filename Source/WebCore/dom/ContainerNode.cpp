@@ -2,7 +2,7 @@
  * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
  *           (C) 1999 Antti Koivisto (koivisto@kde.org)
  *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2004-2026 Apple Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -1333,6 +1333,17 @@ ExceptionOr<void> ContainerNode::replaceChildren(FixedVector<NodeOrString>&& vec
     dispatchSubtreeModifiedEvent();
 
     return { };
+}
+
+void ContainerNode::replaceChildrenWithoutValidityCheck(NodeVector&& newChildren)
+{
+    ChildListMutationScope mutation(*this);
+    NodeVector removedChildren;
+    removeAllChildrenWithScriptAssertionMaybeAsync(ChildChange::Source::API, removedChildren, DeferChildrenChanged::No);
+    auto appendResult = insertChildrenBeforeWithoutPreInsertionValidityCheck(WTF::move(newChildren));
+    RELEASE_ASSERT(!appendResult.hasException());
+    rebuildSVGExtensionsElementsIfNecessary();
+    dispatchSubtreeModifiedEvent();
 }
 
 HTMLCollection* ContainerNode::cachedHTMLCollection(CollectionType type)

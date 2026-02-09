@@ -3,7 +3,7 @@
  *           (C) 1999 Antti Koivisto (koivisto@kde.org)
  *           (C) 2001 Dirk Mueller (mueller@kde.org)
  *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2004-2026 Apple Inc. All rights reserved.
  * Copyright (C) 2010-2017 Google Inc. All rights reserved.
  * Copyright (C) 2011 Motorola Mobility, Inc. All rights reserved.
  *
@@ -36,12 +36,14 @@
 #include "HTMLNames.h"
 #include "HTMLOptGroupElement.h"
 #include "HTMLSelectElement.h"
+#include "HTMLSelectedContentElement.h"
 #include "NodeName.h"
 #include "NodeRenderStyle.h"
 #include "NodeTraversal.h"
 #include "PseudoClassChangeInvalidation.h"
 #include "RenderStyle+GettersInlines.h"
 #include "RenderTheme.h"
+#include "ScriptDisallowedScope.h"
 #include "ScriptElement.h"
 #include "StyleResolver.h"
 #include "Text.h"
@@ -119,6 +121,26 @@ void HTMLOptionElement::removedFromAncestor(RemovalType removalType, ContainerNo
 
     if (RefPtr select = std::exchange(m_ownerSelect, nullptr).get())
         select->setRecalcListItems();
+}
+
+void HTMLOptionElement::finishParsingChildren()
+{
+    if (!document().settings().htmlEnhancedSelectSelectedContentEnabled())
+        return;
+
+    if (document().settings().mutationEventsEnabled())
+        return;
+
+    ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
+
+    if (m_disabled || !selected())
+        return;
+
+    RefPtr select = m_ownerSelect.get();
+    if (!select)
+        return;
+
+    select->updateSelectedContent();
 }
 
 bool HTMLOptionElement::isFocusable() const
@@ -388,6 +410,18 @@ String HTMLOptionElement::collectOptionInnerText() const
 String HTMLOptionElement::collectOptionInnerTextCollapsingWhitespace() const
 {
     return collectOptionInnerText().trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace);
+}
+
+void HTMLOptionElement::cloneIntoSelectedContent(HTMLSelectedContentElement& selectedContent)
+{
+    ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
+    ASSERT(document().settings().htmlEnhancedSelectSelectedContentEnabled());
+    ASSERT(!selectedContent.document().settings().mutationEventsEnabled());
+
+    NodeVector newChildren;
+    for (RefPtr child = firstChild(); child; child = child->nextSibling())
+        newChildren.append(child->cloneNode(true));
+    selectedContent.replaceChildrenWithoutValidityCheck(WTF::move(newChildren));
 }
 
 } // namespace
