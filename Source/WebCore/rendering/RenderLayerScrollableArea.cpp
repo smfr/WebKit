@@ -1290,7 +1290,7 @@ void RenderLayerScrollableArea::updateScrollbarsAfterStyleChange(const RenderSty
 
 void RenderLayerScrollableArea::updateScrollbarsAfterLayout()
 {
-    RenderBox* box = m_layer.renderBox();
+    CheckedPtr box = m_layer.renderBox();
     ASSERT(box);
 
     // List box parts handle the scrollbars by themselves so we have nothing to do.
@@ -1357,6 +1357,9 @@ void RenderLayerScrollableArea::updateScrollbarsAfterLayout()
     };
 
     updateScrollableAreaSet(hasScrollableOverflow());
+
+    if (CheckedPtr scrollAnchoringController = this->scrollAnchoringController())
+        scrollAnchoringController->scrollerDidLayout();
 }
 
 void RenderLayerScrollableArea::updateScrollbarSteps()

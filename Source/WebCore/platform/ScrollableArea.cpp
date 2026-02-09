@@ -261,8 +261,8 @@ void ScrollableArea::scrollPositionChanged(const ScrollPosition& position)
     if (scrollPosition() != oldPosition) {
         scrollbarsController().notifyContentAreaScrolled(scrollPosition() - oldPosition);
 
-        LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollableArea::scrollPositionChanged() from " << oldPosition << " to " << scrollPosition() << " - clearing scroll anchor");
-        clearScrollAnchor();
+        if (CheckedPtr controller = scrollAnchoringController())
+            controller->scrollPositionDidChange();
 
         updateAnchorPositionedAfterScroll();
     }

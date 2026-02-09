@@ -61,6 +61,9 @@ public:
 
     bool shouldMaintainScrollAnchor() const;
 
+    void scrollPositionDidChange();
+    void scrollerDidLayout();
+
     void clearAnchor(bool includeAncestors = false);
     void updateBeforeLayout();
     void adjustScrollPositionForAnchoring();
@@ -99,6 +102,7 @@ private:
     void invalidate();
     void chooseAnchorElement(Document&);
     bool anchoringSuppressedByStyleChange() const;
+    void updateScrollableAreaRegistration();
 
     CheckedRef<ScrollableArea> m_owningScrollableArea;
     SingleThreadWeakPtr<RenderObject> m_anchorObject;

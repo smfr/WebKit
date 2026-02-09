@@ -4714,6 +4714,20 @@ void LocalFrameView::performPostLayoutTasks()
         m_frame->eventHandler().scheduleMouseEventTargetUpdateAfterLayout();
 }
 
+void LocalFrameView::addScrollableAreaForScrollAnchoring(ScrollableArea& scrollableArea)
+{
+    if (!m_anchoringScrollableAreas)
+        m_anchoringScrollableAreas = makeUnique<ScrollableAreaSet>();
+
+    m_anchoringScrollableAreas->add(scrollableArea);
+}
+
+void LocalFrameView::removeScrollableAreaForScrollAnchoring(ScrollableArea& scrollableArea)
+{
+    if (m_anchoringScrollableAreas)
+        m_anchoringScrollableAreas->remove(scrollableArea);
+}
+
 void LocalFrameView::dequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea& scrollableArea)
 {
     m_scrollableAreasWithScrollAnchoringControllersNeedingUpdate.remove(scrollableArea);
@@ -4727,10 +4741,10 @@ void LocalFrameView::queueScrollableAreaForScrollAnchoringUpdate(ScrollableArea&
 void LocalFrameView::clearScrollAnchorsInScrollableAreas()
 {
     clearScrollAnchor();
-    if (!m_scrollableAreas)
+    if (!m_anchoringScrollableAreas)
         return;
 
-    for (auto& scrollableArea : *m_scrollableAreas)
+    for (auto& scrollableArea : *m_anchoringScrollableAreas)
         scrollableArea.clearScrollAnchor();
 }
 
@@ -4739,11 +4753,10 @@ void LocalFrameView::updateScrollAnchoringBeforeLayoutForScrollableAreas()
     if (CheckedPtr controller = scrollAnchoringController())
         controller->updateBeforeLayout();
 
-    if (!m_scrollableAreas)
+    if (!m_anchoringScrollableAreas)
         return;
 
-    // Maybe just store scrollable areas that need anchoring
-    for (auto& scrollableArea : *m_scrollableAreas) {
+    for (auto& scrollableArea : *m_anchoringScrollableAreas) {
         if (CheckedPtr controller = scrollableArea.scrollAnchoringController())
             controller->updateBeforeLayout();
     }

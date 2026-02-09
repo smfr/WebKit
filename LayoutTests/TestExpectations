@@ -6367,7 +6367,6 @@ imported/w3c/web-platform-tests/css/css-scroll-anchoring/position-change-heurist
 imported/w3c/web-platform-tests/css/css-scroll-anchoring/shadow-dom-subscroller.html [ Pass Failure ]
 imported/w3c/web-platform-tests/css/css-scroll-anchoring/start-edge-in-block-layout-direction.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-scroll-anchoring/nested-overflow-subtree-layout-vertical.html [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/css/css-scroll-anchoring/nested-overflow-subtree-layout.html [ ImageOnlyFailure ]
 fast/repaint/absolute-position-changed.html [ Pass ImageOnlyFailure ]
 
 webkit.org/b/307272 editing/execCommand/insert-line-break-no-scroll.html [ Failure ]

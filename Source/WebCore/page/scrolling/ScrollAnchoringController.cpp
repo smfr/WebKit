@@ -68,8 +68,8 @@ bool ScrollAnchoringController::shouldMaintainScrollAnchor() const
     if (!scrollerBox)
         return false;
 
-    // FIXME: Writing modes: only check the block direction.
-    if (!scrollerBox->hasScrollableOverflowX() && !scrollerBox->hasScrollableOverflowY())
+    // FIXME: Writing modes: only check the block direction?
+    if (!scrollerBox->hasPotentiallyScrollableOverflow())
         return false;
 
     if (scrollerBox->style().overflowAnchor() == OverflowAnchor::None)
@@ -80,6 +80,27 @@ bool ScrollAnchoringController::shouldMaintainScrollAnchor() const
         return false;
 
     return true;
+}
+
+void ScrollAnchoringController::scrollPositionDidChange()
+{
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollableArea::scrollPositionChanged() to " << m_owningScrollableArea->scrollPosition() << " - clearing scroll anchor");
+    clearAnchor();
+    updateScrollableAreaRegistration();
+}
+
+void ScrollAnchoringController::scrollerDidLayout()
+{
+    updateScrollableAreaRegistration();
+}
+
+void ScrollAnchoringController::updateScrollableAreaRegistration()
+{
+    Ref frameView = this->frameView();
+    if (shouldMaintainScrollAnchor())
+        frameView->addScrollableAreaForScrollAnchoring(m_owningScrollableArea);
+    else
+        frameView->removeScrollableAreaForScrollAnchoring(m_owningScrollableArea);
 }
 
 LocalFrameView& ScrollAnchoringController::frameView() const
@@ -442,7 +463,7 @@ bool ScrollAnchoringController::anchoringSuppressedByStyleChange() const
 
 void ScrollAnchoringController::updateBeforeLayout()
 {
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " on " << *scrollableAreaBox() << " updateBeforeLayout() - queued " << m_isQueuedForScrollPositionUpdate);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " on " << *scrollableAreaBox() << " updateBeforeLayout() - scroll offset " << m_owningScrollableArea->scrollOffset() << " queued " << m_isQueuedForScrollPositionUpdate);
 
     if (m_isQueuedForScrollPositionUpdate) {
         m_anchoringSuppressedByStyleChange |= anchoringSuppressedByStyleChange();
