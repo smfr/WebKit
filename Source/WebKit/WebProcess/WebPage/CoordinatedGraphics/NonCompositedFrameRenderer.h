@@ -45,6 +45,8 @@ public:
     void setNeedsDisplayInRect(const WebCore::IntRect&);
 
     void display();
+    void updateRenderingWithForcedRepaint();
+    void updateRenderingWithForcedRepaintAsync(CompletionHandler<void()>&&);
 
 #if ENABLE(DAMAGE_TRACKING)
     void resetDamageHistoryForTesting();
@@ -63,6 +65,7 @@ private:
     std::unique_ptr<WebCore::GLContext> m_context;
     bool m_canRenderNextFrame { true };
     bool m_shouldRenderFollowupFrame { false };
+    CompletionHandler<void()> m_forcedRepaintAsyncCallback;
 #if ENABLE(DAMAGE_TRACKING)
     std::optional<WebCore::Damage> m_frameDamage;
     Lock m_frameDamageHistoryForTestingLock;

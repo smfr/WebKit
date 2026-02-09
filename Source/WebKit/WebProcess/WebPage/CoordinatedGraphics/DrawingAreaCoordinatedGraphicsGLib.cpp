@@ -105,30 +105,20 @@ void DrawingAreaCoordinatedGraphics::scroll(const IntRect& scrollRect, const Int
 
 void DrawingAreaCoordinatedGraphics::updateRenderingWithForcedRepaint()
 {
-    if (!m_layerTreeHost) {
-        if (m_nonCompositedFrameRenderer) {
-            m_nonCompositedFrameRenderer->setNeedsDisplayInRect(m_webPage->bounds());
-            display();
-            return;
-        }
-        return;
-    }
-
-    if (!m_layerTreeStateIsFrozen)
+    if (m_layerTreeHost && !m_layerTreeStateIsFrozen)
         m_layerTreeHost->updateRenderingWithForcedRepaint();
+    else if (m_nonCompositedFrameRenderer)
+        m_nonCompositedFrameRenderer->updateRenderingWithForcedRepaint();
 }
 
 void DrawingAreaCoordinatedGraphics::updateRenderingWithForcedRepaintAsync(WebPage& page, CompletionHandler<void()>&& completionHandler)
 {
-    if (!m_layerTreeHost) {
-        updateRenderingWithForcedRepaint();
-        return completionHandler();
-    }
-
-    if (m_layerTreeStateIsFrozen)
-        return completionHandler();
-
-    m_layerTreeHost->updateRenderingWithForcedRepaintAsync(WTF::move(completionHandler));
+    if (m_layerTreeHost) {
+        if (m_layerTreeStateIsFrozen)
+            return completionHandler();
+        m_layerTreeHost->updateRenderingWithForcedRepaintAsync(WTF::move(completionHandler));
+    } else if (m_nonCompositedFrameRenderer)
+        m_nonCompositedFrameRenderer->updateRenderingWithForcedRepaintAsync(WTF::move(completionHandler));
 }
 
 void DrawingAreaCoordinatedGraphics::setLayerTreeStateIsFrozen(bool isFrozen)
@@ -453,7 +443,7 @@ void DrawingAreaCoordinatedGraphics::display()
 
     if (m_nonCompositedFrameRenderer) {
         m_nonCompositedFrameRenderer->display();
-        dispatchPendingCallbacksAfterEnsuringDrawing();
+        return;
     }
 }
 
