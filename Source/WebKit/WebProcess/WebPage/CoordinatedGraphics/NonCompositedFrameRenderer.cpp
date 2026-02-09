@@ -126,6 +126,12 @@ void NonCompositedFrameRenderer::display()
     GraphicsContextSkia graphicsContext(*canvas, m_context ? RenderingMode::Accelerated : RenderingMode::Unaccelerated, RenderingPurpose::DOM);
     graphicsContext.applyDeviceScaleFactor(webPage->deviceScaleFactor());
 
+    if (m_surface->shouldPaintMirrored()) {
+        SkMatrix matrix;
+        matrix.setScaleTranslate(1, -1, 0, webPage->size().height());
+        canvas->concat(matrix);
+    }
+
 #if ENABLE(DAMAGE_TRACKING)
     if (m_frameDamage) {
         {
