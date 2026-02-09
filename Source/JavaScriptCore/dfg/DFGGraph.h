@@ -418,7 +418,7 @@ public:
         return shouldSpeculateInt52ForAdd(left) && shouldSpeculateInt52ForAdd(right);
     }
 
-    bool modShouldSpeculateInt52(Node* node)
+    bool divShouldSpeculateInt52(Node* node)
     {
         // This is much more relaxed compared to addShouldSpeculateInt52.
         // The reason is double mod is so costly, so it is worth trying with much more aggressively compared to addShouldSpeculateInt52.
