@@ -568,7 +568,7 @@ void LineLayout::updateRenderTreePositions(const Vector<LineAdjustment>& lineAdj
 
     if (m_inlineContent) {
         for (auto& box : m_inlineContent->displayContent().boxes) {
-            if (box.isInlineBox() || box.isText())
+            if (box.isInlineBox() || box.isTextOrSoftLineBreak())
                 continue;
 
             auto& layoutBox = box.layoutBox();
