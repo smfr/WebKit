@@ -116,6 +116,8 @@ public:
     // This asserts that URL argument is a JavaScript URL.
     void executeJavaScriptURL(const URL&, const NavigationAction&, bool& didReplaceDocument);
 
+    static uint64_t scriptExecutionCount();
+
     static void initializeMainThread();
 
     void loadModuleScriptInWorld(LoadableModuleScript&, const URL& topLevelModuleURL, Ref<JSC::ScriptFetchParameters>&&, DOMWrapperWorld&);

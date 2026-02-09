@@ -108,6 +108,13 @@ enum class WebCoreProfileTag { };
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(ScriptController);
 
+static uint64_t s_scriptExecutionCount = 0;
+
+uint64_t ScriptController::scriptExecutionCount()
+{
+    return s_scriptExecutionCount;
+}
+
 void ScriptController::initializeMainThread()
 {
 #if !PLATFORM(IOS_FAMILY)
@@ -819,8 +826,10 @@ void ScriptController::executeAsynchronousUserAgentScriptInWorld(DOMWrapperWorld
 
 bool ScriptController::canExecuteScripts(ReasonForCallingCanExecuteScripts reason, DOMWrapperWorld* world)
 {
-    if (reason == ReasonForCallingCanExecuteScripts::AboutToExecuteScript)
+    if (reason == ReasonForCallingCanExecuteScripts::AboutToExecuteScript) {
         RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(ScriptDisallowedScope::InMainThread::isScriptAllowed());
+        s_scriptExecutionCount++;
+    }
 
     if (world && !world->isNormal())
         return true;
