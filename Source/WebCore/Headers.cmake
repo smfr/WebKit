@@ -2156,8 +2156,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     page/MediaProducer.h
     page/MemoryRelease.h
     page/ModalContainerTypes.h
-    page/NavigationActivation.h
-    page/NavigationHistoryEntry.h
     page/NavigationNavigationType.h
     page/Navigator.h
     page/NavigatorBase.h

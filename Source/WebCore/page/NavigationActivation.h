@@ -41,7 +41,7 @@ public:
         return adoptRef(*new NavigationActivation(type, WTF::move(entry), WTF::move(fromEntry)));
     }
 
-    WEBCORE_EXPORT ~NavigationActivation();
+    ~NavigationActivation();
 
     NavigationNavigationType navigationType() { return m_navigationType; };
     NavigationHistoryEntry* from() const { return m_fromEntry.get(); };
