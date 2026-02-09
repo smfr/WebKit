@@ -83,7 +83,7 @@ public:
     XREnvironmentBlendMode environmentBlendMode() const;
     XRInteractionMode interactionMode() const;
     XRVisibilityState visibilityState() const;
-    const WebXRRenderState& renderState() const;
+    const WebXRRenderState& NODELETE renderState() const;
     const WebXRInputSourceArray& inputSources() const { return m_inputSources; }
     RefPtr<PlatformXR::Device> device() const { return m_device; }
 

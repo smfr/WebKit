@@ -230,7 +230,7 @@ private:
     void pendingUpdateTimerFired();
     void clearPendingUpdate();
 
-    TreeScope& treeScope();
+    TreeScope& NODELETE treeScope();
 
     using MediaQueryViewportState = std::tuple<IntSize, float, bool>;
     static MediaQueryViewportState mediaQueryViewportStateForDocument(const Document&);

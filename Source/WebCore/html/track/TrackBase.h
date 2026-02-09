@@ -71,13 +71,13 @@ public:
     virtual int uniqueId() const { return m_uniqueId; }
 
 #if ENABLE(MEDIA_SOURCE)
-    SourceBuffer* sourceBuffer() const;
+    SourceBuffer* NODELETE sourceBuffer() const;
     void setSourceBuffer(SourceBuffer*);
 #endif
 
     void setTrackList(TrackListBase&);
     void clearTrackList();
-    TrackListBase* trackList() const;
+    TrackListBase* NODELETE trackList() const;
     WebCoreOpaqueRoot opaqueRoot();
 
     virtual bool enabled() const = 0;

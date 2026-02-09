@@ -110,7 +110,7 @@ public:
     std::optional<FrameIdentifier> frameID() const { return m_frameID; }
     bool isTargetItem() const { return m_isTargetItem; }
     
-    WEBCORE_EXPORT FormData* formData();
+    WEBCORE_EXPORT FormData* NODELETE formData();
     WEBCORE_EXPORT String formContentType() const;
     
     bool lastVisitWasFailure() const { return m_lastVisitWasFailure; }

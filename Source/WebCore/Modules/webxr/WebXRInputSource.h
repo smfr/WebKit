@@ -84,7 +84,7 @@ public:
     void pollEvents(Vector<Ref<XRInputSourceEvent>>&);
 
     // For GC reachablitiy.
-    WebXRSession* session();
+    WebXRSession* NODELETE session();
 
 private:
     WebXRInputSource(Document&, WebXRSession&, double timestamp, const InputSource&);

@@ -89,7 +89,7 @@ public:
 
     ScriptExecutionContext* scriptExecutionContext() const { return m_context.get(); }
 
-    FontFaceSet* fontFaceSetIfExists();
+    FontFaceSet* NODELETE fontFaceSetIfExists();
     FontFaceSet& fontFaceSet();
     CSSFontFaceSet& cssFontFaceSet() { return m_cssFontFaceSet; }
 

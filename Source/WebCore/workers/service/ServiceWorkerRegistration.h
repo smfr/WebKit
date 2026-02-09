@@ -69,9 +69,9 @@ public:
 
     ServiceWorkerRegistrationIdentifier identifier() const { return m_registrationData.identifier; }
 
-    ServiceWorker* installing();
-    ServiceWorker* waiting();
-    ServiceWorker* active();
+    ServiceWorker* NODELETE installing();
+    ServiceWorker* NODELETE waiting();
+    ServiceWorker* NODELETE active();
 
     bool isActive() const final { return !!m_activeWorker; }
 

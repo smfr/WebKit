@@ -86,10 +86,10 @@ public:
     virtual CrossOriginOpenerPolicy crossOriginOpenerPolicy() const { return m_crossOriginOpenerPolicy; }
     void setCrossOriginOpenerPolicy(const CrossOriginOpenerPolicy& crossOriginOpenerPolicy) { m_crossOriginOpenerPolicy = crossOriginOpenerPolicy; }
 
-    const IntegrityPolicy* integrityPolicy() const;
+    const IntegrityPolicy* NODELETE integrityPolicy() const;
     void setIntegrityPolicy(std::unique_ptr<IntegrityPolicy>&&);
 
-    const IntegrityPolicy* integrityPolicyReportOnly() const;
+    const IntegrityPolicy* NODELETE integrityPolicyReportOnly() const;
     void setIntegrityPolicyReportOnly(std::unique_ptr<IntegrityPolicy>&&);
 
     virtual ReferrerPolicy referrerPolicy() const { return m_referrerPolicy; }

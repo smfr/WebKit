@@ -873,7 +873,7 @@ public:
     void hideCaptionDisplaySettingsPreviewForMediaElement(HTMLMediaElement&);
 
     void setMockCaptionDisplaySettingsClientCallback(RefPtr<MockCaptionDisplaySettingsClientCallback>&&);
-    MockCaptionDisplaySettingsClientCallback* mockCaptionDisplaySettingsClientCallback() const;
+    MockCaptionDisplaySettingsClientCallback* NODELETE mockCaptionDisplaySettingsClientCallback() const;
     RefPtr<MediaControlsHost> controlsHostForMediaElement(HTMLMediaElement&);
 #endif
 
@@ -1702,7 +1702,7 @@ public:
     void testAsyncIterator(JSDOMGlobalObject&, JSC::JSValue, IteratorResultPromise&&);
 
 #if ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)
-    MockMediaDeviceRouteController& mockMediaDeviceRouteController();
+    MockMediaDeviceRouteController& NODELETE mockMediaDeviceRouteController();
 #endif
 
 private:

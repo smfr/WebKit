@@ -747,8 +747,8 @@ public:
     void remoteEngineFailedToLoad();
     SecurityOriginData documentSecurityOrigin() const;
 
-    const MediaPlayerPrivateInterface* playerPrivate() const;
-    MediaPlayerPrivateInterface* playerPrivate();
+    const MediaPlayerPrivateInterface* NODELETE playerPrivate() const;
+    MediaPlayerPrivateInterface* NODELETE playerPrivate();
     RefPtr<MediaPlayerPrivateInterface> protectedPlayerPrivate();
 
     DynamicRangeMode preferredDynamicRangeMode() const { return m_preferredDynamicRangeMode; }
@@ -814,7 +814,7 @@ public:
 #endif
 
     void setMessageClientForTesting(WeakPtr<MessageClientForTesting>);
-    MessageClientForTesting* messageClientForTesting() const;
+    MessageClientForTesting* NODELETE messageClientForTesting() const;
 
     void elementIdChanged(const String&) const;
 

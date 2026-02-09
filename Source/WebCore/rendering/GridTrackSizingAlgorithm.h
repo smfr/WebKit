@@ -94,7 +94,7 @@ public:
     void setGrowthLimitCap(std::optional<LayoutUnit>);
     std::optional<LayoutUnit> growthLimitCap() const { return m_growthLimitCap; }
 
-    const Style::GridTrackSize& cachedTrackSize() const;
+    const Style::GridTrackSize& NODELETE cachedTrackSize() const;
     void setCachedTrackSize(const Style::GridTrackSize&);
 
 private:

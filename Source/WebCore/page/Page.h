@@ -1009,7 +1009,7 @@ public:
     WEBCORE_EXPORT Ref<UserContentProvider> protectedUserContentProviderForFrame();
     WEBCORE_EXPORT void setUserContentProviderForWebKitLegacy(Ref<UserContentProvider>&&);
 
-    ScreenOrientationManager* screenOrientationManager() const;
+    ScreenOrientationManager* NODELETE screenOrientationManager() const;
 
     VisitedLinkStore& visitedLinkStore();
     Ref<VisitedLinkStore> protectedVisitedLinkStore();
@@ -1091,7 +1091,7 @@ public:
     void setAllowsPlaybackControlsForAutoplayingAudio(bool allowsPlaybackControlsForAutoplayingAudio) { m_allowsPlaybackControlsForAutoplayingAudio = allowsPlaybackControlsForAutoplayingAudio; }
 
     IDBClient::IDBConnectionToServer& idbConnection();
-    WEBCORE_EXPORT IDBClient::IDBConnectionToServer* optionalIDBConnection();
+    WEBCORE_EXPORT IDBClient::IDBConnectionToServer* NODELETE optionalIDBConnection();
     WEBCORE_EXPORT void clearIDBConnection();
 
     void setShowAllPlugins(bool showAll) { m_showAllPlugins = showAll; }
@@ -1224,7 +1224,7 @@ public:
     WEBCORE_EXPORT void clearAccessibilityIsolatedTree();
 #endif
 #if USE(ATSPI)
-    AccessibilityRootAtspi* accessibilityRootObject() const;
+    AccessibilityRootAtspi* NODELETE accessibilityRootObject() const;
     void setAccessibilityRootObject(AccessibilityRootAtspi*);
 #endif
 
@@ -1364,7 +1364,7 @@ public:
     WEBCORE_EXPORT RefPtr<HTMLMediaElement> bestMediaElementForRemoteControls(PlatformMediaSessionPlaybackControlsPurpose, Document*);
 
     WEBCORE_EXPORT RefPtr<MediaSessionManagerInterface> mediaSessionManager();
-    WEBCORE_EXPORT MediaSessionManagerInterface* mediaSessionManagerIfExists() const;
+    WEBCORE_EXPORT MediaSessionManagerInterface* NODELETE mediaSessionManagerIfExists() const;
     WEBCORE_EXPORT static RefPtr<MediaSessionManagerInterface> mediaSessionManagerForPageIdentifier(PageIdentifier);
 
 #if ENABLE(MODEL_ELEMENT)
@@ -1457,7 +1457,7 @@ private:
 
     RenderingUpdateScheduler& renderingUpdateScheduler();
     CheckedRef<RenderingUpdateScheduler> checkedRenderingUpdateScheduler();
-    RenderingUpdateScheduler* existingRenderingUpdateScheduler();
+    RenderingUpdateScheduler* NODELETE existingRenderingUpdateScheduler();
 
     WheelEventTestMonitor& ensureWheelEventTestMonitor();
     Ref<WheelEventTestMonitor> ensureProtectedWheelEventTestMonitor();

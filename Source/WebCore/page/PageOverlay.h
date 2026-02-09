@@ -84,7 +84,7 @@ public:
     PageOverlayID pageOverlayID() const { return m_pageOverlayID; }
 
     void setPage(Page*);
-    WEBCORE_EXPORT Page* page() const;
+    WEBCORE_EXPORT Page* NODELETE page() const;
     WEBCORE_EXPORT void setNeedsDisplay(const IntRect& dirtyRect);
     WEBCORE_EXPORT void setNeedsDisplay();
 

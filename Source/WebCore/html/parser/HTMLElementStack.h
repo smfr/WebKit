@@ -137,10 +137,10 @@ public:
     bool secondElementIsHTMLBodyElement() const;
     bool hasTemplateInHTMLScope() const;
     Element& htmlElement() const;
-    Element& headElement() const;
-    Element& bodyElement() const;
+    Element& NODELETE headElement() const;
+    Element& NODELETE bodyElement() const;
 
-    ContainerNode& rootNode() const;
+    ContainerNode& NODELETE rootNode() const;
 
 #if ENABLE(TREE_DEBUGGING)
     void show();

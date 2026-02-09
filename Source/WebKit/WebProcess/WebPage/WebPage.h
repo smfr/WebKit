@@ -1962,7 +1962,7 @@ public:
 #endif
 
 #if ENABLE(WEBXR)
-    PlatformXRSystemProxy& xrSystemProxy();
+    PlatformXRSystemProxy& NODELETE xrSystemProxy();
 #endif
 
     void prepareToRunModalJavaScriptDialog();

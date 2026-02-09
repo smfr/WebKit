@@ -85,7 +85,7 @@ private:
     bool receiveDroppedFiles(const DragData&) final;
 #endif
 
-    Icon* icon() const final;
+    Icon* NODELETE icon() const final;
     void createShadowSubtree() final;
     void disabledStateChanged() final;
     void attributeChanged(const QualifiedName&) final;

@@ -125,7 +125,7 @@ public:
 
     ~ImageBitmap();
 
-    ImageBuffer* buffer() const;
+    ImageBuffer* NODELETE buffer() const;
 
     RefPtr<ImageBuffer> takeImageBuffer();
 

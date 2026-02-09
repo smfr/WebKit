@@ -107,7 +107,7 @@ public:
     WorkerStorageConnection& storageConnection();
     static void postFileSystemStorageTask(Function<void()>&&);
     WorkerFileSystemStorageConnection& getFileSystemStorageConnection(Ref<FileSystemStorageConnection>&&);
-    WEBCORE_EXPORT WorkerFileSystemStorageConnection* fileSystemStorageConnection();
+    WEBCORE_EXPORT WorkerFileSystemStorageConnection* NODELETE fileSystemStorageConnection();
     CacheStorageConnection& cacheStorageConnection();
     MessagePortChannelProvider& messagePortChannelProvider();
 
@@ -144,7 +144,7 @@ public:
     SecurityOrigin& topOrigin() const final { return m_topOrigin.get(); }
 
     Crypto& crypto();
-    Performance& performance() const;
+    Performance& NODELETE performance() const;
     ReportingScope& reportingScope() const { return m_reportingScope.get(); }
 
     void prepareForDestruction() override;

@@ -111,14 +111,14 @@ public:
     InternalReadableStream* internalReadableStream() { return m_internalReadableStream.get(); }
 
     void setDefaultReader(ReadableStreamDefaultReader*);
-    ReadableStreamDefaultReader* defaultReader();
+    ReadableStreamDefaultReader* NODELETE defaultReader();
 
     bool hasByteStreamController() { return !!m_controller; }
     ReadableByteStreamController* controller() { return m_controller.get(); }
     RefPtr<ReadableByteStreamController> protectedController() { return m_controller.get(); }
 
     void setByobReader(ReadableStreamBYOBReader*);
-    ReadableStreamBYOBReader* byobReader();
+    ReadableStreamBYOBReader* NODELETE byobReader();
     void fulfillReadIntoRequest(JSDOMGlobalObject&, RefPtr<JSC::ArrayBufferView>&&, bool done);
 
     void fulfillReadRequest(JSDOMGlobalObject&, RefPtr<JSC::ArrayBufferView>&&, bool done);

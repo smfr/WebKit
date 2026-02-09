@@ -893,7 +893,7 @@ public:
     const URL& baseURLOverride() const { return m_baseURLOverride; }
     const URL& baseElementURL() const { return m_baseElementURL; }
     const AtomString& baseTarget() const { return m_baseTarget; }
-    HTMLBaseElement* firstBaseElement() const;
+    HTMLBaseElement* NODELETE firstBaseElement() const;
     void processBaseElement();
 
     // https://wicg.github.io/nav-speculation/speculation-rules.html#consider-speculation
@@ -1147,10 +1147,10 @@ public:
 
 #if ENABLE(CONTENT_CHANGE_OBSERVER)
     ContentChangeObserver* contentChangeObserverIfExists() { return m_contentChangeObserver.get(); }
-    WEBCORE_EXPORT ContentChangeObserver& contentChangeObserver();
+    WEBCORE_EXPORT ContentChangeObserver& NODELETE contentChangeObserver();
 
     DOMTimerHoldingTank* domTimerHoldingTankIfExists() { return m_domTimerHoldingTank.get(); }
-    DOMTimerHoldingTank& domTimerHoldingTank();
+    DOMTimerHoldingTank& NODELETE domTimerHoldingTank();
 #endif
     void processViewport(const String& features, ViewportArguments::Type origin);
     WEBCORE_EXPORT bool isViewportDocument() const;
@@ -1479,8 +1479,8 @@ public:
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
     DocumentImmersive* immersiveIfExists() { return m_immersive.get(); }
     const DocumentImmersive* immersiveIfExists() const { return m_immersive.get(); }
-    WEBCORE_EXPORT DocumentImmersive& immersive();
-    WEBCORE_EXPORT const DocumentImmersive& immersive() const;
+    WEBCORE_EXPORT DocumentImmersive& NODELETE immersive();
+    WEBCORE_EXPORT const DocumentImmersive& NODELETE immersive() const;
 #endif
 
 #if ENABLE(POINTER_LOCK)
@@ -1507,10 +1507,10 @@ public:
 #endif
 
 #if ENABLE(DEVICE_ORIENTATION) && PLATFORM(IOS_FAMILY)
-    DeviceMotionController& deviceMotionController() const;
+    DeviceMotionController& NODELETE deviceMotionController() const;
     WEBCORE_EXPORT void simulateDeviceMotionChange(double xAcceleration, double yAcceleration, double zAcceleration, double xAccelerationIncludingGravity, double yAccelerationIncludingGravity, double zAccelerationIncludingGravity, double xRotationRate, double yRotationRate, double zRotationRate);
 
-    DeviceOrientationController& deviceOrientationController() const;
+    DeviceOrientationController& NODELETE deviceOrientationController() const;
     WEBCORE_EXPORT void simulateDeviceOrientationChange(double alpha, double beta, double gamma);
 #endif
 
@@ -1777,7 +1777,7 @@ public:
 
     using StartViewTransitionCallbackOptions = Variant<RefPtr<JSViewTransitionUpdateCallback>, StartViewTransitionOptions>;
     RefPtr<ViewTransition> startViewTransition(StartViewTransitionCallbackOptions&&);
-    ViewTransition* activeViewTransition() const;
+    ViewTransition* NODELETE activeViewTransition() const;
     bool activeViewTransitionCapturedDocumentElement() const;
     void setActiveViewTransition(RefPtr<ViewTransition>&&);
 
@@ -2054,7 +2054,7 @@ public:
     WEBCORE_EXPORT FrameMemoryMonitor& frameMemoryMonitor();
 
 #if ENABLE(CONTENT_EXTENSIONS)
-    ResourceMonitor* resourceMonitorIfExists();
+    ResourceMonitor* NODELETE resourceMonitorIfExists();
     ResourceMonitor& resourceMonitor();
     ResourceMonitor* parentResourceMonitorIfExists();
 
@@ -2116,7 +2116,7 @@ private:
     ScriptModuleLoader& ensureModuleLoader();
     WEBCORE_EXPORT DocumentFullscreen& ensureFullscreen();
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
-    WEBCORE_EXPORT DocumentImmersive& ensureImmersive();
+    WEBCORE_EXPORT DocumentImmersive& NODELETE ensureImmersive();
 #endif
     inline DocumentFontLoader& fontLoader();
     DocumentFontLoader& ensureFontLoader();

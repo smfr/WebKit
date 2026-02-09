@@ -251,7 +251,7 @@ public:
 
 // DOM API
 // error state
-    WEBCORE_EXPORT MediaError* error() const;
+    WEBCORE_EXPORT MediaError* NODELETE error() const;
 
     const URL& currentSrc() const { return m_currentSrc; }
 
@@ -353,7 +353,7 @@ public:
 #endif
 
 #if ENABLE(ENCRYPTED_MEDIA)
-    MediaKeys* mediaKeys() const;
+    MediaKeys* NODELETE mediaKeys() const;
 
     void setMediaKeys(MediaKeys*, Ref<DeferredPromise>&&);
 #endif
@@ -548,7 +548,7 @@ public:
     bool isPlaying() const final { return m_playing; }
 
 #if ENABLE(WEB_AUDIO)
-    MediaElementAudioSourceNode* audioSourceNode();
+    MediaElementAudioSourceNode* NODELETE audioSourceNode();
     void setAudioSourceNode(MediaElementAudioSourceNode*);
 
     AudioSourceProvider* audioSourceProvider();
@@ -560,7 +560,7 @@ public:
     const String& mediaGroup() const;
     void setMediaGroup(const String&);
 
-    MediaController* controller() const;
+    MediaController* NODELETE controller() const;
     void setController(RefPtr<MediaController>&&);
 
     MediaController* controllerForBindings() const { return controller(); }
@@ -616,7 +616,7 @@ public:
     void isVisibleInViewportChanged();
     void updateRateChangeRestrictions();
 
-    WEBCORE_EXPORT const MediaResourceLoader* lastMediaResourceLoaderForTesting() const;
+    WEBCORE_EXPORT const MediaResourceLoader* NODELETE lastMediaResourceLoaderForTesting() const;
 
 #if ENABLE(MEDIA_STREAM)
     void mediaStreamCaptureStarted();

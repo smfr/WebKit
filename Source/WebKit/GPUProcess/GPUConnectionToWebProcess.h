@@ -328,7 +328,7 @@ private:
 #endif
 
 #if PLATFORM(IOS_FAMILY)
-    RemoteMediaSessionHelperProxy& mediaSessionHelperProxy();
+    RemoteMediaSessionHelperProxy& NODELETE mediaSessionHelperProxy();
     void ensureMediaSessionHelper();
 #endif
 

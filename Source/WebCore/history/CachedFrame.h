@@ -84,7 +84,7 @@ public:
     void destroy();
 
     WEBCORE_EXPORT void setCachedFramePlatformData(std::unique_ptr<CachedFramePlatformData>);
-    WEBCORE_EXPORT CachedFramePlatformData* cachedFramePlatformData();
+    WEBCORE_EXPORT CachedFramePlatformData* NODELETE cachedFramePlatformData();
 
     HasInsecureContent hasInsecureContent() const;
     UsedLegacyTLS usedLegacyTLS() const;

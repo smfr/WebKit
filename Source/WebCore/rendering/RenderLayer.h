@@ -180,7 +180,7 @@ public:
 
     WEBCORE_EXPORT ~RenderLayer();
 
-    WEBCORE_EXPORT RenderLayerScrollableArea* scrollableArea() const;
+    WEBCORE_EXPORT RenderLayerScrollableArea* NODELETE scrollableArea() const;
     WEBCORE_EXPORT CheckedPtr<RenderLayerScrollableArea> checkedScrollableArea() const;
     WEBCORE_EXPORT RenderLayerScrollableArea* ensureLayerScrollableArea();
 
