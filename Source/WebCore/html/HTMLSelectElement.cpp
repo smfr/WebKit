@@ -191,7 +191,10 @@ void HTMLSelectElement::optionSelectedByUser(int optionIndex, bool fireOnChangeN
     if (optionIndex == selectedIndex())
         return;
 
-    selectOption(optionIndex, DeselectOtherOptions | (fireOnChangeNow ? DispatchChangeEvent : 0) | UserDriven);
+    OptionSet flags = { SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::UserDriven };
+    if (fireOnChangeNow)
+        flags.add(SelectOptionFlag::DispatchChangeEvent);
+    selectOption(optionIndex, flags);
 }
 
 bool HTMLSelectElement::hasPlaceholderLabelOption() const
@@ -616,11 +619,11 @@ bool HTMLSelectElement::willRespondToMouseClickEventsWithEditability(Editability
 // Valid means that it is enabled and an option element.
 int HTMLSelectElement::nextValidIndex(int listIndex, SkipDirection direction, int skip) const
 {
-    ASSERT(direction == -1 || direction == 1);
     auto& listItems = this->listItems();
     int lastGoodIndex = listIndex;
     int size = listItems.size();
-    for (listIndex += direction; listIndex >= 0 && listIndex < size; listIndex += direction) {
+    int step = direction == SkipDirection::Forwards ? 1 : -1;
+    for (listIndex += step; listIndex >= 0 && listIndex < size; listIndex += step) {
         --skip;
         RefPtr listItem = listItems[listIndex].get();
         if (!listItem->isDisabledFormControl() && is<HTMLOptionElement>(*listItem)) {
@@ -634,20 +637,20 @@ int HTMLSelectElement::nextValidIndex(int listIndex, SkipDirection direction, in
 
 int HTMLSelectElement::nextSelectableListIndex(int startIndex) const
 {
-    return nextValidIndex(startIndex, SkipForwards, 1);
+    return nextValidIndex(startIndex, SkipDirection::Forwards, 1);
 }
 
 int HTMLSelectElement::previousSelectableListIndex(int startIndex) const
 {
     if (startIndex == -1)
         startIndex = listItems().size();
-    return nextValidIndex(startIndex, SkipBackwards, 1);
+    return nextValidIndex(startIndex, SkipDirection::Backwards, 1);
 }
 
 int HTMLSelectElement::firstSelectableListIndex() const
 {
     auto& items = listItems();
-    int index = nextValidIndex(items.size(), SkipBackwards, INT_MAX);
+    int index = nextValidIndex(items.size(), SkipDirection::Backwards, INT_MAX);
     if (static_cast<size_t>(index) == items.size())
         return -1;
     return index;
@@ -655,7 +658,7 @@ int HTMLSelectElement::firstSelectableListIndex() const
 
 int HTMLSelectElement::lastSelectableListIndex() const
 {
-    return nextValidIndex(-1, SkipForwards, INT_MAX);
+    return nextValidIndex(-1, SkipDirection::Forwards, INT_MAX);
 }
 
 // Returns the index of the next valid item one page away from |startIndex| in direction |direction|.
@@ -671,8 +674,8 @@ int HTMLSelectElement::nextSelectableListIndexPageAway(int startIndex, SkipDirec
     // One page away, but not outside valid bounds.
     // If there is a valid option item one page away, the index is chosen.
     // If there is no exact one page away valid option, returns startIndex or the most far index.
-    int edgeIndex = direction == SkipForwards ? 0 : items.size() - 1;
-    int skipAmount = pageSize + (direction == SkipForwards ? startIndex : edgeIndex - startIndex);
+    int edgeIndex = direction == SkipDirection::Forwards ? 0 : items.size() - 1;
+    int skipAmount = pageSize + (direction == SkipDirection::Forwards ? startIndex : edgeIndex - startIndex);
     return nextValidIndex(edgeIndex, direction, skipAmount);
 }
 
@@ -977,7 +980,7 @@ int HTMLSelectElement::selectedIndex() const
 
 void HTMLSelectElement::setSelectedIndex(int index)
 {
-    selectOption(index, DeselectOtherOptions);
+    selectOption(index, SelectOptionFlag::DeselectOtherOptions);
 }
 
 void HTMLSelectElement::optionSelectionStateChanged(HTMLOptionElement& option, bool optionIsSelected)
@@ -991,9 +994,9 @@ void HTMLSelectElement::optionSelectionStateChanged(HTMLOptionElement& option, b
         selectOption(nextSelectableListIndex(-1));
 }
 
-void HTMLSelectElement::selectOption(int optionIndex, SelectOptionFlags flags)
+void HTMLSelectElement::selectOption(int optionIndex, OptionSet<SelectOptionFlag> flags)
 {
-    bool shouldDeselect = !m_multiple || (flags & DeselectOtherOptions);
+    bool shouldDeselect = !m_multiple || flags.contains(SelectOptionFlag::DeselectOtherOptions);
 
     auto& items = listItems();
     int listIndex = optionToListIndex(optionIndex);
@@ -1026,8 +1029,8 @@ void HTMLSelectElement::selectOption(int optionIndex, SelectOptionFlags flags)
     scrollToSelection();
 
     if (usesMenuListDeprecated()) {
-        m_isProcessingUserDrivenChange = flags & UserDriven;
-        if (flags & DispatchChangeEvent)
+        m_isProcessingUserDrivenChange = flags.contains(SelectOptionFlag::UserDriven);
+        if (flags.contains(SelectOptionFlag::DispatchChangeEvent))
             dispatchChangeEventForMenuList();
         didUpdateActiveOption(optionIndex);
     }
@@ -1303,22 +1306,22 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
         }
 
         if (keyIdentifier == "Down"_s || keyIdentifier == "Right"_s)
-            listIndex = nextValidIndex(listIndex, SkipForwards, 1);
+            listIndex = nextValidIndex(listIndex, SkipDirection::Forwards, 1);
         else if (keyIdentifier == "Up"_s || keyIdentifier == "Left"_s)
-            listIndex = nextValidIndex(listIndex, SkipBackwards, 1);
+            listIndex = nextValidIndex(listIndex, SkipDirection::Backwards, 1);
         else if (keyIdentifier == "PageDown"_s)
-            listIndex = nextValidIndex(listIndex, SkipForwards, 3);
+            listIndex = nextValidIndex(listIndex, SkipDirection::Forwards, 3);
         else if (keyIdentifier == "PageUp"_s)
-            listIndex = nextValidIndex(listIndex, SkipBackwards, 3);
+            listIndex = nextValidIndex(listIndex, SkipDirection::Backwards, 3);
         else if (keyIdentifier == "Home"_s)
-            listIndex = nextValidIndex(-1, SkipForwards, 1);
+            listIndex = nextValidIndex(-1, SkipDirection::Forwards, 1);
         else if (keyIdentifier == "End"_s)
-            listIndex = nextValidIndex(listItems.size(), SkipBackwards, 1);
+            listIndex = nextValidIndex(listItems.size(), SkipDirection::Backwards, 1);
         else
             handled = false;
 
         if (handled && static_cast<size_t>(listIndex) < listItems.size())
-            selectOption(listToOptionIndex(listIndex), DeselectOtherOptions | DispatchChangeEvent | UserDriven);
+            selectOption(listToOptionIndex(listIndex), { SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::DispatchChangeEvent, SelectOptionFlag::UserDriven });
 
         if (handled)
             keyboardEvent->setDefaultHandled();
@@ -1562,14 +1565,14 @@ void HTMLSelectElement::listBoxDefaultEventHandler(Event& event)
                 if (keyIdentifier == nextKeyIdentifier)
                     endIndex = nextSelectableListIndex(startIndex);
                 else
-                    endIndex = nextSelectableListIndexPageAway(startIndex, SkipForwards);
+                    endIndex = nextSelectableListIndexPageAway(startIndex, SkipDirection::Forwards);
             } else if (keyIdentifier == previousKeyIdentifier || keyIdentifier == "PageUp"_s) {
                 int startIndex = optionToListIndex(selectedIndex());
                 handled = true;
                 if (keyIdentifier == previousKeyIdentifier)
                     endIndex = previousSelectableListIndex(startIndex);
                 else
-                    endIndex = nextSelectableListIndexPageAway(startIndex, SkipBackwards);
+                    endIndex = nextSelectableListIndexPageAway(startIndex, SkipDirection::Backwards);
             }
         } else {
             // Set the end index based on the current end index.
@@ -1580,10 +1583,10 @@ void HTMLSelectElement::listBoxDefaultEventHandler(Event& event)
                 endIndex = previousSelectableListIndex(m_activeSelectionEndIndex);
                 handled = true;
             } else if (keyIdentifier == "PageDown"_s) {
-                endIndex = nextSelectableListIndexPageAway(m_activeSelectionEndIndex, SkipForwards);
+                endIndex = nextSelectableListIndexPageAway(m_activeSelectionEndIndex, SkipDirection::Forwards);
                 handled = true;
             } else if (keyIdentifier == "PageUp"_s) {
-                endIndex = nextSelectableListIndexPageAway(m_activeSelectionEndIndex, SkipBackwards);
+                endIndex = nextSelectableListIndexPageAway(m_activeSelectionEndIndex, SkipDirection::Backwards);
                 handled = true;
             }
         }
@@ -1725,7 +1728,7 @@ void HTMLSelectElement::typeAheadFind(KeyboardEvent& event)
     int index = m_typeAhead.handleEvent(&event, TypeAhead::MatchPrefix | TypeAhead::CycleFirstChar);
     if (index < 0)
         return;
-    selectOption(listToOptionIndex(index), DeselectOtherOptions | DispatchChangeEvent | UserDriven);
+    selectOption(listToOptionIndex(index), { SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::DispatchChangeEvent, SelectOptionFlag::UserDriven });
     if (!usesMenuListDeprecated())
         listBoxOnChange();
 }
@@ -1744,7 +1747,7 @@ void HTMLSelectElement::accessKeySetSelectedIndex(int index)
             if (option->selected())
                 option->setSelectedState(false);
             else
-                selectOption(index, DispatchChangeEvent | UserDriven);
+                selectOption(index, { SelectOptionFlag::DispatchChangeEvent, SelectOptionFlag::UserDriven });
         }
     }
 

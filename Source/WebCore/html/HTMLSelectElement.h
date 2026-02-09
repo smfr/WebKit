@@ -30,6 +30,7 @@
 #include <WebCore/PopupMenuClient.h>
 #include <WebCore/TypeAhead.h>
 #include <wtf/CompletionHandler.h>
+#include <wtf/OptionSet.h>
 
 #if PLATFORM(COCOA)
 #define POPUP_MENU_PULLS_DOWN 0
@@ -227,13 +228,12 @@ private:
 
     bool hasPlaceholderLabelOption() const;
 
-    enum SelectOptionFlag {
+    enum class SelectOptionFlag : uint8_t {
         DeselectOtherOptions = 1 << 0,
         DispatchChangeEvent = 1 << 1,
         UserDriven = 1 << 2,
     };
-    typedef unsigned SelectOptionFlags;
-    void selectOption(int optionIndex, SelectOptionFlags = 0);
+    void selectOption(int optionIndex, OptionSet<SelectOptionFlag> = { });
     void deselectItemsWithoutValidation(HTMLElement* elementToExclude = nullptr);
     void parseMultipleAttribute(const AtomString&);
     int lastSelectedListIndex() const;
@@ -245,7 +245,7 @@ private:
     void updateButtonText();
     size_t searchOptionsForValue(const String&, size_t listIndexStart, size_t listIndexEnd) const;
 
-    enum SkipDirection { SkipBackwards = -1, SkipForwards = 1 };
+    enum class SkipDirection : bool { Backwards, Forwards };
     int nextValidIndex(int listIndex, SkipDirection, int skip) const;
     int nextSelectableListIndex(int startIndex) const;
     int previousSelectableListIndex(int startIndex) const;
