@@ -59,6 +59,7 @@ using TrackSizes = Vector<LayoutUnit>;
 using TrackSizingFunctionsList = Vector<TrackSizingFunctions>;
 using UnsizedTracks = Vector<UnsizedTrack>;
 using UsedBlockSizes = Vector<LayoutUnit>;
+using UsedBorderAndPaddingList = Vector<LayoutUnit>;
 using UsedInlineSizes = Vector<LayoutUnit>;
 } // namespace Layout
 } // namespace WebCore
