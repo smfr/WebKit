@@ -98,11 +98,12 @@ using JSTestNamedSetterWithLegacyUnforgeablePropertiesDOMConstructor = JSDOMCons
 
 /* Hash table */
 
-static const struct CompactHashIndex JSTestNamedSetterWithLegacyUnforgeablePropertiesTableIndex[4] = {
+static const struct CompactHashIndex JSTestNamedSetterWithLegacyUnforgeablePropertiesTableIndex[5] = {
+    { -1, -1 },
+    { 0, 4 },
+    { -1, -1 },
     { -1, -1 },
     { 1, -1 },
-    { -1, -1 },
-    { 0, -1 },
 };
 
 
