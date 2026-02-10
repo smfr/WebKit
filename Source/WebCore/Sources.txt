@@ -2599,6 +2599,7 @@ platform/graphics/PixelBufferFormat.cpp
 platform/graphics/PixelFormat.cpp
 platform/graphics/PlatformDynamicRangeLimit.cpp
 platform/graphics/PlatformTimeRanges.cpp
+platform/graphics/PlatformVideoColorSpace.cpp
 platform/graphics/Region.cpp
 platform/graphics/RenderingMode.cpp
 platform/graphics/RotationDirection.cpp
