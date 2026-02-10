@@ -9021,7 +9021,7 @@ void Document::transferViewTransitionParams(Document& newDocument)
     newDocument.m_inboundViewTransitionParams = std::exchange(m_inboundViewTransitionParams, nullptr);
 }
 
-void Document::dispatchPageswapEvent(bool canTriggerCrossDocumentViewTransition, RefPtr<NavigationActivation>&& activation)
+void Document::dispatchPageswapEvent(CanTriggerCrossDocumentViewTransition canTriggerCrossDocumentViewTransition, RefPtr<NavigationActivation>&& activation)
 {
     if (!settings().crossDocumentViewTransitionsEnabled())
         return;
@@ -9031,7 +9031,7 @@ void Document::dispatchPageswapEvent(bool canTriggerCrossDocumentViewTransition,
     auto startTime = MonotonicTime::now();
     PageSwapEvent::Init swapInit;
     swapInit.activation = WTF::move(activation);
-    if (canTriggerCrossDocumentViewTransition && globalObject()) {
+    if (canTriggerCrossDocumentViewTransition == CanTriggerCrossDocumentViewTransition::Yes && globalObject()) {
         oldViewTransition = ViewTransition::setupCrossDocumentViewTransition(*this);
         swapInit.viewTransition = oldViewTransition;
     }

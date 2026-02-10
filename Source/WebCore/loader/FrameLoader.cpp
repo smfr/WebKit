@@ -2360,7 +2360,7 @@ void FrameLoader::commitProvisionalLoad()
         pdl ? pdl->url().stringCenterEllipsizedToLength().utf8().data() : "<no provisional DocumentLoader>", cachedPage.get());
 
     if (RefPtr document = m_frame->document()) {
-        bool canTriggerCrossDocumentViewTransition = false;
+        auto canTriggerCrossDocumentViewTransition = CanTriggerCrossDocumentViewTransition::No;
         RefPtr<NavigationActivation> activation;
         if (pdl) {
             canTriggerCrossDocumentViewTransition = pdl->navigationCanTriggerCrossDocumentViewTransition(*document, !!cachedPage);

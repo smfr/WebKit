@@ -2516,33 +2516,33 @@ ShouldOpenExternalURLsPolicy DocumentLoader::shouldOpenExternalURLsPolicyToPropa
 }
 
 // https://www.w3.org/TR/css-view-transitions-2/#navigation-can-trigger-a-cross-document-view-transition
-bool DocumentLoader::navigationCanTriggerCrossDocumentViewTransition(Document& oldDocument, bool fromBackForwardCache)
+CanTriggerCrossDocumentViewTransition DocumentLoader::navigationCanTriggerCrossDocumentViewTransition(Document& oldDocument, bool fromBackForwardCache)
 {
     if (loadStartedDuringSwipeAnimation())
-        return false;
+        return CanTriggerCrossDocumentViewTransition::No;
 
     if (std::holds_alternative<Document::SkipTransition>(oldDocument.resolveViewTransitionRule()))
-        return false;
+        return CanTriggerCrossDocumentViewTransition::No;
 
     if (!m_triggeringAction.navigationAPIType() || *m_triggeringAction.navigationAPIType() == NavigationNavigationType::Reload)
-        return false;
+        return CanTriggerCrossDocumentViewTransition::No;
 
     Ref newOrigin = SecurityOrigin::create(documentURL());
     if (!newOrigin->isSameOriginAs(protect(oldDocument.securityOrigin())))
-        return false;
+        return CanTriggerCrossDocumentViewTransition::No;
 
     if (const auto* metrics = response().deprecatedNetworkLoadMetricsOrNull(); metrics && !fromBackForwardCache) {
         if (metrics->crossOriginRedirect())
-            return false;
+            return CanTriggerCrossDocumentViewTransition::No;
     }
 
     if (*m_triggeringAction.navigationAPIType() == NavigationNavigationType::Traverse)
-        return true;
+        return CanTriggerCrossDocumentViewTransition::Yes;
 
     if (isRequestFromClientOrUserInput())
-        return false;
+        return CanTriggerCrossDocumentViewTransition::No;
 
-    return true;
+    return CanTriggerCrossDocumentViewTransition::Yes;
 }
 
 void DocumentLoader::becomeMainResourceClient()

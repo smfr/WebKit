@@ -37,6 +37,7 @@
 #include <WebCore/ContentSecurityPolicyClient.h>
 #include <WebCore/CrossOriginOpenerPolicy.h>
 #include <WebCore/DeviceOrientationOrMotionPermissionState.h>
+#include <WebCore/DocumentEnums.h>
 #include <WebCore/DocumentLoadTiming.h>
 #include <WebCore/DocumentWriter.h>
 #include <WebCore/ElementTargetingTypes.h>
@@ -544,7 +545,7 @@ public:
 
     bool isInitialAboutBlank() const { return m_isInitialAboutBlank; }
 
-    bool navigationCanTriggerCrossDocumentViewTransition(Document& oldDocument, bool fromBackForwardCache);
+    CanTriggerCrossDocumentViewTransition navigationCanTriggerCrossDocumentViewTransition(Document& oldDocument, bool fromBackForwardCache);
     WEBCORE_EXPORT void whenDocumentIsCreated(Function<void(Document*)>&&);
 
     WEBCORE_EXPORT void setNewResultingClientId(ScriptExecutionContextIdentifier);
