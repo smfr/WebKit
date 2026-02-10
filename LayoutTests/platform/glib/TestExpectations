@@ -1660,10 +1660,9 @@ webkit.org/b/211995 fast/images/animated-image-mp4.html [ Failure Timeout ]
 # Player is often not rendering in image tests, especially in Release
 webkit.org/b/234352 imported/w3c/web-platform-tests/media-source/mediasource-video-is-visible.html [ ImageOnlyFailure Pass ]
 webkit.org/b/234352 media/media-source/media-source-video-renders.html [ ImageOnlyFailure Pass ]
-webkit.org/b/234352 media/track/track-webvtt-no-snap-to-lines-overlap.html [ ImageOnlyFailure Pass ]
-webkit.org/b/234352 media/track/track-webvtt-snap-to-lines-inline-style.html [ ImageOnlyFailure Pass ]
-webkit.org/b/234352 media/track/track-webvtt-snap-to-lines-left-right.html [ ImageOnlyFailure Pass ]
-webkit.org/b/234352 media/video-with-alpha.html [ ImageOnlyFailure Pass ]
+webkit.org/b/234352 media/track/track-webvtt-no-snap-to-lines-overlap.html [ Timeout Pass ]
+webkit.org/b/234352 media/track/track-webvtt-snap-to-lines-inline-style.html [ Timeout Pass ]
+webkit.org/b/234352 media/track/track-webvtt-snap-to-lines-left-right.html [ Timeout Pass ]
 
 media/track/webvtt-ruby.html [ Timeout Pass ]
 
@@ -1832,6 +1831,9 @@ webkit.org/b/306461 media/modern-media-controls/media-controller/media-controlle
 
 # Unimplemented WTR::UIScriptController::singleTapAtPoint
 webkit.org/b/286930 media/modern-media-controls/scrubber-support/scrubber-support-seek-back.html [ Skip ]
+
+# Times out very rarely
+webkit.org/b/307438 media/modern-media-controls/text-tracks/text-tracks-height-with-controls.html [ Timeout Pass ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of Media-controls-related bugs
@@ -2934,7 +2936,7 @@ imported/w3c/web-platform-tests/webrtc/RTCSctpTransport-maxChannels.html [ Failu
 imported/w3c/web-platform-tests/webrtc/RTCSctpTransport-maxMessageSize.html [ Failure ]
 imported/w3c/web-platform-tests/webrtc/RTCTrackEvent-constructor.html [ Pass ]
 imported/w3c/web-platform-tests/webrtc/RTCTrackEvent-fire.html  [ Skip ] # Timeout
-imported/w3c/web-platform-tests/webrtc/simplecall.https.html [ Pass ]
+webkit.org/b/307440 imported/w3c/web-platform-tests/webrtc/simplecall.https.html [ Pass Failure ]
 imported/w3c/web-platform-tests/webrtc/toJSON.html [ Pass ]
 imported/w3c/web-platform-tests/webrtc/transfer-datachannel.html [ Skip ] # Timeout
 
@@ -4258,7 +4260,7 @@ imported/w3c/web-platform-tests/html/rendering/widgets/input-checkbox-switch-rtl
 imported/w3c/web-platform-tests/svg/painting/reftests/marker-path-021.svg [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/painting/reftests/marker-path-022.svg [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/painting/reftests/marker-path-023.svg [ ImageOnlyFailure ]
-media/media-vp9-yuv422p10.html [ ImageOnlyFailure Pass ]
+media/media-vp9-yuv422p10.html [ ImageOnlyFailure Pass Timeout ]
 
 webkit.org/b/223830 inspector/debugger/csp-exceptions.html [ Timeout ]
 webkit.org/b/304278 inspector/worker/debugger-pause-subworker.html [ Timeout ]
@@ -4353,7 +4355,7 @@ imported/w3c/web-platform-tests/html/canvas/offscreen/path-objects/2d.path.isPoi
 # Flakies Aug2023
 webkit.org/b/261024 imported/w3c/web-platform-tests/WebCryptoAPI/generateKey/successes_Ed25519.https.any.html [ Failure Pass ]
 webkit.org/b/261024 imported/w3c/web-platform-tests/WebCryptoAPI/generateKey/successes_Ed25519.https.any.worker.html [ Failure Pass ]
-webkit.org/b/261024 media/video-playsinline.html [ Failure Pass ]
+webkit.org/b/261024 media/video-playsinline.html [ Failure Timeout Pass ]
 
 # Initial css/compositing test import
 imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-animation.html [ ImageOnlyFailure ]
