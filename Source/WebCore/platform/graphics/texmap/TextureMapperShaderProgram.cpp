@@ -89,7 +89,7 @@ static const char* vertexTemplateLT320Vars =
         varying float v_antialias;
         varying vec4 v_nonProjectedPosition;
     );
-
+// clang-format off
 static const char* vertexTemplateCommon =
     STRINGIFY(
         uniform mat4 u_modelViewMatrix;
@@ -158,7 +158,7 @@ static const char* vertexTemplateCommon =
             gl_Position = u_projectionMatrix * v_nonProjectedPosition;
         }
     );
-
+// clang-format on
 #define ANTIALIASING_TEX_COORD_DIRECTIVE \
     GLSL_DIRECTIVE(if defined(ENABLE_Antialiasing)) \
         GLSL_DIRECTIVE(define transformTexCoord fragmentTransformTexCoord) \
@@ -187,6 +187,22 @@ static const char* vertexTemplateCommon =
         GLSL_DIRECTIVE(define SamplerExternalOESType sampler2D) \
     GLSL_DIRECTIVE(endif)
 
+// clang-format off
+#define EXT_YUV_TARGET_DIRECTIVE \
+    STRINGIFY(\n) \
+    GLSL_DIRECTIVE(ifdef ENABLE_TextureExternalOESYUV) \
+        GLSL_DIRECTIVE(extension GL_EXT_YUV_target : require) \
+        GLSL_DIRECTIVE(define SamplerExternalOESYUVType __samplerExternal2DY2YEXT) \
+    GLSL_DIRECTIVE(else) \
+        GLSL_DIRECTIVE(if __VERSION__ >= 300) \
+            GLSL_DIRECTIVE(extension GL_OES_EGL_image_external_essl3 : require) \
+        GLSL_DIRECTIVE(else) \
+            GLSL_DIRECTIVE(extension GL_OES_EGL_image_external : require) \
+        GLSL_DIRECTIVE(endif) \
+        GLSL_DIRECTIVE(define SamplerExternalOESYUVType samplerExternalOES) \
+    GLSL_DIRECTIVE(endif)
+// clang-format on
+
 // The max number of stacked rounded rectangle clips allowed is 10, which is also the
 // max number of transforms that we can get. We need 3 components for each rounded
 // rectangle so we need 30 components to receive the 10 rectangles.
@@ -200,12 +216,15 @@ static const char* vertexTemplateCommon =
 // Common header for all versions. We define the matrices variables here to keep the precision
 // directives scope: the first one applies to the matrices variables and the next one to the
 // rest of them.
+// clang-format off
 static const char* fragmentTemplateHeaderCommon =
     ANTIALIASING_TEX_COORD_DIRECTIVE
     BLUR_CONSTANTS
     ROUNDED_RECT_CONSTANTS
     OES_EGL_IMAGE_EXTERNAL_DIRECTIVE
-    TEXTURE_SPACE_MATRIX_PRECISION_DIRECTIVE
+    TEXTURE_SPACE_MATRIX_PRECISION_DIRECTIVE;
+
+static const char* fragmentTemplateHeaderCommonVariables =
     STRINGIFY(
         precision TextureSpaceMatrixPrecision float;
     )
@@ -224,6 +243,38 @@ static const char* fragmentTemplateLT320Vars =
         varying vec2 v_texCoord;
         varying vec2 v_transformedTexCoord;
         varying vec4 v_nonProjectedPosition;
+    );
+
+static const char* fragmentTemplateYUVToRGB =
+    "\n"
+    GLSL_DIRECTIVE(ifdef ENABLE_TextureExternalOESYUV)
+    STRINGIFY(
+        void applyTextureExternalOESYUV(inout vec4 color, vec2 texCoord)
+        {
+            vec4 contentColor = vec4(yuv_2_rgb(texture2D(s_yuvToRgbSampler, texCoord).rgb, itu_601).rgb, 1.0);
+            color = sourceOver(contentColor, color);
+        }
+    )
+    "\n"
+    GLSL_DIRECTIVE(else)
+    STRINGIFY(
+        void applyTextureExternalOESYUV(inout vec4 color, vec2 texCoord)
+        {
+            vec4 contentColor = texture2D(s_yuvToRgbSampler, texCoord);
+            color = sourceOver(contentColor, color);
+        }
+    )
+    "\n"
+    GLSL_DIRECTIVE(endif);
+
+static const char* fragmentTemplateYUVToRGBNoop =
+    "\n"
+    STRINGIFY(
+        void applyTextureExternalOESYUV(inout vec4 color, vec2 texCoord)
+        {
+            vec4 contentColor = texture2D(s_yuvToRgbSampler, texCoord);
+            color = sourceOver(contentColor, color);
+        }
     );
 
 // PQ tone-mapping function with conditional highp precision.
@@ -292,6 +343,7 @@ static const char* fragmentTemplateCommon =
         uniform sampler2D s_samplerA;
         uniform sampler2D s_contentTexture;
         uniform SamplerExternalOESType s_externalOESTexture;
+        uniform SamplerExternalOESYUVType s_yuvToRgbSampler;
         uniform float u_opacity;
         uniform float u_filterAmount;
         uniform mat4 u_yuvToRgb;
@@ -338,6 +390,8 @@ static const char* fragmentTemplateCommon =
         void applyPremultiply(inout vec4 color) { color = vec4(color.rgb * color.a, color.a); }
 
         void applyToneMapPQ(inout vec4 color);
+
+        void applyTextureExternalOESYUV(inout vec4 color, vec2 texCoord);
 
         vec3 yuvToRgb(float y, float u, float v)
         {
@@ -624,10 +678,12 @@ static const char* fragmentTemplateCommon =
             applyTextureCopyIfNeeded(color, texCoord);
             applyBlurFilterIfNeeded(color, texCoord);
             applyTextureExternalOESIfNeeded(color, texCoord);
+            applyTextureExternalOESYUVIfNeeded(color, texCoord);
             applyRoundedRectClipIfNeeded(color);
             gl_FragColor = color;
         }
     );
+// clang-format on
 
 Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapperShaderProgram::Options options)
 {
@@ -664,6 +720,7 @@ Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapper
     SET_APPLIER_FROM_OPTIONS(ManualRepeat);
     SET_APPLIER_FROM_OPTIONS(ClampUVBounds);
     SET_APPLIER_FROM_OPTIONS(TextureExternalOES);
+    SET_APPLIER_FROM_OPTIONS(TextureExternalOESYUV);
     SET_APPLIER_FROM_OPTIONS(RoundedRectClip);
     SET_APPLIER_FROM_OPTIONS(Premultiply);
 
@@ -701,6 +758,13 @@ Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapper
     // Append the common header.
     fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateHeaderCommon));
 
+    if (GLContext::current()->glExtensions().EXT_YUV_target)
+        fragmentShaderBuilder.append(unsafeSpan(EXT_YUV_TARGET_DIRECTIVE));
+    else
+        fragmentShaderBuilder.append(unsafeSpan(GLSL_DIRECTIVE(define SamplerExternalOESYUVType sampler2D)));
+
+    fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateHeaderCommonVariables));
+
     // Append the appropriate input/output variable definitions.
     fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateLT320Vars));
 
@@ -709,6 +773,11 @@ Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapper
 
     // Append the PQ tone mapping function.
     fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateToneMapPq));
+
+    if (GLContext::current()->glExtensions().EXT_YUV_target)
+        fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateYUVToRGB));
+    else
+        fragmentShaderBuilder.append(unsafeSpan(fragmentTemplateYUVToRGBNoop));
 
     return adoptRef(*new TextureMapperShaderProgram(vertexShaderBuilder.toString(), fragmentShaderBuilder.toString()));
 }
