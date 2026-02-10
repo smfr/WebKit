@@ -446,8 +446,6 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
         parameters.bundleParameterData = API::Data::createWithoutCopying(data.get());
     }
-    parameters.networkATSContext = adoptCF(_CFNetworkCopyATSContext());
-
 #if !RELEASE_LOG_DISABLED
     parameters.shouldLogUserInteraction = [defaults boolForKey:WebKitLogCookieInformationDefaultsKey];
 #endif
