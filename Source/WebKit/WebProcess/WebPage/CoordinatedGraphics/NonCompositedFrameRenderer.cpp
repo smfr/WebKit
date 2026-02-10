@@ -28,6 +28,7 @@
 
 #if USE(COORDINATED_GRAPHICS)
 #include <WebCore/GraphicsContextSkia.h>
+#include <wtf/SystemTracing.h>
 
 namespace WebKit {
 using namespace WebCore;
@@ -43,6 +44,7 @@ std::unique_ptr<NonCompositedFrameRenderer> NonCompositedFrameRenderer::create(W
 NonCompositedFrameRenderer::NonCompositedFrameRenderer(WebPage& webPage)
     : m_webPage(webPage)
     , m_surface(AcceleratedSurface::create(m_webPage, [this] {
+        WTFEmitSignpost(this, FrameComplete);
         m_canRenderNextFrame = true;
         if (m_shouldRenderFollowupFrame) {
             m_shouldRenderFollowupFrame = false;
@@ -105,6 +107,8 @@ void NonCompositedFrameRenderer::display()
         return;
     }
 
+    WTFBeginSignpost(this, NonCompositedRenderingUpdate);
+
     Ref webPage = m_webPage.get();
     webPage->updateRendering();
     webPage->finalizeRenderingUpdate({ });
@@ -113,13 +117,16 @@ void NonCompositedFrameRenderer::display()
     IntSize scaledSize = webPage->size();
     scaledSize.scale(webPage->deviceScaleFactor());
 
+    RefPtr drawingArea = webPage->drawingArea();
+    if (drawingArea)
+        drawingArea->willStartRenderingUpdateDisplay();
+
     if (m_context)
         m_context->makeContextCurrent();
     m_surface->willRenderFrame(scaledSize);
 
     auto* canvas = m_surface->canvas();
-    if (!canvas)
-        return;
+    RELEASE_ASSERT(canvas);
 
     if (m_context)
         PlatformDisplay::sharedDisplay().skiaGLContext()->makeContextCurrent();
@@ -153,7 +160,9 @@ void NonCompositedFrameRenderer::display()
             rectToRepaint = renderTargetDamage->bounds();
     }
 #endif
+    WTFBeginSignpost(canvas, DrawRect, "Skia/%s, dirty region %ix%i+%i+%i", m_context ? "GPU" : "CPU", rectToRepaint.x(), rectToRepaint.y(), rectToRepaint.width(), rectToRepaint.height());
     webPage->drawRect(graphicsContext, rectToRepaint);
+    WTFEndSignpost(canvas, DrawRect);
     canvas->restore();
 
     if (m_context) {
@@ -170,6 +179,11 @@ void NonCompositedFrameRenderer::display()
         drawingArea->dispatchPendingCallbacksAfterEnsuringDrawing();
 
     webPage->didUpdateRendering();
+
+    if (drawingArea)
+        drawingArea->didCompleteRenderingUpdateDisplay();
+
+    WTFEndSignpost(this, NonCompositedRenderingUpdate);
 
     if (m_forcedRepaintAsyncCallback) {
         m_forcedRepaintAsyncCallback();
