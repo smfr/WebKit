@@ -78,7 +78,6 @@ http/tests/security/mixedContent/secure-page-navigates-to-basic-auth-secure-page
 http/tests/security/xss-DENIED-script-inject-into-inactive-window2-pson.html [ Skip ]
 http/tests/security/xss-DENIED-script-inject-into-inactive-window2.html [ Skip ]
 http/tests/security/xss-DENIED-script-inject-into-inactive-window3.html [ Skip ]
-http/tests/site-isolation/inspector/target/target.html [ Skip ]
 http/tests/storage/storage-map-leaking.html [ Skip ]
 http/tests/webgpu/webgpu/api/validation/queue/copyToTexture/CopyExternalImageToTexture.html [ Skip ]
 http/tests/webrtc/audioSessionInFrames.html [ Skip ]

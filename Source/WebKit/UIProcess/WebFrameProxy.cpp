@@ -128,7 +128,7 @@ WebFrameProxy::WebFrameProxy(WebPageProxy& page, FrameProcess& process, FrameIde
     allFrames().set(frameID, *this);
     WebProcessPool::statistics().wkFrameCount++;
 
-    page.inspectorController().createWebFrameInspectorTarget(*this, WebFrameInspectorTarget::toTargetID(frameID));
+    page.inspectorController().didCreateFrame(*this);
 
     protect(m_frameProcess)->incrementFrameCount();
 }
@@ -136,7 +136,7 @@ WebFrameProxy::WebFrameProxy(WebPageProxy& page, FrameProcess& process, FrameIde
 WebFrameProxy::~WebFrameProxy()
 {
     if (RefPtr page = m_page.get())
-        page->inspectorController().destroyInspectorTarget(WebFrameInspectorTarget::toTargetID(frameID()));
+        page->inspectorController().willDestroyFrame(*this);
 
     WebProcessPool::statistics().wkFrameCount--;
 #if PLATFORM(GTK)
@@ -191,7 +191,7 @@ void WebFrameProxy::webProcessWillShutDown()
         childFrame->webProcessWillShutDown();
 
     if (RefPtr page = m_page.get())
-        page->inspectorController().destroyInspectorTarget(WebFrameInspectorTarget::toTargetID(frameID()));
+        page->inspectorController().willDestroyFrame(*this);
 
     m_page = nullptr;
 

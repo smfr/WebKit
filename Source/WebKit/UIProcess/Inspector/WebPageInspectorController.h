@@ -27,6 +27,7 @@
 
 #include "InspectorTargetProxy.h"
 #include "ProvisionalPageProxy.h"
+#include "UIProcess/WebFrameProxy.h"
 #include <JavaScriptCore/InspectorAgentRegistry.h>
 #include <JavaScriptCore/InspectorTargetAgent.h>
 #include <WebCore/FrameIdentifier.h>
@@ -71,8 +72,8 @@ public:
     void setIndicating(bool);
 #endif
 
+    // FIXME <https://webkit.org/b/306912>: Remove this unused function and corresponding IPC message.
     void createWebPageInspectorTarget(const String& targetId, Inspector::InspectorTargetType);
-    void createWebFrameInspectorTarget(WebFrameProxy&, const String& targetId);
     void destroyInspectorTarget(const String& targetId);
     void sendMessageToInspectorFrontend(const String& targetId, const String& message);
 
@@ -82,6 +83,8 @@ public:
     void didCreateProvisionalPage(ProvisionalPageProxy&);
     void willDestroyProvisionalPage(const ProvisionalPageProxy&);
     void didCommitProvisionalPage(WebCore::PageIdentifier oldWebPageID, WebCore::PageIdentifier newWebPageID);
+    void didCreateFrame(WebFrameProxy&);
+    void willDestroyFrame(const WebFrameProxy&);
 
     InspectorBrowserAgent* enabledBrowserAgent() const;
     void setEnabledBrowserAgent(InspectorBrowserAgent*);
