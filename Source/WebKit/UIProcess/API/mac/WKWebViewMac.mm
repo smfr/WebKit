@@ -746,12 +746,12 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
 
 - (NSRect)unionRectInVisibleSelectedRange
 {
-    return _impl->unionRectInVisibleSelectedRange();
+    return _impl->unionRectInVisibleSelectedRangeInScreen();
 }
 
 - (NSRect)documentVisibleRect
 {
-    return _impl->documentVisibleRect();
+    return _impl->documentVisibleRectInScreen();
 }
 
 - (void)showContextMenuForSelection:(id)sender

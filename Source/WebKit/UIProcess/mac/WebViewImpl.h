@@ -681,8 +681,8 @@ public:
     void characterIndexForPoint(NSPoint, void(^)(NSUInteger));
     void typingAttributesWithCompletionHandler(void(^)(NSDictionary<NSString *, id> *));
 
-    NSRect unionRectInVisibleSelectedRange() const;
-    NSRect documentVisibleRect() const;
+    NSRect unionRectInVisibleSelectedRangeInScreen() const;
+    NSRect documentVisibleRectInScreen() const;
 
     bool isContentRichlyEditable() const;
 
@@ -899,6 +899,8 @@ private:
     RetainPtr<AVTouchBarScrubber> m_mediaPlaybackControlsView;
 #endif // ENABLE(WEB_PLAYBACK_CONTROLS_MANAGER)
 #endif // HAVE(TOUCH_BAR)
+
+    NSRect convertFromViewToScreen(NSRect rectInView) const;
 
     bool supportsArbitraryLayoutModes() const;
     float intrinsicDeviceScaleFactor() const;

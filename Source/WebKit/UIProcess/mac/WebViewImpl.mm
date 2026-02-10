@@ -2040,6 +2040,17 @@ CGFloat WebViewImpl::viewScale() const
     return m_page->viewScaleFactor();
 }
 
+NSRect WebViewImpl::convertFromViewToScreen(NSRect rectInView) const
+{
+    RetainPtr view = m_view.get();
+    RetainPtr window = [view window];
+    if (!window)
+        return NSZeroRect;
+
+    auto rectInWindow = [view convertRect:rectInView toView:nil];
+    return [window convertRectToScreen:rectInWindow];
+}
+
 WKLayoutMode WebViewImpl::layoutMode() const
 {
     return [m_layoutStrategy layoutMode];
@@ -2919,16 +2930,20 @@ void WebViewImpl::selectionDidChange()
         requestCandidatesForSelectionIfNeeded();
 #endif
 
+    bool alreadyNotifiedClient = false;
     if (page->editorState().hasPostLayoutData()) {
 #if HAVE(REDESIGNED_TEXT_CURSOR)
         updateCursorAccessoryPlacement();
 #endif
-        if (protect(page->preferences())->textInputClientSelectionUpdatesEnabled())
+        if (protect(page->preferences())->textInputClientSelectionUpdatesEnabled()) {
+            alreadyNotifiedClient = true;
             [protect(inputContext()) textInputClientDidUpdateSelection];
+        }
     }
 
 #if ENABLE(WRITING_TOOLS)
-    if (isEditable() || page->configuration().writingToolsBehavior() == WebCore::WritingTools::Behavior::Complete) {
+    bool wantsCompleteWritingTools = isEditable() || page->configuration().writingToolsBehavior() == WebCore::WritingTools::Behavior::Complete;
+    if (wantsCompleteWritingTools && !alreadyNotifiedClient) {
         auto isRange = page->editorState().hasPostLayoutData() && page->editorState().selectionIsRange;
         auto selectionRect = isRange ? page->editorState().postLayoutData->selectionBoundingRect : IntRect { };
 
@@ -3024,7 +3039,7 @@ void WebViewImpl::typingAttributesWithCompletionHandler(void(^completion)(NSDict
     });
 }
 
-NSRect WebViewImpl::unionRectInVisibleSelectedRange() const
+NSRect WebViewImpl::unionRectInVisibleSelectedRangeInScreen() const
 {
     RetainPtr view = m_view.get();
     if (!view)
@@ -3038,10 +3053,10 @@ NSRect WebViewImpl::unionRectInVisibleSelectedRange() const
     if (selectionRect.isEmpty())
         return NSZeroRect;
 
-    return selectionRect;
+    return convertFromViewToScreen(selectionRect);
 }
 
-NSRect WebViewImpl::documentVisibleRect() const
+NSRect WebViewImpl::documentVisibleRectInScreen() const
 {
     RetainPtr view = m_view.get();
     if (!view)
@@ -3049,7 +3064,7 @@ NSRect WebViewImpl::documentVisibleRect() const
 
     FloatRect visibleRect = [view bounds];
     visibleRect.contract(m_page->obscuredContentInsets());
-    return visibleRect;
+    return convertFromViewToScreen(visibleRect);
 }
 
 void WebViewImpl::changeFontColorFromSender(id sender)
@@ -5561,9 +5576,7 @@ void WebViewImpl::firstRectForCharacterRange(NSRange range, void(^completionHand
             return;
         }
 
-        RetainPtr view = weakThis->m_view.get();
-        NSRect resultRect = [view convertRect:rect toView:nil];
-        resultRect = [retainPtr([view window]) convertRectToScreen:resultRect];
+        auto resultRect = weakThis->convertFromViewToScreen(rect);
 
         LOG(TextInput, "    -> firstRectForCharacterRange returned (%f, %f, %f, %f)", resultRect.origin.x, resultRect.origin.y, resultRect.size.width, resultRect.size.height);
         completionHandler(resultRect, actualRange);
