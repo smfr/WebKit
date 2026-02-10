@@ -2555,8 +2555,9 @@
 		F48C81E42AE0BA8E00073850 /* CoreIPCData.h in Headers */ = {isa = PBXBuildFile; fileRef = F48C81E32AE0BA6E00073850 /* CoreIPCData.h */; };
 		F48D2A8521583A7E00C6752B /* AppKitSPI.h in Headers */ = {isa = PBXBuildFile; fileRef = F48D2A8421583A0200C6752B /* AppKitSPI.h */; };
 		F48EC3582B75895800D1B886 /* WKTextExtractionUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = F48EC3562B7585A300D1B886 /* WKTextExtractionUtilities.h */; };
-		F48F411C2F3A573F0095484F /* CoreIPCPKPaymentMethod.h in Headers */ = {isa = PBXBuildFile; fileRef = F48F41192F3A57350095484F /* CoreIPCPKPaymentMethod.h */; };
-		F48F411D2F3A57450095484F /* CoreIPCPKPaymentMethod.mm in Sources */ = {isa = PBXBuildFile; fileRef = F48F411A2F3A57350095484F /* CoreIPCPKPaymentMethod.mm */; };
+		F48F41242F3AC98C0095484F /* CoreIPCPKPayment.h in Headers */ = {isa = PBXBuildFile; fileRef = F48F41212F3AC9810095484F /* CoreIPCPKPayment.h */; };
+		F48F41252F3AC9940095484F /* CoreIPCPKPayment.mm in Sources */ = {isa = PBXBuildFile; fileRef = F48F41222F3AC9810095484F /* CoreIPCPKPayment.mm */; };
+		F48F41262F3AD3FA0095484F /* CoreIPCPKPaymentMethod.mm in Sources */ = {isa = PBXBuildFile; fileRef = F48F411A2F3A57350095484F /* CoreIPCPKPaymentMethod.mm */; };
 		F496A4311F58A272004C1757 /* DragDropInteractionState.h in Headers */ = {isa = PBXBuildFile; fileRef = F496A42F1F58A272004C1757 /* DragDropInteractionState.h */; };
 		F4974E76265ECBBC00B49B8C /* WKRevealItemPresenter.h in Headers */ = {isa = PBXBuildFile; fileRef = F446EDEF265EB2B00031DA8F /* WKRevealItemPresenter.h */; };
 		F4975CF22624B80A003C626E /* WKQuickLookPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = F4975CF12624B80A003C626E /* WKQuickLookPreviewController.h */; };
@@ -8818,6 +8819,9 @@
 		F48F41192F3A57350095484F /* CoreIPCPKPaymentMethod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreIPCPKPaymentMethod.h; sourceTree = "<group>"; };
 		F48F411A2F3A57350095484F /* CoreIPCPKPaymentMethod.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CoreIPCPKPaymentMethod.mm; sourceTree = "<group>"; };
 		F48F411B2F3A57350095484F /* CoreIPCPKPaymentMethod.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoreIPCPKPaymentMethod.serialization.in; sourceTree = "<group>"; };
+		F48F41212F3AC9810095484F /* CoreIPCPKPayment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreIPCPKPayment.h; sourceTree = "<group>"; };
+		F48F41222F3AC9810095484F /* CoreIPCPKPayment.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CoreIPCPKPayment.mm; sourceTree = "<group>"; };
+		F48F41232F3AC9810095484F /* CoreIPCPKPayment.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoreIPCPKPayment.serialization.in; sourceTree = "<group>"; };
 		F496A42F1F58A272004C1757 /* DragDropInteractionState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragDropInteractionState.h; sourceTree = "<group>"; };
 		F496A4301F58A272004C1757 /* DragDropInteractionState.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DragDropInteractionState.mm; sourceTree = "<group>"; };
 		F4975CF12624B80A003C626E /* WKQuickLookPreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKQuickLookPreviewController.h; sourceTree = "<group>"; };
@@ -13057,9 +13061,6 @@
 		37C4C0901814B37B003688B9 /* cocoa */ = {
 			isa = PBXGroup;
 			children = (
-				F48F41192F3A57350095484F /* CoreIPCPKPaymentMethod.h */,
-				F48F411A2F3A57350095484F /* CoreIPCPKPaymentMethod.mm */,
-				F48F411B2F3A57350095484F /* CoreIPCPKPaymentMethod.serialization.in */,
 				48B188FE2E789A3B009B57A9 /* AccessibilityPreferences.mm */,
 				E3C3D1AE2E007922004B306A /* AnnotatedMachSendRight.mm */,
 				1A1EF1971A1D5B420023200A /* APIDataCocoa.mm */,
@@ -13149,9 +13150,15 @@
 				F458B8E72E8F46E100948328 /* CoreIPCPKDateComponentsRange.h */,
 				F458B8E82E8F46E100948328 /* CoreIPCPKDateComponentsRange.mm */,
 				F458B8E92E8F46E100948328 /* CoreIPCPKDateComponentsRange.serialization.in */,
+				F48F41212F3AC9810095484F /* CoreIPCPKPayment.h */,
+				F48F41222F3AC9810095484F /* CoreIPCPKPayment.mm */,
+				F48F41232F3AC9810095484F /* CoreIPCPKPayment.serialization.in */,
 				F4E2D8742F0D88F6007B52E7 /* CoreIPCPKPaymentMerchantSession.h */,
 				F4E2D8752F0D88F6007B52E7 /* CoreIPCPKPaymentMerchantSession.mm */,
 				F4E2D8772F0D91ED007B52E7 /* CoreIPCPKPaymentMerchantSession.serialization.in */,
+				F48F41192F3A57350095484F /* CoreIPCPKPaymentMethod.h */,
+				F48F411A2F3A57350095484F /* CoreIPCPKPaymentMethod.mm */,
+				F48F411B2F3A57350095484F /* CoreIPCPKPaymentMethod.serialization.in */,
 				F4AF77852F27CFBC00861236 /* CoreIPCPKPaymentSetupFeature.h */,
 				F4AF77862F27CFBC00861236 /* CoreIPCPKPaymentSetupFeature.mm */,
 				F4AF77872F27CFBC00861236 /* CoreIPCPKPaymentSetupFeature.serialization.in */,
@@ -17960,6 +17967,7 @@
 				5157AE0A2B23E96A00C0E095 /* CoreIPCPassKit.h in Headers */,
 				51AD56912B1C4704001A0ECB /* CoreIPCPersonNameComponents.h in Headers */,
 				F458B8EA2E8F46E900948328 /* CoreIPCPKDateComponentsRange.h in Headers */,
+				F48F41242F3AC98C0095484F /* CoreIPCPKPayment.h in Headers */,
 				F4AF77882F27CFC800861236 /* CoreIPCPKPaymentSetupFeature.h in Headers */,
 				F4AF724A2F23025700861236 /* CoreIPCPKPaymentToken.h in Headers */,
 				F4EBCF642F33E87800BFAC3C /* CoreIPCPKShippingMethod.h in Headers */,
@@ -18458,7 +18466,6 @@
 				E4D54D0421F1D72D007E3C36 /* ScrollingTreeFrameScrollingNodeRemoteIOS.h in Headers */,
 				0F931C1C18C5711900DBA7C3 /* ScrollingTreeOverflowScrollingNodeIOS.h in Headers */,
 				0F931C1C18C5711900DBB8D4 /* ScrollingTreeScrollingNodeDelegateIOS.h in Headers */,
-				F48F411C2F3A573F0095484F /* CoreIPCPKPaymentMethod.h in Headers */,
 				51D130541382EAC000351EDD /* SecItemRequestData.h in Headers */,
 				51D130561382EAC000351EDD /* SecItemResponseData.h in Headers */,
 				86EB7204298D310A00C1DC77 /* SecItemShim.h in Headers */,
@@ -21587,7 +21594,9 @@
 				5157AE0B2B23E97400C0E095 /* CoreIPCPassKit.mm in Sources */,
 				51AD56902B1C46FE001A0ECB /* CoreIPCPersonNameComponents.mm in Sources */,
 				F458B8EB2E8F46F000948328 /* CoreIPCPKDateComponentsRange.mm in Sources */,
+				F48F41252F3AC9940095484F /* CoreIPCPKPayment.mm in Sources */,
 				F4E2D8762F0D88FF007B52E7 /* CoreIPCPKPaymentMerchantSession.mm in Sources */,
+				F48F41262F3AD3FA0095484F /* CoreIPCPKPaymentMethod.mm in Sources */,
 				F4AF77892F27CFCF00861236 /* CoreIPCPKPaymentSetupFeature.mm in Sources */,
 				F4AF72492F22FCC400861236 /* CoreIPCPKPaymentToken.mm in Sources */,
 				FAF27D302D2851EB00F1F0BB /* CoreIPCPKSecureElementPass.mm in Sources */,
@@ -21606,7 +21615,6 @@
 				7B9FC5A828A38D1E007570E7 /* PlatformUnifiedSource1.cpp in Sources */,
 				7B9FC5D028A5300D007570E7 /* PlatformUnifiedSource2-nonARC.mm in Sources */,
 				7B9FC5D428A53023007570E7 /* PlatformUnifiedSource2.cpp in Sources */,
-				F48F411D2F3A57450095484F /* CoreIPCPKPaymentMethod.mm in Sources */,
 				7B9FC5DE28A53CCD007570E7 /* PlatformUnifiedSource3-nonARC.mm in Sources */,
 				7B9FC5D328A5301D007570E7 /* PlatformUnifiedSource3.cpp in Sources */,
 				7B9FC5D228A53018007570E7 /* PlatformUnifiedSource4.cpp in Sources */,

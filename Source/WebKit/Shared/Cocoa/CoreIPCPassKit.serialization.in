@@ -61,6 +61,7 @@ webkit_platform_headers: "CoreIPCPKSecureElementPass.h"
 }
 #endif
 
+#if !HAVE(WK_SECURE_CODING_PKPAYMENT)
 [WebKitSecureCodingClass=PAL::getPKPaymentClassSingleton(), SupportWKKeyedCoder, WebKitPlatform] webkit_secure_coding PKPayment {
     token: PKPaymentToken
     shippingContact: PKContact
@@ -71,6 +72,7 @@ webkit_platform_headers: "CoreIPCPKSecureElementPass.h"
     biometryAttempts: Number
     installmentAuthorizationToken: String
 }
+#endif
 
 #if !HAVE(WK_SECURE_CODING_PKPAYMENTTOKEN)
 [WebKitSecureCodingClass=PAL::getPKPaymentTokenClassSingleton(), SupportWKKeyedCoder, WebKitPlatform] webkit_secure_coding PKPaymentToken {

@@ -33,6 +33,9 @@
 #if HAVE(WK_SECURE_CODING_PKPAYMENTMETHOD)
 #include "CoreIPCPKPaymentMethod.h"
 #endif
+#if HAVE(WK_SECURE_CODING_PKPAYMENT)
+#include "CoreIPCPKPayment.h"
+#endif
 #if HAVE(WK_SECURE_CODING_PKPAYMENTMERCHANTSESSION)
 #include "CoreIPCPKPaymentMerchantSession.h"
 #endif
@@ -66,7 +69,9 @@ class CoreIPCPKPaymentSetupFeature;
 #endif
 class CoreIPCPKContact;
 class CoreIPCPKSecureElementPass;
+#if !HAVE(WK_SECURE_CODING_PKPAYMENT)
 class CoreIPCPKPayment;
+#endif
 #if !HAVE(WK_SECURE_CODING_PKPAYMENTTOKEN)
 class CoreIPCPKPaymentToken;
 #endif

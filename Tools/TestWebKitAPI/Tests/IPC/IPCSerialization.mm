@@ -28,6 +28,7 @@
 #import "ArgumentCodersCocoa.h"
 #import "CoreIPCCFDictionary.h"
 #import "CoreIPCError.h"
+#import "CoreIPCPKPayment.h"
 #import "CoreIPCPKPaymentMethod.h"
 #import "CoreIPCPKPaymentSetupFeature.h"
 #import "CoreIPCPKShippingMethod.h"
@@ -1742,6 +1743,44 @@ TEST(IPCSerialization, PKPaymentSetupFeature)
     runTestNS({ feature.get() });
 }
 
+#endif
+
+#if USE(PASSKIT) && HAVE(WK_SECURE_CODING_PKPAYMENT)
+TEST(IPCSerialization, PKPayment)
+{
+    RetainPtr<PKPaymentMethod> paymentMethod = adoptNS([PAL::getPKPaymentMethodClassSingleton() new]);
+    paymentMethod.get().displayName = @"WebKitPay";
+    paymentMethod.get().network = @"WebKitCard";
+    paymentMethod.get().type = PKPaymentMethodTypeCredit;
+
+    RetainPtr<PKPaymentToken> paymentToken = adoptNS([PAL::getPKPaymentTokenClassSingleton() new]);
+    paymentToken.get().paymentMethod = paymentMethod.get();
+    paymentToken.get().transactionIdentifier = @"WebKitTXIdentifier";
+    paymentToken.get().paymentData = adoptNS([NSData new]);
+
+    WebKit::CoreIPCPKPaymentData data;
+    data.token = paymentToken.get();
+    data.shippingContact = pkContactForTesting().get();
+    data.billingContact = pkContactForTesting().get();
+
+    RetainPtr<PKShippingMethod> shippingMethod = adoptNS([PAL::getPKShippingMethodClassSingleton() new]);
+    shippingMethod.get().identifier = @"WebKitPostalService";
+    shippingMethod.get().detail = @"Ships in 1 to 2 bugzillas";
+    data.shippingMethod = shippingMethod.get();
+
+    data.credential = [NSData dataWithBytes:"AAAA" length:4];
+    data.biometryAttempts = @(2);
+    data.installmentAuthorizationToken = @"InstallmentToken123";
+
+    WebKit::CoreIPCPKPayment paymentWrapper { std::optional { WTF::move(data) } };
+    RetainPtr<PKPayment> payment = paymentWrapper.toID();
+    EXPECT_TRUE([payment isKindOfClass:PAL::getPKPaymentClassSingleton()]);
+    runTestNS({ payment.get() });
+
+    WebKit::CoreIPCPKPayment nilWrapper(nil);
+    RetainPtr<id> nilPayment = nilWrapper.toID();
+    EXPECT_TRUE(nilPayment.get() == nil);
+}
 #endif
 
 #if PLATFORM(MAC)
