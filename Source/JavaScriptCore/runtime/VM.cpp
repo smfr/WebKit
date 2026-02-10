@@ -399,6 +399,8 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
         const char* profilerPath = getenv("JSC_PROFILER_PATH");
         if (profilerPath)
             pathOut.print(profilerPath, "/");
+        else
+            pathOut.print("/tmp/");
         pathOut.print("JSCProfile-", getCurrentProcessID(), "-", m_perBytecodeProfiler->databaseID(), ".json");
         static NeverDestroyed<CString> pathOutString = pathOut.toCString();
 
@@ -417,6 +419,7 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
                     dataLogF("<BYTECODE.STAT><%d> Failed to dump to %s. Do you need to add a sandbox extension? ((allow file-write* (subpath \"/private/tmp/\")) in WebProcess.sb.in\n", pid, pathOutString->data());
                 else
                     dataLogF("<BYTECODE.STAT><%d> Dumped to %s\n", pid, pathOutString->data());
+                dataLogF("<BYTECODE.STAT><%d> Dumping finished\n", pid);
             });
         });
 #endif
