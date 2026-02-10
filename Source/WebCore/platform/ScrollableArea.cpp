@@ -1065,4 +1065,20 @@ void ScrollableArea::scrollbarColorDidChange(std::optional<ScrollbarColor> scrol
     scrollbarsController().scrollbarColorChanged(scrollbarColor);
 }
 
+// MARK: -
+
+ScrollbarRevealBehaviorScope::ScrollbarRevealBehaviorScope(ScrollableArea& scrollableArea, ScrollbarRevealBehavior reveal)
+    : m_scrollableArea(scrollableArea)
+    , m_oldBehavior(scrollableArea.scrollbarRevealBehavior())
+{
+    scrollableArea.setScrollbarRevealBehavior(reveal);
+}
+
+ScrollbarRevealBehaviorScope::~ScrollbarRevealBehaviorScope()
+{
+    CheckedRef scrollableArea = m_scrollableArea.get();
+    scrollableArea->setScrollbarRevealBehavior(m_oldBehavior);
+}
+
+
 } // namespace WebCore

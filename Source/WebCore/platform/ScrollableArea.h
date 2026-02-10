@@ -152,6 +152,9 @@ public:
     virtual OverscrollBehavior horizontalOverscrollBehavior() const { return OverscrollBehavior::Auto; }
     virtual OverscrollBehavior verticalOverscrollBehavior() const { return OverscrollBehavior::Auto; }
 
+    void setScrollbarRevealBehavior(ScrollbarRevealBehavior behavior) { m_scrollbarRevealBehavior = behavior; }
+    ScrollbarRevealBehavior scrollbarRevealBehavior() const { return m_scrollbarRevealBehavior; }
+
     WEBCORE_EXPORT virtual Color scrollbarThumbColorStyle() const;
     WEBCORE_EXPORT virtual Color scrollbarTrackColorStyle() const;
     WEBCORE_EXPORT virtual Style::ScrollbarGutter scrollbarGutterStyle() const;
@@ -532,8 +535,19 @@ private:
     bool m_scrollOriginChanged { false };
     bool m_scrollShouldClearLatchedState { false };
     bool m_isAwaitingScrollend { false };
+    ScrollbarRevealBehavior m_scrollbarRevealBehavior { ScrollbarRevealBehavior::Default };
 
     Markable<ScrollingNodeID> m_scrollingNodeIDForTesting;
+};
+
+class ScrollbarRevealBehaviorScope {
+public:
+    ScrollbarRevealBehaviorScope(ScrollableArea&, ScrollbarRevealBehavior);
+    ~ScrollbarRevealBehaviorScope();
+
+private:
+    WeakRef<ScrollableArea> m_scrollableArea;
+    ScrollbarRevealBehavior m_oldBehavior;
 };
 
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, const ScrollableArea&);

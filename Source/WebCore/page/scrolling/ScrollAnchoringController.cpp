@@ -578,6 +578,8 @@ void ScrollAnchoringController::adjustScrollPositionForAnchoring()
     auto options = ScrollPositionChangeOptions::createProgrammatic();
     options.originalScrollDelta = adjustment;
 
+    auto revealScope = ScrollbarRevealBehaviorScope(m_owningScrollableArea.get(), ScrollbarRevealBehavior::DontReveal);
+
     auto oldScrollType = m_owningScrollableArea->currentScrollType();
     m_owningScrollableArea->setCurrentScrollType(ScrollType::Programmatic);
 

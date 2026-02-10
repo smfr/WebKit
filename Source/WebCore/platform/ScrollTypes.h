@@ -312,6 +312,11 @@ enum class ScrollbarOverlayStyle : uint8_t {
     Light
 };
 
+enum class ScrollbarRevealBehavior : bool {
+    DontReveal,
+    Default,
+};
+
 enum class ScrollPinningBehavior : uint8_t {
     DoNotPin,
     PinToTop,
@@ -401,6 +406,7 @@ WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollBehavior);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollElasticity);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, RubberBandingBehavior);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollbarMode);
+WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollbarRevealBehavior);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, OverflowAnchor);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollDirection);
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ScrollGranularity);

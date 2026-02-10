@@ -356,6 +356,7 @@ header: <WebCore/ScrollbarTrackCornerSystemImageMac.h>
 
 header: <WebCore/ScrollTypes.h>
 enum class WebCore::ScrollIsAnimated : bool;
+enum class WebCore::ScrollbarRevealBehavior : bool;
 
 enum class WebCore::ScrollGranularity : uint8_t {
     Line,
@@ -4313,6 +4314,7 @@ enum class WebCore::ScrollType : bool;
     WebCore::ScrollType scrollType;
     WebCore::ScrollClamping clamping;
     WebCore::ScrollIsAnimated animated;
+    WebCore::ScrollbarRevealBehavior scrollbarRevealBehavior;
     std::optional<std::tuple<WebCore::ScrollRequestType, Variant<WebCore::FloatPoint, WebCore::FloatSize>, WebCore::ScrollType, WebCore::ScrollClamping>> requestedDataBeforeAnimatedScroll;
 }
 

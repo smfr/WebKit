@@ -421,9 +421,9 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
     tracePoint(ProgrammaticScroll, scrollPosition.y(), frameView->frame().isMainFrame());
 
     if (options.originalScrollDelta)
-        stateNode->setRequestedScrollData({ ScrollRequestType::DeltaUpdate, *options.originalScrollDelta, options.type, options.clamping, options.animated });
+        stateNode->setRequestedScrollData({ ScrollRequestType::DeltaUpdate, *options.originalScrollDelta, options.type, options.clamping, options.animated, scrollableArea.scrollbarRevealBehavior() });
     else
-        stateNode->setRequestedScrollData({ ScrollRequestType::PositionUpdate, scrollPosition, options.type, options.clamping, options.animated });
+        stateNode->setRequestedScrollData({ ScrollRequestType::PositionUpdate, scrollPosition, options.type, options.clamping, options.animated, scrollableArea.scrollbarRevealBehavior() });
 
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::requestScrollToPosition " << scrollPosition << " for nodeID " << scrollingNodeID << " requestedScrollData " << stateNode->requestedScrollData());
 
