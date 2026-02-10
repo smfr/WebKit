@@ -456,7 +456,7 @@ RefPtr<WebCore::TextIndicator> WebFoundTextRangeController::createTextIndicatorF
 #if PLATFORM(IOS_FAMILY)
     if (RefPtr frame = m_webPage->corePage()->focusController().focusedOrMainFrame()) {
         frame->selection().setUpdateAppearanceEnabled(true);
-        frame->selection().updateAppearance();
+        protect(frame->selection())->updateAppearance();
         frame->selection().setUpdateAppearanceEnabled(false);
     }
 #endif

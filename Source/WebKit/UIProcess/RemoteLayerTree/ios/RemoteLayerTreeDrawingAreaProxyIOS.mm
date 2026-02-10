@@ -355,7 +355,7 @@ void RemoteLayerTreeDrawingAreaProxyIOS::didRefreshDisplay()
         if (!page)
             return;
         if (auto displayID = page->displayID())
-            page->scrollingCoordinatorProxy()->displayDidRefresh(*displayID);
+            protect(page->scrollingCoordinatorProxy())->displayDidRefresh(*displayID);
     }
 }
 

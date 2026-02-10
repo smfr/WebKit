@@ -173,17 +173,19 @@ void FindController::didFindString()
     RefPtr frame = protect(*m_webPage)->corePage()->focusController().focusedOrMainFrame();
     if (!frame)
         return;
-    frame->selection().setUpdateAppearanceEnabled(true);
-    frame->selection().updateAppearance();
-    frame->selection().setUpdateAppearanceEnabled(false);
+
+    CheckedRef selection = frame->selection();
+    selection->setUpdateAppearanceEnabled(true);
+    selection->updateAppearance();
+    selection->setUpdateAppearanceEnabled(false);
 
     // Scrolling the main frame is handled by the SmartMagnificationController class but we still
     // need to consider overflow nodes and subframes here.
     // Many sites have overlay headers or footers that may overlap with the highlighted
     // text, so we reveal the text at the center of the viewport.
     // FIXME: Find a better way to estimate the obscured area (https://webkit.org/b/183889).
-    frame->selection().revealSelection({ SelectionRevealMode::RevealUpToMainFrame, ScrollAlignment::alignCenterAlways, WebCore::RevealExtentOption::DoNotRevealExtent });
-    revealClosedDetailsAndHiddenUntilFoundAncestors(*protect(frame->selection().selection().start().anchorNode()));
+    selection->revealSelection({ SelectionRevealMode::RevealUpToMainFrame, ScrollAlignment::alignCenterAlways, WebCore::RevealExtentOption::DoNotRevealExtent });
+    revealClosedDetailsAndHiddenUntilFoundAncestors(*protect(selection->selection().start().anchorNode()));
 }
 
 void FindController::didFailToFindString()

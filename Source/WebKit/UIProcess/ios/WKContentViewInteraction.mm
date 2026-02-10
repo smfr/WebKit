@@ -12222,7 +12222,7 @@ static WebKit::DocumentEditingContextRequest toWebRequest(id request)
         return;
 
     WebKit::TextChecker::setGrammarCheckingEnabled(enabled);
-    _page->legacyMainFrameProcess().updateTextCheckerState();
+    protect(_page->legacyMainFrameProcess())->updateTextCheckerState();
 }
 
 #if HAVE(UIKIT_WITH_MOUSE_SUPPORT)
