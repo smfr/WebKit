@@ -487,7 +487,7 @@ void LocalDOMWindow::prewarmLocalStorageIfNecessary()
     if (!localStorage)
         return;
 
-    localStorage->protectedArea()->prewarm();
+    protect(localStorage->area())->prewarm();
 }
 
 LocalDOMWindow::~LocalDOMWindow()

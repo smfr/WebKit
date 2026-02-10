@@ -122,7 +122,6 @@ public:
     const RenderStyle* rootElementRenderStyle() const { return m_context.rootElementStyle; }
 
     const Document& document() const { return *m_context.document; }
-    Ref<const Document> protectedDocument() const { return *m_context.document; }
     const Element* element() const { return m_context.element.get(); }
 
     inline void setZoom(Zoom);

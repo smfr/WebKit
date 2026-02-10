@@ -8982,7 +8982,7 @@ Variant<Document::SkipTransition, Vector<AtomString>> Document::resolveViewTrans
     if (hidden())
         return SkipTransition { };
 
-    RefPtr rule = styleScope().protectedResolver()->viewTransitionRule();
+    RefPtr rule = protect(styleScope().resolver())->viewTransitionRule();
     if (rule && rule->computedNavigation() == ViewTransitionNavigation::Auto)
         return rule->types();
     return SkipTransition { };

@@ -137,7 +137,6 @@ public:
 #endif
 
     WEBCORE_EXPORT Resolver& resolver();
-    Ref<Resolver> protectedResolver();
     Resolver* resolverIfExists() { return m_resolver.get(); }
     const Resolver* resolverIfExists() const { return m_resolver.get(); }
     void clearResolver();
