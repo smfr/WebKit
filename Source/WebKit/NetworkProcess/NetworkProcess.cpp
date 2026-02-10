@@ -221,11 +221,6 @@ DownloadManager& NetworkProcess::downloadManager()
     return m_downloadManager;
 }
 
-CheckedRef<DownloadManager> NetworkProcess::checkedDownloadManager()
-{
-    return downloadManager();
-}
-
 void NetworkProcess::removeNetworkConnectionToWebProcess(NetworkConnectionToWebProcess& connection)
 {
     ASSERT(m_webProcessConnections.contains(connection.webProcessIdentifier()));
@@ -2288,17 +2283,17 @@ void NetworkProcess::closeITPDatabase(PAL::SessionID sessionID, CompletionHandle
 
 void NetworkProcess::downloadRequest(PAL::SessionID sessionID, DownloadID downloadID, const ResourceRequest& request, const std::optional<WebCore::SecurityOriginData>& topOrigin, std::optional<NavigatingToAppBoundDomain> isNavigatingToAppBoundDomain, const String& suggestedFilename)
 {
-    checkedDownloadManager()->startDownload(sessionID, downloadID, request, topOrigin, isNavigatingToAppBoundDomain, suggestedFilename);
+    protect(downloadManager())->startDownload(sessionID, downloadID, request, topOrigin, isNavigatingToAppBoundDomain, suggestedFilename);
 }
 
 void NetworkProcess::resumeDownload(PAL::SessionID sessionID, DownloadID downloadID, std::span<const uint8_t> resumeData, const String& path, WebKit::SandboxExtensionHandle&& sandboxExtensionHandle, CallDownloadDidStart callDownloadDidStart, std::span<const uint8_t> activityAccessToken)
 {
-    checkedDownloadManager()->resumeDownload(sessionID, downloadID, resumeData, path, WTF::move(sandboxExtensionHandle), callDownloadDidStart, activityAccessToken);
+    protect(downloadManager())->resumeDownload(sessionID, downloadID, resumeData, path, WTF::move(sandboxExtensionHandle), callDownloadDidStart, activityAccessToken);
 }
 
 void NetworkProcess::cancelDownload(DownloadID downloadID, CompletionHandler<void(std::span<const uint8_t>)>&& completionHandler)
 {
-    checkedDownloadManager()->cancelDownload(downloadID, WTF::move(completionHandler));
+    protect(downloadManager())->cancelDownload(downloadID, WTF::move(completionHandler));
 }
 
 #if PLATFORM(COCOA)
@@ -2310,7 +2305,7 @@ void NetworkProcess::publishDownloadProgress(DownloadID downloadID, const URL& u
 #else
 void NetworkProcess::publishDownloadProgress(DownloadID downloadID, const URL& url, SandboxExtension::Handle&& sandboxExtensionHandle)
 {
-    checkedDownloadManager()->publishDownloadProgress(downloadID, url, WTF::move(sandboxExtensionHandle));
+    protect(downloadManager())->publishDownloadProgress(downloadID, url, WTF::move(sandboxExtensionHandle));
 }
 #endif
 #endif

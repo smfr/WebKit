@@ -605,12 +605,12 @@ void NetworkResourceLoader::convertToDownload(DownloadID downloadID, const Resou
     LOADER_RELEASE_LOG("convertToDownload: (downloadID=%" PRIu64 ", hasNetworkLoad=%d, hasResponseCompletionHandler=%d)", downloadID.toUInt64(), !!m_networkLoad, !!m_responseCompletionHandler);
 
     RefPtr task = m_serviceWorkerFetchTask;
-    if (task && task->convertToDownload(protect(connectionToWebProcess())->networkProcess().checkedDownloadManager(), downloadID, request, response))
+    if (task && task->convertToDownload(protect(protect(connectionToWebProcess())->networkProcess().downloadManager()), downloadID, request, response))
         return;
 
     // This can happen if the resource came from the disk cache.
     if (!m_networkLoad) {
-        protect(connectionToWebProcess())->networkProcess().checkedDownloadManager()->startDownload(sessionID(), downloadID, request, m_parameters.topOrigin ? std::optional { m_parameters.topOrigin->data() } : std::nullopt, m_parameters.isNavigatingToAppBoundDomain);
+        protect(protect(connectionToWebProcess())->networkProcess().downloadManager())->startDownload(sessionID(), downloadID, request, m_parameters.topOrigin ? std::optional { m_parameters.topOrigin->data() } : std::nullopt, m_parameters.isNavigatingToAppBoundDomain);
         abort();
         return;
     }
@@ -618,7 +618,7 @@ void NetworkResourceLoader::convertToDownload(DownloadID downloadID, const Resou
     auto networkLoad = std::exchange(m_networkLoad, nullptr);
 
     if (m_responseCompletionHandler)
-        protect(connectionToWebProcess())->networkProcess().checkedDownloadManager()->convertNetworkLoadToDownload(downloadID, networkLoad.releaseNonNull(), WTF::move(m_responseCompletionHandler), WTF::move(m_fileReferences), request, response);
+        protect(protect(connectionToWebProcess())->networkProcess().downloadManager())->convertNetworkLoadToDownload(downloadID, networkLoad.releaseNonNull(), WTF::move(m_responseCompletionHandler), WTF::move(m_fileReferences), request, response);
 }
 
 void NetworkResourceLoader::abort()

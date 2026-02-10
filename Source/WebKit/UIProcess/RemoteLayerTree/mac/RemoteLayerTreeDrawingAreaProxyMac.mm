@@ -538,13 +538,13 @@ void RemoteLayerTreeDrawingAreaProxyMac::windowScreenDidChange(PlatformDisplayID
 
     RefPtr page = this->page();
     if (m_displayID && page)
-        page->checkedScrollingCoordinatorProxy()->windowScreenWillChange();
+        protect(page->scrollingCoordinatorProxy())->windowScreenWillChange();
 
     m_displayID = displayID;
     m_displayNominalFramesPerSecond = displayNominalFramesPerSecond();
 
     if (page)
-        page->checkedScrollingCoordinatorProxy()->windowScreenDidChange(displayID, m_displayNominalFramesPerSecond);
+        protect(page->scrollingCoordinatorProxy())->windowScreenDidChange(displayID, m_displayNominalFramesPerSecond);
 
     scheduleDisplayRefreshCallbacks();
     if (hadFullSpeedOberver) {
@@ -585,7 +585,7 @@ void RemoteLayerTreeDrawingAreaProxyMac::didRefreshDisplay()
     }
     // FIXME: Need to pass WebCore::DisplayUpdate here and filter out non-relevant displays.
     if (page)
-        page->checkedScrollingCoordinatorProxy()->displayDidRefresh(m_displayID.value_or(0));
+        protect(page->scrollingCoordinatorProxy())->displayDidRefresh(m_displayID.value_or(0));
     RemoteLayerTreeDrawingAreaProxy::didRefreshDisplay();
 }
 

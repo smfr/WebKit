@@ -304,7 +304,7 @@ void RemoteLayerTreeDrawingAreaProxy::notifyPendingCommitLayerTree(IPC::Connecti
 
 #if ENABLE(ASYNC_SCROLLING)
         if (RefPtr page = this->page())
-            page->checkedScrollingCoordinatorProxy()->applyScrollingTreeLayerPositionsAfterCommit();
+            protect(page->scrollingCoordinatorProxy())->applyScrollingTreeLayerPositionsAfterCommit();
 #endif
     }
 }
@@ -790,7 +790,7 @@ IPC::Error RemoteLayerTreeDrawingAreaProxy::didRefreshDisplay(ProcessState& stat
 
     if (&state == &m_webPageProxyProcessState) {
         if (RefPtr page = this->page())
-            page->checkedScrollingCoordinatorProxy()->sendScrollingTreeNodeUpdate();
+            protect(page->scrollingCoordinatorProxy())->sendScrollingTreeNodeUpdate();
     }
 
     // Waiting for CA to commit is insufficient, because the render server can still be
@@ -917,25 +917,25 @@ void RemoteLayerTreeDrawingAreaProxy::sizeToContentAutoSizeMaximumSizeDidChange(
 void RemoteLayerTreeDrawingAreaProxy::animationsWereAddedToNode(RemoteLayerTreeNode& node)
 {
     if (RefPtr page = this->page())
-        page->checkedScrollingCoordinatorProxy()->animationsWereAddedToNode(node);
+        protect(page->scrollingCoordinatorProxy())->animationsWereAddedToNode(node);
 }
 
 void RemoteLayerTreeDrawingAreaProxy::animationsWereRemovedFromNode(RemoteLayerTreeNode& node)
 {
     if (RefPtr page = this->page())
-        page->checkedScrollingCoordinatorProxy()->animationsWereRemovedFromNode(node);
+        protect(page->scrollingCoordinatorProxy())->animationsWereRemovedFromNode(node);
 }
 
 void RemoteLayerTreeDrawingAreaProxy::updateTimelinesRegistration(WebCore::ProcessIdentifier processIdentifier, const WebCore::AcceleratedTimelinesUpdate& timelinesUpdate, MonotonicTime now)
 {
     if (RefPtr page = this->page())
-        page->checkedScrollingCoordinatorProxy()->updateTimelinesRegistration(processIdentifier, timelinesUpdate, now);
+        protect(page->scrollingCoordinatorProxy())->updateTimelinesRegistration(processIdentifier, timelinesUpdate, now);
 }
 
 RefPtr<const RemoteAnimationTimeline> RemoteLayerTreeDrawingAreaProxy::timeline(const TimelineID& timelineID) const
 {
     if (RefPtr page = this->page())
-        return page->checkedScrollingCoordinatorProxy()->timeline(timelineID);
+        return protect(page->scrollingCoordinatorProxy())->timeline(timelineID);
     return nullptr;
 }
 

@@ -7028,11 +7028,6 @@ LocalFrameView* WebPage::localMainFrameView() const
     return dynamicDowncast<LocalFrameView>(mainFrameView());
 }
 
-CheckedPtr<WebCore::LocalFrameView> WebPage::checkedLocalMainFrameView() const
-{
-    return localMainFrameView();
-}
-
 bool WebPage::shouldUseCustomContentProviderForResponse(const ResourceResponse& response)
 {
     auto& mimeType = response.mimeType();
