@@ -208,12 +208,7 @@ TEST(WebTransport, Datagram)
     EXPECT_TRUE(challenged);
 }
 
-// FIXME when rdar://169994150 is resolved.
-#if PLATFORM(MAC)
-TEST(WebTransport, DISABLED_Unidirectional)
-#else
 TEST(WebTransport, Unidirectional)
-#endif
 {
     WebTransportServer echoServer([](ConnectionGroup group) -> ConnectionTask {
         auto connection = co_await group.receiveIncomingConnection();
