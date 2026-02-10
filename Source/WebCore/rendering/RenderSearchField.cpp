@@ -75,7 +75,7 @@ RenderSearchField::~RenderSearchField() = default;
 void RenderSearchField::willBeDestroyed()
 {
     if (RefPtr searchPopup = std::exchange(m_searchPopup, nullptr))
-        searchPopup->protectedPopupMenu()->disconnectClient();
+        protect(searchPopup->popupMenu())->disconnectClient();
 
     RenderTextControlSingleLine::willBeDestroyed();
 }
@@ -123,13 +123,13 @@ void RenderSearchField::showPopup()
     FloatPoint absTopLeft = localToAbsolute(FloatPoint(), UseTransforms);
     IntRect absBounds = absoluteBoundingBoxRectIgnoringTransforms();
     absBounds.setLocation(roundedIntPoint(absTopLeft));
-    protectedSearchPopup()->protectedPopupMenu()->show(absBounds, view().frameView(), -1);
+    protect(protectedSearchPopup()->popupMenu())->show(absBounds, view().frameView(), -1);
 }
 
 void RenderSearchField::hidePopup()
 {
     if (RefPtr searchPopup = m_searchPopup)
-        searchPopup->protectedPopupMenu()->hide();
+        protect(searchPopup->popupMenu())->hide();
 }
 
 LayoutUnit RenderSearchField::computeControlLogicalHeight(LayoutUnit lineHeight, LayoutUnit nonContentHeight) const
@@ -171,7 +171,7 @@ void RenderSearchField::updateFromElement()
         updateCancelButtonVisibility();
 
     if (m_searchPopupIsVisible)
-        protectedSearchPopup()->protectedPopupMenu()->updateFromElement();
+        protect(protectedSearchPopup()->popupMenu())->updateFromElement();
 }
 
 void RenderSearchField::updateCancelButtonVisibility() const

@@ -462,7 +462,7 @@ void PDFScrollingPresentationController::setSelectionLayerEnabled(bool enabled)
     if (!enabled)
         selectionLayer->removeFromParent();
     else
-        m_contentsLayer->protectedParent()->addChild(WTF::move(selectionLayer));
+        protect(m_contentsLayer->parent())->addChild(WTF::move(selectionLayer));
 #endif
 }
 

@@ -531,7 +531,7 @@ public:
 
     double volume() const;
     void setVolume(double);
-    bool platformVolumeConfigurationRequired() const { return protectedClient()->mediaPlayerPlatformVolumeConfigurationRequired(); }
+    bool platformVolumeConfigurationRequired() const { return protect(client())->mediaPlayerPlatformVolumeConfigurationRequired(); }
 
     bool muted() const;
     void setMuted(bool);
@@ -716,7 +716,7 @@ public:
 
 #if !RELEASE_LOG_DISABLED
     const Logger& mediaPlayerLogger();
-    uint64_t mediaPlayerLogIdentifier() { return protectedClient()->mediaPlayerLogIdentifier(); }
+    uint64_t mediaPlayerLogIdentifier() { return protect(client())->mediaPlayerLogIdentifier(); }
 #endif
 
     void applicationWillResignActive();
@@ -730,18 +730,18 @@ public:
 
     bool shouldIgnoreIntrinsicSize();
 
-    bool renderingCanBeAccelerated() const { return protectedClient()->mediaPlayerRenderingCanBeAccelerated(); }
-    void renderingModeChanged() const  { protectedClient()->mediaPlayerRenderingModeChanged(); }
-    bool acceleratedCompositingEnabled() { return protectedClient()->mediaPlayerAcceleratedCompositingEnabled(); }
-    void activeSourceBuffersChanged() { protectedClient()->mediaPlayerActiveSourceBuffersChanged(); }
-    LayoutRect playerContentBoxRect() const { return protectedClient()->mediaPlayerContentBoxRect(); }
-    float playerContentsScale() const { return protectedClient()->mediaPlayerContentsScale(); }
-    bool shouldUsePersistentCache() const { return protectedClient()->mediaPlayerShouldUsePersistentCache(); }
-    const String& mediaCacheDirectory() const { return protectedClient()->mediaPlayerMediaCacheDirectory(); }
-    bool isVideoPlayer() const { return protectedClient()->mediaPlayerIsVideo(); }
-    void mediaEngineUpdated() { protectedClient()->mediaPlayerEngineUpdated(); }
-    void resourceNotSupported() { protectedClient()->mediaPlayerResourceNotSupported(); }
-    bool isLooping() const { return protectedClient()->mediaPlayerIsLooping(); }
+    bool renderingCanBeAccelerated() const { return protect(client())->mediaPlayerRenderingCanBeAccelerated(); }
+    void renderingModeChanged() const  { protect(client())->mediaPlayerRenderingModeChanged(); }
+    bool acceleratedCompositingEnabled() { return protect(client())->mediaPlayerAcceleratedCompositingEnabled(); }
+    void activeSourceBuffersChanged() { protect(client())->mediaPlayerActiveSourceBuffersChanged(); }
+    LayoutRect playerContentBoxRect() const { return protect(client())->mediaPlayerContentBoxRect(); }
+    float playerContentsScale() const { return protect(client())->mediaPlayerContentsScale(); }
+    bool shouldUsePersistentCache() const { return protect(client())->mediaPlayerShouldUsePersistentCache(); }
+    const String& mediaCacheDirectory() const { return protect(client())->mediaPlayerMediaCacheDirectory(); }
+    bool isVideoPlayer() const { return protect(client())->mediaPlayerIsVideo(); }
+    void mediaEngineUpdated() { protect(client())->mediaPlayerEngineUpdated(); }
+    void resourceNotSupported() { protect(client())->mediaPlayerResourceNotSupported(); }
+    bool isLooping() const { return protect(client())->mediaPlayerIsLooping(); }
     void isLoopingChanged();
 
     void remoteEngineFailedToLoad();
@@ -775,7 +775,7 @@ public:
     void renderVideoWillBeDestroyed();
 
     void setShouldDisableHDR(bool);
-    bool shouldDisableHDR() const { return protectedClient()->mediaPlayerShouldDisableHDR(); }
+    bool shouldDisableHDR() const { return protect(client())->mediaPlayerShouldDisableHDR(); }
 
     void setResourceOwner(const ProcessIdentity&);
 
@@ -800,8 +800,8 @@ public:
     void setInFullscreenOrPictureInPicture(bool);
     bool isInFullscreenOrPictureInPicture() const;
 
-    PlatformVideoTarget videoTarget() const { return protectedClient()->mediaPlayerVideoTarget(); }
-    MediaPlayerClientIdentifier clientIdentifier() const { return protectedClient()->mediaPlayerClientIdentifier(); }
+    PlatformVideoTarget videoTarget() const { return protect(client())->mediaPlayerVideoTarget(); }
+    MediaPlayerClientIdentifier clientIdentifier() const { return protect(client())->mediaPlayerClientIdentifier(); }
 
 #if ENABLE(LINEAR_MEDIA_PLAYER)
     bool supportsLinearMediaPlayer() const;
@@ -823,7 +823,6 @@ private:
     MediaPlayer(MediaPlayerClient&, MediaPlayerEnums::MediaEngineIdentifier);
 
     MediaPlayerClient& client() const { return *m_client; }
-    Ref<MediaPlayerClient> protectedClient() const { return client(); }
 
     RefPtr<MediaPlayerPrivateInterface> protectedPrivate() const;
 

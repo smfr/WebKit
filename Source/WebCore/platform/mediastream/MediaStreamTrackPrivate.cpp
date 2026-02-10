@@ -370,7 +370,7 @@ bool MediaStreamTrackPrivate::isOnCreationThread()
 
 void MediaStreamTrackPrivate::updateLabelIfRemoteTrack()
 {
-    if (!isMainThread() || !(protectedSource()->isIncomingAudioSource() || protectedSource()->isIncomingVideoSource()))
+    if (!isMainThread() || !(protect(source())->isIncomingAudioSource() || protect(source())->isIncomingVideoSource()))
         return;
 
     m_label = makeString(m_label, " - "_s, m_id);
@@ -499,16 +499,6 @@ const RealtimeMediaSource& MediaStreamTrackPrivate::source() const
 {
     ASSERT(isMainThread());
     return m_sourceObserver->source();
-}
-
-Ref<RealtimeMediaSource> MediaStreamTrackPrivate::protectedSource()
-{
-    return source();
-}
-
-Ref<const RealtimeMediaSource> MediaStreamTrackPrivate::protectedSource() const
-{
-    return source();
 }
 
 RealtimeMediaSource& MediaStreamTrackPrivate::sourceForProcessor()

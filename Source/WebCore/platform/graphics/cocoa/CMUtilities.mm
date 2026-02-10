@@ -476,7 +476,7 @@ Expected<RetainPtr<CMSampleBufferRef>, CString> toCMSampleBuffer(const MediaSamp
     if (!samples.info())
         return makeUnexpected("No TrackInfo found");
 
-    RetainPtr format = formatDescription ? retainPtr(formatDescription) : createFormatDescriptionFromTrackInfo(*samples.protectedInfo());
+    RetainPtr format = formatDescription ? retainPtr(formatDescription) : createFormatDescriptionFromTrackInfo(*protect(samples.info()));
     if (!format)
         return makeUnexpected("No CMFormatDescription available");
 

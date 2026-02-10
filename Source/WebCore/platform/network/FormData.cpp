@@ -322,7 +322,7 @@ static void appendBlobResolved(BlobRegistryImpl* blobRegistry, FormData& formDat
     for (const auto& blobItem : blobData->items()) {
         switch (blobItem.type()) {
         case BlobDataItem::Type::Data:
-            formData.appendData(blobItem.protectedData()->span().subspan(blobItem.offset(), blobItem.length()));
+            formData.appendData(protect(blobItem.data())->span().subspan(blobItem.offset(), blobItem.length()));
             break;
         case BlobDataItem::Type::File: {
             Ref file = blobItem.file();

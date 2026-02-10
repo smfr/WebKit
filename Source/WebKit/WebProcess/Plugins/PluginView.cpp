@@ -899,7 +899,7 @@ void PluginView::viewGeometryDidChange()
 
         float pageScaleFactor = frame->page() ? frame->page()->pageScaleFactor() : 1;
         IntPoint scaledFrameRectLocation { frameRect().location().scaled(pageScaleFactor) };
-        IntPoint scaledLocationInRootViewCoordinates { protectedParent()->contentsToRootView(scaledFrameRectLocation) };
+        IntPoint scaledLocationInRootViewCoordinates { protect(parent())->contentsToRootView(scaledFrameRectLocation) };
 
         transform.translate(scaledLocationInRootViewCoordinates);
         transform.scale(pageScaleFactor);
@@ -929,7 +929,7 @@ void PluginView::viewVisibilityDidChange()
 IntRect PluginView::clipRectInWindowCoordinates() const
 {
     // Get the frame rect in window coordinates.
-    IntRect frameRectInWindowCoordinates = protectedParent()->contentsToWindow(frameRect());
+    IntRect frameRectInWindowCoordinates = protect(parent())->contentsToWindow(frameRect());
 
     RefPtr frame = this->frame();
 

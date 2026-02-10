@@ -1771,7 +1771,7 @@ private:
             return;
         }
 
-        auto arrayBuffer = pixelBuffer->protectedData()->possiblySharedBuffer();
+        auto arrayBuffer = protect(pixelBuffer->data())->possiblySharedBuffer();
         if (!arrayBuffer) {
             code = SerializationReturnCode::ValidationError;
             return;

@@ -1161,10 +1161,10 @@ void NetworkResourceLoader::didFinishLoading(const NetworkLoadMetrics& networkLo
 #endif
 
     if (isSynchronous())
-        sendReplyToSynchronousRequest(*m_synchronousLoadData, m_bufferedData.protectedBuffer().get(), networkLoadMetrics);
+        sendReplyToSynchronousRequest(*m_synchronousLoadData, protect(m_bufferedData.buffer()).get(), networkLoadMetrics);
     else {
         if (!m_bufferedData.isEmpty()) {
-            sendBuffer(*m_bufferedData.protectedBuffer());
+            sendBuffer(*protect(m_bufferedData.buffer()));
         }
 #if ENABLE(CONTENT_FILTERING)
         if (RefPtr contentFilter = m_contentFilter) {

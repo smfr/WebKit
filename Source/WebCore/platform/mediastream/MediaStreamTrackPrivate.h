@@ -134,8 +134,6 @@ public:
 
     WEBCORE_EXPORT RealtimeMediaSource& source();
     const RealtimeMediaSource& source() const;
-    Ref<RealtimeMediaSource> protectedSource();
-    Ref<const RealtimeMediaSource> protectedSource() const;
     RealtimeMediaSource& sourceForProcessor();
     bool hasSource(const RealtimeMediaSource*) const;
 
