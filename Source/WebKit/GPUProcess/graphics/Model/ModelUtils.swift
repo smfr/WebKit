@@ -21,7 +21,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 
-#if canImport(RealityCoreRenderer, _version: 9) && !os(iOS)
+#if canImport(RealityCoreRenderer, _version: 9) && os(macOS)
 
 internal import DirectResource
 internal import Metal
