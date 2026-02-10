@@ -806,6 +806,7 @@ private func makeMTLTextureFromImageAsset(
     let bytesPerRow = imageAsset.width * imageAsset.bytesPerPixel
     let bytesPerImage = bytesPerRow * imageAsset.height
 
+#if compiler(>=6.2)
     unsafe imageAssetData.bytes.withUnsafeBytes { textureBytes in
         guard let textureBytesBaseAddress = textureBytes.baseAddress else {
             return
@@ -824,6 +825,26 @@ private func makeMTLTextureFromImageAsset(
             )
         }
     }
+#else
+    imageAssetData.bytes.withUnsafeBytes { textureBytes in
+        guard let textureBytesBaseAddress = textureBytes.baseAddress else {
+            return
+        }
+        for face in 0..<sliceCount {
+            let offset = face * bytesPerImage
+            let facePointer = textureBytesBaseAddress.advanced(by: offset)
+
+            mtlTexture.replace(
+                region: MTLRegionMake2D(0, 0, imageAsset.width, imageAsset.height),
+                mipmapLevel: 0,
+                slice: face,
+                withBytes: facePointer,
+                bytesPerRow: bytesPerRow,
+                bytesPerImage: bytesPerImage
+            )
+        }
+    }
+#endif
 
     return mtlTexture
 }
