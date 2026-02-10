@@ -190,7 +190,10 @@ void GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
 
     GridDefinition gridDefinition { gridTemplateColumns, gridTemplateRows, autoFlowOptions };
 
-    GridLayoutState layoutState { layoutConstraints, gridDefinition };
+    auto usedJustifyContent = gridStyle->justifyContent().resolve();
+    auto usedAlignContent = gridStyle->alignContent().resolve();
+
+    GridLayoutState layoutState { layoutConstraints, gridDefinition, usedJustifyContent, usedAlignContent };
 
     auto [ usedTrackSizes, gridItemRects ] = GridLayout { *this }.layout(unplacedGridItems, layoutState);
 

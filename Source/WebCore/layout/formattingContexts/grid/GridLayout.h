@@ -69,7 +69,8 @@ private:
 
     static TrackSizingFunctionsList trackSizingFunctions(size_t implicitGridTracksCount, const Vector<Style::GridTrackSize> gridTemplateTrackSizes);
 
-    UsedTrackSizes performGridSizingAlgorithm(const PlacedGridItems&, const TrackSizingFunctionsList&, const TrackSizingFunctionsList&, const GridLayoutConstraints&) const;
+    UsedTrackSizes performGridSizingAlgorithm(const PlacedGridItems&, const TrackSizingFunctionsList&, const TrackSizingFunctionsList&, const GridLayoutConstraints&,
+        const StyleContentAlignmentData& usedJustifyContent, const StyleContentAlignmentData& usedAlignContent) const;
 
     std::pair<UsedInlineSizes, UsedBlockSizes> layoutGridItems(const PlacedGridItems&, const GridAreaSizes&) const;
 
