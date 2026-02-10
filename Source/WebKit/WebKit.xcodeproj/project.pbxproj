@@ -8523,6 +8523,7 @@
 		E350A7C82934F75F00A06C29 /* common.sb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = common.sb; sourceTree = "<group>"; };
 		E350A7DF29364D3800A06C29 /* util.sb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = util.sb; sourceTree = "<group>"; };
 		E3607DE92C7FE92200956766 /* WKDownloadDelegatePrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKDownloadDelegatePrivate.h; sourceTree = "<group>"; };
+		E361284B2F3668E000F85DA8 /* webcontent-defines.sb */ = {isa = PBXFileReference; lastKnownFileType = text; path = "webcontent-defines.sb"; sourceTree = "<group>"; };
 		E36A00E129CF4EBA00AC4E8A /* TextTrackRepresentationCocoa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextTrackRepresentationCocoa.h; sourceTree = "<group>"; };
 		E36A00E229CF7AC000AC4E8A /* TextTrackRepresentationCocoa.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TextTrackRepresentationCocoa.mm; sourceTree = "<group>"; };
 		E36D701A27B709ED006531B7 /* WebAttachmentElementClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebAttachmentElementClient.h; sourceTree = "<group>"; };
@@ -17329,6 +17330,7 @@
 			isa = PBXGroup;
 			children = (
 				E3C2BC93289CF8FB00ACC3E9 /* common.sb */,
+				E361284B2F3668E000F85DA8 /* webcontent-defines.sb */,
 			);
 			path = macOS;
 			sourceTree = "<group>";

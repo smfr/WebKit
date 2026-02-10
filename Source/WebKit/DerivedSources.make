@@ -392,6 +392,11 @@ GENERATED_MESSAGES_FILES_AS_PATTERNS := $(call to-pattern, $(GENERATED_MESSAGES_
 MESSAGES_IN_FILES := $(addsuffix .messages.in,$(MESSAGE_RECEIVERS))
 
 SANDBOX_IMPORT_DIR=$(SDKROOT)/usr/local/share/sandbox/profiles/embedded/imports
+ifeq ($(RC_XBS),YES)
+	RC_XBS_PREPROCESSOR_FLAG=-DRC_XBS=1
+else
+	RC_XBS_PREPROCESSOR_FLAG=-DRC_XBS=0
+endif
 
 .PHONY : all
 
@@ -477,7 +482,7 @@ NOTIFICATION_ALLOW_LISTS = \
 
 %.sb : %.sb.in $(NOTIFICATION_ALLOW_LISTS)
 	@echo Pre-processing $* sandbox profile...
-	grep -o '^[^;]*' $< | $(CC) $(SANITIZE_FLAGS) $(SDK_FLAGS) $(TARGET_TRIPLE_FLAGS) $(SANDBOX_DEFINES) $(TEXT_PREPROCESSOR_FLAGS) $(FRAMEWORK_FLAGS) $(HEADER_FLAGS) $(EXTERNAL_FLAGS) -include "wtf/Platform.h" - > $@.tmp
+	grep -o '^[^;]*' $< | $(CC) $(RC_XBS_PREPROCESSOR_FLAG) $(SANITIZE_FLAGS) $(SDK_FLAGS) $(TARGET_TRIPLE_FLAGS) $(SANDBOX_DEFINES) $(TEXT_PREPROCESSOR_FLAGS) $(FRAMEWORK_FLAGS) $(HEADER_FLAGS) $(EXTERNAL_FLAGS) -include "wtf/Platform.h" - > $@.tmp
 	$(WebKit2)/Scripts/compile-sandbox.sh $@.tmp $* $(SDK_NAME) $(SANDBOX_IMPORT_DIR)
 	mv $@.tmp $@
 
