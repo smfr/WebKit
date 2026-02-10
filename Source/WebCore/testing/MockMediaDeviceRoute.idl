@@ -29,4 +29,6 @@
     LegacyNoInterfaceObject,
 ] interface MockMediaDeviceRoute {
     undefined setURLCallback(MockMediaDeviceRouteURLCallback? callback);
+
+    attribute DOMString deviceName;
 };

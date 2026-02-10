@@ -199,6 +199,11 @@ MediaDeviceRoute::MediaDeviceRoute(WebMediaDevicePlatformRoute *platformRoute)
 {
 }
 
+String MediaDeviceRoute::deviceName() const
+{
+    return [m_platformRoute routeDisplayName];
+}
+
 WebMediaDevicePlatformRoute *MediaDeviceRoute::platformRoute() const
 {
     return m_platformRoute.get();

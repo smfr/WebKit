@@ -123,6 +123,7 @@ public:
     void setClient(MediaDeviceRouteClient* client) { m_client = client; }
 
     const WTF::UUID& identifier() const { return m_identifier; }
+    String deviceName() const;
     WebMediaDevicePlatformRoute *platformRoute() const;
 
     void loadURL(const URL&, CompletionHandler<void(const MediaDeviceRouteLoadURLResult&)>&&);

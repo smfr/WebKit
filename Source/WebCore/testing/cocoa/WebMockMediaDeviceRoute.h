@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WebMockMediaDeviceRoute : NSObject <AVMediaSource, WebMediaDevicePlatformRoute>
 @property (nonatomic, nullable, setter=setURLCallback:) WebCore::MockMediaDeviceRouteURLCallback* urlCallback;
+@property (copy) NSString *routeDisplayName;
 @end
 
 NS_ASSUME_NONNULL_END

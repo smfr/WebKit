@@ -55,6 +55,16 @@ void MockMediaDeviceRoute::setURLCallback(MockMediaDeviceRouteURLCallback* urlCa
     [m_platformRoute setURLCallback:urlCallback];
 }
 
+String MockMediaDeviceRoute::deviceName() const
+{
+    return [m_platformRoute routeDisplayName];
+}
+
+void MockMediaDeviceRoute::setDeviceName(const String& deviceName)
+{
+    [m_platformRoute setRouteDisplayName:deviceName.createNSString().get()];
+}
+
 } // namespace WebCore
 
 #endif // ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)

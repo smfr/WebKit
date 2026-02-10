@@ -47,6 +47,9 @@ public:
 
     void setURLCallback(MockMediaDeviceRouteURLCallback*);
 
+    String deviceName() const;
+    void setDeviceName(const String&);
+
 private:
     MockMediaDeviceRoute();
 

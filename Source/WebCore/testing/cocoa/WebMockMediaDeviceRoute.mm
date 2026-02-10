@@ -69,6 +69,7 @@ typedef NS_ENUM(NSInteger, WebMockMediaDeviceRouteErrorCode) {
 @synthesize muted;
 @synthesize volume;
 @synthesize metadata;
+@synthesize routeDisplayName;
 
 - (WebCore::MockMediaDeviceRouteURLCallback* _Nullable)urlCallback
 {
