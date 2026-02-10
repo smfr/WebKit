@@ -48,7 +48,10 @@ bool DocumentImmersive::immersiveEnabled(Document& document)
     if (!document.isFullyActive())
         return false;
 
-    return false; // Needs client support
+    if (!document.isTopDocument())
+        return false;
+
+    return false; // FIXME: rdar://168579137 - Needs client support
 }
 
 Element* DocumentImmersive::immersiveElement(Document& document)
@@ -88,6 +91,9 @@ void DocumentImmersive::requestImmersive(HTMLModelElement* element, CompletionHa
     if (!protect(document())->isFullyActive())
         return handleImmersiveError(element, "Cannot request immersive on a document that is not fully active."_s, EmitErrorEvent::No, ExceptionCode::TypeError, WTF::move(completionHandler));
 
+    if (!protect(document())->isTopDocument())
+        return handleImmersiveError(element, "Immersive API is only available in a top-level frame."_s, EmitErrorEvent::Yes, ExceptionCode::InvalidAccessError, WTF::move(completionHandler));
+
     if (RefPtr window = document().window(); !window || !window->consumeTransientActivation())
         return handleImmersiveError(element, "Cannot request immersive without transient activation."_s, EmitErrorEvent::Yes, ExceptionCode::TypeError, WTF::move(completionHandler));
 
@@ -112,6 +118,9 @@ void DocumentImmersive::requestImmersive(HTMLModelElement* element, CompletionHa
 
             if (!protect(protectedThis->document())->isFullyActive())
                 return protectedThis->handleImmersiveError(protectedElement.get(), "Document is no longer fully active."_s, EmitErrorEvent::Yes, ExceptionCode::AbortError, WTF::move(completionHandler));
+
+            if (!protect(protectedThis->document())->isTopDocument())
+                return protectedThis->handleImmersiveError(protectedElement.get(), "Document is no longer a top-level frame."_s, EmitErrorEvent::Yes, ExceptionCode::InvalidAccessError, WTF::move(completionHandler));
 
             if (!protectedElement->isConnected() || &protectedElement->document() != protect(protectedThis->document()).ptr())
                 return protectedThis->handleImmersiveError(protectedElement.get(), "Element is not connected to the document."_s, EmitErrorEvent::No, ExceptionCode::AbortError, WTF::move(completionHandler));
