@@ -1581,16 +1581,20 @@ static bool selectOptionByValue(NodeIdentifier identifier, const String& optionT
     return false;
 }
 
-static RefPtr<Node> resolveNodeWithBodyAsFallback(LocalFrame& frame, std::optional<NodeIdentifier> identifier)
+static HTMLElement* documentBodyElement(const LocalFrame& frame)
+{
+    if (RefPtr document = frame.document())
+        return document->body();
+
+    return nullptr;
+}
+
+static RefPtr<Node> resolveNodeWithBodyAsFallback(const LocalFrame& frame, std::optional<NodeIdentifier> identifier)
 {
     if (identifier)
         return Node::fromIdentifier(WTF::move(*identifier));
 
-    RefPtr document = frame.document();
-    if (!document)
-        return { };
-
-    return document->body();
+    return documentBodyElement(frame);
 }
 
 static std::optional<SimpleRange> rangeForTextInContainer(const String& searchText, Ref<Node>&& node)
@@ -1771,6 +1775,9 @@ void handleInteraction(Interaction&& interaction, LocalFrame& frame, CompletionH
         if (auto identifier = interaction.nodeIdentifier)
             return dispatchSimulatedClick(*identifier, WTF::move(interaction.text), WTF::move(completion));
 
+        if (RefPtr body = documentBodyElement(frame); body && !interaction.text.isEmpty())
+            return dispatchSimulatedClick(*body, WTF::move(interaction.text), WTF::move(completion));
+
         return completion(false, "Missing location and nodeIdentifier"_s);
     }
     case Action::SelectMenuItem: {
@@ -1831,9 +1838,9 @@ static String normalizedLabelText(const Element& element)
     return { };
 }
 
-static String wrapWithDoubleQuotes(String&& text)
+static String wrapWithDoubleQuotes(StringView text)
 {
-    return makeString(u"“", WTF::move(text), u"”");
+    return makeString(u"“", text, u"”");
 }
 
 static String textDescription(const Element& element, Vector<String>& stringsToValidate, bool isTargetElement = true)
@@ -1954,6 +1961,31 @@ static String textDescription(std::optional<NodeIdentifier> identifier, Vector<S
     return textDescription(RefPtr { Node::fromIdentifier(*identifier) }.get(), stringsToValidate);
 }
 
+static String textDescription(LocalFrame& frame, std::optional<NodeIdentifier> identifier, const String& searchText, Vector<String>& stringsToValidate)
+{
+    if (!identifier && searchText.isEmpty())
+        return { };
+
+    RefPtr target = resolveNodeWithBodyAsFallback(frame, identifier);
+    auto searchTextPrefix = emptyString();
+    if (!searchText.isEmpty()) {
+        auto range = searchForText(*target, searchText);
+        if (!range)
+            return { };
+
+        target = commonInclusiveAncestor<ComposedTree>(*range);
+
+        auto escapedSearchText = normalizeText(searchText);
+        stringsToValidate.append(escapedSearchText);
+        searchTextPrefix = makeString(wrapWithDoubleQuotes(escapedSearchText), " in "_s);
+    }
+
+    if (!target)
+        return { };
+
+    return makeString(WTF::move(searchTextPrefix), textDescription(target.get(), stringsToValidate));
+}
+
 static String textDescription(LocalFrame& frame, FloatPoint locationInRootView, Vector<String>& stringsToValidate)
 {
     RefPtr document = frame.document();
@@ -2000,11 +2032,25 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
         return { };
     }());
 
+    bool usesSearchText = [&] {
+        switch (action) {
+        case Action::SelectText:
+        case Action::Click:
+        case Action::HighlightText:
+            return true;
+        case Action::SelectMenuItem:
+        case Action::TextInput:
+        case Action::KeyPress:
+        case Action::ScrollBy:
+            return false;
+        }
+        ASSERT_NOT_REACHED();
+        return false;
+    }();
+
     Vector<String> stringsToValidate;
-    if (!isSingleKeyPress) {
+    if (!usesSearchText) {
         if (auto escapedString = normalizeText(interaction.text); !escapedString.isEmpty()) {
-            if (action == Action::Click)
-                description.append(" over text"_s);
             description.append(makeString(" "_s, wrapWithDoubleQuotes(String { escapedString })));
             stringsToValidate.append(WTF::move(escapedString));
         }
@@ -2045,7 +2091,9 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
         auto roundedLocation = roundedIntPoint(*location);
         description.append(" at coordinates ("_s, roundedLocation.x(), ", "_s, roundedLocation.y(), ')');
         appendElementString(frame, *location, stringsToValidate);
-    } else
+    } else if (usesSearchText)
+        appendElementString(frame, interaction.nodeIdentifier, interaction.text, stringsToValidate);
+    else
         appendElementString(interaction.nodeIdentifier, stringsToValidate);
 
     bool appendedReplaceTextDescription = false;
@@ -2078,21 +2126,7 @@ std::optional<SimpleRange> rangeForExtractedText(const LocalFrame& frame, Extrac
 {
     auto [text, nodeIdentifier] = extractedText;
 
-    RefPtr node = [&] -> RefPtr<Node> {
-        if (nodeIdentifier) {
-            if (RefPtr node = Node::fromIdentifier(*nodeIdentifier))
-                return node;
-        }
-
-        if (RefPtr document = frame.document())
-            return document->body();
-
-        return { };
-    }();
-
-    if (!node)
-        return { };
-
+    RefPtr node = resolveNodeWithBodyAsFallback(frame, nodeIdentifier);
     if (text.isEmpty())
         return { makeRangeSelectingNodeContents(*node) };
 
