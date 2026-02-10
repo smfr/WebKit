@@ -86,7 +86,7 @@ private:
     bool findPriorityCandidate(Document&);
 
     AnchorSearchStatus examineAnchorCandidate(RenderObject&) const;
-    AnchorSearchStatus examinePriorityCandidate(RenderObject&) const;
+    AnchorSearchStatus examinePriorityCandidate(RenderElement&) const;
 
     AnchorSearchStatus findAnchorInOutOfFlowObjects(RenderObject&);
     AnchorSearchStatus findAnchorRecursive(RenderObject*);

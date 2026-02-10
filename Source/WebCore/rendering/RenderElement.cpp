@@ -1130,8 +1130,31 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
     }
 
     if (settings().cssScrollAnchoringEnabled() && style().scrollAnchoringSuppressionStyleDidChange(oldStyle)) {
-        // FIXME: Need to set a bit to store whether this change should suppress scroll anchoring.
+        auto findNearestScrollAnchoringController = [](const RenderElement& renderer) -> CheckedPtr<ScrollAnchoringController> {
+            // At this point we can't find the appropriate enclosing ScrollAnchoringController, because we haven't done layout.
+            // We will, however, have created a ScrollAnchoringController for potentially scrollable ancestors, so store
+            // the bit there. It will be propagated later. FIXME: Propagation not implemented yet.
+            // Note that this doesn't do a containing block walk; the spec talks about "element within the scrollable element".
+            for (CheckedPtr ancestor = renderer.parent(); ancestor; ancestor = ancestor->parent()) {
+                if (ancestor->hasLayer()) {
+                    if (CheckedPtr scrollableArea = downcast<RenderLayerModelObject>(*ancestor).layer()->scrollableArea()) {
+                        if (CheckedPtr controller = scrollableArea->scrollAnchoringController())
+                            return controller;
+                    }
+                }
+            }
+            return renderer.view().frameView().scrollAnchoringController();
+        };
+
+        // https://drafts.csswg.org/css-scroll-anchoring/#suppression-triggers
+        // Any change to the computed value of the position property...
+        if (style().outOfFlowPositionStyleDidChange(oldStyle)) {
+            if (CheckedPtr controller = findNearestScrollAnchoringController(*this))
+                controller->notifyChildHadSuppressingStyleChange(*this);
+        }
+
         LOG_WITH_STREAM(ScrollAnchoring, stream << "RenderElement::styleDidChange: scroll anchoring suppression style change on " << *this);
+        setScrollAnchoringSuppressionStyleChanged(true);
     }
 
     // FIXME: First line change on the block comes in as equal on inline boxes.
