@@ -2795,18 +2795,6 @@ RefPtr<WebAutomationSession> WebPageProxy::activeAutomationSession() const
     return m_configuration->processPool().automationSession();
 }
 
-void WebPageProxy::createInspectorTarget(IPC::Connection& connection, const String& targetId, Inspector::InspectorTargetType type)
-{
-    MESSAGE_CHECK_BASE(!targetId.isEmpty(), connection);
-    m_inspectorController->createWebPageInspectorTarget(targetId, type);
-}
-
-void WebPageProxy::destroyInspectorTarget(IPC::Connection& connection, const String& targetId)
-{
-    MESSAGE_CHECK_BASE(!targetId.isEmpty(), connection);
-    m_inspectorController->destroyInspectorTarget(targetId);
-}
-
 void WebPageProxy::sendMessageToInspectorFrontend(const String& targetId, const String& message)
 {
     m_inspectorController->sendMessageToInspectorFrontend(targetId, message);

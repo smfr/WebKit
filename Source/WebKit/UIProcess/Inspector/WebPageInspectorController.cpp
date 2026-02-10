@@ -71,7 +71,7 @@ WebPageInspectorController::~WebPageInspectorController() = default;
 void WebPageInspectorController::init()
 {
     String pageTargetId = WebPageInspectorTarget::toTargetID(m_inspectedPage->webPageIDInMainFrameProcess());
-    createWebPageInspectorTarget(pageTargetId, Inspector::InspectorTargetType::Page);
+    addTarget(WebPageInspectorTargetProxy::create(protect(m_inspectedPage), pageTargetId, Inspector::InspectorTargetType::Page));
 }
 
 void WebPageInspectorController::pageClosed()
@@ -164,20 +164,6 @@ void WebPageInspectorController::setIndicating(bool indicating)
 }
 #endif
 
-void WebPageInspectorController::createWebPageInspectorTarget(const String& targetId, Inspector::InspectorTargetType type)
-{
-    addTarget(WebPageInspectorTargetProxy::create(protect(m_inspectedPage), targetId, type));
-}
-
-void WebPageInspectorController::destroyInspectorTarget(const String& targetId)
-{
-    auto it = m_targets.find(targetId);
-    if (it == m_targets.end())
-        return;
-    checkedTargetAgent()->targetDestroyed(CheckedRef { *it->value });
-    m_targets.remove(it);
-}
-
 void WebPageInspectorController::sendMessageToInspectorFrontend(const String& targetId, const String& message)
 {
     checkedTargetAgent()->sendMessageFromTargetToFrontend(targetId, message);
@@ -207,7 +193,7 @@ void WebPageInspectorController::didCreateProvisionalPage(ProvisionalPageProxy& 
 
 void WebPageInspectorController::willDestroyProvisionalPage(const ProvisionalPageProxy& provisionalPage)
 {
-    destroyInspectorTarget(getTargetID(provisionalPage));
+    removeTarget(getTargetID(provisionalPage));
 }
 
 void WebPageInspectorController::didCommitProvisionalPage(WebCore::PageIdentifier oldWebPageID, WebCore::PageIdentifier newWebPageID)
@@ -238,7 +224,7 @@ void WebPageInspectorController::didCreateFrame(WebFrameProxy& frame)
 void WebPageInspectorController::willDestroyFrame(const WebFrameProxy& frame)
 {
     if (protect(protect(m_inspectedPage)->preferences())->siteIsolationEnabled())
-        destroyInspectorTarget(WebFrameInspectorTarget::toTargetID(frame.frameID()));
+        removeTarget(WebFrameInspectorTarget::toTargetID(frame.frameID()));
 }
 
 InspectorBrowserAgent* WebPageInspectorController::enabledBrowserAgent() const
@@ -271,6 +257,15 @@ void WebPageInspectorController::addTarget(std::unique_ptr<InspectorTargetProxy>
 {
     checkedTargetAgent()->targetCreated(*target);
     m_targets.set(target->identifier(), WTF::move(target));
+}
+
+void WebPageInspectorController::removeTarget(const String& targetId)
+{
+    auto it = m_targets.find(targetId);
+    if (it == m_targets.end())
+        return;
+    checkedTargetAgent()->targetDestroyed(CheckedRef { *it->value });
+    m_targets.remove(it);
 }
 
 void WebPageInspectorController::setEnabledBrowserAgent(InspectorBrowserAgent* agent)

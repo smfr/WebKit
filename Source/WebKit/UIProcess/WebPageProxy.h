@@ -821,8 +821,6 @@ public:
     void hideInspectorIndication();
 #endif
 
-    void createInspectorTarget(IPC::Connection&, const String& targetId, Inspector::InspectorTargetType);
-    void destroyInspectorTarget(IPC::Connection&, const String& targetId);
     void sendMessageToInspectorFrontend(const String& targetId, const String& message);
 
     void getAllFrames(CompletionHandler<void(std::optional<FrameTreeNodeData>&&)>&&);

@@ -72,9 +72,6 @@ public:
     void setIndicating(bool);
 #endif
 
-    // FIXME <https://webkit.org/b/306912>: Remove this unused function and corresponding IPC message.
-    void createWebPageInspectorTarget(const String& targetId, Inspector::InspectorTargetType);
-    void destroyInspectorTarget(const String& targetId);
     void sendMessageToInspectorFrontend(const String& targetId, const String& message);
 
     bool shouldPauseLoading(const ProvisionalPageProxy&) const;
@@ -98,6 +95,7 @@ private:
     void createLazyAgents();
 
     void addTarget(std::unique_ptr<InspectorTargetProxy>&&);
+    void removeTarget(const String& targetId);
 
     const Ref<Inspector::FrontendRouter> m_frontendRouter;
     const Ref<Inspector::BackendDispatcher> m_backendDispatcher;

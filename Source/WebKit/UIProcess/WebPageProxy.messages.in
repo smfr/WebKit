@@ -434,9 +434,6 @@ messages -> WebPageProxy {
 #endif
 
     DidChangeInspectorFrontendCount(uint32_t count)
-
-    CreateInspectorTarget(String targetId, enum:uint8_t Inspector::InspectorTargetType type)
-    DestroyInspectorTarget(String targetId)
     SendMessageToInspectorFrontend(String targetId, String message)
 
     # Search popup menus
