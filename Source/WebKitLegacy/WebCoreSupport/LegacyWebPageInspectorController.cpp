@@ -166,7 +166,7 @@ public:
             return;
 
         m_channel = makeUnique<FrontendChannel>(identifier(), connectionType, m_handler);
-        Ref { m_frame.get() }->protectedInspectorController()->connectFrontend(*m_channel);
+        protect(Ref { m_frame.get() }->inspectorController())->connectFrontend(*m_channel);
     }
 
     void disconnect() override
@@ -174,13 +174,13 @@ public:
         if (!m_channel)
             return;
 
-        Ref { m_frame.get() }->protectedInspectorController()->disconnectFrontend(*m_channel);
+        protect(Ref { m_frame.get() }->inspectorController())->disconnectFrontend(*m_channel);
         m_channel = nullptr;
     }
 
     void sendMessageToTargetBackend(const String& message) override
     {
-        Ref { m_frame.get() }->protectedInspectorController()->dispatchMessageFromFrontend(message);
+        protect(Ref { m_frame.get() }->inspectorController())->dispatchMessageFromFrontend(message);
     }
 
 private:

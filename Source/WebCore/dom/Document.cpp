@@ -3541,7 +3541,7 @@ void Document::attachToCachedFrame(CachedFrameBase& cachedFrame)
     ASSERT(cachedFrame.view());
     ASSERT(m_backForwardCacheState == Document::InBackForwardCache);
     if (CheckedPtr localFrameView = dynamicDowncast<LocalFrameView>(cachedFrame.view()))
-        observeFrame(localFrameView->protectedFrame().ptr());
+        observeFrame(protect(localFrameView->frame()).ptr());
 }
 
 void Document::detachFromCachedFrame(CachedFrameBase& cachedFrame)
@@ -4085,7 +4085,7 @@ ExceptionOr<void> Document::open(Document* entryDocument)
             }
         }
 
-        bool isNavigating = frame->loader().policyChecker().delegateIsDecidingNavigationPolicy() || frame->loader().state() == FrameState::Provisional || frame->protectedNavigationScheduler()->hasQueuedNavigation();
+        bool isNavigating = frame->loader().policyChecker().delegateIsDecidingNavigationPolicy() || frame->loader().state() == FrameState::Provisional || protect(frame->navigationScheduler())->hasQueuedNavigation();
         if (frame->loader().policyChecker().delegateIsDecidingNavigationPolicy())
             frame->loader().policyChecker().stopCheck();
         // Null-checking m_frame again as `policyChecker().stopCheck()` may have cleared it.
@@ -4278,7 +4278,7 @@ void Document::explicitClose()
 void Document::implicitClose()
 {
     RELEASE_ASSERT(!m_inStyleRecalc);
-    bool wasLocationChangePending = frame() && frame()->protectedNavigationScheduler()->locationChangePending();
+    bool wasLocationChangePending = frame() && protect(frame()->navigationScheduler())->locationChangePending();
     bool doload = !parsing() && m_parser && !m_processingLoadEvent && !wasLocationChangePending;
 
     if (!doload)
@@ -11320,7 +11320,7 @@ void Document::navigateFromServiceWorker(const URL& url, CompletionHandler<void(
             callback(ScheduleLocationChangeResult::Stopped);
             return;
         }
-        frame->protectedNavigationScheduler()->scheduleLocationChange(*weakThis, weakThis->securityOrigin(), url, frame->loader().outgoingReferrer(), LockHistory::Yes, LockBackForwardList::No, NavigationHistoryBehavior::Auto, [callback = WTF::move(callback)](auto result) mutable {
+        protect(frame->navigationScheduler())->scheduleLocationChange(*weakThis, weakThis->securityOrigin(), url, frame->loader().outgoingReferrer(), LockHistory::Yes, LockBackForwardList::No, NavigationHistoryBehavior::Auto, [callback = WTF::move(callback)](auto result) mutable {
             callback(result);
         });
     });

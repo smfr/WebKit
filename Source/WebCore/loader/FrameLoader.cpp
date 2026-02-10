@@ -480,7 +480,7 @@ void FrameLoader::setDefersLoading(bool defers)
     history().setDefersLoading(defers);
 
     if (!defers) {
-        protect(m_frame)->protectedNavigationScheduler()->startTimer();
+        protect(protect(m_frame)->navigationScheduler())->startTimer();
         startCheckCompleteTimer();
     }
 }
@@ -579,7 +579,7 @@ void FrameLoader::submitForm(Ref<FormSubmission>&& submission)
     submission->setReferrer(outgoingReferrer());
     submission->setOrigin(SecurityPolicy::generateOriginHeader(frame->document()->referrerPolicy(), submission->requestURL(), protect(protect(frame->document())->securityOrigin()), OriginAccessPatternsForWebProcess::singleton()));
 
-    targetFrame->protectedNavigationScheduler()->scheduleFormSubmission(WTF::move(submission));
+    protect(targetFrame->navigationScheduler())->scheduleFormSubmission(WTF::move(submission));
 }
 
 void FrameLoader::stopLoading(UnloadEventPolicy unloadEventPolicy)
@@ -613,7 +613,7 @@ void FrameLoader::stopLoading(UnloadEventPolicy unloadEventPolicy)
     policyChecker().stopCheck();
 
     // FIXME: This will cancel redirection timer, which really needs to be restarted when restoring the frame from b/f cache.
-    frame->protectedNavigationScheduler()->cancel();
+    protect(frame->navigationScheduler())->cancel();
 }
 
 void FrameLoader::stop()
@@ -651,13 +651,13 @@ void FrameLoader::closeURL()
 bool FrameLoader::didOpenURL()
 {
     Ref frame = m_frame.get();
-    if (frame->protectedNavigationScheduler()->redirectScheduledDuringLoad()) {
+    if (protect(frame->navigationScheduler())->redirectScheduledDuringLoad()) {
         // A redirect was scheduled before the document was created.
         // This can happen when one frame changes another frame's location.
         return false;
     }
 
-    frame->protectedNavigationScheduler()->cancel();
+    protect(frame->navigationScheduler())->cancel();
 
     m_isComplete = false;
     m_didCallImplicitClose = false;
@@ -683,7 +683,7 @@ void FrameLoader::didExplicitOpen()
     // from a subsequent window.document.open / window.document.write call. 
     // Canceling redirection here works for all cases because document.open 
     // implicitly precedes document.write.
-    protect(m_frame)->protectedNavigationScheduler()->cancel();
+    protect(protect(m_frame)->navigationScheduler())->cancel();
 }
 
 static inline bool shouldClearWindowName(const LocalFrame& frame, const Document& newDocument)
@@ -758,7 +758,7 @@ void FrameLoader::clear(RefPtr<Document>&& newDocument, bool clearWindowProperti
         script->setWebAssemblyEnabled(enableWASMValue, newDocumentCSP->webAssemblyErrorMessage());
     }
 
-    frame->protectedNavigationScheduler()->clear();
+    protect(frame->navigationScheduler())->clear();
 
     m_checkTimer.stop();
     m_shouldCallCheckCompleted = false;
@@ -997,7 +997,7 @@ void FrameLoader::checkCompleted()
 
     checkCallImplicitClose(); // if we didn't do it before
 
-    frame->protectedNavigationScheduler()->startTimer();
+    protect(frame->navigationScheduler())->startTimer();
 
     completed();
     if (frame->page())
@@ -1186,7 +1186,7 @@ void FrameLoader::provisionalLoadStarted()
     if (m_stateMachine.firstLayoutDone())
         m_stateMachine.advanceTo(FrameLoaderStateMachine::CommittedFirstRealLoad);
     Ref frame = m_frame.get();
-    frame->protectedNavigationScheduler()->cancel(NewLoadInProgress::Yes);
+    protect(frame->navigationScheduler())->cancel(NewLoadInProgress::Yes);
     m_client->provisionalLoadStarted();
 
     if (frame->isMainFrame()) {
@@ -1384,7 +1384,7 @@ void FrameLoader::completed()
     Ref frame = m_frame.get();
 
     for (RefPtr descendant = frame->tree().traverseNext(frame.ptr()); descendant; descendant = descendant->tree().traverseNext(frame.ptr()))
-        descendant->protectedNavigationScheduler()->startTimer();
+        protect(descendant->navigationScheduler())->startTimer();
 
     if (RefPtr parent = frame->tree().parent()) {
         if (RefPtr localParent = dynamicDowncast<LocalFrame>(parent.releaseNonNull()))
@@ -1937,7 +1937,7 @@ void FrameLoader::loadWithDocumentLoader(DocumentLoader* loader, FrameLoadType t
         loader->setTriggeringAction(WTF::move(action));
     }
 
-    frame->protectedNavigationScheduler()->cancel(NewLoadInProgress::Yes);
+    protect(frame->navigationScheduler())->cancel(NewLoadInProgress::Yes);
 
     if (shouldTreatCurrentLoadAsContinuingLoad()) {
         continueLoadAfterNavigationPolicy(loader->request(), formSubmission.get(), NavigationPolicyDecision::ContinueLoad, allowNavigationToInvalidURL);
@@ -2179,7 +2179,7 @@ void FrameLoader::stopForBackForwardCache()
     // We cancel pending navigations & policy checks *after* cancelling loads because cancelling loads might end up
     // running script, which could schedule new navigations.
     policyChecker().stopCheck();
-    protect(m_frame)->protectedNavigationScheduler()->cancel();
+    protect(protect(m_frame)->navigationScheduler())->cancel();
 }
 
 void FrameLoader::stopAllLoadersAndCheckCompleteness()
@@ -2703,7 +2703,7 @@ void FrameLoader::willRestoreFromCachedPage()
     ASSERT(m_frame->page());
     ASSERT(m_frame->isMainFrame());
 
-    protect(m_frame)->protectedNavigationScheduler()->cancel();
+    protect(protect(m_frame)->navigationScheduler())->cancel();
 
     // We still have to close the previous part page.
     closeURL();
@@ -3291,7 +3291,7 @@ String FrameLoader::userAgent(const URL& url) const
 
 String FrameLoader::navigatorPlatform() const
 {
-    auto customNavigatorPlatform = m_frame->protectedMainFrame()->customNavigatorPlatform();
+    auto customNavigatorPlatform = protect(m_frame->mainFrame())->customNavigatorPlatform();
     if (!customNavigatorPlatform.isEmpty())
         return customNavigatorPlatform;
     return String();
@@ -3508,7 +3508,7 @@ void FrameLoader::scheduleRefreshIfNeeded(Document& document, const String& cont
     if (parseMetaHTTPEquivRefresh(content, delay, urlString)) {
         auto completedURL = urlString.isEmpty() ? document.url() : document.completeURL(urlString);
         if (!completedURL.protocolIsJavaScript())
-            protect(m_frame)->protectedNavigationScheduler()->scheduleRedirect(document, delay, WTF::move(completedURL), isMetaRefresh);
+            protect(protect(m_frame)->navigationScheduler())->scheduleRedirect(document, delay, WTF::move(completedURL), isMetaRefresh);
         else {
             auto message = makeString("Refused to refresh "_s, document.url().stringCenterEllipsizedToLength(), " to a javascript: URL"_s);
             document.addConsoleMessage(MessageSource::Security, MessageLevel::Error, message);

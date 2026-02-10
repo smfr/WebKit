@@ -313,7 +313,7 @@ RefPtr<Page> WebChromeClient::createWindow(LocalFrame& frame, const String& open
     RefPtr newPage = core(newWebView.get());
     if (newPage) {
         if (!features.wantsNoOpener()) {
-            m_webView.page->protectedStorageNamespaceProvider()->cloneSessionStorageNamespaceForPage(*m_webView.page, *newPage);
+            protect(m_webView.page->storageNamespaceProvider())->cloneSessionStorageNamespaceForPage(*m_webView.page, *newPage);
             newPage->mainFrame().setOpenerForWebKitLegacy(&frame);
             newPage->applyWindowFeatures(features);
         }

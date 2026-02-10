@@ -872,7 +872,7 @@ void LocalFrame::clearTimers(LocalFrameView *view, Document *document)
     view->checkedLayoutContext()->unscheduleLayout();
     if (CheckedPtr timelines = document->timelinesController())
         timelines->suspendAnimations();
-    view->protectedFrame()->eventHandler().stopAutoscrollTimer();
+    protect(view->frame())->eventHandler().stopAutoscrollTimer();
 }
 
 void LocalFrame::clearTimers()
@@ -1686,11 +1686,6 @@ std::optional<DocumentSecurityPolicy> LocalFrame::frameDocumentSecurityPolicy() 
         return std::nullopt;
 
     return DocumentSecurityPolicy { document->crossOriginEmbedderPolicy(), document->crossOriginOpenerPolicy() };
-}
-
-Ref<FrameInspectorController> LocalFrame::protectedInspectorController() const
-{
-    return m_inspectorController.get();
 }
 
 String LocalFrame::frameURLProtocol() const

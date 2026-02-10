@@ -652,7 +652,7 @@ void DocumentFullscreen::didExitFullscreen(CompletionHandler<void(ExceptionOr<vo
     INFO_LOG(LOGIDENTIFIER);
 
     if (RefPtr frame = document().frame())
-        finishExitFullscreen(frame->protectedMainFrame(), ExitMode::Resize);
+        finishExitFullscreen(protect(frame->mainFrame()), ExitMode::Resize);
 
     if (RefPtr exitedFullscreenElement = fullscreenOrPendingElement())
         exitedFullscreenElement->didStopBeingFullscreenElement();

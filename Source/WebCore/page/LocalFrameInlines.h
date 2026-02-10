@@ -54,16 +54,6 @@ inline const Editor& LocalFrame::editor() const
     return protectedDocument()->editor();
 }
 
-inline Ref<Editor> LocalFrame::protectedEditor()
-{
-    return editor();
-}
-
-inline Ref<const Editor> LocalFrame::protectedEditor() const
-{
-    return editor();
-}
-
 inline FrameSelection& LocalFrame::selection()
 {
     return document()->selection();

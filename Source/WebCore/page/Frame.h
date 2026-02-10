@@ -75,7 +75,6 @@ public:
 
     WindowProxy& windowProxy() { return m_windowProxy; }
     const WindowProxy& windowProxy() const { return m_windowProxy; }
-    Ref<WindowProxy> protectedWindowProxy() const;
 
     DOMWindow* window() const { return virtualWindow(); }
     RefPtr<DOMWindow> protectedWindow() const;
@@ -83,16 +82,13 @@ public:
     WEBCORE_EXPORT std::optional<uint64_t> indexInFrameTreeSiblings() const;
     WEBCORE_EXPORT Vector<uint64_t> pathToFrame() const;
     FrameIdentifier frameID() const { return m_frameID; }
-    SecurityOrigin& topOrigin() const;
-    WEBCORE_EXPORT Ref<SecurityOrigin> protectedTopOrigin() const;
+    WEBCORE_EXPORT SecurityOrigin& topOrigin() const;
     inline Page* page() const; // Defined in DocumentPage.h.
     inline RefPtr<Page> protectedPage() const; // Defined in DocumentPage.h.
     inline std::optional<PageIdentifier> pageID() const; // Defined in DocumentPage.h.
     Settings& settings() const { return m_settings.get(); }
     Frame& mainFrame() { return *m_mainFrame; }
     const Frame& mainFrame() const { return *m_mainFrame; }
-    Ref<Frame> protectedMainFrame() { return mainFrame(); }
-    Ref<const Frame> protectedMainFrame() const { return mainFrame(); }
     bool isMainFrame() const { return this == m_mainFrame.get(); }
     WEBCORE_EXPORT void disownOpener(NotifyUIProcess = NotifyUIProcess::No);
     WEBCORE_EXPORT void updateOpener(Frame&, NotifyUIProcess = NotifyUIProcess::Yes);
@@ -114,7 +110,6 @@ public:
 
     WEBCORE_EXPORT void disconnectOwnerElement();
     NavigationScheduler& navigationScheduler() const { return m_navigationScheduler.get(); }
-    Ref<NavigationScheduler> protectedNavigationScheduler() const;
     WEBCORE_EXPORT void takeWindowProxyAndOpenerFrom(Frame&);
 
     virtual void frameDetached() = 0;
@@ -156,7 +151,6 @@ public:
 
     virtual bool frameCanCreatePaymentSession() const;
     FrameTreeSyncData& frameTreeSyncData() const { return m_frameTreeSyncData.get(); }
-    Ref<FrameTreeSyncData> protectedFrameTreeSyncData() const { return m_frameTreeSyncData.get(); }
     WEBCORE_EXPORT virtual SecurityOrigin* frameDocumentSecurityOrigin() const = 0;
     WEBCORE_EXPORT virtual std::optional<DocumentSecurityPolicy> frameDocumentSecurityPolicy() const = 0;
     WEBCORE_EXPORT virtual String frameURLProtocol() const = 0;

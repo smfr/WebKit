@@ -692,7 +692,7 @@ void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCh
         finishedTimingForWorkerLoad(resourceTiming);
     else {
         if (RefPtr window = document().window())
-            window->protectedPerformance()->addResourceTiming(WTF::move(resourceTiming));
+            protect(window->performance())->addResourceTiming(WTF::move(resourceTiming));
     }
 
     didFinishLoading(identifier, { });

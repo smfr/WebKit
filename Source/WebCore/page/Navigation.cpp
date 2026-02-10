@@ -456,7 +456,7 @@ Navigation::Result Navigation::performTraversal(const String& key, Navigation::O
         createErrorResult(WTF::move(committed), WTF::move(finished), ExceptionCode::AbortError, "Navigation aborted"_s);
 
     RefPtr frame = this->frame();
-    if (!frame->isMainFrame() && protect(window->document())->canNavigate(&protect(frame->page())->protectedMainFrame().get()) != CanNavigateState::Able)
+    if (!frame->isMainFrame() && protect(window->document())->canNavigate(protect(protect(frame->page())->mainFrame()).ptr()) != CanNavigateState::Able)
         return createErrorResult(WTF::move(committed), WTF::move(finished), ExceptionCode::SecurityError, "Invalid state"_s);
 
     RefPtr current = currentEntry();
@@ -475,7 +475,7 @@ Navigation::Result Navigation::performTraversal(const String& key, Navigation::O
     RefPtr apiMethodTracker = addUpcomingTraverseAPIMethodTracker(WTF::move(committed), WTF::move(finished), key, options.info);
 
     // FIXME: 11. Let sourceSnapshotParams be the result of snapshotting source snapshot params given document.
-    frame->protectedNavigationScheduler()->scheduleHistoryNavigationByKey(key, [apiMethodTracker] (ScheduleHistoryNavigationResult result) {
+    protect(frame->navigationScheduler())->scheduleHistoryNavigationByKey(key, [apiMethodTracker] (ScheduleHistoryNavigationResult result) {
         if (result == ScheduleHistoryNavigationResult::Aborted)
             createErrorResult(WTF::move(apiMethodTracker->committedPromise), WTF::move(apiMethodTracker->finishedPromise), ExceptionCode::AbortError, "Navigation aborted"_s);
     });

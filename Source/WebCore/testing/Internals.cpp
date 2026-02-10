@@ -500,7 +500,7 @@ InspectorStubFrontend::InspectorStubFrontend(Page& inspectedPage, LocalFrame& ma
 
     frontendPage()->inspectorController().setInspectorFrontendClient(this);
     inspectedPage.protectedInspectorController()->connectFrontend(*this);
-    mainFrame.protectedInspectorController()->connectFrontend(*this);
+    protect(mainFrame.inspectorController())->connectFrontend(*this);
 }
 
 InspectorStubFrontend::~InspectorStubFrontend()

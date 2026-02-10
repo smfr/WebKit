@@ -539,7 +539,7 @@ void FocusController::setFocusedInternal(bool focused)
     }
 
     if (!focusedFrame())
-        setFocusedFrame(m_page->protectedMainFrame().ptr());
+        setFocusedFrame(protect(m_page->mainFrame()).ptr());
 
     RefPtr focusedFrame = focusedLocalFrame();
     if (focusedFrame && focusedFrame->view()) {

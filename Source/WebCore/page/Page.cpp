@@ -491,7 +491,7 @@ Page::Page(PageConfiguration&& pageConfiguration)
 {
     updateTimerThrottlingState();
 
-    protectedPluginInfoProvider()->addPage(*this);
+    protect(pluginInfoProvider())->addPage(*this);
     Ref { m_userContentProvider }->addPage(*this);
     protectedVisitedLinkStore()->addPage(*this);
 
@@ -509,7 +509,7 @@ Page::Page(PageConfiguration&& pageConfiguration)
         MemoryPressureHandler::setPageCount(gNonUtilityPageCount);
     }
 
-    protectedStorageNamespaceProvider()->setSessionStorageQuota(m_settings->sessionStorageQuota());
+    protect(storageNamespaceProvider())->setSessionStorageQuota(m_settings->sessionStorageQuota());
 
 #if PLATFORM(COCOA)
     platformInitialize();
@@ -544,7 +544,7 @@ Page::~Page()
     m_validationMessageClient = nullptr;
     m_diagnosticLoggingClient = nullptr;
     m_performanceLoggingClient = nullptr;
-    protectedMainFrame()->disconnectView();
+    protect(mainFrame())->disconnectView();
     setGroupName(String());
     allPages().remove(*this);
     if (!isUtilityPage()) {
@@ -572,7 +572,7 @@ Page::~Page()
     if (!isUtilityPage())
         BackForwardCache::singleton().removeAllItemsForPage(*this);
 
-    protectedPluginInfoProvider()->removePage(*this);
+    protect(pluginInfoProvider())->removePage(*this);
     Ref { m_userContentProvider }->removePage(*this);
     protectedVisitedLinkStore()->removePage(*this);
 }
@@ -662,7 +662,7 @@ static RefPtr<Document> viewportDocumentForFrame(const Frame& frame)
 
 ViewportArguments Page::viewportArguments() const
 {
-    if (RefPtr document = viewportDocumentForFrame(protectedMainFrame()))
+    if (RefPtr document = viewportDocumentForFrame(protect(mainFrame())))
         return document->viewportArguments();
     return ViewportArguments();
 }
@@ -1006,11 +1006,6 @@ SecurityOrigin& Page::mainFrameOrigin() const
     return *m_topDocumentSyncData->documentSecurityOrigin;
 }
 
-Ref<SecurityOrigin> Page::protectedMainFrameOrigin() const
-{
-    return mainFrameOrigin();
-}
-
 RefPtr<Frame> Page::findFrameByPath(const Vector<uint64_t>& path) const
 {
     RefPtr current = m_mainFrame.get();
@@ -1070,11 +1065,6 @@ const String& Page::groupName() const
     return m_group ? m_group->name() : nullAtom().string();
 }
 
-Ref<BroadcastChannelRegistry> Page::protectedBroadcastChannelRegistry() const
-{
-    return m_broadcastChannelRegistry;
-}
-
 void Page::setBroadcastChannelRegistry(Ref<BroadcastChannelRegistry>&& broadcastChannelRegistry)
 {
     m_broadcastChannelRegistry = WTF::move(broadcastChannelRegistry);
@@ -1125,7 +1115,7 @@ void Page::refreshPlugins(bool reload)
     WeakHashSet<PluginInfoProvider> pluginInfoProviders;
 
     for (auto& page : allPages())
-        pluginInfoProviders.add(Ref { page.get() }->protectedPluginInfoProvider());
+        pluginInfoProviders.add(protect(Ref { page.get() }->pluginInfoProvider()));
 
     for (Ref pluginInfoProvider : pluginInfoProviders)
         pluginInfoProvider->refresh(reload);
@@ -1184,11 +1174,6 @@ void Page::setCanStartMedia(bool canStartMedia)
             break;
         Ref { listener->first.get() }->mediaCanStart(Ref { listener->second.get() });
     }
-}
-
-Ref<Frame> Page::protectedMainFrame() const
-{
-    return m_mainFrame;
 }
 
 static Frame* incrementFrame(Frame* current, bool forward, CanWrap canWrap, DidWrap* didWrap = nullptr)
@@ -1761,7 +1746,7 @@ void Page::setDeviceScaleFactor(float scaleFactor)
 void Page::screenPropertiesDidChange(bool affectsStyle)
 {
 #if ENABLE(VIDEO)
-    auto mode = preferredDynamicRangeMode(protectedMainFrame()->protectedVirtualView().get());
+    auto mode = preferredDynamicRangeMode(protect(mainFrame())->protectedVirtualView().get());
     forEachMediaElement([mode] (auto& element) {
         element.setPreferredDynamicRangeMode(mode);
     });
@@ -1813,7 +1798,7 @@ void Page::windowScreenDidChange(PlatformDisplayID displayID, std::optional<Fram
     updateScreenSupportedContentsFormats();
 
 #if ENABLE(VIDEO)
-    auto mode = preferredDynamicRangeMode(protectedMainFrame()->protectedVirtualView().get());
+    auto mode = preferredDynamicRangeMode(protect(mainFrame())->protectedVirtualView().get());
     forEachMediaElement([mode] (auto& element) {
         element.setPreferredDynamicRangeMode(mode);
     });
@@ -1983,7 +1968,7 @@ void Page::setShouldSuppressScrollbarAnimations(bool suppressAnimations)
 
 void Page::lockAllOverlayScrollbarsToHidden(bool lockOverlayScrollbars)
 {
-    RefPtr view = protectedMainFrame()->virtualView();
+    RefPtr view = protect(mainFrame())->virtualView();
     if (!view)
         return;
 
@@ -2025,7 +2010,7 @@ void Page::setVerticalScrollElasticity(ScrollElasticity elasticity)
     
     m_verticalScrollElasticity = elasticity;
 
-    if (RefPtr view = protectedMainFrame()->virtualView())
+    if (RefPtr view = protect(mainFrame())->virtualView())
         view->setVerticalScrollElasticity(elasticity);
 }
     
@@ -2550,13 +2535,8 @@ void Page::renderingUpdateCompleted()
 
     if (!isUtilityPage()) {
         auto nextRenderingUpdate = m_lastRenderingUpdateTimestamp + preferredRenderingUpdateInterval();
-        protectedOpportunisticTaskScheduler()->rescheduleIfNeeded(nextRenderingUpdate);
+        protect(opportunisticTaskScheduler())->rescheduleIfNeeded(nextRenderingUpdate);
     }
-}
-
-Ref<OpportunisticTaskScheduler> Page::protectedOpportunisticTaskScheduler() const
-{
-    return m_opportunisticTaskScheduler;
 }
 
 void Page::willStartRenderingUpdateDisplay()
@@ -3605,7 +3585,7 @@ bool Page::shouldApplyScreenFingerprintingProtections(Document& document) const
 
 OptionSet<AdvancedPrivacyProtections> Page::advancedPrivacyProtections() const
 {
-    return protectedMainFrame()->advancedPrivacyProtections();
+    return protect(mainFrame())->advancedPrivacyProtections();
 }
 
 void Page::addLayoutMilestones(OptionSet<LayoutMilestone> milestones)
@@ -4000,22 +3980,7 @@ void Page::mainFrameLoadStarted(const URL& destinationURL, FrameLoadType type)
     logNavigation(navigation);
 }
 
-Ref<CookieJar> Page::protectedCookieJar() const
-{
-    return m_cookieJar;
-}
-
-Ref<StorageNamespaceProvider> Page::protectedStorageNamespaceProvider() const
-{
-    return m_storageNamespaceProvider;
-}
-
 PluginInfoProvider& Page::pluginInfoProvider()
-{
-    return m_pluginInfoProvider;
-}
-
-Ref<PluginInfoProvider> Page::protectedPluginInfoProvider() const
 {
     return m_pluginInfoProvider;
 }
@@ -4560,7 +4525,7 @@ void Page::forEachDocumentFromMainFrame(const Frame& mainFrame, NOESCAPE const F
 
 void Page::forEachDocument(NOESCAPE const Function<void(Document&)>& functor) const
 {
-    forEachDocumentFromMainFrame(protectedMainFrame(), functor);
+    forEachDocumentFromMainFrame(protect(mainFrame()), functor);
 }
 
 bool Page::findMatchingLocalDocument(NOESCAPE const Function<bool(Document&)>& functor) const
@@ -4750,11 +4715,6 @@ void Page::dispatchAfterPrintEvent()
 }
 
 #if ENABLE(APPLE_PAY)
-Ref<PaymentCoordinator> Page::protectedPaymentCoordinator() const
-{
-    return paymentCoordinator();
-}
-
 void Page::setPaymentCoordinator(Ref<PaymentCoordinator>&& paymentCoordinator)
 {
     m_paymentCoordinator = WTF::move(paymentCoordinator);
@@ -5355,7 +5315,7 @@ void Page::reloadExecutionContextsForOrigin(const ClientOrigin& origin, std::opt
             frame = frame->tree().traverseNext();
             continue;
         }
-        localFrame->protectedNavigationScheduler()->scheduleRefresh(*document);
+        protect(localFrame->navigationScheduler())->scheduleRefresh(*document);
         frame = frame->tree().traverseNextSkippingChildren();
     }
 }
@@ -5880,7 +5840,7 @@ bool Page::requiresScriptTrackingPrivacyProtections(const URL& scriptURL) const
     if (!advancedPrivacyProtections().contains(AdvancedPrivacyProtections::ScriptTrackingPrivacy))
         return false;
 
-    return chrome().client().requiresScriptTrackingPrivacyProtections(scriptURL, protectedMainFrameOrigin());
+    return chrome().client().requiresScriptTrackingPrivacyProtections(scriptURL, protect(mainFrameOrigin()));
 }
 
 void Page::applyWindowFeatures(const WindowFeatures& features)
@@ -5977,7 +5937,7 @@ void Page::setPresentingApplicationAuditToken(std::optional<audit_token_t> prese
 
 bool Page::requiresUserGestureForAudioPlayback() const
 {
-    auto autoplayPolicy = protectedMainFrame()->autoplayPolicy();
+    auto autoplayPolicy = protect(mainFrame())->autoplayPolicy();
     if (autoplayPolicy != AutoplayPolicy::Default)
         return autoplayPolicy == AutoplayPolicy::AllowWithoutSound || autoplayPolicy == AutoplayPolicy::Deny;
     return m_settings->requiresUserGestureForAudioPlayback();
@@ -5985,7 +5945,7 @@ bool Page::requiresUserGestureForAudioPlayback() const
 
 bool Page::requiresUserGestureForVideoPlayback() const
 {
-    auto autoplayPolicy = protectedMainFrame()->autoplayPolicy();
+    auto autoplayPolicy = protect(mainFrame())->autoplayPolicy();
     if (autoplayPolicy != AutoplayPolicy::Default)
         return autoplayPolicy == AutoplayPolicy::Deny;
     return m_settings->requiresUserGestureForVideoPlayback();

@@ -810,11 +810,6 @@ Performance& LocalDOMWindow::performance() const
     return *m_performance;
 }
 
-Ref<Performance> LocalDOMWindow::protectedPerformance() const
-{
-    return performance();
-}
-
 ReducedResolutionSeconds LocalDOMWindow::nowTimestamp() const
 {
     return performance().nowInReducedResolutionSeconds();
@@ -2818,7 +2813,7 @@ void LocalDOMWindow::setLocation(LocalDOMWindow& activeWindow, const URL& comple
     // We want a new history item if we are processing a user gesture.
     LockHistory lockHistory = (locking != SetLocationLocking::LockHistoryBasedOnGestureState || !UserGestureIndicator::processingUserGesture()) ? LockHistory::Yes : LockHistory::No;
     LockBackForwardList lockBackForwardList = (locking != SetLocationLocking::LockHistoryBasedOnGestureState) ? LockBackForwardList::Yes : LockBackForwardList::No;
-    frame->protectedNavigationScheduler()->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()),
+    protect(frame->navigationScheduler())->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()),
         // FIXME: What if activeDocument()->frame() is 0?
         completedURL, activeDocument->frame()->loader().outgoingReferrer(),
         lockHistory, lockBackForwardList,
@@ -2898,7 +2893,7 @@ ExceptionOr<RefPtr<Frame>> LocalDOMWindow::createWindow(const String& urlString,
         newFrame->changeLocation(WTF::move(frameLoadRequest));
     } else if (!urlString.isEmpty()) {
         LockHistory lockHistory = UserGestureIndicator::processingUserGesture() ? LockHistory::No : LockHistory::Yes;
-        newFrame->protectedNavigationScheduler()->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()), completedURL, referrer, lockHistory, LockBackForwardList::No);
+        protect(newFrame->navigationScheduler())->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()), completedURL, referrer, lockHistory, LockBackForwardList::No);
     }
 
     // Navigating the new frame could result in it being detached from its page by a navigation policy delegate.
@@ -2991,7 +2986,7 @@ ExceptionOr<RefPtr<WindowProxy>> LocalDOMWindow::open(LocalDOMWindow& activeWind
         // For whatever reason, Firefox uses the first window rather than the active window to
         // determine the outgoing referrer. We replicate that behavior here.
         LockHistory lockHistory = UserGestureIndicator::processingUserGesture() ? LockHistory::No : LockHistory::Yes;
-        targetFrame->protectedNavigationScheduler()->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()), completedURL, firstFrame->loader().outgoingReferrer(),
+        protect(targetFrame->navigationScheduler())->scheduleLocationChange(*activeDocument, protect(activeDocument->securityOrigin()), completedURL, firstFrame->loader().outgoingReferrer(),
             lockHistory, LockBackForwardList::No);
         return &targetFrame->windowProxy();
     }

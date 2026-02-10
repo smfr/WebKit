@@ -549,7 +549,7 @@ Vector<FloatRect> FindController::rectsForTextMatchesInRect(IntRect clipRect)
 #endif
 
     Vector<FloatRect> rects;
-    RefPtr mainFrameView = protect(protectedWebPage()->corePage())->protectedMainFrame()->virtualView();
+    RefPtr mainFrameView = protect(protect(protectedWebPage()->corePage())->mainFrame())->virtualView();
     for (RefPtr frame = m_webPage->corePage()->mainFrame(); frame; frame = frame->tree().traverseNext()) {
         auto* localFrame = dynamicDowncast<LocalFrame>(frame.get());
         if (!localFrame)

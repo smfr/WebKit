@@ -600,10 +600,10 @@ void ContextMenuController::contextMenuItemSelected(ContextMenuAction action, co
         protect(frame->editor())->capitalizeWord();
         break;
     case ContextMenuItemTagConvertToTraditionalChinese:
-        frame->protectedEditor()->convertToTraditionalChinese();
+        protect(frame->editor())->convertToTraditionalChinese();
         break;
     case ContextMenuItemTagConvertToSimplifiedChinese:
-        frame->protectedEditor()->convertToSimplifiedChinese();
+        protect(frame->editor())->convertToSimplifiedChinese();
         break;
 #endif
 #if PLATFORM(COCOA)

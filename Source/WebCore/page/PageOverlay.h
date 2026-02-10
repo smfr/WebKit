@@ -122,7 +122,6 @@ public:
 
     // FIXME: PageOverlay should own its layer, instead of PageOverlayController.
     WEBCORE_EXPORT GraphicsLayer& layer() const;
-    WEBCORE_EXPORT Ref<GraphicsLayer> protectedLayer() const;
 
     bool needsSynchronousScrolling() const { return m_needsSynchronousScrolling; }
     void setNeedsSynchronousScrolling(bool needsSynchronousScrolling) { m_needsSynchronousScrolling = needsSynchronousScrolling; }

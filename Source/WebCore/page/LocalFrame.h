@@ -164,8 +164,6 @@ public:
 
     inline Editor& editor(); // Defined in LocalFrameInlines.h
     inline const Editor& editor() const; // Defined in LocalFrameInlines.h
-    inline Ref<Editor> protectedEditor(); // Defined in LocalFrameInlines.h
-    inline Ref<const Editor> protectedEditor() const; // Defined in LocalFrameInlines.h
 
     EventHandler& eventHandler() { return m_eventHandler; }
     const EventHandler& eventHandler() const { return m_eventHandler; }
@@ -358,7 +356,6 @@ public:
 
     FrameInspectorController& inspectorController() { return m_inspectorController.get(); }
     const FrameInspectorController& inspectorController() const { return m_inspectorController.get(); }
-    WEBCORE_EXPORT Ref<FrameInspectorController> protectedInspectorController() const;
     FrameConsoleClient& console() { return m_consoleClient.get(); }
     const FrameConsoleClient& console() const { return m_consoleClient.get(); }
 

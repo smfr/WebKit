@@ -2907,7 +2907,7 @@ bool UnifiedPDFPlugin::takeFindStringFromSelection()
     if (!frame || !frame->coreLocalFrame())
         return false;
 
-    if (CheckedPtr client = protect(frame->coreLocalFrame())->protectedEditor()->client())
+    if (CheckedPtr client = protect(protect(frame->coreLocalFrame())->editor())->client())
         client->updateStringForFind(findString);
     else
         return false;
@@ -2926,7 +2926,7 @@ bool UnifiedPDFPlugin::forwardEditingCommandToEditor(const String& commandName, 
     if (!localFrame)
         return false;
 
-    return localFrame->protectedEditor()->command(commandName).execute(argument);
+    return protect(localFrame->editor())->command(commandName).execute(argument);
 }
 
 void UnifiedPDFPlugin::selectAll()

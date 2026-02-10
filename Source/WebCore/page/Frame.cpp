@@ -139,7 +139,7 @@ Frame::Frame(Page& page, FrameIdentifier frameID, FrameType frameType, HTMLFrame
 Frame::~Frame()
 {
     protect(windowProxy())->detachFromFrame();
-    protectedNavigationScheduler()->cancel();
+    protect(navigationScheduler())->cancel();
 
 #if ASSERT_ENABLED
     FrameLifetimeVerifier::singleton().frameDestroyed(*this);
@@ -195,19 +195,9 @@ void Frame::takeWindowProxyAndOpenerFrom(Frame& frame)
     frame.m_openedFrames.clear();
 }
 
-Ref<WindowProxy> Frame::protectedWindowProxy() const
-{
-    return m_windowProxy;
-}
-
 RefPtr<DOMWindow> Frame::protectedWindow() const
 {
     return window();
-}
-
-Ref<NavigationScheduler> Frame::protectedNavigationScheduler() const
-{
-    return m_navigationScheduler.get();
 }
 
 std::optional<uint64_t> Frame::indexInFrameTreeSiblings() const
@@ -366,7 +356,7 @@ void Frame::updateFrameTreeSyncData(Ref<FrameTreeSyncData>&& data)
 
 void Frame::updateFrameTreeSyncData(const FrameTreeSyncSerializationData& data)
 {
-    protectedFrameTreeSyncData()->update(data);
+    protect(frameTreeSyncData())->update(data);
 }
 
 bool Frame::frameCanCreatePaymentSession() const
@@ -394,11 +384,6 @@ SecurityOrigin& Frame::topOrigin() const
         return page->mainFrameOrigin();
 
     return SecurityOrigin::opaqueOrigin();
-}
-
-Ref<SecurityOrigin> Frame::protectedTopOrigin() const
-{
-    return topOrigin();
 }
 
 float Frame::frameScaleFactor() const

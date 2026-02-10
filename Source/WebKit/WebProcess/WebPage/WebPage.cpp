@@ -997,11 +997,11 @@ WebPage::WebPage(PageIdentifier pageID, WebPageCreationParameters&& parameters)
     // in modern WebKit.
     page->settings().setBackForwardCacheExpirationInterval(Seconds::infinity());
 
-    m_mainFrame->initWithCoreMainFrame(*this, page->protectedMainFrame());
+    m_mainFrame->initWithCoreMainFrame(*this, protect(page->mainFrame()));
 
     if (auto& remotePageParameters = parameters.remotePageParameters) {
         Ref frameTreeSyncData = remotePageParameters->frameTreeParameters.frameTreeSyncData;
-        page->protectedMainFrame()->updateFrameTreeSyncData(WTF::move(frameTreeSyncData));
+        protect(page->mainFrame())->updateFrameTreeSyncData(WTF::move(frameTreeSyncData));
         for (auto& childParameters : remotePageParameters->frameTreeParameters.children)
             constructFrameTree(m_mainFrame.get(), childParameters);
         page->setMainFrameURLAndOrigin(remotePageParameters->initialMainDocumentURL, nullptr);
@@ -1700,7 +1700,7 @@ void WebPage::changeFontAttributes(WebCore::FontAttributeChanges&& changes)
         return;
 
     if (frame->selection().selection().isContentEditable())
-        frame->protectedEditor()->applyStyleToSelection(changes.createEditingStyle(), changes.editAction(), Editor::ColorFilterMode::InvertColor);
+        protect(frame->editor())->applyStyleToSelection(changes.createEditingStyle(), changes.editAction(), Editor::ColorFilterMode::InvertColor);
 }
 
 void WebPage::changeFont(WebCore::FontChanges&& changes)
@@ -1710,7 +1710,7 @@ void WebPage::changeFont(WebCore::FontChanges&& changes)
         return;
 
     if (frame->selection().selection().isContentEditable())
-        frame->protectedEditor()->applyStyleToSelection(changes.createEditingStyle(), EditAction::SetFont, Editor::ColorFilterMode::InvertColor);
+        protect(frame->editor())->applyStyleToSelection(changes.createEditingStyle(), EditAction::SetFont, Editor::ColorFilterMode::InvertColor);
 }
 
 void WebPage::executeEditCommandWithCallback(const String& commandName, const String& argument, CompletionHandler<void()>&& completionHandler)
@@ -1919,7 +1919,7 @@ void WebPage::executeEditingCommand(const String& commandName, const String& arg
     }
 #endif
 
-    frame->protectedEditor()->command(commandName).execute(argument);
+    protect(frame->editor())->command(commandName).execute(argument);
 }
 
 void WebPage::setEditable(bool editable)
@@ -1931,7 +1931,7 @@ void WebPage::setEditable(bool editable)
         return;
 
     if (editable) {
-        frame->protectedEditor()->applyEditingStyleToBodyElement();
+        protect(frame->editor())->applyEditingStyleToBodyElement();
         // If the page is made editable and the selection is empty, set it to something.
         if (frame->selection().isNone())
             frame->checkedSelection()->setSelectionFromNone();
@@ -1944,7 +1944,7 @@ void WebPage::increaseListLevel()
     if (!frame)
         return;
 
-    frame->protectedEditor()->increaseSelectionListLevel();
+    protect(frame->editor())->increaseSelectionListLevel();
 }
 
 void WebPage::decreaseListLevel()
@@ -1953,7 +1953,7 @@ void WebPage::decreaseListLevel()
     if (!frame)
         return;
 
-    frame->protectedEditor()->decreaseSelectionListLevel();
+    protect(frame->editor())->decreaseSelectionListLevel();
 }
 
 void WebPage::changeListType()
@@ -1962,7 +1962,7 @@ void WebPage::changeListType()
     if (!frame)
         return;
 
-    frame->protectedEditor()->changeSelectionListType();
+    protect(frame->editor())->changeSelectionListType();
 }
 
 void WebPage::setBaseWritingDirection(WritingDirection direction)
@@ -1971,7 +1971,7 @@ void WebPage::setBaseWritingDirection(WritingDirection direction)
     if (!frame)
         return;
 
-    frame->protectedEditor()->setBaseWritingDirection(direction);
+    protect(frame->editor())->setBaseWritingDirection(direction);
 }
 
 void WebPage::enterAcceleratedCompositingMode(WebCore::Frame& frame, GraphicsLayer* layer)
@@ -2471,7 +2471,7 @@ void WebPage::setSize(const WebCore::IntSize& viewSize)
         return;
 
     m_viewSize = viewSize;
-    RefPtr view = protect(corePage())->protectedMainFrame()->virtualView();
+    RefPtr view = protect(protect(corePage())->mainFrame())->virtualView();
     if (!view) {
         ASSERT_NOT_REACHED();
         return;
@@ -2741,7 +2741,7 @@ void WebPage::didScaleView(double scale)
 
     RefPtr page = m_page;
     IntPoint scrollPositionAtNewScale;
-    if (RefPtr mainFrameView = page->protectedMainFrame()->virtualView()) {
+    if (RefPtr mainFrameView = protect(page->mainFrame())->virtualView()) {
         double scaleRatio = scale / viewScaleFactor();
         scrollPositionAtNewScale = mainFrameView->scrollPosition();
         scrollPositionAtNewScale.scale(scaleRatio);
@@ -3267,7 +3267,7 @@ static DestinationColorSpace snapshotColorSpace(SnapshotOptions options, WebPage
 {
 #if USE(CG)
     if (options.contains(SnapshotOption::UseScreenColorSpace)) {
-        auto screenColorSpace = WebCore::screenColorSpace(protect(page.corePage())->protectedMainFrame()->protectedVirtualView().get());
+        auto screenColorSpace = WebCore::screenColorSpace(protect(protect(page.corePage())->mainFrame())->protectedVirtualView().get());
 #if HAVE(SUPPORT_HDR_DISPLAY)
         if (options.contains(SnapshotOption::AllowHDR) && protect(page.corePage())->drawsHDRContent()) {
             if (auto extendedScreenColorSpace = screenColorSpace.asExtended())
@@ -3373,7 +3373,7 @@ void WebPage::pageDidScroll()
 #endif
     m_pageScrolledHysteresis.impulse();
 
-    if (RefPtr view = protect(corePage())->protectedMainFrame()->virtualView())
+    if (RefPtr view = protect(protect(corePage())->mainFrame())->virtualView())
         send(Messages::WebPageProxy::PageDidScroll(view->scrollPosition()));
 }
 
@@ -3878,7 +3878,7 @@ void WebPage::validateCommand(const String& commandName, CompletionHandler<void(
     else
 #endif
     {
-        auto command = frame->protectedEditor()->command(commandName);
+        auto command = protect(frame->editor())->command(commandName);
         state = (command.state() != TriState::False);
         isEnabled = command.isSupported() && command.isEnabled();
     }
@@ -3913,7 +3913,7 @@ void WebPage::requestFontAttributesAtSelectionStart(CompletionHandler<void(const
     RefPtr focusedOrMainFrame = corePage()->focusController().focusedOrMainFrame();
     if (!focusedOrMainFrame)
         return completionHandler({ });
-    completionHandler(focusedOrMainFrame->protectedEditor()->fontAttributesAtSelectionStart());
+    completionHandler(protect(focusedOrMainFrame->editor())->fontAttributesAtSelectionStart());
 }
 
 void WebPage::cancelCurrentInteractionInformationRequest()
@@ -4125,7 +4125,7 @@ void WebPage::insertNewlineInQuotedContent()
         return;
     if (frame->selection().isNone())
         return;
-    frame->protectedEditor()->insertParagraphSeparatorInQuotedContent();
+    protect(frame->editor())->insertParagraphSeparatorInQuotedContent();
 }
 
 #if ENABLE(REMOTE_INSPECTOR)
@@ -4637,7 +4637,7 @@ void WebPage::copyLinkWithHighlight()
         return;
 
     if (url.isValid())
-        frame->protectedEditor()->copyURL(url, { });
+        protect(frame->editor())->copyURL(url, { });
 }
 
 void WebPage::getSelectionOrContentsAsString(CompletionHandler<void(const String&)>&& callback)
@@ -5024,7 +5024,7 @@ static void detectDataInFrame(const Ref<Frame>& frame, OptionSet<WebCore::DataDe
 void WebPage::detectDataInAllFrames(OptionSet<WebCore::DataDetectorType> dataDetectorTypes, CompletionHandler<void(DataDetectionResult&&)>&& completionHandler)
 {
     auto mainFrameResult = makeUniqueRef<DataDetectionResult>();
-    detectDataInFrame(protect(corePage())->protectedMainFrame().get(), dataDetectorTypes, m_dataDetectionReferenceDate, WTF::move(mainFrameResult), WTF::move(completionHandler));
+    detectDataInFrame(protect(protect(corePage())->mainFrame()).get(), dataDetectorTypes, m_dataDetectionReferenceDate, WTF::move(mainFrameResult), WTF::move(completionHandler));
 }
 
 #endif // ENABLE(DATA_DETECTION)
@@ -5990,7 +5990,7 @@ void WebPage::advanceToNextMisspelling(bool startBeforeSelection)
     if (!frame)
         return;
 
-    frame->protectedEditor()->advanceToNextMisspelling(startBeforeSelection);
+    protect(frame->editor())->advanceToNextMisspelling(startBeforeSelection);
 }
 #endif
 
@@ -6044,7 +6044,7 @@ void WebPage::uppercaseWord(FrameIdentifier frameID)
     if (!coreFrame)
         return;
 
-    coreFrame->protectedEditor()->uppercaseWord();
+    protect(coreFrame->editor())->uppercaseWord();
 }
 
 void WebPage::lowercaseWord(FrameIdentifier frameID)
@@ -6057,7 +6057,7 @@ void WebPage::lowercaseWord(FrameIdentifier frameID)
     if (!coreFrame)
         return;
 
-    coreFrame->protectedEditor()->lowercaseWord();
+    protect(coreFrame->editor())->lowercaseWord();
 }
 
 void WebPage::capitalizeWord(FrameIdentifier frameID)
@@ -6071,7 +6071,7 @@ void WebPage::capitalizeWord(FrameIdentifier frameID)
         return;
 
 
-    coreFrame->protectedEditor()->capitalizeWord();
+    protect(coreFrame->editor())->capitalizeWord();
 }
 
 void WebPage::convertToTraditionalChinese(FrameIdentifier frameID)
@@ -6084,7 +6084,7 @@ void WebPage::convertToTraditionalChinese(FrameIdentifier frameID)
     if (!coreFrame)
         return;
 
-    coreFrame->protectedEditor()->convertToTraditionalChinese();
+    protect(coreFrame->editor())->convertToTraditionalChinese();
 }
 
 void WebPage::convertToSimplifiedChinese(FrameIdentifier frameID)
@@ -6097,7 +6097,7 @@ void WebPage::convertToSimplifiedChinese(FrameIdentifier frameID)
     if (!coreFrame)
         return;
 
-    coreFrame->protectedEditor()->convertToSimplifiedChinese();
+    protect(coreFrame->editor())->convertToSimplifiedChinese();
 }
 #endif
 
@@ -6129,7 +6129,7 @@ void WebPage::didSelectItemFromActiveContextMenu(const WebContextMenuItemData& i
 
 void WebPage::replaceSelectionWithText(LocalFrame* frame, const String& text)
 {
-    return frame->protectedEditor()->replaceSelectionWithText(text, WebCore::Editor::SelectReplacement::Yes, WebCore::Editor::SmartReplace::No);
+    return protect(frame->editor())->replaceSelectionWithText(text, WebCore::Editor::SelectReplacement::Yes, WebCore::Editor::SmartReplace::No);
 }
 
 #if !PLATFORM(IOS_FAMILY)
@@ -7070,7 +7070,7 @@ static RefPtr<LocalFrame> targetFrameForEditing(WebPage& page)
 void WebPage::cancelComposition(const String& compositionString)
 {
     if (RefPtr targetFrame = targetFrameForEditing(*this))
-        targetFrame->protectedEditor()->confirmComposition(compositionString);
+        protect(targetFrame->editor())->confirmComposition(compositionString);
 }
 
 void WebPage::deleteSurrounding(int64_t offset, unsigned characterCount)
@@ -7408,7 +7408,7 @@ void WebPage::setAlwaysShowsHorizontalScroller(bool alwaysShowsHorizontalScrolle
 
     m_alwaysShowsHorizontalScroller = alwaysShowsHorizontalScroller;
 
-    RefPtr view = protect(corePage())->protectedMainFrame()->virtualView();
+    RefPtr view = protect(protect(corePage())->mainFrame())->virtualView();
     if (!alwaysShowsHorizontalScroller)
         view->setHorizontalScrollbarLock(false);
     view->setHorizontalScrollbarMode(alwaysShowsHorizontalScroller ? ScrollbarMode::AlwaysOn : m_mainFrameIsScrollable ? ScrollbarMode::Auto : ScrollbarMode::AlwaysOff, alwaysShowsHorizontalScroller || !m_mainFrameIsScrollable);
@@ -7421,7 +7421,7 @@ void WebPage::setAlwaysShowsVerticalScroller(bool alwaysShowsVerticalScroller)
 
     m_alwaysShowsVerticalScroller = alwaysShowsVerticalScroller;
 
-    RefPtr view = protect(corePage())->protectedMainFrame()->virtualView();
+    RefPtr view = protect(protect(corePage())->mainFrame())->virtualView();
     if (!alwaysShowsVerticalScroller)
         view->setVerticalScrollbarLock(false);
     view->setVerticalScrollbarMode(alwaysShowsVerticalScroller ? ScrollbarMode::AlwaysOn : m_mainFrameIsScrollable ? ScrollbarMode::Auto : ScrollbarMode::AlwaysOff, alwaysShowsVerticalScroller || !m_mainFrameIsScrollable);
@@ -8624,7 +8624,7 @@ void WebPage::insertAttachment(const String& identifier, std::optional<uint64_t>
     if (!frame)
         return callback();
 
-    frame->protectedEditor()->insertAttachment(identifier, WTF::move(fileSize), AtomString { fileName }, AtomString { contentType });
+    protect(frame->editor())->insertAttachment(identifier, WTF::move(fileSize), AtomString { fileName }, AtomString { contentType });
     callback();
 }
 
@@ -10072,7 +10072,7 @@ void WebPage::updateLastNodeBeforeWritingSuggestions(const KeyboardEvent& event)
         return;
 
     if (RefPtr frame = corePage()->focusController().focusedOrMainFrame())
-        m_lastNodeBeforeWritingSuggestions = frame->protectedEditor()->nodeBeforeWritingSuggestions();
+        m_lastNodeBeforeWritingSuggestions = protect(frame->editor())->nodeBeforeWritingSuggestions();
 }
 
 void WebPage::didAddOrRemoveViewportConstrainedObjects()

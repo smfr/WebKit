@@ -172,7 +172,7 @@ void WebFoundTextRangeController::replaceFoundTextRangeWithString(const WebFound
     OptionSet temporarySelectionOptions { WebCore::TemporarySelectionOption::DoNotSetFocus, WebCore::TemporarySelectionOption::IgnoreSelectionChanges };
     WebCore::TemporarySelectionChange selectionChange(*document, visibleSelection, temporarySelectionOptions);
 
-    frame->protectedEditor()->replaceSelectionWithText(string, WebCore::Editor::SelectReplacement::Yes, WebCore::Editor::SmartReplace::No, WebCore::EditAction::InsertReplacement);
+    protect(frame->editor())->replaceSelectionWithText(string, WebCore::Editor::SelectReplacement::Yes, WebCore::Editor::SmartReplace::No, WebCore::EditAction::InsertReplacement);
 }
 
 void WebFoundTextRangeController::decorateTextRangeWithStyle(const WebFoundTextRange& range, FindDecorationStyle style)
@@ -310,13 +310,13 @@ void WebFoundTextRangeController::addLayerForFindOverlay(CompletionHandler<void(
     if (!m_findPageOverlay) {
         Ref findPageOverlay = WebCore::PageOverlay::create(*this, WebCore::PageOverlay::OverlayType::Document, WebCore::PageOverlay::AlwaysTileOverlayLayer::Yes);
         m_webPage->corePage()->pageOverlayController().installPageOverlay(findPageOverlay, WebCore::PageOverlay::FadeMode::DoNotFade);
-        findPageOverlay->protectedLayer()->setOpacity(0);
+        protect(findPageOverlay->layer())->setOpacity(0);
         m_findPageOverlay = WTF::move(findPageOverlay);
     }
 
     RefPtr findPageOverlay = m_findPageOverlay;
 
-    completionHandler(findPageOverlay->protectedLayer()->primaryLayerID());
+    completionHandler(protect(findPageOverlay->layer())->primaryLayerID());
 
     findPageOverlay->setNeedsDisplay();
 }

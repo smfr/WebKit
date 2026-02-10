@@ -394,7 +394,7 @@ void WebPage::insertDictatedTextAsync(const String& text, const EditingRange& re
     if (frame->editor().hasComposition())
         return;
 
-    frame->protectedEditor()->insertDictatedText(text, dictationAlternativeLocations, nullptr /* triggeringEvent */);
+    protect(frame->editor())->insertDictatedText(text, dictationAlternativeLocations, nullptr /* triggeringEvent */);
 
     if (focusedElement && options.shouldSimulateKeyboardInput) {
         focusedElement->dispatchEvent(Event::create(eventNames().keyupEvent, Event::CanBubble::Yes, Event::IsCancelable::Yes));
@@ -761,7 +761,7 @@ void WebPage::getPlatformEditorStateCommon(LocalFrame& frame, EditorState& resul
                 ASSERT_NOT_REACHED();
         }
 
-        postLayoutData.baseWritingDirection = frame.protectedEditor()->baseWritingDirectionForSelectionStart();
+        postLayoutData.baseWritingDirection = protect(frame.editor())->baseWritingDirectionForSelectionStart();
         postLayoutData.canEnableWritingSuggestions = [&] {
             if (!selection.canEnableWritingSuggestions())
                 return false;
@@ -769,7 +769,7 @@ void WebPage::getPlatformEditorStateCommon(LocalFrame& frame, EditorState& resul
             if (!m_lastNodeBeforeWritingSuggestions)
                 return true;
 
-            RefPtr currentNode = frame.protectedEditor()->nodeBeforeWritingSuggestions();
+            RefPtr currentNode = protect(frame.editor())->nodeBeforeWritingSuggestions();
             return !currentNode || m_lastNodeBeforeWritingSuggestions == currentNode.get();
         }();
     }
@@ -895,7 +895,7 @@ void WebPage::replaceImageForRemoveBackground(const ElementContext& elementConte
     {
         OverridePasteboardForSelectionReplacement overridePasteboard { types, data };
         IgnoreSelectionChangeForScope ignoreSelectionChanges { *frame };
-        frame->protectedEditor()->replaceNodeFromPasteboard(*element, replaceSelectionPasteboardName(), EditAction::RemoveBackground);
+        protect(frame->editor())->replaceNodeFromPasteboard(*element, replaceSelectionPasteboardName(), EditAction::RemoveBackground);
 
         auto position = frame->selection().selection().visibleStart();
         if (auto imageRange = makeSimpleRange(WebCore::VisiblePositionRange { position.previous(), position })) {
@@ -947,7 +947,7 @@ void WebPage::readSelectionFromPasteboard(const String& pasteboardName, Completi
         return completionHandler(false);
     if (frame->selection().isNone())
         return completionHandler(false);
-    frame->protectedEditor()->readSelectionFromPasteboard(pasteboardName);
+    protect(frame->editor())->readSelectionFromPasteboard(pasteboardName);
     completionHandler(true);
 }
 
@@ -1755,7 +1755,7 @@ void WebPage::handleAlternativeTextUIResult(const String& result)
     if (!frame)
         return;
 
-    frame->protectedEditor()->handleAlternativeTextUIResult(result);
+    protect(frame->editor())->handleAlternativeTextUIResult(result);
 }
 
 void WebPage::setTextAsync(const String& text)
@@ -1768,9 +1768,9 @@ void WebPage::setTextAsync(const String& text)
         UserTypingGestureIndicator indicator(*frame);
         frame->checkedSelection()->selectAll();
         if (text.isEmpty())
-            frame->protectedEditor()->deleteSelectionWithSmartDelete(false);
+            protect(frame->editor())->deleteSelectionWithSmartDelete(false);
         else
-            frame->protectedEditor()->insertText(text, nullptr, TextEventInputKeyboard);
+            protect(frame->editor())->insertText(text, nullptr, TextEventInputKeyboard);
         return;
     }
 
@@ -1870,7 +1870,7 @@ void WebPage::getMarkedRangeAsync(CompletionHandler<void(const EditingRange&)>&&
     if (!frame)
         return completionHandler({ });
 
-    completionHandler(EditingRange::fromRange(*frame, frame->protectedEditor()->compositionRange()));
+    completionHandler(EditingRange::fromRange(*frame, protect(frame->editor())->compositionRange()));
 }
 
 void WebPage::getSelectedRangeAsync(CompletionHandler<void(const EditingRange& selectedRange, const EditingRange& compositionRange)>&& completionHandler)
@@ -1880,7 +1880,7 @@ void WebPage::getSelectedRangeAsync(CompletionHandler<void(const EditingRange& s
         return completionHandler({ }, { });
 
     completionHandler(EditingRange::fromRange(*frame, frame->selection().selection().toNormalizedRange()),
-        EditingRange::fromRange(*frame, frame->protectedEditor()->compositionRange()));
+        EditingRange::fromRange(*frame, protect(frame->editor())->compositionRange()));
 }
 
 void WebPage::characterIndexForPointAsync(const WebCore::IntPoint& point, CompletionHandler<void(uint64_t)>&& completionHandler)
@@ -1908,7 +1908,7 @@ void WebPage::firstRectForCharacterRangeAsync(const EditingRange& editingRange, 
     if (!range)
         return completionHandler({ }, editingRange);
 
-    auto rect = RefPtr(frame->view())->contentsToWindow(frame->protectedEditor()->firstRectForRange(*range));
+    auto rect = RefPtr(frame->view())->contentsToWindow(protect(frame->editor())->firstRectForRange(*range));
     auto startPosition = makeContainerOffsetPosition(range->start);
 
     auto endPosition = endOfLine(startPosition);
@@ -1945,7 +1945,7 @@ void WebPage::setCompositionAsync(const String& text, const Vector<CompositionUn
             if (auto replacementRange = EditingRange::toRange(*frame, replacementEditingRange))
                 frame->checkedSelection()->setSelection(VisibleSelection(*replacementRange));
         }
-        frame->protectedEditor()->setComposition(text, underlines, highlights, annotations, selection.location, selection.location + selection.length);
+        protect(frame->editor())->setComposition(text, underlines, highlights, annotations, selection.location, selection.location + selection.length);
     }
 }
 
@@ -1957,7 +1957,7 @@ void WebPage::setWritingSuggestion(const String& fullTextWithPrediction, const E
     if (!frame)
         return;
 
-    frame->protectedEditor()->setWritingSuggestion(fullTextWithPrediction, { selection.location, selection.length });
+    protect(frame->editor())->setWritingSuggestion(fullTextWithPrediction, { selection.location, selection.length });
 }
 
 void WebPage::confirmCompositionAsync()
@@ -1968,7 +1968,7 @@ void WebPage::confirmCompositionAsync()
     if (!frame)
         return;
 
-    frame->protectedEditor()->confirmComposition();
+    protect(frame->editor())->confirmComposition();
 }
 
 void WebPage::getInformationFromImageData(const Vector<uint8_t>& data, CompletionHandler<void(Expected<std::pair<String, Vector<IntSize>>, WebCore::ImageDecodingError>&&)>&& completionHandler)
@@ -1989,7 +1989,7 @@ void WebPage::insertTextPlaceholder(const IntSize& size, CompletionHandler<void(
     if (!frame)
         return completionHandler({ });
 
-    auto placeholder = frame->protectedEditor()->insertTextPlaceholder(size);
+    auto placeholder = protect(frame->editor())->insertTextPlaceholder(size);
     completionHandler(placeholder ? contextForElement(*placeholder) : std::nullopt);
 }
 
@@ -1997,7 +1997,7 @@ void WebPage::removeTextPlaceholder(const ElementContext& placeholder, Completio
 {
     if (auto element = elementForContext(placeholder)) {
         if (RefPtr frame = element->document().frame())
-            frame->protectedEditor()->removeTextPlaceholder(downcast<TextPlaceholderElement>(*element));
+            protect(frame->editor())->removeTextPlaceholder(downcast<TextPlaceholderElement>(*element));
     }
     completionHandler();
 }

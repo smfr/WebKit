@@ -456,7 +456,7 @@ void DocumentLoader::notifyFinished(CachedResource& resource, const NetworkLoadM
 
     if (RefPtr document = this->document()) {
         if (RefPtr window = document->window())
-            window->protectedPerformance()->documentLoadFinished(*metrics);
+            protect(window->performance())->documentLoadFinished(*metrics);
     }
 
     ASSERT_UNUSED(resource, m_mainResource == &resource);
@@ -915,7 +915,7 @@ void DocumentLoader::responseReceived(const CachedResource& resource, const Reso
             auto firstPartyDomain = RegistrableDomain(response.url());
             if (auto loginDomains = NetworkStorageSession::subResourceDomainsInNeedOfStorageAccessForFirstParty(firstPartyDomain)) {
                 if (!Quirks::hasStorageAccessForAllLoginDomains(*loginDomains, firstPartyDomain)) {
-                    frame->protectedNavigationScheduler()->scheduleRedirect(document, 0, microsoftTeamsRedirectURL(), IsMetaRefresh::No);
+                    protect(frame->navigationScheduler())->scheduleRedirect(document, 0, microsoftTeamsRedirectURL(), IsMetaRefresh::No);
                     completionHandler();
                     return;
                 }
@@ -1352,7 +1352,7 @@ void DocumentLoader::commitData(const SharedBuffer& data)
                     || source == ResourceResponse::Source::MemoryCacheAfterValidation;
                 if (RefPtr frameLoader = this->frameLoader())
                     finalMetrics.fromPrefetch = frameLoader->documentPrefetcher().wasPrefetched(url());
-                window->protectedPerformance()->addNavigationTiming(*this, document, *m_mainResource, timing(), finalMetrics);
+                protect(window->performance())->addNavigationTiming(*this, document, *m_mainResource, timing(), finalMetrics);
             }
         }
 

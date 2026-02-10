@@ -681,7 +681,7 @@ bool RenderView::shouldUsePrintingLayout() const
 {
     if (!printing())
         return false;
-    return frameView().protectedFrame()->shouldUsePrintingLayout();
+    return protect(frameView().frame())->shouldUsePrintingLayout();
 }
 
 LayoutRect RenderView::viewRect() const

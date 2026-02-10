@@ -182,7 +182,7 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
 {
     getPlatformEditorStateCommon(frame, result);
 
-    result.canEnableAutomaticSpellingCorrection = result.isContentEditable && frame.protectedEditor()->canEnableAutomaticSpellingCorrection();
+    result.canEnableAutomaticSpellingCorrection = result.isContentEditable && protect(frame.editor())->canEnableAutomaticSpellingCorrection();
     RefPtr document = frame.document();
     result.inputMethodUsesCorrectKeyEventOrder = frame.settings().inputMethodUsesCorrectKeyEventOrder() || (document && document->quirks().inputMethodUsesCorrectKeyEventOrder());
 
@@ -203,12 +203,12 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
     if (!selectionStartBoundary || !selectionEnd || !paragraphStart)
         return;
 
-    auto contextRangeForCandidateRequest = frame.protectedEditor()->contextRangeForCandidateRequest();
+    auto contextRangeForCandidateRequest = protect(frame.editor())->contextRangeForCandidateRequest();
 
     postLayoutData.candidateRequestStartPosition = characterCount({ *paragraphStart, *selectionStartBoundary });
     postLayoutData.selectedTextLength = characterCount({ *selectionStartBoundary, *selectionEnd });
     postLayoutData.paragraphContextForCandidateRequest = contextRangeForCandidateRequest ? plainText(*contextRangeForCandidateRequest) : String();
-    postLayoutData.stringForCandidateRequest = frame.protectedEditor()->stringForCandidateRequest();
+    postLayoutData.stringForCandidateRequest = protect(frame.editor())->stringForCandidateRequest();
 
     auto quads = RenderObject::absoluteTextQuads(*selectedRange);
     if (!quads.isEmpty())
@@ -222,7 +222,7 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
 void WebPage::handleAcceptedCandidate(WebCore::TextCheckingResult acceptedCandidate)
 {
     if (RefPtr frame = m_page->focusController().focusedLocalFrame())
-        frame->protectedEditor()->handleAcceptedCandidate(acceptedCandidate);
+        protect(frame->editor())->handleAcceptedCandidate(acceptedCandidate);
 }
 
 static String commandNameForSelectorName(const String& selectorName)
@@ -480,7 +480,7 @@ void WebPage::getStringSelectionForPasteboard(CompletionHandler<void(String&&)>&
     if (frame->selection().isNone())
         return completionHandler({ });
 
-    completionHandler(frame->protectedEditor()->stringSelectionForPasteboard());
+    completionHandler(protect(frame->editor())->stringSelectionForPasteboard());
 }
 
 void WebPage::getDataSelectionForPasteboard(const String pasteboardType, CompletionHandler<void(RefPtr<SharedBuffer>&&)>&& completionHandler)
@@ -491,7 +491,7 @@ void WebPage::getDataSelectionForPasteboard(const String pasteboardType, Complet
     if (frame->selection().isNone())
         return completionHandler({ });
 
-    auto buffer = frame->protectedEditor()->dataSelectionForPasteboard(pasteboardType);
+    auto buffer = protect(frame->editor())->dataSelectionForPasteboard(pasteboardType);
     if (!buffer)
         return completionHandler({ });
     completionHandler(buffer.releaseNonNull());

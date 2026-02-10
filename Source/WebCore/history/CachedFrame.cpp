@@ -128,7 +128,7 @@ void CachedFrameBase::restore()
         // Reconstruct the FrameTree. And open the child CachedFrames in their respective FrameLoaders.
         for (auto& childFrame : m_childFrames) {
             ASSERT(childFrame->view()->frame().page());
-            frame->tree().appendChild(protect(childFrame->view())->protectedFrame());
+            frame->tree().appendChild(protect(protect(childFrame->view())->frame()));
             childFrame->open();
             if (localFrame)
                 RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(m_document == localFrame->document());
@@ -237,7 +237,7 @@ void CachedFrame::open()
     ASSERT(m_document || is<RemoteFrameView>(m_view.get()));
 
     if (RefPtr localFrameView = dynamicDowncast<LocalFrameView>(m_view.get()))
-        localFrameView->protectedFrame()->loader().open(*this);
+        protect(localFrameView->frame())->loader().open(*this);
 }
 
 void CachedFrame::clear()

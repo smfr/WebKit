@@ -231,7 +231,6 @@ private:
     LocalFrame& frame() const;
     Ref<LocalFrame> protectedFrame();
     LocalFrameView& view() const;
-    Ref<LocalFrameView> protectedView() const;
     RenderView* renderView() const;
     Document* document() const;
     RefPtr<Document> protectedDocument() const;

@@ -563,7 +563,7 @@ void WebLoaderStrategy::scheduleLoadFromNetworkProcess(ResourceLoader& resourceL
         RefPtr coreFrame = webFrame ? webFrame->coreFrame() : nullptr;
         RefPtr openerFrame = coreFrame ? coreFrame->opener() : nullptr;
         RefPtr openerDocumentSecurityOrigin = openerFrame ? openerFrame->frameDocumentSecurityOrigin() : nullptr;
-        bool openerDocumentIsSameOriginAsTopDocument = openerDocumentSecurityOrigin ? openerDocumentSecurityOrigin->isSameOriginAs(openerFrame->protectedTopOrigin()) : false;
+        bool openerDocumentIsSameOriginAsTopDocument = openerDocumentSecurityOrigin ? openerDocumentSecurityOrigin->isSameOriginAs(protect(openerFrame->topOrigin())) : false;
         auto openerDocumentSecurityPolicy = openerFrame ? openerFrame->frameDocumentSecurityPolicy() : std::nullopt;
         if (!document->haveInitializedSecurityOrigin() && openerDocumentSecurityPolicy && openerDocumentIsSameOriginAsTopDocument)
             loadParameters.sourceCrossOriginOpenerPolicy = openerDocumentSecurityPolicy->crossOriginOpenerPolicy;

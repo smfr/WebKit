@@ -284,7 +284,7 @@ LocalFrame* FrameLoader::SubframeLoader::loadOrRedirectSubframe(HTMLFrameOwnerEl
                 page->willChangeLocationInCompletelyLoadedSubframe();
         }
 
-        frame->protectedNavigationScheduler()->scheduleLocationChange(initiatingDocument, protect(initiatingDocument->securityOrigin()), upgradedRequestURL, m_frame->loader().outgoingReferrer(), lockHistory, lockBackForwardList, NavigationHistoryBehavior::Auto, WTF::move(stopDelayingLoadEvent));
+        protect(frame->navigationScheduler())->scheduleLocationChange(initiatingDocument, protect(initiatingDocument->securityOrigin()), upgradedRequestURL, m_frame->loader().outgoingReferrer(), lockHistory, lockBackForwardList, NavigationHistoryBehavior::Auto, WTF::move(stopDelayingLoadEvent));
     } else
         frame = loadSubframe(ownerElement, upgradedRequestURL, frameName, m_frame->loader().outgoingReferrerURL());
 

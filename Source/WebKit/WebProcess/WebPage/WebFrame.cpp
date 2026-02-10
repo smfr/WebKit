@@ -727,7 +727,7 @@ String WebFrame::selectionAsString() const
     if (!localFrame)
         return String();
 
-    return localFrame->displayStringModifiedByEncoding(localFrame->protectedEditor()->selectedText());
+    return localFrame->displayStringModifiedByEncoding(protect(localFrame->editor())->selectedText());
 }
 
 IntSize WebFrame::size() const
@@ -1244,11 +1244,11 @@ void WebFrame::setTextDirection(const String& direction)
         return;
 
     if (direction == "auto"_s)
-        localFrame->protectedEditor()->setBaseWritingDirection(WritingDirection::Natural);
+        protect(localFrame->editor())->setBaseWritingDirection(WritingDirection::Natural);
     else if (direction == "ltr"_s)
-        localFrame->protectedEditor()->setBaseWritingDirection(WritingDirection::LeftToRight);
+        protect(localFrame->editor())->setBaseWritingDirection(WritingDirection::LeftToRight);
     else if (direction == "rtl"_s)
-        localFrame->protectedEditor()->setBaseWritingDirection(WritingDirection::RightToLeft);
+        protect(localFrame->editor())->setBaseWritingDirection(WritingDirection::RightToLeft);
 }
 
 #if PLATFORM(COCOA)

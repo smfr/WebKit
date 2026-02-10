@@ -5245,7 +5245,7 @@ void RenderLayerCompositor::attachRootLayer(RootLayerAttachment attachment)
             ASSERT_NOT_REACHED();
             break;
         case RootLayerAttachedViaChromeClient: {
-            page().chrome().client().attachRootGraphicsLayer(m_renderView.frameView().protectedFrame(), RefPtr { rootGraphicsLayer() }.get());
+            page().chrome().client().attachRootGraphicsLayer(protect(m_renderView.frameView().frame()), RefPtr { rootGraphicsLayer() }.get());
             break;
         }
         case RootLayerAttachedViaEnclosingFrame: {
@@ -5300,7 +5300,7 @@ void RenderLayerCompositor::detachRootLayer()
     case RootLayerAttachedViaChromeClient: {
         if (RefPtr scrollingCoordinator = this->scrollingCoordinator())
             scrollingCoordinator->frameViewWillBeDetached(m_renderView.frameView());
-        page().chrome().client().attachRootGraphicsLayer(m_renderView.frameView().protectedFrame(), nullptr);
+        page().chrome().client().attachRootGraphicsLayer(protect(m_renderView.frameView().frame()), nullptr);
     }
     break;
     case RootLayerUnattached:

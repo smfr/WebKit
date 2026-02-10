@@ -414,7 +414,6 @@ public:
     void clearPluginData();
 
     OpportunisticTaskScheduler& opportunisticTaskScheduler() const { return m_opportunisticTaskScheduler.get(); }
-    Ref<OpportunisticTaskScheduler> protectedOpportunisticTaskScheduler() const;
 
     WEBCORE_EXPORT void setCanStartMedia(bool);
     bool canStartMedia() const { return m_canStartMedia; }
@@ -425,11 +424,9 @@ public:
     WEBCORE_EXPORT Document* localTopDocument() const;
 
     Frame& mainFrame() const { return m_mainFrame.get(); }
-    WEBCORE_EXPORT Ref<Frame> protectedMainFrame() const;
     WEBCORE_EXPORT void setMainFrame(Ref<Frame>&&);
     WEBCORE_EXPORT const URL& mainFrameURL() const;
     SecurityOrigin& mainFrameOrigin() const;
-    Ref<SecurityOrigin> protectedMainFrameOrigin() const;
     WEBCORE_EXPORT RefPtr<Frame> findFrameByPath(const Vector<uint64_t>& path) const;
 
     WEBCORE_EXPORT void setMainFrameURLAndOrigin(const URL&, RefPtr<SecurityOrigin>&&);
@@ -471,7 +468,6 @@ public:
     WEBCORE_EXPORT CheckedRef<PageGroup> checkedGroup();
 
     BroadcastChannelRegistry& broadcastChannelRegistry() { return m_broadcastChannelRegistry; }
-    WEBCORE_EXPORT Ref<BroadcastChannelRegistry> protectedBroadcastChannelRegistry() const;
     WEBCORE_EXPORT void setBroadcastChannelRegistry(Ref<BroadcastChannelRegistry>&&); // Only used by WebKitLegacy.
 
     WEBCORE_EXPORT static void forEachPage(NOESCAPE const Function<void(Page&)>&);
@@ -764,7 +760,6 @@ public:
 
 #if ENABLE(APPLE_PAY)
     PaymentCoordinator& paymentCoordinator() const { return *m_paymentCoordinator; }
-    WEBCORE_EXPORT Ref<PaymentCoordinator> protectedPaymentCoordinator() const;
     WEBCORE_EXPORT void setPaymentCoordinator(Ref<PaymentCoordinator>&&);
 #endif
 
@@ -997,13 +992,10 @@ public:
     CacheStorageProvider& cacheStorageProvider() { return m_cacheStorageProvider; }
     SocketProvider& socketProvider() { return m_socketProvider; }
     CookieJar& cookieJar() { return m_cookieJar.get(); }
-    WEBCORE_EXPORT Ref<CookieJar> protectedCookieJar() const;
 
     StorageNamespaceProvider& storageNamespaceProvider() { return m_storageNamespaceProvider.get(); }
-    WEBCORE_EXPORT Ref<StorageNamespaceProvider> protectedStorageNamespaceProvider() const;
 
     PluginInfoProvider& pluginInfoProvider();
-    Ref<PluginInfoProvider> protectedPluginInfoProvider() const;
 
     UserContentProvider& userContentProviderForFrame() { return m_userContentProvider; }
     WEBCORE_EXPORT Ref<UserContentProvider> protectedUserContentProviderForFrame();

@@ -129,7 +129,7 @@ void BroadcastChannel::MainThreadBridge::registerChannel()
 {
     ensureOnMainThread([this, protectedThis = Ref { *this }, contextIdentifier = m_broadcastChannel->scriptExecutionContext()->identifier()](auto* page) mutable {
         if (page)
-            page->protectedBroadcastChannelRegistry()->registerChannel(m_origin, m_name, identifier());
+            protect(page->broadcastChannelRegistry())->registerChannel(m_origin, m_name, identifier());
         channelToContextIdentifier().add(identifier(), contextIdentifier);
     });
 }
@@ -138,7 +138,7 @@ void BroadcastChannel::MainThreadBridge::unregisterChannel()
 {
     ensureOnMainThread([this, protectedThis = Ref { *this }](auto* page) {
         if (page)
-            page->protectedBroadcastChannelRegistry()->unregisterChannel(m_origin, m_name, identifier());
+            protect(page->broadcastChannelRegistry())->unregisterChannel(m_origin, m_name, identifier());
         channelToContextIdentifier().remove(identifier());
     });
 }
@@ -150,7 +150,7 @@ void BroadcastChannel::MainThreadBridge::postMessage(Ref<SerializedScriptValue>&
             return;
 
         auto blobHandles = message->blobHandles();
-        page->protectedBroadcastChannelRegistry()->postMessage(m_origin, m_name, identifier(), WTF::move(message), [blobHandles = WTF::move(blobHandles)] {
+        protect(page->broadcastChannelRegistry())->postMessage(m_origin, m_name, identifier(), WTF::move(message), [blobHandles = WTF::move(blobHandles)] {
             // Keeps Blob data inside messageData alive until the message has been delivered.
         });
     });

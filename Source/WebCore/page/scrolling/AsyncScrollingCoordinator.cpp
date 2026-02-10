@@ -312,7 +312,7 @@ void AsyncScrollingCoordinator::frameViewEventTrackingRegionsChanged(LocalFrameV
     // FIXME: This needs to disambiguate between event regions in the scrolling tree, and those in GraphicsLayers.
     scheduleTreeStateCommit();
 
-    DebugPageOverlays::didChangeEventHandlers(frameView.protectedFrame());
+    DebugPageOverlays::didChangeEventHandlers(protect(frameView.frame()));
 }
 
 void AsyncScrollingCoordinator::frameViewRootLayerDidChange(LocalFrameView& frameView)
