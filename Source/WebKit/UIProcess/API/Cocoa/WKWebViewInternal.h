@@ -646,6 +646,9 @@ struct PerWebProcessState {
 - (WKPageRef)_pageForTesting;
 - (NakedPtr<WebKit::WebPageProxy>)_page;
 - (RefPtr<WebKit::WebPageProxy>)_protectedPage;
+#if PLATFORM(MAC)
+- (WebKit::WebViewImpl * _Null_unspecified)_impl;
+#endif
 #if ENABLE(SCREEN_TIME)
 - (nullable STWebpageController *)_screenTimeWebpageController;
 #if PLATFORM(MAC)
@@ -669,10 +672,6 @@ struct PerWebProcessState {
 @property (nonatomic, setter=_setHasActiveNowPlayingSession:) BOOL _hasActiveNowPlayingSession;
 
 @property (nonatomic, readonly) RetainPtr<WKWebView> _horizontallyAttachedInspectorWebView;
-
-#if PLATFORM(MAC)
-- (WebKit::WebViewImpl *)_impl;
-#endif
 
 @end
 

@@ -1293,13 +1293,19 @@ bool EventHandler::handleMouseReleaseEvent(const MouseEventWithHitTestResults& e
         if (node && node->renderer() && (caretBrowsing || node->hasEditableStyle())) {
             auto pos = node->renderer()->visiblePositionForPoint(event.localPoint(), HitTestSource::User);
             newSelection = VisibleSelection(pos);
+
 #if PLATFORM(IOS_FAMILY)
             // On iOS, selection changes are triggered using platform-specific text interaction gestures rather than
             // default behavior on click or mouseup. As such, the only time we should allow click events to change the
             // selection on iOS is when we focus a different editable element, in which case the text interaction
             // gestures will fail.
-            allowSelectionChanges = frame->selection().selection().rootEditableElement() != newSelection.rootEditableElement();
+            static constexpr auto usePlatformTextInteraction = true;
+#else
+            auto usePlatformTextInteraction = event.event().inputSource() == MouseEventInputSource::Automation;
 #endif
+
+            if (usePlatformTextInteraction)
+                allowSelectionChanges = frame->selection().selection().rootEditableElement() != newSelection.rootEditableElement();
         }
 
         if (allowSelectionChanges)
@@ -3852,7 +3858,7 @@ bool EventHandler::sendContextMenuEvent(const PlatformMouseEvent& event)
     frame->selection().setCaretBlinkingSuspended(false);
     // Clear mouse press state to avoid initiating a drag while context menu is up.
     m_mousePressed = false;
-    bool swallowEvent;
+
     const auto flooredEventPosition = flooredIntPoint(event.position());
     LayoutPoint viewportPos = view->windowToContents(flooredEventPosition);
     constexpr OptionSet<HitTestRequest::Type> hitType { HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent };
@@ -3862,14 +3868,15 @@ bool EventHandler::sendContextMenuEvent(const PlatformMouseEvent& event)
     if (mouseEvent.scrollbar() || view->scrollbarAtPoint(flooredEventPosition))
         return false;
 
-    if (frame->editor().behavior().shouldSelectOnContextualMenuClick()
-        && !frame->selection().contains(viewportPos)) {
+    auto shouldSelectOnContextualMenuClick = frame->editor().behavior().shouldSelectOnContextualMenuClick() && event.inputSource() == MouseEventInputSource::Hardware;
+
+    if (shouldSelectOnContextualMenuClick && !frame->selection().contains(viewportPos)) {
         m_mouseDownMayStartSelect = true; // context menu events are always allowed to perform a selection
         selectClosestContextualWordOrLinkFromHitTestResult(mouseEvent.hitTestResult(), shouldAppendTrailingWhitespace(mouseEvent, m_frame));
     }
 
-    swallowEvent = !dispatchMouseEvent(eventNames().contextmenuEvent, mouseEvent.protectedTargetNode().get(), 0, event, FireMouseOverOut::No);
-    
+    auto swallowEvent = !dispatchMouseEvent(eventNames().contextmenuEvent, mouseEvent.protectedTargetNode().get(), 0, event, FireMouseOverOut::No);
+
     return swallowEvent;
 }
 

@@ -2262,6 +2262,13 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
     return _page.get();
 }
 
+#if PLATFORM(MAC)
+- (WebKit::WebViewImpl *)_impl
+{
+    return _impl.get();
+}
+#endif // PLATFORM(MAC)
+
 #if ENABLE(SCREEN_TIME)
 - (STWebpageController *)_screenTimeWebpageController
 {
@@ -3789,15 +3796,6 @@ struct WKWebViewData {
 {
     self._protectedPage->scrollToEdge(toRectEdges(edge), animated ? WebCore::ScrollIsAnimated::Yes : WebCore::ScrollIsAnimated::No);
 }
-
-#if PLATFORM(MAC)
-
-- (WebKit::WebViewImpl *)_impl
-{
-    return _impl.get();
-}
-
-#endif
 
 @end
 

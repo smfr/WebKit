@@ -27,6 +27,7 @@
 
 #if PLATFORM(IOS_FAMILY)
 
+#import "UIKitSPI.h"
 #import "WKBaseScrollView.h"
 #import "WKWebViewInternal.h"
 
@@ -37,8 +38,6 @@
 #import <wtf/spi/cocoa/NSObjCRuntimeSPI.h>
 
 #endif // !__has_feature(modules) || WK_SUPPORTS_SWIFT_OBJCXX_INTEROP
-
-#import "UIKitSPI.h"
 
 @class WKBEScrollViewScrollUpdate;
 

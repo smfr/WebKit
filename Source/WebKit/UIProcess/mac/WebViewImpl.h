@@ -37,6 +37,7 @@
 #include "ImageAnalysisUtilities.h"
 #include "PDFPluginIdentifier.h"
 #include "WKLayoutMode.h"
+#include "WebMouseEvent.h"
 #include <WebCore/DOMPasteAccess.h>
 #include <WebCore/FocusDirection.h>
 #include <WebCore/HTMLMediaElementIdentifier.h>
@@ -694,8 +695,8 @@ public:
     bool hasFlagsChangedEventMonitor();
 
     void mouseMoved(NSEvent *);
-    void mouseDown(NSEvent *);
-    void mouseUp(NSEvent *);
+    void mouseDown(NSEvent *, WebMouseEventInputSource);
+    void mouseUp(NSEvent *, WebMouseEventInputSource);
     void mouseDragged(NSEvent *);
     void mouseEntered(NSEvent *);
     void mouseExited(NSEvent *);
@@ -914,14 +915,14 @@ private:
     Vector<WebCore::KeypressCommand> collectKeyboardLayoutCommandsForEvent(NSEvent *);
     void interpretKeyEvent(NSEvent *, void(^completionHandler)(BOOL handled, const Vector<WebCore::KeypressCommand>&));
 
-    void nativeMouseEventHandler(NSEvent *);
-    void nativeMouseEventHandlerInternal(NSEvent *);
-    
+    void nativeMouseEventHandler(NSEvent *, WebMouseEventInputSource);
+    void nativeMouseEventHandlerInternal(NSEvent *, WebMouseEventInputSource);
+
     void scheduleMouseDidMoveOverElement(NSEvent *);
 
     void mouseMovedInternal(NSEvent *);
-    void mouseDownInternal(NSEvent *);
-    void mouseUpInternal(NSEvent *);
+    void mouseDownInternal(NSEvent *, WebMouseEventInputSource);
+    void mouseUpInternal(NSEvent *, WebMouseEventInputSource);
     void mouseDraggedInternal(NSEvent *);
 
     void handleProcessSwapOrExit();
