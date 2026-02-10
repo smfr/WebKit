@@ -827,8 +827,10 @@ T UnifiedPDFPlugin::convertUp(CoordinateSpace sourceSpace, CoordinateSpace desti
         if (destinationSpace == CoordinateSpace::Contents)
             return mappedValue;
 
-        mappedValue.move(centeringOffset());
-        mappedValue.scale(m_scaleFactor);
+        if (!shouldSizeToFitContent()) {
+            mappedValue.move(centeringOffset());
+            mappedValue.scale(m_scaleFactor);
+        }
         [[fallthrough]];
 
     case CoordinateSpace::ScrolledContents:
