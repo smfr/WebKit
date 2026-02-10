@@ -50,6 +50,31 @@ static inline bool compositingLogEnabled()
         GLSL_DIRECTIVE(define TextureSpaceMatrixPrecision mediump) \
     GLSL_DIRECTIVE(endif)
 
+// ES 3.0 Compatibility Macros
+#define ES3_COMPATIBILITY_VERTEX \
+    GLSL_DIRECTIVE(if __VERSION__ >= 300) \
+        GLSL_DIRECTIVE(define texture2D texture) \
+        GLSL_DIRECTIVE(define texture2DProj textureProj) \
+        GLSL_DIRECTIVE(define texture2DLod textureLod) \
+        GLSL_DIRECTIVE(define texture2DProjLod textureProjLod) \
+        GLSL_DIRECTIVE(define textureCube texture) \
+        GLSL_DIRECTIVE(define textureCubeLod textureLod) \
+        GLSL_DIRECTIVE(define attribute in) \
+        GLSL_DIRECTIVE(define varying out) \
+    GLSL_DIRECTIVE(endif)
+
+#define ES3_COMPATIBILITY_FRAGMENT \
+    GLSL_DIRECTIVE(if __VERSION__ >= 300) \
+        GLSL_DIRECTIVE(define texture2D texture) \
+        GLSL_DIRECTIVE(define texture2DProj textureProj) \
+        GLSL_DIRECTIVE(define texture2DLod textureLod) \
+        GLSL_DIRECTIVE(define texture2DProjLod textureProjLod) \
+        GLSL_DIRECTIVE(define textureCube texture) \
+        GLSL_DIRECTIVE(define textureCubeLod textureLod) \
+        GLSL_DIRECTIVE(define varying in) \
+        "out mediump vec4 fragColor;\n" \
+        GLSL_DIRECTIVE(define gl_FragColor fragColor) \
+    GLSL_DIRECTIVE(endif)
 
 // Input/output variables definition for OpenGL ES < 3.2.
 static const char* vertexTemplateLT320Vars =
@@ -149,7 +174,11 @@ static const char* vertexTemplateCommon =
 
 #define OES_EGL_IMAGE_EXTERNAL_DIRECTIVE \
     GLSL_DIRECTIVE(ifdef ENABLE_TextureExternalOES) \
-        GLSL_DIRECTIVE(extension GL_OES_EGL_image_external : require) \
+        GLSL_DIRECTIVE(if __VERSION__ >= 300) \
+            GLSL_DIRECTIVE(extension GL_OES_EGL_image_external_essl3 : require) \
+        GLSL_DIRECTIVE(else) \
+            GLSL_DIRECTIVE(extension GL_OES_EGL_image_external : require) \
+        GLSL_DIRECTIVE(endif) \
         GLSL_DIRECTIVE(define SamplerExternalOESType samplerExternalOES) \
         STRINGIFY( \
             precision mediump samplerExternalOES;\n \
@@ -640,6 +669,11 @@ Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapper
 
     StringBuilder vertexShaderBuilder;
 
+    if (glVersion >= 300) {
+        vertexShaderBuilder.append(unsafeSpan(GLSL_DIRECTIVE(version 300 es)));
+        vertexShaderBuilder.append(unsafeSpan(ES3_COMPATIBILITY_VERTEX));
+    }
+
     // Append the options.
     vertexShaderBuilder.append(optionsApplierBuilder.toString());
 
@@ -650,6 +684,11 @@ Ref<TextureMapperShaderProgram> TextureMapperShaderProgram::create(TextureMapper
     vertexShaderBuilder.append(unsafeSpan(vertexTemplateCommon));
 
     StringBuilder fragmentShaderBuilder;
+
+    if (glVersion >= 300) {
+        fragmentShaderBuilder.append(unsafeSpan(GLSL_DIRECTIVE(version 300 es)));
+        fragmentShaderBuilder.append(unsafeSpan(ES3_COMPATIBILITY_FRAGMENT));
+    }
 
     // Append the options.
     fragmentShaderBuilder.append(optionsApplierBuilder.toString());
