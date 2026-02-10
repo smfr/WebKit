@@ -8225,6 +8225,21 @@ ThreadedScrollingEnabled:
     WebKit:
       default: true
 
+ThreadedTimeBasedAnimationsAtHighFrameRateEnabled:
+  type: bool
+  status: unstable
+  category: animation
+  humanReadableName: "Threaded Time-based Animations at High Frame Rate"
+  humanReadableDescription: "Run qualifying time-based animations on a separate thread at a high frame rate"
+  condition: ENABLE(THREADED_ANIMATIONS) && PLATFORM(IOS_FAMILY)
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 ThreadedTimeBasedAnimationsEnabled:
   type: bool
   status: unstable

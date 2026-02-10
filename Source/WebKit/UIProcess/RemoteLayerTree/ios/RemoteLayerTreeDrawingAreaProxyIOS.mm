@@ -385,12 +385,16 @@ void RemoteLayerTreeDrawingAreaProxyIOS::pauseDisplayRefreshCallbacksForMonotoni
 
 void RemoteLayerTreeDrawingAreaProxyIOS::scheduleDisplayLinkAndSetFrameRate()
 {
-    auto preferPageRenderingUpdatesNear60FPSEnabled = [&] {
-        return !page() || protect(page()->preferences())->preferPageRenderingUpdatesNear60FPSEnabled();
+    auto shouldUpdateMonotonicAnimationsAtHighFrameRate = [&] {
+        return page() && protect(page()->preferences())->threadedTimeBasedAnimationsAtHighFrameRateEnabled();
     };
 
-    auto wantsHighFrameRate = m_needsDisplayRefreshCallbacksForMonotonicAnimations
-        || (m_needsDisplayRefreshCallbacksForDrawing && !preferPageRenderingUpdatesNear60FPSEnabled());
+    auto shouldUpdatePageRenderingAtHighFrameRate = [&] {
+        return page() && !protect(page()->preferences())->preferPageRenderingUpdatesNear60FPSEnabled();
+    };
+
+    auto wantsHighFrameRate = (m_needsDisplayRefreshCallbacksForMonotonicAnimations && shouldUpdateMonotonicAnimationsAtHighFrameRate())
+        || (m_needsDisplayRefreshCallbacksForDrawing && shouldUpdatePageRenderingAtHighFrameRate());
     RetainPtr displayLinkHandler = this->displayLinkHandler();
     [displayLinkHandler setWantsHighFrameRate:wantsHighFrameRate];
     [displayLinkHandler schedule];
