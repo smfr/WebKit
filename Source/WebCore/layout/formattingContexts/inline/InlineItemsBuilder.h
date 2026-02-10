@@ -65,6 +65,8 @@ private:
 
     void computeInlineBoxBoundaryTextSpacings(const InlineItemList&);
 
+    std::pair<bool, bool> shouldDeferTextMeasurement(const InlineTextBox&) const;
+
     const ElementBox& root() const { return m_root; }
     InlineContentCache& inlineContentCache() { return m_inlineContentCache; }
 
