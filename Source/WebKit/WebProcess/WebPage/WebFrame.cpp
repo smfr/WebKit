@@ -547,6 +547,9 @@ void WebFrame::removeFromTree()
         return;
     }
 
+    if (RefPtr client = localFrameLoaderClient())
+        client->removeStorageAccess();
+
     if (RefPtr parent = coreFrame->tree().parent())
         parent->tree().removeChild(*coreFrame);
     coreFrame->disconnectView();

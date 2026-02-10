@@ -68,6 +68,8 @@ public:
 
     WebCore::AllowsContentJavaScript allowsContentJavaScriptFromMostRecentNavigation() const final;
 
+    void removeStorageAccess();
+
 private:
     bool hasHTMLView() const final;
     bool hasWebView() const final;
@@ -289,8 +291,6 @@ private:
 #if ENABLE(CONTENT_EXTENSIONS)
     void didExceedNetworkUsageThreshold();
 #endif
-
-    void removeStorageAccess();
 
 #if ENABLE(PDF_PLUGIN)
     RefPtr<PluginView> m_pluginView;
