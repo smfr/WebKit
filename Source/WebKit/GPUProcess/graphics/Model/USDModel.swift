@@ -56,6 +56,7 @@ extension _USDKit_RealityKit._Proto_DeformationData_v1.SkinningData {
     internal func inverseBindPosesCompat() -> [simd_float4x4]
 }
 
+#if canImport(ShaderGraph, _version: 9999)
 extension RealityCoreRenderer._Proto_LowLevelRenderContext_v1 {
     @_silgen_name(
         "$s19RealityCoreRenderer16MaterialCompilerC24makeShaderGraphFunctionsyAA015_Proto_LowLevelD11Resource_v1C0gH6OutputV10Foundation4DataVSg_ScA_pSgYitYaKF"
@@ -675,6 +676,7 @@ private func fromSGType(_ functionRef: ShaderGraph.FunctionReference?) -> WKBrid
     return WKBridgeFunctionReference(moduleName: "functionRef.module", functionIndex: 0)
     #endif
 }
+#endif
 
 extension MTLCaptureDescriptor {
     fileprivate convenience init(from device: MTLDevice?) {
