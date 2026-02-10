@@ -52,7 +52,7 @@ enum class GridAvoidanceReason : uint8_t {
     GridNeedsBaseline,
     GridHasOutOfFlowChild,
     GridHasNonVisibleOverflow,
-    GridHasUnsupportedRenderer,
+    GridItemIsReplacedElement,
     GridIsEmpty,
     GridHasNonInitialMinWidth,
     GridHasNonInitialMaxWidth,
@@ -357,8 +357,10 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
     Vector<size_t> explicitlyPlacedItemsInRowCount;
 
     for (CheckedRef gridItem : childrenOfType<RenderBox>(renderGrid)) {
-        if (!gridItem->isRenderBlockFlow())
-            ADD_REASON_AND_RETURN_IF_NEEDED(GridHasUnsupportedRenderer, reasons, reasonCollectionMode);
+        // We do not yet support grid item sizing spec for replaced elements.
+        // See: https://drafts.csswg.org/css-grid/#grid-item-sizing
+        if (protect(gridItem->element())->isReplaced())
+            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemIsReplacedElement, reasons, reasonCollectionMode);
 
         CheckedRef gridItemStyle = gridItem->style();
 
@@ -561,8 +563,8 @@ static void printReason(GridAvoidanceReason reason, TextStream& stream)
     case GridAvoidanceReason::GridHasNonVisibleOverflow:
         stream << "grid has non-visible overflow";
         break;
-    case GridAvoidanceReason::GridHasUnsupportedRenderer:
-        stream << "grid has unsupported renderer";
+    case GridAvoidanceReason::GridItemIsReplacedElement:
+        stream << "grid item is a replaced element";
         break;
     case GridAvoidanceReason::GridIsEmpty:
         stream << "grid is empty";
