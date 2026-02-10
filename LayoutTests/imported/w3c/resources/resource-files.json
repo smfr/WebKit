@@ -2289,6 +2289,7 @@
         "web-platform-tests/css/css-animations/jump-start-animation-before-phase-ref.html",
         "web-platform-tests/css/css-animations/nested-scale-animations-ref.html",
         "web-platform-tests/css/css-animations/parent-after-change-style-pseudo-element-flicker-ref.html",
+        "web-platform-tests/css/css-animations/parsing/animation-name-edge-cases-ref.html",
         "web-platform-tests/css/css-animations/svg-transform-animation-ref.html",
         "web-platform-tests/css/css-animations/transform-animation-under-large-scale-ref.html",
         "web-platform-tests/css/css-animations/translation-animation-on-important-property-ref.html",
