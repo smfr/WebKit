@@ -492,11 +492,12 @@ NS_ASSUME_NONNULL_END
 
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET) && HAVE(AVROUTEPICKERVIEW)
-#if USE(APPLE_INTERNAL_SDK)
+#if USE(APPLE_INTERNAL_SDK) && !__has_feature(modules)
 #import <AVKit/AVRoutePickerView_Private.h>
 #import <AVKit/AVRoutePickerView_WebKitOnly.h>
 #else
 
+#if !__has_feature(modules)
 #import <AVKit/AVRoutePickerView.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -510,7 +511,8 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-#endif // USE(APPLE_INTERNAL_SDK)
+#endif // !__has_feature(modules)
+#endif // USE(APPLE_INTERNAL_SDK) && !__has_feature(modules)
 #endif // ENABLE(WIRELESS_PLAYBACK_TARGET) && HAVE(AVROUTEPICKERVIEW)
 
 // AVPictureInPicture SPI
