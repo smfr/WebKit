@@ -24,7 +24,7 @@
 internal import Metal
 internal import WebKit_Internal
 
-#if canImport(RealityCoreRenderer, _version: 9) && os(macOS)
+#if canImport(RealityCoreRenderer, _version: 9) && os(macOS) && canImport(_USDKit_RealityKit)
 @_spi(RealityCoreRendererAPI) internal import RealityKit
 @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_spi(SwiftAPI) internal import DirectResource
