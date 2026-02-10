@@ -2289,11 +2289,21 @@ class YarrGenerator final : public YarrJITInfo {
 
         case QuantifierType::NonGreedy: {
             const MacroAssembler::RegisterID matchAmount = m_regs.regT0;
+            const MacroAssembler::RegisterID beginIndex = m_regs.regT1;
 
             failures.append(atEndOfInput());
             loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex(), matchAmount);
             if (term->quantityMaxCount != quantifyInfinite)
                 failures.append(m_jit.branch32(MacroAssembler::AboveOrEqual, MacroAssembler::Imm32(term->quantityMaxCount), matchAmount));
+
+            // If the index hasn't advanced past beginIndex and matchAmount > 0,
+            // the backreference matched zero-width (undefined or empty capture).
+            // Repeating zero-width matches cannot make progress, so fail.
+            loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::beginIndex(), beginIndex);
+            MacroAssembler::Jump indexAdvanced = m_jit.branch32(MacroAssembler::NotEqual, m_regs.index, beginIndex);
+            failures.append(m_jit.branchTest32(MacroAssembler::NonZero, matchAmount));
+            indexAdvanced.link(&m_jit);
+
             m_jit.add32(MacroAssembler::TrustedImm32(1), matchAmount);
             storeToFrame(matchAmount, parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex());
             m_jit.jump(op.m_reentry);
