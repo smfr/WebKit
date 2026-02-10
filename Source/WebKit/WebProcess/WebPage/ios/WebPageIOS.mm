@@ -370,7 +370,7 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
     Ref view = *frame.view();
 
     if (frame.editor().hasComposition()) {
-        if (auto compositionRange = frame.editor().compositionRange()) {
+        if (auto compositionRange = protect(frame.editor())->compositionRange()) {
             visualData.markedTextRects = RenderObject::collectSelectionGeometries(*compositionRange).geometries;
             convertContentToRootView(view, visualData.markedTextRects);
 
@@ -431,7 +431,7 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
 
 #if USE(DICTATION_ALTERNATIVES)
     if (selectedRange) {
-        auto markers = frame.document()->markers().markersInRange(*selectedRange, DocumentMarkerType::DictationAlternatives);
+        auto markers = protect(frame.document())->markers().markersInRange(*selectedRange, DocumentMarkerType::DictationAlternatives);
         postLayoutData.dictationContextsForSelection = WTF::map(markers, [] (auto& marker) {
             return std::get<DocumentMarker::DictationData>(marker->data()).context;
         });
@@ -448,7 +448,7 @@ void WebPage::getPlatformEditorState(LocalFrame& frame, EditorState& result) con
                 CheckedRef style = protect(editableRoot->renderer())->style();
                 postLayoutData.caretColor = CaretBase::computeCaretColor(style, editableRoot.get());
                 postLayoutData.hasCaretColorAuto = style->caretColor().isAuto();
-                postLayoutData.hasGrammarDocumentMarkers = editableRoot->document().markers().hasMarkers(makeRangeSelectingNodeContents(*editableRoot), DocumentMarkerType::Grammar);
+                postLayoutData.hasGrammarDocumentMarkers = protect(editableRoot->document())->markers().hasMarkers(makeRangeSelectingNodeContents(*editableRoot), DocumentMarkerType::Grammar);
             }
         }
 
@@ -585,7 +585,7 @@ void WebPage::restorePageState(const HistoryItem& historyItem)
 
         std::optional<FloatPoint> scrollPosition;
         if (historyItem.shouldRestoreScrollPosition()) {
-            m_drawingArea->setExposedContentRect(historyItem.exposedContentRect());
+            protect(m_drawingArea)->setExposedContentRect(historyItem.exposedContentRect());
             m_hasRestoredExposedContentRectAfterDidCommitLoad = true;
             scrollPosition = FloatPoint(historyItem.scrollPosition());
         }
@@ -671,7 +671,7 @@ bool WebPage::handleEditingKeyboardEvent(KeyboardEvent& event)
     auto context = KeyEventInterpretationContext { isCharEvent, scrollingNodeID };
 
     // FIXME: Interpret the event immediately upon receiving it in UI process, without sending to WebProcess first.
-    auto sendResult = WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPageProxy::InterpretKeyEvent(editorState(ShouldPerformLayout::Yes), context), m_identifier);
+    auto sendResult = protect(WebProcess::singleton().parentProcessConnection())->sendSync(Messages::WebPageProxy::InterpretKeyEvent(editorState(ShouldPerformLayout::Yes), context), m_identifier);
     auto [eventWasHandled] = sendResult.takeReplyOr(false);
     return eventWasHandled;
 }
@@ -811,7 +811,7 @@ IntRect WebPage::rectForElementAtInteractionLocation() const
     RefPtr hitNode = result.innerNode();
     if (!hitNode || !hitNode->renderer())
         return IntRect();
-    return result.innerNodeFrame()->view()->contentsToRootView(hitNode->renderer()->absoluteBoundingBoxRect(true));
+    return protect(result.innerNodeFrame()->view())->contentsToRootView(hitNode->renderer()->absoluteBoundingBoxRect(true));
 }
 
 void WebPage::updateSelectionAppearance()
@@ -1018,7 +1018,7 @@ void WebPage::completeSyntheticClick(std::optional<WebCore::FrameIdentifier> fra
     auto rootFrameID = frameID;
     if (RefPtr webFrame = WebProcess::singleton().webFrame(frameID)) {
         if (RefPtr frame = webFrame->coreLocalFrame(); frame && !frame->isRootFrame())
-            rootFrameID = WebFrame::fromCoreFrame(frame->rootFrame())->frameID();
+            rootFrameID = WebFrame::fromCoreFrame(protect(frame->rootFrame()))->frameID();
     }
 
     RefPtr localRootFrame = this->localRootFrame(rootFrameID);
@@ -1455,7 +1455,7 @@ Awaitable<std::optional<WebCore::RemoteUserInputEventData>> WebPage::potentialTa
         double viewportMinimumScale;
         double viewportMaximumScale;
 
-        viewGestureGeometryCollector->computeZoomInformationForNode(*m_potentialTapNode, origin, absoluteBoundingRect, fitEntireRect, viewportMinimumScale, viewportMaximumScale);
+        viewGestureGeometryCollector->computeZoomInformationForNode(*protect(m_potentialTapNode), origin, absoluteBoundingRect, fitEntireRect, viewportMinimumScale, viewportMaximumScale);
 
         bool nodeIsRootLevel = is<WebCore::Document>(*m_potentialTapNode) || is<WebCore::HTMLBodyElement>(*m_potentialTapNode);
         bool nodeIsPluginElement = is<WebCore::HTMLPlugInElement>(*m_potentialTapNode);
@@ -1485,7 +1485,7 @@ Awaitable<std::optional<WebCore::FrameIdentifier>> WebPage::commitPotentialTap(s
         if (RefPtr element = dynamicDowncast<Element>(m_potentialTapNode); element && !targetRenders)
             targetRenders = element->renderOrDisplayContentsStyle();
         if (RefPtr shadowRoot = dynamicDowncast<ShadowRoot>(m_potentialTapNode); shadowRoot && !targetRenders)
-            targetRenders = shadowRoot->host()->renderOrDisplayContentsStyle();
+            targetRenders = protect(shadowRoot->host())->renderOrDisplayContentsStyle();
         invalidTargetForSingleClick = !targetRenders && !is<HTMLAreaElement>(m_potentialTapNode);
     }
 
@@ -1585,7 +1585,7 @@ void WebPage::cancelPotentialTapInFrame(WebFrame& frame)
 
     if (m_potentialTapNode) {
         RefPtr potentialTapFrame = m_potentialTapNode->document().frame();
-        if (potentialTapFrame && !potentialTapFrame->tree().isDescendantOf(frame.coreLocalFrame()))
+        if (potentialTapFrame && !potentialTapFrame->tree().isDescendantOf(protect(frame.coreLocalFrame())))
             return;
     }
 
@@ -1617,7 +1617,7 @@ void WebPage::inspectorNodeSearchMovedToPosition(const FloatPoint& position)
     IntPoint adjustedPoint = roundedIntPoint(position);
 
     localMainFrame->eventHandler().mouseMoved(PlatformMouseEvent(adjustedPoint, adjustedPoint, MouseButton::None, PlatformEvent::Type::MouseMoved, 0, { }, { }, 0, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware));
-    localMainFrame->document()->updateStyleIfNeeded();
+    protect(localMainFrame->document())->updateStyleIfNeeded();
 }
 
 void WebPage::inspectorNodeSearchEndedAtPosition(const FloatPoint& position)
@@ -1665,7 +1665,7 @@ void WebPage::blurFocusedElement()
     if (!m_focusedElement)
         return;
 
-    m_focusedElement->blur();
+    protect(m_focusedElement)->blur();
 }
 
 void WebPage::setFocusedElementValue(const WebCore::ElementContext& context, const String& value)
@@ -1761,7 +1761,7 @@ static std::pair<std::optional<SimpleRange>, SelectionWasFlipped> rangeForPointI
     if (!localMainFrame)
         return { std::nullopt, SelectionWasFlipped::No };
 
-    auto pointInDocument = frame.view()->rootViewToContents(pointInRootViewCoordinates.constrainedWithin(localMainFrame->view()->unobscuredContentRect()));
+    auto pointInDocument = protect(frame.view())->rootViewToContents(pointInRootViewCoordinates.constrainedWithin(protect(localMainFrame->view())->unobscuredContentRect()));
 
     if (!selectionFlippingEnabled) {
         RefPtr node = selectionStart.deepEquivalent().containerNode();
@@ -1939,12 +1939,12 @@ void WebPage::dispatchSyntheticMouseEventsForSelectionGesture(SelectionTouch tou
 
     IntRect focusedElementRect;
     if (m_focusedElement)
-        focusedElementRect = rootViewInteractionBounds(*m_focusedElement);
+        focusedElementRect = rootViewInteractionBounds(*protect(m_focusedElement));
 
     if (focusedElementRect.isEmpty())
         return;
 
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return;
 
@@ -1968,7 +1968,7 @@ void WebPage::dispatchSyntheticMouseEventsForSelectionGesture(SelectionTouch tou
 
 void WebPage::clearSelectionAfterTappingSelectionHighlightIfNeeded(WebCore::FloatPoint location)
 {
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return;
 
@@ -2375,14 +2375,14 @@ void WebPage::requestEvasionRectsAboveSelection(CompletionHandler<void(const Vec
         return;
     }
 
-    if (!m_focusedElement || !m_focusedElement->renderer() || isTransparentOrFullyClipped(*m_focusedElement)) {
+    if (!m_focusedElement || !m_focusedElement->renderer() || isTransparentOrFullyClipped(*protect(m_focusedElement))) {
         reply({ });
         return;
     }
 
     float scaleFactor = pageScaleFactor();
     const double factorOfContentArea = 0.5;
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame) {
         reply({ });
         return;
@@ -2406,7 +2406,7 @@ void WebPage::requestEvasionRectsAboveSelection(CompletionHandler<void(const Vec
     FloatPoint centerTopInRootViewCoordinates { centerOfTargetBounds.x(), selectionBoundsInRootViewCoordinates.y() };
 
     auto clickableNonEditableNode = [&](const FloatPoint& locationInRootViewCoordinates) -> RefPtr<Node> {
-        RefPtr localMainFrame = m_page->localMainFrame();
+        RefPtr localMainFrame = protect(m_page)->localMainFrame();
         if (!localMainFrame)
             return nullptr;
 
@@ -2808,7 +2808,7 @@ void WebPage::requestRVItemInCurrentSelectedRange(CompletionHandler<void(const W
 void WebPage::prepareSelectionForContextMenuWithLocationInView(IntPoint point, CompletionHandler<void(bool, const RevealItem&)>&& completionHandler)
 {
     constexpr OptionSet hitType { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::AllowVisibleChildFrameContentOnly };
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return completionHandler(false, { });
     Ref frame = *localMainFrame;
@@ -2853,7 +2853,7 @@ void WebPage::replaceSelectedText(const String& oldText, const String& newText)
 
     IgnoreSelectionChangeForScope ignoreSelectionChanges { *frame };
     frame->selection().setSelectedRange(wordRange, Affinity::Upstream, WebCore::FrameSelection::ShouldCloseTyping::Yes);
-    frame->editor().insertText(newText, 0);
+    protect(frame->editor())->insertText(newText, 0);
 }
 
 void WebPage::replaceDictatedText(const String& oldText, const String& newText)
@@ -2866,14 +2866,14 @@ void WebPage::replaceDictatedText(const String& oldText, const String& newText)
         return;
     
     if (frame->selection().isRange()) {
-        frame->editor().deleteSelectionWithSmartDelete(false);
+        protect(frame->editor())->deleteSelectionWithSmartDelete(false);
         return;
     }
     VisiblePosition position = frame->selection().selection().start();
     for (auto i = numGraphemeClusters(oldText); i; --i)
         position = position.previous();
     if (position.isNull())
-        position = startOfDocument(frame->document());
+        position = startOfDocument(protect(frame->document()));
     auto range = makeSimpleRange(position, frame->selection().selection().start());
 
     if (plainTextForContext(range) != oldText)
@@ -2882,7 +2882,7 @@ void WebPage::replaceDictatedText(const String& oldText, const String& newText)
     // We don't want to notify the client that the selection has changed until we are done inserting the new text.
     IgnoreSelectionChangeForScope ignoreSelectionChanges { *frame };
     frame->selection().setSelectedRange(range, Affinity::Upstream, WebCore::FrameSelection::ShouldCloseTyping::Yes);
-    frame->editor().insertText(newText, 0);
+    protect(frame->editor())->insertText(newText, 0);
 }
 
 void WebPage::willInsertFinalDictationResult()
@@ -2948,7 +2948,7 @@ void WebPage::requestAutocorrectionData(const String& textForAutocorrection, Com
 
     bool multipleFonts = false;
     CTFontRef font = nil;
-    if (auto coreFont = frame->editor().fontForSelection(multipleFonts))
+    if (auto coreFont = protect(frame->editor())->fontForSelection(multipleFonts))
         font = coreFont->ctFont();
 
     reply({ WTF::move(rootViewSelectionRects) , (__bridge UIFont *)font });
@@ -3042,12 +3042,13 @@ bool WebPage::applyAutocorrectionInternal(const String& correction, const String
         affinity = VisiblePosition(makeDeprecatedLegacyPosition(range->start), Affinity::Upstream).affinity();
     
     frame->selection().setSelectedRange(range, affinity, WebCore::FrameSelection::ShouldCloseTyping::Yes);
+    Ref editor = frame->editor();
     if (correction.length()) {
-        frame->editor().insertText(correction, 0, originalText.isEmpty() ? TextEventInputKeyboard : TextEventInputAutocompletion);
+        editor->insertText(correction, 0, originalText.isEmpty() ? TextEventInputKeyboard : TextEventInputAutocompletion);
         if (isCandidate)
             adjustCandidateAutocorrectionInFrame(correction, *frame);
     } else if (originalText.length())
-        frame->editor().deleteWithDirection(SelectionDirection::Backward, TextGranularity::CharacterGranularity, false, true);
+        editor->deleteWithDirection(SelectionDirection::Backward, TextGranularity::CharacterGranularity, false, true);
     return true;
 }
 
@@ -3078,7 +3079,7 @@ WebAutocorrectionContext WebPage::autocorrectionContext()
     if (frame->selection().isRange())
         selectedText = plainTextForContext(frame->selection().selection().toNormalizedRange());
 
-    if (auto compositionRange = frame->editor().compositionRange()) {
+    if (auto compositionRange = protect(frame->editor())->compositionRange()) {
         auto markedTextBefore = plainTextForContext(makeSimpleRange(compositionRange->start, startPosition));
         auto markedTextAfter = plainTextForContext(makeSimpleRange(endPosition, compositionRange->end));
         markedText = makeString(markedTextBefore, selectedText, markedTextAfter);
@@ -3180,7 +3181,7 @@ static inline bool isAssistableElement(Element& element)
 
 static inline bool isObscuredElement(Element& element)
 {
-    RefPtr mainFrameDocument = element.document().mainFrameDocument();
+    RefPtr mainFrameDocument = protect(element.document())->mainFrameDocument();
     if (!mainFrameDocument) {
         LOG_ONCE(SiteIsolation, "Unable to properly perform isObscuredElement() without access to the main frame document ");
         return false;
@@ -3213,7 +3214,7 @@ static void focusedElementPositionInformation(WebPage& page, Element& focusedEle
     IntPoint constrainedPoint = WebPage::constrainPoint(adjustedPoint, *frame, focusedElement);
     VisiblePosition position = frame->visiblePositionForPoint(constrainedPoint);
 
-    auto compositionRange = frame->editor().compositionRange();
+    auto compositionRange = protect(frame->editor())->compositionRange();
     if (!compositionRange)
         return;
 
@@ -3362,7 +3363,7 @@ static void imagePositionInformation(WebPage& page, Element& element, const Inte
 
     auto& [renderImage, image] = *rendererAndImage;
     info.isImage = true;
-    info.imageURL = page.applyLinkDecorationFiltering(element.document().completeURL(renderImage.cachedImage()->url().string()), LinkDecorationFilteringTrigger::Unspecified);
+    info.imageURL = page.applyLinkDecorationFiltering(protect(element.document())->completeURL(renderImage.cachedImage()->url().string()), LinkDecorationFilteringTrigger::Unspecified);
     info.imageMIMEType = image.mimeType();
     info.isAnimatedImage = image.isAnimated();
     info.isAnimating = image.isAnimating();
@@ -3655,11 +3656,15 @@ static void animationPositionInformation(WebPage& page, const InteractionInforma
             continue;
 
         auto rendererAndImage = imageRendererAndImage(*element);
-        if (!rendererAndImage || !rendererAndImage->second.isAnimated())
+        if (!rendererAndImage)
+            continue;
+
+        Ref image = rendererAndImage->second;
+        if (!image->isAnimated())
             continue;
 
         if (auto elementContext = page.contextForElement(*element))
-            info.animationsAtPoint.append({ WTF::move(*elementContext), rendererAndImage->second.isAnimating() });
+            info.animationsAtPoint.append({ WTF::move(*elementContext), image->isAnimating() });
     }
 #else
     UNUSED_PARAM(page);
@@ -3674,7 +3679,7 @@ InteractionInformationAtPosition WebPage::positionInformation(const InteractionI
     info.request = request;
 
     FloatPoint adjustedPoint;
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return info;
 
@@ -3703,7 +3708,7 @@ InteractionInformationAtPosition WebPage::positionInformation(const InteractionI
     auto hitTestResult = eventHandler.hitTestResultAtPoint(request.point, hitTestRequestTypes);
 
 #if ENABLE(PDF_PLUGIN)
-    RefPtr pluginView = hitTestResult.isOverWidget() ? pluginViewForFrame(hitTestResult.innerNodeFrame()) : nullptr;
+    RefPtr pluginView = hitTestResult.isOverWidget() ? pluginViewForFrame(protect(hitTestResult.innerNodeFrame())) : nullptr;
 #endif
 
     info.cursorContext = [&] {
@@ -3717,7 +3722,7 @@ InteractionInformationAtPosition WebPage::positionInformation(const InteractionI
     }();
 
     if (m_focusedElement)
-        focusedElementPositionInformation(*this, *m_focusedElement, request, info);
+        focusedElementPositionInformation(*this, *protect(m_focusedElement), request, info);
 
     RefPtr hitTestNode = hitTestResult.innerNonSharedNode();
     if (RefPtr element = dynamicDowncast<Element>(nodeRespondingToClickEvents)) {
@@ -3792,7 +3797,7 @@ void WebPage::startInteractionWithElementContextOrPosition(std::optional<WebCore
     }
 
     FloatPoint adjustedPoint;
-    if (RefPtr localMainFrame = m_page->localMainFrame())
+    if (RefPtr localMainFrame = protect(m_page)->localMainFrame())
         m_interactionNode = localMainFrame->nodeRespondingToInteraction(point, adjustedPoint);
 }
 
@@ -3823,6 +3828,8 @@ void WebPage::performActionOnElement(uint32_t action, const String& authorizatio
         return;
 
     if (static_cast<SheetAction>(action) == SheetAction::Copy) {
+        Ref interactionNodeEditor = m_interactionNode->document().editor();
+        Ref elementDocument = element->document();
         if (is<RenderImage>(*element->renderer())) {
             URL urlToCopy;
             String titleToCopy;
@@ -3835,11 +3842,11 @@ void WebPage::performActionOnElement(uint32_t action, const String& authorizatio
                     titleToCopy = titleToCopy.trim(isASCIIWhitespace);
                 }
             }
-            m_interactionNode->document().editor().writeImageToPasteboard(*Pasteboard::createForCopyAndPaste(PagePasteboardContext::create(element->document().pageID())), *element, urlToCopy, titleToCopy);
+            interactionNodeEditor->writeImageToPasteboard(*Pasteboard::createForCopyAndPaste(PagePasteboardContext::create(elementDocument->pageID())), *element, urlToCopy, titleToCopy);
         } else if (element->isLink())
-            m_interactionNode->document().editor().copyURL(element->document().completeURL(element->attributeWithoutSynchronization(HTMLNames::hrefAttr)), element->textContent());
+            interactionNodeEditor->copyURL(elementDocument->completeURL(element->attributeWithoutSynchronization(HTMLNames::hrefAttr)), element->textContent());
 #if ENABLE(ATTACHMENT_ELEMENT)
-        else if (auto attachmentInfo = element->document().editor().promisedAttachmentInfo(*element))
+        else if (auto attachmentInfo = protect(elementDocument->editor())->promisedAttachmentInfo(*element))
             send(Messages::WebPageProxy::WritePromisedAttachmentToPasteboard(WTF::move(attachmentInfo), authorizationToken));
 #endif
     } else if (static_cast<SheetAction>(action) == SheetAction::SaveImage) {
@@ -3899,7 +3906,7 @@ static inline RefPtr<Element> nextAssistableElement(Node* startNode, Page& page,
 
 void WebPage::focusNextFocusedElement(bool isForward, CompletionHandler<void()>&& completionHandler)
 {
-    auto nextElement = nextAssistableElement(m_focusedElement.get(), *m_page, isForward);
+    auto nextElement = nextAssistableElement(m_focusedElement.get(), *protect(m_page), isForward);
     m_userIsInteracting = true;
     if (nextElement)
         nextElement->focus();
@@ -3909,7 +3916,8 @@ void WebPage::focusNextFocusedElement(bool isForward, CompletionHandler<void()>&
 
 std::optional<FocusedElementInformation> WebPage::focusedElementInformation()
 {
-    RefPtr focusedOrMainFrame = protect(*m_page)->focusController().focusedOrMainFrame();
+    Ref page = *m_page;
+    RefPtr focusedOrMainFrame = page->focusController().focusedOrMainFrame();
     if (!focusedOrMainFrame)
         return std::nullopt;
     RefPtr<Document> document = focusedOrMainFrame->document();
@@ -3962,11 +3970,11 @@ std::optional<FocusedElementInformation> WebPage::focusedElementInformation()
     information.maximumScaleFactorIgnoringAlwaysScalable = maximumPageScaleFactorIgnoringAlwaysScalable();
     information.allowsUserScaling = m_viewportConfiguration.allowsUserScaling();
     information.allowsUserScalingIgnoringAlwaysScalable = m_viewportConfiguration.allowsUserScalingIgnoringAlwaysScalable();
-    if (auto nextElement = nextAssistableElement(focusedElement.get(), *m_page, true)) {
+    if (auto nextElement = nextAssistableElement(focusedElement.get(), page, true)) {
         information.nextNodeRect = rootViewBounds(*nextElement);
         information.hasNextNode = true;
     }
-    if (auto previousElement = nextAssistableElement(focusedElement.get(), *m_page, false)) {
+    if (auto previousElement = nextAssistableElement(focusedElement.get(), page, false)) {
         information.previousNodeRect = rootViewBounds(*previousElement);
         information.hasPreviousNode = true;
     }
@@ -4046,7 +4054,7 @@ std::optional<FocusedElementInformation> WebPage::focusedElementInformation()
             information.acceptsAutofilledLoginCredentials = true;
             information.isAutofillableUsernameField = autofillElements->username() == focusedElement;
         }
-        information.representingPageURL = element->document().urlForBindings();
+        information.representingPageURL = protect(element->document())->urlForBindings();
         information.autocapitalizeType = element->autocapitalizeType();
         information.isAutocorrect = element->shouldAutocorrect();
         information.placeholder = element->attributeWithoutSynchronization(HTMLNames::placeholderAttr);
@@ -4117,12 +4125,14 @@ std::optional<FocusedElementInformation> WebPage::focusedElementInformation()
         information.hasPlainText = hasAnyPlainText(makeRangeSelectingNodeContents(*focusedElement));
     }
 
-    if (focusedElement->document().quirks().shouldSuppressAutocorrectionAndAutocapitalizationInHiddenEditableAreas() && isTransparentOrFullyClipped(*focusedElement)) {
+    Ref focusedElementDocument = focusedElement->document();
+
+    if (focusedElementDocument->quirks().shouldSuppressAutocorrectionAndAutocapitalizationInHiddenEditableAreas() && isTransparentOrFullyClipped(*focusedElement)) {
         information.autocapitalizeType = WebCore::AutocapitalizeType::None;
         information.isAutocorrect = false;
     }
 
-    auto& quirks = focusedElement->document().quirks();
+    auto& quirks = focusedElementDocument->quirks();
     information.shouldAvoidResizingWhenInputViewBoundsChange = quirks.shouldAvoidResizingWhenInputViewBoundsChange();
     information.shouldAvoidScrollingWhenFocusedContentIsVisible = quirks.shouldAvoidScrollingWhenFocusedContentIsVisible();
     information.shouldUseLegacySelectPopoverDismissalBehaviorInDataActivation = quirks.shouldUseLegacySelectPopoverDismissalBehaviorInDataActivation();
@@ -4190,19 +4200,19 @@ void WebPage::setDeviceOrientation(IntDegrees deviceOrientation)
         return;
     m_deviceOrientation = deviceOrientation;
 #if ENABLE(ORIENTATION_EVENTS)
-    if (RefPtr localMainFrame = m_page->localMainFrame())
+    if (RefPtr localMainFrame = protect(m_page)->localMainFrame())
         localMainFrame->orientationChanged();
 #endif
 }
 
 void WebPage::setOverrideViewportArguments(const std::optional<WebCore::ViewportArguments>& arguments)
 {
-    m_page->setOverrideViewportArguments(arguments);
+    protect(m_page)->setOverrideViewportArguments(arguments);
 }
 
 void WebPage::dynamicViewportSizeUpdate(const DynamicViewportSizeUpdate& target)
 {
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return;
 
@@ -4257,7 +4267,7 @@ void WebPage::dynamicViewportSizeUpdate(const DynamicViewportSizeUpdate& target)
     setDefaultUnobscuredSize(target.maximumUnobscuredSize);
     setMinimumUnobscuredSize(target.minimumUnobscuredSize);
     setMaximumUnobscuredSize(target.maximumUnobscuredSize);
-    m_page->setUnobscuredSafeAreaInsets(target.unobscuredSafeAreaInsets);
+    protect(m_page)->setUnobscuredSafeAreaInsets(target.unobscuredSafeAreaInsets);
 
     frameView->updateLayoutAndStyleIfNeededRecursive();
 
@@ -4374,7 +4384,7 @@ void WebPage::dynamicViewportSizeUpdate(const DynamicViewportSizeUpdate& target)
 
     IntPoint roundedUnobscuredContentRectPosition = roundedIntPoint(newUnobscuredContentRect.location());
     frameView->setUnobscuredContentSize(newUnobscuredContentRect.size());
-    m_drawingArea->setExposedContentRect(newExposedContentRect);
+    protect(m_drawingArea)->setExposedContentRect(newExposedContentRect);
 
     scalePage(scale, roundedUnobscuredContentRectPosition);
 
@@ -4393,13 +4403,13 @@ void WebPage::dynamicViewportSizeUpdate(const DynamicViewportSizeUpdate& target)
     setDeviceOrientation(target.deviceOrientation);
     frameView->setScrollOffset(roundedUnobscuredContentRectPosition);
 
-    m_page->isolatedUpdateRendering();
+    protect(m_page)->isolatedUpdateRendering();
 
 #if ENABLE(VIEWPORT_RESIZING)
     shrinkToFitContent();
 #endif
 
-    m_drawingArea->triggerRenderingUpdate();
+    protect(m_drawingArea)->triggerRenderingUpdate();
 
     m_pendingDynamicViewportSizeUpdateID = target.identifier;
 }
@@ -4501,7 +4511,7 @@ void WebPage::resetIdempotentTextAutosizingIfNeeded(double previousInitialScale)
     if (m_page->initialScaleIgnoringContentSize() >= 1 && previousInitialScale >= 1)
         return;
     
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return;
 
@@ -4618,7 +4628,7 @@ bool WebPage::shouldIgnoreMetaViewport() const
     if (!m_page)
         return false;
 
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (RefPtr mainDocument = localMainFrame ? localMainFrame->document() : nullptr) {
         RefPtr loader = mainDocument->loader();
         if (loader && loader->metaViewportPolicy() == WebCore::MetaViewportPolicy::Ignore)
@@ -4661,7 +4671,7 @@ void WebPage::viewportConfigurationChanged(ZoomToInitialScale zoomToInitialScale
     double initialScaleIgnoringContentSize = m_viewportConfiguration.initialScaleIgnoringContentSize();
 #if ENABLE(TEXT_AUTOSIZING)
     double previousInitialScaleIgnoringContentSize = m_page->initialScaleIgnoringContentSize();
-    m_page->setInitialScaleIgnoringContentSize(initialScaleIgnoringContentSize);
+    protect(m_page)->setInitialScaleIgnoringContentSize(initialScaleIgnoringContentSize);
     resetIdempotentTextAutosizingIfNeeded(previousInitialScaleIgnoringContentSize);
     updateTextAutosizingEnablementFromInitialScale(initialScale);
 #endif
@@ -4687,7 +4697,7 @@ void WebPage::viewportConfigurationChanged(ZoomToInitialScale zoomToInitialScale
 
     LOG_WITH_STREAM(VisibleRects, stream << "WebPage " << m_identifier << " viewportConfigurationChanged - setting zoomedOutPageScaleFactor to " << minimumScale << " and scale to " << scale);
 
-    m_page->setZoomedOutPageScaleFactor(minimumScale);
+    protect(m_page)->setZoomedOutPageScaleFactor(minimumScale);
 
     updateSizeForCSSDefaultViewportUnits();
     updateSizeForCSSSmallViewportUnits();
@@ -4711,7 +4721,7 @@ void WebPage::viewportConfigurationChanged(ZoomToInitialScale zoomToInitialScale
         // FIXME: We could send down the obscured margins to find a better exposed rect and unobscured rect.
         // It is not a big deal at the moment because the tile coverage will always extend past the obscured bottom inset.
         if (!m_hasRestoredExposedContentRectAfterDidCommitLoad)
-            m_drawingArea->setExposedContentRect(FloatRect(scrollPosition, minimumLayoutSizeInDocumentCoordinates));
+            protect(m_drawingArea)->setExposedContentRect(FloatRect(scrollPosition, minimumLayoutSizeInDocumentCoordinates));
     }
     scalePage(scale, scrollPosition);
     
@@ -4732,7 +4742,7 @@ void WebPage::applicationWillResignActive()
         manager->applicationWillBecomeInactive();
 
     if (m_page)
-        m_page->applicationWillResignActive();
+        protect(m_page)->applicationWillResignActive();
 }
 
 void WebPage::applicationDidEnterBackground(bool isSuspendedUnderLock)
@@ -4748,7 +4758,7 @@ void WebPage::applicationDidEnterBackground(bool isSuspendedUnderLock)
         manager->applicationDidEnterBackground(isSuspendedUnderLock);
 
     if (m_page)
-        m_page->applicationDidEnterBackground();
+        protect(m_page)->applicationDidEnterBackground();
 }
 
 void WebPage::applicationDidFinishSnapshottingAfterEnteringBackground()
@@ -4771,7 +4781,7 @@ void WebPage::applicationWillEnterForeground(bool isSuspendedUnderLock)
         manager->applicationWillEnterForeground(isSuspendedUnderLock);
 
     if (m_page)
-        m_page->applicationWillEnterForeground();
+        protect(m_page)->applicationWillEnterForeground();
 }
 
 void WebPage::applicationDidBecomeActive()
@@ -4783,7 +4793,7 @@ void WebPage::applicationDidBecomeActive()
         manager->applicationDidBecomeActive();
 
     if (m_page)
-        m_page->applicationDidBecomeActive();
+        protect(m_page)->applicationDidBecomeActive();
 }
 
 void WebPage::applicationDidEnterBackgroundForMedia(bool isSuspendedUnderLock)
@@ -4879,8 +4889,8 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
     float scaleToUse = scaleFromUIProcess.value_or(m_page->pageScaleFactor());
     FloatRect exposedContentRect = visibleContentRectUpdateInfo.exposedContentRect();
     FloatRect adjustedExposedContentRect = adjustExposedRectForNewScale(exposedContentRect, visibleContentRectUpdateInfo.scale(), scaleToUse);
-    m_drawingArea->setExposedContentRect(adjustedExposedContentRect);
-    RefPtr localMainFrame = m_page->localMainFrame();
+    protect(m_drawingArea)->setExposedContentRect(adjustedExposedContentRect);
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return;
     RefPtr frameView = *localMainFrame->view();
@@ -4990,10 +5000,11 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
 
     frameView->clearObscuredInsetsAdjustmentsIfNeeded();
     frameView->setUnobscuredContentSize(unobscuredContentRect.size());
-    m_page->setContentInsets(visibleContentRectUpdateInfo.contentInsets());
-    m_page->setObscuredInsets(visibleContentRectUpdateInfo.obscuredInsets());
-    m_page->setUnobscuredSafeAreaInsets(visibleContentRectUpdateInfo.unobscuredSafeAreaInsets());
-    m_page->setEnclosedInScrollableAncestorView(visibleContentRectUpdateInfo.enclosedInScrollableAncestorView());
+    Ref page = *m_page;
+    page->setContentInsets(visibleContentRectUpdateInfo.contentInsets());
+    page->setObscuredInsets(visibleContentRectUpdateInfo.obscuredInsets());
+    page->setUnobscuredSafeAreaInsets(visibleContentRectUpdateInfo.unobscuredSafeAreaInsets());
+    page->setEnclosedInScrollableAncestorView(visibleContentRectUpdateInfo.enclosedInScrollableAncestorView());
 
     VelocityData scrollVelocity = visibleContentRectUpdateInfo.scrollVelocity();
     adjustVelocityDataForBoundedScale(scrollVelocity, visibleContentRectUpdateInfo.scale(), m_viewportConfiguration.minimumScale(), m_viewportConfiguration.maximumScale());
@@ -5249,7 +5260,7 @@ void WebPage::drawToImage(WebCore::FrameIdentifier frameID, const PrintInfo& pri
             break;
         graphicsContext->save();
         graphicsContext->translate(0, pageHeight * static_cast<int>(pageIndex));
-        m_printContext->spoolPage(*graphicsContext, pageIndex, pageWidth);
+        protect(m_printContext)->spoolPage(*graphicsContext, pageIndex, pageWidth);
         graphicsContext->restore();
     }
 
@@ -5338,18 +5349,18 @@ void WebPage::drawPrintingToSnapshotiOS(RemoteSnapshotIdentifier snapshotIdentif
             break;
         context.save();
         context.translate(0, pageHeight * static_cast<int>(pageIndex));
-        m_printContext->spoolPage(context, pageIndex, pageWidth);
+        protect(m_printContext)->spoolPage(context, pageIndex, pageWidth);
         context.restore();
     }
 
-    remoteRenderingBackend->sinkSnapshotRecorderIntoSnapshotFrame(WTF::move(m_remoteSnapshotState->recorder), frameID, m_remoteSnapshotState->callback->chain());
+    remoteRenderingBackend->sinkSnapshotRecorderIntoSnapshotFrame(WTF::move(m_remoteSnapshotState->recorder), frameID, protect(m_remoteSnapshotState->callback)->chain());
     m_remoteSnapshotState = std::nullopt;
 }
 
 void WebPage::drawToPDFiOS(FrameIdentifier frameID, const PrintInfo& printInfo, uint64_t pageCount, CompletionHandler<void(RefPtr<SharedBuffer>&&)>&& reply)
 {
     if (printInfo.snapshotFirstPage) {
-        RefPtr localMainFrame = m_page->localMainFrame();
+        RefPtr localMainFrame = protect(m_page)->localMainFrame();
         if (!localMainFrame)
             return;
 
@@ -5431,7 +5442,7 @@ void WebPage::drawPrintingPagesToSnapshotiOS(RemoteSnapshotIdentifier snapshotId
     } else
         drawPrintContextPagesToGraphicsContext(context, mediaBox, 0, pageCount);
 
-    remoteRenderingBackend->sinkSnapshotRecorderIntoSnapshotFrame(WTF::move(m_remoteSnapshotState->recorder), frameID, m_remoteSnapshotState->callback->chain());
+    remoteRenderingBackend->sinkSnapshotRecorderIntoSnapshotFrame(WTF::move(m_remoteSnapshotState->recorder), frameID, protect(m_remoteSnapshotState->callback)->chain());
     m_remoteSnapshotState = std::nullopt;
 }
 
@@ -5508,7 +5519,7 @@ void WebPage::hardwareKeyboardAvailabilityChanged(HardwareKeyboardState state)
     m_keyboardIsAttached = state.isAttached;
     setHardwareKeyboardState(state);
 
-    m_page->didUpdateHardwareKeyboardAttachment(m_keyboardIsAttached);
+    protect(m_page)->didUpdateHardwareKeyboardAttachment(m_keyboardIsAttached);
 
     if (RefPtr focusedFrame = m_page->focusController().focusedLocalFrame())
         focusedFrame->eventHandler().capsLockStateMayHaveChanged();
@@ -5588,7 +5599,7 @@ static VisiblePosition moveByGranularityRespectingWordBoundary(const VisiblePosi
 
 static VisiblePosition visiblePositionForPointInRootViewCoordinates(LocalFrame& frame, FloatPoint pointInRootViewCoordinates)
 {
-    auto pointInDocument = frame.view()->rootViewToContents(roundedIntPoint(pointInRootViewCoordinates));
+    auto pointInDocument = protect(frame.view())->rootViewToContents(roundedIntPoint(pointInRootViewCoordinates));
     return frame.visiblePositionForPoint(pointInDocument);
 }
 
@@ -5736,7 +5747,7 @@ void WebPage::requestDocumentEditingContext(DocumentEditingContextRequest&& requ
 
     VisiblePosition contextBeforeStart;
     VisiblePosition contextAfterEnd;
-    auto compositionRange = frame->editor().compositionRange();
+    auto compositionRange = protect(frame->editor())->compositionRange();
     if (request.granularityCount) {
         contextBeforeStart = moveByGranularityRespectingWordBoundary(rangeOfInterest.start, request.surroundingGranularity, request.granularityCount, SelectionDirection::Backward);
         contextAfterEnd = moveByGranularityRespectingWordBoundary(rangeOfInterest.end, request.surroundingGranularity, request.granularityCount, SelectionDirection::Forward);
@@ -5831,7 +5842,7 @@ void WebPage::requestDocumentEditingContext(DocumentEditingContextRequest&& requ
             }
 
             for (auto& absoluteRect : absoluteRects)
-                rects.append({ iterator.range().start.document().view()->contentsToRootView(absoluteRect), { offsetSoFar++, 1 } });
+                rects.append({ protect(iterator.range().start.document().view())->contentsToRootView(absoluteRect), { offsetSoFar++, 1 } });
 
             lastTextRange = iterator.range();
         }
@@ -5861,7 +5872,7 @@ void WebPage::requestDocumentEditingContext(DocumentEditingContextRequest&& requ
 
     if (request.options.contains(DocumentEditingContextRequest::Options::AutocorrectedRanges)) {
         if (auto contextRange = makeSimpleRange(contextBeforeStart, contextAfterEnd)) {
-            auto ranges = frame->document()->markers().rangesForMarkersInRange(*contextRange, DocumentMarkerType::CorrectionIndicator);
+            auto ranges = protect(frame->document())->markers().rangesForMarkersInRange(*contextRange, DocumentMarkerType::CorrectionIndicator);
             context.autocorrectedRanges = ranges.map([&] (auto& range) {
                 auto characterRangeInContext = characterRange(*contextRange, range);
                 return DocumentEditingContext::Range { characterRangeInContext.location, characterRangeInContext.length };
@@ -5879,7 +5890,7 @@ void WebPage::setShouldRevealCurrentSelectionAfterInsertion(bool shouldRevealCur
     m_shouldRevealCurrentSelectionAfterInsertion = shouldRevealCurrentSelectionAfterInsertion;
     if (!shouldRevealCurrentSelectionAfterInsertion)
         return;
-    m_page->revealCurrentSelection();
+    protect(m_page)->revealCurrentSelection();
     scheduleFullEditorStateUpdate();
 }
 
@@ -5907,7 +5918,7 @@ void WebPage::textInputContextsInRect(FloatRect searchRect, CompletionHandler<vo
     });
     completionHandler(contexts);
 #if ENABLE(EDITABLE_REGION)
-    m_page->setEditableRegionEnabled();
+    protect(m_page)->setEditableRegionEnabled();
 #endif
 }
 
@@ -5945,7 +5956,7 @@ void WebPage::focusTextInputContextAndPlaceCaret(const ElementContext& elementCo
     }
 
     ASSERT(targetFrame->view());
-    auto position = closestEditablePositionInElementForAbsolutePoint(*target, targetFrame->view()->rootViewToContents(point));
+    auto position = closestEditablePositionInElementForAbsolutePoint(*target, protect(targetFrame->view())->rootViewToContents(point));
     if (position.isNull()) {
         completionHandler(false);
         return;
@@ -6004,7 +6015,7 @@ void WebPage::animationDidFinishForElement(const Element& animatedElement)
     if (!m_page->settings().layoutViewportHeightExpansionFactor())
         return;
 
-    if (!animatedElement.document().isTopDocument())
+    if (!protect(animatedElement.document())->isTopDocument())
         return;
 
     if (CheckedPtr renderer = animatedElement.renderer(); renderer && renderer->isFixedPositioned())
@@ -6064,7 +6075,7 @@ FloatSize WebPage::screenSizeForFingerprintingProtections(const LocalFrame&, Flo
 
 void WebPage::shouldDismissKeyboardAfterTapAtPoint(FloatPoint point, CompletionHandler<void(bool)>&& completion)
 {
-    RefPtr localMainFrame = m_page->localMainFrame();
+    RefPtr localMainFrame = protect(m_page)->localMainFrame();
     if (!localMainFrame)
         return completion(false);
 
@@ -6112,7 +6123,7 @@ void WebPage::computeEnclosingLayerID(EditorState& state, const VisibleSelection
         CheckedRef renderer = layer->renderer();
         WeakPtr scrollableArea = [&] -> ScrollableArea* {
             if (renderer->isRenderView())
-                return renderer->document().isTopDocument() ? nullptr : renderer->frame().view();
+                return protect(renderer->document())->isTopDocument() ? nullptr : renderer->frame().view();
 
             return layer->scrollableArea();
         }();
@@ -6128,7 +6139,7 @@ void WebPage::computeEnclosingLayerID(EditorState& state, const VisibleSelection
     };
 
     CheckedPtr<RenderLayer> scrollableLayer;
-    for (CheckedPtr layer = nextScroller(*enclosingLayer, IncludeSelfOrNot::IncludeSelf); layer; layer = nextScroller(*layer, IncludeSelfOrNot::ExcludeSelf)) {
+    for (CheckedPtr layer = nextScroller(*protect(enclosingLayer), IncludeSelfOrNot::IncludeSelf); layer; layer = nextScroller(*layer, IncludeSelfOrNot::ExcludeSelf)) {
         if (auto [scrollOffset, scrollingNodeID] = scrollOffsetAndNodeIDForLayer(layer.get()); scrollingNodeID) {
             state.visualData->enclosingScrollOffset = scrollOffset;
             state.visualData->enclosingScrollingNodeID = WTF::move(scrollingNodeID);
@@ -6138,7 +6149,7 @@ void WebPage::computeEnclosingLayerID(EditorState& state, const VisibleSelection
     }
 
     ASSERT_IMPLIES(state.visualData->enclosingLayerID, graphicsLayer);
-    state.visualData->enclosingLayerUsesContentsLayer = graphicsLayer && graphicsLayer->usesContentsLayer();
+    state.visualData->enclosingLayerUsesContentsLayer = graphicsLayer && protect(graphicsLayer)->usesContentsLayer();
 
     if (selection.isCaret()) {
         state.visualData->scrollingNodeIDAtStart = state.visualData->enclosingScrollingNodeID;

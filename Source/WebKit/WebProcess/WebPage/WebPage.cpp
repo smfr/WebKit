@@ -7244,7 +7244,7 @@ static bool isTextFormControlOrEditableContent(const WebCore::Element& element)
 #if PLATFORM(IOS_FAMILY) && ENABLE(FULLSCREEN_API)
 static bool shouldExitFullscreenAfterFocusingElement(const WebCore::Element& element)
 {
-    if (!protect(element.document().fullscreen())->isFullscreen())
+    if (!protect(protect(element.document())->fullscreen())->isFullscreen())
         return false;
 
     if (RefPtr input = dynamicDowncast<const HTMLInputElement>(element))
@@ -7278,7 +7278,7 @@ void WebPage::elementDidFocus(Element& element, const FocusOptions& options)
 
 #if ENABLE(FULLSCREEN_API)
     if (shouldExitFullscreenAfterFocusingElement(element))
-        protect(element.document().fullscreen())->fullyExitFullscreen();
+        protect(protect(element.document())->fullscreen())->fullyExitFullscreen();
 #endif
         if (isChangingFocusedElement && (m_userIsInteracting || m_keyboardIsAttached))
             m_sendAutocorrectionContextAfterFocusingElement = true;
@@ -7289,7 +7289,7 @@ void WebPage::elementDidFocus(Element& element, const FocusOptions& options)
 
         RefPtr<API::Object> userData;
 
-        m_formClient->willBeginInputSession(this, &element, protect(WebFrame::fromCoreFrame(*element.document().frame())).get(), m_userIsInteracting, userData);
+        m_formClient->willBeginInputSession(this, &element, protect(WebFrame::fromCoreFrame(*protect(element.document().frame()))).get(), m_userIsInteracting, userData);
 
         if (!userData) {
             auto userInfo = element.userInfo();

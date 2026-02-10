@@ -89,7 +89,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 {
     RetainPtr view = _view;
     [_colorPickerViewController setSelectedColor:cocoaColor([view focusedElementInformation].colorValue).get()];
-    [_colorPickerViewController setSupportsAlpha:[view focusedElementInformation].supportsAlpha == WebKit::ColorControlSupportsAlpha::Yes && [view page]->preferences().inputTypeColorEnhancementsEnabled()];
+    [_colorPickerViewController setSupportsAlpha:[view focusedElementInformation].supportsAlpha == WebKit::ColorControlSupportsAlpha::Yes && protect([view page]->preferences())->inputTypeColorEnhancementsEnabled()];
     if ([_colorPickerViewController respondsToSelector:@selector(_setSuggestedColors:)])
         [_colorPickerViewController _setSuggestedColors:[self focusedElementSuggestedColors]];
 }

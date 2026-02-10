@@ -1122,7 +1122,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
 
 - (BOOL)_shouldExposeRollAngleAsTwist
 {
-    return protect(_page)->preferences().exposeRollAngleAsTwistEnabled();
+    return protect(protect(_page)->preferences())->exposeRollAngleAsTwistEnabled();
 }
 
 @end
@@ -1320,7 +1320,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
         if (!callbackID)
             return;
 
-        protect(_page)->legacyMainFrameProcess().connection().waitForAsyncReplyAndDispatchImmediately<Messages::WebPage::DrawToPDFiOS>(*callbackID, Seconds::infinity());
+        protect(protect(_page)->legacyMainFrameProcess().connection())->waitForAsyncReplyAndDispatchImmediately<Messages::WebPage::DrawToPDFiOS>(*callbackID, Seconds::infinity());
         return;
     }
 
@@ -1364,7 +1364,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
         if (!callbackID)
             return;
 
-        protect(_page)->legacyMainFrameProcess().connection().waitForAsyncReplyAndDispatchImmediately<Messages::WebPage::DrawRectToImage>(*callbackID, Seconds::infinity());
+        protect(protect(_page)->legacyMainFrameProcess().connection())->waitForAsyncReplyAndDispatchImmediately<Messages::WebPage::DrawRectToImage>(*callbackID, Seconds::infinity());
         return;
     }
 

@@ -2907,7 +2907,7 @@ bool UnifiedPDFPlugin::takeFindStringFromSelection()
     if (!frame || !frame->coreLocalFrame())
         return false;
 
-    if (CheckedPtr client = frame->coreLocalFrame()->protectedEditor()->client())
+    if (CheckedPtr client = protect(frame->coreLocalFrame())->protectedEditor()->client())
         client->updateStringForFind(findString);
     else
         return false;

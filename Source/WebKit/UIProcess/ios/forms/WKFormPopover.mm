@@ -143,7 +143,7 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     if (CGPointEqualToPoint(self.presentationPoint, CGPointZero))
         presentationRect = view.get().focusedElementInformation.interactionRect;
     else {
-        auto scale = view.get().page->pageScaleFactor();
+        auto scale = protect(view.get().page)->pageScaleFactor();
         presentationRect = CGRectMake(self.presentationPoint.x * scale, self.presentationPoint.y * scale, 1, 1);
     }
 

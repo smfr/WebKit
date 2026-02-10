@@ -414,7 +414,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     self.playing = playbackSessionModel ? playbackSessionModel->isPlaying() : NO;
     bool isPiPEnabled = false;
     if (RefPtr page = [self._webView _page].get())
-        isPiPEnabled = page->preferences().pictureInPictureAPIEnabled() && page->preferences().allowsPictureInPictureMediaPlayback();
+        isPiPEnabled = protect(page->preferences())->pictureInPictureAPIEnabled() && protect(page->preferences())->allowsPictureInPictureMediaPlayback();
     bool isPiPSupported = playbackSessionModel && playbackSessionModel->isPictureInPictureSupported();
 #if ENABLE(VIDEO_USES_ELEMENT_FULLSCREEN)
     [_cancelButton setHidden:_shouldHideCustomControls];
@@ -456,7 +456,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (!videoPresentationManager)
         return nullptr;
 
-    if (page->preferences().videoFullsceenPrefersMostVisibleHeuristic())
+    if (protect(page->preferences())->videoFullsceenPrefersMostVisibleHeuristic())
         return videoPresentationManager->bestVideoForElementFullscreen();
     return videoPresentationManager->controlsManagerInterface();
 }
@@ -749,7 +749,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     UIImage *doneImage;
 
     // FIXME: Rename `alternateFullScreenControlDesignEnabled` to something that explains it is for visionOS.
-    auto alternateFullScreenControlDesignEnabled = protect(*self._webView._page)->preferences().alternateFullScreenControlDesignEnabled();
+    auto alternateFullScreenControlDesignEnabled = protect(protect(*self._webView._page)->preferences())->alternateFullScreenControlDesignEnabled();
     
     if (alternateFullScreenControlDesignEnabled) {
         buttonSize = CGSizeMake(44.0, 44.0);
@@ -1039,7 +1039,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (!page)
         return;
 
-    if (page->preferences().fullScreenEnabled())
+    if (protect(page->preferences())->fullScreenEnabled())
         return;
 
     // When only VideoFullscreenRequiresElementFullscreen is enabled,
@@ -1131,7 +1131,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     ASSERT(_valid);
 
     RefPtr page = self._webView._page.get();
-    if (page && !page->preferences().fullScreenEnabled()) {
+    if (page && !protect(page->preferences())->fullScreenEnabled()) {
         ASSERT(page->preferences().videoFullscreenRequiresElementFullscreen());
         _secheuristic.reset();
         return;

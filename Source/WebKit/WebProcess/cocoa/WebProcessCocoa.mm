@@ -944,7 +944,7 @@ void WebProcess::initializeLogForwarding(const WebProcessCreationParameters& par
     if (!connectionPair)
         CRASH();
     auto [connection, handle] = WTF::move(*connectionPair);
-    connection->open(protect(*this), RunLoop::currentSingleton());
+    protect(connection)->open(protect(*this), RunLoop::currentSingleton());
     std::unique_ptr newLogClient = makeUnique<LogClient>(Ref { connection });
     parentConnection->sendWithAsyncReply(Messages::WebProcessProxy::CreateLogStream(WTF::move(handle), newLogClient->identifier()), [newLogClient = WTF::move(newLogClient), connection = WTF::move(connection), isDebugLoggingEnabled = parameters.isDebugLoggingEnabled] (IPC::Semaphore&& wakeUpSemaphore, IPC::Semaphore&& clientWaitSemaphore) mutable {
         connection->setSemaphores(WTF::move(wakeUpSemaphore), WTF::move(clientWaitSemaphore));
