@@ -24,7 +24,7 @@
 internal import Metal
 internal import WebKit_Internal
 
-#if canImport(RealityCoreRenderer, _version: 8) && !os(iOS)
+#if canImport(RealityCoreRenderer, _version: 9) && !os(iOS)
 @_spi(RealityCoreRendererAPI) internal import RealityKit
 @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_spi(SwiftAPI) internal import DirectResource
@@ -793,7 +793,7 @@ extension WKBridgeLiteral {
     }
 }
 
-#if canImport(RealityCoreRenderer, _version: 8) && !os(iOS)
+#if canImport(RealityCoreRenderer, _version: 9) && !os(iOS)
 
 internal func toData<T>(_ input: [T]) -> Data {
     unsafe input.withUnsafeBytes { bufferPointer in

@@ -26,7 +26,7 @@ internal import OSLog
 internal import WebKit_Internal
 internal import simd
 
-#if canImport(RealityCoreRenderer, _version: 8) && !os(iOS)
+#if canImport(RealityCoreRenderer, _version: 9) && !os(iOS)
 @_spi(RealityCoreRendererAPI) internal import RealityKit
 @_spi(RealityCoreTextureProcessingAPI) internal import RealityCoreTextureProcessing
 @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
@@ -669,7 +669,7 @@ private func fromSGGraphEdge(_ edge: (ShaderGraph.ModuleGraph.Node.ID, ShaderGra
 
 private func fromSGType(_ functionRef: ShaderGraph.FunctionReference?) -> WKBridgeFunctionReference? {
     guard let functionRef else { return nil }
-    #if canImport(RealityCoreRenderer, _version: 8)
+    #if canImport(RealityCoreRenderer, _version: 9)
     return WKBridgeFunctionReference(moduleName: functionRef.module, functionIndex: 0)
     #else
     return WKBridgeFunctionReference(moduleName: "functionRef.module", functionIndex: 0)
