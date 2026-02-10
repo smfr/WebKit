@@ -51,6 +51,9 @@ public:
 
 private:
     std::optional<size_t> findFirstAvailableColumnPosition(size_t rowStart, size_t rowEnd, size_t columnSpan, size_t startSearchColumn) const;
+    std::optional<size_t> findColumnPosition(GridAutoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan
+    , HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>>* rowCursors) const;
+    void growGridToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd, size_t currentColumnsCount);
     bool isCellRangeEmpty(size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd) const;
     void insertItemInArea(const UnplacedGridItem&, size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd);
 

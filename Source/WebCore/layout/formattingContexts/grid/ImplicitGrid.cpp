@@ -108,44 +108,13 @@ void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridIte
     // FIXME: Support multi-row spans
     ASSERT(normalizedRowEnd - normalizedRowStart == 1);
 
-    auto findColumnPosition = [&]() -> std::optional<size_t> {
-        if (autoFlowOptions.strategy == PackingStrategy::Dense) {
-            // Dense packing: always start searching from column 0
-            return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, 0);
-        }
-        // Sparse packing: use per-row cursors to maintain placement order
-        // For multi-row items, use the maximum cursor position across all spanned rows
-        ASSERT(autoFlowOptions.strategy == PackingStrategy::Sparse);
-        size_t startSearchColumn = 0;
-        for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row)
-            startSearchColumn = std::max(startSearchColumn, rowCursors->get(row));
-        return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, startSearchColumn);
-    };
-
-    auto growGridToFit = [&](size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd, size_t currentColumnsCount) {
-        // Find the last occupied column in the spanned rows
-        size_t lastOccupiedColumn = 0;
-        for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row) {
-            for (size_t column = currentColumnsCount; column > 0; --column) {
-                if (!m_gridMatrix[row][column - 1].isEmpty()) {
-                    lastOccupiedColumn = std::max(lastOccupiedColumn, column - 1);
-                    break;
-                }
-            }
-        }
-
-        size_t minimumColumnsNeeded = lastOccupiedColumn + 1 + columnSpan;
-        for (auto& row : m_gridMatrix)
-            row.resize(minimumColumnsNeeded);
-    };
-
-    auto columnPosition = findColumnPosition();
+    std::optional<size_t> columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan, rowCursors);
 
     if (!columnPosition) {
         growGridToFit(columnSpan, normalizedRowStart, normalizedRowEnd, columnsCount());
 
         // Retry finding position in the grown grid
-        columnPosition = findColumnPosition();
+        columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan, rowCursors);
 #ifndef NDEBUG
         ASSERT(columnPosition); // Must succeed after growing
 
@@ -189,6 +158,40 @@ std::optional<size_t> ImplicitGrid::findFirstAvailableColumnPosition(size_t rowS
     // If we are unable to find a valid position, signal that we need to grow the grid.
     return std::nullopt;
 }
+std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan
+, HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>>* rowCursors) const
+{
+    if (autoFlowOptions.strategy == PackingStrategy::Dense) {
+        // Dense packing: always start searching from column 0
+        return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, 0);
+    }
+    // Sparse packing: use per-row cursors to maintain placement order
+    // For multi-row items, use the maximum cursor position across all spanned rows
+    ASSERT(autoFlowOptions.strategy == PackingStrategy::Sparse);
+    size_t startSearchColumn = 0;
+    for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row)
+        startSearchColumn = std::max(startSearchColumn, rowCursors->get(row));
+    return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, startSearchColumn);
+}
+
+void ImplicitGrid::growGridToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd, size_t currentColumnsCount)
+{
+    // Find the last occupied column in the spanned rows
+    size_t lastOccupiedColumn = 0;
+    for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row) {
+        for (size_t column = currentColumnsCount; column > 0; --column) {
+            if (!m_gridMatrix[row][column - 1].isEmpty()) {
+                lastOccupiedColumn = std::max(lastOccupiedColumn, column - 1);
+                break;
+            }
+        }
+    }
+
+    size_t minimumColumnsNeeded = lastOccupiedColumn + 1 + columnSpan;
+    for (auto& row : m_gridMatrix)
+        row.resize(minimumColumnsNeeded);
+}
+
 
 bool ImplicitGrid::isCellRangeEmpty(size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd) const
 {
