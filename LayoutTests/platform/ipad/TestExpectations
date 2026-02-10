@@ -163,3 +163,6 @@ fast/viewport/ios/use-minimum-device-width-for-page-without-viewport-meta.html [
 fast/visual-viewport/ios/resize-event-for-keyboard.html [ Skip ]
 fast/visual-viewport/ios/visual-viewport-dimensions-during-scroll-with-keyboard.html [ Skip ]
 scrollingcoordinator/ios/fixed-scrolling-with-keyboard.html [ Skip ]
+
+# Failure only on iPad simulator 
+webkit.org/b/307451 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-keyboard-behavior.optional.html [ Pass Failure ]
