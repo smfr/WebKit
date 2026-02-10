@@ -584,7 +584,7 @@ void RemoteLayerTreePropertyApplier::applyProperties(RemoteLayerTreeNode& node, 
         node.setEventRegion(properties.eventRegion);
     updateMask(node, properties, relatedLayers);
 
-#if ENABLE(GAZE_GLOW_FOR_INTERACTION_REGIONS) || HAVE(CORE_ANIMATION_SEPARATED_LAYERS)
+#if ENABLE(GAZE_GLOW_FOR_INTERACTION_REGIONS) || HAVE(CORE_ANIMATION_SEPARATED_LAYERS) || ENABLE(OVERLAY_REGIONS_REMOTE_EFFECT)
     if (properties.changedProperties & LayerChange::VisibleRectChanged)
         node.setVisibleRect(properties.visibleRect);
 #endif
@@ -605,6 +605,11 @@ void RemoteLayerTreePropertyApplier::applyProperties(RemoteLayerTreeNode& node, 
         } else if (node.layer().isSeparated)
             node.layer().separated = false;
     }
+#endif
+
+#if ENABLE(OVERLAY_REGIONS_REMOTE_EFFECT)
+    if (properties.changedProperties & LayerChange::VisibleRectChanged)
+        node.visibleRectChangedForOverlayRegions();
 #endif
 
 #if ENABLE(SCROLLING_THREAD)
@@ -658,6 +663,9 @@ void RemoteLayerTreePropertyApplier::applyHierarchyUpdates(RemoteLayerTreeNode& 
 #if ENABLE(GAZE_GLOW_FOR_INTERACTION_REGIONS)
         node.updateInteractionRegionAfterHierarchyChange();
 #endif
+#if ENABLE(OVERLAY_REGIONS_REMOTE_EFFECT)
+        node.updateOverlayRegionAfterHierarchyChange();
+#endif
         return;
     }
 #endif
@@ -678,6 +686,10 @@ void RemoteLayerTreePropertyApplier::applyHierarchyUpdates(RemoteLayerTreeNode& 
 #endif
         return childNode->layer();
     }).get()];
+
+#if ENABLE(OVERLAY_REGIONS_REMOTE_EFFECT)
+    node.updateOverlayRegionAfterHierarchyChange();
+#endif
 
     END_BLOCK_OBJC_EXCEPTIONS
 }
