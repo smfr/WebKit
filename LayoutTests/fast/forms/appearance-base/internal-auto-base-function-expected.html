@@ -2,9 +2,16 @@
 <html>
 <head>
     <style>
+        /* `appearance: base` selects match `<div>` rendering */
+        .fake-base-select {
+            display: inline-block;
+            background-color: green;
+            color: white;
+        }
         select {
             all: unset; /* Remove all UA styles */
-            background-color: green;
+            display: inline-block;
+            background-color: red;
             color: white;
         }
     </style>
@@ -14,8 +21,8 @@
     <div style="color: orange">This text should be orange (base-select on non-select)</div>
     <div style="color: blue">This text should be blue (base)</div>
 
-    <select><option>This select should be green with white text. (base-select)</option></select>
-    <select><option>This select should be green with white text. (base)</option></select>
-    <select style="background-color: red;"><option>This select should be red with white text. (default)</option></select>
+    <div class="fake-base-select">This select should be green with white text. (base-select)</div>
+    <div class="fake-base-select">This select should be green with white text. (base)</div>
+    <select><option>This select should be red with white text. (default)</option></select>
 </body>
 </html>

@@ -397,10 +397,13 @@ bool HTMLSelectElement::canSelectAll() const
     return m_multiple;
 }
 
-RenderPtr<RenderElement> HTMLSelectElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
+RenderPtr<RenderElement> HTMLSelectElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition& position)
 {
-    if (usesMenuList())
+    if (usesMenuList()) {
+        if (style.usedAppearance() == StyleAppearance::Base)
+            return HTMLElement::createElementRenderer(WTF::move(style), position);
         return createRenderer<RenderMenuList>(*this, WTF::move(style));
+    }
     return createRenderer<RenderListBox>(*this, WTF::move(style));
 }
 
@@ -827,7 +830,7 @@ void HTMLSelectElement::setOptionsChangedOnRenderer()
     if (CheckedPtr renderer = this->renderer()) {
         if (auto* renderMenuList = dynamicDowncast<RenderMenuList>(*renderer))
             renderMenuList->setOptionsChanged(true);
-        else
+        else if (!usesMenuList())
             downcast<RenderListBox>(*renderer).setOptionsChanged(true);
     }
 
