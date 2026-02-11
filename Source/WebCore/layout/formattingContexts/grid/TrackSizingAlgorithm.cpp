@@ -323,10 +323,11 @@ static void resolveIntrinsicTrackSizes(UnsizedTracks& unsizedTracks, const Place
     UNUSED_VARIABLE(increaseSizesToAccommodateSpanningItemsCrossingFlexibleTracks);
 
     // 5. If any track still has an infinite growth limit, set its growth limit to its base size.
-    auto setInfiniteGrowthLimitsToBaseSize = [] {
-        notImplemented();
-    };
-    UNUSED_VARIABLE(setInfiniteGrowthLimitsToBaseSize);
+    for (auto& unsizedTrack : unsizedTracks) {
+        auto& growthLimit = unsizedTrack.growthLimit;
+        if (growthLimit == LayoutUnit::max())
+            growthLimit = unsizedTrack.baseSize;
+    }
 }
 
 static LayoutUnit totalGuttersSize(size_t tracksCount, LayoutUnit gapsSize)
