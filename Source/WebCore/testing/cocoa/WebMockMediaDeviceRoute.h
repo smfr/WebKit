@@ -29,15 +29,25 @@
 
 #import <WebKitAdditions/WebMockMediaDeviceRouteAdditions.h>
 
+typedef NS_ENUM(NSInteger, WebMockMediaDeviceRouteErrorCode) {
+    WebMockMediaDeviceRouteErrorCodeInvalidState,
+    WebMockMediaDeviceRouteErrorCodeUnsupportedURL,
+    WebMockMediaDeviceRouteErrorPlaybackError,
+};
+
 namespace WebCore {
 class MockMediaDeviceRouteURLCallback;
 }
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSErrorDomain const WebMockMediaDeviceRouteErrorDomain;
+
 @interface WebMockMediaDeviceRoute : NSObject <AVMediaSource, WebMediaDevicePlatformRoute>
 @property (nonatomic, nullable, setter=setURLCallback:) WebCore::MockMediaDeviceRouteURLCallback* urlCallback;
 @property (copy) NSString *routeDisplayName;
+@property (nonatomic, getter=isReady) BOOL ready;
+@property (nonatomic, strong, nullable) NSError *playbackError;
 @end
 
 NS_ASSUME_NONNULL_END

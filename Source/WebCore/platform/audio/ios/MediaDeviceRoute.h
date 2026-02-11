@@ -99,17 +99,17 @@ class MediaDeviceRouteClient : public AbstractRefCountedAndCanMakeWeakPtr<MediaD
 public:
     virtual ~MediaDeviceRouteClient() = default;
 
-    virtual void timeRangeDidChange(MediaDeviceRoute&) = 0;
-    virtual void readyDidChange(MediaDeviceRoute&) = 0;
-    virtual void bufferingDidChange(MediaDeviceRoute&) = 0;
-    virtual void playbackErrorDidChange(MediaDeviceRoute&) = 0;
-    virtual void hasAudioDidChange(MediaDeviceRoute&) = 0;
-    virtual void currentValueDidChange(MediaDeviceRoute&) = 0;
-    virtual void playingDidChange(MediaDeviceRoute&) = 0;
-    virtual void playbackSpeedDidChange(MediaDeviceRoute&) = 0;
-    virtual void scanSpeedDidChange(MediaDeviceRoute&) = 0;
-    virtual void mutedDidChange(MediaDeviceRoute&) = 0;
-    virtual void volumeDidChange(MediaDeviceRoute&) = 0;
+    virtual void timeRangeDidChange(MediaDeviceRoute&) { }
+    virtual void readyDidChange(MediaDeviceRoute&) { }
+    virtual void bufferingDidChange(MediaDeviceRoute&) { }
+    virtual void playbackErrorDidChange(MediaDeviceRoute&) { }
+    virtual void hasAudioDidChange(MediaDeviceRoute&) { }
+    virtual void currentValueDidChange(MediaDeviceRoute&) { }
+    virtual void playingDidChange(MediaDeviceRoute&) { }
+    virtual void playbackSpeedDidChange(MediaDeviceRoute&) { }
+    virtual void scanSpeedDidChange(MediaDeviceRoute&) { }
+    virtual void mutedDidChange(MediaDeviceRoute&) { }
+    virtual void volumeDidChange(MediaDeviceRoute&) { }
 };
 
 class MediaDeviceRoute final : public RefCountedAndCanMakeWeakPtr<MediaDeviceRoute> {

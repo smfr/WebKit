@@ -50,6 +50,12 @@ public:
     String deviceName() const;
     void setDeviceName(const String&);
 
+    bool ready() const;
+    void setReady(bool);
+
+    bool hasPlaybackError() const;
+    void setHasPlaybackError(bool);
+
 private:
     MockMediaDeviceRoute();
 

@@ -35,12 +35,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static NSErrorDomain const WebMockMediaDeviceRouteErrorDomain = @"WebMockMediaDeviceRouteErrorDomain";
-
-typedef NS_ENUM(NSInteger, WebMockMediaDeviceRouteErrorCode) {
-    WebMockMediaDeviceRouteErrorCodeInvalidState,
-    WebMockMediaDeviceRouteErrorCodeURLPromiseRejected,
-};
+NSErrorDomain const WebMockMediaDeviceRouteErrorDomain = @"WebMockMediaDeviceRouteErrorDomain";
 
 @implementation WebMockMediaDeviceRoute {
     RefPtr<WebCore::MockMediaDeviceRouteURLCallback> _urlCallback;
@@ -96,7 +91,7 @@ typedef NS_ENUM(NSInteger, WebMockMediaDeviceRouteErrorCode) {
         case WebCore::DOMPromise::Status::Fulfilled:
             return completionHandler(nil, strongSelf.get());
         case WebCore::DOMPromise::Status::Rejected:
-            return completionHandler([NSError errorWithDomain:WebMockMediaDeviceRouteErrorDomain code:WebMockMediaDeviceRouteErrorCodeURLPromiseRejected userInfo:nil], nil);
+            return completionHandler([NSError errorWithDomain:WebMockMediaDeviceRouteErrorDomain code:WebMockMediaDeviceRouteErrorCodeUnsupportedURL userInfo:nil], nil);
         case WebCore::DOMPromise::Status::Pending:
             break;
         }

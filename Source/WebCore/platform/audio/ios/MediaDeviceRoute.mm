@@ -61,12 +61,16 @@
     [_mediaSource removeObserver:self forKeyPath:@#KeyPath context:WebMediaSourceObserverContext]; \
 \
 
+#define NOTIFY_CLIENT(KeyPath, SetterSuffix, Type) \
+    if (RefPtr route = _route.get()) { \
+        if (RefPtr client = route->client()) \
+            client->KeyPath##DidChange(*route); \
+    } \
+\
+
 #define OBSERVE_VALUE(KeyPath, SetterSuffix, Type) \
     if ([keyPath isEqualToString:@#KeyPath]) { \
-        if (RefPtr route = _route.get()) { \
-            if (RefPtr client = route->client()) \
-                client->KeyPath##DidChange(*route); \
-        } \
+        NOTIFY_CLIENT(KeyPath, SetterSuffix, Type) \
         return; \
     } \
 \
@@ -120,6 +124,7 @@ static void* WebMediaSourceObserverContext = &WebMediaSourceObserverContext;
     FOR_EACH_KEY_PATH(REMOVE_OBSERVER)
     _mediaSource = mediaSource;
     FOR_EACH_KEY_PATH(ADD_OBSERVER)
+    FOR_EACH_KEY_PATH(NOTIFY_CLIENT)
 }
 
 - (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(nullable NSDictionary *)change context:(nullable void*)context
