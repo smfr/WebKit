@@ -5222,6 +5222,9 @@ webkit.org/b/307368 fast/repaint/iframe-from-display-none-repaint.html [ Pass Im
 
 webkit.org/b/307586 imported/w3c/web-platform-tests/css/css-view-transitions/no-raf-while-render-blocked.html [ Failure ]
 
+# Note: this randomly crashes on the EWS (which runs Release+Asserts) but passes always on post-commit (Release)
+webkit.org/b/307597 imported/w3c/web-platform-tests/service-workers/service-worker/redirected-response.https.html [ Crash Pass ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////
