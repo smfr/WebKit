@@ -71,7 +71,7 @@ static std::optional<LayoutUnit> minimumSizeConstraint(const Style::MinimumSize&
 static std::optional<LayoutUnit> maximumSizeConstraint(const Style::MaximumSize& computedMaximumSize, const Style::ZoomFactor& gridContainerZoom)
 {
     return WTF::switchOn(computedMaximumSize,
-        [&gridContainerZoom](const Style::MinimumSize::Fixed& fixedValue) -> std::optional<LayoutUnit> {
+        [&gridContainerZoom](const Style::MaximumSize::Fixed& fixedValue) -> std::optional<LayoutUnit> {
             return Style::evaluate<LayoutUnit>(fixedValue, gridContainerZoom);
         },
         [](const CSS::Keyword::None&) -> std::optional<LayoutUnit> {
