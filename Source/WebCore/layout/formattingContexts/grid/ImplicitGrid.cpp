@@ -108,13 +108,13 @@ void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridIte
     // FIXME: Support multi-row spans
     ASSERT(normalizedRowEnd - normalizedRowStart == 1);
 
-    std::optional<size_t> columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan);
+    std::optional<size_t> columnPosition = findColumnPositionForDefiniteRowItem(normalizedRowStart, normalizedRowEnd, columnSpan, autoFlowOptions);
 
     if (!columnPosition) {
-        growGridToFit(columnSpan, normalizedRowStart, normalizedRowEnd, columnsCount());
+        growGridColumnsToFit(columnSpan, normalizedRowStart, normalizedRowEnd);
 
         // Retry finding position in the grown grid
-        columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan);
+        columnPosition = findColumnPositionForDefiniteRowItem(normalizedRowStart, normalizedRowEnd, columnSpan, autoFlowOptions);
 #ifndef NDEBUG
         ASSERT(columnPosition); // Must succeed after growing
 
@@ -122,14 +122,6 @@ void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridIte
         ASSERT(isCellRangeEmpty(*columnPosition, *columnPosition + columnSpan, normalizedRowStart, normalizedRowEnd),
             "After grid growth, placed item overlaps with occupied cells.");
 
-        auto verifyHasEmptyLastColumn = [&]() {
-            for (size_t row = 0; row < m_gridMatrix.size(); ++row) {
-                if (!m_gridMatrix[row].last().isEmpty())
-                    return false;
-            }
-            ASSERT_NOT_REACHED();
-            return true;
-        };
         verifyHasEmptyLastColumn();
 #endif
     }
@@ -158,7 +150,7 @@ std::optional<size_t> ImplicitGrid::findFirstAvailableColumnPosition(size_t rowS
     // If we are unable to find a valid position, signal that we need to grow the grid.
     return std::nullopt;
 }
-std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan) const
+std::optional<size_t> ImplicitGrid::findColumnPositionForDefiniteRowItem(size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan, GridAutoFlowOptions autoFlowOptions) const
 {
     if (autoFlowOptions.strategy == PackingStrategy::Dense) {
         // Dense packing: always start searching from column 0
@@ -173,8 +165,10 @@ std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoF
     return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, startSearchColumn);
 }
 
-void ImplicitGrid::growGridToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd, size_t currentColumnsCount)
+void ImplicitGrid::growGridColumnsToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd)
 {
+    auto currentColumnsCount = columnsCount();
+
     // Find the last occupied column in the spanned rows
     size_t lastOccupiedColumn = 0;
     for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row) {
@@ -190,7 +184,6 @@ void ImplicitGrid::growGridToFit(size_t columnSpan, size_t normalizedRowStart, s
     for (auto& row : m_gridMatrix)
         row.resize(minimumColumnsNeeded);
 }
-
 
 bool ImplicitGrid::isCellRangeEmpty(size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd) const
 {
@@ -210,6 +203,14 @@ void ImplicitGrid::insertItemInArea(const UnplacedGridItem& unplacedGridItem, si
             m_gridMatrix[row][column].append(unplacedGridItem);
     }
 }
+
+#ifndef NDEBUG
+void ImplicitGrid::verifyHasEmptyLastColumn() const
+{
+    for (size_t row = 0; row < m_gridMatrix.size(); ++row)
+        ASSERT(m_gridMatrix[row].last().isEmpty());
+}
+#endif
 
 } // namespace Layout
 } // namespace WebCore

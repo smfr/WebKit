@@ -52,10 +52,14 @@ public:
 private:
     using RowCursors = HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>>;
     std::optional<size_t> findFirstAvailableColumnPosition(size_t rowStart, size_t rowEnd, size_t columnSpan, size_t startSearchColumn) const;
-    std::optional<size_t> findColumnPosition(GridAutoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan) const;
-    void growGridToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd, size_t currentColumnsCount);
+    std::optional<size_t> findColumnPositionForDefiniteRowItem(size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan, GridAutoFlowOptions) const;
+    void growGridColumnsToFit(size_t columnSpan, size_t normalizedRowStart, size_t normalizedRowEnd);
     bool isCellRangeEmpty(size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd) const;
     void insertItemInArea(const UnplacedGridItem&, size_t columnStart, size_t columnEnd, size_t rowStart, size_t rowEnd);
+
+#ifndef NDEBUG
+    void verifyHasEmptyLastColumn() const;
+#endif
 
     GridMatrix m_gridMatrix;
 
