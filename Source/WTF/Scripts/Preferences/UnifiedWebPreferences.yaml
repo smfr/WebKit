@@ -1941,9 +1941,8 @@ ContentChangeObserverEnabled:
     WebKitLegacy:
       default: true
     WebKit:
-      default: true
+      default: defaultContentChangeObserverEnabled()
     WebCore:
-      "PLATFORM(IOS_FAMILY) && !PLATFORM(MACCATALYST)": true
       default: false
 
 ContentDispositionAttachmentSandboxEnabled:

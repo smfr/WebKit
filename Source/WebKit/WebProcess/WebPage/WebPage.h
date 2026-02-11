@@ -95,7 +95,6 @@
 #include "DynamicViewportSizeUpdate.h"
 #include <WebCore/InspectorOverlay.h>
 #include <WebCore/IntPoint.h>
-#include <WebCore/WKContentObservation.h>
 #endif
 
 #if ENABLE(META_VIEWPORT)
@@ -228,6 +227,7 @@ enum class ActivityState : uint16_t;
 enum class AdjustViewSize : bool;
 enum class COEPDisposition : bool;
 enum class CaretAnimatorType : uint8_t;
+enum class ContentChange : uint8_t;
 enum class CreateNewGroupForHighlight : bool;
 enum class DidFilterLinkDecoration : bool;
 enum class DOMPasteAccessCategory : uint8_t;
@@ -1494,7 +1494,6 @@ public:
     void applicationDidBecomeActive();
     void applicationDidEnterBackgroundForMedia(bool isSuspendedUnderLock);
     void applicationWillEnterForegroundForMedia(bool isSuspendedUnderLock);
-    void didFinishContentChangeObserving(WebCore::FrameIdentifier, WKContentChange);
 
     bool platformPrefersTextLegibilityBasedZoomScaling() const;
 
@@ -1506,6 +1505,10 @@ public:
     bool canShowWhileLocked() const;
 
     void shouldDismissKeyboardAfterTapAtPoint(WebCore::FloatPoint, CompletionHandler<void(bool)>&&);
+#endif
+
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+    void didFinishContentChangeObserving(WebCore::FrameIdentifier, WebCore::ContentChange);
 #endif
 
     void processWillSuspend();

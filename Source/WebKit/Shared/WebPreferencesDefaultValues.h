@@ -230,4 +230,8 @@ bool defaultCaptionDisplaySettingsEnabled();
 bool defaultShouldEnableScreenCapture();
 #endif
 
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+bool defaultContentChangeObserverEnabled();
+#endif
+
 } // namespace WebKit

@@ -35,6 +35,7 @@ class HTMLImageElement;
 class HTMLVideoElement;
 class RegistrableDomain;
 enum class BroadcastFocusedElement : bool;
+enum class ContentChange : uint8_t;
 enum class DidFilterLinkDecoration : bool;
 enum class IsLoggedIn : uint8_t;
 enum class PointerLockRequestResult : uint8_t;
@@ -177,7 +178,6 @@ private:
 #if PLATFORM(IOS_FAMILY)
     void didReceiveMobileDocType(bool) final;
     void setNeedsScrollNotifications(WebCore::LocalFrame&, bool) final;
-    void didFinishContentChangeObserving(WebCore::LocalFrame&, WKContentChange) final;
     void notifyRevealedSelectionByScrollingFrame(WebCore::LocalFrame&) final;
     bool isStopping() final;
 
@@ -201,6 +201,10 @@ private:
     bool shouldUseMouseEventForSelection(const WebCore::PlatformMouseEvent&) final;
 
     bool showDataDetectorsUIForElement(const WebCore::Element&, const WebCore::Event&) final;
+#endif
+
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+    void didFinishContentChangeObserving(WebCore::LocalFrame&, WebCore::ContentChange) final;
 #endif
 
 #if ENABLE(ORIENTATION_EVENTS)

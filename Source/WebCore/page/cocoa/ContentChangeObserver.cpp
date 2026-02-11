@@ -175,7 +175,7 @@ bool ContentChangeObserver::isConsideredActionableContent(const Element& candida
         if (willRespondToMouseClickEvents || !hasRenderer || hadRenderer == ElementHadRenderer::No)
             return willRespondToMouseClickEvents;
 
-        // In case when the content already had renderers it's not sufficient to check the candidate element only since it might just be the container for the clickable content.  
+        // In case when the content already had renderers it's not sufficient to check the candidate element only since it might just be the container for the clickable content.
         for (auto& descendant : descendantsOfType<RenderElement>(*element.renderer())) {
             if (!descendant.element())
                 continue;
@@ -433,7 +433,7 @@ void ContentChangeObserver::willDetachPage()
 }
 
 void ContentChangeObserver::rendererWillBeDestroyed(const Element& element)
-{ 
+{
     if (!isContentChangeObserverEnabled())
         return;
     if (!isObservingContentChanges())
@@ -583,7 +583,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
         }
 
         // First demote to "no change" because we've got no pending activity anymore.
-        if (observedContentChange() == WKContentIndeterminateChange)
+        if (observedContentChange() == ContentChange::Indeterminate)
             setHasNoChangeState();
 
         LOG_WITH_STREAM(ContentObservation, stream << "notifyClientIfNeeded: sending observedContentChange ->" << observedContentChange());
@@ -593,7 +593,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
         stopContentObservation();
     };
 
-    // These user initiated events trigger content observation (touchStart and mouseMove). 
+    // These user initiated events trigger content observation (touchStart and mouseMove).
     {
         if (event == Event::StartedTouchStartEventDispatching) {
             resetToStartObserving();
@@ -646,7 +646,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
             return;
         }
         if (event == Event::StartedDOMTimerExecution) {
-            ASSERT(isObservationTimeWindowActive() || observedContentChange() == WKContentIndeterminateChange);
+            ASSERT(isObservationTimeWindowActive() || observedContentChange() == ContentChange::Indeterminate);
             return;
         }
         if (event == Event::EndedDOMTimerExecution) {
@@ -659,7 +659,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
         }
         if (event == Event::EndedTransitionButFinalStyleIsNotDefiniteYet) {
             // onAnimationEnd can be called while in the middle of resolving the document (synchronously) or
-            // asynchronously right before the style update is issued. It also means we don't know whether this animation ends up producing visible content yet. 
+            // asynchronously right before the style update is issued. It also means we don't know whether this animation ends up producing visible content yet.
             if (m_document->inStyleRecalc()) {
                 // We need to start observing this style change synchronously.
                 m_isInObservedStyleRecalc = true;
@@ -678,7 +678,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
         }
         if (event == Event::StartedStyleRecalc) {
             setShouldObserveNextStyleRecalc(false);
-            ASSERT(isObservationTimeWindowActive() || observedContentChange() == WKContentIndeterminateChange);
+            ASSERT(isObservationTimeWindowActive() || observedContentChange() == ContentChange::Indeterminate);
             return;
         }
         if (event == Event::EndedStyleRecalc) {
@@ -686,7 +686,7 @@ void ContentChangeObserver::adjustObservedState(Event event)
             return;
         }
     }
-    // Either the page decided to call preventDefault on the touch action or the tap gesture evolved to some other gesture (long press, double tap). 
+    // Either the page decided to call preventDefault on the touch action or the tap gesture evolved to some other gesture (long press, double tap).
     if (event == Event::WillNotProceedWithClick) {
         stopContentObservation();
         return;

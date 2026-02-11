@@ -933,7 +933,7 @@ void WebPage::handleSyntheticClick(std::optional<WebCore::FrameIdentifier> frame
     auto targetNodeTriggersFastPath = nodeTriggersFastPath(nodeRespondingToClick);
 
     auto observedContentChange = contentChangeObserver->observedContentChange();
-    auto continueContentObservation = !(observedContentChange == WKContentVisibilityChange || targetNodeTriggersFastPath);
+    auto continueContentObservation = !(observedContentChange == WebCore::ContentChange::Visibility || targetNodeTriggersFastPath);
     if (continueContentObservation) {
         // Wait for callback to didFinishContentChangeObserving() to decide whether to send the click event.
         const Seconds observationDuration = 32_ms;
@@ -950,7 +950,7 @@ void WebPage::handleSyntheticClick(std::optional<WebCore::FrameIdentifier> frame
         if (protectedThis->m_isClosed || !protectedThis->corePage())
             return;
 
-        auto shouldStayAtHoverState = observedContentChange == WKContentVisibilityChange;
+        auto shouldStayAtHoverState = observedContentChange == WebCore::ContentChange::Visibility;
         if (shouldStayAtHoverState) {
             // The move event caused new contents to appear. Don't send synthetic click event, but just ensure that the mouse is on the most recent content.
             if (RefPtr localRootFrame = protectedThis->localRootFrame(frameID))
@@ -970,7 +970,7 @@ void WebPage::didHandleTapAsHover()
     send(Messages::WebPageProxy::DidHandleTapAsHover());
 }
 
-void WebPage::didFinishContentChangeObserving(WebCore::FrameIdentifier frameID, WKContentChange observedContentChange)
+void WebPage::didFinishContentChangeObserving(WebCore::FrameIdentifier frameID, WebCore::ContentChange observedContentChange)
 {
     LOG_WITH_STREAM(ContentObservation, stream << "didFinishContentChangeObserving: pending target node(" << m_pendingSyntheticClickNode << ")");
     if (!m_pendingSyntheticClickNode)
@@ -991,7 +991,7 @@ void WebPage::didFinishContentChangeObserving(WebCore::FrameIdentifier frameID, 
             return;
 
         // Only dispatch the click if the document didn't get changed by any timers started by the move event.
-        if (observedContentChange == WKContentNoChange) {
+        if (observedContentChange == WebCore::ContentChange::None) {
             LOG(ContentObservation, "No change was observed -> click.");
             protectedThis->completeSyntheticClick(frameID, targetNode, location, modifiers, WebCore::SyntheticClickType::OneFingerTap, pointerId);
             return;

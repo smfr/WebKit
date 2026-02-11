@@ -56,6 +56,9 @@
 #import <WebCore/AnimationTimelinesController.h>
 #import <WebCore/Chrome.h>
 #import <WebCore/ChromeClient.h>
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+#import <WebCore/ContentChangeObserver.h>
+#endif
 #import <WebCore/DeprecatedGlobalSettings.h>
 #import <WebCore/DictionaryLookup.h>
 #import <WebCore/DocumentMarkerController.h>
@@ -2392,6 +2395,13 @@ VisiblePosition WebPage::visiblePositionInFocusedNodeForPoint(const LocalFrame& 
     IntPoint constrainedPoint = m_focusedElement && isInteractingWithFocusedElement ? WebPage::constrainPoint(adjustedPoint, frame, WTF::protect(*m_focusedElement)) : adjustedPoint;
     return frame.visiblePositionForPoint(constrainedPoint);
 }
+
+#if ENABLE(CONTENT_CHANGE_OBSERVER) && !PLATFORM(IOS_FAMILY)
+void WebPage::didFinishContentChangeObserving(WebCore::FrameIdentifier, WebCore::ContentChange)
+{
+    notImplemented();
+}
+#endif
 
 } // namespace WebKit
 

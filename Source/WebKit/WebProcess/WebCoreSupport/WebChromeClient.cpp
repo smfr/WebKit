@@ -80,6 +80,9 @@
 #include <WebCore/BarcodeDetectorInterface.h>
 #include <WebCore/ColorChooser.h>
 #include <WebCore/ColorChooserClient.h>
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+#include <WebCore/ContentChangeObserver.h>
+#endif
 #include <WebCore/ContentRuleListMatchedRule.h>
 #include <WebCore/ContentRuleListResults.h>
 #include <WebCore/DataListSuggestionPicker.h>
@@ -2422,6 +2425,14 @@ void WebChromeClient::showCaptionDisplaySettings(HTMLMediaElement& element, cons
         else
             completionHandler(expected.error().toException());
     });
+}
+#endif
+
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+void WebChromeClient::didFinishContentChangeObserving(WebCore::LocalFrame& frame, WebCore::ContentChange observedContentChange)
+{
+    if (RefPtr page = m_page.get())
+        page->didFinishContentChangeObserving(frame.frameID(), observedContentChange);
 }
 #endif
 

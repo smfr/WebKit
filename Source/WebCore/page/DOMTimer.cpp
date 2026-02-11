@@ -310,7 +310,7 @@ void DOMTimer::fired()
     ASSERT(scriptExecutionContext());
     Ref context = *scriptExecutionContext();
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
     if (RefPtr document = dynamicDowncast<Document>(context); document && m_oneShot) {
         if (auto* holdingTank = document->domTimerHoldingTankIfExists(); holdingTank && holdingTank->contains(*this)) {
             m_timer = protect(document->eventLoop())->scheduleTask(0_s, TaskSource::Timer, [weakThis = WeakPtr { *this }] {

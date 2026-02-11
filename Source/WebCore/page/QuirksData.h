@@ -228,6 +228,8 @@ struct QuirksData {
 #endif
 #if PLATFORM(IOS_FAMILY)
         ShouldSynthesizeTouchEventsAfterNonSyntheticClickQuirk,
+#endif
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
         ShouldTreatAddingMouseOutEventListenerAsContentChange,
 #endif
         ShouldUnloadHeavyFrames,

@@ -33,7 +33,6 @@
 #include <WebCore/PlatformEvent.h>
 #include <WebCore/RenderStyleConstants.h>
 #include <WebCore/Timer.h>
-#include <WebCore/WKContentObservation.h>
 #include <WebCore/WebAnimationTypes.h>
 #include <wtf/CheckedRef.h>
 #include <wtf/HashSet.h>
@@ -50,6 +49,12 @@ namespace WebCore {
 class Animation;
 class DOMTimer;
 
+enum class ContentChange : uint8_t {
+    None,
+    Visibility,
+    Indeterminate,
+};
+
 class ContentChangeObserver : public CanMakeWeakPtr<ContentChangeObserver> {
     WTF_MAKE_TZONE_ALLOCATED_EXPORT(ContentChangeObserver, WEBCORE_EXPORT);
 public:
@@ -57,7 +62,7 @@ public:
 
     WEBCORE_EXPORT void startContentObservationForDuration(Seconds duration);
     WEBCORE_EXPORT void stopContentObservation();
-    WKContentChange observedContentChange() const { return m_observedContentState; }
+    ContentChange observedContentChange() const { return m_observedContentState; }
     WEBCORE_EXPORT static bool isConsideredVisible(const Node&);
     static bool isVisuallyHidden(const Node&);
 
@@ -101,6 +106,7 @@ public:
         bool m_hadRenderer { false };
     };
 
+#if ENABLE(TOUCH_EVENTS)
     class TouchEventScope {
     public:
         WEBCORE_EXPORT TouchEventScope(Document&, PlatformEvent::Type);
@@ -108,6 +114,7 @@ public:
     private:
         ContentChangeObserver& m_contentChangeObserver;
     };
+#endif
 
     class MouseMovedScope {
     public:
@@ -167,11 +174,11 @@ private:
     void stopObservingPendingActivities();
     void reset();
 
-    void setHasNoChangeState() { m_observedContentState = WKContentNoChange; }
-    void setHasIndeterminateState() { m_observedContentState = WKContentIndeterminateChange; }
-    void setHasVisibleChangeState() { m_observedContentState = WKContentVisibilityChange; } 
+    void setHasNoChangeState() { m_observedContentState = ContentChange::None; }
+    void setHasIndeterminateState() { m_observedContentState = ContentChange::Indeterminate; }
+    void setHasVisibleChangeState() { m_observedContentState = ContentChange::Visibility; }
 
-    bool hasVisibleChangeState() const { return observedContentChange() == WKContentVisibilityChange; }
+    bool hasVisibleChangeState() const { return observedContentChange() == ContentChange::Visibility; }
     bool hasObservedDOMTimer() const;
     bool hasObservedTransition() const { return !m_elementsWithTransition.isEmptyIgnoringNullReferences(); }
 
@@ -194,7 +201,7 @@ private:
 
     enum class ElementHadRenderer : bool { No, Yes };
     bool isConsideredActionableContent(const Element&, ElementHadRenderer) const;
-    
+
     bool isContentChangeObserverEnabled();
 
     enum class Event : uint8_t {
@@ -228,7 +235,7 @@ private:
     WeakHashSet<const DOMTimer> m_DOMTimerList;
     WeakHashSet<const Element, WeakPtrImplWithEventTargetData> m_elementsWithTransition;
     WeakHashSet<const Element, WeakPtrImplWithEventTargetData> m_elementsWithDestroyedVisibleRenderer;
-    WKContentChange m_observedContentState { WKContentNoChange };
+    ContentChange m_observedContentState { ContentChange::None };
     WeakPtr<Element, WeakPtrImplWithEventTargetData> m_hiddenTouchTargetElement;
     WeakPtr<Node, WeakPtrImplWithEventTargetData> m_clickTarget;
     WeakHashSet<Element, WeakPtrImplWithEventTargetData> m_visibilityCandidateList;

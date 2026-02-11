@@ -901,12 +901,18 @@ bool HTMLImageElement::childShouldCreateRenderer(const Node& child) const
 }
 #endif
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
 // FIXME: We should find a better place for the touch callout logic. See rdar://problem/48937767.
 bool HTMLImageElement::willRespondToMouseClickEventsWithEditability(Editability editability, IgnoreTouchCallout ignoreTouchCallout) const
 {
-    auto renderer = this->renderer();
-    if (ignoreTouchCallout == IgnoreTouchCallout::No && (!renderer || renderer->style().touchCallout() == Style::WebkitTouchCallout::Default))
+#if ENABLE(WEBKIT_TOUCH_CALLOUT_CSS_PROPERTY)
+    CheckedPtr renderer = this->renderer();
+    bool touchCalloutIsDefault = !renderer || renderer->style().touchCallout() == Style::WebkitTouchCallout::Default;
+#else
+    bool touchCalloutIsDefault = true;
+#endif
+
+    if (ignoreTouchCallout == IgnoreTouchCallout::No && touchCalloutIsDefault)
         return true;
     return HTMLElement::willRespondToMouseClickEventsWithEditability(editability);
 }

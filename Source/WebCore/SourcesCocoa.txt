@@ -228,6 +228,8 @@ loader/mac/LoaderNSURLExtras.mm @nonARC
 loader/mac/ResourceLoaderMac.mm @nonARC
 page/CaptionUserPreferencesMediaAF.cpp
 page/cocoa/CaptionUserPreferencesMediaAFCocoa.mm @nonARC
+page/cocoa/ContentChangeObserver.cpp
+page/cocoa/DOMTimerHoldingTank.cpp
 page/cocoa/EventHandlerCocoa.mm @nonARC
 page/cocoa/MemoryReleaseCocoa.mm @nonARC
 page/cocoa/PageCocoa.mm @nonARC
@@ -236,8 +238,6 @@ page/cocoa/ResourceUsageOverlayCocoa.mm @nonARC
 page/cocoa/ResourceUsageThreadCocoa.mm @nonARC
 page/cocoa/SettingsBaseCocoa.mm @nonARC
 page/cocoa/WebTextIndicatorLayer.mm @nonARC
-page/ios/ContentChangeObserver.cpp
-page/ios/DOMTimerHoldingTank.cpp
 page/ios/EventHandlerIOS.mm @nonARC
 page/ios/FrameIOS.mm @nonARC
 page/ios/WebEventRegion.mm @nonARC

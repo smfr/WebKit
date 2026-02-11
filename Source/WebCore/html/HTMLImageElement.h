@@ -102,7 +102,7 @@ public:
     
     WEBCORE_EXPORT void decode(Ref<DeferredPromise>&&);
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
     bool willRespondToMouseClickEventsWithEditability(Editability) const override;
 
     enum class IgnoreTouchCallout : bool { No, Yes };

@@ -267,11 +267,14 @@ public:
     WEBCORE_EXPORT bool shouldIgnoreContentObservationForClick(const Node&) const;
     WEBCORE_EXPORT bool shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Element&) const;
     WEBCORE_EXPORT bool needsPointerTouchCompatibility(const Element&) const;
-    bool shouldTreatAddingMouseOutEventListenerAsContentChange() const;
     WEBCORE_EXPORT bool shouldHideSoftTopScrollEdgeEffectDuringFocus(const Element&) const;
 
     bool needsClaudeSidebarViewportUnitQuirk(Element&, const RenderStyle&) const;
     bool needsChromeOSNavigatorUserAgentQuirk(const Document&) const;
+#endif
+
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+    bool shouldTreatAddingMouseOutEventListenerAsContentChange() const;
 #endif
 
     bool needsMozillaFileTypeForDataTransfer() const;
