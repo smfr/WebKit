@@ -40,6 +40,10 @@
 #include <wtf/TZoneMalloc.h>
 #include <wtf/WeakPtr.h>
 
+namespace WTF {
+class TextStream;
+}
+
 namespace WebCore {
 class ContentChangeObserver;
 }
@@ -265,6 +269,8 @@ inline void ContentChangeObserver::setShouldObserveDOMTimerSchedulingAndTransiti
     m_isObservingDOMTimerScheduling = observe;
     m_isObservingTransitions = observe;
 }
+
+WTF::TextStream& operator<<(WTF::TextStream&, ContentChange);
 
 }
 #endif // ENABLE(CONTENT_CHANGE_OBSERVER)

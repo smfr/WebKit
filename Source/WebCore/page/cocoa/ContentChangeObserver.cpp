@@ -45,6 +45,7 @@
 #include "RenderStyle+GettersInlines.h"
 #include "Settings.h"
 #include <wtf/TZoneMallocInlines.h>
+#include <wtf/text/TextStream.h>
 
 namespace WebCore {
 
@@ -52,6 +53,16 @@ static const Seconds maximumDelayForTimers { 400_ms };
 static const Seconds maximumDelayForTransitions { 300_ms };
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(ContentChangeObserver);
+
+TextStream& operator<<(TextStream& ts, ContentChange contentChange)
+{
+    switch (contentChange) {
+    case ContentChange::None: ts << "None"_s; break;
+    case ContentChange::Visibility: ts << "Visibility"_s; break;
+    case ContentChange::Indeterminate: ts << "Indeterminate"_s; break;
+    }
+    return ts;
+}
 
 #if ENABLE(FULLSCREEN_API)
 static bool isHiddenBehindFullscreenElement(const Node& descendantCandidate)
