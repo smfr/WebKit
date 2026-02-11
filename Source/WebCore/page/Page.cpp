@@ -4815,7 +4815,7 @@ void Page::configureLoggingChannel(const String& channelName, WTFLogChannelState
 
 void Page::didFinishLoadingImageForElement(HTMLImageElement& element)
 {
-    protect(element.document().eventLoop())->queueTask(TaskSource::Networking, [element = Ref { element }]() {
+    protect(protect(element.document())->eventLoop())->queueTask(TaskSource::Networking, [element = Ref { element }]() {
         RefPtr frame = element->document().frame();
         if (!frame)
             return;
