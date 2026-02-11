@@ -9279,6 +9279,25 @@ WebCodecsVideoEnabled:
   richJavaScript: true
   mediaPlaybackRelated: true
 
+WebContentRestrictionsTransitiveTrustEnabled:
+  type: bool
+  status: stable
+  category: security
+  defaultsOverridable: true
+  humanReadableName: "Web Content Restrictions Transitive Trust"
+  humanReadableDescription: "Enable Transitive Trust for WebContentRestrictions"
+  webcoreBinding: DeprecatedGlobalSettings
+  condition: HAVE(WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST)
+  defaultValue:
+    WebKitLegacy:
+      default: true
+    WebKit:
+      default: true
+    WebCore:
+      default: true
+  sharedPreferenceForWebProcess: true
+
+
 WebCryptoSafeCurvesEnabled:
   type: bool
   status: stable

@@ -114,3 +114,4 @@ classes = ["WCRBrowserEngineClient"]
 selectors = [
     { name = "evaluateURL:mainDocumentURL:withCompletion:onCompletionQueue:", class = "WCRBrowserEngineClient" },
 ]
+requires = ["HAVE_WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST"]

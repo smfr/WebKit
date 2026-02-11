@@ -40,6 +40,10 @@
 #import <WebKitAdditions/BEKAdditions.h>
 #endif
 
+#if HAVE(WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST)
+#import <WebCore/DeprecatedGlobalSettings.h>
+#endif
+
 namespace WebKit {
 
 Ref<WebParentalControlsURLFilter> WebParentalControlsURLFilter::create()
@@ -76,7 +80,9 @@ void WebParentalControlsURLFilter::isURLAllowedImpl(const URL& mainDocumentURL, 
         RetainPtr filter = ensureWebContentFilter();
 #if HAVE(WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST)
 #if __has_include(<WebKitAdditions/BEKAdditions.h>)
+    if (WebCore::DeprecatedGlobalSettings::webContentRestrictionsTransitiveTrustEnabled()) {
         MAYBE_EVALUATE_URL_WITH_TRANSITIVE_TRUST
+    }
 #endif
 #endif
         [filter evaluateURL:url.createNSURL().get() completionHandler:makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL shouldBlock, NSData *replacementData) mutable {
