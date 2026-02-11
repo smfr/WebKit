@@ -93,7 +93,7 @@ GridAreas ImplicitGrid::gridAreas() const
     return gridAreas;
 }
 
-void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridItem, GridAutoFlowOptions autoFlowOptions, HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>>* rowCursors)
+void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridItem, GridAutoFlowOptions autoFlowOptions)
 {
     // Step 2 of CSS Grid auto-placement algorithm:
     // Process items locked to a given row (definite row position, auto column position)
@@ -108,13 +108,13 @@ void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridIte
     // FIXME: Support multi-row spans
     ASSERT(normalizedRowEnd - normalizedRowStart == 1);
 
-    std::optional<size_t> columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan, rowCursors);
+    std::optional<size_t> columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan);
 
     if (!columnPosition) {
         growGridToFit(columnSpan, normalizedRowStart, normalizedRowEnd, columnsCount());
 
         // Retry finding position in the grown grid
-        columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan, rowCursors);
+        columnPosition = findColumnPosition(autoFlowOptions, normalizedRowStart, normalizedRowEnd, columnSpan);
 #ifndef NDEBUG
         ASSERT(columnPosition); // Must succeed after growing
 
@@ -138,7 +138,7 @@ void ImplicitGrid::insertDefiniteRowItem(const UnplacedGridItem& unplacedGridIte
 
     if (autoFlowOptions.strategy != PackingStrategy::Dense) {
         for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row)
-            rowCursors->set(row, *columnPosition + columnSpan);
+            m_rowCursors.set(row, *columnPosition + columnSpan);
     }
 }
 
@@ -158,8 +158,7 @@ std::optional<size_t> ImplicitGrid::findFirstAvailableColumnPosition(size_t rowS
     // If we are unable to find a valid position, signal that we need to grow the grid.
     return std::nullopt;
 }
-std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan
-, HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>>* rowCursors) const
+std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoFlowOptions, size_t normalizedRowStart, size_t normalizedRowEnd, size_t columnSpan) const
 {
     if (autoFlowOptions.strategy == PackingStrategy::Dense) {
         // Dense packing: always start searching from column 0
@@ -170,7 +169,7 @@ std::optional<size_t> ImplicitGrid::findColumnPosition(GridAutoFlowOptions autoF
     ASSERT(autoFlowOptions.strategy == PackingStrategy::Sparse);
     size_t startSearchColumn = 0;
     for (size_t row = normalizedRowStart; row < normalizedRowEnd; ++row)
-        startSearchColumn = std::max(startSearchColumn, rowCursors->get(row));
+        startSearchColumn = std::max(startSearchColumn, m_rowCursors.get(row));
     return findFirstAvailableColumnPosition(normalizedRowStart, normalizedRowEnd, columnSpan, startSearchColumn);
 }
 

@@ -137,10 +137,8 @@ auto GridLayout::placeGridItems(UnplacedGridItems& unplacedGridItems, const Vect
         implicitGrid.insertUnplacedGridItem(nonAutoPositionedItem);
 
     // 2. Process the items locked to a given row.
-    // Phase 1: Only single-cell items within explicit grid bounds
-    HashMap<size_t, size_t, DefaultHash<size_t>, WTF::UnsignedWithZeroKeyHashTraits<size_t>> rowCursors;
     for (auto& definiteRowPositionedItem : unplacedGridItems.definiteRowPositionedItems)
-        implicitGrid.insertDefiniteRowItem(definiteRowPositionedItem, autoFlowOptions, &rowCursors);
+        implicitGrid.insertDefiniteRowItem(definiteRowPositionedItem, autoFlowOptions);
 
     // 3. FIXME: Process auto-positioned items (not implemented yet)
     ASSERT(unplacedGridItems.autoPositionedItems.isEmpty());
