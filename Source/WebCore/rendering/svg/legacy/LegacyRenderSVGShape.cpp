@@ -441,6 +441,13 @@ void LegacyRenderSVGShape::updateRepaintBoundingBox()
 
 FloatRect LegacyRenderSVGShape::repaintRectInLocalCoordinates(RepaintRectCalculation repaintRectCalculation) const
 {
+    // During initial layout the path may not exist yet, so check path before calculating.
+    if (hasNonScalingStroke() && hasPath()) {
+        FloatRect repaintBoundingBox = SVGRenderSupport::calculateApproximateStrokeBoundingBox(*this);
+        SVGRenderSupport::intersectRepaintRectWithResources(*this, repaintBoundingBox, repaintRectCalculation);
+        return repaintBoundingBox;
+    }
+
     if (repaintRectCalculation == RepaintRectCalculation::Fast)
         return m_repaintBoundingBox;
 

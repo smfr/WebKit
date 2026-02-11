@@ -208,6 +208,13 @@ FloatRect LegacyRenderSVGContainer::strokeBoundingBox() const
 
 FloatRect LegacyRenderSVGContainer::repaintRectInLocalCoordinates(RepaintRectCalculation repaintRectCalculation) const
 {
+    if (hasNonScalingStrokeDescendant()) {
+        auto boundingBoxes = SVGRenderSupport::computeContainerBoundingBoxes(*this, repaintRectCalculation);
+        FloatRect repaintBoundingBox = boundingBoxes.repaintBoundingBox;
+        SVGRenderSupport::intersectRepaintRectWithResources(*this, repaintBoundingBox, repaintRectCalculation);
+        return repaintBoundingBox;
+    }
+
     if (repaintRectCalculation == RepaintRectCalculation::Fast)
         return m_repaintBoundingBox;
 

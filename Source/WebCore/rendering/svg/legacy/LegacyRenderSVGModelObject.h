@@ -73,6 +73,7 @@ protected:
     LegacyRenderSVGModelObject(Type, SVGElement&, RenderStyle&&, OptionSet<SVGModelObjectFlag> = { });
 
     void willBeDestroyed() override;
+    void insertedIntoTree() override;
 
 private:
     // This method should never be called, SVG uses a different nodeAtPoint method

@@ -129,8 +129,15 @@ void LegacyRenderSVGModelObject::absoluteQuads(Vector<FloatQuad>& quads, bool* w
 
 void LegacyRenderSVGModelObject::willBeDestroyed()
 {
+    SVGRenderSupport::elementWillBeRemovedFromTree(*this);
     SVGResourcesCache::clientDestroyed(*this);
     RenderElement::willBeDestroyed();
+}
+
+void LegacyRenderSVGModelObject::insertedIntoTree()
+{
+    RenderElement::insertedIntoTree();
+    SVGRenderSupport::elementInsertedIntoTree(*this);
 }
 
 void LegacyRenderSVGModelObject::styleDidChange(Style::Difference diff, const RenderStyle* oldStyle)
