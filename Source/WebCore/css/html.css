@@ -1099,6 +1099,11 @@ select:is([size=""], [size="0"], [size="1"]) {
 }
 #endif
 
+select:not([multiple]):-internal-uses-menulist > button:first-child {
+    all: unset;
+    /* FIXME: add display: contents; once it works as expected */
+}
+
 optgroup {
     font-weight: bolder;
 }

@@ -281,6 +281,8 @@ private:
 
     std::optional<int> m_lastActiveIndex;
 
+    WeakPtr<HTMLSlotElement, WeakPtrImplWithEventTargetData> m_buttonSlot;
+
 #if !PLATFORM(IOS_FAMILY)
     RefPtr<PopupMenu> m_popup;
     bool m_popupIsVisible { false };

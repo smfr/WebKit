@@ -44,6 +44,7 @@
 #include "FrameDestructionObserverInlines.h"
 #include "FormController.h"
 #include "GenericCachedHTMLCollection.h"
+#include "HTMLButtonElement.h"
 #include "HTMLDataListElement.h"
 #include "HTMLFormElement.h"
 #include "HTMLHRElement.h"
@@ -67,6 +68,7 @@
 #include "SelectFallbackButtonElement.h"
 #include "Settings.h"
 #include "ShadowRoot.h"
+#include "SlotAssignment.h"
 #include <JavaScriptCore/ConsoleTypes.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
@@ -82,6 +84,39 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(HTMLSelectElement);
 using namespace WTF::Unicode;
 
 using namespace HTMLNames;
+
+static const AtomString& buttonSlotName()
+{
+    static MainThreadNeverDestroyed<const AtomString> buttonSlot("buttonSlot"_s);
+    return buttonSlot;
+}
+
+class SelectSlotAssignment final : public NamedSlotAssignment {
+private:
+    void hostChildElementDidChange(const Element&, ShadowRoot&) final;
+    const AtomString& slotNameForHostChild(const Node&) const final;
+};
+
+void SelectSlotAssignment::hostChildElementDidChange(const Element& childElement, ShadowRoot& shadowRoot)
+{
+    if (is<HTMLButtonElement>(childElement)) {
+        // Don't check whether this is the first button element
+        // since we don't know the answer when this function is called inside Element::removedFrom.
+        didChangeSlot(buttonSlotName(), shadowRoot);
+    } else
+        didChangeSlot(NamedSlotAssignment::defaultSlotName(), shadowRoot);
+}
+
+const AtomString& SelectSlotAssignment::slotNameForHostChild(const Node& child) const
+{
+    // The first button child gets assigned to the button slot.
+    if (is<HTMLButtonElement>(child)) {
+        Ref select = downcast<HTMLSelectElement>(*child.parentNode());
+        if (&child == childrenOfType<HTMLButtonElement>(select).first())
+            return buttonSlotName();
+    }
+    return NamedSlotAssignment::defaultSlotName();
+}
 
 // https://html.spec.whatwg.org/#dom-htmloptionscollection-length
 static constexpr unsigned maxSelectItems = 100000;
@@ -106,15 +141,13 @@ Ref<HTMLSelectElement> HTMLSelectElement::create(const QualifiedName& tagName, D
 {
     ASSERT(tagName.matches(selectTag));
     Ref select = adoptRef(*new HTMLSelectElement(tagName, document, form));
-    select->ensureUserAgentShadowRoot();
+    select->addShadowRoot(ShadowRoot::create(document, makeUnique<SelectSlotAssignment>()));
     return select;
 }
 
 Ref<HTMLSelectElement> HTMLSelectElement::create(Document& document)
 {
-    Ref select = adoptRef(*new HTMLSelectElement(selectTag, document, nullptr));
-    select->ensureUserAgentShadowRoot();
-    return select;
+    return HTMLSelectElement::create(selectTag, document, nullptr);
 }
 
 HTMLSelectElement::~HTMLSelectElement() = default;
@@ -135,7 +168,15 @@ void HTMLSelectElement::didAddUserAgentShadowRoot(ShadowRoot& root)
     Ref document = this->document();
 
     ScriptDisallowedScope::EventAllowedScope rootScope { root };
-    root.appendChild(SelectFallbackButtonElement::create(document));
+
+    Ref buttonSlot = HTMLSlotElement::create(slotTag, document);
+    ScriptDisallowedScope::EventAllowedScope buttonSlotScope { buttonSlot };
+    buttonSlot->setAttributeWithoutSynchronization(inertAttr, emptyAtom());
+    buttonSlot->setAttributeWithoutSynchronization(nameAttr, buttonSlotName());
+    buttonSlot->appendChild(SelectFallbackButtonElement::create(document));
+    root.appendChild(buttonSlot);
+    m_buttonSlot = WTF::move(buttonSlot);
+
     root.appendChild(HTMLSlotElement::create(slotTag, document));
 }
 
@@ -160,6 +201,16 @@ void HTMLSelectElement::didRecalcStyle(OptionSet<Style::Change> styleChange)
     // Even though the options didn't necessarily change, we will call setOptionsChangedOnRenderer for its side effect
     // of recomputing the width of the element. We need to do that if the style change included a change in zoom level.
     setOptionsChangedOnRenderer();
+
+    // When the select's style changes, invalidate the fallback button's style since it depends on
+    // the host's usedAppearance() to compute the padding.
+    if (styleChange.contains(Style::Change::NonInherited)) {
+        if (RefPtr buttonSlot = m_buttonSlot.get()) {
+            if (RefPtr fallbackButton = dynamicDowncast<SelectFallbackButtonElement>(buttonSlot->firstChild()))
+                fallbackButton->invalidateStyle();
+        }
+    }
+
     HTMLFormControlElement::didRecalcStyle(styleChange);
 }
 
@@ -417,6 +468,10 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
 #endif
     if (child.isInShadowTree() && child.containingShadowRoot() == userAgentShadowRoot())
         return true;
+    if (usesMenuList() && is<HTMLButtonElement>(child)) {
+        if (&child == childrenOfType<HTMLButtonElement>(*this).first())
+            return true;
+    }
     return validationMessageShadowTreeContains(child);
 }
 
@@ -499,7 +554,7 @@ void HTMLSelectElement::optionElementChildrenChanged()
 
 void HTMLSelectElement::updateButtonText()
 {
-    protect(downcast<SelectFallbackButtonElement>(*protect(userAgentShadowRoot())->firstChild()))->updateText();
+    protect(downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()))->updateText();
 }
 
 void HTMLSelectElement::setSize(unsigned size)
@@ -2051,7 +2106,7 @@ bool HTMLSelectElement::itemIsSelected(unsigned listIndex) const
 #if !PLATFORM(COCOA)
 void HTMLSelectElement::setTextFromItem(unsigned listIndex)
 {
-    downcast<SelectFallbackButtonElement>(*protect(userAgentShadowRoot())->firstChild()).setTextFromOption(listToOptionIndex(listIndex));
+    downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()).setTextFromOption(listToOptionIndex(listIndex));
 }
 #endif
 

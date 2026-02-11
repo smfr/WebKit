@@ -1,5 +1,5 @@
-
+  button
 
 PASS defaultbutton: <select disabled> should prevent focus and activation with appearance:base-select.
-FAIL custombutton: <select disabled> should prevent focus and activation with appearance:base-select. assert_not_equals: select button should not be focusable when select is disabled. got disallowed value Element node <button>button</button>
+PASS custombutton: <select disabled> should prevent focus and activation with appearance:base-select.
 
