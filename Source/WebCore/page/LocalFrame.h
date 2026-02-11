@@ -225,7 +225,8 @@ public:
     float pageZoomFactor() const { return m_pageZoomFactor; }
     float textZoomFactor() const { return m_textZoomFactor; }
 
-    float usedZoomForChild(const Frame&) const final;
+    // Scale factor of this frame with respect to the container.
+    WEBCORE_EXPORT float frameScaleFactor() const;
 
     void deviceOrPageScaleFactorChanged();
 

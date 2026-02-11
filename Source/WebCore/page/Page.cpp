@@ -153,7 +153,6 @@
 #include "RTCController.h"
 #include "Range.h"
 #include "RemoteFrame.h"
-#include "RemoteFrameLayoutInfo.h"
 #include "RenderDescendantIterator.h"
 #include "RenderElementInlines.h"
 #include "RenderImage.h"
@@ -2157,31 +2156,6 @@ unsigned Page::renderingUpdateCount() const
     return m_renderingUpdateCount;
 }
 
-void Page::syncLocalFrameInfoToRemote()
-{
-    forEachLocalFrame([] (LocalFrame& frame) {
-        CheckedPtr frameView = frame.view();
-
-        frameView->updateLayoutViewportRect();
-
-        {
-            HashMap<FrameIdentifier, RemoteFrameLayoutInfo> childrenFrameLayoutInfo;
-
-            for (RefPtr child = frame.tree().firstChild(); child; child = child->tree().nextSibling()) {
-                auto visibleRect = frameView->visibleRectOfChild(*child.get());
-
-                float usedZoom = 1.0;
-                if (CheckedPtr ownerRenderer = child->ownerRenderer())
-                    usedZoom = ownerRenderer->style().usedZoom();
-
-                childrenFrameLayoutInfo.add(child->frameID(), RemoteFrameLayoutInfo { .visibleRectInParent = visibleRect, .usedZoom = usedZoom });
-            }
-
-            frame.loader().client().broadcastChildrenFrameLayoutInfoToOtherProcesses(childrenFrameLayoutInfo);
-        }
-    });
-}
-
 // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
 void Page::updateRendering()
 {
@@ -2466,9 +2440,6 @@ void Page::doAfterUpdateRendering()
     }
 
     computeSampledPageTopColorIfNecessary();
-
-    if (settings().siteIsolationEnabled())
-        syncLocalFrameInfoToRemote();
 }
 
 void Page::finalizeRenderingUpdate(OptionSet<FinalizeRenderingUpdateFlags> flags)

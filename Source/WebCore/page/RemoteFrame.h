@@ -108,7 +108,6 @@ private:
     SecurityOrigin* frameDocumentSecurityOrigin() const final;
     std::optional<DocumentSecurityPolicy> frameDocumentSecurityPolicy() const final;
     String frameURLProtocol() const final;
-    float usedZoomForChild(const Frame&) const final;
 
     FrameView* virtualView() const final;
     void disconnectView() final;
