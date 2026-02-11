@@ -791,6 +791,11 @@ fast/scrolling/rtl-scrollbars-animation-property.html [ Pass ]
 
 webkit.org/b/307357 [ Debug arm64 ] http/tests/inspector/console/message-from-worker.html [ Pass Timeout ]
 
+webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/eventsource-type.html [ Pass Timeout ]
+webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/fetch-response-body-304.html [ Pass Timeout ]
+webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/har/har-basic.html [ Pass Timeout ]
+webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/har/har-page-aggressive-gc.html [ Pass Timeout ]
+
 webkit.org/b/167607 [ Debug ] http/tests/inspector/worker/blob-script-with-cross-domain-imported-scripts.html [ Pass Timeout ]
 
 webkit.org/b/160042 accessibility/mac/value-change/value-change-user-info-contenteditable.html [ Pass Failure ]
@@ -1111,9 +1116,6 @@ http/tests/inspector/network/contentextensions/blocked-websocket-crash.html [ Pa
 
 # <rdar://problem/60548192> [ Mac wk2 ] http/tests/contentextensions/service-worker.https.html is flaky failing.
 http/tests/contentextensions/service-worker.https.html [ Pass Failure ]
-
-# <rdar://problem/60590009> [ macOS ] REGRESSION(~r258238) http/tests/inspector/network/har/har-basic.html is flaky crashing
-http/tests/inspector/network/har/har-basic.html [ Pass Crash ]
 
 # <rdar://problem/61062687> [ macos wk2 ] REGRESSION: media/modern-media-controls/scrubber-support/scrubber-support-media-api.html is flaky crashing
 media/modern-media-controls/scrubber-support/scrubber-support-media-api.html [ Pass Crash ]
