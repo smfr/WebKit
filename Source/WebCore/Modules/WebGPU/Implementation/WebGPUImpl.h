@@ -37,20 +37,10 @@
 #include <wtf/Function.h>
 #include <wtf/TZoneMalloc.h>
 
-namespace WebModel {
-struct MeshDescriptor;
-}
-
 namespace WebCore {
-class ConvertToBackingContext;
 class GraphicsContext;
 class IntSize;
 class NativeImage;
-}
-
-namespace WebKit {
-class Mesh;
-class ModelConvertToBackingContext;
 }
 
 namespace WebCore::WebGPU {

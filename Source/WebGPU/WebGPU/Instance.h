@@ -39,16 +39,11 @@
 #import <wtf/WeakObjCPtr.h>
 #import <wtf/WeakPtr.h>
 
-struct WebModelCreateMeshDescriptor;
 struct WGPUInstanceImpl {
 };
 
 namespace WTF {
 class MachSendRight;
-}
-
-namespace WebModel {
-class Mesh;
 }
 
 namespace WebGPU {

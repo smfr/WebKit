@@ -44,14 +44,12 @@ struct MeshDescriptor;
 namespace WebCore {
 class IntSize;
 class GraphicsContext;
-class Mesh;
 class NativeImage;
-class Mesh;
-class ModelConvertToBackingContext;
 }
 
 namespace WebKit {
 class ConvertToBackingContext;
+class Mesh;
 class ModelConvertToBackingContext;
 class RemoteRenderingBackendProxy;
 class WebPage;

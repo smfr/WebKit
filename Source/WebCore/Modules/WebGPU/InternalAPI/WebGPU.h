@@ -32,19 +32,10 @@
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
 
-namespace WebModel {
-struct ImageAsset;
-struct MeshDescriptor;
-}
-
 namespace WebCore {
 class NativeImage;
 class IntSize;
 class GraphicsContext;
-}
-
-namespace WebKit {
-class Mesh;
 }
 
 namespace WebCore::WebGPU {
@@ -62,8 +53,6 @@ class Device;
 class ExternalTexture;
 class GPU;
 class GPUImpl;
-class GraphicsContext;
-class NativeImage;
 class PipelineLayout;
 class PresentationContext;
 class QuerySet;
