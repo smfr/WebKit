@@ -61,6 +61,7 @@
 #include "MouseEvent.h"
 #include "NodeName.h"
 #include "NodeRareData.h"
+#include "PseudoClassChangeInvalidation.h"
 #include "RenderListBox.h"
 #include "RenderMenuList.h"
 #include "RenderTheme.h"
@@ -158,7 +159,7 @@ void HTMLSelectElement::didDetachRenderers()
     if (RefPtr popup = m_popup)
         popup->hide();
     m_popup = nullptr;
-    m_popupIsVisible = false;
+    setPopupIsVisible(false);
 #endif
     HTMLFormControlElement::didDetachRenderers();
 }
@@ -1858,7 +1859,7 @@ void HTMLSelectElement::showPopup()
 
     if (!m_popup)
         m_popup = document().page()->chrome().createPopupMenu(*this);
-    m_popupIsVisible = true;
+    setPopupIsVisible(true);
 
     // Compute the top left taking transforms into account, but use
     // the actual width of the element to size the popup.
@@ -1873,7 +1874,22 @@ void HTMLSelectElement::hidePopup()
     if (RefPtr popup = m_popup)
         popup->hide();
 }
+
+void HTMLSelectElement::setPopupIsVisible(bool visible)
+{
+    Style::PseudoClassChangeInvalidation styleInvalidation(*this, CSSSelector::PseudoClass::Open, visible);
+    m_popupIsVisible = visible;
+}
 #endif
+
+bool HTMLSelectElement::isOpen() const
+{
+#if PLATFORM(IOS_FAMILY)
+    return false;
+#else
+    return popupIsVisible();
+#endif
+}
 
 ExceptionOr<void> HTMLSelectElement::showPicker()
 {
@@ -2093,7 +2109,7 @@ int HTMLSelectElement::listSize() const
 void HTMLSelectElement::popupDidHide()
 {
 #if !PLATFORM(IOS_FAMILY)
-    m_popupIsVisible = false;
+    setPopupIsVisible(false);
 #endif
 }
 

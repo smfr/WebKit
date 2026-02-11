@@ -116,7 +116,10 @@ public:
 #if !PLATFORM(IOS_FAMILY)
     void hidePopup();
     bool popupIsVisible() const { return m_popupIsVisible; }
+    void setPopupIsVisible(bool);
 #endif
+
+    bool isOpen() const;
 
     void didUpdateActiveOption(int optionIndex);
 

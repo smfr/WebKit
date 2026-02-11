@@ -597,6 +597,8 @@ ALWAYS_INLINE bool matchesOpenPseudoClass(const Element& element)
         return dialog->isOpen();
     if (auto* details = dynamicDowncast<HTMLDetailsElement>(element))
         return details->isOpen();
+    if (auto* select = dynamicDowncast<HTMLSelectElement>(element))
+        return select->isOpen();
 
     return false;
 }
