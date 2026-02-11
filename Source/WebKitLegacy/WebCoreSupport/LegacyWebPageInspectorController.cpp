@@ -266,7 +266,7 @@ void LegacyWebPageInspectorController::willDestroyPage(const WebCore::Page& page
 
 void LegacyWebPageInspectorController::addTarget(std::unique_ptr<Inspector::InspectorTarget>&& target)
 {
-    checkedTargetAgent()->targetCreated(*target);
+    protect(targetAgent())->targetCreated(*target);
     m_targets.set(target->identifier(), WTF::move(target));
 }
 
@@ -276,7 +276,7 @@ void LegacyWebPageInspectorController::removeTarget(const String& targetID)
     if (it == m_targets.end())
         return;
 
-    checkedTargetAgent()->targetDestroyed(CheckedRef { *it->value });
+    protect(targetAgent())->targetDestroyed(protect(*it->value));
     m_targets.remove(it);
 }
 
@@ -319,5 +319,5 @@ void LegacyWebPageInspectorController::dispatchMessageFromFrontend(const String&
 
 void LegacyWebPageInspectorController::sendMessageToInspectorFrontend(const String& targetID, const String& message)
 {
-    checkedTargetAgent()->sendMessageFromTargetToFrontend(targetID, message);
+    protect(targetAgent())->sendMessageFromTargetToFrontend(targetID, message);
 }
