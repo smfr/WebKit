@@ -791,6 +791,8 @@ fast/scrolling/rtl-scrollbars-animation-property.html [ Pass ]
 
 webkit.org/b/307357 [ Debug arm64 ] http/tests/inspector/console/message-from-worker.html [ Pass Timeout ]
 
+webkit.org/b/307569 [ Debug arm64 ] http/tests/inspector/console/message-from-iframe.html [ Pass Timeout ]
+
 webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/eventsource-type.html [ Pass Timeout ]
 webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/fetch-response-body-304.html [ Pass Timeout ]
 webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/har/har-basic.html [ Pass Timeout ]
