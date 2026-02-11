@@ -1819,6 +1819,12 @@ bool Quirks::needsConsistentQueryParameterFilteringQuirk(const URL& url) const
     return false;
 }
 
+bool Quirks::mayBenefitFromFingerprintingProtectionQuirk(const URL& url) const
+{
+    // FIXME: Placeholder for now.
+    return needsConsistentQueryParameterFilteringQuirk(url);
+}
+
 #if PLATFORM(COCOA)
 
 #if !PLATFORM(IOS_FAMILY)

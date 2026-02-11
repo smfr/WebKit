@@ -96,9 +96,9 @@ ScriptTrackingPrivacyFlag scriptCategoryAsFlag(ScriptTrackingPrivacyCategory cat
     return ScriptTrackingPrivacyFlag::FormControls;
 }
 
-bool shouldEnableScriptTrackingPrivacy(ScriptTrackingPrivacyCategory category, OptionSet<AdvancedPrivacyProtections> protections)
+bool shouldEnableScriptTrackingPrivacy(ScriptTrackingPrivacyCategory category, OptionSet<AdvancedPrivacyProtections> protections, bool needsConsistentPrivacy)
 {
-    if (protections.contains(AdvancedPrivacyProtections::BaselineProtections))
+    if (protections.contains(AdvancedPrivacyProtections::BaselineProtections) || needsConsistentPrivacy)
         return true;
 
     switch (category) {
