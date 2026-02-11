@@ -32,7 +32,6 @@
 #include "LayerTreeHost.h"
 #include "MessageSenderInlines.h"
 #include "NonCompositedFrameRenderer.h"
-#include "UpdateInfo.h"
 #include "WebDisplayRefreshMonitor.h"
 #include "WebPage.h"
 #include "WebPageCreationParameters.h"
@@ -272,23 +271,6 @@ void DrawingAreaCoordinatedGraphics::updateGeometry(const IntSize& size, Complet
     completionHandler();
 }
 
-void DrawingAreaCoordinatedGraphics::displayDidRefresh(MonotonicTime)
-{
-    // We might get didUpdate messages from the UI process even after we've
-    // entered accelerated compositing mode. Ignore them.
-    if (m_layerTreeHost)
-        return;
-
-    m_isWaitingForDidUpdate = false;
-
-    if (!m_scheduledWhileWaitingForDidUpdate)
-        return;
-    m_scheduledWhileWaitingForDidUpdate = false;
-
-    // Display if needed. We call displayTimerFired here since it will throttle updates to 60fps.
-    displayTimerFired();
-}
-
 void DrawingAreaCoordinatedGraphics::dispatchAfterEnsuringDrawing(IPC::AsyncReplyID callbackID)
 {
     m_pendingAfterDrawCallbackIDs.append(callbackID);
@@ -410,11 +392,6 @@ void DrawingAreaCoordinatedGraphics::scheduleDisplay()
 {
     ASSERT(!m_layerTreeHost);
 
-    if (m_isWaitingForDidUpdate) {
-        m_scheduledWhileWaitingForDidUpdate = true;
-        return;
-    }
-
     if (m_isPaintingSuspended)
         return;
 
@@ -432,7 +409,6 @@ void DrawingAreaCoordinatedGraphics::displayTimerFired()
 void DrawingAreaCoordinatedGraphics::display()
 {
     ASSERT(!m_layerTreeHost);
-    ASSERT(!m_isWaitingForDidUpdate);
     ASSERT(!m_inUpdateGeometry);
 
     if (m_layerTreeStateIsFrozen)
@@ -445,24 +421,6 @@ void DrawingAreaCoordinatedGraphics::display()
         m_nonCompositedFrameRenderer->display();
         return;
     }
-}
-
-void DrawingAreaCoordinatedGraphics::forceUpdate()
-{
-    if (m_isWaitingForDidUpdate || m_layerTreeHost)
-        return;
-
-    if (m_nonCompositedFrameRenderer)
-        m_nonCompositedFrameRenderer->setNeedsDisplayInRect(m_webPage->bounds());
-
-    display();
-}
-
-void DrawingAreaCoordinatedGraphics::didDiscardBackingStore()
-{
-    // Ensure the next update will cover the entire view, since the UI process discarded its backing store.
-    if (m_nonCompositedFrameRenderer)
-        m_nonCompositedFrameRenderer->setNeedsDisplayInRect(m_webPage->bounds());
 }
 
 #if PLATFORM(WPE) && ENABLE(WPE_PLATFORM) && (USE(GBM) || OS(ANDROID))
