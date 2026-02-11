@@ -5789,17 +5789,17 @@ OffscreenCanvasInWorkersEnabled:
 
 OpenPseudoClassEnabled:
   type: bool
-  status: testable
+  status: stable
   humanReadableName: ":open pseudo-class"
   humanReadableDescription: "Enable the :open CSS pseudo-class"
   category: css
   defaultValue:
     WebKitLegacy:
-      default: false
+      default: true
     WebKit:
-      default: false
+      default: true
     WebCore:
-      default: false
+      default: true
 
 OpenXRDMABufRelaxedForTesting:
   type: bool
