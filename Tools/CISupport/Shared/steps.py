@@ -369,7 +369,6 @@ class UpdateSwiftCheckouts(steps.ShellSequence, ShellMixin):
         self.commands = [
             util.ShellArg(command=self.shell_command('utils/update-checkout --clone'), logname='stdio', haltOnFailure=True),
             util.ShellArg(command=self.shell_command(f'utils/update-checkout --tag {swift_tag}'), logname='stdio'),
-            util.ShellArg(command=self.shell_command(f'rm -rf ../build'), logname='stdio')
         ]
 
         rc = yield super().run()
@@ -447,9 +446,10 @@ class InstallMetalToolchain(shell.ShellCommand, ShellMixin):
         toolchain_bin = f'{USER_TOOLCHAINS_DIR}/{SWIFT_TOOLCHAIN_NAME}.xctoolchain/usr/bin'
 
         check_and_link_metal = f'''
-if [ -L {toolchain_bin}/metal ]; then
-    echo "Metal symlink already exists"
+if [ -L {toolchain_bin}/metal ] && [ -x {toolchain_bin}/metal ]; then
+    echo "Metal symlink already exists and is valid"
 else
+    rm -f {toolchain_bin}/metal
     xcrun -find metal > /dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain
     ln -s $(xcrun -find metal) {toolchain_bin}/metal
     echo "Created metal symlink"
@@ -463,8 +463,8 @@ fi
         rc = yield super().run()
 
         log_text = self.log_observer.getStdout()
-        if 'already exists' in log_text:
-            self.summary = 'Metal symlink already exists'
+        if 'already exists and is valid' in log_text:
+            self.summary = 'Metal symlink already exists and is valid'
         elif 'Created metal symlink' in log_text:
             self.summary = 'Created metal symlink'
         elif rc != SUCCESS:
@@ -473,9 +473,6 @@ fi
             self.summary = 'Installed metal toolchain'
 
         return defer.returnValue(rc)
-
-    def doStepIf(self, step):
-        return self.getProperty('swift_toolchain_rebuilt', False)
 
     def getResultSummary(self):
         if self.results == SKIPPED:

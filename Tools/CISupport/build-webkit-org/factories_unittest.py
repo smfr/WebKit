@@ -392,6 +392,7 @@ class TestExpectedBuildSteps(unittest.TestCase):
             'print-clang-version',
             'checkout-llvm-project',
             'update-clang',
+            'install-metal-toolchain',
             'scan-build'
         ],
         'Apple-Sequoia-Release-Build': [

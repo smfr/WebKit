@@ -328,6 +328,7 @@ class SaferCPPStaticAnalyzerFactory(Factory):
             self.addStep(PrintClangVersion())
             self.addStep(CheckOutLLVMProject())
             self.addStep(UpdateClang())
+            self.addStep(InstallMetalToolchain())
         self.addStep(ScanBuild())
 
 

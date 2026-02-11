@@ -621,11 +621,6 @@ class TestUpdateSwiftCheckouts(BuildStepMixinAdditions, unittest.TestCase):
                         timeout=1800,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'utils/update-checkout --tag swift-6.3-DEVELOPMENT-SNAPSHOT'])
             .exit(0),
-            ExpectShell(workdir=SWIFT_DIR,
-                        log_environ=False,
-                        timeout=1800,
-                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf ../build'])
-            .exit(0),
         )
         self.expect_outcome(result=SUCCESS, state_string='Successfully updated swift checkout')
         return self.run_step()
@@ -775,9 +770,10 @@ class TestInstallMetalToolchain(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=600,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c',
-                                 f'\nif [ -L {toolchain_bin}/metal ]; then\n'
-                                 f'    echo "Metal symlink already exists"\n'
+                                 f'\nif [ -L {toolchain_bin}/metal ] && [ -x {toolchain_bin}/metal ]; then\n'
+                                 f'    echo "Metal symlink already exists and is valid"\n'
                                  f'else\n'
+                                 f'    rm -f {toolchain_bin}/metal\n'
                                  f'    xcrun -find metal > /dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain\n'
                                  f'    ln -s $(xcrun -find metal) {toolchain_bin}/metal\n'
                                  f'    echo "Created metal symlink"\n'
@@ -797,17 +793,18 @@ class TestInstallMetalToolchain(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=600,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c',
-                                 f'\nif [ -L {toolchain_bin}/metal ]; then\n'
-                                 f'    echo "Metal symlink already exists"\n'
+                                 f'\nif [ -L {toolchain_bin}/metal ] && [ -x {toolchain_bin}/metal ]; then\n'
+                                 f'    echo "Metal symlink already exists and is valid"\n'
                                  f'else\n'
+                                 f'    rm -f {toolchain_bin}/metal\n'
                                  f'    xcrun -find metal > /dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain\n'
                                  f'    ln -s $(xcrun -find metal) {toolchain_bin}/metal\n'
                                  f'    echo "Created metal symlink"\n'
                                  f'fi\n'])
-            .log('stdio', stdout='Metal symlink already exists\n')
+            .log('stdio', stdout='Metal symlink already exists and is valid\n')
             .exit(0),
         )
-        self.expect_outcome(result=SUCCESS, state_string='Metal symlink already exists')
+        self.expect_outcome(result=SUCCESS, state_string='Metal symlink already exists and is valid')
         return self.run_step()
 
     def test_failure(self):
@@ -819,9 +816,10 @@ class TestInstallMetalToolchain(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=600,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c',
-                                 f'\nif [ -L {toolchain_bin}/metal ]; then\n'
-                                 f'    echo "Metal symlink already exists"\n'
+                                 f'\nif [ -L {toolchain_bin}/metal ] && [ -x {toolchain_bin}/metal ]; then\n'
+                                 f'    echo "Metal symlink already exists and is valid"\n'
                                  f'else\n'
+                                 f'    rm -f {toolchain_bin}/metal\n'
                                  f'    xcrun -find metal > /dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain\n'
                                  f'    ln -s $(xcrun -find metal) {toolchain_bin}/metal\n'
                                  f'    echo "Created metal symlink"\n'
@@ -841,9 +839,10 @@ class TestInstallMetalToolchain(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=600,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c',
-                                 f'\nif [ -L {toolchain_bin}/metal ]; then\n'
-                                 f'    echo "Metal symlink already exists"\n'
+                                 f'\nif [ -L {toolchain_bin}/metal ] && [ -x {toolchain_bin}/metal ]; then\n'
+                                 f'    echo "Metal symlink already exists and is valid"\n'
                                  f'else\n'
+                                 f'    rm -f {toolchain_bin}/metal\n'
                                  f'    xcrun -find metal > /dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain\n'
                                  f'    ln -s $(xcrun -find metal) {toolchain_bin}/metal\n'
                                  f'    echo "Created metal symlink"\n'
@@ -852,12 +851,6 @@ class TestInstallMetalToolchain(BuildStepMixinAdditions, unittest.TestCase):
             .exit(0),
         )
         self.expect_outcome(result=SUCCESS, state_string='Installed metal toolchain')
-        return self.run_step()
-
-    def test_skipped_when_not_rebuilt(self):
-        self.configureStep()
-        self.setProperty('swift_toolchain_rebuilt', False)
-        self.expect_outcome(result=SKIPPED, state_string='Metal toolchain installation skipped')
         return self.run_step()
 
 
