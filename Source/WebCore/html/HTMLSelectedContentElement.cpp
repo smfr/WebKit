@@ -83,7 +83,24 @@ void HTMLSelectedContentElement::didFinishInsertingNode()
     }
     if (m_isDisabled || !nearestAncestorSelect || nearestAncestorSelect->multiple())
         return;
+
+    if (m_owningSelect != nearestAncestorSelect) {
+        if (RefPtr oldSelect = m_owningSelect)
+            oldSelect->unregisterSelectedContentElement();
+        m_owningSelect = nearestAncestorSelect;
+        nearestAncestorSelect->registerSelectedContentElement();
+    }
     nearestAncestorSelect->updateSelectedContent();
+}
+
+void HTMLSelectedContentElement::removedFromAncestor(RemovalType removalType, ContainerNode& oldParentOfRemovedTree)
+{
+    HTMLElement::removedFromAncestor(removalType, oldParentOfRemovedTree);
+
+    if (RefPtr select = m_owningSelect; select && !isInclusiveDescendantOf(*select)) {
+        select->unregisterSelectedContentElement();
+        m_owningSelect = nullptr;
+    }
 }
 
 } // namespace WebCore

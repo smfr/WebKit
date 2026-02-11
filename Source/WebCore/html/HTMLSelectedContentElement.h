@@ -29,6 +29,8 @@
 
 namespace WebCore {
 
+class HTMLSelectElement;
+
 class HTMLSelectedContentElement final : public HTMLElement {
     WTF_MAKE_TZONE_ALLOCATED(HTMLSelectedContentElement);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectedContentElement);
@@ -42,8 +44,10 @@ private:
 
     InsertedIntoAncestorResult insertedIntoAncestor(InsertionType, ContainerNode&) final;
     void didFinishInsertingNode() final;
+    void removedFromAncestor(RemovalType, ContainerNode&) final;
 
     bool m_isDisabled { false };
+    WeakPtr<HTMLSelectElement, WeakPtrImplWithEventTargetData> m_owningSelect;
 };
 
 } // namespace WebCore

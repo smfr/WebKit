@@ -552,9 +552,9 @@ void HTMLSelectElement::optionElementChildrenChanged()
     updateButtonText();
 }
 
-void HTMLSelectElement::updateButtonText()
+void HTMLSelectElement::updateButtonText(HTMLOptionElement* selectedOption, int optionIndex)
 {
-    protect(downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()))->updateText();
+    protect(downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()))->updateText(selectedOption, optionIndex);
 }
 
 void HTMLSelectElement::setSize(unsigned size)
@@ -1066,12 +1066,14 @@ void HTMLSelectElement::selectOption(int optionIndex, OptionSet<SelectOptionFlag
     if (shouldDeselect)
         deselectItemsWithoutValidation(element.get());
 
+    RefPtr<HTMLOptionElement> selectedOption;
     if (RefPtr option = dynamicDowncast<HTMLOptionElement>(element)) {
         if (m_activeSelectionAnchorIndex < 0 || shouldDeselect)
             setActiveSelectionAnchorIndex(listIndex);
         if (m_activeSelectionEndIndex < 0 || shouldDeselect)
             setActiveSelectionEndIndex(listIndex);
         option->setSelectedState(true);
+        selectedOption = option;
     }
 
     invalidateSelectedItems();
@@ -1079,10 +1081,10 @@ void HTMLSelectElement::selectOption(int optionIndex, OptionSet<SelectOptionFlag
 
     // Update the button text element to display the new selection and ensure it picks up the new
     // selection's direction and unicode-bidi.
-    updateButtonText();
+    updateButtonText(selectedOption.get(), optionIndex);
     if (document().settings().htmlEnhancedSelectEnabled()
         && !document().settings().mutationEventsEnabled())
-        updateSelectedContent();
+        updateSelectedContent(selectedOption.get());
 
     scrollToSelection();
 
@@ -1898,24 +1900,26 @@ ExceptionOr<void> HTMLSelectElement::showPicker()
     return { };
 }
 
-void HTMLSelectElement::updateSelectedContent() const
+void HTMLSelectElement::updateSelectedContent(HTMLOptionElement* selectedOption) const
 {
     ASSERT(document().settings().htmlEnhancedSelectParsingEnabled());
     ASSERT(document().settings().htmlEnhancedSelectEnabled());
     ASSERT(!document().settings().mutationEventsEnabled());
 
-    if (m_multiple)
+    if (m_multiple || !m_selectedContentDescendantCount)
         return;
 
-    RefPtr selectedOption = [&] -> RefPtr<HTMLOptionElement> {
+    RefPtr selectedOptionRef = selectedOption;
+    if (!selectedOptionRef) {
         for (auto& element : listItems()) {
             if (RefPtr option = dynamicDowncast<HTMLOptionElement>(*element)) {
-                if (option->selected())
-                    return option;
+                if (option->selected()) {
+                    selectedOptionRef = option;
+                    break;
+                }
             }
         }
-        return nullptr;
-    }();
+    }
 
     Vector<Ref<HTMLSelectedContentElement>> selectedContentElements;
     for (Ref selectedContent : descendantsOfType<HTMLSelectedContentElement>(*const_cast<HTMLSelectElement*>(this))) {
@@ -1924,11 +1928,22 @@ void HTMLSelectElement::updateSelectedContent() const
     }
 
     for (Ref selectedContent : selectedContentElements) {
-        if (!selectedOption)
+        if (!selectedOptionRef)
             selectedContent->removeChildren();
         else
-            selectedOption->cloneIntoSelectedContent(selectedContent);
+            selectedOptionRef->cloneIntoSelectedContent(selectedContent);
     }
+}
+
+void HTMLSelectElement::registerSelectedContentElement()
+{
+    ++m_selectedContentDescendantCount;
+}
+
+void HTMLSelectElement::unregisterSelectedContentElement()
+{
+    ASSERT(m_selectedContentDescendantCount > 0);
+    --m_selectedContentDescendantCount;
 }
 
 // PopupMenuClient methods
@@ -2106,7 +2121,7 @@ bool HTMLSelectElement::itemIsSelected(unsigned listIndex) const
 #if !PLATFORM(COCOA)
 void HTMLSelectElement::setTextFromItem(unsigned listIndex)
 {
-    downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()).setTextFromOption(listToOptionIndex(listIndex));
+    downcast<SelectFallbackButtonElement>(*protect(m_buttonSlot)->firstChild()).updateText(nullptr, listToOptionIndex(listIndex));
 }
 #endif
 
