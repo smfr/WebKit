@@ -102,6 +102,7 @@ private:
 
     void setPlaybackRate(double, CompletionHandler<void(double effectivePlaybackRate)>&&) final;
     void setAutoplay(bool) final;
+    void setLoop(bool) final;
     void setPaused(bool, CompletionHandler<void(bool succeeded)>&&) final;
     bool paused() const final;
     void play(bool);

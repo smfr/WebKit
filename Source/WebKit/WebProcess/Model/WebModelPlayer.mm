@@ -559,6 +559,14 @@ void WebModelPlayer::play(bool playing)
     }
 }
 
+void WebModelPlayer::setLoop(bool loop)
+{
+    if (m_isLooping == loop)
+        return;
+
+    m_isLooping = loop;
+}
+
 void WebModelPlayer::setAutoplay(bool autoplay)
 {
     if (m_pauseState == PauseState::Paused)
