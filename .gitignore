@@ -88,3 +88,7 @@ CLAUDE.md
 
 # Remove mimalloc binaries
 /Source/bmalloc/mimalloc/mimalloc/bin/
+
+# Ignore tracing files
+*.atrc
+
