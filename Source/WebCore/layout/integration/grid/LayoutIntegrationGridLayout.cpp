@@ -55,12 +55,27 @@ void GridLayout::updateFormattingContextGeometries()
     boxGeometryUpdater.setFormattingContextContentGeometry(CheckedRef { layoutState() }->geometryForBox(gridBox()).contentBoxWidth(), { });
 }
 
-template <typename SizeType>
-static std::optional<LayoutUnit> sizeValue(const SizeType& computedSize, const Style::ZoomFactor& gridContainerZoom)
+static std::optional<LayoutUnit> minimumSizeConstraint(const Style::MinimumSize& computedMinimumSize, const Style::ZoomFactor& gridContainerZoom)
 {
-    return WTF::switchOn(computedSize,
-        [&gridContainerZoom](const SizeType::Fixed& fixedValue) -> std::optional<LayoutUnit> {
+    return WTF::switchOn(computedMinimumSize,
+        [&gridContainerZoom](const Style::MinimumSize::Fixed& fixedValue) -> std::optional<LayoutUnit> {
             return Style::evaluate<LayoutUnit>(fixedValue, gridContainerZoom);
+        },
+        [](const auto&) -> std::optional<LayoutUnit> {
+            ASSERT_NOT_IMPLEMENTED_YET();
+            return { };
+        }
+    );
+}
+
+static std::optional<LayoutUnit> maximumSizeConstraint(const Style::MaximumSize& computedMaximumSize, const Style::ZoomFactor& gridContainerZoom)
+{
+    return WTF::switchOn(computedMaximumSize,
+        [&gridContainerZoom](const Style::MinimumSize::Fixed& fixedValue) -> std::optional<LayoutUnit> {
+            return Style::evaluate<LayoutUnit>(fixedValue, gridContainerZoom);
+        },
+        [](const CSS::Keyword::None&) -> std::optional<LayoutUnit> {
+            return { };
         },
         [](const auto&) -> std::optional<LayoutUnit> {
             ASSERT_NOT_IMPLEMENTED_YET();
@@ -85,15 +100,15 @@ static inline Layout::GridLayoutConstraints constraintsForGridContent(const Layo
 
     auto inlineAxisMinMaxSizes = [&]() -> std::pair<std::optional<LayoutUnit>, std::optional<LayoutUnit>> {
         return {
-            sizeValue(gridContainerStyle->minWidth(), gridContainerZoom),
-            sizeValue(gridContainerStyle->maxWidth(), gridContainerZoom)
+            minimumSizeConstraint(gridContainerStyle->minWidth(), gridContainerZoom),
+            maximumSizeConstraint(gridContainerStyle->maxWidth(), gridContainerZoom)
         };
     }();
 
     auto blockAxisMinMaxSizes = [&]() -> std::pair<std::optional<LayoutUnit>, std::optional<LayoutUnit>> {
         return {
-            sizeValue(gridContainerStyle->minHeight(), gridContainerZoom),
-            sizeValue(gridContainerStyle->maxHeight(), gridContainerZoom)
+            minimumSizeConstraint(gridContainerStyle->minHeight(), gridContainerZoom),
+            maximumSizeConstraint(gridContainerStyle->maxHeight(), gridContainerZoom)
         };
     }();
 
