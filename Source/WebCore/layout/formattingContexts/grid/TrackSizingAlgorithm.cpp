@@ -380,7 +380,7 @@ static void stretchAutoTracks(std::optional<LayoutUnit> freeSpace, UnsizedTracks
 }
 
 // https://drafts.csswg.org/css-grid-1/#algo-grow-tracks
-static void maximizeTracks(UnsizedTracks& unsizedTracks, const FreeSpaceScenario& freeSpaceScenario)
+static void maximizeTracks(UnsizedTracks& unsizedTracks, std::optional<LayoutUnit> availableGridSpace, const FreeSpaceScenario& freeSpaceScenario, LayoutUnit gapSize)
 {
     switch (freeSpaceScenario) {
     case FreeSpaceScenario::MaxContent:
@@ -392,11 +392,39 @@ static void maximizeTracks(UnsizedTracks& unsizedTracks, const FreeSpaceScenario
     case FreeSpaceScenario::MinContent:
         // if sizing under a min-content constraint, the free space is zero, and the track sizes are not increased beyond their base sizes.
         return;
-    case FreeSpaceScenario::Definite:
-        // If the free space is positive, distribute it equally to the base sizes of all tracks,
-        // freezing tracks as they reach their growth limits (and continuing to grow the unfrozen tracks as needed).
-        notImplemented();
-        return;
+    case FreeSpaceScenario::Definite: {
+        auto determineUnfrozenTracks = [&]() {
+            Vector<size_t> unfrozenTrackIndexes;
+            for (auto [trackIndex, unsizedTrack] : indexedRange(unsizedTracks)) {
+                ASSERT_WITH_MESSAGE(unsizedTrack.growthLimit != LayoutUnit::max(), "Infinite growth limits should have been resolved by the end of ResolveIntrinsicTrackSizes");
+                if (unsizedTrack.baseSize < unsizedTrack.growthLimit)
+                    unfrozenTrackIndexes.append(trackIndex);
+            }
+            return unfrozenTrackIndexes;
+        };
+
+        auto freeSpace = computeFreeSpace(availableGridSpace, unsizedTracks, gapSize);
+        auto unfrozenTrackIndexes = determineUnfrozenTracks();
+        // If the free space is positive...
+        while (!unfrozenTrackIndexes.isEmpty() && freeSpace > 0) {
+            // distribute it equally to the base sizes of all tracks, freezing tracks as
+            // they reach their growth limits (and continuing to grow the unfrozen tracks as needed).
+            auto spaceToDistribute = *freeSpace / unfrozenTrackIndexes.size();
+            if (!spaceToDistribute)
+                break;
+
+            for (auto trackIndex : unfrozenTrackIndexes) {
+                auto& unfrozenTrack = unsizedTracks[trackIndex];
+                auto spaceRemainingUntilGrowthLimit = unfrozenTrack.growthLimit - unfrozenTrack.baseSize;
+                if (spaceRemainingUntilGrowthLimit >= spaceToDistribute)
+                    unfrozenTrack.baseSize += spaceToDistribute;
+                else
+                    unfrozenTrack.baseSize += spaceRemainingUntilGrowthLimit;
+            }
+            freeSpace = computeFreeSpace(availableGridSpace, unsizedTracks, gapSize);
+            unfrozenTrackIndexes = determineUnfrozenTracks();
+        }
+    }
     }
 }
 
@@ -415,7 +443,7 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
     resolveIntrinsicTrackSizes(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList, gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions);
 
     // 3. Maximize Tracks
-    maximizeTracks(unsizedTracks, freeSpaceScenario);
+    maximizeTracks(unsizedTracks, availableGridSpace, freeSpaceScenario, gapSize);
 
     // 4. Expand Flexible Tracks
     // https://drafts.csswg.org/css-grid-1/#algo-flex-tracks
