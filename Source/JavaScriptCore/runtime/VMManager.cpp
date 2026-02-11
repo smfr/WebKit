@@ -29,7 +29,7 @@
 #include "JSCConfig.h"
 #include "JSLock.h"
 #include "VM.h"
-#include "VMEntryScope.h"
+#include "VMEntryScopeInlines.h"
 #include "VMThreadContext.h"
 #include "WasmDebugServerUtilities.h"
 #include <wtf/RunLoop.h>

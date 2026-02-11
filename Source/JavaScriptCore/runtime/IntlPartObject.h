@@ -26,6 +26,7 @@
 #pragma once
 
 #include "JSGlobalObject.h"
+#include "JSString.h"
 #include "ObjectConstructor.h"
 
 namespace JSC {
