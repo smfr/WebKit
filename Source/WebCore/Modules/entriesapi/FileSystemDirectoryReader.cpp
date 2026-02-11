@@ -87,7 +87,7 @@ void FileSystemDirectoryReader::readEntries(ScriptExecutionContext& context, Ref
     m_isReading = true;
     callOnMainThread([context = Ref { context }, successCallback = WTF::move(successCallback), errorCallback = WTF::move(errorCallback), pendingActivity = makePendingActivity(*this)]() mutable {
         pendingActivity->object().m_isReading = false;
-        pendingActivity->object().m_directory->filesystem().listDirectory(context, pendingActivity->object().m_directory, [successCallback = WTF::move(successCallback), errorCallback = WTF::move(errorCallback), pendingActivity = WTF::move(pendingActivity)](ExceptionOr<Vector<Ref<FileSystemEntry>>>&& result) mutable {
+        protect(pendingActivity->object().m_directory->filesystem())->listDirectory(context, pendingActivity->object().m_directory, [successCallback = WTF::move(successCallback), errorCallback = WTF::move(errorCallback), pendingActivity = WTF::move(pendingActivity)](ExceptionOr<Vector<Ref<FileSystemEntry>>>&& result) mutable {
             RefPtr document = pendingActivity->object().document();
             if (result.hasException()) {
                 pendingActivity->object().m_error = result.releaseException();
