@@ -67,6 +67,13 @@ symbols = [
 ]
 
 [[legacy]]
+selectors = [
+    { name = "rectValue", class = "?" },
+    { name = "valueWithRect:", class = "?" },
+]
+requires = [ "!HAVE_WK_SECURE_CODING_PKPAYMENT" ]
+
+[[legacy]]
 classes = [
     "AKAuthorizationController",
     "AMSEngagementRequest",
