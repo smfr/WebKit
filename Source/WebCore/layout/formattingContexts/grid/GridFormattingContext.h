@@ -127,6 +127,13 @@ public:
 
     void layout(GridLayoutConstraints);
 
+    struct IntrinsicWidths {
+        LayoutUnit minimum;
+        LayoutUnit maximum;
+    };
+
+    IntrinsicWidths computeIntrinsicWidths();
+
     PlacedGridItems constructPlacedGridItems(const GridAreas&) const;
 
     const ElementBox& root() const { return m_gridBox; }

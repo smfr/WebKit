@@ -149,6 +149,13 @@ void GridLayout::updateFormattingContextRootRenderer()
         orderIteratorPopulator.collectChild(CheckedRef { downcast<RenderBox>(*layoutBox->rendererForIntegration()) });
 }
 
+std::pair<LayoutUnit, LayoutUnit> GridLayout::computeIntrinsicWidths()
+{
+    auto gridFormattingContext = Layout::GridFormattingContext { gridBox(), layoutState() };
+    auto intrinsicWidths = gridFormattingContext.computeIntrinsicWidths();
+    return { intrinsicWidths.minimum, intrinsicWidths.maximum };
+}
+
 void GridLayout::layout()
 {
     Layout::GridFormattingContext { gridBox(), layoutState() }.layout(constraintsForGridContent(gridBox()));

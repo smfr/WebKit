@@ -378,6 +378,27 @@ static void stretchAutoTracks(std::optional<LayoutUnit> freeSpace, UnsizedTracks
         unsizedTracks[trackIndex].baseSize += spacePerTrack;
 }
 
+// https://drafts.csswg.org/css-grid-1/#algo-grow-tracks
+static void maximizeTracks(UnsizedTracks& unsizedTracks, const FreeSpaceScenario& freeSpaceScenario)
+{
+    switch (freeSpaceScenario) {
+    case FreeSpaceScenario::MaxContent:
+        // If sizing the grid container under a max-content constraint, the free space is infinite.
+        // Set each track's base size to its growth limit.
+        for (auto& track : unsizedTracks)
+            track.baseSize = track.growthLimit;
+        break;
+    case FreeSpaceScenario::MinContent:
+        // if sizing under a min-content constraint, the free space is zero, and the track sizes are not increased beyond their base sizes.
+        return;
+    case FreeSpaceScenario::Definite:
+        // If the free space is positive, distribute it equally to the base sizes of all tracks,
+        // freezing tracks as they reach their growth limits (and continuing to grow the unfrozen tracks as needed).
+        notImplemented();
+        return;
+    }
+}
+
 // https://drafts.csswg.org/css-grid-1/#algo-track-sizing
 TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, const ComputedSizesList& gridItemComputedSizesList,
     const UsedBorderAndPaddingList& borderAndPaddingList, const PlacedGridItemSpanList& gridItemSpanList, const TrackSizingFunctionsList& trackSizingFunctions,
@@ -393,10 +414,7 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
     resolveIntrinsicTrackSizes(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList, gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions);
 
     // 3. Maximize Tracks
-    auto maximizeTracks = [] {
-        notImplemented();
-    };
-    UNUSED_VARIABLE(maximizeTracks);
+    maximizeTracks(unsizedTracks, freeSpaceScenario);
 
     // 4. Expand Flexible Tracks
     // https://drafts.csswg.org/css-grid-1/#algo-flex-tracks

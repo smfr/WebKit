@@ -486,7 +486,7 @@ UsedTrackSizes GridLayout::performGridSizingAlgorithm(const PlacedGridItems& pla
 }
 
 // Helper to compute margins from axis sizes
-static UsedMargins computeMarginsForAxis(const auto& axisSizes, const Style::ZoomFactor& zoomFactor)
+static UsedMargins computeMarginsForAxis(const ComputedSizes& axisSizes, const Style::ZoomFactor& zoomFactor)
 {
     auto marginStart = [&] -> LayoutUnit {
         if (auto fixedMarginStart = axisSizes.marginStart.tryFixed())
