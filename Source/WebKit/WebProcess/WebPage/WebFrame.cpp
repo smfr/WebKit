@@ -104,6 +104,7 @@
 #include <WebCore/LocalFrameInlines.h>
 #include <WebCore/LocalFrameView.h>
 #include <WebCore/MouseEventTypes.h>
+#include <WebCore/NavigationActivation.h>
 #include <WebCore/NodeDocument.h>
 #include <WebCore/OriginAccessPatterns.h>
 #include <WebCore/PluginDocument.h>
@@ -394,12 +395,17 @@ void WebFrame::loadDidCommitInAnotherProcess(std::optional<WebCore::LayerHosting
         return;
     }
 
+    // loadDidCommitInAnotherProcess implies the new frame is cross-origin to the current frame.
+    // Cross-origin navigation doesn't trigger view transitions, and does not provide any activation information.
+    protect(localFrame->document())->dispatchPageswapEvent(CanTriggerCrossDocumentViewTransition::No, nullptr);
+
     auto invalidator = frameLoaderClient->takeFrameInvalidator();
     RefPtr ownerRenderer = localFrame->ownerRenderer();
     localFrame->setView(nullptr);
 
     if (ownerElement)
         localFrame->disconnectOwnerElement();
+
     auto clientCreator = [protectedThis = Ref { *this }, invalidator = WTF::move(invalidator)] (auto&) mutable {
         return makeUniqueRef<WebRemoteFrameClient>(WTF::move(protectedThis), WTF::move(invalidator));
     };

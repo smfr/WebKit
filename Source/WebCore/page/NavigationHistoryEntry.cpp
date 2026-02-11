@@ -36,6 +36,7 @@
 #include "FrameDestructionObserverInlines.h"
 #include "FrameLoader.h"
 #include "HistoryController.h"
+#include "HistoryItem.h"
 #include "JSDOMGlobalObject.h"
 #include "LocalDOMWindow.h"
 #include "Navigation.h"
