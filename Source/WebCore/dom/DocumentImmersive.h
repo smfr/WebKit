@@ -95,7 +95,7 @@ private:
     void beginImmersiveRequest(Ref<HTMLModelElement>&&, CompletionHandler<void(ExceptionOr<void>)>&&);
     void createModelPlayerForImmersive(Ref<HTMLModelElement>&&, CompletionHandler<void(ExceptionOr<void>)>&&);
     void presentImmersiveElement(Ref<HTMLModelElement>&&, LayerHostingContextIdentifier, CompletionHandler<void(ExceptionOr<void>)>&&);
-    void dismissClientImmersivePresentation(HTMLModelElement*, CompletionHandler<void()>&&);
+    void dismissClientImmersivePresentation(CompletionHandler<void()>&&);
 
     enum class EmitErrorEvent : bool { No, Yes };
     void handleImmersiveError(HTMLModelElement*, const String& message, EmitErrorEvent, ExceptionCode, CompletionHandler<void(ExceptionOr<void>)>&&);

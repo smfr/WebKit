@@ -341,9 +341,9 @@ public:
 #endif
 
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
-    virtual void allowImmersiveElement(const Element&, CompletionHandler<void(bool)>&& completion) const { completion(false); }
-    virtual void presentImmersiveElement(const Element&, const LayerHostingContextIdentifier, CompletionHandler<void(bool)>&& completion) const { completion(false); }
-    virtual void dismissImmersiveElement(const Element&, CompletionHandler<void()>&& completion) const { completion(); }
+    virtual void allowImmersiveElement(CompletionHandler<void(bool)>&& completion) const { completion(false); }
+    virtual void presentImmersiveElement(const LayerHostingContextIdentifier, CompletionHandler<void(bool)>&& completion) const { completion(false); }
+    virtual void dismissImmersiveElement(CompletionHandler<void()>&& completion) const { completion(); }
 #endif
 
 #if ENABLE(APP_HIGHLIGHTS)

@@ -3113,7 +3113,7 @@ private:
 #endif
 
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
-    void allowImmersiveElementFromURL(const URL&, CompletionHandler<void(bool)>&&) const;
+    void allowImmersiveElement(CompletionHandler<void(bool)>&&);
     void presentImmersiveElement(const WebCore::LayerHostingContextIdentifier, CompletionHandler<void(bool)>&&);
     void dismissImmersiveElement(CompletionHandler<void()>&&);
 #endif
@@ -4133,6 +4133,7 @@ private:
 
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
     bool m_immersive { false };
+    std::optional<URL> m_allowedImmersiveElementFrameURL;
 #endif
 
 #if HAVE(AUDIT_TOKEN)

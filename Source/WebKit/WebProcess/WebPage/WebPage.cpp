@@ -7963,18 +7963,17 @@ void WebPage::spatialBackdropSourceChanged()
 #endif
 
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)
-void WebPage::allowImmersiveElement(const Element& element, CompletionHandler<void(bool)>&& completion)
+void WebPage::allowImmersiveElement(CompletionHandler<void(bool)>&& completion)
 {
-    auto url = element.document().url();
-    sendWithAsyncReply(Messages::WebPageProxy::AllowImmersiveElementFromURL(url), WTF::move(completion));
+    sendWithAsyncReply(Messages::WebPageProxy::AllowImmersiveElement(), WTF::move(completion));
 }
 
-void WebPage::presentImmersiveElement(const Element&, const LayerHostingContextIdentifier contextID, CompletionHandler<void(bool)>&& completion)
+void WebPage::presentImmersiveElement(const LayerHostingContextIdentifier contextID, CompletionHandler<void(bool)>&& completion)
 {
     sendWithAsyncReply(Messages::WebPageProxy::PresentImmersiveElement(contextID), WTF::move(completion));
 }
 
-void WebPage::dismissImmersiveElement(const Element&, CompletionHandler<void()>&& completion)
+void WebPage::dismissImmersiveElement(CompletionHandler<void()>&& completion)
 {
     sendWithAsyncReply(Messages::WebPageProxy::DismissImmersiveElement(), WTF::move(completion));
 }
