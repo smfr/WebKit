@@ -1396,6 +1396,59 @@ void LOLJIT::emit_op_to_object(const JSInstruction* currentInstruction)
     moveValueRegs(operandRegs, dstRegs);
 }
 
+void LOLJIT::emit_op_to_property_key(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpToPropertyKey>();
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ srcRegs ] = allocations.uses;
+    auto [ dstRegs ] = allocations.defs;
+
+    addSlowCase(branchIfNotCell(srcRegs));
+    Jump done = branchIfSymbol(srcRegs.payloadGPR());
+    addSlowCase(branchIfNotString(srcRegs.payloadGPR()));
+
+    done.link(this);
+    moveValueRegs(srcRegs, dstRegs);
+
+    m_fastAllocator.releaseScratches(allocations);
+}
+
+void LOLJIT::emit_op_to_property_key_or_number(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpToPropertyKeyOrNumber>();
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ srcRegs ] = allocations.uses;
+    auto [ dstRegs ] = allocations.defs;
+
+    JumpList done;
+
+    done.append(branchIfNumber(srcRegs, s_scratch));
+    addSlowCase(branchIfNotCell(srcRegs));
+    done.append(branchIfSymbol(srcRegs.payloadGPR()));
+    addSlowCase(branchIfNotString(srcRegs.payloadGPR()));
+
+    done.link(this);
+    moveValueRegs(srcRegs, dstRegs);
+
+    m_fastAllocator.releaseScratches(allocations);
+}
+
+void LOLJIT::emit_op_to_primitive(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpToPrimitive>();
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ srcRegs ] = allocations.uses;
+    auto [ dstRegs ] = allocations.defs;
+
+    Jump isImm = branchIfNotCell(srcRegs);
+    addSlowCase(branchIfObject(srcRegs.payloadGPR()));
+    isImm.link(this);
+
+    moveValueRegs(srcRegs, dstRegs);
+
+    m_fastAllocator.releaseScratches(allocations);
+}
+
 void LOLJIT::emit_op_create_lexical_environment(const JSInstruction* currentInstruction)
 {
     auto bytecode = currentInstruction->as<OpCreateLexicalEnvironment>();
