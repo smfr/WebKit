@@ -1874,21 +1874,17 @@ void HTMLSelectElement::hidePopup()
     if (RefPtr popup = m_popup)
         popup->hide();
 }
+#endif
 
 void HTMLSelectElement::setPopupIsVisible(bool visible)
 {
     Style::PseudoClassChangeInvalidation styleInvalidation(*this, CSSSelector::PseudoClass::Open, visible);
     m_popupIsVisible = visible;
 }
-#endif
 
 bool HTMLSelectElement::isOpen() const
 {
-#if PLATFORM(IOS_FAMILY)
-    return false;
-#else
-    return popupIsVisible();
-#endif
+    return m_popupIsVisible;
 }
 
 ExceptionOr<void> HTMLSelectElement::showPicker()

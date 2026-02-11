@@ -115,9 +115,10 @@ public:
     void showPopup();
 #if !PLATFORM(IOS_FAMILY)
     void hidePopup();
-    bool popupIsVisible() const { return m_popupIsVisible; }
-    void setPopupIsVisible(bool);
 #endif
+
+    bool popupIsVisible() const { return m_popupIsVisible; }
+    WEBCORE_EXPORT void setPopupIsVisible(bool);
 
     bool isOpen() const;
 
@@ -292,8 +293,8 @@ private:
 
 #if !PLATFORM(IOS_FAMILY)
     RefPtr<PopupMenu> m_popup;
-    bool m_popupIsVisible { false };
 #endif
+    bool m_popupIsVisible { false };
 };
 
 } // namespace
