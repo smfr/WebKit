@@ -52,6 +52,7 @@
 #import <WebCore/AnimationFrameRate.h>
 #import <WebCore/GraphicsContextCG.h>
 #import <WebCore/IOSurfacePool.h>
+#import <WebCore/ScrollTypes.h>
 #import <WebCore/ScrollView.h>
 #import <WebCore/WebActionDisablingCALayerDelegate.h>
 #import <pal/spi/cocoa/QuartzCoreSPI.h>
@@ -510,7 +511,9 @@ void RemoteLayerTreeDrawingAreaProxy::commitLayerTreeTransaction(IPC::Connection
                     currentScrollPosition = RequestedScrollData::computeDestinationPosition(currentScrollPosition, requestType, positionOrDeltaBeforeAnimatedScroll);
             }
 
-            page->requestScroll(requestedScroll->destinationPosition(currentScrollPosition), layerTreeTransaction.scrollOrigin(), requestedScroll->animated);
+            // FIXME: Maybe we should avoid interrupting animations in more cases?
+            auto interruptScrollAnimation = requestedScroll->requestType == ScrollRequestType::DeltaUpdate ? InterruptScrollAnimation::No : InterruptScrollAnimation::Yes;
+            page->requestScroll(requestedScroll->destinationPosition(currentScrollPosition), layerTreeTransaction.scrollOrigin(), requestedScroll->animated, interruptScrollAnimation);
         }
 #endif // ENABLE(ASYNC_SCROLLING)
 

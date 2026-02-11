@@ -3009,10 +3009,10 @@ void WebPageProxy::setViewNeedsDisplay(const Region& region)
         pageClient->setViewNeedsDisplay(region);
 }
 
-void WebPageProxy::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin, ScrollIsAnimated animated)
+void WebPageProxy::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin, ScrollIsAnimated animated, WebCore::InterruptScrollAnimation interruptAnimation)
 {
     if (RefPtr pageClient = this->pageClient())
-        pageClient->requestScroll(scrollPosition, scrollOrigin, animated);
+        pageClient->requestScroll(scrollPosition, scrollOrigin, animated, interruptAnimation);
 }
 
 WebCore::FloatPoint WebPageProxy::viewScrollPosition() const

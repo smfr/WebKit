@@ -383,7 +383,8 @@ void ScrollingTreeScrollingNode::requestKeyboardScroll(const RequestedKeyboardSc
 
 void ScrollingTreeScrollingNode::handleScrollPositionRequest(const RequestedScrollData& requestedScrollData)
 {
-    stopAnimatedScroll();
+    if (requestedScrollData.requestType != ScrollRequestType::DeltaUpdate)
+        stopAnimatedScroll();
 
     if (requestedScrollData.requestType == ScrollRequestType::CancelAnimatedScroll) {
         ASSERT(!requestedScrollData.requestedDataBeforeAnimatedScroll);

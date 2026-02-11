@@ -3672,6 +3672,7 @@ webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrolle
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-after-snap.html [ Skip ]
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-scrollIntoView.html?include=subframe-inline-end-block-end-behavior-auto [ Skip ]
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-scrollIntoView.html?include=subframe-inline-start-block-start-behavior-smooth [ Skip ]
+webkit.org/b/307555 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-programmatic-scroll.html?include=root-scrollBy-smooth [ Failure ]
 
 webkit.org/b/231337 imported/w3c/web-platform-tests/xhr/send-timeout-events.htm [ Pass Failure ]
 
@@ -7603,9 +7604,6 @@ imported/w3c/web-platform-tests/workers/SharedWorker_dataUrl.html [ Pass Failure
 
 # webkit.org/b/261919 NEW TEST(247465@main): [ macOS wk2 ] webanimations/frame-rate/animation-frame-rate-alignment-started-with-one-frame-separation.html is a flaky failure.
 webanimations/frame-rate/animation-frame-rate-alignment-started-with-one-frame-separation.html [ Pass Failure ]
-
-# webkit.org/b/277905 [ iOS ] fast/scrolling/ios/scroll-anchoring-momentum-scroll.html is a flaky text failure
-fast/scrolling/ios/scroll-anchoring-momentum-scroll.html [ Pass Failure ]
 
 imported/w3c/web-platform-tests/css/css-scroll-anchoring/adjustments-in-scroll-event-handler.tentative.html [ Pass Failure ]
 imported/w3c/web-platform-tests/css/css-scroll-anchoring/after-scrollable-range-shrinkage-002.html [ Pass Failure ]

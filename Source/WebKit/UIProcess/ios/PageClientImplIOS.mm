@@ -131,9 +131,9 @@ void PageClientImpl::setViewNeedsDisplay(const Region&)
     ASSERT_NOT_REACHED();
 }
 
-void PageClientImpl::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin, ScrollIsAnimated animated)
+void PageClientImpl::requestScroll(const FloatPoint& scrollPosition, const IntPoint& scrollOrigin, ScrollIsAnimated animated, InterruptScrollAnimation interrupt)
 {
-    [webView() _scrollToContentScrollPosition:scrollPosition scrollOrigin:scrollOrigin animated:animated == ScrollIsAnimated::Yes];
+    [webView() _scrollToContentScrollPosition:scrollPosition scrollOrigin:scrollOrigin animated:animated == ScrollIsAnimated::Yes interruptAnimation:interrupt == InterruptScrollAnimation::Yes];
 }
 
 WebCore::FloatPoint PageClientImpl::viewScrollPosition()

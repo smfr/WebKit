@@ -1443,7 +1443,7 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
     return contentOffset.constrainedBetween(minimumContentOffset, WebCore::FloatPoint(maximumContentOffset));
 }
 
-- (void)_scrollToContentScrollPosition:(WebCore::FloatPoint)scrollPosition scrollOrigin:(WebCore::IntPoint)scrollOrigin animated:(BOOL)animated
+- (void)_scrollToContentScrollPosition:(WebCore::FloatPoint)scrollPosition scrollOrigin:(WebCore::IntPoint)scrollOrigin animated:(BOOL)animated interruptAnimation:(BOOL)interruptAnimation
 {
     if (_perProcessState.commitDidRestoreScrollPosition || self._shouldDeferGeometryUpdates)
         return;
@@ -1462,7 +1462,10 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
 
     CGPoint contentOffsetInScrollViewCoordinates = [self _contentOffsetAdjustedForObscuredInset:scaledOffset];
     contentOffsetInScrollViewCoordinates = contentOffsetBoundedInValidRange(_scrollView.get(), contentOffsetInScrollViewCoordinates);
-    [_scrollView _wk_stopScrollingAndZooming];
+
+    if (interruptAnimation)
+        [_scrollView _wk_stopScrollingAndZooming];
+
     CGPoint scrollViewContentOffset = [_scrollView contentOffset];
 
     if (!CGPointEqualToPoint(contentOffsetInScrollViewCoordinates, scrollViewContentOffset)) {
@@ -1472,9 +1475,14 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
         if (WTF::areEssentiallyEqual<float>(scrollPosition.y(), 0) && scrollViewContentOffset.y < 0)
             contentOffsetInScrollViewCoordinates.y = scrollViewContentOffset.y;
 
-        [_scrollView setContentOffset:contentOffsetInScrollViewCoordinates animated:animated];
+        if (interruptAnimation)
+            [_scrollView setContentOffset:contentOffsetInScrollViewCoordinates animated:animated];
+        else
+            [_scrollView setContentOffset:contentOffsetInScrollViewCoordinates];
+
         if (!animated)
             [self _didFinishScrolling:_scrollView.get()];
+
     } else if (!_perProcessState.didDeferUpdateVisibleContentRectsForAnyReason) {
         // If we haven't changed anything, and are not deferring updates, there would not be any VisibleContentRect update sent to the content.
         // The WebProcess would keep the invalid contentOffset as its scroll position.
