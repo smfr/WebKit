@@ -49,6 +49,7 @@
 #include "ErrorInstance.h"
 #include "EvalCodeBlockInlines.h"
 #include "EvalExecutableInlines.h"
+#include "EvacuatedStack.h"
 #include "Exception.h"
 #include "FTLThunks.h"
 #include "FileBasedFuzzerAgent.h"
@@ -98,6 +99,7 @@
 #include "NarrowingNumberPredictionFuzzerAgent.h"
 #include "NativeExecutable.h"
 #include "NumberObject.h"
+#include "PinballCompletion.h"
 #include "PredictionFileCreatingFuzzerAgent.h"
 #include "ProfilerDatabase.h"
 #include "ProgramCodeBlockInlines.h"
@@ -151,7 +153,7 @@
 #include <wtf/text/AtomStringTable.h>
 #include <wtf/text/StringToIntegerConversion.h>
 
-#if ENABLE(DFG_JIT)
+#if ENABLE(DFG_JIT) || ENABLE(WEBASSEMBLY)
 #include "ConservativeRoots.h"
 #endif
 
@@ -167,6 +169,8 @@
 #include <notify.h>
 #include <wtf/darwin/DispatchExtras.h>
 #endif
+
+#include <span>
 
 namespace JSC {
 
@@ -329,6 +333,9 @@ VM::VM(VMType vmType, HeapType heapType, WTF::RunLoop* runLoop, bool* success)
     evalExecutableStructure.setWithoutWriteBarrier(EvalExecutable::createStructure(*this, nullptr, jsNull()));
     programExecutableStructure.setWithoutWriteBarrier(ProgramExecutable::createStructure(*this, nullptr, jsNull()));
     functionExecutableStructure.setWithoutWriteBarrier(FunctionExecutable::createStructure(*this, nullptr, jsNull()));
+#if ENABLE(WEBASSEMBLY)
+    pinballCompletionStructure.setWithoutWriteBarrier(PinballCompletion::createStructure(*this, nullptr, jsNull()));
+#endif
     moduleProgramExecutableStructure.setWithoutWriteBarrier(ModuleProgramExecutable::createStructure(*this, nullptr, jsNull()));
     promiseReactionStructure.setWithoutWriteBarrier(JSPromiseReaction::createStructure(*this, nullptr, jsNull()));
     promiseCombinatorsContextStructure.setWithoutWriteBarrier(JSPromiseCombinatorsContext::createStructure(*this, nullptr, jsNull()));
@@ -1172,6 +1179,21 @@ void VM::scanSideState(ConservativeRoots& roots) const
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
 #endif // ENABLE(DFG_JIT)
 
+#if ENABLE(WEBASSEMBLY)
+
+void VM::gatherEvacuatedStackRoots(ConservativeRoots& roots)
+{
+    Locker locker { m_evacuatedStacksLock };
+    for (auto* slice : m_evacuatedStackSlices) {
+        std::span<Register> slots = slice->slots();
+        roots.add(slots.data(), slots.data() + slots.size());
+    }
+    for (const auto& span : m_evacuatedCalleeSaves)
+        roots.add(span.data(), span.data() + span.size());
+}
+
+#endif // ENABLE(WEBASSEMBLY)
+
 void VM::pushCheckpointOSRSideState(std::unique_ptr<CheckpointOSRExitSideState>&& payload)
 {
     ASSERT(currentThreadIsHoldingAPILock());
@@ -1533,6 +1555,32 @@ bool VM::isScratchBuffer(void* ptr)
     return false;
 }
 
+void VM::addEvacuatedStackSlice(EvacuatedStackSlice* slice)
+{
+    Locker lock { m_evacuatedStacksLock };
+    m_evacuatedStackSlices.append(slice);
+}
+
+void VM::removeEvacuatedStackSlice(EvacuatedStackSlice* slice)
+{
+    Locker lock { m_evacuatedStacksLock };
+    m_evacuatedStackSlices.removeAll(slice);
+}
+
+void VM::addEvacuatedCalleeSaves(std::span<CPURegister> span)
+{
+    Locker lock { m_evacuatedStacksLock };
+    m_evacuatedCalleeSaves.constructAndAppend(span);
+}
+
+void VM::removeEvacuatedCalleeSaves(std::span<CPURegister> span)
+{
+    Locker lock { m_evacuatedStacksLock };
+    m_evacuatedCalleeSaves.removeAllMatching([&](const std::span<CPURegister>& existing) {
+        return existing.data() == span.data() && existing.size() == span.size();
+    });
+}
+
 Ref<Waiter> VM::syncWaiter()
 {
     return m_syncWaiter;
@@ -1814,6 +1862,7 @@ void VM::visitAggregateImpl(Visitor& visitor)
     visitor.append(programExecutableStructure);
     visitor.append(functionExecutableStructure);
 #if ENABLE(WEBASSEMBLY)
+    visitor.append(pinballCompletionStructure);
     visitor.append(webAssemblyCalleeGroupStructure);
 #endif
     visitor.append(moduleProgramExecutableStructure);
@@ -2006,5 +2055,10 @@ Wasm::DebugState* VM::debugState()
     return m_debugState.get();
 }
 #endif
+
+JSPIContext::~JSPIContext()
+{
+    ASSERT_WITH_MESSAGE(!limitFrame, "JSPIContext is still active when leaving its scope");
+}
 
 } // namespace JSC

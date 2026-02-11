@@ -153,6 +153,8 @@ set(JavaScriptCore_OBJECT_LUT_SOURCES
     wasm/js/WebAssemblyModulePrototype.cpp
     wasm/js/WebAssemblyRuntimeErrorConstructor.cpp
     wasm/js/WebAssemblyRuntimeErrorPrototype.cpp
+    wasm/js/WebAssemblySuspendErrorConstructor.cpp
+    wasm/js/WebAssemblySuspendErrorPrototype.cpp
     wasm/js/WebAssemblyStructConstructor.cpp
     wasm/js/WebAssemblyStructPrototype.cpp
     wasm/js/WebAssemblyTableConstructor.cpp
@@ -1088,6 +1090,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     runtime/ErrorInstance.h
     runtime/ErrorPrototype.h
     runtime/ErrorType.h
+    runtime/EvacuatedStack.h
     runtime/EvalExecutable.h
     runtime/Exception.h
     runtime/ExceptionEventLocation.h
@@ -1292,6 +1295,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     runtime/OrderedHashTableHelper.h
     runtime/PageCount.h
     runtime/ParseInt.h
+    runtime/PinballCompletion.h
     runtime/PrivateFieldPutKind.h
     runtime/PrivateName.h
     runtime/ProfilerSupport.h
@@ -1478,6 +1482,8 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     wasm/js/JSWebAssemblyLinkError.h
     wasm/js/JSWebAssemblyMemory.h
     wasm/js/JSWebAssemblyModule.h
+    wasm/js/WebAssemblyPromising.h
+    wasm/js/WebAssemblySuspending.h
     wasm/js/JSWebAssemblyTable.h
     wasm/js/WebAssemblyBuiltin.h
     wasm/js/WebAssemblyFunction.h
@@ -1486,6 +1492,8 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     wasm/js/WebAssemblyLinkErrorConstructor.h
     wasm/js/WebAssemblyLinkErrorPrototype.h
     wasm/js/WebAssemblyModuleRecord.h
+    wasm/js/WebAssemblySuspendingConstructor.h
+    wasm/js/WebAssemblySuspendingPrototype.h
     wasm/js/WebAssemblyWrapperFunction.h
 
     yarr/RegularExpression.h

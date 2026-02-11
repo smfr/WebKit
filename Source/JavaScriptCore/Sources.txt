@@ -813,6 +813,7 @@ runtime/ErrorHandlingScope.cpp
 runtime/ErrorInstance.cpp
 runtime/ErrorPrototype.cpp
 runtime/ErrorType.cpp
+runtime/EvacuatedStack.cpp
 runtime/EvalExecutable.cpp
 runtime/Exception.cpp
 runtime/ExceptionEventLocation.cpp
@@ -1018,6 +1019,7 @@ runtime/Operations.cpp
 runtime/Options.cpp
 runtime/OrderedHashTable.cpp
 runtime/PageCount.cpp
+runtime/PinballCompletion.cpp
 runtime/PredictionFileCreatingFuzzerAgent.cpp
 runtime/PrivateFieldPutKind.cpp
 runtime/ProfilerSupport.cpp
@@ -1214,8 +1216,11 @@ wasm/js/JSWebAssemblyInstance.cpp
 wasm/js/JSWebAssemblyLinkError.cpp
 wasm/js/JSWebAssemblyMemory.cpp
 wasm/js/JSWebAssemblyModule.cpp
+wasm/js/WebAssemblyPromising.cpp
 wasm/js/JSWebAssemblyRuntimeError.cpp
+wasm/js/JSWebAssemblySuspendError.cpp
 wasm/js/JSWebAssemblyStruct.cpp
+wasm/js/WebAssemblySuspending.cpp
 wasm/js/JSWebAssemblyTable.cpp
 wasm/js/JSWebAssemblyTag.cpp
 wasm/js/WasmToJS.cpp
@@ -1246,8 +1251,12 @@ wasm/js/WebAssemblyModulePrototype.cpp
 wasm/js/WebAssemblyModuleRecord.cpp
 wasm/js/WebAssemblyRuntimeErrorConstructor.cpp
 wasm/js/WebAssemblyRuntimeErrorPrototype.cpp
+wasm/js/WebAssemblySuspendErrorConstructor.cpp
+wasm/js/WebAssemblySuspendErrorPrototype.cpp
 wasm/js/WebAssemblyStructConstructor.cpp
 wasm/js/WebAssemblyStructPrototype.cpp
+wasm/js/WebAssemblySuspendingConstructor.cpp
+wasm/js/WebAssemblySuspendingPrototype.cpp
 wasm/js/WebAssemblyTableConstructor.cpp
 wasm/js/WebAssemblyTablePrototype.cpp
 wasm/js/WebAssemblyTagConstructor.cpp

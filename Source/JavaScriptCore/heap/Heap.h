@@ -187,6 +187,7 @@ class Heap;
 
 #if ENABLE(WEBASSEMBLY)
 #define FOR_EACH_JSC_WEBASSEMBLY_DYNAMIC_ISO_SUBSPACE(v) \
+    v(pinballCompletionSpace, destructibleCellHeapCellType, PinballCompletion) \
     v(webAssemblyExceptionSpace, webAssemblyExceptionHeapCellType, JSWebAssemblyException) \
     v(webAssemblyFunctionSpace, webAssemblyFunctionHeapCellType, WebAssemblyFunction) \
     v(webAssemblyGlobalSpace, webAssemblyGlobalHeapCellType, JSWebAssemblyGlobal) \
@@ -737,7 +738,7 @@ private:
     void prepareForMarking();
     
     void gatherStackRoots(ConservativeRoots&);
-    void gatherScratchBufferRoots(ConservativeRoots&);
+    void gatherVMRoots(ConservativeRoots&);
     void beginMarking();
     void visitCompilerWorklistWeakReferences();
     void removeDeadCompilerWorklistEntries();
