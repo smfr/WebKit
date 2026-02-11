@@ -319,7 +319,7 @@ void NetworkResourceLoader::retrieveCacheEntry(const ResourceRequest& request)
     if (isMainFrameLoad()) {
         ASSERT(m_parameters.options.mode == FetchOptions::Mode::Navigate);
         if (CheckedPtr session = protect(connectionToWebProcess())->networkProcess().networkSession(sessionID())) {
-            if (auto entry = session->checkedPrefetchCache()->take(request.url())) {
+            if (auto entry = protect(session->prefetchCache())->take(request.url())) {
                 LOADER_RELEASE_LOG("retrieveCacheEntry: retrieved an entry from the prefetch cache (isRedirect=%d)", !entry->redirectRequest.isNull());
                 if (!entry->redirectRequest.isNull()) {
                     auto cacheEntry = cache->makeRedirectEntry(request, entry->response, entry->redirectRequest);
@@ -1416,7 +1416,7 @@ void NetworkResourceLoader::didFinishWithRedirectResponse(WebCore::ResourceReque
     if (!isCrossOriginPrefetch())
         didReceiveResponse(WTF::move(redirectResponse), PrivateRelayed::No, [] (auto) { });
     else if (CheckedPtr session = protect(connectionToWebProcess())->networkProcess().networkSession(sessionID()))
-        session->checkedPrefetchCache()->storeRedirect(request.url(), WTF::move(redirectResponse), WTF::move(redirectRequest));
+        protect(session->prefetchCache())->storeRedirect(request.url(), WTF::move(redirectResponse), WTF::move(redirectRequest));
 
     WebCore::NetworkLoadMetrics networkLoadMetrics;
     networkLoadMetrics.markComplete();
@@ -1635,7 +1635,7 @@ void NetworkResourceLoader::tryStoreAsCacheEntry()
     if (isCrossOriginPrefetch()) {
         if (CheckedPtr session = protect(connectionToWebProcess())->networkProcess().networkSession(sessionID())) {
             LOADER_RELEASE_LOG("tryStoreAsCacheEntry: Storing entry in prefetch cache");
-            session->checkedPrefetchCache()->store(m_networkLoad->currentRequest().url(), WTF::move(m_response), m_privateRelayed, m_bufferedDataForCache.takeBuffer());
+            protect(session->prefetchCache())->store(m_networkLoad->currentRequest().url(), WTF::move(m_response), m_privateRelayed, m_bufferedDataForCache.takeBuffer());
         }
         return;
     }

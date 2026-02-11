@@ -85,7 +85,7 @@ void WebPaymentCoordinatorProxy::platformCanMakePaymentsWithActiveCard(const Str
         return completionHandler(false);
 #endif
 
-    PKCanMakePaymentsWithMerchantIdentifierDomainAndSourceApplication(merchantIdentifier.createNSString().get(), domainName.createNSString().get(), checkedClient()->paymentCoordinatorSourceApplicationSecondaryIdentifier(*this).createNSString().get(), makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL canMakePayments, NSError *error) mutable {
+    PKCanMakePaymentsWithMerchantIdentifierDomainAndSourceApplication(merchantIdentifier.createNSString().get(), domainName.createNSString().get(), protect(m_client)->paymentCoordinatorSourceApplicationSecondaryIdentifier(*this).createNSString().get(), makeBlockPtr([completionHandler = WTF::move(completionHandler)](BOOL canMakePayments, NSError *error) mutable {
         if (error)
             LOG_ERROR("PKCanMakePaymentsWithMerchantIdentifierAndDomain error %@", error);
 
@@ -531,7 +531,7 @@ void WebPaymentCoordinatorProxy::platformEndApplePaySetup()
 
 void WebPaymentCoordinatorProxy::platformBeginApplePaySetup(const PaymentSetupConfiguration& configuration, const PaymentSetupFeatures& features, CompletionHandler<void(bool)>&& reply)
 {
-    RetainPtr presentingViewController = checkedClient()->paymentCoordinatorPresentingViewController(*this);
+    RetainPtr presentingViewController = protect(m_client)->paymentCoordinatorPresentingViewController(*this);
     if (!presentingViewController) {
         reply(false);
         return;

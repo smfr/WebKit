@@ -198,7 +198,7 @@ public:
 
     NetworkCache::Cache* cache() { return m_cache.get(); }
 
-    CheckedRef<PrefetchCache> checkedPrefetchCache();
+    PrefetchCache& prefetchCache();
     void clearPrefetchCache() { m_prefetchCache->clear(); }
 
     virtual RefPtr<WebSocketTask> createWebSocketTask(WebPageProxyIdentifier, std::optional<WebCore::FrameIdentifier>, std::optional<WebCore::PageIdentifier>, NetworkSocketChannel&, const WebCore::ResourceRequest&, const String& protocol, const WebCore::ClientOrigin&, bool hadMainFrameMainResourcePrivateRelayed, bool allowPrivacyProxy, OptionSet<WebCore::AdvancedPrivacyProtections>, WebCore::StoredCredentialsPolicy);

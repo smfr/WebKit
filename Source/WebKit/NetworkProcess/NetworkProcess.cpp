@@ -614,11 +614,6 @@ WebCore::NetworkStorageSession* NetworkProcess::storageSession(PAL::SessionID se
     return m_networkStorageSessions.get(sessionID);
 }
 
-CheckedPtr<WebCore::NetworkStorageSession> NetworkProcess::checkedStorageSession(PAL::SessionID sessionID) const
-{
-    return storageSession(sessionID);
-}
-
 void NetworkProcess::forEachNetworkStorageSession(NOESCAPE const Function<void(WebCore::NetworkStorageSession&)>& functor)
 {
     for (auto& storageSession : m_networkStorageSessions.values())
@@ -629,11 +624,6 @@ NetworkSession* NetworkProcess::networkSession(PAL::SessionID sessionID) const
 {
     ASSERT(RunLoop::isMain());
     return m_networkSessions.get(sessionID);
-}
-
-CheckedPtr<NetworkSession> NetworkProcess::checkedNetworkSession(PAL::SessionID sessionID) const
-{
-    return networkSession(sessionID);
 }
 
 void NetworkProcess::setSession(PAL::SessionID sessionID, std::unique_ptr<NetworkSession>&& session)
@@ -2356,7 +2346,7 @@ void NetworkProcess::findPendingDownloadLocation(NetworkDataTask& networkDataTas
 void NetworkProcess::dataTaskWithRequest(WebPageProxyIdentifier pageID, PAL::SessionID sessionID, WebCore::ResourceRequest&& request, const std::optional<WebCore::SecurityOriginData>& topOrigin, IPC::FormDataReference&& httpBody, CompletionHandler<void(std::optional<DataTaskIdentifier>)>&& completionHandler)
 {
     request.setHTTPBody(httpBody.takeData());
-    checkedNetworkSession(sessionID)->dataTaskWithRequest(pageID, WTF::move(request), topOrigin, [completionHandler = WTF::move(completionHandler)](auto dataTaskIdentifier) mutable {
+    protect(networkSession(sessionID))->dataTaskWithRequest(pageID, WTF::move(request), topOrigin, [completionHandler = WTF::move(completionHandler)](auto dataTaskIdentifier) mutable {
         completionHandler(dataTaskIdentifier);
     });
 }

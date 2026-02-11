@@ -166,7 +166,7 @@ void WebPageInspectorController::setIndicating(bool indicating)
 
 void WebPageInspectorController::sendMessageToInspectorFrontend(const String& targetId, const String& message)
 {
-    checkedTargetAgent()->sendMessageFromTargetToFrontend(targetId, message);
+    protect(m_targetAgent)->sendMessageFromTargetToFrontend(targetId, message);
 }
 
 bool WebPageInspectorController::shouldPauseLoading(const ProvisionalPageProxy& provisionalPage) const
@@ -255,7 +255,7 @@ void WebPageInspectorController::createLazyAgents()
 
 void WebPageInspectorController::addTarget(std::unique_ptr<InspectorTargetProxy>&& target)
 {
-    checkedTargetAgent()->targetCreated(*target);
+    protect(m_targetAgent)->targetCreated(*target);
     m_targets.set(target->identifier(), WTF::move(target));
 }
 
@@ -264,7 +264,7 @@ void WebPageInspectorController::removeTarget(const String& targetId)
     auto it = m_targets.find(targetId);
     if (it == m_targets.end())
         return;
-    checkedTargetAgent()->targetDestroyed(CheckedRef { *it->value });
+    protect(m_targetAgent)->targetDestroyed(CheckedRef { *it->value });
     m_targets.remove(it);
 }
 
