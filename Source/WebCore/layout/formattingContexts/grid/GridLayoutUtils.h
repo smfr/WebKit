@@ -51,9 +51,9 @@ LayoutUnit inlineAxisMinContentContribution(const PlacedGridItem&, LayoutUnit bl
 LayoutUnit inlineAxisMaxContentContribution(const PlacedGridItem&, LayoutUnit blockAxisConstraint, const IntegrationUtils&);
 GridItemSizingFunctions inlineAxisGridItemSizingFunctions(const IntegrationUtils&);
 
-LayoutUnit blockAxisMinContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const IntegrationUtils&);
-LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const IntegrationUtils&);
-GridItemSizingFunctions blockAxisGridItemSizingFunctions(const IntegrationUtils&);
+LayoutUnit blockAxisMinContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const GridFormattingContext&);
+LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const GridFormattingContext&);
+GridItemSizingFunctions blockAxisGridItemSizingFunctions(const GridFormattingContext&);
 
 bool preferredSizeBehavesAsAuto(const Style::PreferredSize&);
 bool preferredSizeDependsOnContainingBlockSize(const Style::PreferredSize&);

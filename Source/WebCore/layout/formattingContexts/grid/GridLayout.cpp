@@ -398,7 +398,6 @@ UsedTrackSizes GridLayout::performGridSizingAlgorithm(const PlacedGridItems& pla
     const TrackSizingFunctionsList& columnTrackSizingFunctionsList, const TrackSizingFunctionsList& rowTrackSizingFunctionsList, const GridLayoutConstraints& layoutConstraints,
     const StyleContentAlignmentData& usedJustifyContent, const StyleContentAlignmentData& usedAlignContent) const
 {
-    auto& integrationUtils = formattingContext().integrationUtils();
     auto gridItemsCount = placedGridItems.size();
 
     Vector<WTF::Range<size_t>> columnSpanList;
@@ -447,9 +446,10 @@ UsedTrackSizes GridLayout::performGridSizingAlgorithm(const PlacedGridItems& pla
     auto columnsGap = GridLayoutUtils::computeGapValue(formattingContextRootStyle->columnGap());
     auto rowsGap = GridLayoutUtils::computeGapValue(formattingContextRootStyle->rowGap());
 
+    auto& formattingContext = this->formattingContext();
     // 1. First, the track sizing algorithm is used to resolve the sizes of the grid columns.
     auto columnSizes = TrackSizingAlgorithm::sizeTracks(placedGridItems, inlineAxisComputedSizesList, inlineBorderAndPaddingList, columnSpanList,
-        columnTrackSizingFunctionsList, inlineAxisAvailableSpace, blockAxisConstraintList, GridLayoutUtils::inlineAxisGridItemSizingFunctions(integrationUtils),
+        columnTrackSizingFunctionsList, inlineAxisAvailableSpace, blockAxisConstraintList, GridLayoutUtils::inlineAxisGridItemSizingFunctions(formattingContext.integrationUtils()),
         columnFreeSpaceScenario, columnsGap, usedJustifyContent);
 
     // To find the inline-axis available space for any items whose block-axis size contributions
@@ -461,7 +461,7 @@ UsedTrackSizes GridLayout::performGridSizingAlgorithm(const PlacedGridItems& pla
 
     // 2. Next, the track sizing algorithm resolves the sizes of the grid rows.
     auto rowSizes = TrackSizingAlgorithm::sizeTracks(placedGridItems, blockAxisComputedSizesList, blockBorderAndPaddingList, rowSpanList,
-        rowTrackSizingFunctionsList, blockAxisAvailableSpace, inlineAxisConstraintList, GridLayoutUtils::blockAxisGridItemSizingFunctions(integrationUtils),
+        rowTrackSizingFunctionsList, blockAxisAvailableSpace, inlineAxisConstraintList, GridLayoutUtils::blockAxisGridItemSizingFunctions(formattingContext),
         rowFreeSpaceScenario, rowsGap, usedAlignContent);
 
     // 3. Then, if the min-content contribution of any grid item has changed based on the

@@ -414,31 +414,29 @@ GridItemSizingFunctions inlineAxisGridItemSizingFunctions(const IntegrationUtils
 
 }
 
-LayoutUnit blockAxisMinContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const IntegrationUtils&)
+LayoutUnit blockAxisMinContentContribution(const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint, const GridFormattingContext& formattingContext)
 {
-    UNUSED_PARAM(inlineAxisConstraint);
-    ASSERT_NOT_IMPLEMENTED_YET();
-    return { };
+    formattingContext.integrationUtils().layoutWithFormattingContextForBox(gridItem.layoutBox(), inlineAxisConstraint);
+    return formattingContext.geometryForGridItem(gridItem.layoutBox()).borderBoxHeight();
 }
 
-LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem&, LayoutUnit inlineAxisConstraint, const IntegrationUtils&)
+LayoutUnit blockAxisMaxContentContribution(const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint, const GridFormattingContext& formattingContext)
 {
-    UNUSED_PARAM(inlineAxisConstraint);
-    ASSERT_NOT_IMPLEMENTED_YET();
-    return { };
+    formattingContext.integrationUtils().layoutWithFormattingContextForBox(gridItem.layoutBox(), inlineAxisConstraint);
+    return formattingContext.geometryForGridItem(gridItem.layoutBox()).borderBoxHeight();
 }
 
-GridItemSizingFunctions blockAxisGridItemSizingFunctions(const IntegrationUtils& integrationUtils)
+GridItemSizingFunctions blockAxisGridItemSizingFunctions(const GridFormattingContext& formattingContext)
 {
     return {
-        [&integrationUtils](const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint) {
-            return blockAxisMinContentContribution(gridItem, inlineAxisConstraint, integrationUtils);
+        [&formattingContext](const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint) {
+            return blockAxisMinContentContribution(gridItem, inlineAxisConstraint, formattingContext);
         },
-        [&integrationUtils](const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint) {
-            return blockAxisMaxContentContribution(gridItem, inlineAxisConstraint, integrationUtils);
+        [&formattingContext](const PlacedGridItem& gridItem, LayoutUnit inlineAxisConstraint) {
+            return blockAxisMaxContentContribution(gridItem, inlineAxisConstraint, formattingContext);
         },
-        [&integrationUtils](const PlacedGridItem& gridItem, const TrackSizingFunctionsList& trackSizingFunctions, LayoutUnit borderAndPadding, LayoutUnit availableSpace) {
-            return usedBlockMinimumSize(gridItem, trackSizingFunctions, borderAndPadding, availableSpace, integrationUtils);
+        [&formattingContext](const PlacedGridItem& gridItem, const TrackSizingFunctionsList& trackSizingFunctions, LayoutUnit borderAndPadding, LayoutUnit availableSpace) {
+            return usedBlockMinimumSize(gridItem, trackSizingFunctions, borderAndPadding, availableSpace, formattingContext.integrationUtils());
         }
     };
 }
