@@ -140,8 +140,8 @@ public:
 
     float zoomWithTextZoomFactor();
 
-    bool useSVGZoomRules() const;
-    bool useSVGZoomRulesForLength() const;
+    bool NODELETE useSVGZoomRules() const;
+    bool NODELETE useSVGZoomRulesForLength() const;
 
     ScopeOrdinal styleScopeOrdinal() const { return m_currentProperty->styleScopeOrdinal; }
 
@@ -159,13 +159,13 @@ public:
         return m_currentProperty && m_currentProperty->origin == PropertyCascade::Origin::Author;
     }
 
-    CSSPropertyID cssPropertyID() const;
+    CSSPropertyID NODELETE cssPropertyID() const;
 
-    bool isCurrentPropertyInvalidAtComputedValueTime() const;
-    void setCurrentPropertyInvalidAtComputedValueTime();
+    bool NODELETE isCurrentPropertyInvalidAtComputedValueTime() const;
+    void NODELETE setCurrentPropertyInvalidAtComputedValueTime();
 
-    void setUsesViewportUnits();
-    void setUsesContainerUnits();
+    void NODELETE setUsesViewportUnits();
+    void NODELETE setUsesContainerUnits();
 
     double lookupCSSRandomBaseValue(const CSSCalc::RandomCachingKey&, std::optional<CSS::Keyword::ElementShared>) const;
 
