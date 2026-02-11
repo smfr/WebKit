@@ -69,9 +69,9 @@ void* relocateReturnPC(void* returnPC, const CallerFrameAndPC* originalFP, const
 #if CPU(ARM64E)
     auto* originalSignatureSP = reinterpret_cast<const void*>(originalFP + 1);
     auto* newSignatureSP = reinterpret_cast<const void*>(newFP + 1);
-    return isJITPC(removeCodePtrTag(returnPC))
-        ? relocateJITReturnPC(returnPC, originalSignatureSP, newSignatureSP)
-        : ptrauth_auth_and_resign(returnPC, ptrauth_key_asib, originalSignatureSP, ptrauth_key_asib, newSignatureSP);
+    if (Options::useJITCage() && isJITPC(removeCodePtrTag(returnPC)))
+        return relocateJITReturnPC(returnPC, originalSignatureSP, newSignatureSP);
+    return ptrauth_auth_and_resign(returnPC, ptrauth_key_asib, originalSignatureSP, ptrauth_key_asib, newSignatureSP);
 #else
     UNUSED_PARAM(originalFP);
     UNUSED_PARAM(newFP);

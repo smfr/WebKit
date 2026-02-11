@@ -346,7 +346,7 @@ void initialize()
 #if ENABLE(WEBASSEMBLY)
     {
         static LazyNeverDestroyed<MacroAssemblerCodeRef<NativeToJITGatePtrTag>> codeRef;
-        if (Options::useJIT())
+        if (Options::useJITCage() && Options::useJSPI())
             codeRef.construct(relocateJITReturnPCThunk(retagCodePtr<void*, CFunctionPtrTag, OperationPtrTag>(&relocate_jit_return_pc_return_location)));
         else
             codeRef.construct(MacroAssemblerCodeRef<NativeToJITGatePtrTag>::createSelfManagedCodeRef(CodePtr<NativeToJITGatePtrTag>::fromTaggedPtr(retagCodePtr<void*, CFunctionPtrTag, NativeToJITGatePtrTag>(&relocate_jit_return_pc_trampoline))));
@@ -354,7 +354,7 @@ void initialize()
     }
     {
         static LazyNeverDestroyed<MacroAssemblerCodeRef<NativeToJITGatePtrTag>> codeRef;
-        if (Options::useJIT())
+        if (Options::useJITCage() && Options::useJSPI())
             codeRef.construct(exitImplantedSliceGateThunk(retagCodePtr<void*, CFunctionPtrTag, OperationPtrTag>(&exit_implanted_slice)));
         else
             codeRef.construct(MacroAssemblerCodeRef<NativeToJITGatePtrTag>::createSelfManagedCodeRef(CodePtr<NativeToJITGatePtrTag>::fromTaggedPtr(retagCodePtr<void*, CFunctionPtrTag, NativeToJITGatePtrTag>(&exit_implanted_slice))));
@@ -363,7 +363,7 @@ void initialize()
     }
     {
         static LazyNeverDestroyed<MacroAssemblerCodeRef<NativeToJITGatePtrTag>> codeRef;
-        if (Options::useJIT())
+        if (Options::useJITCage() && Options::useJSPI())
             codeRef.construct(getSentinelFrameReturnPCGateThunk(retagCodePtr<void*, CFunctionPtrTag, OperationPtrTag>(&get_sentinel_frame_return_pc_return_location)));
         else
             codeRef.construct(MacroAssemblerCodeRef<NativeToJITGatePtrTag>::createSelfManagedCodeRef(CodePtr<NativeToJITGatePtrTag>::fromTaggedPtr(retagCodePtr<void*, CFunctionPtrTag, NativeToJITGatePtrTag>(&get_sentinel_frame_return_pc_trampoline))));
