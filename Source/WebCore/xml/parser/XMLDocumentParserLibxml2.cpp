@@ -855,7 +855,7 @@ void XMLDocumentParser::startElementNs(const xmlChar* xmlLocalName, const xmlCha
 
     if (willConstructCustomElement) [[unlikely]] {
         markupInsertionCountIncrementer.emplace(*document);
-        document->checkedEventLoop()->performMicrotaskCheckpoint();
+        protect(document->eventLoop())->performMicrotaskCheckpoint();
         customElementReactionStack.emplace(document->globalObject());
     }
 

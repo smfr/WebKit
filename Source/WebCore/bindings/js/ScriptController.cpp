@@ -326,7 +326,7 @@ void ScriptController::initScriptForWindowProxy(JSWindowProxy& windowProxy)
     windowProxy.window()->setConsoleClient(m_frame->console());
 
     if (RefPtr document = m_frame->document())
-        document->checkedContentSecurityPolicy()->didCreateWindowProxy(windowProxy);
+        protect(document->contentSecurityPolicy())->didCreateWindowProxy(windowProxy);
 
     if (RefPtr page = m_frame->page()) {
         windowProxy.attachDebugger(page->debugger());
@@ -882,7 +882,7 @@ void ScriptController::executeJavaScriptURL(const URL& url, const NavigationActi
     if (preNavigationCheckURLString.isNull())
         return;
 
-    if (!ownerDocument->checkedContentSecurityPolicy()->allowJavaScriptURLs(ownerDocument->url().string(), eventHandlerPosition().m_line, preNavigationCheckURLString, nullptr))
+    if (!protect(ownerDocument->contentSecurityPolicy())->allowJavaScriptURLs(ownerDocument->url().string(), eventHandlerPosition().m_line, preNavigationCheckURLString, nullptr))
         return;
 
     const int javascriptSchemeLength = sizeof("javascript:") - 1;

@@ -280,7 +280,7 @@ void SliderThumbElement::setPositionFromPoint(const LayoutPoint& absolutePoint)
     auto stepRange = input->createStepRange(AnyStepHandling::Reject);
     auto value = stepRange.clampValue(stepRange.valueFromProportion(fraction));
 
-    const LayoutUnit snappingThreshold = checkedRenderer()->theme().sliderTickSnappingThreshold();
+    const LayoutUnit snappingThreshold = protect(renderer())->theme().sliderTickSnappingThreshold();
     if (snappingThreshold > 0) {
         if (std::optional<Decimal> closest = input->findClosestTickMarkValue(value)) {
             double closestFraction = stepRange.proportionFromValue(*closest).toDouble();

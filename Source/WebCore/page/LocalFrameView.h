@@ -112,7 +112,6 @@ public:
     WEBCORE_EXPORT LocalFrame& frame() const final;
 
     WEBCORE_EXPORT RenderView* renderView() const;
-    WEBCORE_EXPORT CheckedPtr<RenderView> checkedRenderView() const;
 
     int mapFromLayoutToCSSUnits(LayoutUnit) const;
     LayoutUnit mapFromCSSToLayoutUnits(int) const;

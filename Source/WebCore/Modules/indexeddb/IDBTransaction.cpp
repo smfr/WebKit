@@ -104,7 +104,7 @@ IDBTransaction::IDBTransaction(IDBDatabase& database, const IDBTransactionInfo& 
         RefPtr context = scriptExecutionContext();
         ASSERT(context);
 
-        context->checkedEventLoop()->runAtEndOfMicrotaskCheckpoint([protectedThis = Ref { *this }] {
+        protect(context->eventLoop())->runAtEndOfMicrotaskCheckpoint([protectedThis = Ref { *this }] {
             protectedThis->deactivate();
         });
 

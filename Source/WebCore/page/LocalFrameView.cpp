@@ -6695,11 +6695,6 @@ RenderView* LocalFrameView::renderView() const
     return m_frame->contentRenderer();
 }
 
-CheckedPtr<RenderView> LocalFrameView::checkedRenderView() const
-{
-    return renderView();
-}
-
 int LocalFrameView::mapFromLayoutToCSSUnits(LayoutUnit value) const
 {
     Ref frame = m_frame;

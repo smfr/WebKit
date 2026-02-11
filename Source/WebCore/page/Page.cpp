@@ -2819,7 +2819,7 @@ void Page::userStyleSheetLocationChanged()
     }
 
     forEachDocument([] (Document& document) {
-        document.checkedExtensionStyleSheets()->updatePageUserSheet();
+        protect(document.extensionStyleSheets())->updatePageUserSheet();
     });
 }
 
@@ -4699,7 +4699,7 @@ static void dispatchPrintEvent(Frame& mainFrame, const AtomString& eventType, Di
             if (dispatchedOnDocumentEventLoop == DispatchedOnDocumentEventLoop::No)
                 return dispatchEvent();
             if (RefPtr document = frame->document())
-                document->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, WTF::move(dispatchEvent));
+                protect(document->eventLoop())->queueTask(TaskSource::DOMManipulation, WTF::move(dispatchEvent));
         }
     }
 }
@@ -4815,7 +4815,7 @@ void Page::configureLoggingChannel(const String& channelName, WTFLogChannelState
 
 void Page::didFinishLoadingImageForElement(HTMLImageElement& element)
 {
-    protect(element.document())->checkedEventLoop()->queueTask(TaskSource::Networking, [element = Ref { element }]() {
+    protect(element.document().eventLoop())->queueTask(TaskSource::Networking, [element = Ref { element }]() {
         RefPtr frame = element->document().frame();
         if (!frame)
             return;
@@ -4943,10 +4943,10 @@ void Page::injectUserStyleSheet(UserStyleSheet& userStyleSheet)
 
     if (userStyleSheet.injectedFrames() == UserContentInjectedFrames::InjectInTopFrameOnly) {
         if (RefPtr document = localMainFrame ? localMainFrame->document() : nullptr)
-            document->checkedExtensionStyleSheets()->injectPageSpecificUserStyleSheet(userStyleSheet);
+            protect(document->extensionStyleSheets())->injectPageSpecificUserStyleSheet(userStyleSheet);
     } else {
         forEachDocument([&] (Document& document) {
-            document.checkedExtensionStyleSheets()->injectPageSpecificUserStyleSheet(userStyleSheet);
+            protect(document.extensionStyleSheets())->injectPageSpecificUserStyleSheet(userStyleSheet);
         });
     }
 }
@@ -4963,10 +4963,10 @@ void Page::removeInjectedUserStyleSheet(UserStyleSheet& userStyleSheet)
     if (userStyleSheet.injectedFrames() == UserContentInjectedFrames::InjectInTopFrameOnly) {
         RefPtr localMainFrame = dynamicDowncast<LocalFrame>(m_mainFrame.get());
         if (RefPtr document = localMainFrame ? localMainFrame->document() : nullptr)
-            document->checkedExtensionStyleSheets()->removePageSpecificUserStyleSheet(userStyleSheet);
+            protect(document->extensionStyleSheets())->removePageSpecificUserStyleSheet(userStyleSheet);
     } else {
         forEachDocument([&] (Document& document) {
-            document.checkedExtensionStyleSheets()->removePageSpecificUserStyleSheet(userStyleSheet);
+            protect(document.extensionStyleSheets())->removePageSpecificUserStyleSheet(userStyleSheet);
         });
     }
 }
@@ -5093,7 +5093,7 @@ void Page::updateElementsWithTextRecognitionResults()
     }
 
     for (auto& [element, result] : elementsToUpdate) {
-        protect(element->document())->checkedEventLoop()->queueTask(TaskSource::InternalAsyncTask, [result = TextRecognitionResult { result }, weakElement = WeakPtr { element }] {
+        protect(protect(element->document())->eventLoop())->queueTask(TaskSource::InternalAsyncTask, [result = TextRecognitionResult { result }, weakElement = WeakPtr { element }] {
             if (RefPtr element = weakElement.get())
                 ImageOverlay::updateWithTextRecognitionResult(*element, result, ImageOverlay::CacheTextRecognitionResults::No);
         });
@@ -5203,7 +5203,7 @@ void Page::forceRepaintAllFrames()
         if (!frameView || !frameView->renderView())
             continue;
 
-        frameView->checkedRenderView()->repaintViewAndCompositedLayers();
+        protect(frameView->renderView())->repaintViewAndCompositedLayers();
     }
 }
 

@@ -3282,7 +3282,7 @@ ExceptionOr<void> WebGLRenderingContextBase::texImageSource(TexImageFunctionID f
     if (!validationResult.returnValue())
         return { };
 
-    RefPtr imageForRender = source.cachedImage()->imageForRenderer(source.checkedRenderer().get());
+    RefPtr imageForRender = source.cachedImage()->imageForRenderer(protect(source.renderer()).get());
     if (!imageForRender)
         return { };
 
@@ -5205,7 +5205,7 @@ void WebGLRenderingContextBase::maybeRestoreContextSoon(Seconds timeout)
     if (!scriptExecutionContext)
         return;
 
-    m_restoreTimer = scriptExecutionContext->checkedEventLoop()->scheduleTask(timeout, TaskSource::WebGL, [weakThis = WeakPtr { *this }] {
+    m_restoreTimer = protect(scriptExecutionContext->eventLoop())->scheduleTask(timeout, TaskSource::WebGL, [weakThis = WeakPtr { *this }] {
         if (RefPtr protectedThis = weakThis.get()) {
             protectedThis->m_restoreTimer = nullptr;
             protectedThis->maybeRestoreContext();

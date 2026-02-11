@@ -463,7 +463,7 @@ bool HTMLPlugInElement::requestObject(const String& relativeURL, const String& m
     if (ScriptDisallowedScope::InMainThread::isScriptAllowed())
         return document->frame()->loader().subframeLoader().requestObject(*this, relativeURL, getNameAttribute(), mimeType, paramNames, paramValues);
 
-    document->checkedEventLoop()->queueTask(TaskSource::Networking, [this, protectedThis = Ref { *this }, relativeURL, nameAttribute = getNameAttribute(), mimeType, paramNames, paramValues, document]() mutable {
+    protect(document->eventLoop())->queueTask(TaskSource::Networking, [this, protectedThis = Ref { *this }, relativeURL, nameAttribute = getNameAttribute(), mimeType, paramNames, paramValues, document]() mutable {
         if (!this->isConnected() || &this->document() != document.ptr())
             return;
         RefPtr frame = this->document().frame();
@@ -514,7 +514,7 @@ void HTMLPlugInElement::scheduleUpdateForAfterStyleResolution()
 
     m_hasUpdateScheduledForAfterStyleResolution = true;
 
-    document->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, [element = GCReachableRef { *this }] {
+    protect(document->eventLoop())->queueTask(TaskSource::DOMManipulation, [element = GCReachableRef { *this }] {
         element->updateAfterStyleResolution();
     });
 }

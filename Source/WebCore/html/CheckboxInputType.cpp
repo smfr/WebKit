@@ -474,7 +474,7 @@ void CheckboxInputType::updateIsSwitchVisuallyOnFromAbsoluteLocation(LayoutPoint
     auto isSwitchVisuallyOn = m_isSwitchVisuallyOn;
     auto isRTL = element->computedStyle()->writingMode().isBidiRTL();
     auto switchThumbIsLogicallyLeft = (!isRTL && !isSwitchVisuallyOn) || (isRTL && isSwitchVisuallyOn);
-    auto switchTrackRect = element->checkedRenderer()->absoluteBoundingBoxRect();
+    auto switchTrackRect = protect(element->renderer())->absoluteBoundingBoxRect();
     auto switchThumbLength = switchTrackRect.height();
     auto switchTrackWidth = switchTrackRect.width();
 
@@ -522,7 +522,7 @@ void CheckboxInputType::switchAnimationTimerFired()
             stopSwitchAnimation(SwitchAnimationType::Held);
     }
 
-    element->checkedRenderer()->repaint();
+    protect(element->renderer())->repaint();
 }
 
 } // namespace WebCore

@@ -165,7 +165,7 @@ public:
             return;
 
         auto& globalObject = *JSC::jsCast<JSDOMGlobalObject*>(context->globalObject());
-        context->checkedEventLoop()->queueMicrotask([task = WTF::move(task), value = JSC::Strong<JSC::Unknown> { globalObject.vm(), value }] {
+        protect(context->eventLoop())->queueMicrotask([task = WTF::move(task), value = JSC::Strong<JSC::Unknown> { globalObject.vm(), value }] {
             task(value.get());
         });
     }

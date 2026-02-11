@@ -180,7 +180,7 @@ void RTCEncodedStreamProducer::generateKeyFrame(ScriptExecutionContext& context,
         return;
 
     if (!backend->requestKeyFrame(rid)) {
-        context.checkedEventLoop()->queueTask(TaskSource::Networking, [promise = WTF::move(promise)]() mutable {
+        protect(context.eventLoop())->queueTask(TaskSource::Networking, [promise = WTF::move(promise)]() mutable {
             promise->reject(Exception { ExceptionCode::NotFoundError, "rid was not found or is empty"_s });
         });
         return;

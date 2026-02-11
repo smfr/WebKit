@@ -862,7 +862,7 @@ inline void ContainerNode::rebuildSVGExtensionsElementsIfNecessary()
 {
     Ref<Document> document = this->document();
     if (document->svgExtensionsIfExists() && !is<SVGUseElement>(shadowHost()))
-        document->checkedSVGExtensions()->rebuildElements();
+        protect(document->svgExtensions())->rebuildElements();
 }
 
 // this differs from other remove functions because it forcibly removes all the children,

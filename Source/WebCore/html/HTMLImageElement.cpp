@@ -642,7 +642,7 @@ unsigned HTMLImageElement::naturalWidth() const
     if (!m_imageLoader->image())
         return 0;
 
-    return m_imageLoader->image()->unclampedImageSizeForRenderer(checkedRenderer().get(), effectiveImageDevicePixelRatio()).width().toUnsigned();
+    return m_imageLoader->image()->unclampedImageSizeForRenderer(protect(renderer()).get(), effectiveImageDevicePixelRatio()).width().toUnsigned();
 }
 
 unsigned HTMLImageElement::naturalHeight() const
@@ -650,7 +650,7 @@ unsigned HTMLImageElement::naturalHeight() const
     if (!m_imageLoader->image())
         return 0;
 
-    return m_imageLoader->image()->unclampedImageSizeForRenderer(checkedRenderer().get(), effectiveImageDevicePixelRatio()).height().toUnsigned();
+    return m_imageLoader->image()->unclampedImageSizeForRenderer(protect(renderer()).get(), effectiveImageDevicePixelRatio()).height().toUnsigned();
 }
 
 bool HTMLImageElement::isURLAttribute(const Attribute& attribute) const

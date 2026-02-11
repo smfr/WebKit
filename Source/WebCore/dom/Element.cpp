@@ -418,7 +418,7 @@ void Element::hideNonceSlow()
     ASSERT(isConnected());
     ASSERT(hasAttributeWithoutSynchronization(nonceAttr));
 
-    if (!protect(document())->checkedContentSecurityPolicy()->isHeaderDelivered())
+    if (!protect(protect(document())->contentSecurityPolicy())->isHeaderDelivered())
         return;
 
     // Retain previous IDL nonce.
@@ -1838,10 +1838,10 @@ IntRect Element::boundsInRootViewSpace()
 
     if (RefPtr svgElement = elementWithSVGLayoutBox(*this)) {
         if (auto localRect = svgElement->getBoundingBox())
-            quads.append(checkedRenderer()->localToAbsoluteQuad(*localRect));
+            quads.append(protect(renderer())->localToAbsoluteQuad(*localRect));
     } else if (shouldObtainBoundsFromBoxModel(this)) {
         // Get the bounding rectangle from the box model.
-        checkedRenderer()->absoluteQuads(quads);
+        protect(renderer())->absoluteQuads(quads);
     }
 
     return view->contentsToRootView(enclosingIntRect(unitedBoundingBoxes(quads)));
@@ -1902,7 +1902,7 @@ LayoutRect Element::absoluteEventBounds(bool& boundsIncludeAllDescendantElements
     LayoutRect result;
     if (RefPtr svgElement = elementWithSVGLayoutBox(*this)) {
         if (auto localRect = svgElement->getBoundingBox())
-            result = LayoutRect(checkedRenderer()->localToAbsoluteQuad(*localRect, UseTransforms, &includesFixedPositionElements).boundingBox());
+            result = LayoutRect(protect(renderer())->localToAbsoluteQuad(*localRect, UseTransforms, &includesFixedPositionElements).boundingBox());
     } else {
         CheckedPtr renderer = this->renderer();
         if (CheckedPtr box = dynamicDowncast<RenderBox>(renderer.get())) {
@@ -3625,11 +3625,6 @@ CustomElementDefaultARIA& Element::customElementDefaultARIA()
         defaultARIA = elementRareData()->customElementDefaultARIA();
     }
     return *defaultARIA.unsafeGet();
-}
-
-CheckedRef<CustomElementDefaultARIA> Element::checkedCustomElementDefaultARIA()
-{
-    return customElementDefaultARIA();
 }
 
 CustomElementDefaultARIA* Element::customElementDefaultARIAIfExists() const

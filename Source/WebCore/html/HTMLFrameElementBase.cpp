@@ -173,7 +173,7 @@ void HTMLFrameElementBase::didFinishInsertingNode()
     if (!m_openingURLAfterInserting)
         work();
     else
-        document->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, WTF::move(work));
+        protect(document->eventLoop())->queueTask(TaskSource::DOMManipulation, WTF::move(work));
 }
 
 void HTMLFrameElementBase::didAttachRenderers()

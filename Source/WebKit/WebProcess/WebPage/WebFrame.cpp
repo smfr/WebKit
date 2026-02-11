@@ -926,7 +926,7 @@ void WebFrame::setAccessibleName(const AtomString& accessibleName)
     if (!document)
         return;
 
-    RefPtr rootObject = document->checkedAXObjectCache()->rootObjectForFrame(*localFrame);
+    RefPtr rootObject = protect(document->axObjectCache())->rootObjectForFrame(*localFrame);
     if (!rootObject)
         return;
 

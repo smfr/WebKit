@@ -311,7 +311,7 @@ void Geolocation::getCurrentPosition(Ref<PositionCallback>&& successCallback, Re
             return;
 
         if (RefPtr context = errorCallback->scriptExecutionContext()) {
-            context->checkedEventLoop()->queueTask(TaskSource::Geolocation, [errorCallback = WTF::move(errorCallback)] {
+            protect(context->eventLoop())->queueTask(TaskSource::Geolocation, [errorCallback = WTF::move(errorCallback)] {
                 errorCallback->invoke(GeolocationPositionError::create(GeolocationPositionError::POSITION_UNAVAILABLE, "Document is not fully active"_s));
             });
         }
@@ -332,7 +332,7 @@ int Geolocation::watchPosition(Ref<PositionCallback>&& successCallback, RefPtr<P
             return 0;
 
         if (RefPtr context = errorCallback->scriptExecutionContext()) {
-            context->checkedEventLoop()->queueTask(TaskSource::Geolocation, [errorCallback = WTF::move(errorCallback)] {
+            protect(context->eventLoop())->queueTask(TaskSource::Geolocation, [errorCallback = WTF::move(errorCallback)] {
                 errorCallback->invoke(GeolocationPositionError::create(GeolocationPositionError::POSITION_UNAVAILABLE, "Document is not fully active"_s));
             });
         }

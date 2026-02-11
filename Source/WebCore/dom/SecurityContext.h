@@ -54,7 +54,6 @@ public:
 
     SandboxFlags sandboxFlags() const { return m_sandboxFlags; }
     WEBCORE_EXPORT ContentSecurityPolicy* contentSecurityPolicy();
-    CheckedPtr<ContentSecurityPolicy> checkedContentSecurityPolicy();
 
     bool isSecureTransitionTo(const URL&) const;
 

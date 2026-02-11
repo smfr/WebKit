@@ -346,7 +346,7 @@ std::optional<std::pair<RenderLayer&, GraphicsLayer&>> InteractionRegionOverlay:
     if (!hitNode || !hitNode->renderer())
         return std::nullopt;
 
-    CheckedPtr rendererLayer = hitNode->checkedRenderer()->enclosingLayer();
+    CheckedPtr rendererLayer = protect(hitNode->renderer())->enclosingLayer();
     if (!rendererLayer)
         return std::nullopt;
 

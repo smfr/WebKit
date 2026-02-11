@@ -110,7 +110,6 @@ class CachedRawResource;
         Ref<SecurityOrigin> topOrigin() const;
         SecurityOrigin& securityOrigin() const;
         const ContentSecurityPolicy& contentSecurityPolicy() const;
-        CheckedRef<const ContentSecurityPolicy> checkedContentSecurityPolicy() const;
         const CrossOriginEmbedderPolicy& NODELETE crossOriginEmbedderPolicy() const;
 
         Document& document() { return *m_document; }
