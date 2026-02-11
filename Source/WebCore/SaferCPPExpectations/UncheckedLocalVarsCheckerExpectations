@@ -134,7 +134,6 @@ page/PageColorSampler.cpp
 page/PrintContext.cpp
 page/ResizeObservation.cpp
 page/SpatialNavigation.cpp
-page/cocoa/ContentChangeObserver.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
 [ Mac ] page/mac/EventHandlerMac.mm

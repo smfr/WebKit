@@ -349,7 +349,6 @@ page/SettingsBase.cpp
 page/SpatialNavigation.cpp
 page/VisualViewport.cpp
 page/cocoa/PageCocoa.mm
-page/cocoa/ContentChangeObserver.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
 [ Mac ] page/mac/ServicesOverlayController.mm
