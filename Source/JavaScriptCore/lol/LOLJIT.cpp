@@ -30,6 +30,7 @@
 
 #include "BaselineJITPlan.h"
 #include "BaselineJITRegisters.h"
+#include "BinarySwitch.h"
 #include "BytecodeGenerator.h"
 #include "BytecodeGraph.h"
 #include "BytecodeUseDef.h"
@@ -754,6 +755,10 @@ void LOLJIT::privateCompileSlowCases()
         REPLAY_ALLOCATION_FOR_OP(op_new_reg_exp, OpNewRegExp)
         REPLAY_ALLOCATION_FOR_OP(op_get_argument, OpGetArgument)
         REPLAY_ALLOCATION_FOR_OP(op_argument_count, OpArgumentCount)
+        REPLAY_ALLOCATION_FOR_OP(op_throw, OpThrow)
+        REPLAY_ALLOCATION_FOR_OP(op_switch_imm, OpSwitchImm)
+        REPLAY_ALLOCATION_FOR_OP(op_switch_char, OpSwitchChar)
+        REPLAY_ALLOCATION_FOR_OP(op_switch_string, OpSwitchString)
 
         default:
             RELEASE_ASSERT_NOT_REACHED();
@@ -2201,6 +2206,161 @@ void LOLJIT::emit_op_jneq_ptr(const JSInstruction* currentInstruction)
 #endif
 
     m_fastAllocator.releaseScratches(allocations);
+}
+
+void LOLJIT::emit_op_throw(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpThrow>();
+    uint32_t bytecodeOffset = m_bytecodeIndex.offset();
+
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ thrownValueRegs ] = allocations.uses;
+
+    using BaselineJITRegisters::Throw::thrownValueJSR;
+    using BaselineJITRegisters::Throw::bytecodeOffsetGPR;
+
+    moveValueRegs(thrownValueRegs, thrownValueJSR);
+    move(TrustedImm32(bytecodeOffset), bytecodeOffsetGPR);
+    jumpThunk(CodeLocationLabel { vm().getCTIStub(op_throw_handlerGenerator).retaggedCode<NoPtrTag>() });
+}
+
+void LOLJIT::emit_op_switch_imm(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpSwitchImm>();
+    size_t tableIndex = bytecode.m_tableIndex;
+
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ scrutineeRegs ] = allocations.uses;
+
+    const UnlinkedSimpleJumpTable& unlinkedTable = m_unlinkedCodeBlock->unlinkedSwitchJumpTable(tableIndex);
+    int32_t defaultOffset = unlinkedTable.defaultOffset();
+    SimpleJumpTable& linkedTable = m_switchJumpTables[tableIndex];
+    m_switches.append(SwitchRecord(tableIndex, m_bytecodeIndex, defaultOffset, SwitchRecord::Immediate));
+
+    auto notInt32 = branchIfNotInt32(scrutineeRegs);
+
+    auto dispatch = label();
+    if (unlinkedTable.isList()) {
+        Vector<int64_t, 16> cases;
+        Vector<int64_t, 16> jumps;
+        cases.reserveInitialCapacity(unlinkedTable.m_branchOffsets.size() / 2);
+        jumps.reserveInitialCapacity(unlinkedTable.m_branchOffsets.size() / 2);
+
+        for (unsigned i = 0; i < unlinkedTable.m_branchOffsets.size(); i += 2) {
+            int32_t value = unlinkedTable.m_branchOffsets[i];
+            int32_t target = unlinkedTable.m_branchOffsets[i + 1];
+            cases.append(value);
+            jumps.append(target);
+        }
+
+        BinarySwitch binarySwitch(scrutineeRegs.payloadGPR(), cases.span(), BinarySwitch::Int32);
+        while (binarySwitch.advance(*this))
+            addJump(jump(), jumps[binarySwitch.caseIndex()]);
+        addJump(binarySwitch.fallThrough(), defaultOffset);
+    } else {
+        linkedTable.ensureCTITable(unlinkedTable);
+        sub32(Imm32(unlinkedTable.m_min), scrutineeRegs.payloadGPR());
+        addJump(branch32(AboveOrEqual, scrutineeRegs.payloadGPR(), Imm32(linkedTable.m_ctiOffsets.size())), defaultOffset);
+        move(TrustedImmPtr(linkedTable.m_ctiOffsets.mutableSpan().data()), s_scratch);
+        loadPtr(BaseIndex(s_scratch, scrutineeRegs.payloadGPR(), ScalePtr), s_scratch);
+        farJump(s_scratch, JSSwitchPtrTag);
+    }
+
+    notInt32.link(this);
+    JumpList failureCases;
+    failureCases.append(branchIfNotNumber(scrutineeRegs, s_scratch));
+#if USE(JSVALUE64)
+    unboxDoubleWithoutAssertions(scrutineeRegs.payloadGPR(), s_scratch, fpRegT0);
+#else
+    unboxDouble(scrutineeRegs.tagGPR(), scrutineeRegs.payloadGPR(), fpRegT0);
+#endif
+    branchConvertDoubleToInt32(fpRegT0, scrutineeRegs.payloadGPR(), failureCases, fpRegT1, /* shouldCheckNegativeZero */ false);
+    jump().linkTo(dispatch, this);
+    addJump(failureCases, defaultOffset);
+}
+
+void LOLJIT::emit_op_switch_char(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpSwitchChar>();
+    size_t tableIndex = bytecode.m_tableIndex;
+
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ scrutineeRegs ] = allocations.uses;
+
+    const UnlinkedSimpleJumpTable& unlinkedTable = m_unlinkedCodeBlock->unlinkedSwitchJumpTable(tableIndex);
+    int32_t defaultOffset = unlinkedTable.defaultOffset();
+    SimpleJumpTable& linkedTable = m_switchJumpTables[tableIndex];
+    m_switches.append(SwitchRecord(tableIndex, m_bytecodeIndex, defaultOffset, SwitchRecord::Character));
+
+    auto dispatch = label();
+    addJump(branchIfNotCell(scrutineeRegs), defaultOffset);
+    addJump(branchIfNotString(scrutineeRegs.payloadGPR()), defaultOffset);
+
+    loadPtr(Address(scrutineeRegs.payloadGPR(), JSString::offsetOfValue()), regT4);
+    auto isRope = branchIfRopeStringImpl(regT4);
+    addJump(branch32(NotEqual, Address(regT4, StringImpl::lengthMemoryOffset()), TrustedImm32(1)), defaultOffset);
+    loadPtr(Address(regT4, StringImpl::dataOffset()), regT5);
+    auto is8Bit = branchTest32(NonZero, Address(regT4, StringImpl::flagsOffset()), TrustedImm32(StringImpl::flagIs8Bit()));
+    load16(Address(regT5), regT5);
+    auto loaded = jump();
+    is8Bit.link(this);
+    load8(Address(regT5), regT5);
+    loaded.link(this);
+
+    if (unlinkedTable.isList()) {
+        Vector<int64_t, 16> cases;
+        Vector<int64_t, 16> jumps;
+        cases.reserveInitialCapacity(unlinkedTable.m_branchOffsets.size() / 2);
+        jumps.reserveInitialCapacity(unlinkedTable.m_branchOffsets.size() / 2);
+        for (unsigned i = 0; i < unlinkedTable.m_branchOffsets.size(); i += 2) {
+            int32_t value = unlinkedTable.m_branchOffsets[i];
+            int32_t target = unlinkedTable.m_branchOffsets[i + 1];
+            cases.append(value);
+            jumps.append(target);
+        }
+
+        BinarySwitch binarySwitch(regT5, cases.span(), BinarySwitch::Int32);
+        while (binarySwitch.advance(*this))
+            addJump(jump(), jumps[binarySwitch.caseIndex()]);
+        addJump(binarySwitch.fallThrough(), defaultOffset);
+    } else {
+        linkedTable.ensureCTITable(unlinkedTable);
+        sub32(Imm32(unlinkedTable.m_min), regT5);
+        addJump(branch32(AboveOrEqual, regT5, Imm32(linkedTable.m_ctiOffsets.size())), defaultOffset);
+        move(TrustedImmPtr(linkedTable.m_ctiOffsets.mutableSpan().data()), s_scratch);
+        loadPtr(BaseIndex(s_scratch, regT5, ScalePtr), s_scratch);
+        farJump(s_scratch, JSSwitchPtrTag);
+    }
+
+    isRope.link(this);
+    addJump(branch32(NotEqual, Address(scrutineeRegs.payloadGPR(), JSRopeString::offsetOfLength()), TrustedImm32(1)), defaultOffset);
+    loadGlobalObject(s_scratch);
+    callOperation(operationResolveRope, s_scratch, scrutineeRegs.payloadGPR());
+    jump().linkTo(dispatch, this);
+}
+
+void LOLJIT::emit_op_switch_string(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpSwitchString>();
+    size_t tableIndex = bytecode.m_tableIndex;
+
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ scrutineeRegs ] = allocations.uses;
+
+    // create jump table for switch destinations, track this switch statement.
+    const UnlinkedStringJumpTable& unlinkedTable = m_unlinkedCodeBlock->unlinkedStringSwitchJumpTable(tableIndex);
+    int32_t defaultOffset = unlinkedTable.defaultOffset();
+    StringJumpTable& linkedTable = m_stringSwitchJumpTables[tableIndex];
+    m_switches.append(SwitchRecord(tableIndex, m_bytecodeIndex, defaultOffset, SwitchRecord::String));
+    linkedTable.ensureCTITable(unlinkedTable);
+
+    using BaselineJITRegisters::SwitchString::globalObjectGPR;
+    using BaselineJITRegisters::SwitchString::scrutineeJSR;
+
+    moveValueRegs(scrutineeRegs, scrutineeJSR);
+    loadGlobalObject(globalObjectGPR);
+    callOperation(operationSwitchStringWithUnknownKeyType, globalObjectGPR, scrutineeJSR, tableIndex);
+    farJump(returnValueGPR, JSSwitchPtrTag);
 }
 
 template<typename Op>

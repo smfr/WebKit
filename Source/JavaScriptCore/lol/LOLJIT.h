@@ -131,6 +131,10 @@ namespace JSC::LOL {
     macro(op_new_async_generator_func_exp) \
     macro(op_new_object) \
     macro(op_new_reg_exp) \
+    macro(op_throw) \
+    macro(op_switch_imm) \
+    macro(op_switch_char) \
+    macro(op_switch_string) \
 
 
 #define FOR_EACH_OP_WITH_SLOW_CASE(macro) \
