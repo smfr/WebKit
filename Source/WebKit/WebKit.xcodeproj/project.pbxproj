@@ -1870,7 +1870,10 @@
 		961A72D02E17270900DD2AF9 /* WebExtensionBookmarksParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 96CC7DBF2E15EC2800233E69 /* WebExtensionBookmarksParameters.h */; };
 		96418A5E2DFA4B8100C19CDC /* JSWebExtensionAPIBookmarks.h in Headers */ = {isa = PBXBuildFile; fileRef = 96418A5D2DFA4B8100C19CDC /* JSWebExtensionAPIBookmarks.h */; };
 		96EE6CE82DFA4980000F90BD /* WebExtensionAPIBookmarks.h in Headers */ = {isa = PBXBuildFile; fileRef = 96EE6CE72DFA4975000F90BD /* WebExtensionAPIBookmarks.h */; };
+		97311DE42F0DB61F00B23BE9 /* WKSurroundingsEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97311DE32F0DB1CF00B23BE9 /* WKSurroundingsEffectView.swift */; };
 		9732D19C2ECFD0B600AC856D /* _WKCaptionStyleMenuControllerAVKitMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 97AD28872ECFA49800039097 /* _WKCaptionStyleMenuControllerAVKitMac.mm */; };
+		976544262EF3514300BD8947 /* WKSurroundingsEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = 976544232EF34BDE00BD8947 /* WKSurroundingsEffect.h */; };
+		9788BFD92EF4A6940038405A /* WKSurroundingsEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9765441E2EF22B0B00BD8947 /* WKSurroundingsEffect.swift */; };
 		97AD28742ECE625300039097 /* _WKCaptionStyleMenuControllerAVKit.mm in Sources */ = {isa = PBXBuildFile; fileRef = 97F26D492EC67188006096CD /* _WKCaptionStyleMenuControllerAVKit.mm */; };
 		97C476282ECD33A6004D1492 /* _WKCaptionStyleMenuControllerInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 97C476272ECD338A004D1492 /* _WKCaptionStyleMenuControllerInternal.h */; };
 		99036AE223A949CF0000B06A /* _WKInspectorDebuggableInfoInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 99036AE123A949CE0000B06A /* _WKInspectorDebuggableInfoInternal.h */; };
@@ -7435,6 +7438,9 @@
 		96D1B84C2E01F06300D2D42E /* WebExtensionAPIBookmarksCocoa.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WebExtensionAPIBookmarksCocoa.mm; sourceTree = "<group>"; };
 		96E05A002DF7B58700285827 /* WebExtensionAPIBookmarks.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebExtensionAPIBookmarks.idl; sourceTree = "<group>"; };
 		96EE6CE72DFA4975000F90BD /* WebExtensionAPIBookmarks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebExtensionAPIBookmarks.h; sourceTree = "<group>"; };
+		97311DE32F0DB1CF00B23BE9 /* WKSurroundingsEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKSurroundingsEffectView.swift; sourceTree = "<group>"; };
+		9765441E2EF22B0B00BD8947 /* WKSurroundingsEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKSurroundingsEffect.swift; sourceTree = "<group>"; };
+		976544232EF34BDE00BD8947 /* WKSurroundingsEffect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKSurroundingsEffect.h; sourceTree = "<group>"; };
 		97AD28872ECFA49800039097 /* _WKCaptionStyleMenuControllerAVKitMac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = _WKCaptionStyleMenuControllerAVKitMac.mm; sourceTree = "<group>"; };
 		97AD28882ECFA4AE00039097 /* _WKCaptionStyleMenuControllerAVKitMac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _WKCaptionStyleMenuControllerAVKitMac.h; sourceTree = "<group>"; };
 		97C476272ECD338A004D1492 /* _WKCaptionStyleMenuControllerInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _WKCaptionStyleMenuControllerInternal.h; sourceTree = "<group>"; };
@@ -17407,6 +17413,9 @@
 				A1A207442D8A7A92003B1A13 /* QuickLook_SPI_Temp.swiftinterface */,
 				E539DFEC2A44A78600769F09 /* RealitySimulationServicesSPI.h */,
 				DD6E58C42BE004DE0000C264 /* RealitySystemSupportSPI.h */,
+				976544232EF34BDE00BD8947 /* WKSurroundingsEffect.h */,
+				9765441E2EF22B0B00BD8947 /* WKSurroundingsEffect.swift */,
+				97311DE32F0DB1CF00B23BE9 /* WKSurroundingsEffectView.swift */,
 			);
 			path = visionos;
 			sourceTree = "<group>";
@@ -19320,6 +19329,7 @@
 				BC40761A124FF0370068F20A /* WKStringCF.h in Headers */,
 				BC9099801256A98200083756 /* WKStringPrivate.h in Headers */,
 				9593675F252E5E3100D3F0A0 /* WKStylusDeviceObserver.h in Headers */,
+				976544262EF3514300BD8947 /* WKSurroundingsEffect.h in Headers */,
 				CE5B4C8821B73D870022E64F /* WKSyntheticFlagsChangedWebEvent.h in Headers */,
 				26F10BE819187E2E001D0E68 /* WKSyntheticTapGestureRecognizer.h in Headers */,
 				F43548382AB7C41E00150894 /* WKTapHighlightView.h in Headers */,
@@ -22092,6 +22102,8 @@
 				1DB01944211CF005009FB3E8 /* WKShareSheet.mm in Sources */,
 				7A78FF332241919B0096483E /* WKStorageAccessAlert.mm in Sources */,
 				07152D072F2F037D00B56C0E /* WKTextSelectionController.swift in Sources */,
+				9788BFD92EF4A6940038405A /* WKSurroundingsEffect.swift in Sources */,
+				97311DE42F0DB61F00B23BE9 /* WKSurroundingsEffectView.swift in Sources */,
 				076897F02D07B330006F9FA7 /* WKUIDelegateAdapter.swift in Sources */,
 				079A4DB02D73EA4A00CA387F /* WKURLSchemeHandlerAdapter.swift in Sources */,
 				079A4DA52D72CE3F00CA387F /* WKWebpagePreferences+Extras.swift in Sources */,

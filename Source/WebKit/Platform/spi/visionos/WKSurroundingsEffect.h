@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,19 +23,34 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Add project-level Objective-C header files here to be able to access them from within Swift sources.
+#pragma once
 
+#import <Foundation/Foundation.h>
 #import <wtf/Platform.h>
 
-#import "ModelTypes.h" // NOLINT
-#import "UIWindowScene+Extras.h"
-#import "WKMaterialHostingSupport.h"
-#import "WKMouseDeviceObserver.h"
-#import "WKPreferencesInternal.h"
-#import "WKScrollGeometry.h"
-#import "WKSeparatedImageView.h"
-#import "WKSurroundingsEffect.h"
-#import "WKUIDelegateInternal.h"
-#import "WKWebViewConfigurationInternal.h"
-#import "WKWebViewInternal.h"
-#import "_WKTextExtractionInternal.h"
+#if PLATFORM(VISION)
+
+#import <UIKit/UIKit.h>
+
+typedef NS_ENUM(NSInteger, WKSurroundingsEffectType) {
+    WKSurroundingsEffectTypeNone = 0,
+    WKSurroundingsEffectTypeSemiDark = 1,
+    WKSurroundingsEffectTypeDark = 2,
+    WKSurroundingsEffectTypeUltraDark = 3,
+};
+
+NS_HEADER_AUDIT_BEGIN(nullability, sendability)
+
+NS_SWIFT_UI_ACTOR
+@interface WKSurroundingsEffectManager : NSObject
++ (WKSurroundingsEffectManager *)shared;
+@property (nonatomic) WKSurroundingsEffectType currentEffect;
+@end
+
+@interface WKSurroundingsEffectWindow : UIWindow
+- (instancetype)initWithWindowScene:(UIWindowScene *)windowScene;
+- (void)setupSurroundingsEffectIfNeeded;
+@end
+
+NS_HEADER_AUDIT_END(nullability, sendability)
+#endif
