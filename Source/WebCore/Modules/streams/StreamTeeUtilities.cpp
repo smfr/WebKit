@@ -208,8 +208,8 @@ private:
     bool m_canceled2 = false;
     Ref<DeferredPromise> m_cancelDeferredPromise;
     Ref<DOMPromise> m_cancelPromise;
-    RefPtr<ReadableStream> m_branch1;
-    RefPtr<ReadableStream> m_branch2;
+    WeakPtr<ReadableStream> m_branch1;
+    WeakPtr<ReadableStream> m_branch2;
     JSValueInWrappedObject m_branch1Reason;
     JSValueInWrappedObject m_branch2Reason;
 };
@@ -227,11 +227,13 @@ ExceptionOr<Vector<Ref<ReadableStream>>> byteStreamTee(JSDOMGlobalObject& global
     Ref state = StreamTeeState::create(globalObject, stream, reader.copyRef());
 
     ReadableByteStreamController::PullAlgorithm pull1Algorithm = [state = Ref { state }](auto& globalObject, auto&&) {
-        return pull1Steps(globalObject, state, Ref { *state->branch1() });
+        Ref branch1 = *state->branch1();
+        return pull1Steps(globalObject, state, branch1.get());
     };
 
     ReadableByteStreamController::PullAlgorithm pull2Algorithm = [state = Ref { state }](auto& globalObject, auto&&) {
-        return pull2Steps(globalObject, state, Ref { *state->branch2() });
+        Ref branch2 = *state->branch2();
+        return pull2Steps(globalObject, state, branch2.get());
     };
 
     ReadableByteStreamController::CancelAlgorithm cancel1Algorithm = [state = Ref { state }](auto& globalObject, auto&&, auto&& reason) {
