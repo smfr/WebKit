@@ -1208,7 +1208,7 @@ public:
     }
 
     template<typename Functor>
-    auto emitCheckAndPrepareAndMaterializePointerApply(Value pointer, uint32_t uoffset, uint32_t sizeOfOperation, Functor&& functor) -> decltype(auto);
+    auto emitCheckAndPrepareAndMaterializePointerApply(Value pointer, uint64_t uoffset, uint32_t sizeOfOperation, Functor&&) -> decltype(auto);
 
     static inline uint32_t sizeOfLoadOp(LoadOpType op)
     {
@@ -1268,7 +1268,7 @@ public:
         "I64Load8S", "I64Load8U", "I64Load16S", "I64Load16U", "I64Load32S", "I64Load32U"
     };
 
-    [[nodiscard]] PartialResult load(LoadOpType loadOp, Value pointer, Value& result, uint32_t uoffset);
+    [[nodiscard]] PartialResult load(LoadOpType loadOp, Value pointer, Value& result, uint64_t uoffset);
 
     inline uint32_t sizeOfStoreOp(StoreOpType op)
     {
@@ -1296,7 +1296,7 @@ public:
         "I64Store8", "I64Store16", "I64Store32",
     };
 
-    [[nodiscard]] PartialResult store(StoreOpType storeOp, Value pointer, Value value, uint32_t uoffset);
+    [[nodiscard]] PartialResult store(StoreOpType storeOp, Value pointer, Value value, uint64_t uoffset);
 
     [[nodiscard]] PartialResult addGrowMemory(Value delta, Value& result);
 

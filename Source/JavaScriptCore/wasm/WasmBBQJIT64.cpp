@@ -340,7 +340,7 @@ Value BBQJIT::instanceValue()
 
 // Memory
 
-[[nodiscard]] PartialResult BBQJIT::load(LoadOpType loadOp, Value pointer, Value& result, uint32_t uoffset)
+[[nodiscard]] PartialResult BBQJIT::load(LoadOpType loadOp, Value pointer, Value& result, uint64_t uoffset)
 {
     if (sumOverflows<uint32_t>(uoffset, sizeOfLoadOp(loadOp))) [[unlikely]] {
         // FIXME: Same issue as in AirIRGenerator::load(): https://bugs.webkit.org/show_bug.cgi?id=166435
@@ -432,7 +432,7 @@ Value BBQJIT::instanceValue()
     return { };
 }
 
-[[nodiscard]] PartialResult BBQJIT::store(StoreOpType storeOp, Value pointer, Value value, uint32_t uoffset)
+[[nodiscard]] PartialResult BBQJIT::store(StoreOpType storeOp, Value pointer, Value value, uint64_t uoffset)
 {
     Location valueLocation = locationOf(value);
     if (sumOverflows<uint32_t>(uoffset, sizeOfStoreOp(storeOp))) [[unlikely]] {
