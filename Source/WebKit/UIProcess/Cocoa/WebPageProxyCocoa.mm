@@ -279,9 +279,8 @@ std::optional<IPC::AsyncReplyID> WebPageProxy::grantAccessToCurrentPasteboardDat
 #if USE(APPLE_INTERNAL_SDK) && __has_include(<WebKitAdditions/WebPageProxyCocoaAdditions.mm>)
 #import <WebKitAdditions/WebPageProxyCocoaAdditions.mm>
 #else
-// Redefine as function-like macro for statement context
 #undef SAFE_BROWSING_LOOKUP_RESULT_ADDITIONS
-#define SAFE_BROWSING_LOOKUP_RESULT_ADDITIONS(lookupResult)
+#define SAFE_BROWSING_LOOKUP_RESULT_ADDITIONS(lookupResult) (void)lookupResult;
 #endif
 
 void WebPageProxy::beginSafeBrowsingCheck(const URL& url, API::Navigation& navigation, bool forMainFrameNavigation)
