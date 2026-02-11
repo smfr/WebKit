@@ -259,10 +259,39 @@ void ScrollAnchoringController::notifyChildHadSuppressingStyleChange(RenderEleme
     scrollerBox->setScrollAnchoringSuppressionStyleChanged(true);
 }
 
-// https://drafts.csswg.org/css-scroll-anchoring/#anchor-priority-candidates
-bool ScrollAnchoringController::findPriorityCandidate(Document&)
+static CheckedPtr<RenderElement> priorityCandidateForElement(Element* element)
 {
-    // FIXME: Implement, without triggering assertion via isEditableNode() for interleaved layouts.
+    while (element) {
+        if (CheckedPtr renderer = element->renderer()) {
+            if (!renderer->isAnonymousBlock() && (!renderer->isInline() || renderer->isAtomicInlineLevelBox()))
+                return renderer;
+        }
+        SUPPRESS_UNCOUNTED_LOCAL element = element->parentElement();
+    }
+    return nullptr;
+}
+
+// https://drafts.csswg.org/css-scroll-anchoring/#anchor-priority-candidates
+bool ScrollAnchoringController::findPriorityCandidate(Document& document)
+{
+    CheckedPtr scrollerBox = scrollableAreaBox();
+    if (!scrollerBox)
+        return false;
+
+    RefPtr focusedElement = document.focusedElement();
+    if (focusedElement && isEditableNode(*focusedElement)) {
+        if (CheckedPtr candidate = priorityCandidateForElement(focusedElement)) {
+            auto status = examinePriorityCandidate(*candidate);
+            if (isViableStatus(status)) {
+                m_anchorObject = *candidate;
+                // FIXME: Look inside the candidate?
+            }
+            return true;
+        }
+    }
+
+    // FIXME: Find in page match
+
     return false;
 }
 
