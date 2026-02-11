@@ -2540,7 +2540,7 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
     return WebKit::convertToCocoaWritingToolsBehavior(_page->writingToolsBehavior());
 }
 
-- (void)willBeginWritingToolsSession:(WTSession *)session requestContexts:(void (^)(NSArray<WTContext *> *))completion
+- (void)willBeginWritingToolsSession:(WTSession *)session forProofreadingReview:(BOOL)proofreadingReview requestContexts:(void (^)(NSArray<WTContext *> *))completion
 {
     auto webSession = WebKit::convertToWebSession(session);
 
@@ -2548,6 +2548,10 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
         _activeWritingToolsSession = session;
         _page->setWritingToolsActive(true);
     }
+
+    _activeWritingToolsSessionIsForProofreadingReview = proofreadingReview;
+    if (proofreadingReview && webSession)
+        webSession->isForProofreadingReview = WebCore::WritingTools::IsForProofreadingReview::Yes;
 
     _page->willBeginWritingToolsSession(webSession, [completion = makeBlockPtr(completion)](const auto& contextData) {
         auto contexts = [NSMutableArray arrayWithCapacity:contextData.size()];
@@ -2557,6 +2561,11 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
         }
         completion(contexts);
     });
+}
+
+- (void)willBeginWritingToolsSession:(WTSession *)session requestContexts:(void (^)(NSArray<WTContext *> *))completion
+{
+    [self willBeginWritingToolsSession:session forProofreadingReview:NO requestContexts:completion];
 }
 
 - (void)didBeginWritingToolsSession:(WTSession *)session contexts:(NSArray<WTContext *> *)contexts
@@ -2580,7 +2589,7 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
 
     _page->didBeginWritingToolsSession(*webSession, contextData);
 
-    if (session.type == WTSessionTypeProofreading)
+    if (session.type == WTSessionTypeProofreading && !_activeWritingToolsSessionIsForProofreadingReview)
         _intelligenceTextEffectCoordinator = adoptNS([WebKit::allocWKIntelligenceReplacementTextEffectCoordinatorInstance() initWithDelegate:(id<WKIntelligenceTextEffectCoordinatorDelegate>)self]);
     else if (session.type == WTSessionTypeComposition && session.compositionSessionType == WTCompositionSessionTypeSmartReply)
         _intelligenceTextEffectCoordinator = adoptNS([WebKit::allocWKIntelligenceSmartReplyTextEffectCoordinatorInstance() initWithDelegate:(id<WKIntelligenceTextEffectCoordinatorDelegate>)self]);
@@ -2631,7 +2640,10 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
         });
     });
 
-    [_intelligenceTextEffectCoordinator requestReplacementWithProcessedRange:range finished:finished characterDelta:delta operation:operation.get() completion:^{ }];
+    if (_activeWritingToolsSessionIsForProofreadingReview)
+        _page->proofreadingSessionDidReceiveSuggestions(*webSession, replacementData, range, *webContext, finished, [] { });
+    else
+        [_intelligenceTextEffectCoordinator requestReplacementWithProcessedRange:range finished:finished characterDelta:delta operation:operation.get() completion:^{ }];
 }
 
 - (void)proofreadingSession:(WTSession *)session didUpdateState:(WTTextSuggestionState)state forSuggestionWithUUID:(NSUUID *)suggestionUUID inContext:(WTContext *)context
@@ -2676,6 +2688,20 @@ static _WKSelectionAttributes selectionAttributes(const WebKit::EditorState& edi
     _activeWritingToolsSession = nil;
     [_writingToolsTextSuggestions removeAllObjects];
 
+    if (_activeWritingToolsSessionIsForProofreadingReview) {
+        // The proofreading review case will not have animations or reversions at this point,
+        // but the willEndWritingToolsSession call here makes sure any necessary cleanup takes place.
+        _activeWritingToolsSessionIsForProofreadingReview = NO;
+        _page->setWritingToolsActive(false);
+        _page->willEndWritingToolsSession(*webSession, accepted, [webSession, accepted, weakSelf = WeakObjCPtr<WKWebView>(self)] {
+            auto strongSelf = weakSelf.get();
+            if (!strongSelf)
+                return;
+
+            strongSelf->_page->didEndWritingToolsSession(*webSession, accepted);
+        });
+        return;
+    }
     if (!_intelligenceTextEffectCoordinator) {
         _page->setWritingToolsActive(false);
         _page->didEndWritingToolsSession(*webSession, accepted);

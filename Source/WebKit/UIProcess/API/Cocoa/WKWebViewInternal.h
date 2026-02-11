@@ -344,6 +344,7 @@ struct PerWebProcessState {
 
     NSUInteger _partialIntelligenceTextAnimationCount;
     BOOL _writingToolsTextReplacementsFinished;
+    BOOL _activeWritingToolsSessionIsForProofreadingReview;
 #endif
 
 #if ENABLE(SCREEN_TIME)

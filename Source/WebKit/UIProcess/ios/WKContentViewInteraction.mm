@@ -14200,6 +14200,12 @@ inline static NSString *extendSelectionCommand(UITextLayoutDirection direction)
     [_webView.get() willBeginWritingToolsSession:session requestContexts:completion];
 }
 
+- (void)willBeginWritingToolsSession:(WTSession *)session forProofreadingReview:(BOOL)proofreadingReview requestContexts:(void (^)(NSArray<WTContext *> *))completion
+{
+    // FIXME - Staging: rdar://170159369
+    [(id)_webView.get() willBeginWritingToolsSession:session forProofreadingReview:proofreadingReview requestContexts:completion];
+}
+
 - (void)didBeginWritingToolsSession:(WTSession *)session contexts:(NSArray<WTContext *> *)contexts
 {
     [_webView.get() didBeginWritingToolsSession:session contexts:contexts];

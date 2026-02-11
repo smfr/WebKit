@@ -7071,6 +7071,9 @@ header: <WebCore/WritingToolsTypes.h>
     Other
 };
 
+header: <WebCore/WritingToolsTypes.h>
+enum class WebCore::WritingTools::IsForProofreadingReview : bool;
+
 using WebCore::WritingTools::SessionID = WTF::UUID;
 
 header: <WebCore/WritingToolsTypes.h>
@@ -7078,6 +7081,7 @@ header: <WebCore/WritingToolsTypes.h>
     WebCore::WritingTools::SessionID identifier;
     WebCore::WritingTools::SessionType type;
     WebCore::WritingTools::SessionCompositionType compositionType;
+    WebCore::WritingTools::IsForProofreadingReview isForProofreadingReview;
 };
 
 using WebCore::WritingTools::ContextID = WTF::UUID;
@@ -7094,7 +7098,8 @@ header: <WebCore/WritingToolsTypes.h>
     Pending,
     Reviewing,
     Rejected,
-    Invalid
+    Invalid,
+    Accepted
 };
 
 using WebCore::WritingTools::TextSuggestionID = WTF::UUID;

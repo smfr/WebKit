@@ -135,10 +135,9 @@ typedef NS_ENUM(NSInteger, WTSessionType) {
 typedef NS_ENUM(NSInteger, WTTextSuggestionState) {
     WTTextSuggestionStatePending = 0,
     WTTextSuggestionStateReviewing = 1,
+    WTTextSuggestionStateAccepted = 2,
     WTTextSuggestionStateRejected = 3,
     WTTextSuggestionStateInvalid = 4,
-
-    WTTextSuggestionStateAccepted = 2,
 };
 
 @interface WTTextSuggestion : NSObject<BSXPCCoding, NSSecureCoding>
