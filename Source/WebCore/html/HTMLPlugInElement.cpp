@@ -157,7 +157,7 @@ JSC::Bindings::Instance* HTMLPlugInElement::bindingsInstance()
 
     if (!m_instance) {
         if (RefPtr widget = pluginWidget())
-            m_instance = frame->checkedScript()->createScriptInstanceForWidget(widget.get());
+            m_instance = protect(frame->script())->createScriptInstanceForWidget(widget.get());
     }
     return m_instance.get();
 }

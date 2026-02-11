@@ -543,7 +543,7 @@ void FocusController::setFocusedInternal(bool focused)
 
     RefPtr focusedFrame = focusedLocalFrame();
     if (focusedFrame && focusedFrame->view()) {
-        focusedFrame->checkedSelection()->setFocused(focused);
+        protect(focusedFrame->selection())->setFocused(focused);
         dispatchEventsOnWindowAndFocusedElement(protect(focusedFrame->document()).get(), focused);
     }
 }

@@ -250,7 +250,7 @@ LocalFrame::~LocalFrame()
         loader->closeURL();
 
     loader->clear(protect(document()), false);
-    checkedScript()->updatePlatformScriptObjects();
+    protect(script())->updatePlatformScriptObjects();
 
     // FIXME: We should not be doing all this work inside the destructor
 
@@ -301,7 +301,7 @@ void LocalFrame::setView(RefPtr<LocalFrameView>&& view)
         protect(document())->willBeRemovedFromFrame();
     
     if (RefPtr view = m_view)
-        view->checkedLayoutContext()->unscheduleLayout();
+        protect(view->layoutContext())->unscheduleLayout();
     
     m_eventHandler->clear();
 
@@ -840,18 +840,13 @@ void LocalFrame::injectUserScriptImmediately(DOMWrapperWorld& world, const UserS
     loader->client().willInjectUserScript(world);
 
     WTFBeginSignpost(this, UserScript, "injectUserScript: %" PRIVATE_LOG_STRING " (%u bytes, top frame only %d, doc start %d)", script.debugDescription().ascii().data(), script.source().length(), script.injectedFrames() == UserContentInjectedFrames::InjectInTopFrameOnly, script.injectionTime() == UserScriptInjectionTime::DocumentStart);
-    checkedScript()->evaluateInWorldIgnoringException(ScriptSourceCode(script.source(), JSC::SourceTaintedOrigin::Untainted, URL(script.url())), world);
+    protect(this->script())->evaluateInWorldIgnoringException(ScriptSourceCode(script.source(), JSC::SourceTaintedOrigin::Untainted, URL(script.url())), world);
     WTFEndSignpost(this, UserScript);
 }
 
 RenderView* LocalFrame::contentRenderer() const
 {
     return document() ? document()->renderView() : nullptr;
-}
-
-CheckedPtr<RenderView> LocalFrame::checkedContentRenderer() const
-{
-    return contentRenderer();
 }
 
 LocalFrame* LocalFrame::frameForWidget(const Widget& widget)
@@ -869,7 +864,7 @@ void LocalFrame::clearTimers(LocalFrameView *view, Document *document)
 {
     if (!view)
         return;
-    view->checkedLayoutContext()->unscheduleLayout();
+    protect(view->layoutContext())->unscheduleLayout();
     if (CheckedPtr timelines = document->timelinesController())
         timelines->suspendAnimations();
     protect(view->frame())->eventHandler().stopAutoscrollTimer();
@@ -880,21 +875,8 @@ void LocalFrame::clearTimers()
     clearTimers(protect(view()).get(), protect(document()).get());
 }
 
-CheckedRef<ScriptController> LocalFrame::checkedScript()
-{
-    return m_script.get();
-}
-
-CheckedRef<const ScriptController> LocalFrame::checkedScript() const
-{
-    return m_script.get();
-}
-
 void LocalFrame::willDetachPage()
 {
-    if (RefPtr parent = dynamicDowncast<LocalFrame>(tree().parent()))
-        parent->loader().checkLoadComplete();
-
     for (Ref observer : m_destructionObservers)
         observer->willDetachPage();
 
@@ -1124,7 +1106,7 @@ void LocalFrame::setPageAndTextZoomFactors(float pageZoomFactor, float textZoomF
 
     if (RefPtr view = this->view()) {
         if (document->renderView() && document->renderView()->needsLayout() && view->didFirstLayout())
-            view->checkedLayoutContext()->layout();
+            protect(view->layoutContext())->layout();
 
         // Scrolling to the calculated position must be done after the layout.
         if (scrollPositionAfterZoomed)
@@ -1177,7 +1159,7 @@ void LocalFrame::resumeActiveDOMObjectsAndAnimations()
     if (CheckedPtr timelines = document->timelinesController())
         timelines->resumeAnimations();
     if (RefPtr view = m_view)
-        view->checkedLayoutContext()->scheduleLayout();
+        protect(view->layoutContext())->scheduleLayout();
 }
 
 void LocalFrame::deviceOrPageScaleFactorChanged()

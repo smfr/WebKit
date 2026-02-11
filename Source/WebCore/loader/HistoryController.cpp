@@ -613,7 +613,7 @@ void HistoryController::updateForRedirectWithLockedBackForwardList()
             if (RefPtr parentCurrentItem = parentFrame->loader().history().currentItem()) {
                 Ref item = createItem(page->historyItemClient(), parentCurrentItem->itemID());
                 parentCurrentItem->setChildItem(item.copyRef());
-                page->checkedBackForward()->setChildItem(parentCurrentItem->frameItemID(), WTF::move(item));
+                protect(page->backForward())->setChildItem(parentCurrentItem->frameItemID(), WTF::move(item));
             }
         }
     }
@@ -1008,7 +1008,7 @@ void HistoryController::updateBackForwardListClippedAtTarget(bool doClip)
     if (!item)
         return;
     LOG(History, "HistoryController %p updateBackForwardListClippedAtTarget: Adding backforward item %p in frame %p (main frame %d) %s", this, item.get(), m_frame.ptr(), m_frame->isMainFrame(), m_frame->loader().documentLoader()->url().string().utf8().data());
-    page->checkedBackForward()->addItem(item.releaseNonNull());
+    protect(page->backForward())->addItem(item.releaseNonNull());
 }
 
 void HistoryController::updateCurrentItem()
@@ -1071,7 +1071,7 @@ void HistoryController::pushState(RefPtr<SerializedScriptValue>&& stateObject, c
 
     LOG(History, "HistoryController %p pushState: Adding top item %p, setting url of current item %p to %s, scrollRestoration is %s", this, topItem.ptr(), m_currentItem.get(), urlString.ascii().data(), topItem->shouldRestoreScrollPosition() ? "auto" : "manual");
 
-    page->checkedBackForward()->addItem(WTF::move(topItem));
+    protect(page->backForward())->addItem(WTF::move(topItem));
 
     if (!canRecordHistoryForFrame(frame))
         return;

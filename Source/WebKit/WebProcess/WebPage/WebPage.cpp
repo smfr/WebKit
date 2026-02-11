@@ -1934,7 +1934,7 @@ void WebPage::setEditable(bool editable)
         protect(frame->editor())->applyEditingStyleToBodyElement();
         // If the page is made editable and the selection is empty, set it to something.
         if (frame->selection().isNone())
-            frame->checkedSelection()->setSelectionFromNone();
+            protect(frame->selection())->setSelectionFromNone();
     }
 }
 
@@ -3254,7 +3254,7 @@ void WebPage::paintSnapshotAtSize(const IntRect& rect, const IntSize& bitmapSize
     frameView.paintContentsForSnapshot(graphicsContext, snapshotRect, shouldPaintSelection, coordinateSpace);
 
     if (options.contains(SnapshotOption::PaintSelectionRectangle)) {
-        FloatRect selectionRectangle = frame.checkedSelection()->selectionBounds();
+        FloatRect selectionRectangle = protect(frame.selection())->selectionBounds();
         graphicsContext.setStrokeColor(Color::red);
         graphicsContext.strokeRect(selectionRectangle, 1);
     }
@@ -4082,7 +4082,7 @@ void WebPage::centerSelectionInVisibleArea()
     RefPtr frame = corePage()->focusController().focusedOrMainFrame();
     if (!frame)
         return;
-    frame->checkedSelection()->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignCenterAlways });
+    protect(frame->selection())->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignCenterAlways });
     findController().showFindIndicatorInSelection();
 }
 
@@ -4536,7 +4536,7 @@ void WebPage::runJavaScript(WebFrame* frame, RunJavaScriptParameters&& parameter
             return completionHandler(makeUnexpected(std::nullopt));
 
         JSGlobalContextRef context = frame->jsContextForWorld(world.ptr());
-        JSValueRef jsValue = toRef(coreFrame->checkedScript()->globalObject(Ref { world->coreWorld() }), result.value());
+        JSValueRef jsValue = toRef(protect(coreFrame->script())->globalObject(Ref { world->coreWorld() }), result.value());
         if (auto result = JavaScriptEvaluationResult::extract(context, jsValue))
             return completionHandler(WTF::move(*result));
         return completionHandler(makeUnexpected(std::nullopt));
@@ -4565,7 +4565,7 @@ void WebPage::runJavaScript(WebFrame* frame, RunJavaScriptParameters&& parameter
     };
 
     JSLockHolder lock(commonVM());
-    protect(frame->coreLocalFrame())->checkedScript()->executeAsynchronousUserAgentScriptInWorld(protect(world->coreWorld()), WTF::move(coreParameters), WTF::move(resolveFunction));
+    protect(protect(frame->coreLocalFrame())->script())->executeAsynchronousUserAgentScriptInWorld(protect(world->coreWorld()), WTF::move(coreParameters), WTF::move(resolveFunction));
 }
 
 void WebPage::runJavaScriptInFrameInScriptWorld(RunJavaScriptParameters&& parameters, std::optional<WebCore::FrameIdentifier> frameID, const ContentWorldData& worldData, bool wantsResult, CompletionHandler<void(Expected<JavaScriptEvaluationResult, std::optional<WebCore::ExceptionDetails>>)>&& completionHandler)
@@ -6139,7 +6139,7 @@ void WebPage::clearSelection()
     if (!frame)
         return;
 
-    frame->checkedSelection()->clear();
+    protect(frame->selection())->clear();
 }
 #endif
 
@@ -6447,7 +6447,7 @@ void WebPage::setCaretAnimatorType(WebCore::CaretAnimatorType caretType)
     if (!frame)
         return;
 
-    frame->checkedSelection()->caretAnimatorInvalidated(caretType);
+    protect(frame->selection())->caretAnimatorInvalidated(caretType);
 }
 
 void WebPage::setCaretBlinkingSuspended(bool suspended)
@@ -6456,7 +6456,7 @@ void WebPage::setCaretBlinkingSuspended(bool suspended)
     if (!frame)
         return;
 
-    frame->checkedSelection()->setCaretBlinkingSuspended(suspended);
+    protect(frame->selection())->setCaretBlinkingSuspended(suspended);
 }
 
 #endif
@@ -7088,7 +7088,7 @@ void WebPage::deleteSurrounding(int64_t offset, unsigned characterCount)
     auto selectionRange = resolveCharacterRange(makeRangeSelectingNodeContents(rootNode), characterRange);
 
     targetFrame->editor().setIgnoreSelectionChanges(true);
-    targetFrame->checkedSelection()->setSelection(VisibleSelection(selectionRange));
+    protect(targetFrame->selection())->setSelection(VisibleSelection(selectionRange));
     targetFrame->editor().deleteSelectionWithSmartDelete(false);
     targetFrame->editor().setIgnoreSelectionChanges(false);
     sendEditorStateUpdate();
@@ -9802,7 +9802,7 @@ void WebPage::layerTreeAsTextForTesting(WebCore::FrameIdentifier frameID, uint64
     }
 
     auto ts = WebCore::createTextStream(*renderer);
-    ts << coreLocalFrame->checkedContentRenderer()->checkedCompositor()->layerTreeAsText(options, baseIndent);
+    ts << protect(protect(coreLocalFrame->contentRenderer())->compositor())->layerTreeAsText(options, baseIndent);
     completionHandler(ts.release());
 }
 
@@ -9832,7 +9832,7 @@ void WebPage::requestTargetedElement(TargetedElementRequest&& request, Completio
     if (!page)
         return completion({ });
 
-    completion(page->checkedElementTargetingController()->findTargets(WTF::move(request)));
+    completion(protect(page->elementTargetingController())->findTargets(WTF::move(request)));
 }
 
 void WebPage::requestAllTargetableElements(float hitTestInterval, CompletionHandler<void(Vector<Vector<WebCore::TargetedElementInfo>>&&)>&& completion)
@@ -9841,7 +9841,7 @@ void WebPage::requestAllTargetableElements(float hitTestInterval, CompletionHand
     if (!page)
         return completion({ });
 
-    completion(page->checkedElementTargetingController()->findAllTargets(hitTestInterval));
+    completion(protect(page->elementTargetingController())->findAllTargets(hitTestInterval));
 }
 
 void WebPage::hasTextExtractionFilterRules(CompletionHandler<void(bool)>&& completion)
@@ -9973,13 +9973,13 @@ void WebPage::hitTestAtPoint(WebCore::FrameIdentifier frameID, WebCore::FloatPoi
 void WebPage::adjustVisibilityForTargetedElements(Vector<TargetedElementAdjustment>&& adjustments, CompletionHandler<void(bool)>&& completion)
 {
     RefPtr page = corePage();
-    completion(page && page->checkedElementTargetingController()->adjustVisibility(WTF::move(adjustments)));
+    completion(page && protect(page->elementTargetingController())->adjustVisibility(WTF::move(adjustments)));
 }
 
 void WebPage::resetVisibilityAdjustmentsForTargetedElements(const Vector<TargetedElementIdentifiers>& identifiers, CompletionHandler<void(bool)>&& completion)
 {
     RefPtr page = corePage();
-    completion(page && page->checkedElementTargetingController()->resetVisibilityAdjustments(identifiers));
+    completion(page && protect(page->elementTargetingController())->resetVisibilityAdjustments(identifiers));
 }
 
 void WebPage::takeSnapshotForTargetedElement(NodeIdentifier nodeID, ScriptExecutionContextIdentifier documentID, CompletionHandler<void(std::optional<ShareableBitmapHandle>&&)>&& completion)
@@ -9988,7 +9988,7 @@ void WebPage::takeSnapshotForTargetedElement(NodeIdentifier nodeID, ScriptExecut
     if (!page)
         return completion({ });
 
-    RefPtr image = page->checkedElementTargetingController()->snapshotIgnoringVisibilityAdjustment(nodeID, documentID);
+    RefPtr image = protect(page->elementTargetingController())->snapshotIgnoringVisibilityAdjustment(nodeID, documentID);
     if (!image)
         return completion({ });
 
@@ -10007,7 +10007,7 @@ void WebPage::takeSnapshotForTargetedElement(NodeIdentifier nodeID, ScriptExecut
 void WebPage::numberOfVisibilityAdjustmentRects(CompletionHandler<void(uint64_t)>&& completion)
 {
     RefPtr page = corePage();
-    completion(page ? page->checkedElementTargetingController()->numberOfVisibilityAdjustmentRects() : 0);
+    completion(page ? protect(page->elementTargetingController())->numberOfVisibilityAdjustmentRects() : 0);
 }
 
 #if HAVE(SPATIAL_TRACKING_LABEL)

@@ -5052,9 +5052,9 @@ void EventHandler::defaultBackspaceEventHandler(KeyboardEvent& event)
     bool handledEvent = false;
 
     if (event.shiftKey())
-        handledEvent = page->checkedBackForward()->goForward();
+        handledEvent = protect(page->backForward())->goForward();
     else
-        handledEvent = page->checkedBackForward()->goBack();
+        handledEvent = protect(page->backForward())->goBack();
 
     if (handledEvent)
         event.setDefaultHandled();

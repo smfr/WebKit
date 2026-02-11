@@ -381,7 +381,7 @@ void WebPage::insertDictatedTextAsync(const String& text, const EditingRange& re
     if (replacementEditingRange.location != notFound) {
         auto replacementRange = EditingRange::toRange(*frame, replacementEditingRange);
         if (replacementRange)
-            frame->checkedSelection()->setSelection(VisibleSelection { *replacementRange });
+            protect(frame->selection())->setSelection(VisibleSelection { *replacementRange });
     }
 
     if (options.registerUndoGroup)
@@ -910,7 +910,7 @@ void WebPage::replaceImageForRemoveBackground(const ElementContext& elementConte
 
     constexpr auto restoreSelectionOptions = FrameSelection::defaultSetSelectionOptions(UserTriggered::Yes);
     if (!originalSelection.isNoneOrOrphaned()) {
-        frame->checkedSelection()->setSelection(originalSelection, restoreSelectionOptions);
+        protect(frame->selection())->setSelection(originalSelection, restoreSelectionOptions);
         return;
     }
 
@@ -929,7 +929,7 @@ void WebPage::replaceImageForRemoveBackground(const ElementContext& elementConte
     // The node replacement may have orphaned the original selection range; in this case, try to restore
     // the original selected character range.
     auto newSelectionRange = resolveCharacterRange(selectionHostRange, *rangeToRestore, iteratorOptions);
-    frame->checkedSelection()->setSelection(newSelectionRange, restoreSelectionOptions);
+    protect(frame->selection())->setSelection(newSelectionRange, restoreSelectionOptions);
 }
 
 #endif // ENABLE(IMAGE_ANALYSIS_ENHANCEMENTS)
@@ -1766,7 +1766,7 @@ void WebPage::setTextAsync(const String& text)
 
     if (frame->selection().selection().isContentEditable()) {
         UserTypingGestureIndicator indicator(*frame);
-        frame->checkedSelection()->selectAll();
+        protect(frame->selection())->selectAll();
         if (text.isEmpty())
             protect(frame->editor())->deleteSelectionWithSmartDelete(false);
         else
@@ -1799,7 +1799,7 @@ void WebPage::insertTextAsync(const String& text, const EditingRange& replacemen
     if (replacementEditingRange.location != notFound) {
         if (auto replacementRange = EditingRange::toRange(*frame, replacementEditingRange, options.editingRangeIsRelativeTo)) {
             SetForScope isSelectingTextWhileInsertingAsynchronously(m_isSelectingTextWhileInsertingAsynchronously, options.suppressSelectionUpdate);
-            frame->checkedSelection()->setSelection(VisibleSelection(*replacementRange));
+            protect(frame->selection())->setSelection(VisibleSelection(*replacementRange));
             replacesText = replacementEditingRange.length;
         }
     }
@@ -1943,7 +1943,7 @@ void WebPage::setCompositionAsync(const String& text, const Vector<CompositionUn
     if (frame->selection().selection().isContentEditable()) {
         if (replacementEditingRange.location != notFound) {
             if (auto replacementRange = EditingRange::toRange(*frame, replacementEditingRange))
-                frame->checkedSelection()->setSelection(VisibleSelection(*replacementRange));
+                protect(frame->selection())->setSelection(VisibleSelection(*replacementRange));
         }
         protect(frame->editor())->setComposition(text, underlines, highlights, annotations, selection.location, selection.location + selection.length);
     }

@@ -3466,7 +3466,7 @@ void Document::createRenderTree()
 
 void Document::didBecomeCurrentDocumentInFrame()
 {
-    protectedFrame()->checkedScript()->updateDocument();
+    protect(protectedFrame()->script())->updateDocument();
 
     // Many of these functions have event handlers which can detach the frame synchronously, so we must check repeatedly in this function.
     if (!m_frame)
@@ -4974,7 +4974,7 @@ void Document::disableEval(const String& errorMessage)
     if (!frame)
         return;
 
-    frame->checkedScript()->setEvalEnabled(false, errorMessage);
+    protect(frame->script())->setEvalEnabled(false, errorMessage);
 }
 
 void Document::disableWebAssembly(const String& errorMessage)
@@ -4983,7 +4983,7 @@ void Document::disableWebAssembly(const String& errorMessage)
     if (!frame)
         return;
 
-    frame->checkedScript()->setWebAssemblyEnabled(false, errorMessage);
+    protect(frame->script())->setWebAssemblyEnabled(false, errorMessage);
 }
 
 void Document::setTrustedTypesEnforcement(JSC::TrustedTypesEnforcement enforcement)
@@ -4995,7 +4995,7 @@ void Document::setTrustedTypesEnforcement(JSC::TrustedTypesEnforcement enforceme
     if (!frame)
         return;
 
-    frame->checkedScript()->setTrustedTypesEnforcement(enforcement);
+    protect(frame->script())->setTrustedTypesEnforcement(enforcement);
     m_requiresTrustedTypes = enforcement != JSC::TrustedTypesEnforcement::None;
 }
 

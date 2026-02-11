@@ -568,7 +568,7 @@ Page::~Page()
         resourceUsageOverlay->detachFromPage();
 #endif
 
-    checkedBackForward()->close();
+    protect(backForward())->close();
     if (!isUtilityPage())
         BackForwardCache::singleton().removeAllItemsForPage(*this);
 
@@ -577,10 +577,6 @@ Page::~Page()
     protectedVisitedLinkStore()->removePage(*this);
 }
 
-CheckedRef<BackForwardController> Page::checkedBackForward()
-{
-    return m_backForwardController.get();
-}
 
 void Page::firstTimeInitialization()
 {
@@ -1202,7 +1198,7 @@ Page::FindStringData Page::findString(const String& target, FindOptions options,
         if (foundRange) {
             if (!options.contains(FindOption::DoNotSetSelection)) {
                 if (focusedLocalFrame && localFrame != focusedLocalFrame)
-                    focusedLocalFrame->checkedSelection()->clear();
+                    protect(focusedLocalFrame->selection())->clear();
                 m_focusController->setFocusedFrame(localFrame.get());
             }
             return { std::make_optional(localFrame->frameID()), foundRange };
@@ -1420,7 +1416,7 @@ static void replaceRanges(Page& page, const Vector<FindReplacementRange>& ranges
             if (range.collapsed())
                 continue;
 
-            frame->checkedSelection()->setSelectedRange(range, Affinity::Downstream, FrameSelection::ShouldCloseTyping::Yes);
+            protect(frame->selection())->setSelectedRange(range, Affinity::Downstream, FrameSelection::ShouldCloseTyping::Yes);
             protect(frame->editor())->replaceSelectionWithText(replacementText, Editor::SelectReplacement::Yes, Editor::SmartReplace::No, EditAction::InsertReplacement);
         }
     }
@@ -1612,18 +1608,13 @@ DiagnosticLoggingClient& Page::diagnosticLoggingClient() const
     return *m_diagnosticLoggingClient;
 }
 
-CheckedRef<DiagnosticLoggingClient> Page::checkedDiagnosticLoggingClient() const
-{
-    return diagnosticLoggingClient();
-}
-
 void Page::logMediaDiagnosticMessage(const RefPtr<FormData>& formData) const
 {
     unsigned imageOrMediaFilesCount = formData ? formData->imageOrMediaFilesCount() : 0;
     if (!imageOrMediaFilesCount)
         return;
     auto message = makeString(imageOrMediaFilesCount, imageOrMediaFilesCount == 1 ? " media file has been submitted"_s : " media files have been submitted"_s);
-    checkedDiagnosticLoggingClient()->logDiagnosticMessageWithDomain(message, DiagnosticLoggingDomain::Media);
+    protect(diagnosticLoggingClient())->logDiagnosticMessageWithDomain(message, DiagnosticLoggingDomain::Media);
 }
 
 void Page::setMediaVolume(float volume)
@@ -1998,11 +1989,6 @@ PageGroup& Page::group()
     return *m_group;
 }
 
-CheckedRef<PageGroup> Page::checkedGroup()
-{
-    return group();
-}
-    
 void Page::setVerticalScrollElasticity(ScrollElasticity elasticity)
 {
     if (m_verticalScrollElasticity == elasticity)
@@ -2112,7 +2098,7 @@ void Page::scheduleRenderingUpdate(OptionSet<RenderingUpdateStep> requestedSteps
 void Page::scheduleRenderingUpdateInternal()
 {
     if (!chrome().client().scheduleRenderingUpdate())
-        checkedRenderingUpdateScheduler()->scheduleRenderingUpdate();
+        protect(renderingUpdateScheduler())->scheduleRenderingUpdate();
     m_renderingUpdateIsScheduled = true;
 }
 
@@ -3960,10 +3946,10 @@ void Page::logNavigation(const Navigation& navigation)
         // Not logging those for now.
         return;
     }
-    checkedDiagnosticLoggingClient()->logDiagnosticMessage(DiagnosticLoggingKeys::navigationKey(), navigationDescription, ShouldSample::No);
+    protect(diagnosticLoggingClient())->logDiagnosticMessage(DiagnosticLoggingKeys::navigationKey(), navigationDescription, ShouldSample::No);
 
     if (!navigation.domain.isEmpty())
-        checkedDiagnosticLoggingClient()->logDiagnosticMessageWithEnhancedPrivacy(DiagnosticLoggingKeys::domainVisitedKey(), navigation.domain.string(), ShouldSample::Yes);
+        protect(diagnosticLoggingClient())->logDiagnosticMessageWithEnhancedPrivacy(DiagnosticLoggingKeys::domainVisitedKey(), navigation.domain.string(), ShouldSample::Yes);
 }
 
 void Page::mainFrameLoadStarted(const URL& destinationURL, FrameLoadType type)
@@ -4486,7 +4472,7 @@ void Page::didChangeMainDocument(Document* newDocument)
 
     clearSampledPageTopColor();
 
-    checkedElementTargetingController()->didChangeMainDocument(newDocument);
+    protect(m_elementTargetingController)->didChangeMainDocument(newDocument);
 
     updateActiveNowPlayingSessionNow();
 }
@@ -4496,11 +4482,6 @@ RenderingUpdateScheduler& Page::renderingUpdateScheduler()
     if (!m_renderingUpdateScheduler)
         m_renderingUpdateScheduler = RenderingUpdateScheduler::create(*this);
     return *m_renderingUpdateScheduler;
-}
-
-CheckedRef<RenderingUpdateScheduler> Page::checkedRenderingUpdateScheduler()
-{
-    return renderingUpdateScheduler();
 }
 
 RenderingUpdateScheduler* Page::existingRenderingUpdateScheduler()
@@ -4919,7 +4900,7 @@ void Page::revealCurrentSelection()
     RefPtr focusedOrMainFrame = focusController().focusedOrMainFrame();
     if (!focusedOrMainFrame)
         return;
-    focusedOrMainFrame->checkedSelection()->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignCenterIfNeeded });
+    protect(focusedOrMainFrame->selection())->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignCenterIfNeeded });
 }
 
 void Page::injectUserStyleSheet(UserStyleSheet& userStyleSheet)
@@ -5358,23 +5339,8 @@ void Page::deleteRemovedNodesAndDetachedRenderers()
         RefPtr frameView = document->view();
         if (!frameView)
             return;
-        frameView->checkedLayoutContext()->deleteDetachedRenderersNow();
+        protect(frameView->layoutContext())->deleteDetachedRenderersNow();
     });
-}
-
-CheckedRef<ProgressTracker> Page::checkedProgress()
-{
-    return m_progress.get();
-}
-
-CheckedRef<const ProgressTracker> Page::checkedProgress() const
-{
-    return m_progress.get();
-}
-
-CheckedRef<ElementTargetingController> Page::checkedElementTargetingController()
-{
-    return m_elementTargetingController.get();
 }
 
 const String& Page::sceneIdentifier() const

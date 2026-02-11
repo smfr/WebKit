@@ -1226,7 +1226,7 @@ bool HTMLModelElement::shouldDeferLoading() const
     if (!frame)
         return false;
 
-    if (!frame->checkedScript()->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript))
+    if (!protect(frame->script())->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript))
         return false;
 
     return !isVisible() && isModelDeferred() && !document().page()->shouldDisableModelLoadDelaysForTesting();

@@ -155,7 +155,7 @@ unsigned DOMSelection::rangeCount() const
     RefPtr frame = this->frame();
     if (!frame)
         return 0;
-    if (frame->checkedSelection()->associatedLiveRange())
+    if (protect(frame->selection())->associatedLiveRange())
         return 1;
     if (selectionShadowAncestor(*frame))
         return 1;
@@ -280,7 +280,7 @@ void DOMSelection::modify(const String& alterString, const String& directionStri
         return;
 
     if (RefPtr frame = this->frame())
-        frame->checkedSelection()->modify(alter, direction, granularity);
+        protect(frame->selection())->modify(alter, direction, granularity);
 }
 
 ExceptionOr<void> DOMSelection::extend(Node& node, unsigned offset)
@@ -317,7 +317,7 @@ ExceptionOr<Ref<Range>> DOMSelection::getRangeAt(unsigned index)
     if (index >= rangeCount())
         return Exception { ExceptionCode::IndexSizeError };
     Ref frame = this->frame().releaseNonNull();
-    if (RefPtr liveRange = frame->checkedSelection()->associatedLiveRange())
+    if (RefPtr liveRange = protect(frame->selection())->associatedLiveRange())
         return liveRange.releaseNonNull();
     return createLiveRangeBeforeShadowHostWithSelection(frame.get()).releaseNonNull();
 }
@@ -327,7 +327,7 @@ void DOMSelection::removeAllRanges()
     RefPtr frame = this->frame();
     if (!frame)
         return;
-    frame->checkedSelection()->clear();
+    protect(frame->selection())->clear();
 }
 
 void DOMSelection::addRange(Range& liveRange)
@@ -345,7 +345,7 @@ ExceptionOr<void> DOMSelection::removeRange(Range& liveRange)
     RefPtr frame = this->frame();
     if (!frame)
         return { };
-    if (&liveRange != frame->checkedSelection()->associatedLiveRange())
+    if (&liveRange != protect(frame->selection())->associatedLiveRange())
         return Exception { ExceptionCode::NotFoundError };
     removeAllRanges();
     return { };
@@ -400,7 +400,7 @@ void DOMSelection::deleteFromDocument()
     RefPtr frame = this->frame();
     if (!frame)
         return;
-    if (RefPtr range = frame->checkedSelection()->associatedLiveRange())
+    if (RefPtr range = protect(frame->selection())->associatedLiveRange())
         range->deleteContents();
 }
 

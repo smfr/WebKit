@@ -119,7 +119,7 @@ void CachedFrameBase::restore()
         // It is necessary to update any platform script objects after restoring the
         // cached page.
         if (localFrame) {
-            localFrame->checkedScript()->updatePlatformScriptObjects();
+            protect(localFrame->script())->updatePlatformScriptObjects();
             localFrame->loader().client().didRestoreFromBackForwardCache();
         }
 

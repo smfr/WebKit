@@ -465,7 +465,6 @@ public:
     WEBCORE_EXPORT const String& groupName() const;
 
     WEBCORE_EXPORT PageGroup& group();
-    WEBCORE_EXPORT CheckedRef<PageGroup> checkedGroup();
 
     BroadcastChannelRegistry& broadcastChannelRegistry() { return m_broadcastChannelRegistry; }
     WEBCORE_EXPORT void setBroadcastChannelRegistry(Ref<BroadcastChannelRegistry>&&); // Only used by WebKitLegacy.
@@ -512,8 +511,6 @@ public:
     WEBCORE_EXPORT void enableICECandidateFiltering();
     bool shouldEnableICECandidateFilteringByDefault() const { return m_shouldEnableICECandidateFilteringByDefault; }
 
-    WEBCORE_EXPORT CheckedRef<ElementTargetingController> checkedElementTargetingController();
-
     void didChangeMainDocument(Document* newDocument);
     void mainFrameDidChangeToNonInitialEmptyDocument();
 
@@ -542,15 +539,13 @@ public:
 
     ProgressTracker& progress() { return m_progress.get(); }
     const ProgressTracker& progress() const { return m_progress.get(); }
-    CheckedRef<ProgressTracker> checkedProgress();
-    CheckedRef<const ProgressTracker> checkedProgress() const;
 
     WEBCORE_EXPORT void applyWindowFeatures(const WindowFeatures&);
 
     void progressEstimateChanged(LocalFrame&) const;
     void progressFinished(LocalFrame&) const;
     BackForwardController& backForward() { return m_backForwardController.get(); }
-    WEBCORE_EXPORT CheckedRef<BackForwardController> checkedBackForward();
+    ElementTargetingController& elementTargetingController() { return m_elementTargetingController.get(); }
 
     Seconds domTimerAlignmentInterval() const { return m_domTimerAlignmentInterval; }
 
@@ -729,7 +724,6 @@ public:
     WEBCORE_EXPORT unsigned pageCountAssumingLayoutIsUpToDate() const;
 
     WEBCORE_EXPORT DiagnosticLoggingClient& diagnosticLoggingClient() const;
-    WEBCORE_EXPORT CheckedRef<DiagnosticLoggingClient> checkedDiagnosticLoggingClient() const;
 
     WEBCORE_EXPORT void logMediaDiagnosticMessage(const RefPtr<FormData>&) const;
 
@@ -1448,7 +1442,6 @@ private:
     void prioritizeVisibleResources();
 
     RenderingUpdateScheduler& renderingUpdateScheduler();
-    CheckedRef<RenderingUpdateScheduler> checkedRenderingUpdateScheduler();
     RenderingUpdateScheduler* NODELETE existingRenderingUpdateScheduler();
 
     WheelEventTestMonitor& ensureWheelEventTestMonitor();

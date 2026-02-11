@@ -2184,7 +2184,7 @@ void applyRules(const String& input, std::optional<NodeIdentifier>&& containerNo
                 return jsNull();
 
             JSLockHolder lock { &lexicalGlobalObject };
-            return toJS(&lexicalGlobalObject, mainFrame->checkedScript()->globalObject(world), *containerNode);
+            return toJS(&lexicalGlobalObject, protect(mainFrame->script())->globalObject(world), *containerNode);
         });
         return std::make_optional(WTF::move(argumentMap));
     };
@@ -2222,7 +2222,7 @@ void applyRules(const String& input, std::optional<NodeIdentifier>&& containerNo
         };
 
         JSLockHolder lock(commonVM());
-        mainFrame->checkedScript()->executeAsynchronousUserAgentScriptInWorld(world, WTF::move(parameters), [document, aggregator, filteredStrings](auto valueOrException) {
+        protect(mainFrame->script())->executeAsynchronousUserAgentScriptInWorld(world, WTF::move(parameters), [document, aggregator, filteredStrings](auto valueOrException) {
             if (!valueOrException)
                 return;
 

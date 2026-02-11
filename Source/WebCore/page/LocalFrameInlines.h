@@ -64,9 +64,4 @@ inline const FrameSelection& LocalFrame::selection() const
     return document()->selection();
 }
 
-inline CheckedRef<FrameSelection> LocalFrame::checkedSelection() const
-{
-    return document()->selection();
-}
-
 } // namespace WebCore

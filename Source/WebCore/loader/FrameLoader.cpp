@@ -345,7 +345,7 @@ public:
     {
         if (m_inProgress && m_frame->page()) {
             Ref frame = m_frame.get();
-            protect(frame->page())->checkedProgress()->progressCompleted(frame);
+            protect(protect(frame->page())->progress())->progressCompleted(frame);
         }
     }
 
@@ -354,7 +354,7 @@ public:
         ASSERT(m_frame->page());
         if (!m_inProgress) {
             Ref frame = m_frame.get();
-            protect(frame->page())->checkedProgress()->progressStarted(frame);
+            protect(protect(frame->page())->progress())->progressStarted(frame);
         }
         m_inProgress = true;
     }
@@ -366,7 +366,7 @@ public:
         m_inProgress = false;
         Ref frame = m_frame.get();
         RefPtr page = frame->page();
-        page->checkedProgress()->progressCompleted(frame);
+        protect(page->progress())->progressCompleted(frame);
         platformStrategies()->loaderStrategy()->pageLoadCompleted(*page);
     }
 
@@ -748,7 +748,7 @@ void FrameLoader::clear(RefPtr<Document>&& newDocument, bool clearWindowProperti
         protect(frame->windowProxy())->setDOMWindow(protect(newDocument->window()).get());
 
     if (clearScriptObjects)
-        frame->checkedScript()->clearScriptObjects();
+        protect(frame->script())->clearScriptObjects();
 
     if (CheckedPtr newDocumentCSP = newDocument->contentSecurityPolicy()) {
         bool enableEvalValue = newDocumentCSP->evalErrorMessage().isNull();
@@ -2966,7 +2966,7 @@ void FrameLoader::checkLoadCompleteForThisFrame(LoadWillContinueInAnotherProcess
         }
         if (shouldReset && item) {
             if (RefPtr page = m_frame->page())
-                page->checkedBackForward()->setCurrentItem(*item);
+                protect(page->backForward())->setCurrentItem(*item);
         }
 
         return;
@@ -4029,7 +4029,7 @@ void FrameLoader::executeJavaScriptURL(const URL& url, const NavigationAction& a
         if (RefPtr document = m_frame->document())
             document->addConsoleMessage(MessageSource::Security, MessageLevel::Error, makeString("Blocked script execution in '"_s, action.requester()->url.stringCenterEllipsizedToLength(), "' because the document's frame is sandboxed and the 'allow-scripts' permission is not set."_s));
     } else
-        protect(m_frame)->checkedScript()->executeJavaScriptURL(url, action, didReplaceDocument);
+        protect(m_frame->script())->executeJavaScriptURL(url, action, didReplaceDocument);
 
     // We need to communicate that a load happened, even if the JavaScript URL execution didn't end up replacing the document.
     if (RefPtr document = m_frame->document(); isFirstNavigationInFrame && !didReplaceDocument)
@@ -4120,7 +4120,7 @@ void FrameLoader::continueLoadAfterNavigationPolicy(const ResourceRequest& reque
             if (RefPtr page = frame->page()) {
                 if (RefPtr localMainFrame = frame->localMainFrame()) {
                     if (RefPtr resetItem = localMainFrame->loader().history().currentItem())
-                        page->checkedBackForward()->setCurrentItem(*resetItem);
+                        protect(page->backForward())->setCurrentItem(*resetItem);
                 }
             }
         }
@@ -4698,7 +4698,7 @@ String FrameLoader::referrer() const
 
 void FrameLoader::dispatchDidClearWindowObjectsInAllWorlds()
 {
-    if (!protect(m_frame)->checkedScript()->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript))
+    if (!protect(m_frame->script())->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript))
         return;
 
     Vector<Ref<DOMWrapperWorld>> worlds;
@@ -4710,7 +4710,7 @@ void FrameLoader::dispatchDidClearWindowObjectsInAllWorlds()
 void FrameLoader::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld& world)
 {
     Ref frame = m_frame.get();
-    if (!frame->checkedScript()->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript) || !protect(frame->windowProxy())->existingJSWindowProxy(world))
+    if (!protect(frame->script())->canExecuteScripts(ReasonForCallingCanExecuteScripts::NotAboutToExecuteScript) || !protect(frame->windowProxy())->existingJSWindowProxy(world))
         return;
 
     m_client->dispatchDidClearWindowObjectInWorld(world);

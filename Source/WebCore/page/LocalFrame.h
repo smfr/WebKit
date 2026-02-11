@@ -173,11 +173,8 @@ public:
 
     inline FrameSelection& selection(); // Defined in LocalFrameInlines.h
     inline const FrameSelection& selection() const; // Defined in LocalFrameInlines.h
-    CheckedRef<FrameSelection> checkedSelection() const; // Defined in LocalFrameInlines.h
     ScriptController& script() { return m_script; }
     const ScriptController& script() const { return m_script; }
-    WEBCORE_EXPORT CheckedRef<ScriptController> checkedScript();
-    WEBCORE_EXPORT CheckedRef<const ScriptController> checkedScript() const;
     void resetScript();
 
     bool isRootFrame() const final { return m_rootFrame.get() == this; }
@@ -185,7 +182,6 @@ public:
     LocalFrame& rootFrame() { return *m_rootFrame; }
 
     WEBCORE_EXPORT RenderView* contentRenderer() const; // Root of the render tree for the document contained in this frame.
-    WEBCORE_EXPORT CheckedPtr<RenderView> checkedContentRenderer() const;
 
     bool documentIsBeingReplaced() const { return m_documentIsBeingReplaced; }
 

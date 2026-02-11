@@ -4665,16 +4665,6 @@ void LocalFrameView::flushAnyPendingPostLayoutTasks()
         updateEmbeddedObjectsTimerFired();
 }
 
-CheckedRef<const LocalFrameViewLayoutContext> LocalFrameView::checkedLayoutContext() const
-{
-    return m_layoutContext;
-}
-
-CheckedRef<LocalFrameViewLayoutContext> LocalFrameView::checkedLayoutContext()
-{
-    return m_layoutContext;
-}
-
 void LocalFrameView::performPostLayoutTasks()
 {
     ScriptDisallowedScope::InMainThread scriptDisallowedScope;

@@ -156,7 +156,7 @@ Vector<Ref<TextTrack>> MediaControlsHost::sortedTrackListForMenu(TextTrackList& 
     if (!page)
         return { };
 
-    return page->checkedGroup()->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList, { TextTrack::Kind::Subtitles, TextTrack::Kind::Captions, TextTrack::Kind::Descriptions });
+    return protect(page->group())->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList, { TextTrack::Kind::Subtitles, TextTrack::Kind::Captions, TextTrack::Kind::Descriptions });
 }
 
 Vector<Ref<AudioTrack>> MediaControlsHost::sortedTrackListForMenu(AudioTrackList& trackList)
@@ -165,7 +165,7 @@ Vector<Ref<AudioTrack>> MediaControlsHost::sortedTrackListForMenu(AudioTrackList
     if (!page)
         return { };
 
-    return page->checkedGroup()->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList);
+    return protect(page->group())->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList);
 }
 
 String MediaControlsHost::displayNameForTrack(const std::optional<TextOrAudioTrack>& track)
@@ -178,7 +178,7 @@ String MediaControlsHost::displayNameForTrack(const std::optional<TextOrAudioTra
         return emptyString();
 
     return WTF::visit([page](auto& track) {
-        return page->checkedGroup()->ensureCaptionPreferences().displayNameForTrack(track);
+        return protect(page->group())->ensureCaptionPreferences().displayNameForTrack(track);
     }, track.value());
 }
 
@@ -203,7 +203,7 @@ AtomString MediaControlsHost::captionDisplayMode() const
     if (!page)
         return emptyAtom();
 
-    switch (page->checkedGroup()->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
+    switch (protect(page->group())->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
     case CaptionUserPreferences::CaptionDisplayMode::Automatic:
         return automaticKeyword();
     case CaptionUserPreferences::CaptionDisplayMode::ForcedOnly:
@@ -594,7 +594,7 @@ auto MediaControlsHost::mediaControlsContextMenuItems(String&& optionsJSONString
 
     if (optionsJSONObject->getBoolean("includeLanguages"_s).value_or(false)) {
         if (RefPtr audioTracks = mediaElement->audioTracks(); audioTracks && audioTracks->length() > 1) {
-            Ref captionPreferences = page->checkedGroup()->ensureCaptionPreferences();
+            Ref captionPreferences = protect(page->group())->ensureCaptionPreferences();
             auto languageMenuItems = captionPreferences->sortedTrackListForMenu(audioTracks.get()).map([&createMenuItem, captionPreferences](auto& audioTrack) {
                 return createMenuItem(audioTrack, captionPreferences->displayNameForTrack(audioTrack.get()), audioTrack->enabled());
             });
@@ -606,7 +606,7 @@ auto MediaControlsHost::mediaControlsContextMenuItems(String&& optionsJSONString
 
     if (optionsJSONObject->getBoolean("includeSubtitles"_s).value_or(false)) {
         if (RefPtr textTracks = mediaElement->textTracks(); textTracks && textTracks->length()) {
-            Ref captionPreferences = page->checkedGroup()->ensureCaptionPreferences();
+            Ref captionPreferences = protect(page->group())->ensureCaptionPreferences();
             auto sortedTextTracks = captionPreferences->sortedTrackListForMenu(textTracks.get(), { TextTrack::Kind::Subtitles, TextTrack::Kind::Captions, TextTrack::Kind::Descriptions });
             bool allTracksDisabled = notFound == sortedTextTracks.findIf([] (const auto& textTrack) {
                 return textTrack->mode() == TextTrack::Mode::Showing;
@@ -678,7 +678,7 @@ auto MediaControlsHost::mediaControlsContextMenuItems(String&& optionsJSONString
 
     if (optionsJSONObject->getBoolean("includeChapters"_s).value_or(false)) {
         if (RefPtr textTracks = mediaElement->textTracks(); textTracks && textTracks->length()) {
-            Ref captionPreferences = page->checkedGroup()->ensureCaptionPreferences();
+            Ref captionPreferences = protect(page->group())->ensureCaptionPreferences();
 
             for (auto& textTrack : captionPreferences->sortedTrackListForMenu(textTracks.get(), { TextTrack::Kind::Chapters })) {
                 Vector<MenuItem> chapterMenuItems;
@@ -950,7 +950,7 @@ void MediaControlsHost::savePreviouslySelectedTextTrackIfNecessary()
         }
     }
 
-    switch (page->checkedGroup()->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
+    switch (protect(page->group())->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
     case CaptionUserPreferences::CaptionDisplayMode::Automatic:
         m_previouslySelectedTextTrack = TextTrack::captionMenuAutomaticItemSingleton();
         return;

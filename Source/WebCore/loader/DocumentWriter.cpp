@@ -201,7 +201,7 @@ bool DocumentWriter::begin(const URL& urlReference, bool dispatch, Document* own
         return false;
 
     if (!shouldReuseDefaultView)
-        frame->checkedScript()->updatePlatformScriptObjects();
+        protect(frame->script())->updatePlatformScriptObjects();
 
     frameLoader->setOutgoingReferrer(url);
     frame->setDocument(document.copyRef());

@@ -856,7 +856,7 @@ String WebFrame::layerTreeAsText() const
     if (!localFrame)
         return emptyString();
 
-    return localFrame->checkedContentRenderer()->checkedCompositor()->layerTreeAsText();
+    return protect(protect(localFrame->contentRenderer())->compositor())->layerTreeAsText();
 }
 
 unsigned WebFrame::pendingUnloadCount() const
@@ -883,7 +883,7 @@ JSGlobalContextRef WebFrame::jsContext()
     if (!localFrame)
         return nullptr;
 
-    return toGlobalRef(localFrame->checkedScript()->globalObject(mainThreadNormalWorldSingleton()));
+    return toGlobalRef(protect(localFrame->script())->globalObject(mainThreadNormalWorldSingleton()));
 }
 
 JSGlobalContextRef WebFrame::jsContextForWorld(DOMWrapperWorld& world)
@@ -892,7 +892,7 @@ JSGlobalContextRef WebFrame::jsContextForWorld(DOMWrapperWorld& world)
     if (!localFrame)
         return nullptr;
 
-    return toGlobalRef(localFrame->checkedScript()->globalObject(world));
+    return toGlobalRef(protect(localFrame->script())->globalObject(world));
 }
 
 JSGlobalContextRef WebFrame::jsContextForWorld(InjectedBundleScriptWorld* world)
@@ -1098,7 +1098,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleCSSStyleDeclarationHandle* 
     if (!localFrame)
         return nullptr;
 
-    auto* globalObject = localFrame->checkedScript()->globalObject(protect(world->coreWorld()));
+    auto* globalObject = protect(localFrame->script())->globalObject(protect(world->coreWorld()));
 
     JSLockHolder lock(globalObject);
     return toRef(globalObject, toJS(globalObject, globalObject, cssStyleDeclarationHandle->coreCSSStyleDeclaration()));
@@ -1110,7 +1110,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleNodeHandle* nodeHandle, Inj
     if (!localFrame)
         return nullptr;
 
-    auto* globalObject = localFrame->checkedScript()->globalObject(protect(world->coreWorld()));
+    auto* globalObject = protect(localFrame->script())->globalObject(protect(world->coreWorld()));
 
     JSLockHolder lock(globalObject);
     RefPtr coreNode = nodeHandle->coreNode();
@@ -1123,7 +1123,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleRangeHandle* rangeHandle, I
     if (!localFrame)
         return nullptr;
 
-    auto* globalObject = localFrame->checkedScript()->globalObject(protect(world->coreWorld()));
+    auto* globalObject = protect(localFrame->script())->globalObject(protect(world->coreWorld()));
 
     JSLockHolder lock(globalObject);
     return toRef(globalObject, toJS(globalObject, globalObject, Ref { rangeHandle->coreRange() }.get()));

@@ -157,7 +157,7 @@ void CachedPage::restore(Page& page)
         if (frameView)
             frameView->setProhibitsScrolling(hadProhibitsScrolling);
         if (localMainFrame)
-            localMainFrame->checkedSelection()->restoreScrolling();
+            protect(localMainFrame->selection())->restoreScrolling();
 #endif
     }
 

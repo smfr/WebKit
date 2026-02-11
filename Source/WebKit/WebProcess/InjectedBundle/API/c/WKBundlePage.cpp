@@ -722,7 +722,7 @@ void WKBundlePageSetCaptionDisplayMode(WKBundlePageRef pageRef, WKStringRef mode
     RefPtr page = WebKit::toImpl(pageRef)->corePage();
     if (!page)
         return;
-    Ref captionPreferences = page->checkedGroup()->ensureCaptionPreferences();
+    Ref captionPreferences = protect(page->group())->ensureCaptionPreferences();
     auto displayMode = WTF::EnumTraits<WebCore::CaptionUserPreferences::CaptionDisplayMode>::fromString(WebKit::toWTFString(mode));
     if (displayMode.has_value())
         captionPreferences->setCaptionDisplayMode(displayMode.value());
@@ -738,7 +738,7 @@ WKCaptionUserPreferencesTestingModeTokenRef WKBundlePageCreateCaptionUserPrefere
     RefPtr page = WebKit::toImpl(pageRef)->corePage();
     if (!page)
         return { };
-    Ref captionPreferences = page->checkedGroup()->ensureCaptionPreferences();
+    Ref captionPreferences = protect(page->group())->ensureCaptionPreferences();
     return WebKit::toAPILeakingRef(API::CaptionUserPreferencesTestingModeToken::create(captionPreferences.get()));
 #else
     UNUSED_PARAM(page);

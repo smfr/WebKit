@@ -1264,7 +1264,7 @@ bool RenderTheme::isFocused(const RenderElement& renderer) const
 
     Ref document = delegate->document();
     RefPtr frame = document->frame();
-    return delegate == document->focusedElement() && frame && frame->checkedSelection()->isFocusedAndActive();
+    return delegate == document->focusedElement() && frame && protect(frame->selection())->isFocusedAndActive();
 }
 
 bool RenderTheme::isPressed(const RenderElement& renderer) const

@@ -427,11 +427,11 @@ void ContextMenuController::contextMenuItemSelected(ContextMenuAction action, co
         break;
     case ContextMenuItemTagGoBack:
         if (RefPtr page = frame->page())
-            page->checkedBackForward()->goBackOrForward(-1);
+            protect(page->backForward())->goBackOrForward(-1);
         break;
     case ContextMenuItemTagGoForward:
         if (RefPtr page = frame->page())
-            page->checkedBackForward()->goBackOrForward(1);
+            protect(page->backForward())->goBackOrForward(1);
         break;
     case ContextMenuItemTagStop:
         frame->loader().stop();
@@ -498,7 +498,7 @@ void ContextMenuController::contextMenuItemSelected(ContextMenuAction action, co
                 ASSERT(selection.isCaretOrRange());
                 VisibleSelection wordSelection(selection.base());
                 wordSelection.expandUsingGranularity(TextGranularity::WordGranularity);
-                frame->checkedSelection()->setSelection(wordSelection);
+                protect(frame->selection())->setSelection(wordSelection);
             } else {
                 ASSERT(frame->editor().selectedText().length());
                 replaceOptions.add(ReplaceSelectionCommand::SelectReplacement);
@@ -508,7 +508,7 @@ void ContextMenuController::contextMenuItemSelected(ContextMenuAction action, co
             ASSERT(document);
             Ref command = ReplaceSelectionCommand::create(*document, createFragmentFromMarkup(*document, title, emptyString()), replaceOptions);
             command->apply();
-            frame->checkedSelection()->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignToEdgeIfNeeded });
+            protect(frame->selection())->revealSelection({ SelectionRevealMode::Reveal, ScrollAlignment::alignToEdgeIfNeeded });
         }
         break;
     }
@@ -1270,10 +1270,10 @@ void ContextMenuController::populate()
 #else
 
                 if (isMainFrame) {
-                    if (page && page->checkedBackForward()->canGoBackOrForward(-1))
+                    if (page && protect(page->backForward())->canGoBackOrForward(-1))
                         appendItem(BackItem, m_contextMenu.get());
 
-                    if (page && page->checkedBackForward()->canGoBackOrForward(1))
+                    if (page && protect(page->backForward())->canGoBackOrForward(1))
                         appendItem(ForwardItem, m_contextMenu.get());
 
                     // Here we use isLoadingInAPISense rather than isLoading because Stop/Reload are
@@ -1740,10 +1740,10 @@ void ContextMenuController::checkOrEnableIfNeeded(ContextMenuItem& item) const
 #endif
 #if PLATFORM(GTK) || PLATFORM(WPE)
         case ContextMenuItemTagGoBack:
-            shouldEnable = frame->page() && frame->page()->checkedBackForward()->canGoBackOrForward(-1);
+            shouldEnable = frame->page() && protect(frame->page()->backForward())->canGoBackOrForward(-1);
             break;
         case ContextMenuItemTagGoForward:
-            shouldEnable = frame->page() && frame->page()->checkedBackForward()->canGoBackOrForward(1);
+            shouldEnable = frame->page() && protect(frame->page()->backForward())->canGoBackOrForward(1);
             break;
         case ContextMenuItemTagStop:
             shouldEnable = frame->loader().documentLoader()->isLoadingInAPISense();

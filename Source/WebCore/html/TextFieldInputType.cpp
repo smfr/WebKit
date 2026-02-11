@@ -765,7 +765,7 @@ bool TextFieldInputType::shouldDrawCapsLockIndicator() const
     if (!frame)
         return false;
 
-    if (!frame->checkedSelection()->isFocusedAndActive())
+    if (!protect(frame->selection())->isFocusedAndActive())
         return false;
 
     return PlatformKeyboardEvent::currentCapsLockState();

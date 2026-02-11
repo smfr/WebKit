@@ -332,7 +332,7 @@ bool SVGSVGElement::checkEnclosure(Ref<SVGElement>&& element, SVGRect& rect)
 void SVGSVGElement::deselectAll()
 {
     if (RefPtr frame = document().frame())
-        frame->checkedSelection()->clear();
+        protect(frame->selection())->clear();
 }
 
 Ref<SVGNumber> SVGSVGElement::createSVGNumber()
