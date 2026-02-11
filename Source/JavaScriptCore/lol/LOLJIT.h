@@ -115,6 +115,7 @@ namespace JSC::LOL {
     macro(op_jnstricteq) \
     macro(op_jbelow) \
     macro(op_jbeloweq) \
+    macro(op_ret) \
     macro(op_create_lexical_environment) \
     macro(op_create_direct_arguments) \
     macro(op_create_scoped_arguments) \

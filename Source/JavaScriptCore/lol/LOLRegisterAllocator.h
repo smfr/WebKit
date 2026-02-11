@@ -599,6 +599,22 @@ auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpToThis& instruct
     return allocateImpl<0>(jit, instruction, index, uses, defs);
 }
 
+template<typename Backend>
+auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpRet& instruction, BytecodeIndex index)
+{
+    std::array<AllocationHint, 1> uses = { AllocationHint(instruction.m_value, JSRInfo::returnValueJSR) };
+    std::array<AllocationHint, 0> defs = { };
+    auto result = allocateImpl<0>(jit, instruction, index, uses, defs);
+    // unbind everything without flushing since we're returning anyway.
+    for (auto reg : m_allocator.allocatedRegisters()) {
+        VirtualRegister binding = bindingFor(reg.gpr());
+        Location& location = locationOfImpl(binding);
+        location = Location();
+        m_allocator.unbind(reg.gpr());
+    }
+    return result;
+}
+
 } // namespace JSC
 
 #endif

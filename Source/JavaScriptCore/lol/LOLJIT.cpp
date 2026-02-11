@@ -759,6 +759,7 @@ void LOLJIT::privateCompileSlowCases()
         REPLAY_ALLOCATION_FOR_OP(op_switch_imm, OpSwitchImm)
         REPLAY_ALLOCATION_FOR_OP(op_switch_char, OpSwitchChar)
         REPLAY_ALLOCATION_FOR_OP(op_switch_string, OpSwitchString)
+        REPLAY_ALLOCATION_FOR_OP(op_ret, OpRet)
 
         default:
             RELEASE_ASSERT_NOT_REACHED();
@@ -830,6 +831,18 @@ void LOLJIT::emit_op_mov(const JSInstruction* currentInstruction)
     auto [ destRegs ] = allocations.defs;
 
     moveValueRegs(sourceRegs, destRegs);
+
+    m_fastAllocator.releaseScratches(allocations);
+}
+
+void LOLJIT::emit_op_ret(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpRet>();
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ valueRegs ] = allocations.uses;
+
+    moveValueRegs(valueRegs, returnValueJSR);
+    jumpThunk(CodeLocationLabel { vm().getCTIStub(CommonJITThunkID::ReturnFromBaseline).retaggedCode<NoPtrTag>() });
 
     m_fastAllocator.releaseScratches(allocations);
 }
