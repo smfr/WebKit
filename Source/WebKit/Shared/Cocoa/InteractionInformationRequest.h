@@ -25,7 +25,9 @@
 
 #pragma once
 
-#if PLATFORM(IOS_FAMILY)
+#include <wtf/Platform.h>
+
+#if PLATFORM(COCOA)
 
 #include <WebCore/IntPoint.h>
 #include <WebCore/SelectionGeometry.h>
@@ -71,4 +73,4 @@ struct InteractionInformationRequest {
 
 }
 
-#endif // PLATFORM(IOS_FAMILY)
+#endif // PLATFORM(COCOA)

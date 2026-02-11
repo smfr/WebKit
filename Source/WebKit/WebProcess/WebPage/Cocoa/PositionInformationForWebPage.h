@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,20 +25,18 @@
 
 #pragma once
 
-#if PLATFORM(IOS_FAMILY)
+#import <wtf/Platform.h>
 
-#include <WebCore/Cursor.h>
-#include <WebCore/FloatRect.h>
+#if PLATFORM(COCOA)
 
 namespace WebKit {
 
-struct CursorContext {
-    WebCore::FloatRect lineCaretExtent;
-    std::optional<WebCore::Cursor> cursor;
-    bool isVerticalWritingMode { false };
-    bool shouldNotUseIBeamInEditableContent { false };
+class WebPage;
+struct InteractionInformationAtPosition;
+struct InteractionInformationRequest;
+
+InteractionInformationAtPosition positionInformationForWebPage(WebPage&, const InteractionInformationRequest&);
+
 };
 
-} // namespace WebKit
-
-#endif // PLATFORM(IOS_FAMILY)
+#endif // PLATFORM(COCOA)

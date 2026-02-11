@@ -1851,6 +1851,17 @@ void WebPageProxy::selectWithGesture(IntPoint point, GestureType gestureType, Ge
     WTF::protect(legacyMainFrameProcess())->sendWithAsyncReply(Messages::WebPage::SelectWithGesture(point, gestureType, gestureState, isInteractingWithFocusedElement), WTF::move(callback), webPageIDInMainFrameProcess());
 }
 
+void WebPageProxy::didReceivePositionInformation(const InteractionInformationAtPosition& info)
+{
+    if (RefPtr pageClient = this->pageClient())
+        pageClient->positionInformationDidChange(info);
+}
+
+void WebPageProxy::requestPositionInformation(const InteractionInformationRequest& request)
+{
+    protect(m_legacyMainFrameProcess)->send(Messages::WebPage::RequestPositionInformation(request), webPageIDInMainFrameProcess());
+}
+
 } // namespace WebKit
 
 #undef MESSAGE_CHECK_COMPLETION

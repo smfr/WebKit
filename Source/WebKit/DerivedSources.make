@@ -692,9 +692,12 @@ SERIALIZATION_DESCRIPTION_FILES = \
 	Shared/Cocoa/CoreIPCStringSet.serialization.in \
 	Shared/Cocoa/CoreIPCURL.serialization.in \
 	Shared/Cocoa/CoreIPCCFCharacterSet.serialization.in \
+	Shared/Cocoa/CursorContext.serialization.in \
 	Shared/Cocoa/DataDetectionResult.serialization.in \
 	Shared/Cocoa/GestureTypes.serialization.in \
 	Shared/Cocoa/InsertTextOptions.serialization.in \
+	Shared/Cocoa/InteractionInformationAtPosition.serialization.in \
+	Shared/Cocoa/InteractionInformationRequest.serialization.in \
 	Shared/Cocoa/RemoteObjectInvocation.serialization.in \
 	Shared/Cocoa/RevealItem.serialization.in \
 	Shared/Cocoa/SharedCARingBuffer.serialization.in \
@@ -744,11 +747,8 @@ SERIALIZATION_DESCRIPTION_FILES = \
 	Shared/ImageOptions.serialization.in \
 	Shared/InspectorExtensionTypes.serialization.in \
 	Shared/IPCTester.serialization.in \
-	Shared/ios/CursorContext.serialization.in \
 	Shared/ios/DynamicViewportSizeUpdate.serialization.in \
 	Shared/ios/HardwareKeyboardState.serialization.in \
-	Shared/ios/InteractionInformationAtPosition.serialization.in \
-	Shared/ios/InteractionInformationRequest.serialization.in \
 	Shared/ios/DragInitiationResult.serialization.in \
 	Shared/ios/WebAutocorrectionContext.serialization.in \
 	Shared/ios/WebAutocorrectionData.serialization.in \

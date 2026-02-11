@@ -1314,7 +1314,7 @@ static WebFrameLoadType toWebFrameLoadType(WebCore::FrameLoadType frameLoadType)
 - (DOMNode *)scrollableNodeAtViewportLocation:(CGPoint)aViewportLocation
 {
     WebCore::LocalFrame *frame = core(self);
-    WebCore::Node *node = frame->nodeRespondingToScrollWheelEvents(WebCore::FloatPoint(aViewportLocation));
+    RefPtr node = frame->nodeRespondingToScrollWheelEvents(WebCore::FloatPoint(aViewportLocation));
     return kit(node);
 }
 
@@ -1323,7 +1323,7 @@ static WebFrameLoadType toWebFrameLoadType(WebCore::FrameLoadType frameLoadType)
     WebCore::LocalFrame *frame = core(self);
     WebCore::FloatPoint viewportLocation(*aViewportLocation);
     WebCore::FloatPoint adjustedLocation;
-    WebCore::Node *node = frame->approximateNodeAtViewportLocationLegacy(viewportLocation, adjustedLocation);
+    RefPtr node = frame->approximateNodeAtViewportLocationLegacy(viewportLocation, adjustedLocation);
     *aViewportLocation = adjustedLocation;
     return kit(node);
 }

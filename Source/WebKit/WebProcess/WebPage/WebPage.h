@@ -36,6 +36,7 @@
 #include <WebCore/DictionaryPopupInfo.h>
 #include <WebCore/DisabledAdaptations.h>
 #include <WebCore/DragActions.h>
+#include <WebCore/Element.h>
 #include <WebCore/FocusOptions.h>
 #include <WebCore/FrameLoaderTypes.h>
 #include <WebCore/FrameTreeSyncData.h>
@@ -184,6 +185,7 @@ class FrameView;
 class FrameSelection;
 class FrameTreeSyncData;
 class GraphicsContext;
+class HTMLAnchorElement;
 class HTMLElement;
 class HTMLImageElement;
 class HTMLPlugInElement;
@@ -589,6 +591,11 @@ enum class DisallowLayoutViewportHeightExpansionReason : uint8_t {
     ElementFullScreen       = 1 << 0,
     LargeContainer          = 1 << 1,
 };
+
+String plainTextForContext(const WebCore::SimpleRange&);
+String plainTextForContext(const std::optional<WebCore::SimpleRange>&);
+String plainTextForDisplay(const WebCore::SimpleRange&);
+String plainTextForDisplay(const std::optional<WebCore::SimpleRange>&);
 
 class WebPage final : public API::ObjectImpl<API::Object::Type::BundlePage>, public IPC::MessageReceiver, public IPC::MessageSender {
 public:
@@ -1067,6 +1074,9 @@ public:
     void selectWithGesture(const WebCore::IntPoint&, GestureType, GestureRecognizerState, bool isInteractingWithFocusedElement, CompletionHandler<void(const WebCore::IntPoint&, GestureType, GestureRecognizerState, OptionSet<SelectionFlags>)>&&);
     void updateFocusBeforeSelectingTextAtLocation(const WebCore::IntPoint&);
     WebCore::VisiblePosition visiblePositionInFocusedNodeForPoint(const WebCore::LocalFrame&, const WebCore::IntPoint&, bool isInteractingWithFocusedElement);
+
+    void requestPositionInformation(const InteractionInformationRequest&);
+    InteractionInformationAtPosition positionInformation(const InteractionInformationRequest&);
 #endif // PLATFORM(COCOA)
 
 #if PLATFORM(IOS_FAMILY)
@@ -1141,7 +1151,6 @@ public:
     void syncApplyAutocorrection(const String& correction, const String& originalText, bool isCandidate, CompletionHandler<void(bool)>&&);
     void handleAutocorrectionContextRequest();
     void preemptivelySendAutocorrectionContext();
-    void requestPositionInformation(const InteractionInformationRequest&);
     void startInteractionWithElementContextOrPosition(std::optional<WebCore::ElementContext>&&, WebCore::IntPoint&&);
     void stopInteraction();
     void performActionOnElement(uint32_t action, const String& authorizationToken, CompletionHandler<void()>&&);
@@ -1835,13 +1844,15 @@ public:
     static WebCore::IntRect rootViewInteractionBounds(const WebCore::Node&);
 
     static WebCore::IntPoint constrainPoint(const WebCore::IntPoint&, const WebCore::LocalFrame&, const WebCore::Element& focusedElement);
+
+    static bool isAssistableElement(WebCore::Element&);
+
+    static RefPtr<WebCore::HTMLAnchorElement> containingLinkAnchorElement(WebCore::Element&);
 #endif
 
 #if PLATFORM(IOS_FAMILY)
     // This excludes layout overflow, includes borders.
     static WebCore::IntRect rootViewBounds(const WebCore::Node&);
-
-    InteractionInformationAtPosition positionInformation(const InteractionInformationRequest&);
 
     void setSceneIdentifier(String&&);
 #endif // PLATFORM(IOS_FAMILY)
@@ -2142,6 +2153,8 @@ public:
 #endif
 
     bool isPopup() const { return m_isPopup; }
+
+    RefPtr<WebCore::Element> focusedElement() const { return m_focusedElement; }
 
 private:
     WebPage(WebCore::PageIdentifier, WebPageCreationParameters&&);

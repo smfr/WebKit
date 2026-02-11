@@ -20,7 +20,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if PLATFORM(IOS_FAMILY)
+#if PLATFORM(COCOA)
 
 [Nested] enum class WebKit::InteractionInformationAtPosition::Selectability : uint8_t {
     Selectable,
@@ -40,7 +40,9 @@ struct WebKit::InteractionInformationAtPosition {
     bool isSelected;
     bool prefersDraggingOverTextSelection;
     bool isNearMarkedText;
+#if PLATFORM(IOS_FAMILY)
     bool touchCalloutEnabled;
+#endif
     bool isLink;
     bool isImage;
 #if ENABLE(MODEL_PROCESS)
@@ -63,7 +65,9 @@ struct WebKit::InteractionInformationAtPosition {
     bool isSpatialImage;
 #endif
     bool isInPlugin;
+#if PLATFORM(IOS_FAMILY)
     bool needsPointerTouchCompatibilityQuirk;
+#endif
     WebCore::FloatPoint adjustedPointForNodeRespondingToClickEvents;
     URL url;
     URL imageURL;
@@ -81,7 +85,7 @@ struct WebKit::InteractionInformationAtPosition {
     WebKit::CursorContext cursorContext;
 
     RefPtr<WebCore::TextIndicator> textIndicator;
-#if ENABLE(DATA_DETECTION)
+#if ENABLE(DATA_DETECTION) && PLATFORM(IOS_FAMILY)
     String dataDetectorIdentifier;
     Vector<RetainPtr<DDScannerResult>> serializableDataDetectorResults();
     WebCore::IntRect dataDetectorBounds;

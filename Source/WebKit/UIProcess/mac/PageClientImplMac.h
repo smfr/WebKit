@@ -330,6 +330,10 @@ private:
     void showCaptionDisplaySettings(WebCore::HTMLMediaElementIdentifier, const WebCore::ResolvedCaptionDisplaySettingsOptions&, CompletionHandler<void(Expected<void, WebCore::ExceptionData>&&)>&&) final;
 #endif
 
+    void positionInformationDidChange(const InteractionInformationAtPosition&) override;
+
+    CheckedPtr<WebViewImpl> checkedImpl() const { return m_impl.get(); }
+
     bool isViewVisible(NSView *, NSWindow *);
 
     WeakObjCPtr<NSView> m_view;

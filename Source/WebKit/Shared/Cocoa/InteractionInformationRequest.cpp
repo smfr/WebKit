@@ -26,10 +26,9 @@
 #import "config.h"
 #import "InteractionInformationRequest.h"
 
+#if PLATFORM(COCOA)
 
 namespace WebKit {
-
-#if PLATFORM(IOS_FAMILY)
 
 bool InteractionInformationRequest::isValidForRequest(const InteractionInformationRequest& other, int radius) const
 {
@@ -56,12 +55,12 @@ bool InteractionInformationRequest::isValidForRequest(const InteractionInformati
 
     return (other.point - point).diagonalLengthSquared() <= radius * radius;
 }
-    
+
 bool InteractionInformationRequest::isApproximatelyValidForRequest(const InteractionInformationRequest& other, int radius) const
 {
     return isValidForRequest(other, radius);
 }
 
-#endif // PLATFORM(IOS_FAMILY)
-
 }
+
+#endif // PLATFORM(COCOA)

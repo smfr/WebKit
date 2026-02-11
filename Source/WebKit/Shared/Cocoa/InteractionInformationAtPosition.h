@@ -25,7 +25,9 @@
 
 #pragma once
 
-#if PLATFORM(IOS_FAMILY)
+#include <wtf/Platform.h>
+
+#if PLATFORM(COCOA)
 
 #include "CursorContext.h"
 #include "InteractionInformationRequest.h"
@@ -59,30 +61,68 @@ struct InteractionInformationAtPosition {
     };
 
     InteractionInformationAtPosition() = default;
-    InteractionInformationAtPosition(InteractionInformationRequest&&, bool canBeValid, std::optional<bool> hitNodeOrWindowHasDoubleClickListener, Selectability&&, bool isSelected, bool prefersDraggingOverTextSelection, bool isNearMarkedText, bool touchCalloutEnabled, bool isLink, bool isImage,
+    InteractionInformationAtPosition(
+        InteractionInformationRequest&&,
+        bool canBeValid,
+        std::optional<bool> hitNodeOrWindowHasDoubleClickListener,
+        Selectability&&,
+        bool isSelected,
+        bool prefersDraggingOverTextSelection,
+        bool isNearMarkedText,
+#if PLATFORM(IOS_FAMILY)
+        bool touchCalloutEnabled,
+#endif
+        bool isLink,
+        bool isImage,
 #if ENABLE(MODEL_PROCESS)
         bool isInteractiveModel,
 #endif
-        bool isAttachment, bool isAnimatedImage, bool isAnimating, bool isPausedVideo, bool isElement, bool isContentEditable, Markable<WebCore::ScrollingNodeID>&& containerScrollingNodeID,
+        bool isAttachment,
+        bool isAnimatedImage,
+        bool isAnimating,
+        bool isPausedVideo,
+        bool isElement,
+        bool isContentEditable,
+        Markable<WebCore::ScrollingNodeID>&& containerScrollingNodeID,
 #if ENABLE(DATA_DETECTION)
         bool isDataDetectorLink,
 #endif
-        bool preventTextInteraction, bool elementContainsImageOverlay, bool isImageOverlayText,
+        bool preventTextInteraction,
+        bool elementContainsImageOverlay,
+        bool isImageOverlayText,
 #if ENABLE(SPATIAL_IMAGE_DETECTION)
         bool isSpatialImage,
 #endif
-        bool isInPlugin, bool needsPointerTouchCompatibilityQuirk, WebCore::FloatPoint&& adjustedPointForNodeRespondingToClickEvents, URL&&, URL&& imageURL, String&& imageMIMEType, String&& title, String&& idAttribute, WebCore::IntRect&& bounds,
+        bool isInPlugin,
+#if PLATFORM(IOS_FAMILY)
+        bool needsPointerTouchCompatibilityQuirk,
+#endif
+        WebCore::FloatPoint&& adjustedPointForNodeRespondingToClickEvents,
+        URL&&,
+        URL&& imageURL,
+        String&& imageMIMEType,
+        String&& title,
+        String&& idAttribute,
+        WebCore::IntRect&& bounds,
 #if PLATFORM(MACCATALYST)
         WebCore::IntRect&& caretRect,
 #endif
-        RefPtr<WebCore::ShareableBitmap>&&, String&& textBefore, String&& textAfter, CursorContext&&, RefPtr<WebCore::TextIndicator>&&,
-#if ENABLE(DATA_DETECTION)
-        String&& dataDetectorIdentifier, Vector<RetainPtr<DDScannerResult>>&&, WebCore::IntRect&& dataDetectorBounds,
+        RefPtr<WebCore::ShareableBitmap>&&,
+        String&& textBefore,
+        String&& textAfter,
+        CursorContext&&,
+        RefPtr<WebCore::TextIndicator>&&,
+#if ENABLE(DATA_DETECTION) && PLATFORM(IOS_FAMILY)
+        String&& dataDetectorIdentifier,
+        Vector<RetainPtr<DDScannerResult>>&&,
+        WebCore::IntRect&& dataDetectorBounds,
 #endif
 #if ENABLE(ACCESSIBILITY_ANIMATION_CONTROL)
         Vector<WebCore::ElementAnimationContext>&& animationsAtPoint,
 #endif
-        std::optional<WebCore::ElementContext>&&, std::optional<WebCore::ElementContext>&& hostImageOrVideoElementContext);
+        std::optional<WebCore::ElementContext>&&,
+        std::optional<WebCore::ElementContext>&& hostImageOrVideoElementContext
+);
 
     InteractionInformationRequest request;
 
@@ -94,7 +134,9 @@ struct InteractionInformationAtPosition {
     bool isSelected { false };
     bool prefersDraggingOverTextSelection { false };
     bool isNearMarkedText { false };
+#if PLATFORM(IOS_FAMILY)
     bool touchCalloutEnabled { true };
+#endif
     bool isLink { false };
     bool isImage { false };
 #if ENABLE(MODEL_PROCESS)
@@ -117,7 +159,9 @@ struct InteractionInformationAtPosition {
     bool isSpatialImage { false };
 #endif
     bool isInPlugin { false };
+#if PLATFORM(IOS_FAMILY)
     bool needsPointerTouchCompatibilityQuirk { false };
+#endif
     WebCore::FloatPoint adjustedPointForNodeRespondingToClickEvents;
     URL url;
     URL imageURL;
@@ -135,7 +179,7 @@ struct InteractionInformationAtPosition {
     CursorContext cursorContext;
 
     RefPtr<WebCore::TextIndicator> textIndicator;
-#if ENABLE(DATA_DETECTION)
+#if ENABLE(DATA_DETECTION) && PLATFORM(IOS_FAMILY)
     String dataDetectorIdentifier;
     RetainPtr<NSArray> dataDetectorResults;
     WebCore::IntRect dataDetectorBounds;
@@ -154,11 +198,11 @@ struct InteractionInformationAtPosition {
     void mergeCompatibleOptionalInformation(const InteractionInformationAtPosition& oldInformation);
 
     bool isSelectable() const { return selectability == Selectability::Selectable; }
-#if ENABLE(DATA_DETECTION)
+#if ENABLE(DATA_DETECTION) && PLATFORM(IOS_FAMILY)
     Vector<RetainPtr<DDScannerResult>> serializableDataDetectorResults() const;
 #endif
 };
 
 } // namespace WebKit
 
-#endif // PLATFORM(IOS_FAMILY)
+#endif // PLATFORM(COCOA)

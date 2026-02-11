@@ -30,10 +30,12 @@
 #import "EditorState.h"
 #import "GPUProcessConnection.h"
 #import "InsertTextOptions.h"
+#import "InteractionInformationAtPosition.h"
 #import "LoadParameters.h"
 #import "MessageSenderInlines.h"
 #import "PDFPlugin.h"
 #import "PluginView.h"
+#import "PositionInformationForWebPage.h"
 #import "PrintInfo.h"
 #import "RemoteLayerTreeCommitBundle.h"
 #import "RemoteLayerTreeTransaction.h"
@@ -68,6 +70,7 @@
 #import <WebCore/Editing.h>
 #import <WebCore/EditingHTMLConverter.h>
 #import <WebCore/Editor.h>
+#import <WebCore/ElementAncestorIteratorInlines.h>
 #import <WebCore/EventHandler.h>
 #import <WebCore/EventNames.h>
 #import <WebCore/FixedContainerEdges.h>
@@ -76,9 +79,13 @@
 #import <WebCore/FrameLoader.h>
 #import <WebCore/FrameView.h>
 #import <WebCore/GraphicsContextCG.h>
+#import <WebCore/HTMLAnchorElement.h>
 #import <WebCore/HTMLBodyElement.h>
+#import <WebCore/HTMLIFrameElement.h>
 #import <WebCore/HTMLImageElement.h>
 #import <WebCore/HTMLOListElement.h>
+#import <WebCore/HTMLSelectElement.h>
+#import <WebCore/HTMLTextAreaElement.h>
 #import <WebCore/HTMLTextFormControlElement.h>
 #import <WebCore/HTMLUListElement.h>
 #import <WebCore/HitTestResult.h>
@@ -155,6 +162,28 @@
 namespace WebKit {
 
 using namespace WebCore;
+
+// FIXME: Unclear if callers in this file are correctly choosing which of these two functions to use.
+
+String plainTextForContext(const SimpleRange& range)
+{
+    return WebCore::plainTextReplacingNoBreakSpace(range);
+}
+
+String plainTextForContext(const std::optional<SimpleRange>& range)
+{
+    return range ? plainTextForContext(*range) : emptyString();
+}
+
+String plainTextForDisplay(const SimpleRange& range)
+{
+    return WebCore::plainTextReplacingNoBreakSpace(range, { }, true);
+}
+
+String plainTextForDisplay(const std::optional<SimpleRange>& range)
+{
+    return range ? plainTextForDisplay(*range) : emptyString();
+}
 
 void WebPage::platformInitialize(const WebPageCreationParameters& parameters)
 {
@@ -2402,6 +2431,46 @@ void WebPage::didFinishContentChangeObserving(WebCore::FrameIdentifier, WebCore:
     notImplemented();
 }
 #endif
+
+InteractionInformationAtPosition WebPage::positionInformation(const InteractionInformationRequest& request)
+{
+    return WebKit::positionInformationForWebPage(*this, request);
+}
+
+void WebPage::requestPositionInformation(const InteractionInformationRequest& request)
+{
+    sendEditorStateUpdate();
+    send(Messages::WebPageProxy::DidReceivePositionInformation(positionInformation(request)));
+}
+
+bool WebPage::isAssistableElement(Element& element)
+{
+    if (is<HTMLSelectElement>(element))
+        return true;
+    if (is<HTMLTextAreaElement>(element))
+        return true;
+    if (RefPtr inputElement = dynamicDowncast<HTMLInputElement>(element)) {
+        // FIXME: This laundry list of types is not a good way to factor this. Need a suitable function on HTMLInputElement itself.
+#if ENABLE(INPUT_TYPE_WEEK_PICKER)
+        if (inputElement->isWeekField())
+            return true;
+#endif
+        return inputElement->isTextField() || inputElement->isDateField() || inputElement->isDateTimeLocalField() || inputElement->isMonthField() || inputElement->isTimeField() || inputElement->isColorControl();
+    }
+    if (is<HTMLIFrameElement>(element))
+        return false;
+    return element.isContentEditable();
+}
+
+RefPtr<HTMLAnchorElement> WebPage::containingLinkAnchorElement(Element& element)
+{
+    // FIXME: There is code in the drag controller that supports any link, even if it's not an HTMLAnchorElement. Why is this different?
+    for (Ref currentElement : lineageOfType<HTMLAnchorElement>(element)) {
+        if (currentElement->isLink())
+            return currentElement;
+    }
+    return nullptr;
+}
 
 } // namespace WebKit
 
