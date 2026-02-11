@@ -131,6 +131,9 @@ namespace JSC::LOL {
     macro(op_new_async_generator_func_exp) \
     macro(op_new_object) \
     macro(op_new_reg_exp) \
+    macro(op_get_prototype_of) \
+    macro(op_to_this) \
+    macro(op_create_this) \
     macro(op_throw) \
     macro(op_switch_imm) \
     macro(op_switch_char) \

@@ -244,6 +244,8 @@ using ReplayRegisterAllocator = RegisterAllocator<ReplayBackend>;
     macro(OpBitnot, m_operand, 0) \
     macro(OpResolveScope, m_scope, 1) \
     macro(OpGetFromScope, m_scope, 1) \
+    macro(OpGetPrototypeOf, m_value, 0) \
+    macro(OpCreateThis, m_callee, 3) \
     macro(OpIsEmpty, m_operand, 0) \
     macro(OpTypeofIsUndefined, m_operand, 0) \
     macro(OpTypeofIsFunction, m_operand, 0) \
@@ -583,6 +585,14 @@ auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpInc& instruction
 
 template<typename Backend>
 auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpDec& instruction, BytecodeIndex index)
+{
+    std::array<AllocationHint, 1> uses = { instruction.m_srcDst };
+    std::array<AllocationHint, 1> defs = { instruction.m_srcDst };
+    return allocateImpl<0>(jit, instruction, index, uses, defs);
+}
+
+template<typename Backend>
+auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpToThis& instruction, BytecodeIndex index)
 {
     std::array<AllocationHint, 1> uses = { instruction.m_srcDst };
     std::array<AllocationHint, 1> defs = { instruction.m_srcDst };
