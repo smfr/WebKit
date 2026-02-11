@@ -84,8 +84,11 @@ NonCompositedFrameRenderer::~NonCompositedFrameRenderer()
 void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
 {
 #if ENABLE(DAMAGE_TRACKING)
-    if (m_frameDamage)
-        m_frameDamage->add(rect);
+    if (m_frameDamage) {
+        IntRect scaledRect = rect;
+        scaledRect.scale(protect(m_webPage)->deviceScaleFactor());
+        m_frameDamage->add(scaledRect);
+    }
 #else
     UNUSED_PARAM(rect);
 #endif
@@ -95,8 +98,20 @@ void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
 void NonCompositedFrameRenderer::resetFrameDamage()
 {
     Ref webPage = m_webPage.get();
-    if (webPage->corePage()->settings().propagateDamagingInformation())
-        m_frameDamage = std::make_optional<Damage>(webPage->bounds(), webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles);
+    IntRect scaledRect = webPage->bounds();
+    scaledRect.scale(webPage->deviceScaleFactor());
+    if (!m_context) {
+        // For CPU rendering use the damage unconditionally to reduce the amount of pixels to upload to the GPU for the UI process.
+        m_frameDamage = std::make_optional<Damage>(scaledRect, Damage::Mode::Rectangles, 4);
+        return;
+    }
+
+    if (!webPage->corePage()->settings().propagateDamagingInformation()) {
+        m_frameDamage = std::nullopt;
+        return;
+    }
+
+    m_frameDamage = std::make_optional<Damage>(webPage->bounds(), webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4);
 }
 #endif
 
@@ -143,26 +158,32 @@ void NonCompositedFrameRenderer::display()
 
 #if ENABLE(DAMAGE_TRACKING)
     if (m_frameDamage) {
-        {
-            Locker locker { m_frameDamageHistoryForTestingLock };
-            if (m_frameDamageHistoryForTesting)
-                m_frameDamageHistoryForTesting->append(m_frameDamage->regionForTesting());
-        }
+        if (m_frameDamageHistoryForTesting)
+            m_frameDamageHistoryForTesting->append(m_frameDamage->regionForTesting());
         m_surface->setFrameDamage(WTF::move(*m_frameDamage));
         resetFrameDamage();
     }
 #endif
 
-    auto rectToRepaint = webPage->bounds();
+    auto drawRect = [&](const IntRect& rect) {
+        WTFBeginSignpost(canvas, DrawRect, "Skia/%s, dirty region %ix%i+%i+%i", m_context ? "GPU" : "CPU", rect.x(), rect.y(), rect.width(), rect.height());
+        webPage->drawRect(graphicsContext, rect);
+        WTFEndSignpost(canvas, DrawRect);
+    };
+
 #if ENABLE(DAMAGE_TRACKING)
-    if (webPage->corePage()->settings().useDamagingInformationForCompositing()) {
-        if (auto& renderTargetDamage = m_surface->renderTargetDamage())
-            rectToRepaint = renderTargetDamage->bounds();
-    }
+    if (auto& renderTargetDamage = m_surface->renderTargetDamage()) {
+        for (const auto& rect : *renderTargetDamage) {
+            IntRect scaledRect = rect;
+            scaledRect.scale(1 / webPage->deviceScaleFactor());
+            drawRect(scaledRect);
+        }
+    } else
+        drawRect(webPage->bounds());
+#else
+    drawRect(webPage->bounds());
 #endif
-    WTFBeginSignpost(canvas, DrawRect, "Skia/%s, dirty region %ix%i+%i+%i", m_context ? "GPU" : "CPU", rectToRepaint.x(), rectToRepaint.y(), rectToRepaint.width(), rectToRepaint.height());
-    webPage->drawRect(graphicsContext, rectToRepaint);
-    WTFEndSignpost(canvas, DrawRect);
+
     canvas->restore();
 
     if (m_context) {
@@ -207,13 +228,11 @@ void NonCompositedFrameRenderer::updateRenderingWithForcedRepaintAsync(Completio
 #if ENABLE(DAMAGE_TRACKING)
 void NonCompositedFrameRenderer::resetDamageHistoryForTesting()
 {
-    Locker locker { m_frameDamageHistoryForTestingLock };
     m_frameDamageHistoryForTesting = std::make_optional<Vector<WebCore::Region>>();
 }
 
 void NonCompositedFrameRenderer::foreachRegionInDamageHistoryForTesting(Function<void(const Region&)>&& callback)
 {
-    Locker locker { m_frameDamageHistoryForTestingLock };
     if (m_frameDamageHistoryForTesting) {
         for (const auto& region : *m_frameDamageHistoryForTesting)
             callback(region);

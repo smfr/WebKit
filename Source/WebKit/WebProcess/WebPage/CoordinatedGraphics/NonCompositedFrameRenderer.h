@@ -68,8 +68,7 @@ private:
     CompletionHandler<void()> m_forcedRepaintAsyncCallback;
 #if ENABLE(DAMAGE_TRACKING)
     std::optional<WebCore::Damage> m_frameDamage;
-    Lock m_frameDamageHistoryForTestingLock;
-    std::optional<Vector<WebCore::Region>> m_frameDamageHistoryForTesting WTF_GUARDED_BY_LOCK(m_frameDamageHistoryForTestingLock);
+    std::optional<Vector<WebCore::Region>> m_frameDamageHistoryForTesting;
 #endif
 };
 

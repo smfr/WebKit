@@ -1115,10 +1115,10 @@ void AcceleratedSurface::didRenderFrame()
 
     Vector<IntRect, 1> damageRects;
 #if ENABLE(DAMAGE_TRACKING)
-    // For now, we use bounding box damage for render target damage, as its only 2 consumers so far
+    // For GL targets we use bounding box damage for render target damage, as its only 2 consumers so far
     // (CoordinatedBackingStore & ThreadedCompositor) only fetch bounds. Thus having damage with
     // better resolution is pointless as the bounds are the same in such case.
-    m_target->setDamage(Damage(m_swapChain.size(), Damage::Mode::BoundingBox));
+    m_target->setDamage(Damage(m_swapChain.size(), usesGL() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4));
     if (m_frameDamage) {
         damageRects = m_frameDamage->rects();
         m_frameDamage = std::nullopt;
