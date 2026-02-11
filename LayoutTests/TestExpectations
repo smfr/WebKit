@@ -1826,7 +1826,6 @@ imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/parsing/grid-l
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/parsing/grid-lanes-shorthand-serialization.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/parsing/grid-lanes-shorthand-valid.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/subgrid/track-sizing/grid-lanes-subgrid-flex.html [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/subgrid/track-sizing/grid-lanes-subgrid-intrinsic-sizing.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/subgrid/column/grid-lanes-subgrid-001a.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/subgrid/column/grid-lanes-subgrid-001e.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-grid/grid-lanes/tentative/subgrid/column/grid-lanes-subgrid-002a.html [ ImageOnlyFailure ]
