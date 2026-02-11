@@ -360,7 +360,6 @@ html/HTMLAttachmentElement.cpp
 html/HTMLCanvasElement.cpp
 html/HTMLFormControlsCollection.cpp
 html/HTMLFormElement.cpp
-html/HTMLImageElement.cpp
 html/HTMLInputElement.cpp
 html/HTMLLinkElement.cpp
 html/HTMLMapElement.cpp
