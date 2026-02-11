@@ -65,6 +65,12 @@ private:
     static bool hasFlexTracks(const UnsizedTracks&);
     static double flexFactorSum(const FlexTracks&);
     static LayoutUnit findSizeOfFr(const UnsizedTracks&, const LayoutUnit& availableSpace, const LayoutUnit& gapSize);
+
+    // Expand Flexible Tracks (spec section 11.7)
+    static void expandFlexibleTracks(UnsizedTracks&, const FreeSpaceScenario&, std::optional<LayoutUnit> availableGridSpace, const LayoutUnit& gapSize);
+    static void expandFlexibleTracksForMinContent(UnsizedTracks&);
+    static void expandFlexibleTracksForMaxContent(UnsizedTracks&, const FlexTracks&, double totalFlex);
+    static void expandFlexibleTracksForDefiniteLength(UnsizedTracks&, const FlexTracks&, std::optional<LayoutUnit> availableGridSpace, const LayoutUnit& gapSize);
 };
 
 } // namespace WebCore
