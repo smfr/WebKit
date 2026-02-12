@@ -40,6 +40,7 @@
 #import "NativeWebKeyboardEvent.h"
 #import "NativeWebTouchEvent.h"
 #import "NetworkProcessMessages.h"
+#import "PDFDisplayMode.h"
 #import "PageClient.h"
 #import "PickerDismissalReason.h"
 #import "PlatformWritingToolsUtilities.h"
@@ -15101,9 +15102,9 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         request.linkIndicatorShouldHaveLegacyMargins = ![strongSelf _shouldUseContextMenus];
         request.gatherAnimations = [strongSelf->_webView.get() _allowAnimationControls];
 
-        [strongSelf doAfterPositionInformationUpdate:[weakSelf = WeakObjCPtr<WKContentView>(strongSelf.get()), completion] (WebKit::InteractionInformationAtPosition) {
+        [strongSelf doAfterPositionInformationUpdate:[weakSelf = WeakObjCPtr<WKContentView>(strongSelf.get()), interaction, completion] (WebKit::InteractionInformationAtPosition) {
             if (auto strongSelf = weakSelf.get())
-                [strongSelf continueContextMenuInteraction:completion.get()];
+                [strongSelf continueContextMenuInteraction:interaction completion:completion.get()];
             else
                 completion(nil);
         } forRequest:request];
@@ -15136,7 +15137,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     return nil;
 }
 
-- (void)continueContextMenuInteraction:(void(^)(UIContextMenuConfiguration *))continueWithContextMenuConfiguration
+- (void)continueContextMenuInteraction:(UIContextMenuInteraction *)interaction completion:(void(^)(UIContextMenuConfiguration *))continueWithContextMenuConfiguration
 {
     if (!self.window)
         return continueWithContextMenuConfiguration(nil);
@@ -15144,7 +15145,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (!_positionInformation.touchCalloutEnabled)
         return continueWithContextMenuConfiguration(nil);
 
-    if (!_positionInformation.isLink && !_positionInformation.isImage && !_positionInformation.isAttachment && !self.positionInformationHasImageOverlayDataDetector)
+    if (!_positionInformation.isLink && !_positionInformation.isImage && !_positionInformation.isAttachment && !_positionInformation.isInPlugin && !self.positionInformationHasImageOverlayDataDetector)
         return continueWithContextMenuConfiguration(nil);
 
     URL linkURL = _positionInformation.url;
@@ -15213,7 +15214,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     }
 #endif
 
-    auto completionBlock = makeBlockPtr([continueWithContextMenuConfiguration = makeBlockPtr(continueWithContextMenuConfiguration), linkURL = WTF::move(linkURL), weakSelf = WeakObjCPtr<WKContentView>(self)] (UIContextMenuConfiguration *configurationFromWKUIDelegate) mutable {
+    auto completionBlock = makeBlockPtr([interaction = retainPtr(interaction), continueWithContextMenuConfiguration = makeBlockPtr(continueWithContextMenuConfiguration), linkURL = WTF::move(linkURL), weakSelf = WeakObjCPtr<WKContentView>(self)] (UIContextMenuConfiguration *configurationFromWKUIDelegate) mutable {
         auto strongSelf = weakSelf.get();
         if (!strongSelf) {
             continueWithContextMenuConfiguration(nil);
@@ -15290,16 +15291,20 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 #if ENABLE(DATA_DETECTION)
         // FIXME: Support JavaScript urls here. But make sure they don't show a preview.
         // <rdar://problem/50572283>
-        if (!canShowHTTPLinkOrDataDetectorPreview) {
-            continueWithContextMenuConfiguration(nil);
+        if (canShowHTTPLinkOrDataDetectorPreview) {
+            [strongSelf continueContextMenuInteractionWithDataDetectors:continueWithContextMenuConfiguration.get()];
             return;
         }
-
-        [strongSelf continueContextMenuInteractionWithDataDetectors:continueWithContextMenuConfiguration.get()];
-        return;
-#else
-        continueWithContextMenuConfiguration(nil);
 #endif
+
+#if ENABLE(UNIFIED_PDF)
+        if (strongSelf->_positionInformation.isInPlugin && [interaction menuAppearance] == UIContextMenuInteractionAppearanceCompact && [strongSelf shouldShowPDFDisplayOptions]) {
+            [strongSelf continueContextMenuInteractionWithPDFDisplayOptions:continueWithContextMenuConfiguration.get()];;
+            return;
+        }
+#endif
+
+        continueWithContextMenuConfiguration(nil);
     });
 
     _contextMenuActionProviderDelegateNeedsOverride = NO;
@@ -15359,6 +15364,57 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 }
 
 #endif // ENABLE(DATA_DETECTION)
+
+#if ENABLE(UNIFIED_PDF)
+
+- (BOOL)shouldShowPDFDisplayOptions
+{
+    return protect(_page->preferences())->twoUpPDFDisplayModeSupportEnabled();
+}
+
+- (void)continueContextMenuInteractionWithPDFDisplayOptions:(void(^)(UIContextMenuConfiguration *))continueWithContextMenuConfiguration
+{
+    static UIActionIdentifier const WKPDFActionSinglePageIdentifier = @"WKPDFActionSinglePageIdentifier";
+    static UIActionIdentifier const WKPDFActionTwoPagesIdentifier = @"WKPDFActionPlayTwoPagesIdentifier";
+
+    RetainPtr configuration = [UIContextMenuConfiguration configurationWithIdentifier:nil previewProvider:nil actionProvider:[weakSelf = WeakObjCPtr<WKContentView>(self)](NSArray<UIMenuElement *> *) -> UIMenu * {
+        RetainPtr strongSelf = weakSelf.get();
+        if (!strongSelf)
+            return nil;
+
+        UIActionHandler actionHandler = [weakSelf](UIAction *action) {
+            RetainPtr strongSelf = weakSelf.get();
+            if (!strongSelf)
+                return;
+
+            RefPtr page = strongSelf->_page;
+            if (!page)
+                return;
+
+            BOOL isSinglePage = page->pdfDisplayMode() == WebKit::PDFDisplayMode::SinglePageContinuous;
+            BOOL isSinglePageAction = [action.identifier isEqualToString:WKPDFActionSinglePageIdentifier];
+
+            if (isSinglePage == isSinglePageAction)
+                return;
+
+            page->requestPDFDisplayMode(isSinglePageAction ? WebKit::PDFDisplayMode::SinglePageContinuous : WebKit::PDFDisplayMode::TwoUpContinuous);
+        };
+
+        RetainPtr singlePageAction = [UIAction actionWithTitle:WebCore::contextMenuItemPDFSinglePage().createNSString().get() image:nil identifier:WKPDFActionSinglePageIdentifier handler:actionHandler];
+        RetainPtr twoPagesAction = [UIAction actionWithTitle:WebCore::contextMenuItemPDFTwoPages().createNSString().get() image:nil identifier:WKPDFActionTwoPagesIdentifier handler:actionHandler];
+
+        if (protect(strongSelf->_page)->pdfDisplayMode() == WebKit::PDFDisplayMode::SinglePageContinuous)
+            [singlePageAction setState:UIMenuElementStateOn];
+        else
+            [twoPagesAction setState:UIMenuElementStateOn];
+
+        return [UIMenu menuWithTitle:@"" children:@[ singlePageAction.get(), twoPagesAction.get() ]];
+    }];
+
+    continueWithContextMenuConfiguration(configuration.get());
+}
+
+#endif
 
 - (NSArray<UIMenuElement *> *)_contextMenuInteraction:(UIContextMenuInteraction *)interaction overrideSuggestedActionsForConfiguration:(UIContextMenuConfiguration *)configuration
 {
