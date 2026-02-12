@@ -333,8 +333,6 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
 
     auto& gridTemplateRows = renderGridStyle->gridTemplateRows();
     auto& gridTemplateRowsTrackList = gridTemplateRows.list;
-    if (gridTemplateRowsTrackList.isEmpty())
-        ADD_REASON_AND_RETURN_IF_NEEDED(GridHasUnsupportedGridTemplateRows, reasons, reasonCollectionMode);
 
     for (auto& rowsTrackListEntry : gridTemplateRowsTrackList) {
         auto avoidanceReason = WTF::switchOn(rowsTrackListEntry,

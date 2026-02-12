@@ -205,8 +205,8 @@ std::pair<UsedTrackSizes, GridItemRects> GridLayout::layout(UnplacedGridItems& u
     auto [ gridAreas, columnsCount, rowsCount ] = placeGridItems(unplacedGridItems, gridTemplateColumnsTrackSizes, gridTemplateRowsTrackSizes, gridDefinition.autoFlowOptions);
     auto placedGridItems = formattingContext.constructPlacedGridItems(gridAreas);
 
-    auto columnTrackSizingFunctionsList = trackSizingFunctions(columnsCount, gridTemplateColumnsTrackSizes);
-    auto rowTrackSizingFunctionsList = trackSizingFunctions(rowsCount, gridTemplateRowsTrackSizes);
+    auto columnTrackSizingFunctionsList = trackSizingFunctions(columnsCount, gridTemplateColumnsTrackSizes, gridDefinition.gridAutoColumns);
+    auto rowTrackSizingFunctionsList = trackSizingFunctions(rowsCount, gridTemplateRowsTrackSizes, gridDefinition.gridAutoRows);
 
     // 2. FIXME: Find the size of the grid container.
 
@@ -324,16 +324,47 @@ TrackSizingFunctions GridLayout::convertGridTrackSizeToTrackSizingFunctions(cons
     return TrackSizingFunctions { minTrackSizingFunction(), maxTrackSizingFunction() };
 }
 
-TrackSizingFunctionsList GridLayout::trackSizingFunctions(size_t implicitGridTracksCount, const Vector<Style::GridTrackSize> gridTemplateTrackSizes)
+// Generates track sizing functions for implicit tracks using grid-auto-{columns,rows}
+// FIXME: This function only supports appended tracks but not prepended tracks.
+TrackSizingFunctionsList GridLayout::generateImplicitTrackSizingFunctions(size_t explicitTracksCount, size_t totalTracksCount, const Style::GridTrackSizes& gridAutoTrackSizes)
 {
-    // FIXME: Support implicit tracks (both before and after the explicit grid)
-    ASSERT(implicitGridTracksCount == gridTemplateTrackSizes.size(), "Currently only support mapping track sizes from explicit grid from grid-template-{columns, rows}");
-    UNUSED_VARIABLE(implicitGridTracksCount);
+    // https://drafts.csswg.org/css-grid-1/#auto-tracks
+    size_t implicitTracksCount = totalTracksCount - explicitTracksCount;
+
+    TrackSizingFunctionsList trackSizingFunctionsForImplicitGrid;
+    trackSizingFunctionsForImplicitGrid.reserveInitialCapacity(implicitTracksCount);
+
+    // Cycle through grid-auto-{columns,rows} values using modulo.
+    for (size_t i = 0; i < implicitTracksCount; ++i) {
+        size_t autoTrackIndex = i % gridAutoTrackSizes.size();
+        trackSizingFunctionsForImplicitGrid.append(convertGridTrackSizeToTrackSizingFunctions(gridAutoTrackSizes[autoTrackIndex]));
+    }
+
+    return trackSizingFunctionsForImplicitGrid;
+}
+
+TrackSizingFunctionsList GridLayout::trackSizingFunctions(size_t totalTracksCount, const Vector<Style::GridTrackSize>& gridTemplateTrackSizes, const Style::GridTrackSizes& gridAutoTrackSizes)
+{
+    // FIXME: This function only supports appended tracks but not prepended tracks.
+    // Per spec, we should support both forward and backward implicit tracks.
+    ASSERT_WITH_MESSAGE(totalTracksCount >= gridTemplateTrackSizes.size(), "Total tracks should be at least as many as explicit tracks");
+
+    TrackSizingFunctionsList trackSizingFunctions;
+    trackSizingFunctions.reserveInitialCapacity(totalTracksCount);
 
     // https://drafts.csswg.org/css-grid-1/#algo-terms
-    return gridTemplateTrackSizes.map([](const Style::GridTrackSize& gridTrackSize) {
-        return convertGridTrackSizeToTrackSizingFunctions(gridTrackSize);
-    });
+    // Map explicit tracks from grid-template-{columns,rows}
+    for (auto& gridTrackSize : gridTemplateTrackSizes)
+        trackSizingFunctions.append(convertGridTrackSizeToTrackSizingFunctions(gridTrackSize));
+
+    // Generate implicit tracks using grid-auto-{columns,rows}
+    // https://drafts.csswg.org/css-grid-1/#auto-tracks
+    // "The first track after the last explicitly-sized track receives the first specified size, and so on forwards"
+    auto implicitTrackSizingFunctions = generateImplicitTrackSizingFunctions(gridTemplateTrackSizes.size(), totalTracksCount, gridAutoTrackSizes);
+    trackSizingFunctions.appendVector(implicitTrackSizingFunctions);
+
+    ASSERT(trackSizingFunctions.size() == totalTracksCount);
+    return trackSizingFunctions;
 }
 
 // If calculating the layout of a grid item in this step depends on the available space in the block axis,

@@ -62,6 +62,8 @@ struct GridAutoFlowOptions {
 struct GridDefinition {
     Style::GridTemplateList gridTemplateColumns;
     Style::GridTemplateList gridTemplateRows;
+    Style::GridTrackSizes gridAutoColumns;
+    Style::GridTrackSizes gridAutoRows;
     GridAutoFlowOptions autoFlowOptions;
 };
 

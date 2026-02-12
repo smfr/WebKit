@@ -189,7 +189,7 @@ void GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
     auto gridTemplateColumns = inlineAxisDependsOnTracks ? gridTemplateListWithPercentagesConvertedToAuto(gridStyle->gridTemplateColumns()) : gridStyle->gridTemplateColumns();
     auto gridTemplateRows = blockAxisDependsOnTracks ? gridTemplateListWithPercentagesConvertedToAuto(gridStyle->gridTemplateRows()) : gridStyle->gridTemplateRows();
 
-    GridDefinition gridDefinition { gridTemplateColumns, gridTemplateRows, autoFlowOptions };
+    GridDefinition gridDefinition { gridTemplateColumns, gridTemplateRows, gridStyle->gridAutoColumns(), gridStyle->gridAutoRows(), autoFlowOptions };
 
     auto usedJustifyContent = gridStyle->justifyContent().resolve();
     auto usedAlignContent = gridStyle->alignContent().resolve();
@@ -300,6 +300,8 @@ GridFormattingContext::IntrinsicWidths GridFormattingContext::computeIntrinsicWi
     GridDefinition gridDefinition {
         gridTemplateListWithPercentagesConvertedToAuto(gridStyle->gridTemplateColumns()),
         gridTemplateListWithPercentagesConvertedToAuto(gridStyle->gridTemplateRows()),
+        gridStyle->gridAutoColumns(),
+        gridStyle->gridAutoRows(),
         autoFlowOptions
     };
 
