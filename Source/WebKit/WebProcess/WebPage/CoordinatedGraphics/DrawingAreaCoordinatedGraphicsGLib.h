@@ -33,12 +33,12 @@
 
 namespace WebCore {
 class GraphicsContext;
+class RunLoopObserver;
 }
 
 namespace WebKit {
 class NonCompositedFrameRenderer;
 struct RenderProcessInfo;
-struct UpdateInfo;
 
 class DrawingAreaCoordinatedGraphics final : public DrawingArea {
 public:
@@ -108,9 +108,11 @@ private:
     void suspendPainting();
     void resumePainting();
 
-    void scheduleDisplay();
-    void displayTimerFired();
-    void display();
+    void scheduleUpdate();
+    void scheduleRenderingUpdateRunLoopObserver();
+    void invalidateRenderingUpdateRunLoopObserver();
+    void renderingUpdateRunLoopObserverFired();
+    void updateRendering();
 
     // Whether we're currently processing an UpdateGeometry message.
     bool m_inUpdateGeometry { false };
@@ -134,7 +136,7 @@ private:
 
     bool m_supportsAsyncScrolling { true };
 
-    RunLoop::Timer m_displayTimer;
+    std::unique_ptr<WebCore::RunLoopObserver> m_renderingUpdateRunLoopObserver;
 
 #if PLATFORM(GTK)
     bool m_transientZoom { false };

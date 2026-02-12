@@ -44,8 +44,10 @@
 #include <WebCore/Page.h>
 #include <WebCore/PageOverlayController.h>
 #include <WebCore/Region.h>
+#include <WebCore/RunLoopObserver.h>
 #include <WebCore/Settings.h>
 #include <WebCore/ShareableBitmap.h>
+#include <WebCore/WindowEventLoop.h>
 #include <wtf/SetForScope.h>
 
 #if USE(GLIB_EVENT_LOOP)
@@ -58,14 +60,16 @@ using namespace WebCore;
 DrawingAreaCoordinatedGraphics::DrawingAreaCoordinatedGraphics(WebPage& webPage, const WebPageCreationParameters& parameters)
     : DrawingArea(parameters.drawingAreaIdentifier, webPage)
     , m_isPaintingSuspended(!(parameters.activityState & ActivityState::IsVisible))
-    , m_displayTimer(RunLoop::mainSingleton(), "DrawingAreaCoordinatedGraphics::DisplayTimer"_s, this, &DrawingAreaCoordinatedGraphics::displayTimerFired)
 {
-#if !PLATFORM(WPE)
-    m_displayTimer.setPriority(RunLoopSourcePriority::NonAcceleratedDrawingTimer);
-#endif
+    m_renderingUpdateRunLoopObserver = makeUnique<RunLoopObserver>(RunLoopObserver::WellKnownOrder::RenderingUpdate, [this] {
+        renderingUpdateRunLoopObserverFired();
+    });
 }
 
-DrawingAreaCoordinatedGraphics::~DrawingAreaCoordinatedGraphics() = default;
+DrawingAreaCoordinatedGraphics::~DrawingAreaCoordinatedGraphics()
+{
+    invalidateRenderingUpdateRunLoopObserver();
+}
 
 void DrawingAreaCoordinatedGraphics::setNeedsDisplay()
 {
@@ -87,7 +91,7 @@ void DrawingAreaCoordinatedGraphics::setNeedsDisplayInRect(const IntRect& rect)
 
     if (m_nonCompositedFrameRenderer) {
         m_nonCompositedFrameRenderer->setNeedsDisplayInRect(dirtyRect);
-        scheduleDisplay();
+        scheduleUpdate();
     }
 }
 
@@ -96,10 +100,8 @@ void DrawingAreaCoordinatedGraphics::scroll(const IntRect& scrollRect, const Int
     if (m_layerTreeHost)
         return;
 
-    if (m_nonCompositedFrameRenderer) {
+    if (m_nonCompositedFrameRenderer)
         m_nonCompositedFrameRenderer->setNeedsDisplayInRect(m_webPage->bounds());
-        scheduleDisplay();
-    }
 }
 
 void DrawingAreaCoordinatedGraphics::updateRenderingWithForcedRepaint()
@@ -129,8 +131,12 @@ void DrawingAreaCoordinatedGraphics::setLayerTreeStateIsFrozen(bool isFrozen)
 
     if (m_layerTreeHost)
         m_layerTreeHost->setLayerTreeStateIsFrozen(isFrozen);
-    else if (!isFrozen)
-        scheduleDisplay();
+    else if (m_nonCompositedFrameRenderer) {
+        if (isFrozen)
+            invalidateRenderingUpdateRunLoopObserver();
+        else
+            scheduleUpdate();
+    }
 }
 
 void DrawingAreaCoordinatedGraphics::updatePreferences(const WebPreferencesStore& store)
@@ -228,8 +234,8 @@ void DrawingAreaCoordinatedGraphics::triggerRenderingUpdate()
 
     if (m_layerTreeHost)
         m_layerTreeHost->scheduleRenderingUpdate();
-    else
-        scheduleDisplay();
+    else if (m_nonCompositedFrameRenderer)
+        scheduleUpdate();
 }
 
 RefPtr<DisplayRefreshMonitor> DrawingAreaCoordinatedGraphics::createDisplayRefreshMonitor(PlatformDisplayID displayID)
@@ -281,7 +287,7 @@ void DrawingAreaCoordinatedGraphics::dispatchAfterEnsuringDrawing(IPC::AsyncRepl
         }
     } else if (!m_isPaintingSuspended && m_nonCompositedFrameRenderer) {
         m_nonCompositedFrameRenderer->setNeedsDisplayInRect(m_webPage->bounds());
-        scheduleDisplay();
+        scheduleUpdate();
         return;
     }
 
@@ -348,8 +354,8 @@ void DrawingAreaCoordinatedGraphics::suspendPainting()
 
     if (m_layerTreeHost)
         m_layerTreeHost->pauseRendering();
-    else
-        m_displayTimer.stop();
+    else if (m_nonCompositedFrameRenderer)
+        invalidateRenderingUpdateRunLoopObserver();
 
     m_isPaintingSuspended = true;
 
@@ -364,13 +370,12 @@ void DrawingAreaCoordinatedGraphics::resumePainting()
         return;
     }
 
-    if (m_layerTreeHost)
-        m_layerTreeHost->resumeRendering();
-
     m_isPaintingSuspended = false;
 
-    // FIXME: We shouldn't always repaint everything here.
-    setNeedsDisplay();
+    if (m_layerTreeHost)
+        m_layerTreeHost->resumeRendering();
+    else if (m_nonCompositedFrameRenderer)
+        scheduleUpdate();
 
     m_webPage->corePage()->resumeScriptedAnimations();
 }
@@ -388,28 +393,55 @@ void DrawingAreaCoordinatedGraphics::sendEnterAcceleratedCompositingModeIfNeeded
     m_compositingAccordingToProxyMessages = true;
 }
 
-void DrawingAreaCoordinatedGraphics::scheduleDisplay()
+void DrawingAreaCoordinatedGraphics::scheduleUpdate()
 {
     ASSERT(!m_layerTreeHost);
 
     if (m_isPaintingSuspended)
         return;
 
-    if (m_displayTimer.isActive())
+    if (m_webPage->size().isEmpty())
         return;
 
-    m_displayTimer.startOneShot(0_s);
+    scheduleRenderingUpdateRunLoopObserver();
 }
 
-void DrawingAreaCoordinatedGraphics::displayTimerFired()
+void DrawingAreaCoordinatedGraphics::scheduleRenderingUpdateRunLoopObserver()
 {
-    display();
+    if (m_renderingUpdateRunLoopObserver->isScheduled())
+        return;
+
+    tracePoint(RenderingUpdateRunLoopObserverStart);
+    m_renderingUpdateRunLoopObserver->schedule();
+
+    // Avoid running any more tasks before the runloop observer fires.
+    WindowEventLoop::breakToAllowRenderingUpdate();
 }
 
-void DrawingAreaCoordinatedGraphics::display()
+void DrawingAreaCoordinatedGraphics::invalidateRenderingUpdateRunLoopObserver()
+{
+    if (!m_renderingUpdateRunLoopObserver->isScheduled())
+        return;
+
+    tracePoint(RenderingUpdateRunLoopObserverEnd);
+    m_renderingUpdateRunLoopObserver->invalidate();
+}
+
+void DrawingAreaCoordinatedGraphics::renderingUpdateRunLoopObserverFired()
+{
+    WTFEmitSignpost(this, RenderingUpdateRunLoopObserverFired);
+
+    if (m_isPaintingSuspended)
+        return;
+
+    updateRendering();
+}
+
+void DrawingAreaCoordinatedGraphics::updateRendering()
 {
     ASSERT(!m_layerTreeHost);
     ASSERT(!m_inUpdateGeometry);
+    invalidateRenderingUpdateRunLoopObserver();
 
     if (m_layerTreeStateIsFrozen)
         return;
