@@ -631,7 +631,7 @@ private:
 
 class TrackerDomainLookupInfo {
 public:
-    enum class CanBlock : bool { No, Yes };
+    enum class CanBlock : uint8_t { No, WithAdvancedPrivacyProtections, WithDefaultProtections };
 
     TrackerDomainLookupInfo(String&& owner, CanBlock canBlock)
         : m_owner { owner.utf8() }
@@ -641,7 +641,7 @@ public:
 
     TrackerDomainLookupInfo(WPTrackingDomain *domain)
         : m_owner { domain.owner.UTF8String }
-        , m_canBlock { domain.canBlock ? CanBlock::Yes : CanBlock::No }
+        , m_canBlock { domain.canBlock ? CanBlock::WithAdvancedPrivacyProtections : CanBlock::No }
     {
     }
 
@@ -722,7 +722,7 @@ void configureForAdvancedPrivacyProtections(NSURLSession *session)
             if (auto* info = TrackerAddressLookupInfo::find(*address)) {
                 *owner = info->owner().data();
                 *hostName = info->host().data();
-                *canBlock = info->canBlock() == TrackerAddressLookupInfo::CanBlock::Yes;
+                *canBlock = info->canBlock() != TrackerAddressLookupInfo::CanBlock::No;
             }
         }
 
@@ -731,7 +731,7 @@ void configureForAdvancedPrivacyProtections(NSURLSession *session)
             if (auto info = TrackerDomainLookupInfo::find(domain.string()); info.owner().length()) {
                 *owner = info.owner().data();
                 *hostName = *host;
-                *canBlock = info.canBlock() == TrackerDomainLookupInfo::CanBlock::Yes;
+                *canBlock = info.canBlock() != TrackerDomainLookupInfo::CanBlock::No;
             }
         }
     });
@@ -755,11 +755,26 @@ WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore:
 {
     return request.isThirdParty() && isKnownTrackerAddressOrDomain(request.url().host()) ? WebCore::IsKnownCrossSiteTracker::Yes : WebCore::IsKnownCrossSiteTracker::No;
 }
+
+bool isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvancedPrivacyProtections)
+{
+    TrackerAddressLookupInfo::populateIfNeeded();
+    TrackerDomainLookupInfo::populateIfNeeded();
+
+    auto domain = WebCore::RegistrableDomain { URL { makeString("http://"_s, request.url().host()) } };
+    if (auto info = TrackerDomainLookupInfo::find(domain.string()); info.owner().length()) {
+        if (info.canBlock() == TrackerDomainLookupInfo::CanBlock::No)
+            return false;
+        return needsAdvancedPrivacyProtections || info.canBlock() == TrackerDomainLookupInfo::CanBlock::WithDefaultProtections;
+    }
+    return false;
+}
 #else
 
 void configureForAdvancedPrivacyProtections(NSURLSession *) { }
 bool isKnownTrackerAddressOrDomain(StringView) { return false; }
 WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&) { return WebCore::IsKnownCrossSiteTracker::No; }
+bool isRequestBlockable(const WebCore::ResourceRequest&, bool) { return false; }
 
 #endif
 

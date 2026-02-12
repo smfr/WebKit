@@ -317,6 +317,15 @@ bool NetworkSession::isTrackingPreventionEnabled() const
     return !!m_resourceLoadStatistics;
 }
 
+bool NetworkSession::isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvancedPrivacyProtections)
+{
+#if ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
+    return WebKit::isRequestBlockable(request, needsAdvancedPrivacyProtections);
+#else
+    return false;
+#endif
+}
+
 IsKnownCrossSiteTracker NetworkSession::isRequestToKnownCrossSiteTracker(const ResourceRequest& request)
 {
 #if ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
@@ -333,13 +342,15 @@ IsKnownCrossSiteTracker NetworkSession::isResourceFromKnownCrossSiteTracker(cons
     return isRequestToKnownCrossSiteTracker(request);
 }
 
-bool NetworkSession::shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest& request, WebPageProxyIdentifier webPageID)
+bool NetworkSession::shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest& request, WebPageProxyIdentifier webPageID, bool mayBlockScriptLoad, bool needsAdvancedPrivacyProtections)
 {
+    if (!mayBlockScriptLoad && !isRequestBlockable(request, needsAdvancedPrivacyProtections))
+        return false;
     auto it = m_trackerBlockingPolicyByPageIdentifier.find(webPageID);
     if (it == m_trackerBlockingPolicyByPageIdentifier.end())
         it = m_trackerBlockingPolicyByPageIdentifier.set(webPageID, HashSet<RegistrableDomain> { }).iterator;
     RegistrableDomain domain { request.url() };
-    return !it->value.add(domain).isNewEntry;
+    return !it->value.add(domain).isNewEntry || !mayBlockScriptLoad;
 }
 
 void NetworkSession::deleteAndRestrictWebsiteDataForRegistrableDomains(OptionSet<WebsiteDataType> dataTypes, RegistrableDomainsToDeleteOrRestrictWebsiteDataFor&& domains, CompletionHandler<void(HashSet<RegistrableDomain>&&)>&& completionHandler)
