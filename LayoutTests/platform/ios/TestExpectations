@@ -6880,8 +6880,6 @@ media/video-orientation-canvas.html [ Failure ]
 http/tests/resourceLoadStatistics/capped-lifetime-for-cookie-set-in-js.html [ Skip ]
 http/tests/resourceLoadStatistics/website-data-removal-for-site-without-user-interaction.html [ Skip ]
 
-webkit.org/b/210849 compositing/overflow/rtl-scrollbar-layer-positioning.html [ Pass Timeout ]
-
 webkit.org/b/243515 svg/compositing/svg-poster-circle.html [ Pass ImageOnlyFailure ]
 webkit.org/b/243515 svg/compositing/outermost-svg-with-border.html [ Pass ImageOnlyFailure ]
 # See also webkit.org/b/252088
@@ -8485,3 +8483,5 @@ webkit.org/b/307091 inspector/network/intercept-aborted-request.html [ Skip ]
 media/caption-display-settings/caption-display-settings-default-anchorBounds.html [ Skip ]
 
 webkit.org/b/307682 editing/execCommand/insert-line-break-no-scroll.html [ Failure ]
+
+webkit.org/b/307582 compositing/overflow/rtl-scrollbar-layer-positioning.html [ Failure ]
