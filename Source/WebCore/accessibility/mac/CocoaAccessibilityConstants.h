@@ -243,6 +243,7 @@
 #define NSAccessibilityConvertRelativeFrameParameterizedAttribute @"AXConvertRelativeFrame"
 #define NSAccessibilityEndTextMarkerForBoundsAttribute @"AXEndTextMarkerForBounds"
 #define NSAccessibilityIndexForTextMarkerAttribute @"AXIndexForTextMarker"
+#define NSAccessibilityIntersectTextMarkerRangesAttribute @"AXIntersectTextMarkerRanges"
 #define NSAccessibilityLeftLineTextMarkerRangeForTextMarkerAttribute @"AXLeftLineTextMarkerRangeForTextMarker"
 #define NSAccessibilityLeftWordTextMarkerRangeForTextMarkerAttribute @"AXLeftWordTextMarkerRangeForTextMarker"
 #define NSAccessibilityLengthForTextMarkerRangeAttribute @"AXLengthForTextMarkerRange"

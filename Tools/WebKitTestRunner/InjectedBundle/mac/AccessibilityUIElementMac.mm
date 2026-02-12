@@ -2438,6 +2438,19 @@ RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElementMac::textMarkerRangeF
     return nullptr;
 }
 
+RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElementMac::intersectTextMarkerRanges(AccessibilityTextMarkerRange* range1, AccessibilityTextMarkerRange* range2)
+{
+    BEGIN_AX_OBJC_EXCEPTIONS
+    if (!range1->platformTextMarkerRange() || !range2->platformTextMarkerRange())
+        return nullptr;
+    NSArray *textMarkerRanges = @[range1->platformTextMarkerRange(), range2->platformTextMarkerRange()];
+    auto intersection = attributeValueForParameter(@"AXIntersectTextMarkerRanges", textMarkerRanges);
+    return AccessibilityTextMarkerRange::create(intersection.get());
+    END_AX_OBJC_EXCEPTIONS
+
+    return nullptr;
+}
+
 RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElementMac::textMarkerRangeForRange(unsigned location, unsigned length)
 {
     BEGIN_AX_OBJC_EXCEPTIONS

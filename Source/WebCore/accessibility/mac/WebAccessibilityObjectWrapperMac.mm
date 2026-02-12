@@ -3455,6 +3455,18 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
         return @(range ? AXObjectCache::lengthForRange(*range) : 0);
     }
 
+    if ([attribute isEqualToString:NSAccessibilityIntersectTextMarkerRangesAttribute]) {
+        if (array.count < 2
+            || !AXObjectIsTextMarkerRange([array objectAtIndex:0])
+            || !AXObjectIsTextMarkerRange([array objectAtIndex:1]))
+            return nil;
+
+        auto range1 = AXTextMarkerRange { (AXTextMarkerRangeRef)[array objectAtIndex:0] };
+        auto range2 = AXTextMarkerRange { (AXTextMarkerRangeRef)[array objectAtIndex:1] };
+        auto intersection = range1.intersectionWith(range2);
+        return intersection ? (*intersection).platformData().bridgingAutorelease() : nil;
+    }
+
     if (backingObject->isExposableTable()) {
         if ([attribute isEqualToString:NSAccessibilityCellForColumnAndRowParameterizedAttribute]) {
             if (array == nil || [array count] != 2)

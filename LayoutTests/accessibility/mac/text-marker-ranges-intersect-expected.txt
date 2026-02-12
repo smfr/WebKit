@@ -1,0 +1,49 @@
+Tests the intersectTextMarkerRanges method.
+
+text, AXRole: AXGroup
+elementRange: text: 'abcdefghij', start: {{ID 74, role StaticText, offset 0}}, end: {{ID 74, role StaticText, offset 10}}
+range1: text: 'abc', start: {{ID 74, role StaticText, offset 0}}, end: {{ID 74, role StaticText, offset 3}}
+range2: text: 'hij', start: {{ID 74, role StaticText, offset 7}}, end: {{ID 74, role StaticText, offset 10}}
+elementRange range1 intersection: text: 'abc', start: {{ID 74, role StaticText, offset 0}}, end: {{ID 74, role StaticText, offset 3}}
+elementRange range2 intersection: text: 'hij', start: {{ID 74, role StaticText, offset 7}}, end: {{ID 74, role StaticText, offset 10}}
+range1 range2 intersection: null
+
+text, AXRole: AXGroup
+elementRange: text: 'abcdefghij', start: {{ID 74, role StaticText, offset 0}}, end: {{ID 74, role StaticText, offset 10}}
+range1: text: 'def', start: {{ID 74, role StaticText, offset 3}}, end: {{ID 74, role StaticText, offset 6}}
+range2: text: 'efghij', start: {{ID 74, role StaticText, offset 4}}, end: {{ID 74, role StaticText, offset 10}}
+elementRange range1 intersection: text: 'def', start: {{ID 74, role StaticText, offset 3}}, end: {{ID 74, role StaticText, offset 6}}
+elementRange range2 intersection: text: 'efghij', start: {{ID 74, role StaticText, offset 4}}, end: {{ID 74, role StaticText, offset 10}}
+range1 range2 intersection: text: 'ef', start: {{ID 74, role StaticText, offset 4}}, end: {{ID 74, role StaticText, offset 6}}
+
+textarea, AXRole: AXTextArea
+elementRange: text: 'Write something here.', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 21}}
+range1: text: 'Write some', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 10}}
+range2: text: 'thing here.', start: {{ID 76, role StaticText, offset 10}}, end: {{ID 76, role StaticText, offset 21}}
+elementRange range1 intersection: text: 'Write some', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 10}}
+elementRange range2 intersection: text: 'thing here.', start: {{ID 76, role StaticText, offset 10}}, end: {{ID 76, role StaticText, offset 21}}
+range1 range2 intersection: text: '', start: {{ID 76, role StaticText, offset 10}}, end: {{ID 76, role StaticText, offset 10}}
+
+textarea, AXRole: AXTextArea
+elementRange: text: 'Write something here.', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 21}}
+range1: text: 'Write some', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 10}}
+range2: text: 'something here.', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 21}}
+elementRange range1 intersection: text: 'Write some', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 10}}
+elementRange range2 intersection: text: 'something here.', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 21}}
+range1 range2 intersection: text: 'some', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 10}}
+
+textarea, AXRole: AXTextArea
+elementRange: text: 'Write something here.', start: {{ID 76, role StaticText, offset 0}}, end: {{ID 76, role StaticText, offset 21}}
+range1: text: 'te something h', start: {{ID 76, role StaticText, offset 3}}, end: {{ID 76, role StaticText, offset 17}}
+range2: text: 'something here.', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 21}}
+elementRange range1 intersection: text: 'te something h', start: {{ID 76, role StaticText, offset 3}}, end: {{ID 76, role StaticText, offset 17}}
+elementRange range2 intersection: text: 'something here.', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 21}}
+range1 range2 intersection: text: 'something h', start: {{ID 76, role StaticText, offset 6}}, end: {{ID 76, role StaticText, offset 17}}
+
+
+PASS successfullyParsed is true
+
+TEST COMPLETE
+abcdefghij
+
+

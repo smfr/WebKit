@@ -1399,6 +1399,11 @@ RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElement::textMarkerRangeForM
     return nullptr;
 }
 
+RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElement::intersectTextMarkerRanges(WTR::AccessibilityTextMarkerRange*, WTR::AccessibilityTextMarkerRange*)
+{
+    return nullptr;
+}
+
 RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElement::textMarkerRangeForRange(unsigned, unsigned)
 {
     return nullptr;
