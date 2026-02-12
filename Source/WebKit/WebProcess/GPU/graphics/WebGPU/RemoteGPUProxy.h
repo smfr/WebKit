@@ -159,8 +159,6 @@ private:
     void dispatch(Function<void()>&&) final;
     bool isCurrent() const final;
 
-    RefPtr<IPC::StreamClientConnection> protectedStreamConnection() const { return m_streamConnection; }
-
     const Ref<WebGPU::ConvertToBackingContext> m_convertToBackingContext;
     const Ref<ModelConvertToBackingContext> m_modelConvertToBackingContext;
     ThreadSafeWeakPtr<SerialFunctionDispatcher> m_dispatcher;

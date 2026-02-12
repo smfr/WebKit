@@ -187,7 +187,7 @@ void PDFScrollingPresentationController::updateLayersOnLayoutChange(FloatSize do
     transform.translate(centeringOffset.width(), centeringOffset.height());
 
     contentsLayer->setTransform(transform);
-    protectedPageBackgroundsContainerLayer()->setTransform(transform);
+    protect(m_pageBackgroundsContainerLayer)->setTransform(transform);
 
 #if ENABLE(PDFKIT_PAINTED_SELECTIONS)
     Ref selectionLayer = *m_selectionLayer;
@@ -270,13 +270,13 @@ void PDFScrollingPresentationController::didGeneratePreviewForPage(PDFDocumentLa
 
 void PDFScrollingPresentationController::updateIsInWindow(bool isInWindow)
 {
-    protectedContentsLayer()->setIsInWindow(isInWindow);
+    protect(m_contentsLayer)->setIsInWindow(isInWindow);
 
 #if ENABLE(PDFKIT_PAINTED_SELECTIONS)
-    protectedSelectionLayer()->setIsInWindow(isInWindow);
+    protect(m_selectionLayer)->setIsInWindow(isInWindow);
 #endif
 
-    for (auto& pageLayer : protectedPageBackgroundsContainerLayer()->children()) {
+    for (auto& pageLayer : protect(m_pageBackgroundsContainerLayer)->children()) {
         if (pageLayer->children().size()) {
             Ref pageContentsLayer = pageLayer->children()[0];
             pageContentsLayer->setIsInWindow(isInWindow);
@@ -323,7 +323,7 @@ void PDFScrollingPresentationController::updateForCurrentScrollability(OptionSet
         tiledBacking->setScrollability(scrollability);
 
 #if ENABLE(PDFKIT_PAINTED_SELECTIONS)
-    if (CheckedPtr tiledBacking = protectedSelectionLayer()->tiledBacking())
+    if (CheckedPtr tiledBacking = protect(m_selectionLayer)->tiledBacking())
         tiledBacking->setScrollability(scrollability);
 #endif
 }

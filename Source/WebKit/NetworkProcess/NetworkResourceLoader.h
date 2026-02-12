@@ -193,9 +193,6 @@ public:
 private:
     NetworkResourceLoader(NetworkResourceLoadParameters&&, NetworkConnectionToWebProcess&, CompletionHandler<void(const WebCore::ResourceError&, const WebCore::ResourceResponse, Vector<uint8_t>&&)>&&);
 
-    RefPtr<NetworkCache::Cache> protectedCache() const;
-    RefPtr<ServiceWorkerFetchTask> protectedServiceWorkerFetchTask() const;
-
     // IPC::MessageSender
     IPC::Connection* messageSenderConnection() const override;
     uint64_t messageSenderDestinationID() const override { return m_parameters.identifier->toUInt64(); }

@@ -410,11 +410,6 @@ private:
     WTFLogChannel& logChannel() const;
 #endif
 
-    RefPtr<WebCore::MediaPlayer> protectedPlayer() const { return m_player; }
-#if ENABLE(MEDIA_SOURCE)
-    RefPtr<RemoteMediaSourceProxy> protectedMediaSourceProxy() const { return m_mediaSourceProxy; }
-#endif
-
     Ref<IPC::Connection> protectedConnection() const { return m_webProcessConnection; }
     Ref<RemoteVideoFrameObjectHeap> protectedVideoFrameObjectHeap() const;
 

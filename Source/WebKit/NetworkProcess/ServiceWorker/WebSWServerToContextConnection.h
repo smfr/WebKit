@@ -105,8 +105,6 @@ public:
 private:
     WebSWServerToContextConnection(NetworkConnectionToWebProcess&, WebPageProxyIdentifier, WebCore::Site&&, std::optional<WebCore::ScriptExecutionContextIdentifier>, WebCore::SWServer&);
 
-    RefPtr<NetworkConnectionToWebProcess> protectedConnection() const;
-
     template<typename T> void sendToParentProcess(T&&);
     template<typename T, typename C> void sendWithAsyncReplyToParentProcess(T&&, C&&);
 

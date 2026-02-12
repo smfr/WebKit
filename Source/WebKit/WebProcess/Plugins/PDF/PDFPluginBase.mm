@@ -846,7 +846,7 @@ bool PDFPluginBase::formControlRefreshEnabled() const
 
 IntRect PDFPluginBase::scrollableAreaBoundingBox(bool*) const
 {
-    return protectedView()->frameRect();
+    return protect(m_view.get())->frameRect();
 }
 
 void PDFPluginBase::setScrollOffset(const ScrollOffset& offset)
@@ -1057,7 +1057,7 @@ void PDFPluginBase::updateScrollbars()
 
     if (horizontalScrollbar) {
         auto scrollbarRect = viewRelativeHorizontalScrollbarRect();
-        scrollbarRect.moveBy(protectedView()->location());
+        scrollbarRect.moveBy(protect(m_view.get())->location());
         horizontalScrollbar->setFrameRect(scrollbarRect);
 
         horizontalScrollbar->setSteps(Scrollbar::pixelsPerLineStep(), firstPageHeight());
@@ -1066,7 +1066,7 @@ void PDFPluginBase::updateScrollbars()
 
     if (verticalScrollbar) {
         auto scrollbarRect = viewRelativeVerticalScrollbarRect();
-        scrollbarRect.moveBy(protectedView()->location());
+        scrollbarRect.moveBy(protect(m_view.get())->location());
         verticalScrollbar->setFrameRect(scrollbarRect);
 
         verticalScrollbar->setSteps(Scrollbar::pixelsPerLineStep(), firstPageHeight());
@@ -1099,7 +1099,7 @@ Ref<Scrollbar> PDFPluginBase::createScrollbar(ScrollbarOrientation orientation)
             scrollAnimator().setWheelEventTestMonitor(page->wheelEventTestMonitor());
     }
 
-    if (RefPtr frame = protectedView()->frame()) {
+    if (RefPtr frame = protect(m_view.get())->frame()) {
         if (RefPtr frameView = frame->view())
             frameView->addChild(widget);
     }
@@ -1141,7 +1141,7 @@ void PDFPluginBase::wantsWheelEventsChanged()
 void PDFPluginBase::print()
 {
     if (RefPtr page = this->page())
-        page->chrome().print(*protect(protectedFrame()->coreLocalFrame()));
+        page->chrome().print(*protect(protect(m_frame.get())->coreLocalFrame()));
 }
 
 std::optional<PageIdentifier> PDFPluginBase::pageIdentifier() const
@@ -1265,7 +1265,7 @@ void PDFPluginBase::updateHUDLocation()
 {
     if (!shouldShowHUD())
         return;
-    protect(protectedFrame()->page())->updatePDFHUDLocation(*this, frameForHUDInRootViewCoordinates());
+    protect(protect(m_frame.get())->page())->updatePDFHUDLocation(*this, frameForHUDInRootViewCoordinates());
 }
 
 IntRect PDFPluginBase::frameForHUDInRootViewCoordinates() const
@@ -1518,7 +1518,7 @@ void PDFPluginBase::registerPDFTest(RefPtr<WebCore::VoidCallback>&& callback)
 
 std::optional<FrameIdentifier> PDFPluginBase::rootFrameID() const
 {
-    return protectedView()->frame()->rootFrame().frameID();
+    return protect(m_view.get())->frame()->rootFrame().frameID();
 }
 
 // FIXME: Share more of the style sheet between the embed/non-embed case.
@@ -1642,16 +1642,6 @@ unsigned PDFPluginBase::countFindMatches(const String& target, WebCore::FindOpti
 
     NSStringCompareOptions nsOptions = options.contains(FindOption::CaseInsensitive) ? NSCaseInsensitiveSearch : 0;
     return [[m_pdfDocument findString:target.createNSString().get() withOptions:nsOptions] count];
-}
-
-RefPtr<PluginView> PDFPluginBase::protectedView() const
-{
-    return m_view.get();
-}
-
-RefPtr<WebFrame> PDFPluginBase::protectedFrame() const
-{
-    return m_frame.get();
 }
 
 } // namespace WebKit

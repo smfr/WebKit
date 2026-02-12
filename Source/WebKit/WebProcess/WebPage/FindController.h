@@ -111,8 +111,6 @@ private:
 
     RefPtr<WebCore::LocalFrame> frameWithSelection(WebCore::Page*);
 
-    RefPtr<WebPage> protectedWebPage() const;
-
 #if ENABLE(PDF_PLUGIN)
     PluginView* mainFramePlugIn();
 #endif

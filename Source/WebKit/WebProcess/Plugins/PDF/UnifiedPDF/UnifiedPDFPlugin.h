@@ -656,11 +656,6 @@ private:
 
     bool delegatesScrollingToMainFrame() const final;
 
-    RefPtr<PDFPresentationController> protectedPresentationController() const;
-
-    RefPtr<WebCore::GraphicsLayer> protectedScrollContainerLayer() const;
-    RefPtr<WebCore::GraphicsLayer> protectedOverflowControlsContainer() const;
-
     RefPtr<PDFPresentationController> m_presentationController;
 
     PDFDocumentLayout m_documentLayout;

@@ -433,34 +433,34 @@ void WebPaymentCoordinatorProxy::platformSetPaymentRequestUserAgent(PKPaymentReq
 
 void WebPaymentCoordinatorProxy::platformCompletePaymentSession(WebCore::ApplePayPaymentAuthorizationResult&& result)
 {
-    protectedAuthorizationPresenter()->completePaymentSession(WTF::move(result));
+    protect(m_authorizationPresenter)->completePaymentSession(WTF::move(result));
 }
 
 void WebPaymentCoordinatorProxy::platformCompleteMerchantValidation(const WebCore::PaymentMerchantSession& paymentMerchantSession)
 {
-    protectedAuthorizationPresenter()->completeMerchantValidation(paymentMerchantSession);
+    protect(m_authorizationPresenter)->completeMerchantValidation(paymentMerchantSession);
 }
 
 void WebPaymentCoordinatorProxy::platformCompleteShippingMethodSelection(std::optional<WebCore::ApplePayShippingMethodUpdate>&& update)
 {
-    protectedAuthorizationPresenter()->completeShippingMethodSelection(WTF::move(update));
+    protect(m_authorizationPresenter)->completeShippingMethodSelection(WTF::move(update));
 }
 
 void WebPaymentCoordinatorProxy::platformCompleteShippingContactSelection(std::optional<WebCore::ApplePayShippingContactUpdate>&& update)
 {
-    protectedAuthorizationPresenter()->completeShippingContactSelection(WTF::move(update));
+    protect(m_authorizationPresenter)->completeShippingContactSelection(WTF::move(update));
 }
 
 void WebPaymentCoordinatorProxy::platformCompletePaymentMethodSelection(std::optional<WebCore::ApplePayPaymentMethodUpdate>&& update)
 {
-    protectedAuthorizationPresenter()->completePaymentMethodSelection(WTF::move(update));
+    protect(m_authorizationPresenter)->completePaymentMethodSelection(WTF::move(update));
 }
 
 #if ENABLE(APPLE_PAY_COUPON_CODE)
 
 void WebPaymentCoordinatorProxy::platformCompleteCouponCodeChange(std::optional<WebCore::ApplePayCouponCodeUpdate>&& update)
 {
-    protectedAuthorizationPresenter()->completeCouponCodeChange(WTF::move(update));
+    protect(m_authorizationPresenter)->completeCouponCodeChange(WTF::move(update));
 }
 
 #endif // ENABLE(APPLE_PAY_COUPON_CODE)

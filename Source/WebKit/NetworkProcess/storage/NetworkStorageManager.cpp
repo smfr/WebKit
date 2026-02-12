@@ -244,11 +244,6 @@ NetworkStorageManager::~NetworkStorageManager()
     ASSERT(m_closed);
 }
 
-RefPtr<NetworkProcess> NetworkStorageManager::protectedProcess() const
-{
-    return m_process.get();
-}
-
 bool NetworkStorageManager::canHandleTypes(OptionSet<WebsiteDataType> types)
 {
     return allManagedTypes().containsAny(types);
@@ -455,7 +450,7 @@ void NetworkStorageManager::prepareForEviction()
         if (!protectedThis || protectedThis->m_closed || !protectedThis->m_process)
             return;
 
-        protectedThis->protectedProcess()->registrableDomainsWithLastAccessedTime(protectedThis->m_sessionID, [weakThis = WTF::move(weakThis)](auto result) mutable {
+        protect(protectedThis->m_process)->registrableDomainsWithLastAccessedTime(protectedThis->m_sessionID, [weakThis = WTF::move(weakThis)](auto result) mutable {
             auto protectedThis = weakThis.get();
             if (!protectedThis || protectedThis->m_closed)
                 return;
@@ -705,7 +700,7 @@ void NetworkStorageManager::fetchRegistrableDomainsForPersist()
     if (!m_process)
         return didFetchRegistrableDomainsForPersist({ });
 
-    protectedProcess()->registrableDomainsExemptFromWebsiteDataDeletion(m_sessionID, [weakThis = ThreadSafeWeakPtr { *this }](HashSet<WebCore::RegistrableDomain>&& domains) mutable {
+    protect(m_process)->registrableDomainsExemptFromWebsiteDataDeletion(m_sessionID, [weakThis = ThreadSafeWeakPtr { *this }](HashSet<WebCore::RegistrableDomain>&& domains) mutable {
         if (RefPtr protectedThis = weakThis.get())
             protectedThis->didFetchRegistrableDomainsForPersist(std::forward<decltype(domains)>(domains));
     });
@@ -896,7 +891,7 @@ void NetworkStorageManager::fileSystemGetDirectory(IPC::Connection& connection, 
 {
     ASSERT(!RunLoop::isMain());
 
-    Ref fileSystemStorageManager = protect(originStorageManager(origin))->fileSystemStorageManager(*protectedFileSystemStorageHandleRegistry());
+    Ref fileSystemStorageManager = protect(originStorageManager(origin))->fileSystemStorageManager(*protect(m_fileSystemStorageHandleRegistry));
     auto result = fileSystemStorageManager->getDirectory(connection.uniqueID());
     if (result)
         completionHandler(std::optional { result.value() });
@@ -908,7 +903,7 @@ void NetworkStorageManager::closeHandle(WebCore::FileSystemHandleIdentifier iden
 {
     ASSERT(!RunLoop::isMain());
 
-    if (RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier))
+    if (RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier))
         handle->close();
 }
 
@@ -916,7 +911,7 @@ void NetworkStorageManager::isSameEntry(WebCore::FileSystemHandleIdentifier iden
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(false);
 
@@ -927,7 +922,7 @@ void NetworkStorageManager::move(WebCore::FileSystemHandleIdentifier identifier,
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(FileSystemStorageError::Unknown);
 
@@ -938,7 +933,7 @@ void NetworkStorageManager::getFileHandle(IPC::Connection& connection, WebCore::
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -949,7 +944,7 @@ void NetworkStorageManager::getDirectoryHandle(IPC::Connection& connection, WebC
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -960,7 +955,7 @@ void NetworkStorageManager::removeEntry(WebCore::FileSystemHandleIdentifier iden
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(FileSystemStorageError::Unknown);
 
@@ -971,7 +966,7 @@ void NetworkStorageManager::resolve(WebCore::FileSystemHandleIdentifier identifi
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -982,7 +977,7 @@ void NetworkStorageManager::getFile(WebCore::FileSystemHandleIdentifier identifi
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -993,7 +988,7 @@ void NetworkStorageManager::createSyncAccessHandle(WebCore::FileSystemHandleIden
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -1004,7 +999,7 @@ void NetworkStorageManager::closeSyncAccessHandle(WebCore::FileSystemHandleIdent
 {
     ASSERT(!RunLoop::isMain());
 
-    if (RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier))
+    if (RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier))
         handle->closeSyncAccessHandle(accessHandleIdentifier);
 
     completionHandler();
@@ -1014,7 +1009,7 @@ void NetworkStorageManager::requestNewCapacityForSyncAccessHandle(WebCore::FileS
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(std::nullopt);
 
@@ -1025,7 +1020,7 @@ void NetworkStorageManager::createWritable(WebCore::FileSystemHandleIdentifier i
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -1036,7 +1031,7 @@ void NetworkStorageManager::closeWritable(WebCore::FileSystemHandleIdentifier id
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(FileSystemStorageError::Unknown);
 
@@ -1047,7 +1042,7 @@ void NetworkStorageManager::executeCommandForWritable(WebCore::FileSystemHandleI
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(FileSystemStorageError::Unknown);
 
@@ -1058,7 +1053,7 @@ void NetworkStorageManager::getHandleNames(WebCore::FileSystemHandleIdentifier i
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -1069,7 +1064,7 @@ void NetworkStorageManager::getHandle(IPC::Connection& connection, WebCore::File
 {
     ASSERT(!RunLoop::isMain());
 
-    RefPtr handle = protectedFileSystemStorageHandleRegistry()->getHandle(identifier);
+    RefPtr handle = protect(m_fileSystemStorageHandleRegistry)->getHandle(identifier);
     if (!handle)
         return completionHandler(makeUnexpected(FileSystemStorageError::Unknown));
 
@@ -2274,11 +2269,6 @@ bool NetworkStorageManager::shouldManageServiceWorkerRegistrationsByOrigin()
     ASSERT(!RunLoop::isMain());
 
     return m_unifiedOriginStorageLevel >= UnifiedOriginStorageLevel::Standard;
-}
-
-RefPtr<FileSystemStorageHandleRegistry> NetworkStorageManager::protectedFileSystemStorageHandleRegistry()
-{
-    return m_fileSystemStorageHandleRegistry;
 }
 
 bool NetworkStorageManager::isStorageTypeEnabled(IPC::Connection& connection, WebCore::StorageType storageType) const

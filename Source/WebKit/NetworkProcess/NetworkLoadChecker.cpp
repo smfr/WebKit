@@ -94,11 +94,6 @@ NetworkLoadChecker::NetworkLoadChecker(NetworkProcess& networkProcess, NetworkRe
 
 NetworkLoadChecker::~NetworkLoadChecker() = default;
 
-RefPtr<NetworkCORSPreflightChecker> NetworkLoadChecker::protectedCORSPreflightChecker() const
-{
-    return m_corsPreflightChecker;
-}
-
 bool NetworkLoadChecker::isSameOrigin(const URL& url, const SecurityOrigin* origin) const
 {
     return url.protocolIsData()
@@ -539,13 +534,13 @@ void NetworkLoadChecker::checkCORSRequestWithPreflight(ResourceRequest&& request
         }
 
         if (protectedThis->m_shouldCaptureExtraNetworkLoadMetrics)
-            protectedThis->m_loadInformation.transactions.append(protectedThis->protectedCORSPreflightChecker()->takeInformation());
+            protectedThis->m_loadInformation.transactions.append(protect(protectedThis->m_corsPreflightChecker)->takeInformation());
 
         auto corsPreflightChecker = std::exchange(protectedThis->m_corsPreflightChecker, nullptr);
         updateRequestForAccessControl(request, *protectedThis->origin(), protectedThis->m_storedCredentialsPolicy);
         handler(WTF::move(request));
     });
-    protectedCORSPreflightChecker()->startPreflight();
+    protect(m_corsPreflightChecker)->startPreflight();
 }
 
 bool NetworkLoadChecker::doesNotNeedCORSCheck(const URL& url) const

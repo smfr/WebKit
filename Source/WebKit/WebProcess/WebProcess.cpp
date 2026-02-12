@@ -1366,7 +1366,7 @@ NetworkProcessConnection& WebProcess::ensureNetworkProcessConnection()
         m_networkProcessConnection->connection().send(Messages::NetworkConnectionToWebProcess::RegisterURLSchemesAsCORSEnabled(WebCore::LegacySchemeRegistry::allURLSchemesRegisteredAsCORSEnabled()), 0);
 
         if (!Document::allDocuments().isEmpty() || SharedWorkerThreadProxy::hasInstances())
-            protect(protectedNetworkProcessConnection()->serviceWorkerConnection())->registerServiceWorkerClients();
+            protect(protect(m_networkProcessConnection.get())->serviceWorkerConnection())->registerServiceWorkerClients();
 
 #if HAVE(LSDATABASECONTEXT)
         // On Mac, this needs to be called before NSApplication is being initialized.
@@ -1393,11 +1393,6 @@ NetworkProcessConnection& WebProcess::ensureNetworkProcessConnection()
 Ref<NetworkProcessConnection> WebProcess::ensureProtectedNetworkProcessConnection()
 {
     return ensureNetworkProcessConnection();
-}
-
-RefPtr<NetworkProcessConnection> WebProcess::protectedNetworkProcessConnection()
-{
-    return existingNetworkProcessConnection();
 }
 
 void WebProcess::logDiagnosticMessageForNetworkProcessCrash()

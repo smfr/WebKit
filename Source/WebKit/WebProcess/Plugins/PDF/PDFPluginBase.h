@@ -474,9 +474,6 @@ protected:
 
     WebCore::Color pluginBackgroundColor() const;
 
-    RefPtr<PluginView> protectedView() const;
-    RefPtr<WebFrame> protectedFrame() const;
-
     SingleThreadWeakPtr<PluginView> m_view;
     WeakPtr<WebFrame> m_frame;
     WeakPtr<WebCore::HTMLPlugInElement, WebCore::WeakPtrImplWithEventTargetData> m_element;

@@ -138,8 +138,6 @@ private:
     template<typename Message> bool sendToClient(Message&&);
 
     void sendNavigationPreloadUpdate();
-
-    RefPtr<ServiceWorkerNavigationPreloader> protectedPreloader();
     void processPreloadResponse();
 
     WeakPtr<WebSWServerConnection> m_swServerConnection;

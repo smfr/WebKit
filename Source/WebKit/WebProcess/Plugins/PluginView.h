@@ -234,8 +234,6 @@ private:
 
     void releaseMemory() final;
 
-    RefPtr<WebPage> protectedWebPage() const;
-
     const Ref<WebCore::HTMLPlugInElement> m_pluginElement;
     const Ref<PDFPluginBase> m_plugin;
     WeakPtr<WebPage> m_webPage;

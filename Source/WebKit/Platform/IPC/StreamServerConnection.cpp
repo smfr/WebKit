@@ -78,7 +78,7 @@ void StreamServerConnection::invalidate()
         connection->invalidate();
         return;
     }
-    protectedWorkQueue()->removeStreamConnection(*this);
+    protect(m_workQueue)->removeStreamConnection(*this);
     connection->invalidate();
     connection->removeMessageReceiveQueue({ });
     m_workQueue = nullptr;
@@ -110,7 +110,7 @@ void StreamServerConnection::enqueueMessage(Connection&, UniqueRef<Decoder>&& me
         m_outOfStreamMessages.append(WTF::move(message));
     }
     ASSERT(m_workQueue);
-    protectedWorkQueue()->wakeUp();
+    protect(m_workQueue)->wakeUp();
 }
 
 void StreamServerConnection::didReceiveMessage(Connection&, Decoder&)
@@ -307,11 +307,5 @@ void StreamServerConnection::markCurrentlyDispatchedMessageAsInvalid(ASCIILitera
     ASSERT(m_isDispatchingMessage);
     m_didReceiveInvalidMessage = true;
 }
-
-RefPtr<StreamConnectionWorkQueue> StreamServerConnection::protectedWorkQueue() const
-{
-    return m_workQueue;
-}
-
 
 }

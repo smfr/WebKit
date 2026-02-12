@@ -647,7 +647,6 @@ private:
     Ref<SerialFunctionDispatcher> dispatcher();
 
     class SyncMessageState;
-    RefPtr<SyncMessageState> protectedSyncState() const;
 
     void addAsyncReplyHandler(AsyncReplyHandler&&);
     void addAsyncReplyHandlerWithDispatcher(AsyncReplyHandlerWithDispatcher&&);

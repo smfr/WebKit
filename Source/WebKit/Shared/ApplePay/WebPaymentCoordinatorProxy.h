@@ -201,8 +201,6 @@ private:
     void platformSetPaymentRequestUserAgent(PKPaymentRequest *, const String& userAgent);
 #endif
 
-    RefPtr<PaymentAuthorizationPresenter> protectedAuthorizationPresenter() { return m_authorizationPresenter; }
-
     WeakPtr<Client> m_client;
     std::optional<WebCore::PageIdentifier> m_destinationID;
 

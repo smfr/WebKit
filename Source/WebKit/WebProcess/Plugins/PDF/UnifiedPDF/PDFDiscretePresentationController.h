@@ -206,19 +206,11 @@ private:
         RefPtr<WebCore::GraphicsLayer> rightPageBackgroundLayer() const;
 
         RefPtr<WebCore::GraphicsLayer> backgroundLayerForPageIndex(PDFDocumentLayout::PageIndex) const;
-
-        RefPtr<WebCore::GraphicsLayer> protectedContainerLayer() const { return containerLayer; }
-        RefPtr<WebCore::GraphicsLayer> protectedLeftPageContainerLayer() const { return leftPageContainerLayer; }
-        RefPtr<WebCore::GraphicsLayer> protectedRightPageContainerLayer() const { return rightPageContainerLayer; }
-        RefPtr<WebCore::GraphicsLayer> protectedContentsLayer() const { return contentsLayer; }
-        RefPtr<WebCore::GraphicsLayer> protectedSelectionLayer() const { return selectionLayer; }
     };
 
     const RowData* rowDataForLayer(const WebCore::GraphicsLayer&) const;
     WebCore::FloatPoint positionForRowContainerLayer(const PDFLayoutRow&) const;
     WebCore::FloatSize rowContainerSize(const PDFLayoutRow&) const;
-
-    RefPtr<WebCore::GraphicsLayer> protectedRowsContainerLayer() const { return m_rowsContainerLayer; }
 
     RefPtr<WebCore::GraphicsLayer> m_rowsContainerLayer;
     Vector<RowData> m_rows;

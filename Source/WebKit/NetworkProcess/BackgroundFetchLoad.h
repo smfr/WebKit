@@ -80,8 +80,6 @@ private:
     void wasBlockedByRestrictions() final;
     void wasBlockedByDisabledFTP() final;
 
-    RefPtr<WebCore::BackgroundFetchRecordLoaderClient> protectedClient() const;
-
     // WebCore::BackgroundFetchRecordLoader
     void abort() final;
 

@@ -262,11 +262,6 @@ PluginView::~PluginView()
     m_plugin->destroy();
 }
 
-RefPtr<WebPage> PluginView::protectedWebPage() const
-{
-    return m_webPage.get();
-}
-
 LocalFrame* PluginView::frame() const
 {
     return m_pluginElement->document().frame();
@@ -1085,7 +1080,7 @@ WebCore::FloatRect PluginView::rectForSelectionInRootView(PDFSelection *selectio
 
 bool PluginView::isUsingUISideCompositing() const
 {
-    return protectedWebPage()->isUsingUISideCompositing();
+    return protect(m_webPage.get())->isUsingUISideCompositing();
 }
 
 void PluginView::didChangeSettings()

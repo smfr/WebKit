@@ -385,12 +385,12 @@ protected:
     template<typename T>
     [[nodiscard]] IPC::Error send(T&& message)
     {
-        return protectedStreamConnection()->send(std::forward<T>(message), m_identifier);
+        return protect(m_streamConnection)->send(std::forward<T>(message), m_identifier);
     }
     template<typename T>
     [[nodiscard]] IPC::Connection::SendSyncResult<T> sendSync(T&& message)
     {
-        return protectedStreamConnection()->sendSync(std::forward<T>(message), m_identifier);
+        return protect(m_streamConnection)->sendSync(std::forward<T>(message), m_identifier);
     }
 
     RemoteGraphicsContextGLIdentifier m_identifier { RemoteGraphicsContextGLIdentifier::generate() };
@@ -410,10 +410,6 @@ private:
     void abandonGpuProcess();
     uint32_t createObjectName();
 
-#if ENABLE(VIDEO)
-    RefPtr<RemoteVideoFrameObjectHeapProxy> protectedVideoFrameObjectHeapProxy() const;
-#endif
-    RefPtr<IPC::StreamClientConnection> protectedStreamConnection() const { return m_streamConnection; }
 
     WeakPtr<GPUProcessConnection> m_gpuProcessConnection; // Only main thread use.
     RefPtr<IPC::StreamClientConnection> m_streamConnection;

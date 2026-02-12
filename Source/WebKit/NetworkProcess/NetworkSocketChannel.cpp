@@ -87,12 +87,12 @@ Ref<NetworkConnectionToWebProcess> NetworkSocketChannel::protectedConnectionToWe
 
 void NetworkSocketChannel::sendString(std::span<const uint8_t> message, CompletionHandler<void()>&& callback)
 {
-    protectedSocket()->sendString(message, WTF::move(callback));
+    protect(m_socket)->sendString(message, WTF::move(callback));
 }
 
 void NetworkSocketChannel::sendData(std::span<const uint8_t> data, CompletionHandler<void()>&& callback)
 {
-    protectedSocket()->sendData(data, WTF::move(callback));
+    protect(m_socket)->sendData(data, WTF::move(callback));
 }
 
 void NetworkSocketChannel::finishClosingIfPossible()
@@ -108,7 +108,7 @@ void NetworkSocketChannel::finishClosingIfPossible()
 
 void NetworkSocketChannel::close(int32_t code, const String& reason)
 {
-    protectedSocket()->close(code, reason);
+    protect(m_socket)->close(code, reason);
     finishClosingIfPossible();
 }
 
@@ -171,11 +171,6 @@ IPC::Connection* NetworkSocketChannel::messageSenderConnection() const
 NetworkSession* NetworkSocketChannel::session() const
 {
     return m_session.get();
-}
-
-RefPtr<WebSocketTask> NetworkSocketChannel::protectedSocket()
-{
-    return m_socket.get();
 }
 
 std::optional<SharedPreferencesForWebProcess> NetworkSocketChannel::sharedPreferencesForWebProcess() const

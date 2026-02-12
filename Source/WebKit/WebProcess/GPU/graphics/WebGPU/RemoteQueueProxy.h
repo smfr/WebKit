@@ -110,9 +110,6 @@ private:
         const WebCore::WebGPU::Extent3D& copySize) final;
 
     void setLabelInternal(const String&) final;
-#if ENABLE(VIDEO)
-    RefPtr<RemoteVideoFrameObjectHeapProxy> protectedVideoFrameObjectHeapProxy() const;
-#endif
     RefPtr<WebCore::NativeImage> getNativeImage(WebCore::VideoFrame&) final;
 
     WebGPUIdentifier m_backing;

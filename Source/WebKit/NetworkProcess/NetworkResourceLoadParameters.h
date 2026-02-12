@@ -77,7 +77,6 @@ struct NetworkResourceLoadParameters {
     OptionSet<WebCore::AdvancedPrivacyProtections> advancedPrivacyProtections { };
     bool mayBlockNetworkRequest { false };
 
-    RefPtr<WebCore::SecurityOrigin> protectedSourceOrigin() const { return sourceOrigin; }
     uint64_t requiredCookiesVersion { 0 };
 
     Markable<WebCore::ResourceLoaderIdentifier> identifier { };

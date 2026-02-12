@@ -162,7 +162,6 @@ private:
     NetworkStorageManager(NetworkProcess&, PAL::SessionID, Markable<WTF::UUID>, std::optional<IPC::Connection::UniqueID>, const String& path, const String& customLocalStoragePath, const String& customIDBStoragePath, const String& customCacheStoragePath, const String& customServiceWorkerStoragePath, uint64_t defaultOriginQuota, std::optional<double> originQuotaRatio, std::optional<double> totalQuotaRatio, std::optional<uint64_t> standardVolumeCapacity, std::optional<uint64_t> volumeCapacityOverride, UnifiedOriginStorageLevel, bool storageSiteValidationEnabled);
     ~NetworkStorageManager();
 
-    RefPtr<NetworkProcess> protectedProcess() const;
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess(IPC::Connection&) const;
     bool isStorageTypeEnabled(IPC::Connection&, WebCore::StorageType) const;
     bool isStorageAreaTypeEnabled(IPC::Connection&, StorageAreaBase::StorageType) const;
@@ -289,8 +288,6 @@ private:
     void setStorageSiteValidationEnabledInternal(bool);
     void addAllowedSitesForConnectionInternal(IPC::Connection::UniqueID, const Vector<WebCore::RegistrableDomain>&);
     bool isSiteAllowedForConnection(IPC::Connection::UniqueID, const WebCore::RegistrableDomain&) const;
-
-    RefPtr<FileSystemStorageHandleRegistry> protectedFileSystemStorageHandleRegistry();
 
     WeakPtr<NetworkProcess> m_process;
     PAL::SessionID m_sessionID;

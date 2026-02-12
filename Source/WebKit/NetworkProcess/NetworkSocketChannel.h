@@ -93,8 +93,6 @@ private:
 
     NetworkSession* session() const;
 
-    RefPtr<WebSocketTask> protectedSocket();
-
     IPC::Connection* messageSenderConnection() const final;
     uint64_t messageSenderDestinationID() const final { return m_identifier.toUInt64(); }
 

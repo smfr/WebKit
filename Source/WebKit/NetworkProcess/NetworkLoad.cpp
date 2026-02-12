@@ -378,11 +378,6 @@ String NetworkLoad::attributedBundleIdentifier(WebPageProxyIdentifier pageID)
     return { };
 }
 
-RefPtr<NetworkDataTask> NetworkLoad::protectedTask()
-{
-    return m_task;
-}
-
 size_t NetworkLoad::bytesTransferredOverNetwork() const
 {
     if (RefPtr task = m_task)

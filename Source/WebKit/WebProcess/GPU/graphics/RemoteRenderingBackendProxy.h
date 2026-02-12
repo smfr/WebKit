@@ -234,8 +234,6 @@ private:
     // SerialFunctionDispatcher
     void dispatch(Function<void()>&&) final;
 
-    RefPtr<IPC::StreamClientConnection> protectedConnection() const { return m_connection; }
-
     ThreadSafeWeakPtr<SerialFunctionDispatcher> m_dispatcher;
     WeakPtr<GPUProcessConnection> m_gpuProcessConnection; // Only for main thread operation.
     RefPtr<IPC::StreamClientConnection> m_connection;
