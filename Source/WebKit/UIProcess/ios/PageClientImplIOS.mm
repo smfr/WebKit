@@ -264,6 +264,16 @@ void PageClientImpl::didRelaunchProcess()
     [webView() _didRelaunchProcess];
 }
 
+void PageClientImpl::didStartUsingProcessForSiteIsolation(WebProcessProxy& webProcessProxy)
+{
+    [contentView() _didStartUsingProcessForSiteIsolation:webProcessProxy];
+}
+
+void PageClientImpl::didStopUsingProcessForSiteIsolation(WebProcessProxy& webProcessProxy)
+{
+    [contentView() _didStopUsingProcessForSiteIsolation:webProcessProxy];
+}
+
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)
 void PageClientImpl::didCreateContextInWebProcessForVisibilityPropagation(LayerHostingContextID)
 {

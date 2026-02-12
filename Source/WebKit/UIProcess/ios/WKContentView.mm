@@ -347,26 +347,39 @@ typedef NS_ENUM(NSInteger, _WKPrintRenderingCallbackType) {
     }
 #endif
 
-    [self _setupVisibilityPropagationForWebProcess];
+    [self _setupVisibilityPropagationForAllWebProcesses];
 #if ENABLE(GPU_PROCESS)
     [self _setupVisibilityPropagationForGPUProcess];
 #endif
 }
 
-- (void)_setupVisibilityPropagationForWebProcess
+- (void)_setupVisibilityPropagationForWebProcess:(WebKit::WebProcessProxy&)webProcess
+{
+#if USE(EXTENSIONKIT)
+    for (WKVisibilityPropagationView *visibilityPropagationView in _visibilityPropagationViews.get())
+        [visibilityPropagationView propagateVisibilityToProcess:webProcess];
+#endif
+}
+
+- (void)_removeVisibilityPropagationForWebProcess:(WebKit::WebProcessProxy&)webProcess
+{
+#if USE(EXTENSIONKIT)
+    for (WKVisibilityPropagationView *visibilityPropagationView in _visibilityPropagationViews.get())
+        [visibilityPropagationView stopPropagatingVisibilityToProcess:webProcess];
+#endif
+}
+
+- (void)_setupVisibilityPropagationForAllWebProcesses
 {
     if (!protect(_page)->hasRunningProcess())
         return;
 
 #if USE(EXTENSIONKIT)
     Ref mainFrameProcess = _page->siteIsolatedProcess();
-    for (WKVisibilityPropagationView *visibilityPropagationView in _visibilityPropagationViews.get())
-        [visibilityPropagationView propagateVisibilityToProcess:mainFrameProcess];
+    [self _setupVisibilityPropagationForWebProcess:mainFrameProcess];
     auto remotePages = mainFrameProcess->remotePages();
-    for (auto& remotePage : remotePages) {
-        for (WKVisibilityPropagationView *visibilityPropagationView in _visibilityPropagationViews.get())
-            [visibilityPropagationView propagateVisibilityToProcess:remotePage->process()];
-    }
+    for (auto& remotePage : remotePages)
+        [self _setupVisibilityPropagationForWebProcess:remotePage->process()];
 #else
 
     auto processID = _page->legacyMainFrameProcess().processID();
@@ -920,7 +933,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
     [self _accessibilityRegisterUIProcessTokens];
     [self setUpInteraction];
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)
-    [self _setupVisibilityPropagationForWebProcess];
+    [self _setupVisibilityPropagationForAllWebProcesses];
 #if ENABLE(GPU_PROCESS)
     [self _setupVisibilityPropagationForGPUProcess];
 #endif
@@ -930,10 +943,24 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
 #endif
 }
 
+- (void)_didStartUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)process
+{
+#if HAVE(VISIBILITY_PROPAGATION_VIEW)
+    [self _setupVisibilityPropagationForWebProcess:process];
+#endif
+}
+
+- (void)_didStopUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)process
+{
+#if HAVE(VISIBILITY_PROPAGATION_VIEW)
+    [self _removeVisibilityPropagationForWebProcess:process];
+#endif
+}
+
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)
 - (void)_webProcessDidCreateContextForVisibilityPropagation
 {
-    [self _setupVisibilityPropagationForWebProcess];
+    [self _setupVisibilityPropagationForAllWebProcesses];
 }
 
 - (void)_gpuProcessDidCreateContextForVisibilityPropagation
@@ -957,7 +984,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
     RetainPtr visibilityPropagationView = adoptNS([[WKVisibilityPropagationView alloc] init]);
     [_visibilityPropagationViews addObject:visibilityPropagationView.get()];
 
-    [self _setupVisibilityPropagationForWebProcess];
+    [self _setupVisibilityPropagationForAllWebProcesses];
 #if ENABLE(GPU_PROCESS)
     [self _setupVisibilityPropagationForGPUProcess];
 #endif

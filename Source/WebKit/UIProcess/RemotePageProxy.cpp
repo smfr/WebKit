@@ -96,6 +96,13 @@ RemotePageProxy::RemotePageProxy(WebPageProxy& page, WebProcessProxy& process, c
         m_messageReceiverRegistration.startReceivingMessages(m_process, m_webPageID, *this, page.backForwardListMessageReceiver());
 
     m_process->addRemotePageProxy(*this);
+
+    RefPtr protectedPage = m_page.get();
+    if (!protectedPage)
+        return;
+
+    if (RefPtr client = protectedPage->pageClient())
+        client->didStartUsingProcessForSiteIsolation(process);
 }
 
 void RemotePageProxy::disconnect()
@@ -194,6 +201,13 @@ void RemotePageProxy::processDidTerminate(WebProcessProxy& process, ProcessTermi
 RemotePageProxy::~RemotePageProxy()
 {
     ASSERT(m_disconnected);
+
+    RefPtr page = m_page.get();
+    if (!page)
+        return;
+
+    if (RefPtr client = page->pageClient())
+        client->didStopUsingProcessForSiteIsolation(m_process);
 }
 
 void RemotePageProxy::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& decoder)

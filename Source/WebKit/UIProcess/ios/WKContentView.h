@@ -103,6 +103,8 @@ enum class ViewStabilityFlag : uint8_t;
 #endif
 - (void)_processWillSwap;
 - (void)_didRelaunchProcess;
+- (void)_didStartUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)webProcessProxy;
+- (void)_didStopUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)webProcessProxy;
 
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)
 - (void)_webProcessDidCreateContextForVisibilityPropagation;

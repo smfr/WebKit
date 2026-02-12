@@ -303,6 +303,8 @@ public:
     virtual void processDidExit() = 0;
     virtual void processWillSwap() { processDidExit(); }
     virtual void didRelaunchProcess() = 0;
+    virtual void didStartUsingProcessForSiteIsolation(WebProcessProxy&) { }
+    virtual void didStopUsingProcessForSiteIsolation(WebProcessProxy&) { }
     virtual void processDidUpdateThrottleState() { }
     virtual void pageClosed() = 0;
 
