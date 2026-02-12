@@ -144,6 +144,8 @@ public:
 
     const Style::ZoomFactor zoomFactor() const { return m_gridBox->style().usedZoomForLength(); }
 
+    const WritingMode writingMode() const { return m_gridBox->style().writingMode(); }
+
 private:
     UnplacedGridItems constructUnplacedGridItems() const;
 

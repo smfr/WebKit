@@ -231,78 +231,64 @@ std::pair<UsedTrackSizes, GridItemRects> GridLayout::layout(UnplacedGridItems& u
     // https://drafts.csswg.org/css-grid-1/#alignment
     // After a grid container’s grid tracks have been sized, and the dimensions of all grid items
     // are finalized, grid items can be aligned within their grid areas.
-    auto inlineAxisPositions = performInlineAxisSelfAlignment(placedGridItems, usedInlineMargins, gridAreaSizes.inlineSizes);
-    auto blockAxisPositions = performBlockAxisSelfAlignment(placedGridItems, usedBlockMargins, gridAreaSizes.blockSizes);
+    auto inlineAxisPositions = performInlineAxisSelfAlignment(placedGridItems, usedInlineMargins, usedInlineSizes, gridAreaSizes.inlineSizes);
+    auto blockAxisPositions = performBlockAxisSelfAlignment(placedGridItems, usedBlockMargins, usedBlockSizes, gridAreaSizes.blockSizes);
 
     auto gridItemRects = computeGridItemRects(placedGridItems, inlineAxisPositions, blockAxisPositions, usedInlineSizes, usedBlockSizes, usedInlineMargins, usedBlockMargins);
 
     return { usedTrackSizes, gridItemRects };
 }
 
-BorderBoxPositions GridLayout::performInlineAxisSelfAlignment(const PlacedGridItems& placedGridItems, const Vector<UsedMargins>& inlineMargins, const Vector<LayoutUnit>& gridAreaInlineSizes)
+BorderBoxPositions GridLayout::performInlineAxisSelfAlignment(const PlacedGridItems& placedGridItems, const Vector<UsedMargins>& inlineMargins, const UsedInlineSizes& borderBoxSizes,
+    const Vector<LayoutUnit>& gridAreasInlineSizeList)
 {
-    UNUSED_PARAM(gridAreaInlineSizes);
     BorderBoxPositions borderBoxPositions;
     borderBoxPositions.reserveInitialCapacity(placedGridItems.size());
 
-    auto computeMarginBoxPosition = [](const PlacedGridItem& placedGridItem) -> LayoutUnit {
-        switch (placedGridItem.inlineAxisAlignment().position()) {
-        case ItemPosition::FlexStart:
-        case ItemPosition::SelfStart:
-        case ItemPosition::Start:
-            return { };
+    auto& formattingContextWritingMode = formattingContext().writingMode();
+    for (size_t gridItemIndex = 0; gridItemIndex < placedGridItems.size(); ++gridItemIndex) {
+        auto& gridItem = placedGridItems[gridItemIndex];
 
+        auto& [marginStart, marginEnd] = inlineMargins[gridItemIndex];
+        auto marginBoxSize = marginStart + borderBoxSizes[gridItemIndex] + marginEnd;
+        auto remainingSpace = gridAreasInlineSizeList[gridItemIndex] - marginBoxSize;
+
+        // Normal behavior:
         // https://www.w3.org/TR/css-align-3/#justify-grid
         // Sizes as either stretch (typical non-replaced elements) or start (typical replaced elements);
         // see Grid Item Sizing in [CSS-GRID-1]. The resulting box is then start-aligned.
         //
         // Stretching should be handled by GridLayout::layoutGridItems.
-        case ItemPosition::Normal:
-            return { };
-        default:
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        }
-    };
+        auto marginBoxPosition = StyleSelfAlignmentData::adjustmentFromStartEdge(remainingSpace, gridItem.inlineAxisAlignment().position(), LogicalBoxAxis::Inline, formattingContextWritingMode, gridItem.writingMode());
 
-    for (size_t gridItemIndex = 0; gridItemIndex < placedGridItems.size(); ++gridItemIndex) {
-        auto& gridItem = placedGridItems[gridItemIndex];
-        auto marginBoxPosition = computeMarginBoxPosition(gridItem);
         borderBoxPositions.append(marginBoxPosition + inlineMargins[gridItemIndex].marginStart);
     }
 
     return borderBoxPositions;
 }
 
-BorderBoxPositions GridLayout::performBlockAxisSelfAlignment(const PlacedGridItems& placedGridItems, const Vector<UsedMargins>& blockMargins, const Vector<LayoutUnit>& gridAreaBlockSizes)
+BorderBoxPositions GridLayout::performBlockAxisSelfAlignment(const PlacedGridItems& placedGridItems, const Vector<UsedMargins>& blockMargins, const UsedBlockSizes& borderBoxSizes,
+    const Vector<LayoutUnit>& gridAreasBlockSizeList)
 {
-    UNUSED_PARAM(gridAreaBlockSizes);
     BorderBoxPositions borderBoxPositions;
     borderBoxPositions.reserveInitialCapacity(placedGridItems.size());
 
-    auto computeMarginBoxPosition = [](const PlacedGridItem& placedGridItem) -> LayoutUnit {
-        switch (placedGridItem.blockAxisAlignment().position()) {
-        case ItemPosition::FlexStart:
-        case ItemPosition::SelfStart:
-        case ItemPosition::Start:
-            return { };
+    auto& formattingContextWritingMode = formattingContext().writingMode();
+    for (size_t gridItemIndex = 0; gridItemIndex < placedGridItems.size(); ++gridItemIndex) {
+        auto& gridItem = placedGridItems[gridItemIndex];
 
+        auto& [marginStart, marginEnd] = blockMargins[gridItemIndex];
+        auto marginBoxSize = marginStart + borderBoxSizes[gridItemIndex] + marginEnd;
+        auto remainingSpace = gridAreasBlockSizeList[gridItemIndex] - marginBoxSize;
+
+        // Normal behavior:
         // https://www.w3.org/TR/css-align-3/#align-grid
         // Sizes as either stretch (typical non-replaced elements) or start (typical replaced
         // elements); see Grid Item Sizing in [CSS-GRID-1]. The resulting box is then start-aligned.
         //
         // Stretching should be handled by GridLayout::layoutGridItems.
-        case ItemPosition::Normal:
-            return { };
-        default:
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        }
-    };
+        auto marginBoxPosition = StyleSelfAlignmentData::adjustmentFromStartEdge(remainingSpace, gridItem.blockAxisAlignment().position(), LogicalBoxAxis::Block, formattingContextWritingMode, gridItem.writingMode());
 
-    for (size_t gridItemIndex = 0; gridItemIndex < placedGridItems.size(); ++gridItemIndex) {
-        auto& gridItem = placedGridItems[gridItemIndex];
-        auto marginBoxPosition = computeMarginBoxPosition(gridItem);
         borderBoxPositions.append(marginBoxPosition + blockMargins[gridItemIndex].marginStart);
     }
 

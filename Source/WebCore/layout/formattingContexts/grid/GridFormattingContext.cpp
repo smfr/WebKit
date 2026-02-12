@@ -223,13 +223,10 @@ PlacedGridItems GridFormattingContext::constructPlacedGridItems(const GridAreas&
 {
     PlacedGridItems placedGridItems;
     placedGridItems.reserveInitialCapacity(gridAreas.size());
-    CheckedRef gridContainerStyle = root().style();
+    CheckedRef formattingContextStyle = root().style();
     for (auto [ unplacedGridItem, gridAreaLines ] : gridAreas) {
 
         CheckedRef gridItemStyle = unplacedGridItem.m_layoutBox->style();
-
-        auto usedJustifySelf = gridItemStyle->justifySelf().resolve(gridContainerStyle.ptr());
-        auto usedAlignSelf = gridItemStyle->alignSelf().resolve(gridContainerStyle.ptr());
 
         ComputedSizes inlineAxisSizes {
             gridItemStyle->width(),
@@ -248,9 +245,8 @@ PlacedGridItems GridFormattingContext::constructPlacedGridItems(const GridAreas&
         };
 
         auto& boxGeometry = geometryForGridItem(unplacedGridItem.m_layoutBox);
-        placedGridItems.constructAndAppend(unplacedGridItem, gridAreaLines, inlineAxisSizes, blockAxisSizes,
-            boxGeometry.horizontalBorderAndPadding(), boxGeometry.verticalBorderAndPadding(), usedJustifySelf,
-            usedAlignSelf, gridItemStyle->usedZoomForLength());
+        placedGridItems.constructAndAppend(unplacedGridItem, gridAreaLines, inlineAxisSizes, blockAxisSizes, boxGeometry.horizontalBorderAndPadding(), boxGeometry.verticalBorderAndPadding(),
+            gridItemStyle->justifySelf().resolve(formattingContextStyle.ptr()), gridItemStyle->alignSelf().resolve(formattingContextStyle.ptr()), gridItemStyle->writingMode(), gridItemStyle->usedZoomForLength());
     }
     return placedGridItems;
 }

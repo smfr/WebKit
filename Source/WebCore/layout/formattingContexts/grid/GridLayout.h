@@ -77,8 +77,8 @@ private:
     static Vector<UsedMargins> computeInlineMargins(const PlacedGridItems&, const Style::ZoomFactor&);
     static Vector<UsedMargins> computeBlockMargins(const PlacedGridItems&, const Style::ZoomFactor&);
 
-    static BorderBoxPositions performInlineAxisSelfAlignment(const PlacedGridItems&, const Vector<UsedMargins>&, const Vector<LayoutUnit>& gridAreaInlineSizes);
-    static BorderBoxPositions performBlockAxisSelfAlignment(const PlacedGridItems&, const Vector<UsedMargins>&, const Vector<LayoutUnit>& gridAreaBlockSizes);
+    BorderBoxPositions performInlineAxisSelfAlignment(const PlacedGridItems&, const Vector<UsedMargins>&, const UsedInlineSizes&, const Vector<LayoutUnit>& gridAreasInlineSizeList);
+    BorderBoxPositions performBlockAxisSelfAlignment(const PlacedGridItems&, const Vector<UsedMargins>&, const UsedBlockSizes&, const Vector<LayoutUnit>& gridAreasBlockSizeList);
 
     const GridFormattingContext& formattingContext() const { return m_gridFormattingContext; }
 
