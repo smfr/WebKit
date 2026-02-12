@@ -531,6 +531,7 @@ Vector<ASCIILiteral> serializedIdentifiers()
         "WebCore::WebTransportSendGroupIdentifier"_s,
         "WebCore::WebTransportStreamIdentifier"_s,
         "WebCore::WindowIdentifier"_s,
+        "WebCore::XRHitTestSourceIdentifier"_s,
         "WebKit::AudioMediaStreamTrackRendererInternalUnitIdentifier"_s,
         "WebKit::AuthenticationChallengeIdentifier"_s,
         "WebKit::WebModelIdentifier"_s,
