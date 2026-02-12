@@ -326,6 +326,11 @@ public:
     bool privateClickMeasurementEnabled() const;
     void setPrivateClickMeasurementDebugMode(PAL::SessionID, bool);
 
+#if HAVE(ENHANCED_SECURITY_LINKS)
+    void setIsEnhancedSecurityLinksEnabled(bool);
+    bool isEnhancedSecurityLinksEnabled() const;
+#endif
+
     void setShouldSendPrivateTokenIPCForTesting(PAL::SessionID, bool) const;
 #if ENABLE(OPT_IN_PARTITIONED_COOKIES)
     void setOptInCookiePartitioningEnabled(PAL::SessionID, bool) const;
@@ -482,6 +487,10 @@ public:
 
 #if HAVE(WEBCONTENTRESTRICTIONS)
     void allowEvaluatedURL(const WebCore::ParentalControlsURLFilterParameters&, CompletionHandler<void(bool)>&&);
+#endif
+
+#if HAVE(ENHANCED_SECURITY_LINKS)
+    void isEnhancedSecurityLink(const URL&, CompletionHandler<void(bool)>&&);
 #endif
 
 private:
@@ -665,6 +674,9 @@ private:
     bool m_isParentProcessFullWebBrowserOrRunningTest { false };
 #endif
     bool m_enableModernDownloadProgress { false };
+#if HAVE(ENHANCED_SECURITY_LINKS)
+    bool m_isEnhancedSecurityLinksEnabled { false };
+#endif
 
     struct DeleteWebsiteDataTask {
         std::optional<PAL::SessionID> sessionID;
