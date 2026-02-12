@@ -156,6 +156,7 @@ Modules/highlight/Highlight.cpp
 Modules/highlight/HighlightRegistry.cpp
 Modules/identity/CredentialRequestCoordinator.cpp
 Modules/identity/DigitalCredential.cpp
+Modules/identity/DigitalCredentialsRequestDataBuilder.cpp
 Modules/identity/dummy/DummyCredentialRequestCoordinatorClient.cpp
 Modules/indexeddb/IDBCursor.cpp
 Modules/indexeddb/IDBCursorWithValue.cpp

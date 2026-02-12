@@ -9880,31 +9880,36 @@ void WebPageProxy::showContactPicker(IPC::Connection& connection, ContactsReques
 #if ENABLE(WEB_AUTHN)
 void WebPageProxy::showDigitalCredentialsPicker(IPC::Connection& connection, const WebCore::DigitalCredentialsRequestData& requestData, CompletionHandler<void(Expected<WebCore::DigitalCredentialsResponseData, WebCore::ExceptionData>&&)>&& completionHandler)
 {
-    MESSAGE_CHECK_COMPLETION_BASE(
-        protect(preferences())->digitalCredentialsEnabled(),
-        connection,
-        completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::SecurityError, "Digital credentials feature is disabled by preference."_s }))
-    );
+    WTF::switchOn(requestData,
+        [&](const auto& requestData) {
+            LOG(DigitalCredentials, "WebPageProxy::showDigitalCredentialsPicker() - UIProcess: received IPC from WebProcess for origin: %s", requestData.topOrigin.toString().utf8().data());
+            MESSAGE_CHECK_COMPLETION_BASE(
+                protect(preferences())->digitalCredentialsEnabled(),
+                connection,
+                completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::SecurityError, "Digital credentials feature is disabled by preference."_s }))
+            );
 
-#if ENABLE(WEB_AUTHN)
-    MESSAGE_CHECK_COMPLETION_BASE(
-        requestData.topOrigin.securityOrigin()->isSameOriginDomain(SecurityOrigin::create(protect(mainFrame())->url())),
-        connection,
-        completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::SecurityError, "Digital credentials request is not same-origin with main frame."_s }))
-    );
+#if HAVE(DIGITAL_CREDENTIALS_UI)
+            MESSAGE_CHECK_COMPLETION_BASE(
+                requestData.topOrigin.securityOrigin()->isSameOriginDomain(SecurityOrigin::create(protect(mainFrame())->url())),
+                connection,
+                completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::SecurityError, "Digital credentials request is not same-origin with top-level navigable."_s }))
+            );
 
-    protect(pageClient())->showDigitalCredentialsPicker(requestData, WTF::move(completionHandler));
+            LOG(DigitalCredentials, "WebPageProxy::showDigitalCredentialsPicker() - UIProcess: passing to pageClient to present picker UI");
+            protect(pageClient())->showDigitalCredentialsPicker(requestData, WTF::move(completionHandler));
 #else
-    completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::NotSupportedError, "Digital credentials UI is not supported."_s }));
+            completionHandler(makeUnexpected(WebCore::ExceptionData { WebCore::ExceptionCode::NotSupportedError, "Digital credentials UI is not supported."_s }));
 #endif
+    });
 }
 
-void WebPageProxy::fetchRawDigitalCredentialRequests(CompletionHandler<void(Vector<WebCore::MobileDocumentRequest>)>&& completionHandler)
+void WebPageProxy::fetchRawDigitalCredentialRequests(CompletionHandler<void(WebCore::DigitalCredentialsRawRequests)>&& completionHandler)
 {
 #if ENABLE(WEB_AUTHN)
     sendWithAsyncReply(Messages::DigitalCredentialsCoordinator::ProvideRawDigitalCredentialRequests(), WTF::move(completionHandler));
 #else
-    completionHandler({ });
+    completionHandler(WebCore::DigitalCredentialsRawRequests { Vector<WebCore::UnvalidatedDigitalCredentialRequest> { } });
 #endif
 }
 

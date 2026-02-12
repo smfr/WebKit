@@ -22,6 +22,7 @@
 #pragma once
 
 #include <WebCore/Cursor.h>
+#include <WebCore/DigitalCredentialsRequestData.h>
 #include <WebCore/DisabledAdaptations.h>
 #include <WebCore/FocusDirection.h>
 #include <WebCore/HostWindow.h>
@@ -33,6 +34,7 @@
 #include <wtf/RefPtr.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/UniqueRef.h>
+#include <wtf/Variant.h>
 #include <wtf/Vector.h>
 
 #if PLATFORM(COCOA)
@@ -95,8 +97,6 @@ struct WindowFeatures;
 
 #if ENABLE(WEB_AUTHN)
 class SecurityOriginData;
-
-struct DigitalCredentialsRequestData;
 struct DigitalCredentialsResponseData;
 struct ExceptionData;
 struct MobileDocumentRequest;

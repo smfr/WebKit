@@ -140,7 +140,7 @@ class Widget;
 class WorkerClient;
 
 #if ENABLE(WEB_AUTHN)
-struct DigitalCredentialsRequestData;
+struct DigitalCredentialsMobileDocumentRequestData;
 struct MobileDocumentRequest;
 #endif
 

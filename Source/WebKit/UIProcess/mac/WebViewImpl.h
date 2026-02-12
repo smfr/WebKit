@@ -39,6 +39,7 @@
 #include "WKLayoutMode.h"
 #include "WebMouseEvent.h"
 #include <WebCore/DOMPasteAccess.h>
+#include <WebCore/DigitalCredentialsRequestData.h>
 #include <WebCore/FocusDirection.h>
 #include <WebCore/HTMLMediaElementIdentifier.h>
 #include <WebCore/KeypressCommand.h>
@@ -205,7 +206,7 @@ struct DragItem;
 struct ResolvedCaptionDisplaySettingsOptions;
 
 #if ENABLE(WEB_AUTHN)
-struct DigitalCredentialsRequestData;
+struct DigitalCredentialsMobileDocumentRequestData;
 struct DigitalCredentialsResponseData;
 #endif
 
