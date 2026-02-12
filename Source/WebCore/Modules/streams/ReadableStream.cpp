@@ -266,6 +266,8 @@ ReadableStream::~ReadableStream()
 
 void ReadableStream::stop()
 {
+    if (m_dependencyToVisit)
+        m_dependencyToVisit->stop();
     if (m_controller)
         m_controller->stop();
 }

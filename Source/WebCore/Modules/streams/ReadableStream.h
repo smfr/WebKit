@@ -148,6 +148,7 @@ public:
     public:
         virtual ~DependencyToVisit() = default;
         virtual void visit(JSC::AbstractSlotVisitor&) = 0;
+        virtual void stop() = 0;
     };
     enum class StartSynchronously : bool { No, Yes };
     enum class IsSourceReachableFromOpaqueRoot : bool { No, Yes };
