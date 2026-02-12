@@ -674,7 +674,7 @@ void RemoteScrollingCoordinatorProxyIOS::establishLayerTreeScrollingRelations(co
         MESSAGE_CHECK(overflowNode);
 
         if (RefPtr layerNode = RemoteLayerTreeNode::forCALayer(protect(scrollProxyNode->layer()))) {
-            layerNode->setActingScrollContainerID(RemoteLayerTreeNode::layerID(static_cast<CALayer*>(overflowNode->scrollContainerLayer())));
+            layerNode->setActingScrollContainerID(RemoteLayerTreeNode::layerID(protect(static_cast<CALayer*>(overflowNode->scrollContainerLayer()))));
             m_layersWithScrollingRelations.add(layerNode->layerID());
         }
     }

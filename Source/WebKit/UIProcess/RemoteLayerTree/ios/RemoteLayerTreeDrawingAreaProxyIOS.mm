@@ -281,7 +281,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     _screenForDisplayLink = [self _screenForDisplayLink];
 
     if (_screenForDisplayLink)
-        _displayLink = [_screenForDisplayLink displayLinkWithTarget:self selector:@selector(displayLinkFired:)];
+        _displayLink = [protect(_screenForDisplayLink) displayLinkWithTarget:self selector:@selector(displayLinkFired:)];
     else {
 ALLOW_DEPRECATED_DECLARATIONS_BEGIN
         // FIXME: CoreAnimation version deprecated rdar://164090713

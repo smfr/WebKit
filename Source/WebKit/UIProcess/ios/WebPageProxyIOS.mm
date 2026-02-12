@@ -1307,7 +1307,7 @@ void WebPageProxy::setIsScrollingOrZooming(bool isScrollingOrZooming)
     // We finished doing the scrolling / zoom animation so we can now show the validation
     // bubble if we're supposed to.
     if (!m_isScrollingOrZooming && m_validationBubble)
-        m_validationBubble->show();
+        protect(m_validationBubble)->show();
 }
 
 void WebPageProxy::hardwareKeyboardAvailabilityChanged(HardwareKeyboardState hardwareKeyboardState)

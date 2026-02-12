@@ -3196,7 +3196,7 @@ void WebPage::performActionOnElement(uint32_t action, const String& authorizatio
         return;
 
     if (static_cast<SheetAction>(action) == SheetAction::Copy) {
-        Ref interactionNodeEditor = m_interactionNode->document().editor();
+        Ref interactionNodeEditor = protect(m_interactionNode->document())->editor();
         Ref elementDocument = element->document();
         if (is<RenderImage>(*element->renderer())) {
             URL urlToCopy;
@@ -5274,7 +5274,7 @@ void WebPage::setInsertionPointColor(WebCore::Color color)
 
 void WebPage::textInputContextsInRect(FloatRect searchRect, CompletionHandler<void(const Vector<ElementContext>&)>&& completionHandler)
 {
-    auto contexts = m_page->editableElementsInRect(searchRect).map([&] (const auto& element) {
+    auto contexts = protect(m_page)->editableElementsInRect(searchRect).map([&] (const auto& element) {
         Ref document = element->document();
 
         ElementContext context;

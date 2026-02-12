@@ -976,7 +976,7 @@ static NSString *optionCellReuseIdentifier = @"WKSelectPickerTableViewCell";
     _collapsedSections = adoptNS([[NSMutableSet alloc] init]);
 
     _numberOfSections = 1;
-    for (auto& option : _contentView.focusedSelectElementOptions) {
+    for (auto& option : protect(_contentView).get().focusedSelectElementOptions) {
         if (option.isGroup)
             _numberOfSections++;
     }
