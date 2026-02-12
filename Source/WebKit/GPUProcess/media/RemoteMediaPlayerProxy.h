@@ -411,7 +411,7 @@ private:
 #endif
 
     Ref<IPC::Connection> protectedConnection() const { return m_webProcessConnection; }
-    Ref<RemoteVideoFrameObjectHeap> protectedVideoFrameObjectHeap() const;
+    Ref<RemoteVideoFrameObjectHeap> NODELETE protectedVideoFrameObjectHeap() const;
 
     Vector<Ref<RemoteAudioTrackProxy>> m_audioTracks;
     Vector<Ref<RemoteVideoTrackProxy>> m_videoTracks;

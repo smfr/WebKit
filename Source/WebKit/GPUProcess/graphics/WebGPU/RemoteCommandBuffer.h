@@ -74,7 +74,7 @@ private:
     RemoteCommandBuffer& operator=(RemoteCommandBuffer&&) = delete;
 
     WebCore::WebGPU::CommandBuffer& backing() { return m_backing; }
-    Ref<IPC::StreamServerConnection> protectedStreamConnection() const;
+    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

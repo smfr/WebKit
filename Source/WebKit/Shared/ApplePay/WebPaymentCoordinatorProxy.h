@@ -132,7 +132,7 @@ public:
 
 private:
     explicit WebPaymentCoordinatorProxy(Client&);
-    Ref<WorkQueue> protectedCanMakePaymentsQueue() const;
+    Ref<WorkQueue> NODELETE protectedCanMakePaymentsQueue() const;
 
     // IPC::MessageReceiver
     void didReceiveMessage(IPC::Connection&, IPC::Decoder&) override;

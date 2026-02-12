@@ -154,7 +154,7 @@ public:
 #endif
 
 #if ENABLE(WEBXR)
-    std::optional<WebCore::ProcessIdentity> immersiveModeProcessIdentity() const;
+    std::optional<WebCore::ProcessIdentity> NODELETE immersiveModeProcessIdentity() const;
 #endif
 
 #if HAVE(AUDIT_TOKEN)

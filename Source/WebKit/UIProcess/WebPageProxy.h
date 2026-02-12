@@ -2906,7 +2906,7 @@ public:
 #endif
 
 #if ENABLE(POINTER_LOCK)
-    RefPtr<WebProcessProxy> webContentPointerLockProcess();
+    RefPtr<WebProcessProxy> NODELETE webContentPointerLockProcess();
     void clearWebContentPointerLockProcess();
     void resetPointerLockState(void);
 #endif
@@ -2929,7 +2929,7 @@ public:
     void takeActivitiesOnRemotePage(RemotePageProxy&);
 
 #if PLATFORM(IOS_FAMILY) && ENABLE(DEVICE_ORIENTATION)
-    RefPtr<WebDeviceOrientationUpdateProviderProxy> webDeviceOrientationUpdateProviderProxy();
+    RefPtr<WebDeviceOrientationUpdateProviderProxy> NODELETE webDeviceOrientationUpdateProviderProxy();
 #endif
 
 #if ENABLE(MODEL_ELEMENT_IMMERSIVE)

@@ -78,10 +78,10 @@ private:
     RemoteXRBinding& operator=(const RemoteXRBinding&) = delete;
     RemoteXRBinding& operator=(RemoteXRBinding&&) = delete;
 
-    Ref<IPC::StreamServerConnection> protectedStreamConnection();
+    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection();
 
     WebCore::WebGPU::XRBinding& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::XRBinding> protectedBacking();
+    Ref<WebCore::WebGPU::XRBinding> NODELETE protectedBacking();
 
     Ref<RemoteGPU> protectedGPU();
 

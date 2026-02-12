@@ -115,7 +115,7 @@ private:
     RemoteDevice& operator=(RemoteDevice&&) = delete;
 
     WebCore::WebGPU::Device& backing() { return m_backing; }
-    Ref<WebGPU::ObjectHeap> protectedObjectHeap() const;
+    Ref<WebGPU::ObjectHeap> NODELETE protectedObjectHeap() const;
     Ref<RemoteGPU> protectedGPU() const { return m_gpu; }
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;

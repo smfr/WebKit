@@ -74,9 +74,9 @@ private:
     RemoteComputePipeline& operator=(RemoteComputePipeline&&) = delete;
 
     WebCore::WebGPU::ComputePipeline& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::ComputePipeline> protectedBacking();
+    Ref<WebCore::WebGPU::ComputePipeline> NODELETE protectedBacking();
 
-    Ref<IPC::StreamServerConnection> protectedStreamConnection() const;
+    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
 
     Ref<WebGPU::ObjectHeap> protectedObjectHeap() const { return m_objectHeap; }
     Ref<RemoteGPU> protectedGPU() const { return m_gpu; }

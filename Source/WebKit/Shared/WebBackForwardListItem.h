@@ -92,7 +92,7 @@ public:
 
     WebBackForwardListFrameItem& navigatedFrameItem() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
-    WebBackForwardListFrameItem& mainFrameItem() const SWIFT_RETURNS_INDEPENDENT_VALUE;
+    WebBackForwardListFrameItem& NODELETE mainFrameItem() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
     void setWasRestoredFromSession();
 

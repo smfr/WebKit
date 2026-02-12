@@ -79,7 +79,7 @@ public:
     void start(const double interval = 0);
     void start(SandboxExtension::Handle&&, const String&, const double interval = 0);
     void stop();
-    bool isRunning() const;
+    bool isRunning() const { return m_isRunning; }
     
     // Do nothing since this is a singleton.
     void ref() const { }

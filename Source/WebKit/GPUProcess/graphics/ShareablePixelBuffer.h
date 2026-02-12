@@ -38,7 +38,7 @@ public:
     static RefPtr<ShareablePixelBuffer> tryCreate(const WebCore::PixelBufferFormat&, const WebCore::IntSize&);
 
     WebCore::SharedMemory& data() const { return m_data.get(); }
-    Ref<WebCore::SharedMemory> protectedData() const;
+    Ref<WebCore::SharedMemory> NODELETE protectedData() const;
 
     RefPtr<WebCore::PixelBuffer> createScratchPixelBuffer(const WebCore::IntSize&) const override;
 

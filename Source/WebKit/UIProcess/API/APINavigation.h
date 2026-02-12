@@ -186,7 +186,7 @@ public:
     bool safeBrowsingCheckOngoing(size_t);
     bool safeBrowsingCheckOngoing();
     void setSafeBrowsingWarning(RefPtr<WebKit::BrowsingWarning>&&);
-    RefPtr<WebKit::BrowsingWarning> safeBrowsingWarning();
+    RefPtr<WebKit::BrowsingWarning> NODELETE safeBrowsingWarning();
     void setSafeBrowsingCheckTimedOut() { m_safeBrowsingCheckTimedOut = true; }
     bool safeBrowsingCheckTimedOut() { return m_safeBrowsingCheckTimedOut; }
     MonotonicTime requestStart() const { return m_requestStart; }

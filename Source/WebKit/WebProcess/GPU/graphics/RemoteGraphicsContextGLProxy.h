@@ -410,7 +410,6 @@ private:
     void abandonGpuProcess();
     uint32_t createObjectName();
 
-
     WeakPtr<GPUProcessConnection> m_gpuProcessConnection; // Only main thread use.
     RefPtr<IPC::StreamClientConnection> m_streamConnection;
     bool m_didInitialize { false };
