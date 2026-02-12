@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,18 +24,18 @@
  */
 
 #import "APIContentWorldConfiguration.h"
-#import "_WKContentWorldConfiguration.h"
+#import "WKContentWorldConfiguration.h"
 #import <wtf/AlignedStorage.h>
 
 namespace WebKit {
 
 template<> struct WrapperTraits<API::ContentWorldConfiguration> {
-    using WrapperClass = _WKContentWorldConfiguration;
+    using WrapperClass = WKContentWorldConfiguration;
 };
 
 }
 
-@interface _WKContentWorldConfiguration () <WKObject> {
+@interface WKContentWorldConfiguration () <WKObject> {
 @package
     AlignedStorage<API::ContentWorldConfiguration> _worldConfiguration;
 }

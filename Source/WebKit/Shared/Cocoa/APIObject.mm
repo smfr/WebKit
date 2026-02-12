@@ -30,6 +30,7 @@
 #import "WKBackForwardListItemInternal.h"
 #import "WKContentRuleListInternal.h"
 #import "WKContentRuleListStoreInternal.h"
+#import "WKContentWorldConfigurationInternal.h"
 #import "WKContentWorldInternal.h"
 #import "WKContextMenuElementInfoInternal.h"
 #import "WKDownloadInternal.h"
@@ -74,7 +75,6 @@
 #import "_WKAttachmentInternal.h"
 #import "_WKAutomationSessionInternal.h"
 #import "_WKContentRuleListActionInternal.h"
-#import "_WKContentWorldConfigurationInternal.h"
 #import "_WKContextMenuElementInfoInternal.h"
 #import "_WKCustomHeaderFieldsInternal.h"
 #import "_WKDataTaskInternal.h"
@@ -389,7 +389,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         break;
 
     case Type::ContentWorldConfiguration:
-        SUPPRESS_RETAINPTR_CTOR_ADOPT wrapper = [_WKContentWorldConfiguration alloc];
+        SUPPRESS_RETAINPTR_CTOR_ADOPT wrapper = [WKContentWorldConfiguration alloc];
         break;
 
     case Type::TargetedElementInfo:

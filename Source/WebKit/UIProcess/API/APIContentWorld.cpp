@@ -98,6 +98,11 @@ Ref<ContentWorld> ContentWorld::sharedWorldWithName(const WTF::String& name, Opt
     return newContentWorld ? newContentWorld.releaseNonNull() : Ref { result.iterator->value.get() };
 }
 
+Ref<ContentWorld> ContentWorld::createNamelessWorld(OptionSet<WebKit::ContentWorldOption> options)
+{
+    return adoptRef(*new ContentWorld(nullString(), options));
+}
+
 ContentWorld& ContentWorld::pageContentWorldSingleton()
 {
     static NeverDestroyed<Ref<ContentWorld>> world(adoptRef(*new ContentWorld(WebKit::pageContentWorldIdentifier())));

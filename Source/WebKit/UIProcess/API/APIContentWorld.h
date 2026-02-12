@@ -43,6 +43,7 @@ public:
     static OptionSet<WebKit::ContentWorldOption> defaultOptions();
     static ContentWorld* worldForIdentifier(WebKit::ContentWorldIdentifier);
     static Ref<ContentWorld> sharedWorldWithName(const WTF::String&, OptionSet<WebKit::ContentWorldOption> = defaultOptions() );
+    static Ref<ContentWorld> createNamelessWorld(OptionSet<WebKit::ContentWorldOption>);
     static ContentWorld& pageContentWorldSingleton();
     static ContentWorld& defaultClientWorldSingleton();
 

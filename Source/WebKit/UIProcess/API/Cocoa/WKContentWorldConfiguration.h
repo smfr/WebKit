@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,40 +23,37 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <WebKit/WKContentWorldConfiguration.h>
 #import <WebKit/WKFoundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*! @abstract A WKContentWorldConfiguration object allows you to specify configuration for WKContentWorld.
-@discussion WKContentWorldConfiguration allows applications to specify ways by which extra JavaScript capabilities should be exposed to the script in the environment.
+/*! @abstract A WKContentWorldConfiguration object allows you to specify custom behavior for a WKContentWorld instance.
+@discussion WKContentWorldConfiguration allows applications to create WKContentWorld instances which have extra JavaScript
+capabilities exposed to script in their environment. It does not change any default WebKit behaviors, nor change anything that web page
+JavaScript can do. Only application JavaScript run in the created `WKContentWorld` will have different capabilities.
+
 For example:
-- If your scripts have to access autofill capabilities, you may want to set allowAutofill to YES. */
+- If your scripts help provide autofill capabilities, you would want to set autofillEnabled to YES.
+*/
 WK_SWIFT_UI_ACTOR
 NS_SWIFT_SENDABLE
-WK_CLASS_AVAILABLE(macos(15.4), ios(18.4), visionos(2.4))
-@interface _WKContentWorldConfiguration : WKContentWorldConfiguration
-
-@property (nonatomic, copy) NSString *name;
+WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
+@interface WKContentWorldConfiguration : NSObject<NSCopying, NSSecureCoding>
 
 /*! @abstract A boolean value indicating whether every shadow root should be treated as open mode shadow root or not. */
-@property (nonatomic) BOOL allowAccessToClosedShadowRoots;
+@property (nonatomic) BOOL openClosedShadowRootsEnabled;
 
 /*! @abstract A boolean value indicating whether the capability to trigger autofill is exposed to scripts or not. */
-@property (nonatomic) BOOL allowAutofill;
+@property (nonatomic) BOOL autofillScriptingEnabled;
 
 /*! @abstract A boolean value indicating whether the ability to attach user info on an element is exposed to scripts or not. */
-@property (nonatomic) BOOL allowElementUserInfo;
+@property (nonatomic) BOOL elementUserInfoEnabled;
 
-/*! @abstract A boolean value indicating whether the behavior that elements with a name attribute overrides builtin methods on document object should be disabled or not. */
-// FIXME: Give this a positive name like enableLegacyBuiltinOverrides to avoid double-negatives in code.
-@property (nonatomic) BOOL disableLegacyBuiltinOverrides;
+/*! @abstract A boolean value indicating whether the behavior that elements with a name attribute overrides builtin methods on document object should be enabled or not. */
+@property (nonatomic) BOOL legacyBuiltinOverridesEnabled;
 
-/*! @abstract A boolean indicating whether window.webkit.createJSHandle is available. */
-@property (nonatomic) BOOL allowJSHandleCreation WK_API_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA));
-
-/*! @abstract A boolean indicating whether window.webkit.serializeNode is available. */
-@property (nonatomic) BOOL allowNodeSerialization WK_API_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA));
+/*! @abstract A boolean indicating whether the JavaScript in this world is visible to the Web Inspector. */
+@property (nonatomic, getter=isInspectable) BOOL inspectable;
 
 @end
 

@@ -28,6 +28,10 @@
 #include "APIObject.h"
 #include <wtf/text/WTFString.h>
 
+namespace WebKit {
+enum class ContentWorldOption : uint8_t;
+}
+
 namespace API {
 
 class ContentWorldConfiguration : public ObjectImpl<Object::Type::ContentWorldConfiguration> {
@@ -62,6 +66,8 @@ public:
 
     bool isInspectable() const;
     void setInspectable(bool);
+
+    OptionSet<WebKit::ContentWorldOption> optionSet() const;
 
 private:
     struct Data {
