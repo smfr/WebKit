@@ -2655,6 +2655,11 @@ bool WebProcess::shouldAllowScriptAccess(const URL& url, const SecurityOrigin& t
     return m_scriptTrackingPrivacyFilter && m_scriptTrackingPrivacyFilter->shouldAllowAccess(url, topOrigin, category);
 }
 
+bool WebProcess::shouldBlockRequest(const URL& url, const WebCore::SecurityOrigin& topOrigin)
+{
+    return m_scriptTrackingPrivacyFilter && m_scriptTrackingPrivacyFilter->shouldBlockRequest(url, topOrigin);
+}
+
 void WebProcess::enableMediaPlayback()
 {
     m_mediaPlaybackEnabled = true;

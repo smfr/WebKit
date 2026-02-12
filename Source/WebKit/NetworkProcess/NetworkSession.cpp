@@ -333,6 +333,15 @@ IsKnownCrossSiteTracker NetworkSession::isResourceFromKnownCrossSiteTracker(cons
     return isRequestToKnownCrossSiteTracker(request);
 }
 
+bool NetworkSession::shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest& request, WebPageProxyIdentifier webPageID)
+{
+    auto it = m_trackerBlockingPolicyByPageIdentifier.find(webPageID);
+    if (it == m_trackerBlockingPolicyByPageIdentifier.end())
+        it = m_trackerBlockingPolicyByPageIdentifier.set(webPageID, HashSet<RegistrableDomain> { }).iterator;
+    RegistrableDomain domain { request.url() };
+    return !it->value.add(domain).isNewEntry;
+}
+
 void NetworkSession::deleteAndRestrictWebsiteDataForRegistrableDomains(OptionSet<WebsiteDataType> dataTypes, RegistrableDomainsToDeleteOrRestrictWebsiteDataFor&& domains, CompletionHandler<void(HashSet<RegistrableDomain>&&)>&& completionHandler)
 {
     if (CheckedPtr storageSession = networkStorageSession()) {

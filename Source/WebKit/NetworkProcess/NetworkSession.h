@@ -144,6 +144,7 @@ public:
     bool isTrackingPreventionEnabled() const;
     static WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&);
     static WebCore::IsKnownCrossSiteTracker isResourceFromKnownCrossSiteTracker(const URL& firstParty, const URL& resource);
+    bool shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest&, WebPageProxyIdentifier);
     void deleteAndRestrictWebsiteDataForRegistrableDomains(OptionSet<WebsiteDataType>, RegistrableDomainsToDeleteOrRestrictWebsiteDataFor&&, CompletionHandler<void(HashSet<WebCore::RegistrableDomain>&&)>&&);
     void registrableDomainsWithWebsiteData(OptionSet<WebsiteDataType>, CompletionHandler<void(HashSet<WebCore::RegistrableDomain>&&)>&&);
     bool enableResourceLoadStatisticsLogTestingEvent() const { return m_enableResourceLoadStatisticsLogTestingEvent; }
@@ -411,6 +412,7 @@ protected:
 #endif
 
     HashMap<WebPageProxyIdentifier, String> m_attributedBundleIdentifierFromPageIdentifiers;
+    HashMap<WebPageProxyIdentifier, HashSet<WebCore::RegistrableDomain>> m_trackerBlockingPolicyByPageIdentifier;
 
 #if ENABLE(WEB_PUSH_NOTIFICATIONS)
     const Ref<NetworkNotificationManager> m_notificationManager;

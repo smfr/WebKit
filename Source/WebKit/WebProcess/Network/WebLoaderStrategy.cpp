@@ -396,10 +396,12 @@ static void addParametersShared(const LocalFrame* frame, NetworkResourceLoadPara
             parameters.request.setHTTPHeaderField(HTTPHeaderName::Referer, referrer);
     }
 
-    if (auto* document = frame->document()) {
+    if (RefPtr document = frame->document()) {
         parameters.crossOriginEmbedderPolicy = document->crossOriginEmbedderPolicy();
         parameters.isClearSiteDataHeaderEnabled = document->settings().clearSiteDataHTTPHeaderEnabled();
         parameters.isClearSiteDataExecutionContextEnabled = document->settings().clearSiteDataExecutionContextsSupportEnabled();
+        parameters.mayBlockNetworkRequest = document->settings().scriptTrackingPrivacyNetworkRequestBlockingLatchEnabled()
+            && WebProcess::singleton().shouldBlockRequest(parameters.request.url(), protect(document->topOrigin()));
     }
 
     if (RefPtr page = frame->page()) {

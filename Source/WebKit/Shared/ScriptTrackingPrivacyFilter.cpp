@@ -99,4 +99,14 @@ bool ScriptTrackingPrivacyFilter::shouldAllowAccess(const URL& url, const WebCor
     return lookup(url, topOrigin).allowedCategories.contains(categoryFlag);
 }
 
+bool ScriptTrackingPrivacyFilter::shouldBlockRequest(const URL& url, const WebCore::SecurityOrigin& topOrigin)
+{
+    if (url.isEmpty())
+        return true;
+
+    auto categoryFlag = WebCore::scriptCategoryAsFlag(ScriptTrackingPrivacyCategory::NetworkRequests);
+    auto result = lookup(url, topOrigin);
+    return result.foundMatch && !result.allowedCategories.contains(categoryFlag);
+}
+
 } // namespace WebKit

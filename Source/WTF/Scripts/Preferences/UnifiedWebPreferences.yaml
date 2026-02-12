@@ -6913,6 +6913,20 @@ ScriptTrackingPrivacyNetworkRequestBlockingEnabled:
     WebCore:
       default: false
 
+ScriptTrackingPrivacyNetworkRequestBlockingLatchEnabled:
+  type: bool
+  status: internal
+  humanReadableName: "Script Tracking Privacy Network Requests Blocking Latch"
+  humanReadableDescription: "Block multiple network requests made to tracking domains"
+  exposed: [ WebKit ]
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 ScriptTrackingPrivacyProtectionsEnabled:
   type: bool
   status: internal
