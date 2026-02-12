@@ -909,7 +909,6 @@ http/tests/resourceLoadStatistics/grandfathering.html [ Pass ]
 http/tests/resourceLoadStatistics/strip-referrer-to-origin-for-third-party-redirects.html [ Pass ]
 http/tests/resourceLoadStatistics/strip-referrer-to-origin-for-third-party-requests.html [ Pass ]
 http/tests/resourceLoadStatistics/cap-cache-max-age-for-prevalent-resource.html [ Pass ]
-http/tests/resourceLoadStatistics/capped-lifetime-for-cookie-set-with-link-query-using-cookiestore-api.https.html [ Pass ]
 
 # The SameSite cookie API is only available in macOS Catalina and above.
 #http/tests/resourceLoadStatistics/set-all-cookies-to-same-site-strict.html [ Pass ]
@@ -2482,3 +2481,5 @@ webkit.org/b/307682 editing/execCommand/insert-line-break-no-scroll.html [ Failu
 webkit.org/b/307688 [ arm64 ] http/tests/site-isolation/inspector/unit-tests/target-manager.html [ Failure ]
 
 webkit.org/b/307691 [ Tahoe Release arm64 ] svg/gradients/spreadMethod.svg [ ImageOnlyFailure Pass ]
+
+webkit.org/b/306436 http/tests/resourceLoadStatistics/capped-lifetime-for-cookie-set-with-link-query-using-cookiestore-api.https.html [ Pass Failure ]
