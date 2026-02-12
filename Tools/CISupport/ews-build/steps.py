@@ -4569,7 +4569,7 @@ class ReRunWebKitTests(RunWebKitTests):
 
             # The significant additional build time isn't worth it on Windows, we'd rather
             # the worker start on another job in the queue.
-            if platform != 'win':
+            if platform not in ('win',):
                 steps_to_add += [
                     ArchiveTestResults(),
                     UploadTestResults(identifier='rerun'),
@@ -7175,7 +7175,7 @@ class ValidateSquashed(shell.ShellCommand, AddToLogMixin):
 
 
 class AddReviewerMixin(object):
-    NOBODY_SED = 's/NOBODY (OO*PP*S!*)/{}/g'
+    NOBODY_SED = 's/by NOBODY( \\(OO*PP*S!*\\))?/by {}/g'
 
     @defer.inlineCallbacks
     def gitCommitEnvironment(self):
@@ -7232,7 +7232,7 @@ class AddReviewerToCommitMessage(shell.ShellCommand, AddReviewerMixin):
         self.command = [
             'git', 'filter-branch', '-f',
             '--env-filter', f"GIT_AUTHOR_DATE='{date}';GIT_COMMITTER_DATE='{date}'",
-            '--msg-filter', f'sed "{self.NOBODY_SED.format(self.reviewers())}"',
+            '--msg-filter', f'sed -E "{self.NOBODY_SED.format(self.reviewers())}"',
             f'{head_ref}...{base_ref}',
         ]
 
@@ -7318,6 +7318,7 @@ class ValidateCommitMessage(steps.ShellSequence, ShellMixin, AddToLogMixin):
         self.commands = []
         commands = [
             f"git log {head_ref} ^{base_ref} | grep -q '{self.OOPS_RE}' && echo 'Commit message contains (OOPS!){reviewer_error_msg}' || test $? -eq 1",
+            f"git log {head_ref} ^{base_ref} | grep -q 'by NOBODY' && echo 'Commit message contains \"by NOBODY\"{reviewer_error_msg}' || test $? -eq 1",
             "git log {} ^{} > commit_msg.txt; grep -q '\\({}\\)' commit_msg.txt || echo 'No reviewer information in commit message';".format(
                 head_ref, base_ref,
                 '\\|'.join(self.REVIEWED_STRINGS)
