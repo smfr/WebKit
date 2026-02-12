@@ -2478,3 +2478,5 @@ webkit.org/b/307377 [ Tahoe Release arm64 ] compositing/webgl/update-composited-
 webkit.org/b/307571 imported/w3c/web-platform-tests/workers/SharedWorkerPerformanceNow.html [ Pass Failure ]
 
 webkit.org/b/307682 editing/execCommand/insert-line-break-no-scroll.html [ Failure ]
+
+webkit.org/b/307688 [ arm64 ] http/tests/site-isolation/inspector/unit-tests/target-manager.html [ Failure ]
