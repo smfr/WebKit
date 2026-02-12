@@ -5227,6 +5227,8 @@ webkit.org/b/307597 imported/w3c/web-platform-tests/service-workers/service-work
 
 webkit.org/b/307657 imported/w3c/web-platform-tests/resource-timing/status-codes-create-entry.html [ Pass Failure ]
 
+webkit.org/b/307666 media/modern-media-controls/status-support/status-support-playing.html [ Pass Timeout ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////
