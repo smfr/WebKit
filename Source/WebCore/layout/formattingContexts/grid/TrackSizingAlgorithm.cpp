@@ -177,8 +177,8 @@ static Vector<LayoutUnit> maxContentContributions(const PlacedGridItems& gridIte
     });
 }
 
-static Vector<LayoutUnit> minimumContributions(const PlacedGridItems& gridItems, const ComputedSizesList& gridItemComputedSizesList, const UsedBorderAndPaddingList&,
-    const GridItemIndexes& gridItemIndexes, const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions)
+static Vector<LayoutUnit> minimumContributions(const PlacedGridItems& gridItems, const ComputedSizesList& gridItemComputedSizesList, const UsedBorderAndPaddingList& borderAndPaddingList,
+    const GridItemIndexes& gridItemIndexes, const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions, const TrackSizingFunctionsList& trackSizingFunctions)
 {
     // The minimum contribution of an item is the smallest outer size it can have. Specifically,
     return gridItemIndexes.map([&](size_t gridItemIndex) -> LayoutUnit {
@@ -186,10 +186,8 @@ static Vector<LayoutUnit> minimumContributions(const PlacedGridItems& gridItems,
         // containing block in the relevant axis, its minimum contribution is the outer size
         // that would result from assuming the item’s used minimum size as its preferred size.
         auto& preferredSize = gridItemComputedSizesList[gridItemIndex].preferredSize;
-        if (GridLayoutUtils::preferredSizeBehavesAsAuto(preferredSize) || GridLayoutUtils::preferredSizeDependsOnContainingBlockSize(preferredSize)) {
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return { };
-        }
+        if (GridLayoutUtils::preferredSizeBehavesAsAuto(preferredSize) || GridLayoutUtils::preferredSizeDependsOnContainingBlockSize(preferredSize))
+            return gridItemSizingFunctions.usedMinimumSize(gridItems[gridItemIndex], trackSizingFunctions, borderAndPaddingList[gridItemIndex], { });
         // else the item’s minimum contribution is its min-content contribution.
         return gridItemSizingFunctions.minContentContribution(gridItems[gridItemIndex], oppositeAxisConstraints[gridItemIndex]);
     });
@@ -198,7 +196,7 @@ static Vector<LayoutUnit> minimumContributions(const PlacedGridItems& gridItems,
 // https://drafts.csswg.org/css-grid-1/#algo-single-span-items
 static void sizeTracksToFitNonSpanningItems(UnsizedTracks& unsizedTracks, const PlacedGridItems& gridItems,
     const ComputedSizesList& gridItemComputedSizesList, const UsedBorderAndPaddingList& borderAndPaddingList, const PlacedGridItemSpanList& gridItemSpanList,
-    const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions)
+    const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions, const TrackSizingFunctionsList& trackSizingFunctionsList)
 {
     // For each track with an intrinsic track sizing function and not a flexible sizing function, consider the items in it with a span of 1:
     for (auto trackIndex : tracksWithIntrinsicSizingFunction(unsizedTracks)) {
@@ -240,7 +238,7 @@ static void sizeTracksToFitNonSpanningItems(UnsizedTracks& unsizedTracks, const 
                 }
                 // Otherwise, set the track’s base size to the maximum of its items’ minimum
                 // contributions, floored at zero.
-                auto contributions = minimumContributions(gridItems, gridItemComputedSizesList, borderAndPaddingList, singleSpanningItemsIndexes, oppositeAxisConstraints, gridItemSizingFunctions);
+                auto contributions = minimumContributions(gridItems, gridItemComputedSizesList, borderAndPaddingList, singleSpanningItemsIndexes, oppositeAxisConstraints, gridItemSizingFunctions, trackSizingFunctionsList);
                 if (contributions.isEmpty())
                     return { };
                 return std::max({ }, std::ranges::max(contributions));
@@ -295,7 +293,7 @@ static void sizeTracksToFitNonSpanningItems(UnsizedTracks& unsizedTracks, const 
 // https://drafts.csswg.org/css-grid-1/#algo-content
 static void resolveIntrinsicTrackSizes(UnsizedTracks& unsizedTracks, const PlacedGridItems& gridItems,
     const ComputedSizesList& gridItemComputedSizesList, const UsedBorderAndPaddingList& borderAndPaddingList, const PlacedGridItemSpanList& gridItemSpanList,
-    const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions)
+    const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions, const TrackSizingFunctionsList& trackSizingFunctionsList)
 {
     // 1. Shim baseline-aligned items so their intrinsic size contributions reflect their
     // baseline alignment.
@@ -306,7 +304,7 @@ static void resolveIntrinsicTrackSizes(UnsizedTracks& unsizedTracks, const Place
 
     // 2. Size tracks to fit non-spanning items.
     sizeTracksToFitNonSpanningItems(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList,
-        gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions);
+        gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions, trackSizingFunctionsList);
 
     // 3. Increase sizes to accommodate spanning items crossing content-sized tracks:
     // Next, consider the items with a span of 2 that do not span a track with a flexible
@@ -440,7 +438,7 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
     auto unsizedTracks = initializeTrackSizes(trackSizingFunctions);
 
     // 2. Resolve Intrinsic Track Sizes
-    resolveIntrinsicTrackSizes(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList, gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions);
+    resolveIntrinsicTrackSizes(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList, gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions, trackSizingFunctions);
 
     // 3. Maximize Tracks
     maximizeTracks(unsizedTracks, availableGridSpace, freeSpaceScenario, gapSize);
