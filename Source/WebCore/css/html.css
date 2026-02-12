@@ -1074,13 +1074,7 @@ select {
 #endif
 }
 
-/* FIXME: Replace with select:-internal-uses-menulist */
-#if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
-select:not([size], [multiple]),
-select:is([size=""], [size="0"], [size="1"]):not([multiple]) {
-#else
-select {
-#endif
+select:-internal-uses-menulist {
 #if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
     border-radius: 5px;
 #endif
@@ -1089,14 +1083,10 @@ select {
     cursor: default;
 }
 
-/* FIXME: Replace with select:not(:-internal-uses-menulist) */
-#if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
-select[size][multiple],
-select:is([size], [multiple]):not([size=""], [size="0"], [size="1"]) {
+select:not(:-internal-uses-menulist) {
     border-style: inset;
     border-color: gray;
 }
-#endif
 
 select:not([multiple]):-internal-uses-menulist > button:first-child {
     all: unset;
