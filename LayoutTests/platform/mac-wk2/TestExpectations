@@ -2480,3 +2480,5 @@ webkit.org/b/307571 imported/w3c/web-platform-tests/workers/SharedWorkerPerforma
 webkit.org/b/307682 editing/execCommand/insert-line-break-no-scroll.html [ Failure ]
 
 webkit.org/b/307688 [ arm64 ] http/tests/site-isolation/inspector/unit-tests/target-manager.html [ Failure ]
+
+webkit.org/b/307691 [ Tahoe Release arm64 ] svg/gradients/spreadMethod.svg [ ImageOnlyFailure Pass ]
