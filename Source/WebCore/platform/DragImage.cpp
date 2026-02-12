@@ -41,12 +41,6 @@
 
 namespace WebCore {
 
-#if PLATFORM(COCOA)
-const float ColorSwatchCornerRadius = 4;
-const float ColorSwatchStrokeSize = 4;
-const float ColorSwatchWidth = 24;
-#endif
-
 DragImageRef fitDragImageToMaxSize(DragImageRef image, const IntSize& layoutSize, const IntSize& maxSize)
 {
     float heightResizeRatio = 0.0f;

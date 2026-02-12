@@ -189,29 +189,12 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(EventHandler);
 using namespace HTMLNames;
 
 #if ENABLE(DRAG_SUPPORT)
-// The link drag hysteresis is much larger than the others because there
-// needs to be enough space to cancel the link press without starting a link drag,
-// and because dragging links is rare.
-const int LinkDragHysteresis = 40;
-const int ImageDragHysteresis = 5;
-const int TextDragHysteresis = 3;
-const int ColorDragHystersis = 3;
-const int GeneralDragHysteresis = 3;
 #if PLATFORM(MAC)
 const Seconds EventHandler::TextDragDelay { 150_ms };
 #else
 const Seconds EventHandler::TextDragDelay { 0_s };
 #endif
 #endif // ENABLE(DRAG_SUPPORT)
-
-#if ENABLE(IOS_GESTURE_EVENTS) || ENABLE(MAC_GESTURE_EVENTS)
-const float GestureUnknown = 0;
-#endif
-
-#if ENABLE(IOS_TOUCH_EVENTS)
-// FIXME: Share this constant with EventHandler and SliderThumbElement.
-const unsigned InvalidTouchIdentifier = 0;
-#endif
 
 // Match key code of composition keydown event on windows.
 // IE sends VK_PROCESSKEY which has value 229;
