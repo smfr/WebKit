@@ -203,6 +203,11 @@ bool ScrollingTreeScrollingNodeDelegateMac::isRubberBandInProgress() const
     return m_scrollController.isRubberBandInProgress();
 }
 
+void ScrollingTreeScrollingNodeDelegateMac::startRubberBandSnapBack()
+{
+    m_scrollController.startRubberBandSnapBack();
+}
+
 bool ScrollingTreeScrollingNodeDelegateMac::allowsHorizontalStretching(const PlatformWheelEvent& wheelEvent) const
 {
     switch (horizontalScrollElasticity()) {
@@ -320,6 +325,28 @@ void ScrollingTreeScrollingNodeDelegateMac::rubberBandingStateChanged(bool inRub
 {
     scrollingTree()->setRubberBandingInProgressForNode(scrollingNode()->scrollingNodeID(), inRubberBand);
 }
+
+FloatSize ScrollingTreeScrollingNodeDelegateMac::rubberBandTargetOffset() const
+{
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    // Only the main frame supports banner views.
+    if (scrollingNode()->nodeType() == ScrollingNodeType::MainFrame) {
+        auto topOffset = scrollingTree()->bannerViewHeight();
+        if (topOffset)
+            return FloatSize(0, -topOffset);
+    }
+#endif
+    return { };
+}
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+
+bool ScrollingTreeScrollingNodeDelegateMac::hasBannerViewOverlay() const
+{
+    return scrollingNode()->nodeType() == ScrollingNodeType::MainFrame && scrollingTree()->hasBannerViewOverlay();
+}
+
+#endif
 
 void ScrollingTreeScrollingNodeDelegateMac::updateScrollbarPainters()
 {

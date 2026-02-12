@@ -289,6 +289,24 @@ WebCore::FloatBoxExtent RemoteScrollingCoordinatorProxy::obscuredContentInsets()
     return m_scrollingTree->mainFrameObscuredContentInsets();
 }
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+
+void RemoteScrollingCoordinatorProxy::setBannerViewHeight(float offset)
+{
+    auto previousOffset = m_scrollingTree->bannerViewHeight();
+    m_scrollingTree->setBannerViewHeight(offset);
+
+    if (offset < previousOffset)
+        m_scrollingTree->triggerMainFrameRubberBandSnapBack();
+}
+
+void RemoteScrollingCoordinatorProxy::setHasBannerViewOverlay(bool hasBannerView)
+{
+    m_scrollingTree->setHasBannerViewOverlay(hasBannerView);
+}
+
+#endif
+
 WebCore::FloatPoint RemoteScrollingCoordinatorProxy::currentMainFrameScrollPosition() const
 {
     return m_scrollingTree->mainFrameScrollPosition();

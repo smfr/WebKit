@@ -286,6 +286,7 @@ public:
 
 #if PLATFORM(COCOA)
     virtual bool canTakeForegroundAssertions() = 0;
+    virtual void scrollingCoordinatorWasCreated() { }
 #endif
 
     // Return whether the view is visible, or occluded by another window.

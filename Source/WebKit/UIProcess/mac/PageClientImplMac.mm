@@ -287,6 +287,11 @@ void PageClientImpl::pageClosed()
     PageClientImplCocoa::pageClosed();
 }
 
+void PageClientImpl::scrollingCoordinatorWasCreated()
+{
+    protect(m_impl)->scrollingCoordinatorWasCreated();
+}
+
 void PageClientImpl::didRelaunchProcess()
 {
     protect(m_impl)->didRelaunchProcess();
@@ -798,6 +803,9 @@ void PageClientImpl::setEditableElementIsFocused(bool editableElementIsFocused)
 void PageClientImpl::scrollingNodeScrollViewDidScroll(WebCore::ScrollingNodeID)
 {
     protect(m_impl)->suppressContentRelativeChildViews(WebViewImpl::ContentRelativeChildViewsSuppressionType::TemporarilyRemove);
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    protect(m_impl)->updateBannerViewFrame();
+#endif
 }
 
 void PageClientImpl::willBeginViewGesture()

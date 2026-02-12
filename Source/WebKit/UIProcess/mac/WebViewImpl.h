@@ -66,6 +66,7 @@
 #include <WebKitAdditions/AppKitSPIAdditions.h>
 #endif
 
+OBJC_CLASS CAShapeLayer;
 OBJC_CLASS NSAccessibilityRemoteUIElement;
 OBJC_CLASS NSImmediateActionGestureRecognizer;
 OBJC_CLASS NSPanGestureRecognizer;
@@ -258,6 +259,7 @@ public:
     void processDidExit();
     void pageClosed();
     void didRelaunchProcess();
+    void scrollingCoordinatorWasCreated();
 
     void setDrawsBackground(bool);
     bool drawsBackground() const;
@@ -840,9 +842,14 @@ public:
 #endif
 
 #if ENABLE(BANNER_VIEW_OVERLAYS)
-void setBannerView(WKBannerView *);
-WKBannerView *bannerView() const { return m_bannerView.get(); }
-void applyBannerViewOverlayHeight(CGFloat, bool);
+    void setBannerView(WKBannerView *);
+    WKBannerView *bannerView() const { return m_bannerView.get(); }
+
+    void applyBannerViewOverlayHeight(CGFloat, bool);
+    CGFloat bannerViewHeight() const;
+    void updateBannerViewForWheelEvent(NSEvent *);
+    void updateBannerViewForPanGesture(NSGestureRecognizerState);
+    void updateBannerViewFrame();
 #endif
 
 #if ENABLE(VIDEO)
@@ -1147,6 +1154,9 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     RetainPtr<WKBannerView> m_bannerView;
+    RetainPtr<CAShapeLayer> m_bannerViewMask;
+    CGFloat m_bannerViewHeight { 0 };
+    bool m_canShowBannerViewOverlay { false };
 #endif
 
 #if HAVE(INLINE_PREDICTIONS)

@@ -41,6 +41,10 @@
 
 namespace WebCore {
 
+#if USE(APPLE_INTERNAL_SDK)
+#import <WebKitAdditions/ScrollingEffectsControllerAdditions.mm>
+#endif
+
 static const Seconds scrollVelocityZeroingTimeout = 100_ms;
 static const float rubberbandDirectionLockStretchRatio = 1;
 static const float rubberbandMinimumRequiredDeltaBeforeStretch = 10;
@@ -319,6 +323,15 @@ bool ScrollingEffectsController::modifyScrollDeltaForStretching(const PlatformWh
     return false;
 }
 
+#if !ENABLE(BANNER_VIEW_OVERLAYS)
+
+FloatSize ScrollingEffectsController::deltaWithAdditionalAdjustments(const FloatSize& delta, bool)
+{
+    return delta;
+}
+
+#endif
+
 bool ScrollingEffectsController::applyScrollDeltaWithStretching(const PlatformWheelEvent& wheelEvent, FloatSize delta, bool isHorizontallyStretched, bool isVerticallyStretched)
 {
     auto eventDelta = (isVerticallyStretched || isHorizontallyStretched) ? -wheelEvent.unacceleratedScrollingDelta() : -wheelEvent.delta();
@@ -369,7 +382,11 @@ bool ScrollingEffectsController::applyScrollDeltaWithStretching(const PlatformWh
     if (delta.isZero())
         return canStartAnimation;
 
-    auto stretchScrollForceDelta = delta;
+    auto stretchAmount = m_client.stretchAmount();
+
+    FloatSize adjustedDelta = deltaWithAdditionalAdjustments(delta, verticalDeltaOpposesStretch);
+    auto stretchScrollForceDelta = adjustedDelta;
+
     if (horizontalDeltaOpposesStretch)
         stretchScrollForceDelta.setWidth(0);
     if (verticalDeltaOpposesStretch)
@@ -378,25 +395,24 @@ bool ScrollingEffectsController::applyScrollDeltaWithStretching(const PlatformWh
     m_stretchScrollForce += stretchScrollForceDelta;
 
     FloatSize dampedDelta;
-    auto stretchAmount = m_client.stretchAmount();
 
     if (horizontalDeltaOpposesStretch) {
-        dampedDelta.setWidth(delta.width());
-    } else if (delta.width()) {
+        dampedDelta.setWidth(adjustedDelta.width());
+    } else if (adjustedDelta.width()) {
         const auto dampedWidth = ceilf(elasticDeltaForReboundDelta(m_stretchScrollForce.width()));
         dampedDelta.setWidth(dampedWidth - stretchAmount.width());
     }
 
     if (verticalDeltaOpposesStretch) {
-        dampedDelta.setHeight(delta.height());
-    } else if (delta.height()) {
+        dampedDelta.setHeight(adjustedDelta.height());
+    } else if (adjustedDelta.height()) {
         const auto dampedHeight = ceilf(elasticDeltaForReboundDelta(m_stretchScrollForce.height()));
         dampedDelta.setHeight(dampedHeight - stretchAmount.height());
     }
 
     clampDeltaForAllowedAxes(wheelEvent, dampedDelta);
 
-    LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::applyScrollDeltaWithStretching() - stretchScrollForce " << m_stretchScrollForce << " move delta " << delta << " dampedDelta " << dampedDelta);
+    LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::applyScrollDeltaWithStretching() - stretchScrollForce " << m_stretchScrollForce << " move delta " << delta << " adjustedDelta " << adjustedDelta << " dampedDelta " << dampedDelta);
 
     m_client.immediateScrollBy(dampedDelta, ScrollClamping::Unclamped);
 
@@ -475,8 +491,9 @@ bool ScrollingEffectsController::startRubberBandAnimation(const FloatSize& initi
         m_currentAnimation->stop();
 
     m_currentAnimation = makeUnique<ScrollAnimationRubberBand>(*this);
-    bool started = downcast<ScrollAnimationRubberBand>(*m_currentAnimation).startRubberBandAnimation(initialVelocity, initialOverscroll);
-    LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::startRubberBandAnimation() - animation " << *m_currentAnimation << " started " << started);
+    auto targetOffset = m_client.rubberBandTargetOffset();
+    bool started = downcast<ScrollAnimationRubberBand>(*m_currentAnimation).startRubberBandAnimation(initialVelocity, initialOverscroll, targetOffset);
+    LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::startRubberBandAnimation() - animation " << *m_currentAnimation << " targetOffset " << targetOffset << " started " << started);
     return started;
 }
 
@@ -500,6 +517,19 @@ void ScrollingEffectsController::didStopRubberBandAnimation()
     m_isAnimatingRubberBand = false;
     m_client.didStopRubberBandAnimation();
     m_client.removeWheelEventTestCompletionDeferralForReason(m_client.scrollingNodeIDForTesting(), WheelEventTestMonitor::DeferReason::RubberbandInProgress);
+}
+
+void ScrollingEffectsController::startRubberBandSnapBack()
+{
+    auto stretchAmount = m_client.stretchAmount();
+    if (stretchAmount.isZero())
+        return;
+
+    if (m_currentAnimation)
+        m_currentAnimation->stop();
+
+    LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::startRubberBandSnapBack() - stretchAmount " << stretchAmount);
+    startRubberBandAnimation({ }, stretchAmount);
 }
 
 void ScrollingEffectsController::startRubberBandAnimationIfNecessary()

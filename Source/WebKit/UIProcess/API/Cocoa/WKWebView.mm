@@ -7568,7 +7568,7 @@ static OptionSet<WebCore::DataDetectorType> coreDataDetectorTypes(_WKTextExtract
 
 - (CGFloat)_bannerViewOverlayHeight
 {
-    return 0;
+    return _impl->bannerViewHeight();
 }
 
 #endif

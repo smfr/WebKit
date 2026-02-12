@@ -38,7 +38,9 @@ public:
     virtual ~ScrollAnimationRubberBand();
 
     // targetOffset is the scroll offset when the animation has finished (i.e. scrolled to an edge).
-    bool startRubberBandAnimation(const FloatSize& initialVelocity, const FloatSize& initialOverscroll);
+    // The optional targetOverscroll parameter specifies where the animation should snap to (defaults to zero).
+    // This is used so that rubber banding does not obscure banner view overlays.
+    bool startRubberBandAnimation(const FloatSize& initialVelocity, const FloatSize& initialOverscroll, const FloatSize& targetOverscroll = { });
 
 private:
     void updateScrollExtents() final;
@@ -51,6 +53,7 @@ private:
 
     FloatSize m_initialVelocity;
     FloatSize m_initialOverscroll;
+    FloatSize m_targetOverscroll;
 };
 
 } // namespace WebCore

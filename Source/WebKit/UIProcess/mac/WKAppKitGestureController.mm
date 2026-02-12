@@ -230,6 +230,10 @@ static NSString * const textSelectionClickGestureName = @"";
     if ([panGesture state] == NSGestureRecognizerStateBegan)
         viewImpl->dismissContentRelativeChildWindowsWithAnimation(false);
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    viewImpl->updateBannerViewForPanGesture([panGesture state]);
+#endif
+
     // FIXME: Need to supply a real event here.
     if (viewImpl->allowsBackForwardNavigationGestures() && viewImpl->ensureProtectedGestureController()->handleScrollWheelEvent(nil)) {
         WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "View gesture controller handled gesture");

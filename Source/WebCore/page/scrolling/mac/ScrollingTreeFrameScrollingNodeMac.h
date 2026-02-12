@@ -49,6 +49,8 @@ public:
 
     RetainPtr<CALayer> rootContentsLayer() const { return m_rootContentsLayer; }
 
+    void startRubberBandSnapBack();
+
 protected:
     ScrollingTreeFrameScrollingNodeMac(ScrollingTree&, ScrollingNodeType, ScrollingNodeID);
 

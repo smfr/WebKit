@@ -59,6 +59,7 @@ public:
     void currentScrollPositionChanged();
 
     bool isRubberBandInProgress() const;
+    void startRubberBandSnapBack();
 
     void updateScrollbarPainters();
     void updateScrollbarLayers() final;
@@ -84,6 +85,10 @@ private:
     bool shouldRubberBandOnSide(BoxSide, FloatSize) const final;
     void didStopRubberBandAnimation() final;
     void rubberBandingStateChanged(bool) final;
+    FloatSize rubberBandTargetOffset() const final;
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    bool hasBannerViewOverlay() const final;
+#endif
     bool scrollPositionIsNotRubberbandingEdge(const FloatPoint&) const;
 
     const Ref<ScrollerPairMac> m_scrollerPair;

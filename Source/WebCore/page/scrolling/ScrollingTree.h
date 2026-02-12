@@ -238,6 +238,13 @@ public:
 
     WEBCORE_EXPORT FloatBoxExtent mainFrameObscuredContentInsets() const;
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    virtual float bannerViewHeight() const { return 0; }
+    virtual bool hasBannerViewOverlay() const { return false; }
+#endif
+
+    virtual void triggerMainFrameRubberBandSnapBack() { }
+
     WEBCORE_EXPORT FloatPoint mainFrameScrollPosition() const;
 
     WEBCORE_EXPORT ScrollbarWidth mainFrameScrollbarWidth() const;

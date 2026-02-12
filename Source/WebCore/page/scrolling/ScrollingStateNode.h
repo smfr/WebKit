@@ -246,7 +246,12 @@ enum class ScrollingStateNodeProperty : uint64_t {
     FooterLayer                                 = 1LLU << 43, // Not serialized
     BehaviorForFixedElements                    = FooterHeight << 1,
     ObscuredContentInsets                       = BehaviorForFixedElements << 1,
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    BannerViewHeight                            = ObscuredContentInsets << 1,
+    VisualViewportIsSmallerThanLayoutViewport   = BannerViewHeight << 1,
+#else
     VisualViewportIsSmallerThanLayoutViewport   = ObscuredContentInsets << 1,
+#endif
     AsyncFrameOrOverflowScrollingEnabled        = VisualViewportIsSmallerThanLayoutViewport << 1,
     WheelEventGesturesBecomeNonBlocking         = AsyncFrameOrOverflowScrollingEnabled << 1,
     ScrollingPerformanceTestingEnabled          = WheelEventGesturesBecomeNonBlocking << 1,

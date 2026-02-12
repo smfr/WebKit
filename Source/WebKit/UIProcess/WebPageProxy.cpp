@@ -1746,8 +1746,11 @@ void WebPageProxy::setDrawingArea(RefPtr<DrawingAreaProxy>&& newDrawingArea)
     drawingArea->setSize(viewSize());
 
 #if PLATFORM(COCOA)
-    if (RefPtr drawingAreaProxy = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(*drawingArea))
+    if (RefPtr drawingAreaProxy = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(*drawingArea)) {
         m_scrollingCoordinatorProxy = drawingAreaProxy->createScrollingCoordinatorProxy();
+        if (RefPtr pageClient = this->pageClient())
+            pageClient->scrollingCoordinatorWasCreated();
+    }
 #endif
 }
 

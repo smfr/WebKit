@@ -592,6 +592,15 @@ void RemoteScrollingTreeMac::scrollingTreeNodeScrollbarMinimumThumbLengthDidChan
     });
 }
 
+void RemoteScrollingTreeMac::triggerMainFrameRubberBandSnapBack()
+{
+    RefPtr rootScrollingNode = dynamicDowncast<ScrollingTreeFrameScrollingNodeMac>(rootNode());
+    if (!rootScrollingNode)
+        return;
+
+    rootScrollingNode->startRubberBandSnapBack();
+}
+
 } // namespace WebKit
 
 #endif // PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)

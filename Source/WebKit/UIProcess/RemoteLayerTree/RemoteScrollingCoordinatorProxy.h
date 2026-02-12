@@ -179,6 +179,10 @@ public:
     virtual void windowScreenDidChange(WebCore::PlatformDisplayID, std::optional<WebCore::FramesPerSecond>) { }
 
     WebCore::FloatBoxExtent obscuredContentInsets() const;
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    void setBannerViewHeight(float);
+    void setHasBannerViewOverlay(bool);
+#endif
     WebCore::FloatPoint currentMainFrameScrollPosition() const;
     WebCore::FloatRect computeVisibleContentRect();
     WebCore::IntPoint scrollOrigin() const;
