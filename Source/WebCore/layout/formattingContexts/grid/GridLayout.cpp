@@ -354,6 +354,9 @@ static Vector<LayoutUnit> rowSizesForFirstIterationColumnSizing(const TrackSizin
                 ASSERT(gridContainerInnerInlineSize, "The formatting context should have transformed this track size to auto");
                 return Style::evaluate<LayoutUnit>(calculatedValue, *gridContainerInnerInlineSize, Style::ZoomNeeded { });
             },
+            [](const CSS::Keyword::MinContent&) -> LayoutUnit {
+                return LayoutUnit::max();
+            },
             [](const auto&) -> LayoutUnit {
                 ASSERT_NOT_IMPLEMENTED_YET();
                 return { };

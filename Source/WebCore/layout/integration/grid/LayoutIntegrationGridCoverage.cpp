@@ -348,8 +348,8 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
 
                 if (minBreadth.isLength()) {
                     auto& gridTrackBreadthLength = minBreadth.length();
-                    // Length types like auto, min-content, max-content, etc. not yet supported
-                    if (!gridTrackBreadthLength.isFixed())
+                    // Length types like auto, max-content, etc. not yet supported
+                    if (!gridTrackBreadthLength.isFixed() && !gridTrackBreadthLength.isMinContent())
                         return GridAvoidanceReason::GridHasUnsupportedGridTemplateRows;
                     return std::nullopt;
                 }
