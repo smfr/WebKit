@@ -285,8 +285,8 @@ bool ScrollAnchoringController::findPriorityCandidate(Document& document)
             if (isViableStatus(status)) {
                 m_anchorObject = *candidate;
                 // FIXME: Look inside the candidate?
+                return true;
             }
-            return true;
         }
     }
 
