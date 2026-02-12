@@ -682,11 +682,11 @@ void TypingCommand::deleteKeyPressed(TextGranularity granularity, bool shouldAdd
         const VisiblePosition& previousPosition = visibleStart.previous(CannotCrossEditingBoundary);
         RefPtr enclosingTableCell = enclosingNodeOfType(visibleStart.deepEquivalent(), &isTableCell);
         RefPtr enclosingTableCellForPreviousPosition = enclosingNodeOfType(previousPosition.deepEquivalent(), &isTableCell);
-        if (previousPosition.isNull() || enclosingTableCell != enclosingTableCellForPreviousPosition) {
+        if (previousPosition.isNull() || enclosingTableCell != enclosingTableCellForPreviousPosition || hasSmartListMarkerAttribute()) {
             // When the caret is at the start of the editable area in an empty list item, break out of the list item.
             if (auto deleteListSelection = shouldBreakOutOfEmptyListItem(); !deleteListSelection.isNone()) {
                 if (willAddTypingToOpenCommand(Type::DeleteKey, granularity, { }, deleteListSelection.firstRange())) {
-                    breakOutOfEmptyListItem();
+                    breakOutOfEmptyListItem(ReconstitutePlainTextListIfNeeded::Yes);
                     typingAddedToOpenCommand(Type::DeleteKey);
                 }
                 return;
