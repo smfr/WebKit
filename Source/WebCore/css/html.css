@@ -998,7 +998,7 @@ input[type="file"]:disabled {
 input:is([type="button"], [type="submit"], [type="reset"]):disabled,
 input[type="file"]:disabled::file-selector-button,
 button:disabled,
-select:disabled {
+select:-internal-uses-menulist:disabled {
     background-color: -apple-system-opaque-secondary-fill-disabled;
     color: -apple-system-tertiary-label;
     opacity: initial;
@@ -1057,6 +1057,13 @@ select {
     appearance: auto;
     border: 1px solid;
     -webkit-rtl-ordering: logical;
+#if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
+    color: CanvasText;
+    background-color: Canvas;
+#endif
+}
+
+select:-internal-uses-menulist {
 #if defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY
     padding-block: 0;
     padding-inline: 0.4em;
@@ -1069,15 +1076,8 @@ select {
     background-color: -apple-system-opaque-secondary-fill;
 #endif /* defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION */
 #else
-    color: CanvasText;
-    background-color: Canvas;
-#endif
-}
-
-select:-internal-uses-menulist {
-#if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
     border-radius: 5px;
-#endif
+#endif /* defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY */
     align-items: center;
     white-space: pre;
     cursor: default;
