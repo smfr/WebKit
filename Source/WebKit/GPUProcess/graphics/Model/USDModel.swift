@@ -27,14 +27,14 @@ internal import WebKit_Internal
 internal import simd
 
 #if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
-@_spi(RealityCoreRendererAPI) internal import RealityKit
-@_spi(RealityCoreTextureProcessingAPI) internal import RealityCoreTextureProcessing
-@_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
-@_spi(SwiftAPI) internal import DirectResource
-internal import _USDKit_RealityKit
-internal import RealityKit
-@_spi(SGPrivate) internal import ShaderGraph
-internal import RealityCoreDeformation
+@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreTextureProcessingAPI) internal import RealityCoreTextureProcessing
+@_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
+@_weakLinked @_spi(SwiftAPI) internal import DirectResource
+@_weakLinked internal import _USDKit_RealityKit
+@_weakLinked internal import RealityKit
+@_weakLinked @_spi(SGPrivate) internal import ShaderGraph
+@_weakLinked internal import RealityCoreDeformation
 
 extension _USDKit_RealityKit._Proto_MeshDataUpdate_v1 {
     @_silgen_name("$s18_USDKit_RealityKit24_Proto_MeshDataUpdate_v1V18instanceTransformsSaySo13simd_float4x4aGvg")

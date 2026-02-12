@@ -23,10 +23,10 @@
 
 #if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
 
-internal import DirectResource
+@_weakLinked internal import DirectResource
 internal import Metal
-@_spi(RealityCoreRendererAPI) internal import RealityKit
-@_spi(SGInternal) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
+@_weakLinked @_spi(SGInternal) internal import RealityKit
 
 nonisolated func mapSemantic(_ semantic: LowLevelMesh.VertexSemantic) -> _Proto_LowLevelMeshResource_v1.VertexSemantic {
     switch semantic {

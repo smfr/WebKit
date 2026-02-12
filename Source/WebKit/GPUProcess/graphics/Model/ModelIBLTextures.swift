@@ -24,8 +24,8 @@
 #if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
 
 internal import Metal
-@_spi(RealityCoreRendererAPI) internal import RealityKit
-@_spi(RealityCoreTextureProcessingAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreTextureProcessingAPI) internal import RealityKit
 
 class IBLTextures {
     static func loadIBLTextures(

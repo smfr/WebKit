@@ -23,7 +23,7 @@
 
 #if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
 
-@_spi(RealityCoreRendererAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
 
 nonisolated func makeParameters(
     for function: _Proto_LowLevelMaterialResource_v1.Function,
