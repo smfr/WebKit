@@ -4571,7 +4571,7 @@ WEBCORE_COMMAND_FOR_WEBVIEW(pasteAndMatchStyle);
 
 - (void)_setTextColorForWebView:(UIColor *)color sender:(id)sender
 {
-    WebCore::Color textColor(WebCore::roundAndClampToSRGBALossy(protect(color).get().CGColor));
+    WebCore::Color textColor(WebCore::roundAndClampToSRGBALossy(protect(protect(color).get().CGColor)));
     protect(_page)->executeEditCommand("ForeColor"_s, WebCore::serializationForHTML(textColor));
 }
 
@@ -6272,8 +6272,8 @@ static void logTextInteraction(const char* methodName, UIGestureRecognizer *loup
 {
     auto color = [&] {
         if (protect(_page->preferences())->inputTypeColorEnhancementsEnabled())
-            return WebCore::Color::createAndPreserveColorSpace(protect(value).get().CGColor);
-        return WebCore::Color(WebCore::roundAndClampToSRGBALossy(protect(value).get().CGColor));
+            return WebCore::Color::createAndPreserveColorSpace(protect(protect(value).get().CGColor));
+        return WebCore::Color(WebCore::roundAndClampToSRGBALossy(protect(protect(value).get().CGColor)));
     }();
     auto valueAsString = WebCore::serializationForHTML(color);
 
@@ -8534,7 +8534,7 @@ static RetainPtr<NSObject <WKFormPeripheral>> createInputPeripheralWithView(WebK
 
     _focusRequiresStrongPasswordAssistance = requiresStrongPasswordAssistance;
 
-    id<_WKInputDelegate> inputDelegate = [_webView.get() _inputDelegate];
+    RetainPtr inputDelegate = [_webView.get() _inputDelegate];
 
     if ([inputDelegate respondsToSelector:@selector(_webViewAdditionalContextForStrongPasswordAssistance:)])
         _additionalContextForStrongPasswordAssistance = [inputDelegate _webViewAdditionalContextForStrongPasswordAssistance:self.webView];
@@ -10402,7 +10402,7 @@ static WebCore::DataOwnerType coreDataOwnerType(_UIDataOwner platformType)
     if (!_contextMenuHintContainerView)
         return;
 
-    CGPoint newOffset = [_scrollViewForTargetedPreview convertPoint:CGPointZero toView:[protect(_contextMenuHintContainerView) superview]];
+    CGPoint newOffset = [protect(_scrollViewForTargetedPreview.get()) convertPoint:CGPointZero toView:[protect(_contextMenuHintContainerView.get()) superview]];
 
     CGRect frame = [_contextMenuHintContainerView frame];
     frame.origin.x = newOffset.x - _scrollViewForTargetedPreviewInitialOffset.x;
@@ -10420,7 +10420,7 @@ static WebCore::DataOwnerType coreDataOwnerType(_UIDataOwner platformType)
     if (!_scrollViewForTargetedPreview)
         _scrollViewForTargetedPreview = self.webView.scrollView;
 
-    _scrollViewForTargetedPreviewInitialOffset = [_scrollViewForTargetedPreview convertPoint:CGPointZero toView:[protect(_contextMenuHintContainerView) superview]];
+    _scrollViewForTargetedPreviewInitialOffset = [protect(_scrollViewForTargetedPreview.get()) convertPoint:CGPointZero toView:[protect(_contextMenuHintContainerView.get()) superview]];
 }
 
 #pragma mark - WKDeferringGestureRecognizerDelegate
@@ -10445,7 +10445,7 @@ static WebCore::DataOwnerType coreDataOwnerType(_UIDataOwner platformType)
 
 - (void)deferringGestureRecognizer:(WKDeferringGestureRecognizer *)deferringGestureRecognizer didEndTouchesWithEvent:(UIEvent *)event
 {
-    protect(self).get().gestureRecognizerConsistencyEnforcer.endTracking(deferringGestureRecognizer);
+    protect(protect(self).get().gestureRecognizerConsistencyEnforcer).get().endTracking(deferringGestureRecognizer);
 
     if (deferringGestureRecognizer.state != UIGestureRecognizerStatePossible)
         return;

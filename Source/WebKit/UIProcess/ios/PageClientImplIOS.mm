@@ -1322,7 +1322,7 @@ WebCore::Color PageClientImpl::contentViewBackgroundColor()
 
 Color PageClientImpl::insertionPointColor()
 {
-    return roundAndClampToSRGBALossy(protect([webView() _insertionPointColor]).get().CGColor);
+    return roundAndClampToSRGBALossy(protect(protect([webView() _insertionPointColor]).get().CGColor));
 }
 
 bool PageClientImpl::isScreenBeingCaptured()
