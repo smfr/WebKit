@@ -460,6 +460,8 @@ void DrawingAreaCoordinatedGraphics::preferredBufferFormatsDidChange()
 {
     if (m_layerTreeHost)
         m_layerTreeHost->preferredBufferFormatsDidChange();
+    else if (m_nonCompositedFrameRenderer)
+        m_nonCompositedFrameRenderer->preferredBufferFormatsDidChange();
 }
 #endif
 

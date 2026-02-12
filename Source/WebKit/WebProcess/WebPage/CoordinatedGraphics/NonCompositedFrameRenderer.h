@@ -48,6 +48,10 @@ public:
     void updateRenderingWithForcedRepaint();
     void updateRenderingWithForcedRepaintAsync(CompletionHandler<void()>&&);
 
+#if PLATFORM(WPE) && ENABLE(WPE_PLATFORM) && (USE(GBM) || OS(ANDROID))
+    void preferredBufferFormatsDidChange();
+#endif
+
 #if ENABLE(DAMAGE_TRACKING)
     void resetDamageHistoryForTesting();
     void foreachRegionInDamageHistoryForTesting(Function<void(const WebCore::Region&)>&&);

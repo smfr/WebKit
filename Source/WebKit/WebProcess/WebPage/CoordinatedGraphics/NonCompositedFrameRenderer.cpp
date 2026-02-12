@@ -225,6 +225,14 @@ void NonCompositedFrameRenderer::updateRenderingWithForcedRepaintAsync(Completio
     updateRenderingWithForcedRepaint();
 }
 
+#if PLATFORM(WPE) && ENABLE(WPE_PLATFORM) && (USE(GBM) || OS(ANDROID))
+void NonCompositedFrameRenderer::preferredBufferFormatsDidChange()
+{
+    ASSERT(RunLoop::isMain());
+    m_surface->preferredBufferFormatsDidChange();
+}
+#endif
+
 #if ENABLE(DAMAGE_TRACKING)
 void NonCompositedFrameRenderer::resetDamageHistoryForTesting()
 {
