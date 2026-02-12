@@ -5636,7 +5636,7 @@ NSTextInputContext *WebViewImpl::inputContext()
     if (!m_page->editorState().isContentEditable)
         return nil;
 
-    return [m_view _web_superInputContext];
+    return [protect(m_view.get()) _web_superInputContext];
 }
 
 NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
@@ -5647,7 +5647,7 @@ NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
     if (!m_page->editorState().isContentEditable && !m_page->editorState().selectionIsRange)
         return nil;
 
-    return [m_view _web_superInputContext];
+    return [protect(m_view.get()) _web_superInputContext];
 }
 
 void WebViewImpl::unmarkText()
