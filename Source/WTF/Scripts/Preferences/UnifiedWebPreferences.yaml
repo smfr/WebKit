@@ -9162,10 +9162,10 @@ WebArchiveTestingModeEnabled:
 
 WebAssemblyDebuggerEnabled:
   type: bool
-  status: internal
+  status: developer
   category: javascript
-  humanReadableName: "WebAssembly Debugger"
-  humanReadableDescription: "Enable LLDB debugging support for WebAssembly (requires page reload)"
+  humanReadableName: "Experimental WebAssembly Debugger (Disables JIT)"
+  humanReadableDescription: "Enable LLDB debugging support for WebAssembly (requires new tab)"
   condition: ENABLE(WEBASSEMBLY_DEBUGGER) && ENABLE(REMOTE_INSPECTOR)
   defaultValue:
     WebKitLegacy:
