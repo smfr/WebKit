@@ -3506,55 +3506,46 @@ class YarrGenerator final : public YarrJITInfo {
                         // Patterns like /[]/ have zero candidates. Since it is rare, we do not do nothing for now.
                         if (!mapCount)
                             break;
-                        if (charactersFastPath.isValid() && !charactersFastPath.isEmpty()) {
-                            static_assert(BoyerMooreFastCandidates::maxSize == 2);
-                            dataLogLnIf(Options::verboseRegExpCompilation(), "Found characters fastpath lookahead ", charactersFastPath, " range:[", beginIndex, ", ", endIndex, ")");
 
-                            JIT_COMMENT(m_jit, "BMSearch characters fastpath lookahead ", charactersFastPath, " range:[", beginIndex, ", ", endIndex, ")");
-                            auto loopHead = m_jit.label();
-                            readCharacter(op.m_checkedOffset - endIndex + 1, m_regs.regT0);
-                            matched.append(m_jit.branch32(MacroAssembler::Equal, m_regs.regT0, MacroAssembler::TrustedImm32(charactersFastPath.at(0))));
-                            if (charactersFastPath.size() > 1)
-                                matched.append(m_jit.branch32(MacroAssembler::Equal, m_regs.regT0, MacroAssembler::TrustedImm32(charactersFastPath.at(1))));
-                            jumpIfAvailableInput(endIndex - beginIndex).linkTo(loopHead, &m_jit);
-                        } else {
-                            auto span = getBoyerMooreBitmap(map);
-                            dataLogLnIf(Options::verboseRegExpCompilation(), "Found bitmap lookahead count:(", mapCount, "),range:[", beginIndex, ", ", endIndex, ")");
+                        unsigned strideLength = endIndex - beginIndex;
+#if CPU(ARM64)
+                        // Try SIMD nibble table optimization first for any number of candidates.
+                        // This includes the scalar loop internally for tail processing,
+                        // following the same pattern as generateMultiPatternSIMDSearch.
+                        auto simdResult = generateBitInTableSIMDSearch(map, charactersFastPath, strideLength, endIndex, op.m_checkedOffset, matched);
+                        if (simdResult) {
+                            m_usesSIMD = true;
+                            op.m_reentry = simdResult->backtrackTarget;
+                            dataLogLnIf(Options::verboseRegExpCompilation(), "Using SIMD nibble table lookahead count:(", mapCount, "),range:[", beginIndex, ", ", endIndex, ")");
 
-                            JIT_COMMENT(m_jit, "BMSearch bitmap lookahead count:(", mapCount, "),range:[", beginIndex, ", ", endIndex, ")");
-                            ASSERT(span.size());
-                            m_jit.move(MacroAssembler::TrustedImmPtr(span.data()), m_regs.regT1);
-                            auto loopHead = m_jit.label();
-                            readCharacter(op.m_checkedOffset - endIndex + 1, m_regs.regT0);
-#if CPU(ARM64) || CPU(RISCV64)
-                            static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint64_t));
-                            static_assert(1 << 6 == 64);
-                            static_assert(1 << (6 + 1) == BoyerMooreBitmap::Map::size());
-                            m_jit.extractUnsignedBitfield32(m_regs.regT0, MacroAssembler::TrustedImm32(6), MacroAssembler::TrustedImm32(1), m_regs.regT2); // Extract 1 bit for index.
-                            m_jit.load64(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesEight), m_regs.regT2);
-                            m_jit.urshift64(m_regs.regT0, m_regs.regT2); // We can ignore upper bits and only lower 6bits are effective.
-                            matched.append(m_jit.branchTest64(MacroAssembler::NonZero, m_regs.regT2, MacroAssembler::TrustedImm32(1)));
-#elif CPU(X86_64)
-                            static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint64_t));
-                            static_assert(1 << 6 == 64);
-                            static_assert(1 << (6 + 1) == BoyerMooreBitmap::Map::size());
-                            m_jit.urshift32(m_regs.regT0, MacroAssembler::TrustedImm32(6), m_regs.regT2);
-                            m_jit.and32(MacroAssembler::TrustedImm32(1), m_regs.regT2);
-                            m_jit.load64(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesEight), m_regs.regT2);
-                            matched.append(m_jit.branchTestBit64(MacroAssembler::NonZero, m_regs.regT2, m_regs.regT0)); // We can ignore upper bits since modulo-64 is performed.
-#else
-                            static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint32_t));
-                            static_assert(1 << 5 == 32);
-                            static_assert(1 << (5 + 2) == BoyerMooreBitmap::Map::size());
-                            m_jit.move(m_regs.regT0, m_regs.regT2);
-                            m_jit.urshift32(MacroAssembler::TrustedImm32(5), m_regs.regT2);
-                            m_jit.and32(MacroAssembler::TrustedImm32(0b11), m_regs.regT2);
-                            m_jit.load32(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesFour), m_regs.regT2);
-                            m_jit.urshift32(m_regs.regT0, m_regs.regT2); // We can ignore upper bits and only lower 5bits are effective.
-                            matched.append(m_jit.branchTest32(MacroAssembler::NonZero, m_regs.regT2, MacroAssembler::TrustedImm32(1)));
-#endif
-                            jumpIfAvailableInput(endIndex - beginIndex).linkTo(loopHead, &m_jit);
+                            // Handle failure path - out of characters
+                            // After scalar loop exhausts, we fall through here
+                            if (!m_pattern.m_body->m_hasFixedSize) {
+                                if (alternative->m_minimumSize) {
+                                    m_jit.sub32(m_regs.index, MacroAssembler::Imm32(alternative->m_minimumSize), m_regs.regT0);
+                                    setMatchStart(m_regs.regT0);
+                                } else
+                                    setMatchStart(m_regs.index);
+                                op.m_jumps.append(m_jit.jump());
+                            } else
+                                op.m_jumps.append(m_jit.jump());
+
+                            // Handle match path
+                            matched.link(&m_jit);
+                            if (!m_pattern.m_body->m_hasFixedSize) {
+                                if (alternative->m_minimumSize) {
+                                    m_jit.sub32(m_regs.index, MacroAssembler::Imm32(alternative->m_minimumSize), m_regs.regT0);
+                                    setMatchStart(m_regs.regT0);
+                                } else
+                                    setMatchStart(m_regs.index);
+                            }
+                            break;
                         }
+#endif
+
+                        // SIMD not available or returned nullopt - use scalar-only paths
+                        generateBoyerMooreScalarLoop(map, charactersFastPath, strideLength, endIndex, op.m_checkedOffset, matched);
+
                         // Fallthrough if out-of-length failure happens.
 
                         // If the pattern size is not fixed, then store the start index for use if we match.
@@ -5771,6 +5762,67 @@ class YarrGenerator final : public YarrJITInfo {
         return pointer;
     }
 
+    // Generate the scalar Boyer-Moore search loop.
+    // This handles both the characters fast path (1-2 candidate characters) and the bitmap path.
+    // Parameters:
+    //   - map: the Boyer-Moore bitmap
+    //   - charactersFastPath: optional fast path for 1-2 character candidates
+    //   - strideLength: how much to advance on each iteration (endIndex - beginIndex)
+    //   - endIndex: the end index of the BM range
+    //   - checkedOffset: the offset being checked
+    //   - matched: JumpList to append match jumps to
+    void generateBoyerMooreScalarLoop(const BoyerMooreBitmap::Map& map, const BoyerMooreFastCandidates& charactersFastPath, unsigned strideLength, unsigned endIndex, unsigned checkedOffset, MacroAssembler::JumpList& matched)
+    {
+        if (charactersFastPath.isValid() && !charactersFastPath.isEmpty()) {
+            static_assert(BoyerMooreFastCandidates::maxSize == 2);
+            dataLogLnIf(Options::verboseRegExpCompilation(), "Found characters fastpath lookahead ", charactersFastPath);
+            JIT_COMMENT(m_jit, "BMSearch characters fastpath");
+            auto loopHead = m_jit.label();
+            readCharacter(checkedOffset - endIndex + 1, m_regs.regT0);
+            matched.append(m_jit.branch32(MacroAssembler::Equal, m_regs.regT0, MacroAssembler::TrustedImm32(charactersFastPath.at(0))));
+            if (charactersFastPath.size() > 1)
+                matched.append(m_jit.branch32(MacroAssembler::Equal, m_regs.regT0, MacroAssembler::TrustedImm32(charactersFastPath.at(1))));
+            jumpIfAvailableInput(strideLength).linkTo(loopHead, &m_jit);
+            return;
+        }
+
+        dataLogLnIf(Options::verboseRegExpCompilation(), "Found bitmap lookahead count:(", map.count(), ")");
+        auto span = getBoyerMooreBitmap(map);
+        JIT_COMMENT(m_jit, "BMSearch bitmap lookahead");
+        ASSERT(span.size());
+        m_jit.move(MacroAssembler::TrustedImmPtr(span.data()), m_regs.regT1);
+        auto loopHead = m_jit.label();
+        readCharacter(checkedOffset - endIndex + 1, m_regs.regT0);
+#if CPU(ARM64) || CPU(RISCV64)
+        static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint64_t));
+        static_assert(1 << 6 == 64);
+        static_assert(1 << (6 + 1) == BoyerMooreBitmap::Map::size());
+        m_jit.extractUnsignedBitfield32(m_regs.regT0, MacroAssembler::TrustedImm32(6), MacroAssembler::TrustedImm32(1), m_regs.regT2);
+        m_jit.load64(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesEight), m_regs.regT2);
+        m_jit.urshift64(m_regs.regT0, m_regs.regT2);
+        matched.append(m_jit.branchTest64(MacroAssembler::NonZero, m_regs.regT2, MacroAssembler::TrustedImm32(1)));
+#elif CPU(X86_64)
+        static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint64_t));
+        static_assert(1 << 6 == 64);
+        static_assert(1 << (6 + 1) == BoyerMooreBitmap::Map::size());
+        m_jit.urshift32(m_regs.regT0, MacroAssembler::TrustedImm32(6), m_regs.regT2);
+        m_jit.and32(MacroAssembler::TrustedImm32(1), m_regs.regT2);
+        m_jit.load64(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesEight), m_regs.regT2);
+        matched.append(m_jit.branchTestBit64(MacroAssembler::NonZero, m_regs.regT2, m_regs.regT0));
+#else
+        static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint32_t));
+        static_assert(1 << 5 == 32);
+        static_assert(1 << (5 + 2) == BoyerMooreBitmap::Map::size());
+        m_jit.move(m_regs.regT0, m_regs.regT2);
+        m_jit.urshift32(MacroAssembler::TrustedImm32(5), m_regs.regT2);
+        m_jit.and32(MacroAssembler::TrustedImm32(0b11), m_regs.regT2);
+        m_jit.load32(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesFour), m_regs.regT2);
+        m_jit.urshift32(m_regs.regT0, m_regs.regT2);
+        matched.append(m_jit.branchTest32(MacroAssembler::NonZero, m_regs.regT2, MacroAssembler::TrustedImm32(1)));
+#endif
+        jumpIfAvailableInput(strideLength).linkTo(loopHead, &m_jit);
+    }
+
 #if CPU(ARM64) || CPU(X86_64)
     // Generate SIMD-accelerated multi-pattern search for alternation patterns like /agggtaaa|tttaccct/i:
     // The idea comes from the SkipUntilOneOfMasked optimization from V8.
@@ -6042,6 +6094,224 @@ class YarrGenerator final : public YarrJITInfo {
         // We return backtrackEntry instead of simdLoopHead to ensure bounds checking is correct
         // after the scalar loop modifies regT1.
         return MultiPatternSIMDResult { simdLoopHead, backtrackEntry };
+    }
+
+    // Generate SIMD-accelerated skip search for Boyer-Moore bitmap using nibble table lookup.
+    //
+    // The algorithm compresses the 128-entry bitmap into a 16-byte nibble table where:
+    //   - Index = low nibble of character (bits 0-3)
+    //   - Value = bitmask of valid high nibbles (bits 4-6)
+    //
+    // For 16 input characters simultaneously:
+    //   1. Extract low nibbles -> TBL lookup gets row from nibble_table
+    //   2. Extract high nibbles -> TBL lookup builds bitmask
+    //   3. CMTST tests if (row & mask) is non-zero for each position
+    //   4. If any lane matches, fall through to scalar loop to find exact position
+    //   5. Otherwise advance by 16 and continue
+    //
+    // Register allocation (ARM64):
+    //   Pattern constants (set once, never modified):
+    //   - vectorTemp0 = nibble_table[16] (character membership lookup)
+    //   - vectorTemp1 = 0x0F repeated (low nibble mask)
+    //   - vectorTemp2 = hi-nibble lookup table (0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0,0,0,0,0,0,0,0)
+    //
+    //   Input/scratch (reloaded/clobbered each iteration):
+    //   - vectorInput0 = 16 input characters
+    //   - vectorScratch0-3 = computation scratch
+    struct SkipBitInTableSIMDResult {
+        MacroAssembler::Label simdLoopHead;
+        MacroAssembler::Label backtrackTarget;
+    };
+
+    std::optional<SkipBitInTableSIMDResult> generateBitInTableSIMDSearch(const BoyerMooreBitmap::Map& bitmap, const BoyerMooreFastCandidates& charactersFastPath, unsigned strideLength, unsigned endIndex, unsigned checkedOffset, MacroAssembler::JumpList& matched)
+    {
+        // Only for Latin1 (8-bit characters)
+        if (m_charSize != CharSize::Char8)
+            return std::nullopt;
+
+        // Only uses SIMD when advance_by == 1. For larger strides,
+        // the scalar Boyer-Moore version can skip multiple characters per iteration,
+        // which performs better than SIMD checking every character.
+        if (strideLength != 1)
+            return std::nullopt;
+
+        // Call can clobber SIMD registers
+        if (mayCall())
+            return std::nullopt;
+
+        // Need valid SIMD registers
+        if (m_regs.vectorTemp0 == InvalidFPRReg || m_regs.vectorInput0 == InvalidFPRReg)
+            return std::nullopt;
+
+        if (checkedOffset > 0x7fffffff)
+            return std::nullopt;
+
+        // baseOffset determines where SIMD reads relative to index.
+        // Scalar loop reads at: index - (checkedOffset - endIndex + 1)
+        // So SIMD should read at the same position: baseOffset = -(checkedOffset - endIndex + 1) = -checkedOffset + endIndex - 1
+        auto baseOffset = Checked<int32_t, RecordOverflow>(-static_cast<int32_t>(checkedOffset)) + static_cast<int32_t>(endIndex) - 1;
+        if (baseOffset.hasOverflowed())
+            return std::nullopt;
+
+        // Need at least 16 characters from the current position to use SIMD
+        int32_t minCharsNeeded = 16;
+        auto totalOffset = minCharsNeeded + baseOffset;
+        if (totalOffset.hasOverflowed())
+            return std::nullopt;
+
+#if CPU(ARM64)
+        JIT_COMMENT(m_jit, "BitInTable SIMD search");
+
+        // ==================== SETUP CONSTANTS (OUTSIDE LOOP) ====================
+        //
+        // This code leverages our BoyerMoore Bitmap (128 entries) for SIMD search.
+        // We spread this bitmap into SIMD register (128bits), and use this with SIMD register to
+        // parallelize the matching.
+        //
+        // For each character c in 0-127:
+        //   - Low nibble (c & 0x0F) selects which of 16 table entries to use
+        //   - High nibble ((c >> 4) & 0x07) selects which bit within that entry
+        // This allows checking membership via:
+        //   nibble_table[low_nibble] & (1 << high_nibble)
+        // SIMD can test 16 characters simultaneously using TBL + CMTST.
+        auto fromBitmap = [](const BoyerMooreBitmap::Map& bitmap) -> v128_t {
+            v128_t table { };
+            for (unsigned i = 0; i < BoyerMooreBitmap::mapSize; ++i) {
+                if (bitmap.get(i)) {
+                    uint8_t lowNibble = i & 0x0F;
+                    uint8_t highNibble = (i >> 4) & 0x07;
+                    table.u8x16[lowNibble] |= (1 << highNibble);
+                }
+            }
+            return table;
+        };
+
+        // vectorTemp0 = nibble_table (16 bytes, for TBL lookup)
+        FPRReg nibbleTableFPR = m_regs.vectorTemp0;
+        m_jit.move128ToVector(fromBitmap(bitmap), nibbleTableFPR);
+
+        // vectorTemp1 = 0x0F repeated (low nibble mask)
+        FPRReg lowNibbleMaskFPR = m_regs.vectorTemp1;
+        v128_t lowNibbleMask;
+        lowNibbleMask.u64x2[0] = 0x0f0f0f0f'0f0f0f0fULL;
+        lowNibbleMask.u64x2[1] = 0x0f0f0f0f'0f0f0f0fULL;
+        m_jit.move128ToVector(lowNibbleMask, lowNibbleMaskFPR);
+
+        // vectorTemp2 = hi-nibble lookup (1 << (hi_nibble & 7) for each position 0-15)
+        // Used to convert high nibble (0-7) into a bitmask (0x01, 0x02, 0x04, ..., 0x80)
+        // The pattern is repeated twice so that positions 8-15 map to the same values as 0-7.
+        // This implicitly performs & 0x7 on the high nibble, which is needed because
+        // characters > 127 can have high nibbles in the range 8-15.
+        FPRReg highNibbleLookupFPR = m_regs.vectorTemp2;
+        v128_t hiNibbleLookup;
+        hiNibbleLookup.u64x2[0] = 0x80402010'08040201ULL;
+        hiNibbleLookup.u64x2[1] = 0x80402010'08040201ULL;
+        m_jit.move128ToVector(hiNibbleLookup, highNibbleLookupFPR);
+
+        // ==================== SIMD LOOP ====================
+        MacroAssembler::JumpList scalarLoop;
+
+        // Backtrack entry point - re-computes threshold since scalar loop clobbers regT1
+        // When verification fails and backtracks, we need to re-compute the SIMD threshold
+        auto backtrackEntry = m_jit.label();
+
+        // Pre-compute max index for SIMD: length - totalOffset
+        // This prevents underflow when length < totalOffset
+        scalarLoop.append(m_jit.branchSub32(MacroAssembler::Signed, m_regs.length, MacroAssembler::TrustedImm32(totalOffset), m_regs.regT1));
+
+        // Bounds check: index <= length - totalOffset
+        scalarLoop.append(m_jit.branch32(MacroAssembler::Above, m_regs.index, m_regs.regT1));
+
+        // Lower bound check when baseOffset is negative
+        if (baseOffset < 0)
+            scalarLoop.append(m_jit.branch32(MacroAssembler::Below, m_regs.index, MacroAssembler::TrustedImm32(-baseOffset)));
+
+        auto simdLoopHead = m_jit.label();
+
+        // Load 16 input bytes
+        m_jit.loadVector(MacroAssembler::BaseIndex(m_regs.input, m_regs.index, MacroAssembler::TimesOne, baseOffset), m_regs.vectorInput0);
+
+        // Step 1: Extract low nibbles (input & 0x0F) -> vectorScratch0
+        m_jit.vectorAnd(SIMDInfo { SIMDLane::v128, SIMDSignMode::None }, m_regs.vectorInput0, lowNibbleMaskFPR, m_regs.vectorScratch0);
+
+        // Step 2: Extract high nibbles ((input >> 4) & 0x0F) -> vectorScratch1
+        m_jit.vectorUshrInt8(m_regs.vectorInput0, 4, m_regs.vectorScratch1);
+        m_jit.vectorAnd(SIMDInfo { SIMDLane::v128, SIMDSignMode::None }, m_regs.vectorScratch1, lowNibbleMaskFPR, m_regs.vectorScratch1);
+
+        // Step 3: TBL lookup row = nibble_table[lo] -> vectorScratch2
+        m_jit.vectorSwizzle(nibbleTableFPR, m_regs.vectorScratch0, m_regs.vectorScratch2);
+
+        // Step 4: TBL lookup mask = hi_lookup[hi] -> vectorScratch3
+        m_jit.vectorSwizzle(highNibbleLookupFPR, m_regs.vectorScratch1, m_regs.vectorScratch3);
+
+        // Step 5: CMTST - test if (row & mask) != 0 for each lane -> vectorScratch0
+        m_jit.vectorTest(SIMDInfo { SIMDLane::i8x16, SIMDSignMode::Unsigned }, m_regs.vectorScratch2, m_regs.vectorScratch3, m_regs.vectorScratch0);
+
+        // Step 6: Narrow the 128-bit result to 64 bits using SHRN
+        // SHRN treats the input as 8 16-bit elements and narrows to 8 8-bit elements.
+        // With shift=4, it takes (element >> 4) & 0xFF, placing results in low 64 bits.
+        // For each byte: 0xFF -> high nibble is 0xF, 0x00 -> high nibble is 0x0.
+        // This gives us a 64-bit value where each nibble (4 bits) indicates a match.
+        m_jit.vectorShrnInt8(m_regs.vectorScratch0, 4, m_regs.vectorScratch0);
+
+        // Extract the 64-bit result
+        m_jit.moveDoubleTo64(m_regs.vectorScratch0, m_regs.regT0);
+
+        // Check if any match found
+        auto matchInVector = m_jit.branchTest64(MacroAssembler::NonZero, m_regs.regT0);
+
+        // ==================== NO MATCH - ADVANCE ====================
+
+        // No match - advance by 16 and continue
+        m_jit.add32(MacroAssembler::TrustedImm32(16), m_regs.index);
+        m_jit.branch32(MacroAssembler::BelowOrEqual, m_regs.index, m_regs.regT1).linkTo(simdLoopHead, &m_jit);
+        // Jump to scalar loop when bounds check fails
+        scalarLoop.append(m_jit.jump());
+
+        // ==================== MATCH FOUND IN VECTOR ====================
+
+        matchInVector.link(&m_jit);
+
+        // Find exact position using RBIT + CLZ
+        // RBIT reverses bits so first match becomes highest bit
+        // CLZ counts leading zeros to find position
+        m_jit.reverseBits64(m_regs.regT0, m_regs.regT0);
+        m_jit.countLeadingZeros64(m_regs.regT0, m_regs.regT0);
+
+        // Character index = bit position / 4 (since SHRN compressed by 4)
+        m_jit.urshift64(MacroAssembler::TrustedImm32(2), m_regs.regT0);
+
+        // Add to current index
+        m_jit.add32(m_regs.regT0, m_regs.index);
+
+        // Jump to matched! (index now points to the matching character)
+        matched.append(m_jit.jump());
+
+        // ==================== SCALAR LOOP ====================
+        // Handles tail positions after SIMD exhausts.
+        scalarLoop.link(&m_jit);
+
+        JIT_COMMENT(m_jit, "BitInTable scalar loop");
+
+        // Initial bounds check before first iteration - SIMD may have left index beyond bounds
+        auto scalarFailed = m_jit.branch32(MacroAssembler::Above, m_regs.index, m_regs.length);
+
+        // Use the shared scalar loop implementation
+        ASSERT(strideLength == 1);
+        generateBoyerMooreScalarLoop(bitmap, charactersFastPath, 1, endIndex, checkedOffset, matched);
+
+        // Fall through when out of bounds - no more characters to check
+        scalarFailed.link(&m_jit);
+
+        return SkipBitInTableSIMDResult { simdLoopHead, backtrackEntry };
+#else
+        UNUSED_PARAM(bitmap);
+        UNUSED_PARAM(charactersFastPath);
+        UNUSED_PARAM(strideLength);
+        UNUSED_PARAM(endIndex);
+        UNUSED_PARAM(matched);
+        return std::nullopt;
+#endif
     }
 #endif
 
