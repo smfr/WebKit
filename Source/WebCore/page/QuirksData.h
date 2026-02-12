@@ -214,6 +214,7 @@ struct QuirksData {
 #endif
         ShouldUseLegacySelectPopoverDismissalBehaviorInDataActivationQuirk,
 #if PLATFORM(IOS_FAMILY)
+        ShouldUseLayoutViewportForClientRectsQuirk,
         ShouldSilenceWindowResizeEventsDuringApplicationSnapshotting,
 #endif
 #if PLATFORM(IOS) || PLATFORM(VISION)

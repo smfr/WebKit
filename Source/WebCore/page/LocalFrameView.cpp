@@ -92,6 +92,7 @@
 #include "PageOverlayController.h"
 #include "PerformanceLoggingClient.h"
 #include "ProgressTracker.h"
+#include "Quirks.h"
 #include "RenderAncestorIterator.h"
 #include "RenderBoxInlines.h"
 #include "RenderElementStyleInlines.h"
@@ -6190,7 +6191,12 @@ FloatRect LocalFrameView::absoluteToClientRect(FloatRect rect, std::optional<flo
 
 FloatSize LocalFrameView::documentToClientOffset() const
 {
-    FloatSize clientOrigin = -toFloatSize(visibleContentRect().location());
+    FloatSize clientOrigin;
+    RefPtr document = m_frame->document();
+    if (document && document->quirks().shouldUseLayoutViewportForClientRects())
+        clientOrigin = -toFloatSize(layoutViewportRect().location());
+    else
+        clientOrigin = -toFloatSize(visibleContentRect().location());
 
     // Layout and visual viewports are affected by page zoom, so we need to factor that out.
     return clientOrigin.scaled(1 / (m_frame->pageZoomFactor() * m_frame->frameScaleFactor()));

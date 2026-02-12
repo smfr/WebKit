@@ -810,6 +810,18 @@ bool Quirks::shouldAvoidScrollingWhenFocusedContentIsVisible() const
     return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldAvoidScrollingWhenFocusedContentIsVisibleQuirk);
 }
 
+// discord.com rdar://162719481
+bool Quirks::shouldUseLayoutViewportForClientRects() const
+{
+    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
+
+#if PLATFORM(IOS_FAMILY)
+    return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldUseLayoutViewportForClientRectsQuirk);
+#else
+    return false;
+#endif
+}
+
 // Some input only specify image/* as an acceptable type, which is failing sometimes for certains domain names
 // which do not support HEIC.
 bool Quirks::shouldTranscodeHeicImagesForURL(const URL& url)
@@ -2467,6 +2479,16 @@ static void handleCNNQuirks(QuirksData& quirksData, const URL& /* quirksURL */, 
     quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::NeedsFullscreenObjectFitQuirk);
 }
 
+#if PLATFORM(IOS_FAMILY)
+// discord.com rdar://162719481
+static void handleDiscordQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL& /* documentURL */)
+{
+    QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("discord.com"_s);
+
+    quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::ShouldUseLayoutViewportForClientRectsQuirk);
+}
+#endif
+
 static void handleDigitalTrendsQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL&  /* documentURL */)
 {
     QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("digitaltrends.com"_s);
@@ -3434,6 +3456,7 @@ void Quirks::determineRelevantQuirks()
         { "cbssports"_s, &handleCBSSportsQuirks },
         { "cnn"_s, &handleCNNQuirks },
         { "digitaltrends"_s, &handleDigitalTrendsQuirks },
+        { "discord"_s, &handleDiscordQuirks },
 #endif
 #if ENABLE(CONTENT_CHANGE_OBSERVER)
         { "steampowered"_s, &handleSteamQuirks },
