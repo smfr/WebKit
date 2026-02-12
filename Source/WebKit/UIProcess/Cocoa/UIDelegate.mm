@@ -139,7 +139,8 @@ void UIDelegate::setDelegate(id<WKUIDelegate> delegate)
     m_delegateMethods.webViewRequestStorageAccessPanelUnderFirstPartyCompletionHandler = [delegate respondsToSelector:@selector(_webView:requestStorageAccessPanelForDomain:underCurrentDomain:completionHandler:)];
     m_delegateMethods.webViewRequestStorageAccessPanelForDomainUnderCurrentDomainForQuirkDomainsCompletionHandler = [delegate respondsToSelector:@selector(_webView:requestStorageAccessPanelForDomain:underCurrentDomain:forQuirkDomains:completionHandler:)];
     m_delegateMethods.webViewRunBeforeUnloadConfirmPanelWithMessageInitiatedByFrameCompletionHandler = [delegate respondsToSelector:@selector(_webView:runBeforeUnloadConfirmPanelWithMessage:initiatedByFrame:completionHandler:)];
-    m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler = [delegate respondsToSelector:@selector(_webView:requestGeolocationPermissionForOrigin:initiatedByFrame:decisionHandler:)];
+    m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandlerSPI = [delegate respondsToSelector:@selector(_webView:requestGeolocationPermissionForOrigin:initiatedByFrame:decisionHandler:)];
+    m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler = [delegate respondsToSelector:@selector(webView:requestGeolocationPermissionForOrigin:initiatedByFrame:decisionHandler:)];
     m_delegateMethods.webViewRequestGeolocationPermissionForFrameDecisionHandler = [delegate respondsToSelector:@selector(_webView:requestGeolocationPermissionForFrame:decisionHandler:)];
     m_delegateMethods.webViewDidResignInputElementStrongPasswordAppearanceWithUserInfo = [delegate respondsToSelector:@selector(_webView:didResignInputElementStrongPasswordAppearanceWithUserInfo:)];
     m_delegateMethods.webViewTakeFocus = [delegate respondsToSelector:@selector(_webView:takeFocus:)];
@@ -577,14 +578,16 @@ void UIDelegate::UIClient::requestStorageAccessConfirm(WebPageProxy& webPageProx
 void UIDelegate::UIClient::decidePolicyForGeolocationPermissionRequest(WebKit::WebPageProxy& page, WebKit::WebFrameProxy& frame, const FrameInfoData& frameInfo, Function<void(bool)>& completionHandler)
 {
     RefPtr uiDelegate = m_uiDelegate.get();
-    if (!uiDelegate || (!uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForFrameDecisionHandler && !uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler))
+    if (!uiDelegate || (!uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForFrameDecisionHandler && !uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandlerSPI
+        && !uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler))
         return;
 
     RetainPtr delegate = uiDelegatePrivate();
     if (!delegate)
         return;
 
-    if (uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler) {
+    if (uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandlerSPI
+        || uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler) {
         auto securityOrigin = WebCore::SecurityOrigin::createFromString(protect(page.pageLoadState())->activeURL());
         auto checker = CompletionHandlerCallChecker::create(delegate.get(), @selector(_webView:requestGeolocationPermissionForOrigin:initiatedByFrame:decisionHandler:));
         auto decisionHandler = makeBlockPtr([completionHandler = std::exchange(completionHandler, nullptr), securityOrigin = securityOrigin->data(), checker = WTF::move(checker), page = WeakPtr { page }] (WKPermissionDecision decision) mutable {
@@ -607,7 +610,10 @@ void UIDelegate::UIClient::decidePolicyForGeolocationPermissionRequest(WebKit::W
                 break;
             }
         });
-        [delegate _webView:uiDelegate->m_webView.get().get() requestGeolocationPermissionForOrigin:wrapper(API::SecurityOrigin::create(securityOrigin.get())).get() initiatedByFrame:wrapper(API::FrameInfo::create(FrameInfoData { frameInfo })).get() decisionHandler:decisionHandler.get()];
+        if (uiDelegate->m_delegateMethods.webViewRequestGeolocationPermissionForOriginDecisionHandler)
+            [delegate webView:uiDelegate->m_webView.get().get() requestGeolocationPermissionForOrigin:wrapper(API::SecurityOrigin::create(securityOrigin.get())).get() initiatedByFrame:wrapper(API::FrameInfo::create(FrameInfoData { frameInfo })).get() decisionHandler:decisionHandler.get()];
+        else
+            [delegate _webView:uiDelegate->m_webView.get().get() requestGeolocationPermissionForOrigin:wrapper(API::SecurityOrigin::create(securityOrigin.get())).get() initiatedByFrame:wrapper(API::FrameInfo::create(FrameInfoData { frameInfo })).get() decisionHandler:decisionHandler.get()];
         return;
     }
 
