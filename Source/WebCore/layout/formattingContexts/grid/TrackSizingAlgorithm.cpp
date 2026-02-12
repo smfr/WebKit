@@ -265,22 +265,15 @@ static void sizeTracksToFitNonSpanningItems(UnsizedTracks& unsizedTracks, const 
                 // limit to the maximum of the items’ max-content contributions.
                 auto itemContributions = maxContentContributions(gridItems, singleSpanningItemsIndexes, oppositeAxisConstraints, gridItemSizingFunctions);
                 auto maximumMaxContentContribution = itemContributions.isEmpty() ? 0_lu : std::ranges::max(itemContributions);
-
-                auto hasFitContentMaximum = [] {
-                    notImplemented();
-                    return false;
-                };
-                // For fit-content() maximums, furthermore clamp this growth limit by the
-                // fit-content() argument.
-                if (hasFitContentMaximum())  {
-                    ASSERT_NOT_IMPLEMENTED_YET();
-                    return { };
-                }
                 return maximumMaxContentContribution;
             },
             [&](const CSS::Keyword::Auto&) -> LayoutUnit {
-                ASSERT_NOT_IMPLEMENTED_YET();
-                return { };
+                // Since it is not explicitly stated otherwise in the spec, auto is treated as max-content:
+                // If the track has a max-content max track sizing function, set its growth
+                // limit to the maximum of the items’ max-content contributions.
+                auto itemContributions = maxContentContributions(gridItems, singleSpanningItemsIndexes, oppositeAxisConstraints, gridItemSizingFunctions);
+                auto maximumMaxContentContribution = itemContributions.isEmpty() ? 0_lu : std::ranges::max(itemContributions);
+                return maximumMaxContentContribution;
             },
             [&](const auto&) -> LayoutUnit {
                 ASSERT_NOT_REACHED();

@@ -315,16 +315,9 @@ TrackSizingFunctions GridLayout::convertGridTrackSizeToTrackSizingFunctions(cons
         if (gridTrackSize.isMinMax())
             return gridTrackSize.maxTrackBreadth();
 
-        // Otherwise, the track's sizing function. In all cases, treat auto and fit-content() as max-content,
+        // Otherwise, the track’s sizing function. In all cases, treat auto and fit-content() as max-content,
         // except where specified otherwise for fit-content().
-        if (gridTrackSize.maxTrackBreadth().isAuto())
-            return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
-
-        if (gridTrackSize.isFitContent()) {
-            ASSERT_NOT_IMPLEMENTED_YET();
-            return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
-        }
-
+        // Note: This special treatment is handled inside of TrackSizingAlgorithm.
         return gridTrackSize.maxTrackBreadth();
     };
 
