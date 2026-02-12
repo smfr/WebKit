@@ -8788,6 +8788,7 @@ UserInterfaceDirectionPolicy:
 UsesBackForwardCache:
   type: bool
   status: embedder
+  defaultsOverridable: true
   webcoreOnChange: usesBackForwardCacheChanged
   webcoreExcludeFromInternalSettings: true
   webKitLegacyPreferenceKey: WebKitUsesPageCachePreferenceKey
