@@ -71,6 +71,7 @@ constexpr WebCore::FramesPerSecond DisplayLinkFramesPerSecond = 60;
 // be overridden temporarily by setWantsHighFrameRate to opt into the maximum frames per second
 // supported by the display link for things like high-performance animations.
 - (void)setPreferredFramesPerSecond:(WebCore::FramesPerSecond)preferredFramesPerSecond;
+- (BOOL)wantsHighFrameRate;
 - (void)setWantsHighFrameRate:(BOOL)wantsHighFrameRate;
 - (BOOL)isDisplayRefreshRelevantForPreferredUpdateFrequency;
 
@@ -228,6 +229,11 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     [self updateFrameRate];
 }
 
+- (BOOL)wantsHighFrameRate
+{
+    return _wantsHighFrameRate;
+}
+
 - (void)updateFrameRate
 {
     auto effectiveFramesPerSecond = _preferredFramesPerSecond;
@@ -374,12 +380,26 @@ void RemoteLayerTreeDrawingAreaProxyIOS::pauseDisplayRefreshCallbacks()
 void RemoteLayerTreeDrawingAreaProxyIOS::scheduleDisplayRefreshCallbacksForMonotonicAnimations()
 {
     m_needsDisplayRefreshCallbacksForMonotonicAnimations = true;
+    if (!m_hasHighImpactMonotonicAnimations) {
+        if (RefPtr page = this->page())
+            m_hasHighImpactMonotonicAnimations = page->scrollingCoordinatorProxy()->hasHighImpactMonotonicAnimations();
+    }
     scheduleDisplayLinkAndSetFrameRate();
+}
+
+void RemoteLayerTreeDrawingAreaProxyIOS::highImpactMonotonicAnimationsWereRemoved()
+{
+    if (!m_hasHighImpactMonotonicAnimations)
+        return;
+
+    if (RefPtr page = this->page())
+        m_hasHighImpactMonotonicAnimations = page->scrollingCoordinatorProxy()->hasHighImpactMonotonicAnimations();
 }
 
 void RemoteLayerTreeDrawingAreaProxyIOS::pauseDisplayRefreshCallbacksForMonotonicAnimations()
 {
     m_needsDisplayRefreshCallbacksForMonotonicAnimations = false;
+    m_hasHighImpactMonotonicAnimations = false;
     pauseDisplayLinkIfNeeded();
 }
 
@@ -393,11 +413,17 @@ void RemoteLayerTreeDrawingAreaProxyIOS::scheduleDisplayLinkAndSetFrameRate()
         return page() && !protect(page()->preferences())->preferPageRenderingUpdatesNear60FPSEnabled();
     };
 
-    auto wantsHighFrameRate = (m_needsDisplayRefreshCallbacksForMonotonicAnimations && shouldUpdateMonotonicAnimationsAtHighFrameRate())
+    ASSERT_IMPLIES(m_hasHighImpactMonotonicAnimations, m_needsDisplayRefreshCallbacksForMonotonicAnimations);
+    auto wantsHighFrameRate = (m_hasHighImpactMonotonicAnimations && shouldUpdateMonotonicAnimationsAtHighFrameRate())
         || (m_needsDisplayRefreshCallbacksForDrawing && shouldUpdatePageRenderingAtHighFrameRate());
     RetainPtr displayLinkHandler = this->displayLinkHandler();
     [displayLinkHandler setWantsHighFrameRate:wantsHighFrameRate];
     [displayLinkHandler schedule];
+}
+
+bool RemoteLayerTreeDrawingAreaProxyIOS::displayLinkWantsHighFrameRateForTesting() const
+{
+    return m_displayLinkHandler && [m_displayLinkHandler wantsHighFrameRate];
 }
 
 void RemoteLayerTreeDrawingAreaProxyIOS::pauseDisplayLinkIfNeeded()

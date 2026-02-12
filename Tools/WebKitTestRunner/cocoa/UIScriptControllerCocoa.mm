@@ -645,4 +645,9 @@ JSRetainPtr<JSStringRef> UIScriptControllerCocoa::progressBasedTimelinesForScrol
 }
 #endif
 
+bool UIScriptControllerCocoa::displayLinkWantsHighFrameRate() const
+{
+    return [webView() _displayLinkWantsHighFrameRate];
+}
+
 } // namespace WTR

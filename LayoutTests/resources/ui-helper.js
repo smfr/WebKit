@@ -2078,6 +2078,15 @@ window.UIHelper = class UIHelper {
         }
     }
 
+    static async displayLinkWantsHighFrameRate()
+    {
+        if (!this.isWebKit2() || !this.isIOSFamily())
+            return Promise.resolve(false);
+
+        const script = `uiController.displayLinkWantsHighFrameRate()`;
+        return new Promise(resolve => testRunner.runUIScript(script, result => resolve(result === "true")));
+    }
+
     static dragFromPointToPoint(fromX, fromY, toX, toY, duration)
     {
         if (!this.isWebKit2() || !this.isIOSFamily()) {

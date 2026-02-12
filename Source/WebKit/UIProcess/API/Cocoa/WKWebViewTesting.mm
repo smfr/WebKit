@@ -1265,6 +1265,11 @@ static void dumpCALayer(TextStream& ts, CALayer *layer, bool traverse)
 }
 #endif
 
+- (bool)_displayLinkWantsHighFrameRate
+{
+    return downcast<WebKit::RemoteLayerTreeDrawingAreaProxy>(protect(_page->drawingArea()))->displayLinkWantsHighFrameRateForTesting();
+}
+
 @end
 
 #if ENABLE(MEDIA_SESSION_COORDINATOR)

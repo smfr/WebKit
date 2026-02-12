@@ -377,6 +377,7 @@ public:
         String property;
         double speed;
         bool isThreaded;
+        bool hasHighImpact;
     };
     virtual Vector<AcceleratedAnimationForTesting> acceleratedAnimationsForTesting() const { return { }; }
 

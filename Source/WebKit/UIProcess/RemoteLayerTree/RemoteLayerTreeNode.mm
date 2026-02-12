@@ -423,6 +423,8 @@ void RemoteLayerTreeNode::setAcceleratedEffectsAndBaseValues(const WebCore::Acce
         animationStack->clear(layer.get());
     host.animationsWereRemovedFromNode(*this);
 
+    m_hasHighImpactMonotonicAnimations = false;
+
     if (effects.isEmpty())
         return;
 
@@ -430,6 +432,8 @@ void RemoteLayerTreeNode::setAcceleratedEffectsAndBaseValues(const WebCore::Acce
         TimelineID timelineID { effect->timelineIdentifier(), m_layerID.processIdentifier() };
         RefPtr timeline = host.timeline(timelineID);
         ASSERT(timeline);
+        if (!m_hasHighImpactMonotonicAnimations && timeline->isMonotonic())
+            m_hasHighImpactMonotonicAnimations = effect->hasHighImpact();
         return RemoteAnimation::create(Ref { effect }.get(), *timeline);
     }), baseValues.clone(), layer.get().bounds);
     m_animationStack = animationStack.copyRef();
