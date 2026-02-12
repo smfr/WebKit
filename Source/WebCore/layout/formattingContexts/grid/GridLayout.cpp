@@ -295,6 +295,42 @@ BorderBoxPositions GridLayout::performBlockAxisSelfAlignment(const PlacedGridIte
     return borderBoxPositions;
 }
 
+TrackSizingFunctions GridLayout::convertGridTrackSizeToTrackSizingFunctions(const Style::GridTrackSize& gridTrackSize)
+{
+    auto minTrackSizingFunction = [&]() {
+        // If the track was sized with a minmax() function, this is the first argument to that function.
+        if (gridTrackSize.isMinMax())
+            return gridTrackSize.minTrackBreadth();
+
+        // If the track was sized with a <flex> value or fit-content() function, auto.
+        if (gridTrackSize.isFitContent() || gridTrackSize.minTrackBreadth().isFlex())
+            return Style::GridTrackBreadth { CSS::Keyword::Auto { } };
+
+        // Otherwise, the track's sizing function.
+        return gridTrackSize.minTrackBreadth();
+    };
+
+    auto maxTrackSizingFunction = [&]() {
+        // If the track was sized with a minmax() function, this is the second argument to that function.
+        if (gridTrackSize.isMinMax())
+            return gridTrackSize.maxTrackBreadth();
+
+        // Otherwise, the track's sizing function. In all cases, treat auto and fit-content() as max-content,
+        // except where specified otherwise for fit-content().
+        if (gridTrackSize.maxTrackBreadth().isAuto())
+            return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
+
+        if (gridTrackSize.isFitContent()) {
+            ASSERT_NOT_IMPLEMENTED_YET();
+            return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
+        }
+
+        return gridTrackSize.maxTrackBreadth();
+    };
+
+    return TrackSizingFunctions { minTrackSizingFunction(), maxTrackSizingFunction() };
+}
+
 TrackSizingFunctionsList GridLayout::trackSizingFunctions(size_t implicitGridTracksCount, const Vector<Style::GridTrackSize> gridTemplateTrackSizes)
 {
     // FIXME: Support implicit tracks (both before and after the explicit grid)
@@ -303,38 +339,7 @@ TrackSizingFunctionsList GridLayout::trackSizingFunctions(size_t implicitGridTra
 
     // https://drafts.csswg.org/css-grid-1/#algo-terms
     return gridTemplateTrackSizes.map([](const Style::GridTrackSize& gridTrackSize) {
-        auto minTrackSizingFunction = [&]() {
-            // If the track was sized with a minmax() function, this is the first argument to that function.
-            if (gridTrackSize.isMinMax())
-                return gridTrackSize.minTrackBreadth();
-
-            // If the track was sized with a <flex> value or fit-content() function, auto.
-            if (gridTrackSize.isFitContent() || gridTrackSize.minTrackBreadth().isFlex())
-                return Style::GridTrackBreadth { CSS::Keyword::Auto { } };
-
-            // Otherwise, the track’s sizing function.
-            return gridTrackSize.minTrackBreadth();
-        };
-
-        auto maxTrackSizingFunction = [&]() {
-            // If the track was sized with a minmax() function, this is the second argument to that function.
-            if (gridTrackSize.isMinMax())
-                return gridTrackSize.maxTrackBreadth();
-
-            // Otherwise, the track’s sizing function. In all cases, treat auto and fit-content() as max-content,
-            // except where specified otherwise for fit-content().
-            if (gridTrackSize.maxTrackBreadth().isAuto())
-                return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
-
-            if (gridTrackSize.isFitContent()) {
-                ASSERT_NOT_IMPLEMENTED_YET();
-                return Style::GridTrackBreadth { CSS::Keyword::MaxContent { } };
-            }
-
-            return gridTrackSize.maxTrackBreadth();
-        };
-
-        return TrackSizingFunctions { minTrackSizingFunction(), maxTrackSizingFunction() };
+        return convertGridTrackSizeToTrackSizingFunctions(gridTrackSize);
     });
 }
 
