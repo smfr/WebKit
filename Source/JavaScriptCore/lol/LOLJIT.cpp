@@ -560,7 +560,8 @@ void LOLJIT::privateCompileSlowCases()
 #define REPLAY_ALLOCATION_FOR_OP(name, Struct) \
     case name: { \
         ASSERT(isImplemented(name)); \
-        m_replayAllocator.allocate(*this, currentInstruction->as<Struct>(), m_bytecodeIndex); \
+        auto allocations = m_replayAllocator.allocate(*this, currentInstruction->as<Struct>(), m_bytecodeIndex); \
+        m_replayAllocator.releaseScratches(allocations); \
         break; \
     }
 
@@ -1728,23 +1729,23 @@ void LOLJIT::emit_op_new_object(const JSInstruction* currentInstruction)
 {
     auto bytecode = currentInstruction->as<OpNewObject>();
     auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ dstRegs ] = allocations.defs;
+    auto [ allocatorRegs, structureRegs ] = allocations.scratches;
 
-    RegisterID resultReg = regT0;
-    RegisterID allocatorReg = regT1;
-    RegisterID scratchReg = regT2;
-    RegisterID structureReg = regT3;
+    GPRReg resultReg = dstRegs.payloadGPR();
+    GPRReg allocatorReg = allocatorRegs.payloadGPR();
+    GPRReg structureReg = structureRegs.payloadGPR();
 
     loadPtrFromMetadata(bytecode, OpNewObject::Metadata::offsetOfObjectAllocationProfile() + ObjectAllocationProfile::offsetOfAllocator(), allocatorReg);
     loadPtrFromMetadata(bytecode, OpNewObject::Metadata::offsetOfObjectAllocationProfile() + ObjectAllocationProfile::offsetOfStructure(), structureReg);
 
     JumpList slowCases;
     auto butterfly = TrustedImmPtr(nullptr);
-    emitAllocateJSObject(resultReg, JITAllocator::variable(), allocatorReg, structureReg, butterfly, scratchReg, slowCases, SlowAllocationResult::UndefinedBehavior);
-    load8(Address(structureReg, Structure::inlineCapacityOffset()), scratchReg);
-    emitInitializeInlineStorage(resultReg, scratchReg);
+    emitAllocateJSObject(resultReg, JITAllocator::variable(), allocatorReg, structureReg, butterfly, s_scratch, slowCases, SlowAllocationResult::UndefinedBehavior);
+    load8(Address(structureReg, Structure::inlineCapacityOffset()), s_scratch);
+    emitInitializeInlineStorage(resultReg, s_scratch);
     mutatorFence(*m_vm);
-    boxCell(resultReg, jsRegT10);
-    emitPutVirtualRegister(bytecode.m_dst, jsRegT10);
+    boxCell(resultReg, dstRegs);
 
     addSlowCase(slowCases);
 
@@ -1755,15 +1756,16 @@ void LOLJIT::emitSlow_op_new_object(const JSInstruction* currentInstruction, Vec
 {
     linkAllSlowCases(iter);
 
-    RegisterID structureReg = regT3;
-
     auto bytecode = currentInstruction->as<OpNewObject>();
     auto allocations = m_replayAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ dstRegs ] = allocations.defs;
 
-    VirtualRegister dst = bytecode.m_dst;
-    callOperationNoExceptionCheck(operationNewObject, TrustedImmPtr(&vm()), structureReg);
-    boxCell(returnValueGPR, returnValueJSR);
-    emitPutVirtualRegister(dst, returnValueJSR);
+    silentSpill(m_replayAllocator, allocations);
+    // Reload structure from metadata since fast path scratch is not preserved.
+    loadPtrFromMetadata(bytecode, OpNewObject::Metadata::offsetOfObjectAllocationProfile() + ObjectAllocationProfile::offsetOfStructure(), s_scratch);
+    callOperationNoExceptionCheck(operationNewObject, TrustedImmPtr(&vm()), s_scratch);
+    boxCell(returnValueGPR, dstRegs);
+    silentFill(m_replayAllocator, dstRegs.payloadGPR());
 
     m_replayAllocator.releaseScratches(allocations);
 }
@@ -2133,8 +2135,10 @@ void LOLJIT::emit_op_jmp(const JSInstruction* currentInstruction)
 {
     auto bytecode = currentInstruction->as<OpJmp>();
     unsigned target = jumpTarget(currentInstruction, bytecode.m_targetLabel);
-    m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
     addJump(jump(), target);
+
+    m_fastAllocator.releaseScratches(allocations);
 }
 
 void LOLJIT::emit_op_jtrue(const JSInstruction* currentInstruction)
@@ -2512,6 +2516,8 @@ void LOLJIT::emitRightShiftFastPath(const JSInstruction* currentInstruction, JIT
     gen.endJumpList().link(this);
 
     addSlowCase(gen.slowPathJumpList());
+
+    m_fastAllocator.releaseScratches(allocations);
 }
 
 void LOLJIT::emit_op_rshift(const JSInstruction* currentInstruction)
@@ -2552,6 +2558,8 @@ void LOLJIT::emit_op_lshift(const JSInstruction* currentInstruction)
     gen.endJumpList().link(this);
 
     addSlowCase(gen.slowPathJumpList());
+
+    m_fastAllocator.releaseScratches(allocations);
 }
 
 template<typename Op, typename SnippetGenerator>
@@ -2659,6 +2667,8 @@ void LOLJIT::emitMathICFast(JITBinaryMathIC<Generator>* mathIC, const JSInstruct
         mathIC->m_generatedCodeSize += size;
     });
 #endif
+
+    m_fastAllocator.releaseScratches(allocations);
 }
 
 template <typename Op, typename Generator, typename ProfiledRepatchFunction, typename ProfiledFunction, typename RepatchFunction>
@@ -2669,8 +2679,10 @@ void LOLJIT::emitMathICSlow(JITBinaryMathIC<Generator>* mathIC, const JSInstruct
     auto [ leftRegs, rightRegs ] = allocations.uses;
     auto [ destRegs ] = allocations.defs;
 
-    if (!hasAnySlowCases(iter))
+    if (!hasAnySlowCases(iter)) {
+        m_replayAllocator.releaseScratches(allocations);
         return;
+    }
 
     linkAllSlowCases(iter);
 
@@ -2720,6 +2732,8 @@ void LOLJIT::emitMathICSlow(JITBinaryMathIC<Generator>* mathIC, const JSInstruct
         MathICGenerationState& mathICGenerationState = m_instructionToMathICGenerationState.find(currentInstruction)->value.get();
         mathIC->finalizeInlineCode(mathICGenerationState, linkBuffer);
     });
+
+    m_replayAllocator.releaseScratches(allocations);
 }
 
 template <typename Op, typename Generator, typename ProfiledFunction, typename NonProfiledFunction>
@@ -2759,6 +2773,8 @@ void LOLJIT::emitMathICFast(JITUnaryMathIC<Generator>* mathIC, const JSInstructi
         mathIC->m_generatedCodeSize += size;
     });
 #endif
+
+    m_fastAllocator.releaseScratches(allocations);
 }
 
 template <typename Op, typename Generator, typename ProfiledRepatchFunction, typename ProfiledFunction, typename RepatchFunction>
@@ -2769,8 +2785,10 @@ void LOLJIT::emitMathICSlow(JITUnaryMathIC<Generator>* mathIC, const JSInstructi
     auto [ srcRegs ] = allocations.uses;
     auto [ destRegs ] = allocations.defs;
 
-    if (!hasAnySlowCases(iter))
+    if (!hasAnySlowCases(iter)) {
+        m_replayAllocator.releaseScratches(allocations);
         return;
+    }
 
     linkAllSlowCases(iter);
 
@@ -2807,6 +2825,8 @@ void LOLJIT::emitMathICSlow(JITUnaryMathIC<Generator>* mathIC, const JSInstructi
         MathICGenerationState& mathICGenerationState = m_instructionToMathICGenerationState.find(currentInstruction)->value.get();
         mathIC->finalizeInlineCode(mathICGenerationState, linkBuffer);
     });
+
+    m_replayAllocator.releaseScratches(allocations);
 }
 
 void LOLJIT::emit_op_add(const JSInstruction* currentInstruction)
