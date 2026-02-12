@@ -412,7 +412,7 @@ class InstallSwiftToolchain(steps.ShellSequence, ShellMixin):
         command_list = [
             f'rm -rf {USER_TOOLCHAINS_DIR}',
             f'mkdir -p {USER_TOOLCHAINS_DIR}',
-            f'cp -r {source_toolchain} {dest_toolchain}'
+            f'cp -a {source_toolchain} {dest_toolchain}'
         ]
         for command in command_list:
             self.commands.append(util.ShellArg(command=self.shell_command(command), logname='stdio', haltOnFailure=True))

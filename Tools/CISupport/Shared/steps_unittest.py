@@ -711,7 +711,7 @@ class TestInstallSwiftToolchain(BuildStepMixinAdditions, unittest.TestCase):
             ExpectShell(workdir='wkdir',
                         log_environ=False,
                         timeout=600,
-                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', f'cp -r {source} {dest}'])
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', f'cp -a {source} {dest}'])
             .exit(0),
         )
         self.expect_outcome(result=SUCCESS, state_string=f'Installed {SWIFT_TOOLCHAIN_NAME} toolchain')
@@ -742,7 +742,7 @@ class TestInstallSwiftToolchain(BuildStepMixinAdditions, unittest.TestCase):
             ExpectShell(workdir='wkdir',
                         log_environ=False,
                         timeout=600,
-                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', f'cp -r {source} {dest}'])
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', f'cp -a {source} {dest}'])
             .exit(1),
         )
         self.expect_outcome(result=FAILURE, state_string='Failed to install swift toolchain')

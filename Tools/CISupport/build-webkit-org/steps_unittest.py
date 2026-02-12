@@ -2754,7 +2754,7 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
             f"'--darwin-toolchain-display-name-short=WebKit Swift' "
             f"--darwin-toolchain-name={SWIFT_TOOLCHAIN_NAME} "
             f"--darwin-toolchain-version=6.0.0 --darwin-toolchain-alias=webkit --darwin-toolchain-require-use-os-runtime=0 "
-            f"--skip-test-swift=1 --skip-test-cmark=1 --swift-testing=1 --install-swift-testing=1 --swift-testing-macros=1 --install-swift-testing-macros=1 --swift-driver=1 --install-swift-driver=1 "
+            f"--swift-testing=1 --install-swift-testing=1 --swift-testing-macros=1 --install-swift-testing-macros=1 --swift-driver=1 --install-swift-driver=1 "
             f"2>&1 | python3 {builddir}/build/Tools/Scripts/filter-test-logs swift --output {builddir}/build/swift-build-log.txt"
         )
 
@@ -2771,6 +2771,11 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=1200,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf "$(getconf DARWIN_USER_CACHE_DIR)org.llvm.clang"'])
+            .exit(0),
+            ExpectShell(workdir=SWIFT_DIR,
+                        log_environ=False,
+                        timeout=1200,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf /Users/buildbot/Library/Developer/Xcode/DerivedData'])
             .exit(0),
             ExpectShell(workdir=SWIFT_DIR,
                         log_environ=False,
@@ -2808,6 +2813,11 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
             ExpectShell(workdir=SWIFT_DIR,
                         log_environ=False,
                         timeout=1200,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf /Users/buildbot/Library/Developer/Xcode/DerivedData'])
+            .exit(0),
+            ExpectShell(workdir=SWIFT_DIR,
+                        log_environ=False,
+                        timeout=1200,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', self.expectedShellCommand()])
             .exit(0),
         )
@@ -2832,6 +2842,11 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
             ExpectShell(workdir=SWIFT_DIR,
                         log_environ=False,
                         timeout=1200,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf /Users/buildbot/Library/Developer/Xcode/DerivedData'])
+            .exit(0),
+            ExpectShell(workdir=SWIFT_DIR,
+                        log_environ=False,
+                        timeout=1200,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', self.expectedShellCommand()])
             .exit(1),
         )
@@ -2851,6 +2866,11 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
                         log_environ=False,
                         timeout=1200,
                         command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf "$(getconf DARWIN_USER_CACHE_DIR)org.llvm.clang"'])
+            .exit(0),
+            ExpectShell(workdir=SWIFT_DIR,
+                        log_environ=False,
+                        timeout=1200,
+                        command=['/bin/bash', '--posix', '-o', 'pipefail', '-c', 'rm -rf /Users/buildbot/Library/Developer/Xcode/DerivedData'])
             .exit(0),
             ExpectShell(workdir=SWIFT_DIR,
                         log_environ=False,
