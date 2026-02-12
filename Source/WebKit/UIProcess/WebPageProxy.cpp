@@ -14558,37 +14558,66 @@ void WebPageProxy::takeSnapshotLegacy(const IntRect& rect, const IntSize& bitmap
 #if PLATFORM(COCOA)
 void WebPageProxy::takeSnapshot(const IntRect& rect, const IntSize& bitmapSize, SnapshotOptions options, CompletionHandler<void(CGImageRef)>&& callback)
 {
-    sendWithAsyncReply(Messages::WebPage::TakeSnapshot(rect, bitmapSize, options), [callback = WTF::move(callback)] (std::optional<ImageBufferBackendHandle>&& imageHandle, Headroom headroom) mutable {
-        if (!imageHandle) {
+    Ref preferences = this->preferences();
+    if (!(preferences->remoteSnapshottingEnabled() && preferences->useGPUProcessForDOMRenderingEnabled())) {
+        sendWithAsyncReply(Messages::WebPage::TakeSnapshot(rect, bitmapSize, options), [callback = WTF::move(callback)] (std::optional<ImageBufferBackendHandle>&& imageHandle, Headroom headroom) mutable {
+            if (!imageHandle) {
+                callback(nullptr);
+                return;
+            }
+
+            RetainPtr<CGImageRef> image;
+            WTF::switchOn(*imageHandle,
+                [&image] (WebCore::ShareableBitmap::Handle& handle) {
+                    if (RefPtr bitmap = WebCore::ShareableBitmap::create(WTF::move(handle), WebCore::SharedMemory::Protection::ReadOnly))
+                        image = bitmap->createPlatformImage(DontCopyBackingStore);
+                }
+                , [&image] (MachSendRight& machSendRight) {
+                    if (auto surface = WebCore::IOSurface::createFromSendRight(WTF::move(machSendRight)))
+                        image = WebCore::IOSurface::sinkIntoImage(WTF::move(surface));
+                }
+#if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
+                , [] (WebCore::DynamicContentScalingDisplayList&) {
+                    ASSERT_NOT_REACHED();
+                    return;
+                }
+#endif
+            );
+
+#if HAVE(SUPPORT_HDR_DISPLAY_APIS)
+            if (image && headroom > Headroom::None)
+                image = adoptCF(CGImageCreateCopyWithContentHeadroom(headroom.headroom, image.get()));
+#endif
+
+            callback(image.get());
+        });
+        return;
+    }
+
+    auto snapshotIdentifier = RemoteSnapshotIdentifier::generate();
+    Ref gpuProcess = GPUProcessProxy::getOrCreate();
+    sendWithAsyncReply(Messages::WebPage::TakeRemoteSnapshot(rect, bitmapSize, options, snapshotIdentifier),
+        [weakGPUProcess = WeakPtr { gpuProcess }, snapshotIdentifier, bitmapSize, callback = WTF::move(callback), rootFrameIdentifier = m_mainFrame->frameID()](bool result) mutable {
+        RefPtr gpuProcess = weakGPUProcess.get();
+        if (!gpuProcess || !gpuProcess->hasConnection()) {
             callback(nullptr);
             return;
         }
-
-        RetainPtr<CGImageRef> image;
-        WTF::switchOn(*imageHandle,
-            [&image] (WebCore::ShareableBitmap::Handle& handle) {
-                if (RefPtr bitmap = WebCore::ShareableBitmap::create(WTF::move(handle), WebCore::SharedMemory::Protection::ReadOnly))
-                    image = bitmap->createPlatformImage(DontCopyBackingStore);
-            }
-            , [&image] (MachSendRight& machSendRight) {
-                if (auto surface = WebCore::IOSurface::createFromSendRight(WTF::move(machSendRight)))
-                    image = WebCore::IOSurface::sinkIntoImage(WTF::move(surface));
-            }
-#if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
-            , [] (WebCore::DynamicContentScalingDisplayList&) {
-                ASSERT_NOT_REACHED();
+        if (!result) {
+            gpuProcess->releaseSnapshot(snapshotIdentifier);
+            callback(nullptr);
+            return;
+        }
+        gpuProcess->sinkCompletedSnapshotToBitmap(snapshotIdentifier, bitmapSize, rootFrameIdentifier, [callback = WTF::move(callback)] (std::optional<WebCore::ShareableBitmap::Handle>&& handle) mutable {
+            if (!handle)
                 return;
-            }
-#endif
-        );
-
-#if HAVE(SUPPORT_HDR_DISPLAY_APIS)
-        if (image && headroom > Headroom::None)
-            image = adoptCF(CGImageCreateCopyWithContentHeadroom(headroom.headroom, image.get()));
-#endif
-
-        callback(image.get());
+            RetainPtr<CGImageRef> image;
+            if (RefPtr bitmap = WebCore::ShareableBitmap::create(WTF::move(*handle), WebCore::SharedMemory::Protection::ReadOnly))
+                image = bitmap->createPlatformImage(DontCopyBackingStore);
+            callback(image.get());
+        });
     });
+
 }
 #endif
 
