@@ -2472,6 +2472,23 @@ RefPtr<HTMLAnchorElement> WebPage::containingLinkAnchorElement(Element& element)
     return nullptr;
 }
 
+void WebPage::selectPositionAtPoint(WebCore::IntPoint point, bool isInteractingWithFocusedElement, CompletionHandler<void()>&& completionHandler)
+{
+    SetForScope userIsInteractingChange { m_userIsInteracting, true };
+
+    updateFocusBeforeSelectingTextAtLocation(point);
+
+    RefPtr frame = m_page->focusController().focusedOrMainFrame();
+    if (!frame)
+        return completionHandler();
+
+    VisiblePosition position = visiblePositionInFocusedNodeForPoint(*frame, point, isInteractingWithFocusedElement);
+
+    if (position.isNotNull())
+        WTF::protect(frame->selection())->setSelectedRange(makeSimpleRange(position), position.affinity(), WebCore::FrameSelection::ShouldCloseTyping::Yes, UserTriggered::Yes);
+    completionHandler();
+}
+
 } // namespace WebKit
 
 #endif // PLATFORM(COCOA)

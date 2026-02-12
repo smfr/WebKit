@@ -1862,6 +1862,18 @@ void WebPageProxy::requestPositionInformation(const InteractionInformationReques
     protect(m_legacyMainFrameProcess)->send(Messages::WebPage::RequestPositionInformation(request), webPageIDInMainFrameProcess());
 }
 
+void WebPageProxy::selectPositionAtPoint(const WebCore::IntPoint point, bool isInteractingWithFocusedElement, CompletionHandler<void()>&& callbackFunction)
+{
+    if (!hasRunningProcess()) {
+        callbackFunction();
+        return;
+    }
+
+    WTF::protect(legacyMainFrameProcess())->sendWithAsyncReply(Messages::WebPage::SelectPositionAtPoint(point, isInteractingWithFocusedElement), [callbackFunction = WTF::move(callbackFunction), backgroundActivity = protect(m_legacyMainFrameProcess->throttler())->backgroundActivity("WebPageProxy::selectPositionAtPoint"_s)] mutable {
+        callbackFunction();
+    }, webPageIDInMainFrameProcess());
+}
+
 } // namespace WebKit
 
 #undef MESSAGE_CHECK_COMPLETION

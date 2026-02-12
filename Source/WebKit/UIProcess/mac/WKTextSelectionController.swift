@@ -58,6 +58,16 @@ extension WKTextSelectionController {
             gestureRecognizer.buttonMask = 0
         }
     }
+
+    func selectionDidChange() {
+        guard let view, let page = view._protectedPage().get() else {
+            return
+        }
+
+        let editorState = unsafe page.editorState
+        view.textSelectionManager?.textSelectionMode =
+            editorState.isContentEditable || editorState.isContentRichlyEditable ? .editable : .selectable
+    }
 }
 
 @objc(NSTextSelectionManagerDelegate)
@@ -119,7 +129,14 @@ extension WKTextSelectionController {
             return
         }
 
-        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Moving insertion cursor to point \(point.debugDescription)...")
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))...")
+
+        Task.immediate {
+            await page.selectPosition(
+                at: WebCore.IntPoint(point),
+                isInteractingWithFocusedElement: true // FIXME: Properly handle the case where this isn't actually true.
+            )
+        }
     }
 
     @objc(handleClickAtPoint:)
@@ -138,10 +155,6 @@ extension WKTextSelectionController {
         }
 
         Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Handling click at point \(point.debugDescription)...")
-
-        defer {
-            Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Done handling click.")
-        }
 
         let previousState = unsafe page.editorState
         let previousVisualData = unsafe Optional(fromCxx: previousState.visualData)
@@ -222,18 +235,49 @@ extension WKTextSelectionController {
 
     @objc(dragSelectionWithGesture:completionHandler:)
     func dragSelection(withGesture gesture: NSGestureRecognizer, completionHandler: @escaping @Sendable (NSDraggingSession) -> Void) {
+        guard let page = view?._protectedPage().get() else {
+            return
+        }
+
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) gesture: \(String(reflecting: gesture))")
     }
 
     @objc(beginRangeSelectionAtPoint:withGranularity:)
     func beginRangeSelection(at point: NSPoint, with granularity: NSTextSelection.Granularity) {
+        guard let page = view?._protectedPage().get() else {
+            return
+        }
+
+        Logger.viewGestures.log(
+            "[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point)) granularity: \(String(reflecting: granularity))"
+        )
     }
 
     @objc(continueRangeSelectionAtPoint:)
     func continueRangeSelection(at point: NSPoint) {
+        guard let page = view?._protectedPage().get() else {
+            return
+        }
+
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
     }
 
     @objc(endRangeSelectionAtPoint:)
     func endRangeSelection(at point: NSPoint) {
+        guard let page = view?._protectedPage().get() else {
+            return
+        }
+
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
+    }
+
+    @objc(selectionManager:makeDraggingSessionWithGesture:)
+    func selectionManager(
+        _ selectionManager: NSTextSelectionManager,
+        makeDraggingSessionWithGesture gesture: NSGestureRecognizer
+    ) -> NSDraggingSession {
+        // This function exists to satisfy a `respondsToSelector(_:)` check, but is never actually called.
+        fatalError("This function should never be called")
     }
 }
 

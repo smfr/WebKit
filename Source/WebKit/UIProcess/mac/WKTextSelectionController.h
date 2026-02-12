@@ -42,9 +42,14 @@ NS_SWIFT_UI_ACTOR
 
 - (void)addTextSelectionManager;
 
+- (void)selectionDidChange;
+
 @end
 
 @interface WKTextSelectionController (NSTextSelectionManagerDelegate) <NSTextSelectionManagerDelegateForWebKit>
+
+// FIXME: (rdar://170015885) Remove this declaration and its definition when possible.
+- (NSDraggingSession *)selectionManager:(NSTextSelectionManager *)selectionManager makeDraggingSessionWithGesture:(NSGestureRecognizer *)gesture;
 
 @end
 

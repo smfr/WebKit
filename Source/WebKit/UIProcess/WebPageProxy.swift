@@ -46,12 +46,23 @@ extension WebKit.WebPageProxy {
         }
     }
 
+    @MainActor
+    func selectPosition(at point: WebCore.IntPoint, isInteractingWithFocusedElement: Bool) async {
+        await withCheckedContinuation { continuation in
+            selectPositionAtPoint(
+                point,
+                isInteractingWithFocusedElement,
+                consuming: .init({ continuation.resume() }, WTF.ThreadLikeAssertion(WTF.CurrentThreadLike()))
+            )
+        }
+    }
+
     private borrowing func editorStateCopy() -> WebKit.EditorState {
-        __editorStateUnsafe().pointee
+        unsafe __editorStateUnsafe().pointee
     }
 
     var editorState: WebKit.EditorState {
-        editorStateCopy()
+        unsafe editorStateCopy()
     }
 }
 

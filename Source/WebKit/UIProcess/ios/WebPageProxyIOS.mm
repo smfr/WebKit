@@ -472,18 +472,6 @@ void WebPageProxy::moveSelectionAtBoundaryWithDirection(WebCore::TextGranularity
     }, webPageIDInMainFrameProcess());
 }
 
-void WebPageProxy::selectPositionAtPoint(const WebCore::IntPoint point, bool isInteractingWithFocusedElement, CompletionHandler<void()>&& callbackFunction)
-{
-    if (!hasRunningProcess()) {
-        callbackFunction();
-        return;
-    }
-
-    protect(legacyMainFrameProcess())->sendWithAsyncReply(Messages::WebPage::SelectPositionAtPoint(point, isInteractingWithFocusedElement), [callbackFunction = WTF::move(callbackFunction), backgroundActivity = protect(m_legacyMainFrameProcess->throttler())->backgroundActivity("WebPageProxy::selectPositionAtPoint"_s)] () mutable {
-        callbackFunction();
-    }, webPageIDInMainFrameProcess());
-}
-
 void WebPageProxy::beginSelectionInDirection(WebCore::SelectionDirection direction, CompletionHandler<void(bool)>&& callback)
 {
     protect(legacyMainFrameProcess())->sendWithAsyncReply(Messages::WebPage::BeginSelectionInDirection(direction), WTF::move(callback), webPageIDInMainFrameProcess());

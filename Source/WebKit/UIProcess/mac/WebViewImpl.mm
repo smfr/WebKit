@@ -2963,6 +2963,10 @@ void WebViewImpl::selectionDidChange()
         }
     }
 
+#if HAVE(APPKIT_GESTURES_SUPPORT)
+    [m_textSelectionController selectionDidChange];
+#endif
+
 #if ENABLE(WRITING_TOOLS)
     bool wantsCompleteWritingTools = isEditable() || page->configuration().writingToolsBehavior() == WebCore::WritingTools::Behavior::Complete;
     if (wantsCompleteWritingTools && !alreadyNotifiedClient) {

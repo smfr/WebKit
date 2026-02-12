@@ -68,6 +68,7 @@ messages -> WebPage WantsAsyncDispatchMessage {
 #if PLATFORM(COCOA)
     SelectWithGesture(WebCore::IntPoint point, enum:uint8_t WebKit::GestureType gestureType, enum:uint8_t WebKit::GestureRecognizerState gestureState, bool isInteractingWithFocusedElement) -> (WebCore::IntPoint point, enum:uint8_t WebKit::GestureType gestureType, enum:uint8_t WebKit::GestureRecognizerState gestureState, OptionSet<WebKit::SelectionFlags> flags)
     RequestPositionInformation(struct WebKit::InteractionInformationRequest request)
+    SelectPositionAtPoint(WebCore::IntPoint point, bool isInteractingWithFocusedElement) -> ()
 #endif
 
 #if PLATFORM(IOS_FAMILY)
@@ -100,7 +101,6 @@ messages -> WebPage WantsAsyncDispatchMessage {
     SelectTextWithGranularityAtPoint(WebCore::IntPoint point, enum:uint8_t WebCore::TextGranularity granularity, bool isInteractingWithFocusedElement) -> ()
     SelectPositionAtBoundaryWithDirection(WebCore::IntPoint point, enum:uint8_t WebCore::TextGranularity granularity, enum:uint8_t WebCore::SelectionDirection direction, bool isInteractingWithFocusedElement) -> ()
     MoveSelectionAtBoundaryWithDirection(enum:uint8_t WebCore::TextGranularity granularity, enum:uint8_t WebCore::SelectionDirection direction) -> ()
-    SelectPositionAtPoint(WebCore::IntPoint point, bool isInteractingWithFocusedElement) -> ()
     BeginSelectionInDirection(enum:uint8_t WebCore::SelectionDirection direction) -> (bool endIsMoving)
     UpdateSelectionWithExtentPoint(WebCore::IntPoint point, bool isInteractingWithFocusedElement, enum:bool WebKit::RespectSelectionAnchor respectSelectionAnchor) -> (bool endIsMoving)
     UpdateSelectionWithExtentPointAndBoundary(WebCore::IntPoint point, enum:uint8_t WebCore::TextGranularity granularity, bool isInteractingWithFocusedElement, enum:uint8_t WebKit::TextInteractionSource sources) -> (bool endIsMoving)
