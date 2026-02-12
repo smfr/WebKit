@@ -115,7 +115,7 @@ public:
 
     virtual String captionPreviewTitle() const;
 
-    PageGroup& pageGroup() const;
+    PageGroup& NODELETE pageGroup() const;
 
 protected:
     explicit CaptionUserPreferences(PageGroup&);

@@ -108,11 +108,6 @@ bool StyleMultiImage::canRender(const RenderElement* renderer, float multiplier)
     return m_selectedImage && m_selectedImage->canRender(renderer, multiplier);
 }
 
-bool StyleMultiImage::isPending() const
-{
-    return m_isPending;
-}
-
 bool StyleMultiImage::isLoaded(const RenderElement* renderer) const
 {
     return m_selectedImage && m_selectedImage->isLoaded(renderer);

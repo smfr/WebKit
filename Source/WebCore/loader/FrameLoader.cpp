@@ -1374,11 +1374,6 @@ void FrameLoader::loadInSameDocument(URL url, RefPtr<SerializedScriptValue> stat
     m_client->didFinishLoad();
 }
 
-bool FrameLoader::isComplete() const
-{
-    return m_isComplete;
-}
-
 void FrameLoader::completed()
 {
     Ref frame = m_frame.get();

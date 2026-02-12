@@ -1194,7 +1194,7 @@ public:
 
     WEBCORE_EXPORT StorageConnection& storageConnection();
 
-    ModelPlayerProvider& modelPlayerProvider();
+    ModelPlayerProvider& NODELETE modelPlayerProvider();
 
     void updateScreenSupportedContentsFormats();
 

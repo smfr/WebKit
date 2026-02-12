@@ -130,7 +130,7 @@ private:
     void findFocusCandidateInContainer(const ContainerNode&, const LayoutRect& startingRect, FocusDirection, const FocusEventData&, FocusCandidate& closest);
 
     void focusRepaintTimerFired();
-    Ref<Page> protectedPage() const;
+    Ref<Page> NODELETE protectedPage() const;
 
     WeakRef<Page> m_page;
     WeakPtr<Frame> m_focusedFrame;

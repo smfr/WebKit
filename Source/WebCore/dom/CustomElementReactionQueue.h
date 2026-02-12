@@ -139,7 +139,7 @@ public:
 
     bool observesStyleAttribute() const;
     bool isElementInternalsDisabled() const;
-    bool isElementInternalsAttached() const;
+    bool isElementInternalsAttached() const { return m_elementInternalsAttached; }
     void setElementInternalsAttached();
     bool isFormAssociated() const;
     bool hasFormStateRestoreCallback() const;

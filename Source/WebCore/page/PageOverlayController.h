@@ -105,7 +105,7 @@ private:
     bool shouldDumpPropertyForLayer(const GraphicsLayer*, ASCIILiteral propertyName, OptionSet<LayerTreeAsTextOptions>) const override;
     void tiledBackingUsageChanged(const GraphicsLayer*, bool) override;
 
-    Ref<Page> protectedPage() const;
+    Ref<Page> NODELETE protectedPage() const;
 
     WeakRef<Page> m_page;
     RefPtr<GraphicsLayer> m_documentOverlayRootLayer;

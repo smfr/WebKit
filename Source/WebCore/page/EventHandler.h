@@ -657,7 +657,7 @@ private:
     bool isCapturingMouseEventsElement() const { return m_capturingMouseEventsElement || m_isCapturingRootElementForMouseEvents; }
     void resetCapturingMouseEventsElement();
 
-    Ref<LocalFrame> protectedFrame() const;
+    Ref<LocalFrame> NODELETE protectedFrame() const;
 
     WeakRef<LocalFrame> m_frame;
     RefPtr<Node> m_mousePressNode;

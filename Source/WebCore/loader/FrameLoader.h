@@ -121,7 +121,7 @@ public:
     WEBCORE_EXPORT void init();
     void initForSynthesizedDocument(const URL&);
 
-    WEBCORE_EXPORT LocalFrame& frame() const;
+    WEBCORE_EXPORT LocalFrame& NODELETE frame() const;
 
     PolicyChecker& policyChecker() const { return m_policyChecker; }
 
@@ -213,7 +213,7 @@ public:
 
     bool shouldTreatURLAsSrcdocDocument(const URL&) const;
 
-    WEBCORE_EXPORT FrameLoadType loadType() const;
+    WEBCORE_EXPORT FrameLoadType NODELETE loadType() const;
 
     CachePolicy subresourceCachePolicy(const URL&) const;
 
@@ -271,7 +271,7 @@ public:
     void finishedParsing();
     void checkCompleted();
 
-    WEBCORE_EXPORT bool isComplete() const;
+    bool isComplete() const { return m_isComplete; }
 
     void commitProvisionalLoad();
     void provisionalLoadFailedInAnotherProcess();
@@ -304,7 +304,7 @@ public:
     enum class PageDismissalType { None, BeforeUnload, PageHide, Unload };
     PageDismissalType pageDismissalEventBeingDispatched() const { return m_pageDismissalEventBeingDispatched; }
 
-    WEBCORE_EXPORT NetworkingContext* networkingContext() const;
+    WEBCORE_EXPORT NetworkingContext* NODELETE networkingContext() const;
 
     void loadProgressingStatusChanged();
 

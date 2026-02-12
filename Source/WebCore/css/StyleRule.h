@@ -421,7 +421,7 @@ public:
     const CSSSelectorList& originalScopeEnd() const { return m_originalScopeEnd; }
     void setScopeStart(CSSSelectorList&& scopeStart) { m_scopeStart = WTF::move(scopeStart); }
     void setScopeEnd(CSSSelectorList&& scopeEnd) { m_scopeEnd = WTF::move(scopeEnd); }
-    WeakPtr<const StyleSheetContents> styleSheetContents() const;
+    WeakPtr<const StyleSheetContents> NODELETE styleSheetContents() const;
     void setStyleSheetContents(const StyleSheetContents&);
 
 private:

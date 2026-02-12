@@ -90,7 +90,7 @@ public:
 
     // When a new value is set with setValue(), in our internal use of the parameter we don't immediately jump to it.
     // Instead we smoothly approach this value to avoid glitching.
-    float smoothedValue();
+    float smoothedValue() const { return m_smoothedValue; }
 
     // Smoothly exponentially approaches to (de-zippers) the desired value.
     // Returns true if smoothed value has already snapped exactly to value.

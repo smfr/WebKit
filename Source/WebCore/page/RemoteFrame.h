@@ -57,7 +57,7 @@ public:
     WEBCORE_EXPORT static Ref<RemoteFrame> createSubframeWithContentsInAnotherProcess(Page&, ClientCreator&&, FrameIdentifier, HTMLFrameOwnerElement&, std::optional<LayerHostingContextIdentifier>, Ref<FrameTreeSyncData>&&);
     ~RemoteFrame();
 
-    RemoteDOMWindow& window() const;
+    RemoteDOMWindow& NODELETE window() const;
 
     const RemoteFrameClient& client() const { return m_client.get(); }
     RemoteFrameClient& client() { return m_client.get(); }
@@ -109,10 +109,10 @@ private:
     std::optional<DocumentSecurityPolicy> frameDocumentSecurityPolicy() const final;
     String frameURLProtocol() const final;
 
-    FrameView* virtualView() const final;
+    FrameView* NODELETE virtualView() const final;
     void disconnectView() final;
     DOMWindow* virtualWindow() const final;
-    FrameLoaderClient& loaderClient() final;
+    FrameLoaderClient& NODELETE loaderClient() final;
     void reinitializeDocumentSecurityContext() final { }
 
     const Ref<RemoteDOMWindow> m_window;

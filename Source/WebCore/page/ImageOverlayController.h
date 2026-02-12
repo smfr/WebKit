@@ -111,7 +111,7 @@ private:
     void platformUpdateElementUnderMouse(LocalFrame&, Element* elementUnderMouse);
     bool platformHandleMouseEvent(const PlatformMouseEvent&);
 
-    Ref<Page> protectedPage() const;
+    Ref<Page> NODELETE protectedPage() const;
     RefPtr<PageOverlay> protectedOverlay() const { return m_overlay; }
 
     WeakRef<Page> m_page;

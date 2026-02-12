@@ -50,7 +50,7 @@ public:
     bool operator==(const StyleImage&) const final;
     bool equals(const StyleCachedImage&) const;
 
-    CachedImage* cachedImage() const final;
+    CachedImage* NODELETE cachedImage() const final;
 
     WrappedImagePtr data() const final { return m_cachedImage.get(); }
 

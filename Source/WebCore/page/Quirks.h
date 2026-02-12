@@ -333,7 +333,7 @@ private:
     static bool domainShouldDisableEndFullscreenEventWhenEnteringPictureInPictureFromFullscreenQuirk(const URL&, QuirksData&);
 #endif
 
-    RefPtr<Document> protectedDocument() const;
+    RefPtr<Document> NODELETE protectedDocument() const;
 
     URL topDocumentURL() const;
 

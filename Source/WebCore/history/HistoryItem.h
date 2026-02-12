@@ -93,19 +93,19 @@ public:
 
     bool operator==(const HistoryItem& other) const { return itemID() == other.itemID(); }
 
-    WEBCORE_EXPORT const String& originalURLString() const;
-    WEBCORE_EXPORT const String& urlString() const;
-    WEBCORE_EXPORT const String& title() const;
+    WEBCORE_EXPORT const String& NODELETE originalURLString() const;
+    WEBCORE_EXPORT const String& NODELETE urlString() const;
+    WEBCORE_EXPORT const String& NODELETE title() const;
     
     WEBCORE_EXPORT bool isInBackForwardCache() const;
     WEBCORE_EXPORT bool hasCachedPageExpired() const;
 
     WEBCORE_EXPORT void setAlternateTitle(const String&);
-    WEBCORE_EXPORT const String& alternateTitle() const;
+    WEBCORE_EXPORT const String& NODELETE alternateTitle() const;
     
     WEBCORE_EXPORT URL url() const;
     WEBCORE_EXPORT URL originalURL() const;
-    WEBCORE_EXPORT const String& referrer() const;
+    WEBCORE_EXPORT const String& NODELETE referrer() const;
     WEBCORE_EXPORT const AtomString& target() const;
     std::optional<FrameIdentifier> frameID() const { return m_frameID; }
     bool isTargetItem() const { return m_isTargetItem; }

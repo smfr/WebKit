@@ -391,7 +391,7 @@ private:
     std::optional<DocumentSecurityPolicy> frameDocumentSecurityPolicy() const final;
     String frameURLProtocol() const final;
 
-    FrameView* virtualView() const final;
+    FrameView* NODELETE virtualView() const final;
     void disconnectView() final;
     DOMWindow* virtualWindow() const final;
     void reinitializeDocumentSecurityContext() final;

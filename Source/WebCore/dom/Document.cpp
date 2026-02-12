@@ -7909,11 +7909,6 @@ void Document::setShouldCreateRenderers(bool f)
     m_createRenderers = f;
 }
 
-bool Document::shouldCreateRenderers()
-{
-    return m_createRenderers;
-}
-
 // Support for Javascript execCommand, and related methods
 
 static Editor::Command command(Document* document, const String& commandName, bool userInterface = false)
@@ -8377,11 +8372,6 @@ void Document::clearSharedObjectPool()
 bool Document::isTelephoneNumberParsingEnabled() const
 {
     return settings().telephoneNumberParsingEnabled() && m_isTelephoneNumberParsingAllowed;
-}
-
-bool Document::isTelephoneNumberParsingAllowed() const
-{
-    return m_isTelephoneNumberParsingAllowed;
 }
 
 #endif
@@ -9625,11 +9615,6 @@ bool Document::hasRecentUserInteractionForNavigationFromJS() const
 void Document::startTrackingStyleRecalcs()
 {
     m_styleRecalcCount = 0;
-}
-
-unsigned Document::styleRecalcCount() const
-{
-    return m_styleRecalcCount;
 }
 
 #if ENABLE(TOUCH_EVENTS)
@@ -11928,19 +11913,9 @@ void Document::setActiveViewTransition(RefPtr<ViewTransition>&& viewTransition)
     }
 }
 
-bool Document::hasViewTransitionPseudoElementTree() const
-{
-    return m_hasViewTransitionPseudoElementTree;
-}
-
 void Document::setHasViewTransitionPseudoElementTree(bool value)
 {
     m_hasViewTransitionPseudoElementTree = value;
-}
-
-bool Document::renderingIsSuppressedForViewTransition() const
-{
-    return m_renderingIsSuppressedForViewTransition;
 }
 
 void Document::setRenderingIsSuppressedForViewTransitionAfterUpdateRendering()

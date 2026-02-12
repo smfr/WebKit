@@ -237,7 +237,7 @@ public:
 private:
     enum class State : uint8_t { Running, Suspended, ReadyToStop, Stopped };
 
-    RefPtr<EventLoop> protectedEventLoop() const;
+    RefPtr<EventLoop> NODELETE protectedEventLoop() const;
 
     WeakPtr<EventLoop> m_eventLoop;
     WeakHashSet<EventLoopTimer> m_timers;

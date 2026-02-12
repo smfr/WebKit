@@ -156,7 +156,7 @@ public:
 
     void scrollToSelection();
 
-    bool canSelectAll() const;
+    bool canSelectAll() const { return m_multiple; }
     void selectAll();
     int listToOptionIndex(int listIndex) const;
     void listBoxOnChange();

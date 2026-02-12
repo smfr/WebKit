@@ -101,11 +101,6 @@ const RenderStyle& LegacyInlineTextBox::lineStyle() const
     return isFirstLine() ? renderer().firstLineStyle() : renderer().style();
 }
 
-bool LegacyInlineTextBox::hasTextContent() const
-{
-    return m_len;
-}
-
 void LegacyInlineTextBox::markDirty(bool dirty)
 {
     if (dirty) {
@@ -224,11 +219,6 @@ std::pair<unsigned, unsigned> LegacyInlineTextBox::selectionStartEnd() const
 bool LegacyInlineTextBox::hasMarkers() const
 {
     return MarkedText::collectForDocumentMarkers(renderer(), selectableRange(), MarkedText::PaintPhase::Decoration).size();
-}
-
-int LegacyInlineTextBox::caretMinOffset() const
-{
-    return m_start;
 }
 
 int LegacyInlineTextBox::caretMaxOffset() const

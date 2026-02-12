@@ -55,7 +55,7 @@ public:
     bool hasLastData() override;
     RefPtr<Event> getLastEvent() override;
 #endif
-    DeviceClient& client() final;
+    DeviceClient& NODELETE client() final;
 
     static DeviceOrientationController* from(Page*);
     static bool isActiveAt(Page*);
@@ -64,7 +64,7 @@ private:
     static ASCIILiteral supplementName() { return "DeviceOrientationController"_s; }
     bool isDeviceOrientationController() const final { return true; }
 
-    CheckedRef<DeviceOrientationClient> checkedClient();
+    CheckedRef<DeviceOrientationClient> NODELETE checkedClient();
 
     WeakRef<DeviceOrientationClient> m_client;
 };

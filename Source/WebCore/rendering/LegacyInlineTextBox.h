@@ -49,7 +49,7 @@ public:
     void setNextTextBox(LegacyInlineTextBox* n) { m_nextTextBox = n; }
     void setPreviousTextBox(LegacyInlineTextBox* p) { m_prevTextBox = p; }
 
-    bool hasTextContent() const;
+    bool hasTextContent() const { return m_len; }
 
     unsigned start() const { return m_start; }
     unsigned end() const { return m_start + m_len; }
@@ -99,7 +99,7 @@ private:
     bool isInlineTextBox() const final { return true; }
 
 public:
-    int caretMinOffset() const final;
+    int caretMinOffset() const final { return m_start; }
     int caretMaxOffset() const final;
 
 private:

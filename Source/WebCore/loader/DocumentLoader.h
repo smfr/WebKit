@@ -275,7 +275,7 @@ public:
     WEBCORE_EXPORT void addAllArchiveResources(Archive&);
     WEBCORE_EXPORT void addArchiveResource(Ref<ArchiveResource>&&);
     RefPtr<Archive> popArchiveForSubframe(const String& frameName, const URL&);
-    WEBCORE_EXPORT SharedBuffer* parsedArchiveData() const;
+    WEBCORE_EXPORT SharedBuffer* NODELETE parsedArchiveData() const;
 
     bool hasArchiveResourceCollection() const { return !!m_archiveResourceCollection; }
     WEBCORE_EXPORT bool scheduleArchiveLoad(ResourceLoader&, const ResourceRequest&);
@@ -408,7 +408,7 @@ public:
     void setModalContainerObservationPolicy(ModalContainerObservationPolicy policy) { m_modalContainerObservationPolicy = policy; }
 
     // FIXME: Why is this in a Loader?
-    WEBCORE_EXPORT ColorSchemePreference colorSchemePreference() const;
+    WEBCORE_EXPORT ColorSchemePreference NODELETE colorSchemePreference() const;
     void setColorSchemePreference(ColorSchemePreference preference) { m_colorSchemePreference = preference; }
 
     HTTPSByDefaultMode httpsByDefaultMode() { return m_httpsByDefaultMode; }
@@ -455,7 +455,7 @@ public:
 
 #if USE(QUICK_LOOK)
     void setPreviewConverter(RefPtr<PreviewConverter>&&);
-    PreviewConverter* previewConverter() const;
+    PreviewConverter* NODELETE previewConverter() const;
 #endif
 
 #if ENABLE(CONTENT_EXTENSIONS)

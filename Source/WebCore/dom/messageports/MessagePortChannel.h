@@ -68,7 +68,7 @@ public:
 private:
     MessagePortChannel(MessagePortChannelRegistry&, const MessagePortIdentifier& port1, const MessagePortIdentifier& port2);
 
-    CheckedRef<MessagePortChannelRegistry> checkedRegistry() const;
+    CheckedRef<MessagePortChannelRegistry> NODELETE checkedRegistry() const;
 
     std::array<MessagePortIdentifier, 2> m_ports;
     std::array<bool, 2> m_isClosed { false, false };

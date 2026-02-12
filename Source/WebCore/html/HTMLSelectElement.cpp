@@ -444,11 +444,6 @@ bool HTMLSelectElement::isMouseFocusable() const
     return HTMLFormControlElement::isMouseFocusable();
 }
 
-bool HTMLSelectElement::canSelectAll() const
-{
-    return m_multiple;
-}
-
 RenderPtr<RenderElement> HTMLSelectElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition& position)
 {
     if (usesMenuList()) {

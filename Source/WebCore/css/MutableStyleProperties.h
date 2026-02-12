@@ -57,7 +57,7 @@ public:
     static constexpr std::nullptr_t end() { return nullptr; }
     unsigned size() const { return propertyCount(); }
 
-    CSSStyleProperties* cssStyleProperties();
+    CSSStyleProperties* NODELETE cssStyleProperties();
 
     bool addParsedProperties(const ParsedPropertyVector&);
     bool addParsedProperty(const CSSProperty&);

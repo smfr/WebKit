@@ -896,8 +896,8 @@ public:
     // https://wicg.github.io/nav-speculation/speculation-rules.html#consider-speculation
     void considerSpeculationRules();
     void processSpeculationRules();
-    Ref<const SpeculationRules> speculationRules() const;
-    Ref<SpeculationRules> speculationRules();
+    Ref<const SpeculationRules> NODELETE speculationRules() const;
+    Ref<SpeculationRules> NODELETE speculationRules();
 
     URL baseURLForComplete(const URL& baseURLOverride) const;
     WEBCORE_EXPORT URL completeURL(const String&, ForceUTF8 = ForceUTF8::No) const final;
@@ -918,7 +918,7 @@ public:
 
     IDBClient::IDBConnectionProxy* idbConnectionProxy() final;
     StorageConnection* storageConnection();
-    SocketProvider* socketProvider() final;
+    SocketProvider* NODELETE socketProvider() final;
     RefPtr<RTCDataChannelRemoteHandlerConnection> createRTCDataChannelRemoteHandlerConnection() final;
 
 #if ENABLE(WEB_RTC)
@@ -1393,7 +1393,7 @@ public:
     void unregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient&);
 
     WEBCORE_EXPORT void setShouldCreateRenderers(bool);
-    bool shouldCreateRenderers();
+    bool shouldCreateRenderers() const { return m_createRenderers; }
 
     void setDecoder(RefPtr<TextResourceDecoder>&&);
     TextResourceDecoder* decoder() const { return m_decoder.get(); }
@@ -1527,7 +1527,7 @@ public:
     bool hasPendingIdleCallback() const;
     IdleCallbackController* idleCallbackController() const { return m_idleCallbackController.get(); }
 
-    EventTarget* errorEventTarget() final;
+    EventTarget* NODELETE errorEventTarget() final;
     void logExceptionToConsole(const String& errorMessage, const String& sourceURL, int lineNumber, int columnNumber, RefPtr<Inspector::ScriptCallStack>&&) final;
 
     WEBCORE_EXPORT void didAddWheelEventHandler(Node&);
@@ -1547,7 +1547,7 @@ public:
     WEBCORE_EXPORT unsigned touchEventHandlerCount() const;
 
     WEBCORE_EXPORT void startTrackingStyleRecalcs();
-    WEBCORE_EXPORT unsigned styleRecalcCount() const;
+    WEBCORE_EXPORT unsigned styleRecalcCount() const { return m_styleRecalcCount; }
 
 #if ENABLE(TOUCH_EVENTS)
     bool hasTouchEventHandlers() const;
@@ -1773,12 +1773,12 @@ public:
     bool activeViewTransitionCapturedDocumentElement() const;
     void setActiveViewTransition(RefPtr<ViewTransition>&&);
 
-    bool hasViewTransitionPseudoElementTree() const;
+    bool hasViewTransitionPseudoElementTree() const { return m_hasViewTransitionPseudoElementTree; }
     void setHasViewTransitionPseudoElementTree(bool);
 
     void performPendingViewTransitions();
 
-    bool renderingIsSuppressedForViewTransition() const;
+    bool renderingIsSuppressedForViewTransition() const { return m_renderingIsSuppressedForViewTransition; }
     void setRenderingIsSuppressedForViewTransitionAfterUpdateRendering();
     void setRenderingIsSuppressedForViewTransitionImmediately();
     void clearRenderingIsSuppressedForViewTransition();
@@ -1801,7 +1801,7 @@ public:
     //    - A read-only telephoneNumberParsingAllowed which is set by the
     //      document if it has the appropriate meta tag.
     //    - isTelephoneNumberParsingEnabled() == isTelephoneNumberParsingAllowed() && page()->settings()->isTelephoneNumberParsingEnabled()
-    WEBCORE_EXPORT bool isTelephoneNumberParsingAllowed() const;
+    WEBCORE_EXPORT bool isTelephoneNumberParsingAllowed() const { return m_isTelephoneNumberParsingAllowed; }
     WEBCORE_EXPORT bool isTelephoneNumberParsingEnabled() const;
 #endif
 
@@ -1989,7 +1989,7 @@ public:
     void setFragmentDirective(const String& fragmentDirective) { m_fragmentDirective = fragmentDirective; }
     const String& fragmentDirective() const { return m_fragmentDirective; }
 
-    FragmentDirective& fragmentDirectiveForBindings();
+    FragmentDirective& NODELETE fragmentDirectiveForBindings();
 
     void prepareCanvasesForDisplayOrFlushIfNeeded();
     void addCanvasNeedingPreparationForDisplayOrFlush(CanvasRenderingContext&);

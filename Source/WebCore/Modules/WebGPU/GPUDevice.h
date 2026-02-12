@@ -107,10 +107,10 @@ public:
     String label() const;
     void setLabel(String&&);
 
-    Ref<GPUSupportedFeatures> features() const;
-    Ref<GPUSupportedLimits> limits() const;
+    Ref<GPUSupportedFeatures> NODELETE features() const;
+    Ref<GPUSupportedLimits> NODELETE limits() const;
 
-    Ref<GPUQueue> queue() const;
+    Ref<GPUQueue> NODELETE queue() const;
 
     void destroy(ScriptExecutionContext&);
 
@@ -152,7 +152,7 @@ public:
     const WebGPU::Device& backing() const { return m_backing; }
     void removeBufferToUnmap(GPUBuffer&);
     void addBufferToUnmap(GPUBuffer&);
-    Ref<GPUAdapterInfo> adapterInfo() const;
+    Ref<GPUAdapterInfo> NODELETE adapterInfo() const;
 
 #if ENABLE(VIDEO)
     WeakPtr<GPUExternalTexture> takeExternalTextureForVideoElement(const HTMLVideoElement&);

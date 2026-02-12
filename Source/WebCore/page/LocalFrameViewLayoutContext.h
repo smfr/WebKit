@@ -230,10 +230,10 @@ private:
 
     LocalFrame& frame() const;
     Ref<LocalFrame> protectedFrame();
-    LocalFrameView& view() const;
+    LocalFrameView& NODELETE view() const;
     RenderView* renderView() const;
     Document* document() const;
-    RefPtr<Document> protectedDocument() const;
+    RefPtr<Document> NODELETE protectedDocument() const;
 
     SingleThreadWeakRef<LocalFrameView> m_frameView;
     Timer m_layoutTimer;

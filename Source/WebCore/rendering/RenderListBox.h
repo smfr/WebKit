@@ -129,7 +129,7 @@ private:
 
     void setScrollOffset(const ScrollOffset&) final;
 
-    ScrollPosition scrollPosition() const final;
+    ScrollPosition NODELETE scrollPosition() const final;
     ScrollPosition minimumScrollPosition() const final;
     ScrollPosition maximumScrollPosition() const final;
 

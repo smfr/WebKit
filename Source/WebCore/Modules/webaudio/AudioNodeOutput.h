@@ -65,11 +65,11 @@ public:
 
     // renderingFanOutCount() is the number of AudioNodeInputs that we're connected to during rendering.
     // Unlike fanOutCount() it will not change during the course of a render quantum.
-    unsigned renderingFanOutCount() const;
+    unsigned renderingFanOutCount() const { return m_renderingFanOutCount; }
 
     // renderingParamFanOutCount() is the number of AudioParams that we're connected to during rendering.
     // Unlike paramFanOutCount() it will not change during the course of a render quantum.
-    unsigned renderingParamFanOutCount() const;
+    unsigned renderingParamFanOutCount() const { return m_renderingParamFanOutCount; }
 
     // Must be called with the context's graph lock.
     void disconnectAll();

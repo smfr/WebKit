@@ -127,7 +127,7 @@ private:
     void computeBitRates(const MediaStreamPrivate*);
     void timeSlicerTimerFired();
 
-    CheckedPtr<MediaRecorderPrivate> checkedPrivate();
+    CheckedPtr<MediaRecorderPrivate> NODELETE checkedPrivate();
 
     static CreatorFunction m_customCreator;
 

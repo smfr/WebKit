@@ -88,7 +88,7 @@ public:
     void detachFromDocument();
 
 private:
-    Ref<Document> protectedDocument() const;
+    Ref<Document> NODELETE protectedDocument() const;
 
     WeakRef<Document, WeakPtrImplWithEventTargetData> m_document;
 

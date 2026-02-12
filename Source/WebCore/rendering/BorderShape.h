@@ -70,8 +70,8 @@ public:
     // Takes `closedEdges` into account.
     const RectEdges<LayoutUnit>& borderWidths() const { return m_borderWidths; }
 
-    LayoutRoundedRect deprecatedRoundedRect() const;
-    LayoutRoundedRect deprecatedInnerRoundedRect() const;
+    LayoutRoundedRect NODELETE deprecatedRoundedRect() const;
+    LayoutRoundedRect NODELETE deprecatedInnerRoundedRect() const;
     FloatRoundedRect deprecatedPixelSnappedRoundedRect(float deviceScaleFactor) const;
     FloatRoundedRect deprecatedPixelSnappedInnerRoundedRect(float deviceScaleFactor) const;
 

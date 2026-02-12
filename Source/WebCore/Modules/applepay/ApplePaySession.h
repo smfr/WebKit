@@ -118,7 +118,7 @@ private:
     void derefEventTarget() override { deref(); }
 
     // PaymentSession
-    unsigned version() const override;
+    unsigned version() const override { return m_version; }
     void validateMerchant(URL&&) override;
     void didAuthorizePayment(const Payment&) override;
     void didSelectShippingMethod(const ApplePayShippingMethod&) override;

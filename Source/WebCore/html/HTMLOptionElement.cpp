@@ -151,11 +151,6 @@ bool HTMLOptionElement::isFocusable() const
     return HTMLElement::isFocusable();
 }
 
-bool HTMLOptionElement::matchesDefaultPseudoClass() const
-{
-    return m_isDefault;
-}
-
 String HTMLOptionElement::text() const
 {
     String text = collectOptionInnerText();

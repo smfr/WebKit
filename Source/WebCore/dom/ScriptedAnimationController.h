@@ -76,7 +76,7 @@ private:
     bool isThrottledRelativeToPage() const;
     bool shouldRescheduleRequestAnimationFrame(ReducedResolutionSeconds) const;
     void scheduleAnimation();
-    RefPtr<Document> protectedDocument();
+    RefPtr<Document> NODELETE protectedDocument();
 
     struct CallbackData {
         Ref<RequestAnimationFrameCallback> callback;

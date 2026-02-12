@@ -79,7 +79,7 @@ private:
 
     bool isFocusable() const final;
     bool rendererIsNeeded(const RenderStyle&) final { return false; }
-    bool matchesDefaultPseudoClass() const final;
+    bool matchesDefaultPseudoClass() const final { return m_isDefault; }
 
     void attributeChanged(const QualifiedName&, const AtomString& oldValue, const AtomString& newValue, AttributeModificationReason) final;
 

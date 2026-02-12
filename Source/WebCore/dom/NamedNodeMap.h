@@ -56,7 +56,7 @@ public:
 
     Vector<String> supportedPropertyNames() const;
 
-    Element& element() const;
+    Element& NODELETE element() const;
 
 private:
     WeakRef<Element, WeakPtrImplWithEventTargetData> m_element;
