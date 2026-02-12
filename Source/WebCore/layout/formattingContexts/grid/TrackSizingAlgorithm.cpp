@@ -269,7 +269,7 @@ static void sizeTracksToFitNonSpanningItems(UnsizedTracks& unsizedTracks, const 
                 auto maximumMaxContentContribution = itemContributions.isEmpty() ? 0_lu : std::ranges::max(itemContributions);
 
                 auto hasFitContentMaximum = [] {
-                    ASSERT_NOT_IMPLEMENTED_YET();
+                    notImplemented();
                     return false;
                 };
                 // For fit-content() maximums, furthermore clamp this growth limit by the
