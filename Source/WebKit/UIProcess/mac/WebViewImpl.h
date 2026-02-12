@@ -658,6 +658,7 @@ public:
     void insertText(id string);
     void insertText(id string, NSRange replacementRange);
     NSTextInputContext *inputContext();
+    NSTextInputContext *inputContextIncludingNonEditable();
     void unmarkText();
     void setMarkedText(id string, NSRange selectedRange, NSRange replacementRange);
     NSRange selectedRange();

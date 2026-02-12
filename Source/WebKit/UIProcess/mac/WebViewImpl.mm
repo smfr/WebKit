@@ -2959,7 +2959,7 @@ void WebViewImpl::selectionDidChange()
 #endif
         if (protect(page->preferences())->textInputClientSelectionUpdatesEnabled()) {
             alreadyNotifiedClient = true;
-            [protect(inputContext()) textInputClientDidUpdateSelection];
+            [protect(inputContextIncludingNonEditable()) textInputClientDidUpdateSelection];
         }
     }
 
@@ -3068,12 +3068,16 @@ NSRect WebViewImpl::unionRectInVisibleSelectedRangeInScreen() const
         return NSZeroRect;
 
     Ref page = m_page.get();
-    if (!page->editorState().selectionIsRange)
+    auto& editorState = page->editorState();
+    if (editorState.selectionIsNone)
         return NSZeroRect;
 
     auto selectionRect = page->selectionBoundingRectInRootViewCoordinates();
     if (selectionRect.isEmpty())
         return NSZeroRect;
+
+    if (!editorState.selectionIsRange && editorState.isContentEditable)
+        selectionRect.setWidth(0);
 
     return convertFromViewToScreen(selectionRect);
 }
@@ -5632,7 +5636,18 @@ NSTextInputContext *WebViewImpl::inputContext()
     if (!m_page->editorState().isContentEditable)
         return nil;
 
-    return [m_view.get() _web_superInputContext];
+    return [m_view _web_superInputContext];
+}
+
+NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
+{
+    if (!protect(m_page->preferences())->textInputClientSelectionUpdatesEnabled())
+        return inputContext();
+
+    if (!m_page->editorState().isContentEditable && !m_page->editorState().selectionIsRange)
+        return nil;
+
+    return [m_view _web_superInputContext];
 }
 
 void WebViewImpl::unmarkText()
