@@ -64,7 +64,7 @@ struct TextExtractionTestOptions {
     bool includeURLs { false };
     bool shortenURLs { false };
     JSRetainPtr<JSStringRef> nodeIdentifierInclusion;
-    bool includeEventListeners { false };
+    JSValueRef eventListenerCategories { nullptr };
     bool includeAccessibilityAttributes { false };
     bool includeTextInAutoFilledControls { false };
     bool includeOffscreenPasswordFields { false };

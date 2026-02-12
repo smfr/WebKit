@@ -60,7 +60,7 @@
     _includeURLs = !onlyVisibleText;
     _includeRects = !onlyVisibleText;
     _nodeIdentifierInclusion = onlyVisibleText ? _WKTextExtractionNodeIdentifierInclusionNone : _WKTextExtractionNodeIdentifierInclusionInteractive;
-    _includeEventListeners = !onlyVisibleText;
+    _eventListenerCategories = onlyVisibleText ? _WKTextExtractionEventListenerCategoryNone : _WKTextExtractionEventListenerCategoryAll;
     _includeAccessibilityAttributes = !onlyVisibleText;
     _includeTextInAutoFilledControls = !onlyVisibleText;
     _onlyIncludeVisibleText = onlyVisibleText;
@@ -153,11 +153,23 @@
     _nodeIdentifierInclusion = value;
 }
 
+- (BOOL)includeEventListeners
+{
+    return _eventListenerCategories != _WKTextExtractionEventListenerCategoryNone;
+}
+
 - (void)setIncludeEventListeners:(BOOL)value
 {
     ENSURE_VALID_TEXT_ONLY_CONFIGURATION(value);
 
-    _includeEventListeners = value;
+    _eventListenerCategories = value ? _WKTextExtractionEventListenerCategoryAll : _WKTextExtractionEventListenerCategoryNone;
+}
+
+- (void)setEventListenerCategories:(_WKTextExtractionEventListenerCategory)value
+{
+    ENSURE_VALID_TEXT_ONLY_CONFIGURATION(value);
+
+    _eventListenerCategories = value;
 }
 
 - (void)setIncludeAccessibilityAttributes:(BOOL)value

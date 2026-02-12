@@ -234,7 +234,6 @@ struct TraversalContext {
     bool mergeParagraphs { false };
     bool skipNearlyTransparentContent { false };
     NodeIdentifierInclusion nodeIdentifierInclusion { NodeIdentifierInclusion::None };
-    bool includeEventListeners { false };
     bool includeAccessibilityAttributes { false };
     unsigned visibleTextLength { 0 };
 
@@ -758,23 +757,24 @@ static inline void extractRecursive(Node& node, Item& parentItem, TraversalConte
     bool shouldSkipSubtree = false;
 
     OptionSet<EventListenerCategory> eventListeners;
-    if (context.includeEventListeners) {
+    if (auto requestedCategories = context.originalRequest.eventListenerCategories) {
         node.enumerateEventListenerTypes([&](auto& type, unsigned) {
             auto typeInfo = eventNames().typeInfoForEvent(type);
-            if (typeInfo.isInCategory(EventCategory::Wheel))
+            if (typeInfo.isInCategory(EventCategory::Wheel) && requestedCategories.contains(EventListenerCategory::Wheel))
                 eventListeners.add(EventListenerCategory::Wheel);
-            else if (typeInfo.isInCategory(EventCategory::MouseClickRelated))
+            else if (typeInfo.isInCategory(EventCategory::MouseClickRelated) && requestedCategories.contains(EventListenerCategory::Click))
                 eventListeners.add(EventListenerCategory::Click);
-            else if (typeInfo.isInCategory(EventCategory::MouseMoveRelated))
+            else if (typeInfo.isInCategory(EventCategory::MouseMoveRelated) && requestedCategories.contains(EventListenerCategory::Hover))
                 eventListeners.add(EventListenerCategory::Hover);
-            else if (typeInfo.isInCategory(EventCategory::TouchRelated))
+            else if (typeInfo.isInCategory(EventCategory::TouchRelated) && requestedCategories.contains(EventListenerCategory::Touch))
                 eventListeners.add(EventListenerCategory::Touch);
 
             switch (typeInfo.type()) {
             case EventType::keydown:
             case EventType::keypress:
             case EventType::keyup:
-                eventListeners.add(EventListenerCategory::Keyboard);
+                if (requestedCategories.contains(EventListenerCategory::Keyboard))
+                    eventListeners.add(EventListenerCategory::Keyboard);
                 break;
 
             default:
@@ -1200,7 +1200,6 @@ Result extractItem(Request&& request, LocalFrame& frame)
             .mergeParagraphs = request.mergeParagraphs,
             .skipNearlyTransparentContent = request.skipNearlyTransparentContent,
             .nodeIdentifierInclusion = request.nodeIdentifierInclusion,
-            .includeEventListeners = request.includeEventListeners,
             .includeAccessibilityAttributes = request.includeAccessibilityAttributes,
         };
         extractRecursive(*extractionRootNode, root, context);

@@ -7284,6 +7284,22 @@ static HashMap<String, HashMap<WebCore::JSHandleIdentifier, String>> extractClie
     return result;
 }
 
+static OptionSet<WebCore::TextExtraction::EventListenerCategory> coreEventListenerCategories(_WKTextExtractionEventListenerCategory categories)
+{
+    OptionSet<WebCore::TextExtraction::EventListenerCategory> coreCategories;
+    if (categories & _WKTextExtractionEventListenerCategoryClick)
+        coreCategories.add(WebCore::TextExtraction::EventListenerCategory::Click);
+    if (categories & _WKTextExtractionEventListenerCategoryHover)
+        coreCategories.add(WebCore::TextExtraction::EventListenerCategory::Hover);
+    if (categories & _WKTextExtractionEventListenerCategoryTouch)
+        coreCategories.add(WebCore::TextExtraction::EventListenerCategory::Touch);
+    if (categories & _WKTextExtractionEventListenerCategoryWheel)
+        coreCategories.add(WebCore::TextExtraction::EventListenerCategory::Wheel);
+    if (categories & _WKTextExtractionEventListenerCategoryKeyboard)
+        coreCategories.add(WebCore::TextExtraction::EventListenerCategory::Keyboard);
+    return coreCategories;
+}
+
 #if ENABLE(DATA_DETECTION)
 
 static OptionSet<WebCore::DataDetectorType> coreDataDetectorTypes(_WKTextExtractionDataDetectorTypes types)
@@ -7351,7 +7367,7 @@ static OptionSet<WebCore::DataDetectorType> coreDataDetectorTypes(_WKTextExtract
             .mergeParagraphs = mergeParagraphs,
             .skipNearlyTransparentContent = skipNearlyTransparentContent,
             .nodeIdentifierInclusion = nodeIdentifierInclusion,
-            .includeEventListeners = !!configuration.includeEventListeners,
+            .eventListenerCategories = coreEventListenerCategories(configuration.eventListenerCategories),
             .includeAccessibilityAttributes = !!configuration.includeAccessibilityAttributes,
             .includeTextInAutoFilledControls = !!configuration.includeTextInAutoFilledControls,
             .includeOffscreenPasswordFields = !!configuration.includeOffscreenPasswordFields,

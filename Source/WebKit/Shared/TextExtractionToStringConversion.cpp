@@ -855,8 +855,12 @@ static Vector<String> partsForItem(const TextExtraction::Item& item, const TextE
         parts.append(makeString("title='"_s, escapeString(item.title), '\''));
 
     auto listeners = eventListenerTypesToStringArray(item.eventListeners);
-    if (!listeners.isEmpty() && !aggregator.useHTMLOutput())
-        parts.append(makeString("events=["_s, commaSeparatedString(listeners), ']'));
+    if (!listeners.isEmpty() && !aggregator.useHTMLOutput()) {
+        if (listeners.size() == 1)
+            parts.append(makeString("events="_s, listeners.first()));
+        else
+            parts.append(makeString("events=["_s, commaSeparatedString(listeners), ']'));
+    }
 
     for (auto& key : sortedKeys(item.ariaAttributes))
         parts.append(makeString(key, "='"_s, escapeString(item.ariaAttributes.get(key)), '\''));
