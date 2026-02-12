@@ -131,7 +131,8 @@ final class WKNavigationDelegateAdapter: NSObject, WKNavigationDelegate {
         _ webView: WKWebView,
         willSubmitForm formInfo: WKFormInfo
     ) async {
-        await navigationDecider.willSubmit(formInfo: formInfo)
+        let convertedFormInfo = WebPage.FormInfo(formInfo)
+        await navigationDecider.willSubmit(formInfo: convertedFormInfo)
     }
 }
 
