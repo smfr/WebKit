@@ -1909,6 +1909,12 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
 
     [_contentView setOpaque:opaque];
 
+#if PLATFORM(VISION)
+    static BOOL alternateRenderingAvailable = [UIScrollView instancesRespondToSelector:@selector(_setUseVisionAlternateScrollIndicatorRendering:)];
+    if (alternateRenderingAvailable)
+        [_scrollView _setUseVisionAlternateScrollIndicatorRendering:opaque];
+#endif
+
     if (!_page)
         return;
 

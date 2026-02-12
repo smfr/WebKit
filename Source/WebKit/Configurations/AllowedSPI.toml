@@ -607,3 +607,10 @@ symbols = [
 ]
 requires = ["ENABLE_GPU_PROCESS_MODEL"]
 
+[[temporary-usage]]
+request = "rdar://170141943"
+cleanup = "rdar://170141943"
+selectors = [
+    { name = "_setUseVisionAlternateScrollIndicatorRendering:", class = "UIScrollView" },
+]
+requires = ["PLATFORM_VISION"]
