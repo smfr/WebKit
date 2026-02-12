@@ -526,10 +526,6 @@ static bool isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoClass pseudo
     switch (compoundPseudoElement) {
     case CSSSelector::PseudoElement::Part:
         return !isTreeStructuralPseudoClass(pseudoClass);
-    case CSSSelector::PseudoElement::Picker:
-        return !isTreeStructuralPseudoClass(pseudoClass);
-    case CSSSelector::PseudoElement::Slotted:
-        return false;
     case CSSSelector::PseudoElement::WebKitResizer:
     case CSSSelector::PseudoElement::WebKitScrollbar:
     case CSSSelector::PseudoElement::WebKitScrollbarCorner:
@@ -545,6 +541,7 @@ static bool isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoClass pseudo
     case CSSSelector::PseudoElement::ViewTransitionNew:
     case CSSSelector::PseudoElement::ViewTransitionOld:
         return pseudoClass == CSSSelector::PseudoClass::OnlyChild;
+    case CSSSelector::PseudoElement::Picker:
     case CSSSelector::PseudoElement::UserAgentPart:
     case CSSSelector::PseudoElement::UserAgentPartLegacyAlias:
     case CSSSelector::PseudoElement::WebKitUnknown:
