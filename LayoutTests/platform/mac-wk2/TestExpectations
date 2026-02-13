@@ -114,6 +114,7 @@ webkit.org/b/307300 [ Debug arm64 ] http/tests/iframe-monitor/throttler.html [ P
 webkit.org/b/307300 [ Debug arm64 ] http/tests/iframe-monitor/workers/service-worker-not-count-twice.html [ Pass Timeout ]
 webkit.org/b/307300 [ Debug arm64 ] http/tests/iframe-monitor/workers/service-worker.html [ Pass Timeout ]
 webkit.org/b/307300 [ Debug arm64 ] http/tests/iframe-monitor/workers/shared-worker.html [ Pass Timeout ]
+webkit.org/b/307300 [ Debug arm64 ] http/tests/inspector/network/copy-as-curl.html [ Pass Timeout ]
 
 # Some of these have failing results: webkit.org/b/293983
 imported/w3c/web-platform-tests/dom/events/scrolling/iframe-chains.html [ Pass ]
