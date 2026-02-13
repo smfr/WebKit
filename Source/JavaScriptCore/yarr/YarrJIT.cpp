@@ -1627,6 +1627,7 @@ class YarrGenerator final : public YarrJITInfo {
         // m_nextOp will reference the YarrOpCode::BodyAlternativeBegin node of the first
         // repeating alternative.
         PatternAlternative* m_alternative;
+        size_t m_index { 0 };
         size_t m_previousOp;
         size_t m_nextOp;
 
@@ -1736,18 +1737,29 @@ class YarrGenerator final : public YarrJITInfo {
         // current location, a provided label, or copying the backtracking out
         // to a JumpList. All actions may require code generation to take place,
         // and as such are passed a pointer to the assembler.
-        void link(MacroAssembler* assembler)
+        void link(YarrGenerator& generator, const YarrOp& op)
         {
             if (m_pendingReturns.size()) {
-                MacroAssembler::Label here(assembler);
+                MacroAssembler::Label here(generator.m_jit);
                 for (unsigned i = 0; i < m_pendingReturns.size(); ++i)
                     m_backtrackRecords.append(ReturnAddressRecord(m_pendingReturns[i], here));
                 m_pendingReturns.clear();
             }
-            m_laterFailures.link(assembler);
+            m_laterFailures.link(generator.m_jit);
             m_laterFailures.clear();
             m_pendingFallthrough = false;
+
+            if (Options::traceRegExpJITExecution()) [[unlikely]] {
+                GPRReg indexReg = generator.m_regs.index;
+                auto index = op.m_index;
+                auto opcode = op.m_op;
+                generator.m_jit.probeDebug([=](Probe::Context& ctx) {
+                    int32_t indexValue = static_cast<int32_t>(ctx.gpr(indexReg));
+                    dataLogLn("RegExpJIT [", index, "] ", opcode, ".bt index=", indexValue);
+                });
+            }
         }
+
         void linkTo(MacroAssembler::Label label, MacroAssembler* assembler)
         {
             if (m_pendingReturns.size()) {
@@ -2205,8 +2217,7 @@ class YarrGenerator final : public YarrJITInfo {
             loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::beginIndex(), m_regs.index);
 
             matches.link(&m_jit);
-            op.m_reentry = m_jit.label();
-            emitTraceReentry(opIndex, op.m_op);
+            defineReentryLabel(op);
             break;
         }
 
@@ -2216,8 +2227,7 @@ class YarrGenerator final : public YarrJITInfo {
 
             matches.append(m_jit.jump());
 
-            op.m_reentry = m_jit.label();
-            emitTraceReentry(opIndex, op.m_op);
+            defineReentryLabel(op);
 
             if (duplicateNamedGroupId) {
                 if (!m_decodeSurrogatePairs)
@@ -2265,9 +2275,8 @@ class YarrGenerator final : public YarrJITInfo {
         YarrOp& op = m_ops[opIndex];
         PatternTerm* term = op.m_term;
 
-        m_backtrackingState.link(&m_jit);
         op.m_jumps.link(&m_jit);
-        emitTraceBacktrack(opIndex, op.m_op);
+        m_backtrackingState.link(*this, op);
 
         MacroAssembler::JumpList failures;
 
@@ -2791,8 +2800,7 @@ class YarrGenerator final : public YarrJITInfo {
 
             failures.link(&m_jit);
         }
-        op.m_reentry = m_jit.label();
-        emitTraceReentry(opIndex, op.m_op);
+        defineReentryLabel(op);
 
         storeToFrame(countRegister, term->frameLocation + BackTrackInfoPatternCharacter::matchAmountIndex());
     }
@@ -2803,8 +2811,7 @@ class YarrGenerator final : public YarrJITInfo {
 
         const MacroAssembler::RegisterID countRegister = m_regs.regT1;
 
-        m_backtrackingState.link(&m_jit);
-        emitTraceBacktrack(opIndex, op.m_op);
+        m_backtrackingState.link(*this, op);
 
         loadFromFrame(term->frameLocation + BackTrackInfoPatternCharacter::matchAmountIndex(), countRegister);
         m_backtrackingState.append(m_jit.branchTest32(MacroAssembler::Zero, countRegister));
@@ -2824,8 +2831,7 @@ class YarrGenerator final : public YarrJITInfo {
         const MacroAssembler::RegisterID countRegister = m_regs.regT1;
 
         m_jit.move(MacroAssembler::TrustedImm32(0), countRegister);
-        op.m_reentry = m_jit.label();
-        emitTraceReentry(opIndex, op.m_op);
+        defineReentryLabel(op);
         storeToFrame(countRegister, term->frameLocation + BackTrackInfoPatternCharacter::matchAmountIndex());
     }
     void backtrackPatternCharacterNonGreedy(size_t opIndex)
@@ -2837,8 +2843,7 @@ class YarrGenerator final : public YarrJITInfo {
         const MacroAssembler::RegisterID character = m_regs.regT0;
         const MacroAssembler::RegisterID countRegister = m_regs.regT1;
 
-        m_backtrackingState.link(&m_jit);
-        emitTraceBacktrack(opIndex, op.m_op);
+        m_backtrackingState.link(*this, op);
 
         loadFromFrame(term->frameLocation + BackTrackInfoPatternCharacter::matchAmountIndex(), countRegister);
 
@@ -2910,8 +2915,7 @@ class YarrGenerator final : public YarrJITInfo {
             YarrOp& op = m_ops[opIndex];
             PatternTerm* term = op.m_term;
 
-            m_backtrackingState.link(&m_jit);
-            emitTraceBacktrack(opIndex, op.m_op);
+            m_backtrackingState.link(*this, op);
             // If we fallthough to the same CharacterClassOnce, we will override this index register, so we do not need to load here.
             if (!fallThroughToCharacterClassFixedCount)
                 loadFromFrame(term->frameLocation + BackTrackInfoCharacterClass::beginIndex(), m_regs.index);
@@ -3039,8 +3043,7 @@ class YarrGenerator final : public YarrJITInfo {
         }
 
         failures.link(&m_jit);
-        op.m_reentry = m_jit.label();
-        emitTraceReentry(opIndex, op.m_op);
+        defineReentryLabel(op);
 
         storeToFrame(countRegister, term->frameLocation + BackTrackInfoCharacterClass::matchAmountIndex());
     }
@@ -3051,8 +3054,7 @@ class YarrGenerator final : public YarrJITInfo {
 
         const MacroAssembler::RegisterID countRegister = m_regs.regT1;
 
-        m_backtrackingState.link(&m_jit);
-        emitTraceBacktrack(opIndex, op.m_op);
+        m_backtrackingState.link(*this, op);
 
         loadFromFrame(term->frameLocation + BackTrackInfoCharacterClass::matchAmountIndex(), countRegister);
         m_backtrackingState.append(m_jit.branchTest32(MacroAssembler::Zero, countRegister));
@@ -3105,8 +3107,7 @@ class YarrGenerator final : public YarrJITInfo {
             storeToFrame(m_regs.index, term->frameLocation + BackTrackInfoCharacterClass::beginIndex());
 #endif
 
-        op.m_reentry = m_jit.label();
-        emitTraceReentry(opIndex, op.m_op);
+        defineReentryLabel(op);
 
         storeToFrame(countRegister, term->frameLocation + BackTrackInfoCharacterClass::matchAmountIndex());
     }
@@ -3124,8 +3125,7 @@ class YarrGenerator final : public YarrJITInfo {
         MacroAssembler::JumpList nonGreedyFailures;
         MacroAssembler::JumpList nonGreedyFailuresDecrementIndex;
 
-        m_backtrackingState.link(&m_jit);
-        emitTraceBacktrack(opIndex, op.m_op);
+        m_backtrackingState.link(*this, op);
 
         loadFromFrame(term->frameLocation + BackTrackInfoCharacterClass::matchAmountIndex(), countRegister);
 
@@ -3450,8 +3450,7 @@ class YarrGenerator final : public YarrJITInfo {
 
                 // We will reenter after the check, and assume the input position to have been
                 // set as appropriate to this alternative.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
 
 #if ENABLE(YARR_JIT_UNICODE_EXPRESSIONS) && ENABLE(YARR_JIT_UNICODE_CAN_INCREMENT_INDEX_FOR_NON_BMP)
                 // Initialize after reentry to ensure fresh register state on backtrack retries,
@@ -3615,8 +3614,7 @@ class YarrGenerator final : public YarrJITInfo {
                     // that jumps here to do so with the input position matching that of the
                     // PRIOR alteranative, and we will only check input availability if we
                     // need to progress it forwards.
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     if (shouldRecordSubpatterns()
                         && priorAlternative->needToCleanupCaptures()) {
                             for (unsigned subpattern = priorAlternative->firstCleanupSubpatternId(); subpattern <= priorAlternative->m_lastSubpatternId; subpattern++)
@@ -3630,8 +3628,7 @@ class YarrGenerator final : public YarrJITInfo {
                 } else if (op.m_nextOp == notFound) {
                     // This is the reentry point for the End of 'once through' alternatives,
                     // jumped to when the last alternative fails to match.
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     m_jit.sub32(MacroAssembler::Imm32(priorAlternative->m_minimumSize), m_regs.index);
                 }
                 break;
@@ -3734,8 +3731,7 @@ class YarrGenerator final : public YarrJITInfo {
                 }
 
                 // This is the entry point for the next alternative.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
 
                 // For FixedCount with quantityMaxCount > 1, store a return address AFTER m_reentry, so that when we
                 // jump here for inter-iteration backtracking, the address gets stored correctly.
@@ -3830,8 +3826,7 @@ class YarrGenerator final : public YarrJITInfo {
                 else if (term->quantityType == QuantifierType::NonGreedy) {
                     storeToFrame(MacroAssembler::TrustedImm32(-1), parenthesesFrameLocation + BackTrackInfoParenthesesOnce::beginIndex());
                     op.m_jumps.append(m_jit.jump());
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     storeToFrame(m_regs.index, parenthesesFrameLocation + BackTrackInfoParenthesesOnce::beginIndex());
                 }
 
@@ -3889,10 +3884,9 @@ class YarrGenerator final : public YarrJITInfo {
                 // If the parentheses are quantified Greedy then add a label to jump back
                 // to if we get a failed match from after the parentheses. For NonGreedy
                 // parentheses, link the jump from before the subpattern to here.
-                if (term->quantityType == QuantifierType::Greedy) {
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
-                } else if (term->quantityType == QuantifierType::NonGreedy) {
+                if (term->quantityType == QuantifierType::Greedy)
+                    defineReentryLabel(op);
+                else if (term->quantityType == QuantifierType::NonGreedy) {
                     YarrOp& beginOp = m_ops[op.m_previousOp];
                     beginOp.m_jumps.link(&m_jit);
                 }
@@ -3911,8 +3905,7 @@ class YarrGenerator final : public YarrJITInfo {
                 termMatchTargets.append(MatchTargets());
 
                 // Upon entry set a label to loop back to.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
 
                 // Store the start index of the current match; we need to reject zero
                 // length matches.
@@ -3937,8 +3930,7 @@ class YarrGenerator final : public YarrJITInfo {
 
                 // This is the entry point to jump to when we stop matching - we will
                 // do so once the subpattern cannot match any more.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
                 break;
             }
 
@@ -3959,8 +3951,7 @@ class YarrGenerator final : public YarrJITInfo {
                 storeToFrame(MacroAssembler::TrustedImm32(0), parenthesesFrameLocation + BackTrackInfoParentheses::matchAmountIndex());
 
                 // Set the reentry label for looping.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
 
                 // Clear nested captures at the start of each iteration.
                 // This is required by ECMAScript spec - capture groups are reset to undefined
@@ -3997,8 +3988,7 @@ class YarrGenerator final : public YarrJITInfo {
 
                 // We've matched the required number of times, continue to next opcode.
                 // Set the reentry point for backtracking to propagate failure upward.
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
                 break;
             }
 
@@ -4045,8 +4035,7 @@ class YarrGenerator final : public YarrJITInfo {
                 }
                 }
 
-                op.m_reentry = m_jit.label();
-                emitTraceReentry(opIndex, op.m_op);
+                defineReentryLabel(op);
                 MacroAssembler::RegisterID currParenContextReg = m_regs.regT0;
                 MacroAssembler::RegisterID newParenContextReg = m_regs.regT1;
 
@@ -4145,16 +4134,14 @@ class YarrGenerator final : public YarrJITInfo {
                     else
                         m_jit.jump(beginOp.m_reentry);
 
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     break;
                 }
                 case QuantifierType::NonGreedy: {
                     // For NonGreedy parentheses, link the jump from before the subpattern to here.
                     YarrOp& beginOp = m_ops[op.m_previousOp];
                     beginOp.m_jumps.link(&m_jit);
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     break;
                 }
                 case QuantifierType::FixedCount: {
@@ -4180,8 +4167,7 @@ class YarrGenerator final : public YarrJITInfo {
                     // If not, we've matched the required number of times, continue to next opcode.
                     // Set the reentry point for backtracking to propagate failure upward.
                     m_jit.branch32(MacroAssembler::Below, countTemporary, MacroAssembler::Imm32(term->quantityMaxCount)).linkTo(beginOp.m_reentry, &m_jit);
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                     break;
                 }
                 }
@@ -4224,8 +4210,7 @@ class YarrGenerator final : public YarrJITInfo {
                             clearSubpattern(subpattern);
                     }
                     op.m_jumps.append(m_jit.jump());
-                    op.m_reentry = m_jit.label();
-                    emitTraceReentry(opIndex, op.m_op);
+                    defineReentryLabel(op);
                 }
                 break;
             }
@@ -4326,8 +4311,7 @@ class YarrGenerator final : public YarrJITInfo {
                     } else {
                         // We need to generate a trampoline of code to execute before looping back
                         // around to the first alternative.
-                        m_backtrackingState.link(&m_jit);
-                        emitTraceBacktrack(opIndex, op.m_op);
+                        m_backtrackingState.link(*this, op);
 
                         // No need to advance and retry for a sticky pattern. And it is already handled before this branch.
                         ASSERT(!m_pattern.sticky());
@@ -4562,8 +4546,7 @@ class YarrGenerator final : public YarrJITInfo {
                 if (op.m_checkAdjust) {
                     if (!m_backtrackingState.isEmpty()) {
                         // Handle the cases where we need to link the backtracks here.
-                        m_backtrackingState.link(&m_jit);
-                        emitTraceBacktrack(opIndex, op.m_op);
+                        m_backtrackingState.link(*this, op);
                         m_jit.sub32(MacroAssembler::Imm32(op.m_checkAdjust), m_regs.index);
                         if (!isLastAlternative) {
                             // An alternative that is not the last should jump to its successor.
@@ -4588,8 +4571,7 @@ class YarrGenerator final : public YarrJITInfo {
                         if (isFixedCountMultiAlt) {
                             // For FixedCount multi-alt, we need to restore index before jumping.
                             // Can't use linkTo directly since we need to emit code first.
-                            m_backtrackingState.link(&m_jit);
-                            emitTraceBacktrack(opIndex, op.m_op);
+                            m_backtrackingState.link(*this, op);
                             unsigned parenthesesFrameLocation = op.m_term->frameLocation;
                             loadFromFrame(parenthesesFrameLocation + BackTrackInfoParentheses::beginIndex(), m_regs.index);
                             m_jit.jump(nextOp.m_reentry);
@@ -4644,8 +4626,7 @@ class YarrGenerator final : public YarrJITInfo {
                 // into the end of a non-simple set of alterntives we need to jump
                 // to the backtracking return address set up during generation.
                 if (op.m_op == YarrOpCode::NestedAlternativeEnd) {
-                    m_backtrackingState.link(&m_jit);
-                    emitTraceBacktrack(opIndex, op.m_op);
+                    m_backtrackingState.link(*this, op);
 
                     // Jump to the return address stored by whichever alternative was taken.
                     // For FixedCount multi-alt: returnAddress was stored by NestedAlternativeBegin/Next
@@ -4685,8 +4666,7 @@ class YarrGenerator final : public YarrJITInfo {
 
                 // We only need to backtrack to this point if capturing or greedy.
                 if ((term->capture() && shouldRecordSubpatterns()) || term->quantityType == QuantifierType::Greedy) {
-                    m_backtrackingState.link(&m_jit);
-                    emitTraceBacktrack(opIndex, op.m_op);
+                    m_backtrackingState.link(*this, op);
 
                     // If capturing, clear the capture (both start and end).
                     if (term->capture() && shouldRecordSubpatterns()) {
@@ -4734,8 +4714,7 @@ class YarrGenerator final : public YarrJITInfo {
                 PatternTerm* term = op.m_term;
 
                 if (term->quantityType != QuantifierType::FixedCount) {
-                    m_backtrackingState.link(&m_jit);
-                    emitTraceBacktrack(opIndex, op.m_op);
+                    m_backtrackingState.link(*this, op);
 
                     // Check whether we should backtrack back into the parentheses, or if we
                     // are currently in a state where we had skipped over the subpattern
@@ -4794,8 +4773,7 @@ class YarrGenerator final : public YarrJITInfo {
                 // Any backtrack to Begin means we failed to match the required count.
                 // First link any pending backtrack state from the content inside,
                 // then propagate the failure upward.
-                m_backtrackingState.link(&m_jit);
-                emitTraceBacktrack(opIndex, op.m_op);
+                m_backtrackingState.link(*this, op);
                 m_backtrackingState.fallthrough();
                 break;
             case YarrOpCode::ParenthesesSubpatternFixedCountEnd:
@@ -4823,8 +4801,7 @@ class YarrGenerator final : public YarrJITInfo {
 #if ENABLE(YARR_JIT_ALL_PARENS_EXPRESSIONS)
                 PatternTerm* term = op.m_term;
                 unsigned parenthesesFrameLocation = term->frameLocation;
-                m_backtrackingState.link(&m_jit);
-                emitTraceBacktrack(opIndex, op.m_op);
+                m_backtrackingState.link(*this, op);
 
                 MacroAssembler::RegisterID currParenContextReg = m_regs.regT0;
                 MacroAssembler::RegisterID newParenContextReg = m_regs.regT1;
@@ -5058,8 +5035,7 @@ class YarrGenerator final : public YarrJITInfo {
                 YarrOp& beginOp = m_ops[op.m_previousOp];
                 unsigned parenthesesFrameLocation = term->frameLocation;
 
-                m_backtrackingState.link(&m_jit);
-                emitTraceBacktrack(opIndex, op.m_op);
+                m_backtrackingState.link(*this, op);
                 switch (term->quantityType) {
                 case QuantifierType::Greedy: {
                     // Check whether we should backtrack back into the parentheses, or if we
@@ -5127,8 +5103,7 @@ class YarrGenerator final : public YarrJITInfo {
                 // of a parenthetical assertion if either we need to correct
                 // the input index, or the assertion was inverted.
                 if (op.m_checkAdjust || term->invert()) {
-                    m_backtrackingState.link(&m_jit);
-                    emitTraceBacktrack(opIndex, op.m_op);
+                    m_backtrackingState.link(*this, op);
 
                     if (op.m_checkAdjust)
                         m_jit.add32(MacroAssembler::Imm32(op.m_checkAdjust), m_regs.index);
@@ -5285,9 +5260,9 @@ class YarrGenerator final : public YarrJITInfo {
         }
 
         size_t parenBegin = m_ops.size();
-        m_ops.append(parenthesesBeginOpCode);
+        appendOp(parenthesesBeginOpCode);
 
-        m_ops.append(alternativeBeginOpCode);
+        appendOp(alternativeBeginOpCode);
         m_ops.last().m_previousOp = notFound;
         m_ops.last().m_term = term;
         PatternDisjunction* disjunction = term->parentheses.disjunction;
@@ -5316,7 +5291,7 @@ class YarrGenerator final : public YarrJITInfo {
             opCompileAlternative(m_ops[lastOpIndex].m_checkedOffset, nestedAlternative);
 
             size_t thisOpIndex = m_ops.size();
-            m_ops.append(YarrOp(alternativeNextOpCode));
+            appendOp(YarrOp(alternativeNextOpCode));
 
             YarrOp& lastOp = m_ops[lastOpIndex];
             YarrOp& thisOp = m_ops[thisOpIndex];
@@ -5334,7 +5309,7 @@ class YarrGenerator final : public YarrJITInfo {
         lastOp.m_checkedOffset = checkedOffset;
 
         size_t parenEnd = m_ops.size();
-        m_ops.append(parenthesesEndOpCode);
+        appendOp(parenthesesEndOpCode);
 
         m_ops[parenBegin].m_term = term;
         m_ops[parenBegin].m_previousOp = notFound;
@@ -5363,12 +5338,12 @@ class YarrGenerator final : public YarrJITInfo {
 
         auto originalCheckedOffset = checkedOffset;
         size_t parenBegin = m_ops.size();
-        m_ops.append(YarrOpCode::ParentheticalAssertionBegin);
+        appendOp(YarrOpCode::ParentheticalAssertionBegin);
         m_ops.last().m_checkAdjust = checkedOffset - term->inputPosition;
         checkedOffset -= m_ops.last().m_checkAdjust;
         m_ops.last().m_checkedOffset = checkedOffset;
 
-        m_ops.append(YarrOpCode::SimpleNestedAlternativeBegin);
+        appendOp(YarrOpCode::SimpleNestedAlternativeBegin);
         m_ops.last().m_previousOp = notFound;
         m_ops.last().m_term = term;
         PatternDisjunction* disjunction = term->parentheses.disjunction;
@@ -5388,7 +5363,7 @@ class YarrGenerator final : public YarrJITInfo {
             opCompileAlternative(m_ops[lastOpIndex].m_checkedOffset, nestedAlternative);
 
             size_t thisOpIndex = m_ops.size();
-            m_ops.append(YarrOp(YarrOpCode::SimpleNestedAlternativeNext));
+            appendOp(YarrOp(YarrOpCode::SimpleNestedAlternativeNext));
 
             YarrOp& lastOp = m_ops[lastOpIndex];
             YarrOp& thisOp = m_ops[thisOpIndex];
@@ -5406,7 +5381,7 @@ class YarrGenerator final : public YarrJITInfo {
         lastOp.m_checkedOffset = checkedOffset;
 
         size_t parenEnd = m_ops.size();
-        m_ops.append(YarrOpCode::ParentheticalAssertionEnd);
+        appendOp(YarrOpCode::ParentheticalAssertionEnd);
 
         m_ops[parenBegin].m_term = term;
         m_ops[parenBegin].m_previousOp = notFound;
@@ -5436,7 +5411,7 @@ class YarrGenerator final : public YarrJITInfo {
                 break;
 
             default:
-                m_ops.append(term);
+                appendOp(term);
                 m_ops.last().m_checkedOffset = checkedOffset;
             }
         }
@@ -5467,7 +5442,7 @@ class YarrGenerator final : public YarrJITInfo {
 
         // Emit the 'once through' alternatives.
         if (alternatives.size() && alternatives[0]->onceThrough()) {
-            m_ops.append(YarrOp(YarrOpCode::BodyAlternativeBegin));
+            appendOp(YarrOp(YarrOpCode::BodyAlternativeBegin));
             m_ops.last().m_previousOp = notFound;
 
             do {
@@ -5478,7 +5453,7 @@ class YarrGenerator final : public YarrJITInfo {
                 opCompileAlternative(alternative->m_minimumSize, alternative);
 
                 size_t thisOpIndex = m_ops.size();
-                m_ops.append(YarrOp(YarrOpCode::BodyAlternativeNext));
+                appendOp(YarrOp(YarrOpCode::BodyAlternativeNext));
 
                 YarrOp& lastOp = m_ops[lastOpIndex];
                 YarrOp& thisOp = m_ops[thisOpIndex];
@@ -5500,14 +5475,14 @@ class YarrGenerator final : public YarrJITInfo {
         }
 
         if (currentAlternativeIndex == alternatives.size()) {
-            m_ops.append(YarrOp(YarrOpCode::MatchFailed));
+            appendOp(YarrOp(YarrOpCode::MatchFailed));
             m_ops.last().m_checkedOffset = 0;
             return;
         }
 
         // Emit the repeated alternatives.
         size_t repeatLoop = m_ops.size();
-        m_ops.append(YarrOp(YarrOpCode::BodyAlternativeBegin));
+        appendOp(YarrOp(YarrOpCode::BodyAlternativeBegin));
         m_ops.last().m_previousOp = notFound;
         // Collect BoyerMooreInfo if it is possible and profitable. BoyerMooreInfo will be used to emit fast skip path with large stride
         // at the beginning of the body alternatives.
@@ -5550,7 +5525,7 @@ class YarrGenerator final : public YarrJITInfo {
             opCompileAlternative(alternative->m_minimumSize, alternative);
 
             size_t thisOpIndex = m_ops.size();
-            m_ops.append(YarrOp(YarrOpCode::BodyAlternativeNext));
+            appendOp(YarrOp(YarrOpCode::BodyAlternativeNext));
 
             YarrOp& lastOp = m_ops[lastOpIndex];
             YarrOp& thisOp = m_ops[thisOpIndex];
@@ -7126,26 +7101,25 @@ public:
         return m_decodeSurrogatePairs || m_decode16BitForBackreferencesWithCalls;
     }
 
-    void emitTraceReentry(size_t opIndex, YarrOpCode opCode)
+    void defineReentryLabel(YarrOp& op)
     {
+        op.m_reentry = m_jit.label();
         if (Options::traceRegExpJITExecution()) [[unlikely]] {
             GPRReg indexReg = m_regs.index;
+            auto opcode = op.m_op;
+            auto index = op.m_index;
             m_jit.probeDebug([=](Probe::Context& ctx) {
                 int32_t indexValue = static_cast<int32_t>(ctx.gpr(indexReg));
-                dataLogLn("RegExpJIT [", opIndex, "] ", opCode, " index=", indexValue);
+                dataLogLn("RegExpJIT [", index, "] ", opcode, " index=", indexValue);
             });
         }
     }
 
-    void emitTraceBacktrack(size_t opIndex, YarrOpCode opCode)
+    template<typename... Args>
+    void appendOp(Args&&... args)
     {
-        if (Options::traceRegExpJITExecution()) [[unlikely]] {
-            GPRReg indexReg = m_regs.index;
-            m_jit.probeDebug([=](Probe::Context& ctx) {
-                int32_t indexValue = static_cast<int32_t>(ctx.gpr(indexReg));
-                dataLogLn("RegExpJIT [", opIndex, "] ", opCode, ".bt index=", indexValue);
-            });
-        }
+        m_ops.constructAndAppend(std::forward<Args>(args)...);
+        m_ops.last().m_index = m_ops.size();
     }
 
 private:
