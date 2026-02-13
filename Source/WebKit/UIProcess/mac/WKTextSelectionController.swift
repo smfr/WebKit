@@ -139,22 +139,28 @@ extension WKTextSelectionController {
         }
     }
 
-    @objc(handleClickAtPoint:)
-    func handleClick(at point: NSPoint) {
+    @objc(handleClickAtPoint:clickCount:)
+    func handleClick(at point: NSPoint, clickCount: Int) {
         Task.immediate {
-            await handleClickInternal(at: point)
+            await handleClickInternal(at: point, clickCount: clickCount)
         }
     }
 
     @MainActor
-    private func handleClickInternal(at point: NSPoint) async {
+    private func handleClickInternal(at point: NSPoint, clickCount: Int) async {
         // The `point` location is relative to the view.
 
         guard let view, let page = view._protectedPage().get() else {
             return
         }
 
-        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Handling click at point \(point.debugDescription)...")
+        Logger.viewGestures.log(
+            "[pageProxyID=\(page.logIdentifier())] \(#function) point \(point.debugDescription) clickCount \(clickCount)"
+        )
+
+        guard clickCount == 1 else {
+            return
+        }
 
         let previousState = unsafe page.editorState
         let previousVisualData = unsafe Optional(fromCxx: previousState.visualData)

@@ -490,19 +490,43 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
     if (isSamePair(gestureRecognizer, otherGestureRecognizer, _singleClickGestureRecognizer.get(), _panGestureRecognizer.get()))
         return YES;
 
-    if ((gestureRecognizer == _singleClickGestureRecognizer.get() && [otherGestureRecognizer.name isEqualToString:textSelectionClickGestureName])
-        || (otherGestureRecognizer == _singleClickGestureRecognizer.get() && [gestureRecognizer.name isEqualToString:textSelectionClickGestureName]))
-        return YES;
+    CheckedPtr viewImpl = _viewImpl.get();
+    if (!viewImpl)
+        return NO;
+
+    RetainPtr webView = viewImpl->view();
+    if (!webView)
+        return NO;
+
+    // Allow the single click GR to be simultaneously recognized with any of those from the text selection manager.
+
+    for (NSGestureRecognizer *gestureForFailureRequirements in [[webView textSelectionManager] gesturesForFailureRequirements]) {
+        if ((gestureRecognizer == _singleClickGestureRecognizer && otherGestureRecognizer == gestureForFailureRequirements)
+            || (otherGestureRecognizer == _singleClickGestureRecognizer && gestureRecognizer == gestureForFailureRequirements))
+            return YES;
+    }
 
     return NO;
 }
 
-- (BOOL)gestureRecognizer:(NSGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(NSGestureRecognizer *)otherGestureRecognizer
+- (BOOL)gestureRecognizer:(NSGestureRecognizer *)gestureRecognizer shouldBeRequiredToFailByGestureRecognizer:(NSGestureRecognizer *)otherGestureRecognizer
 {
     WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(RefPtr { _page.get() }->logIdentifier(), "Gesture: %@, Other gesture: %@", gestureRecognizer, otherGestureRecognizer);
 
-    if (gestureRecognizer == _secondaryClickGestureRecognizer && [otherGestureRecognizer.name isEqualToString:textSelectionSecondaryClickGestureName])
-        return YES;
+    CheckedPtr viewImpl = _viewImpl.get();
+    if (!viewImpl)
+        return NO;
+
+    RetainPtr webView = viewImpl->view();
+    if (!webView)
+        return NO;
+
+    // Fail any gestures from the text selection manager if the secondary click GR handles them.
+
+    for (NSGestureRecognizer *gestureForFailureRequirements in [[webView textSelectionManager] gesturesForFailureRequirements]) {
+        if (gestureRecognizer == _secondaryClickGestureRecognizer && otherGestureRecognizer == gestureForFailureRequirements)
+            return YES;
+    }
 
     return NO;
 }
@@ -515,6 +539,11 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
         CheckedPtr viewImpl = _viewImpl.get();
         if (!viewImpl || !viewImpl->allowsMagnification())
             return NO;
+    }
+
+    if (gestureRecognizer == _secondaryClickGestureRecognizer) {
+        // FIXME: Implement logic for determining if the clicked node is not text.
+        return NO;
     }
 
     return YES;
