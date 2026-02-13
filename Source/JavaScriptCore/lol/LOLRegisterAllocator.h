@@ -610,6 +610,24 @@ auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpDec& instruction
 }
 
 template<typename Backend>
+auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpMod& instruction, BytecodeIndex index)
+{
+    std::array<AllocationHint, 2> uses = { instruction.m_lhs, instruction.m_rhs };
+    std::array<AllocationHint, 1> defs = { instruction.m_dst };
+
+    auto result = allocateImpl<0>(jit, instruction, index, uses, defs);
+#if CPU(X86_64)
+    // TODO: FIX X86 clobbering rules for eax/edx/ecx. This is inefficient and hacky.
+    m_allocator.flushAllRegisters(*this);
+    Location& dstLocation = locationOfImpl(instruction.m_dst);
+    dstLocation.regs = result.defs[0];
+    ASSERT(!dstLocation.isFlushed);
+    m_allocator.bind(result.defs[0].payloadGPR(), instruction.m_dst, index.offset());
+#endif
+    return result;
+}
+
+template<typename Backend>
 auto RegisterAllocator<Backend>::allocate(Backend& jit, const OpToThis& instruction, BytecodeIndex index)
 {
     std::array<AllocationHint, 1> uses = { instruction.m_srcDst };

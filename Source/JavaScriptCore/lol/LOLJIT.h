@@ -53,6 +53,7 @@ namespace JSC::LOL {
     macro(op_add) \
     macro(op_mul) \
     macro(op_sub) \
+    macro(op_mod) \
     macro(op_negate) \
     macro(op_inc) \
     macro(op_dec) \
