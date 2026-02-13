@@ -2371,13 +2371,13 @@ webkit.org/b/302172 [ Debug ] imported/w3c/web-platform-tests/css/css-view-trans
 
 webkit.org/b/302935 [ Sonoma ] media/media-source/media-source-allowed-codecs.html [ Failure ]
 
-# scroll-animations WPT tests after enabling ThreadedScrollDrivenAnimationsEnabled, only happens with CSSScrollAnchoringEnabled
-webkit.org/b/303401 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/animation-with-root-scroller.html [ ImageOnlyFailure ]
-webkit.org/b/303464 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-quirks-mode.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-writing-mode-rl.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-frame-size-changed.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 [ Sequoia+ ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-inline-orientation.html [ ImageOnlyFailure Pass ]
+# scroll-animations WPT tests after enabling ThreadedScrollDrivenAnimationsEnabled, only happens with CSSScrollAnchoringEnabled on Intel
+webkit.org/b/303401 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/animation-with-root-scroller.html [ ImageOnlyFailure ]
+webkit.org/b/303464 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-quirks-mode.html [ ImageOnlyFailure Pass ]
+webkit.org/b/303464 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-writing-mode-rl.html [ ImageOnlyFailure Pass ]
+webkit.org/b/303464 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default.html [ ImageOnlyFailure Pass ]
+webkit.org/b/303464 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-frame-size-changed.html [ ImageOnlyFailure Pass ]
+webkit.org/b/303464 [ Sequoia+ x86_64 ] imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-inline-orientation.html [ ImageOnlyFailure Pass ]
 
 webkit.org/b/302725 [ Sequoia Sonoma ] fast/css/accent-color/datalist.html [ Pass ]
 

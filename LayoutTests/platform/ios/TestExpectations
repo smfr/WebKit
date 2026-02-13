@@ -8388,14 +8388,6 @@ imported/w3c/web-platform-tests/css/CSS2/normal-flow/max-width-014.xht [ ImageOn
 imported/w3c/web-platform-tests/css/CSS2/normal-flow/min-width-014.xht [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/CSS2/normal-flow/width-014.xht [ ImageOnlyFailure ]
 
-# scroll-animations WPT tests after enabling ThreadedScrollDrivenAnimationsEnabled, only happens with CSSScrollAnchoringEnabled
-webkit.org/b/303401 imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/animation-with-root-scroller.html [ ImageOnlyFailure ]
-webkit.org/b/303464 imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-quirks-mode.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default-writing-mode-rl.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-default.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-frame-size-changed.html [ ImageOnlyFailure Pass ]
-webkit.org/b/303464 imported/w3c/web-platform-tests/scroll-animations/css/scroll-timeline-inline-orientation.html [ ImageOnlyFailure Pass ]
-
 webkit.org/b/263872 imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/layout-changes-on-percentage-based-timeline.html [ Pass ]
 
 webkit.org/b/303341 imported/w3c/web-platform-tests/css/css-contain/content-visibility/content-visibility-intrinsic-size-001.html [ Pass ImageOnlyFailure ]
