@@ -28,6 +28,7 @@ root
 		image,src='image.gif',alt='Image with high entropy name'
 		image,src='image2.gif',alt='Image with high entropy name 2'
 		image,src='image2.gif',alt='Image with high entropy name (duplicate)'
+		image,src='image.png',alt='Image with high entropy name, no extension'
 
 -- markdown
 
@@ -56,5 +57,6 @@ root
 ![Image with high entropy name](image.gif)
 ![Image with high entropy name 2](image2.gif)
 ![Image with high entropy name \(duplicate\)](image2.gif)
+![Image with high entropy name, no extension](image.png)
 
 

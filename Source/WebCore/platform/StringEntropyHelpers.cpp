@@ -26,6 +26,7 @@
 #include "config.h"
 #include "StringEntropyHelpers.h"
 
+#include "MIMETypeRegistry.h"
 #include <array>
 #include <wtf/text/MakeString.h>
 
@@ -142,20 +143,20 @@ bool isProbablyHumanReadable(StringView text)
     return entropyScore(text) >= 0;
 }
 
-String lowEntropyLastPathComponent(const URL& url, const String& fallbackName)
+String lowEntropyLastPathComponent(const URL& url, const String& fallbackName, const String& mimeType)
 {
     if (url.protocolIsData() || url.protocolIsBlob() || url.protocolIsJavaScript())
         return fallbackName;
 
+    String result;
     auto component = url.lastPathComponent();
     if (isProbablyHumanReadable(component))
-        return component.toString();
-
-    auto fullStopIndex = component.reverseFind('.');
-    if (fullStopIndex == notFound)
-        return fallbackName;
-
-    return makeString(fallbackName, component.right(component.length() - fullStopIndex));
+        result = component.toString();
+    else if (auto fullStopIndex = component.reverseFind('.'); fullStopIndex != notFound)
+        result = makeString(fallbackName, component.right(component.length() - fullStopIndex));
+    else
+        result = fallbackName;
+    return MIMETypeRegistry::appendFileExtensionIfNecessary(WTF::move(result), mimeType);
 }
 
 URL removeHighEntropyComponents(const URL& url)

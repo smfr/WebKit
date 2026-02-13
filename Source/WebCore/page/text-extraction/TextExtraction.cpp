@@ -62,6 +62,7 @@
 #include "HandleUserInputEventResult.h"
 #include "HighlightRegistry.h"
 #include "HitTestResult.h"
+#include "Image.h"
 #include "ImageOverlay.h"
 #include "JSNode.h"
 #include "LocalFrame.h"
@@ -523,9 +524,16 @@ static inline Variant<SkipExtraction, ItemData, URL, Editable> extractItemData(N
 
     if (RefPtr image = dynamicDowncast<HTMLImageElement>(element)) {
         auto completedSourceURL = image->getURLAttribute(HTMLNames::srcAttr);
+        String mimeType;
+        if (RefPtr underlyingImage = image->image())
+            mimeType = underlyingImage->mimeType();
+
+        if (mimeType.isEmpty())
+            mimeType = "image/png"_s;
+
         return { ImageItemData {
             .completedSource = completedSourceURL,
-            .shortenedName = StringEntropyHelpers::lowEntropyLastPathComponent(completedSourceURL, "image"_s),
+            .shortenedName = StringEntropyHelpers::lowEntropyLastPathComponent(completedSourceURL, "image"_s, mimeType),
             .altText = image->altText(),
         } };
     }
