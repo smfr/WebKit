@@ -663,10 +663,6 @@ JSValue IntlNumberFormat::formatRange(JSGlobalObject* globalObject, IntlMathemat
 }
 
 static constexpr int32_t literalField = -1;
-struct IntlNumberFormatField {
-    int32_t m_field;
-    WTF::Range<int32_t> m_range;
-};
 
 static Vector<IntlNumberFormatField> flattenFields(Vector<IntlNumberFormatField>&& fields, int32_t formattedStringLength)
 {
