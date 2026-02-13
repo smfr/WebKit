@@ -72,6 +72,7 @@
 #include "PositionInlines.h"
 #include "RenderBox.h"
 #include "RenderDescendantIterator.h"
+#include "RenderElementInlines.h"
 #include "RenderIFrame.h"
 #include "RenderLayer.h"
 #include "RenderLayerModelObject.h"
@@ -1047,14 +1048,13 @@ static Node* nodeFromJSHandle(JSHandleIdentifier identifier)
     return nullptr;
 }
 
-static RefPtr<ContainerNode> findLargeContainerAboveNode(Node& node, Node* belowRootNode = nullptr)
+static RefPtr<ContainerNode> findLargeContainerAboveNode(Node& node, FloatSize minimumSize, Node* belowRootNode = nullptr)
 {
-    // FIXME: Consider making this size threshold client-configurable in the future.
-    static constexpr FloatSize minimumSize { 280, 300 };
     for (CheckedPtr renderer = node.renderer(); renderer; renderer = renderer->parent()) {
-        bool wasFixed = false;
-        auto bounds = renderer->absoluteBoundingBoxRect(true, &wasFixed);
-        if ((bounds.width() < minimumSize.width() || bounds.height() < minimumSize.height()) && !wasFixed)
+        auto bounds = renderer->absoluteBoundingBoxRect();
+        CheckedPtr renderElement = dynamicDowncast<RenderElement>(*renderer);
+        bool isFixedOrSticky = renderElement && (renderElement->isFixedPositioned() || renderElement->isStickilyPositioned());
+        if ((bounds.width() < minimumSize.width() || bounds.height() < minimumSize.height()) && !isFixedOrSticky)
             continue;
 
         RefPtr node = renderer->node();
@@ -1100,7 +1100,9 @@ static RefPtr<ContainerNode> findContainerNodeForDataDetectorResults(Node& rootN
     if (!commonAncestor)
         return { };
 
-    return findLargeContainerAboveNode(*commonAncestor, &rootNode);
+    // FIXME: Consider making this size threshold client-configurable in the future.
+    static constexpr FloatSize minimumSize { 280, 300 };
+    return findLargeContainerAboveNode(*commonAncestor, minimumSize, &rootNode);
 }
 
 #endif // ENABLE(DATA_DETECTION)
@@ -1185,7 +1187,8 @@ Result extractItem(Request&& request, LocalFrame& frame)
             }
 
             for (Ref passwordField : passwordFields) {
-                if (RefPtr container = findLargeContainerAboveNode(passwordField)) {
+                static constexpr FloatSize minimumSize { 280, 200 };
+                if (RefPtr container = findLargeContainerAboveNode(passwordField, minimumSize)) {
                     addBoxShadowIfNeeded(*container, "0 0 10px #cb30e0"_s);
                     additionalContainersToCollect.add(container.releaseNonNull());
                 }
