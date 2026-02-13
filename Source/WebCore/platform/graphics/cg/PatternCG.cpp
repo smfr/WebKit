@@ -33,6 +33,7 @@
 #include "CGUtilities.h"
 #include "GraphicsContextCG.h"
 #include "NativeImage.h"
+#include <pal/cg/CoreGraphicsSoftLink.h>
 #include <pal/spi/cg/CoreGraphicsSPI.h>
 #include <wtf/MainThread.h>
 
@@ -80,6 +81,11 @@ RetainPtr<CGPatternRef> Pattern::createPlatformPattern(const AffineTransform& us
     // To make error of floating point less than 0.5, we use the half of the number of mantissa of float (1 << 22).
     CGFloat xStep = repeatX() ? tileRect.width() : (1 << 22);
     CGFloat yStep = repeatY() ? tileRect.height() : (1 << 22);
+
+#if HAVE(CGPATTERN_CREATE_WITH_IMAGE_TRANSFORM_STEP)
+    if (PAL::canLoad_CoreGraphics_CGPatternCreateWithImageTransformStep())
+        return adoptCF(PAL::softLink_CoreGraphics_CGPatternCreateWithImageTransformStep(platformImage.get(), patternTransform, xStep, yStep, kCGPatternTilingConstantSpacing));
+#endif
 
     // The pattern will release the CGImageRef when it's done rendering in patternReleaseCallback
     CGImageRef image = platformImage.leakRef();

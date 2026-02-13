@@ -51,4 +51,10 @@ SOFT_LINK_FUNCTION_MAY_FAIL_FOR_HEADER(PAL, CoreGraphics, CGWindowListCreateImag
 SOFT_LINK_FUNCTION_MAY_FAIL_FOR_HEADER(PAL, CoreGraphics, CGIOSurfaceContextInvalidateSurface, void, (CGContextRef context), (context))
 #endif
 
+#if HAVE(CGPATTERN_CREATE_WITH_IMAGE_TRANSFORM_STEP)
+SOFT_LINK_FUNCTION_MAY_FAIL_FOR_HEADER(PAL, CoreGraphics, CGPatternCreateWithImageTransformStep, CGPatternRef, (CGImageRef image,
+    CGAffineTransform matrix, CGFloat xStep, CGFloat yStep, CGPatternTiling
+    tiling), (image, matrix, xStep, yStep, tiling))
+#endif
+
 #endif
