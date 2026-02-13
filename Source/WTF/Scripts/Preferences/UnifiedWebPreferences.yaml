@@ -1906,6 +1906,20 @@ CompressionStreamEnabled:
     WebCore:
       default: false
 
+ConsistentQueryParameterFilteringInternalQuirkEnabled:
+  type: bool
+  status: internal
+  category: dom
+  humanReadableName: "Consistent Query Parameter Filtering Internal"
+  humanReadableDescription: "Enable internal consistent query parameter filtering"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 ConsistentQueryParameterFilteringQuirkEnabled:
   type: bool
   status: internal

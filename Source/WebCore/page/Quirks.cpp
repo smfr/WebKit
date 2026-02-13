@@ -1819,6 +1819,7 @@ bool Quirks::needsConsistentQueryParameterFilteringQuirk(const URL& url) const
 {
     QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
 
+    static bool wasLoggedOnce { false };
     URL lowercaseURL { url.string().foldCase() };
     if (!m_document->settings().consistentQueryParameterFilteringQuirkEnabled())
         return false;
@@ -1826,9 +1827,16 @@ bool Quirks::needsConsistentQueryParameterFilteringQuirk(const URL& url) const
     if (lowercaseURL.host() == "bundle-file"_s || RegistrableDomain { lowercaseURL } == "consistentqueryparameterfiltering.internal"_s)
         return true;
 
-    if (needsConsistentQueryParameterFilteringInternal(lowercaseURL))
-        return true;
-    return false;
+    bool enableQuirk = m_document->settings().consistentQueryParameterFilteringInternalQuirkEnabled()
+        && needsConsistentQueryParameterFilteringInternal(lowercaseURL);
+
+    if (enableQuirk && !wasLoggedOnce) {
+        RELEASE_LOG(Loading, "Quirks::needsConsistentQueryParameterFilteringQuirk: Enabling consistent privacy protections");
+        m_document->addConsoleMessage(MessageSource::Other, MessageLevel::Info, makeString("Enabling consistent privacy protections on \""_s, lowercaseURL.string(), "\""_s));
+        wasLoggedOnce = true;
+    }
+
+    return enableQuirk;
 }
 
 bool Quirks::mayBenefitFromFingerprintingProtectionQuirk(const URL& url) const
