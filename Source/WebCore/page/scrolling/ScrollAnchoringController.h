@@ -75,6 +75,10 @@ public:
 
     bool hasAnchorElement() const { return !!m_anchorObject; }
 
+    // These nest.
+    void startSuppressingScrollAnchoring();
+    void stopSuppressingScrollAnchoring();
+
 private:
     static bool isViableStatus(AnchorSearchStatus status)
     {
@@ -115,6 +119,7 @@ private:
     bool m_isQueuedForScrollPositionUpdate { false };
     bool m_anchoringSuppressedByStyleChange { false };
     unsigned m_inScrollEventCount { 0 };
+    unsigned m_suppressionCount { 0 };
 };
 
 } // namespace WebCore

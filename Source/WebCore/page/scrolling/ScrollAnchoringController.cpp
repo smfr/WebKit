@@ -574,10 +574,10 @@ void ScrollAnchoringController::updateBeforeLayout()
 // https://drafts.csswg.org/css-scroll-anchoring/#scroll-adjustment
 void ScrollAnchoringController::adjustScrollPositionForAnchoring()
 {
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() - anchor " << m_anchorObject << " offset " << m_lastAnchorOffset << " suppressedByStyleChange  " << m_anchoringSuppressedByStyleChange);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() - anchor " << m_anchorObject << " offset " << m_lastAnchorOffset << " suppressedByStyleChange  " << m_anchoringSuppressedByStyleChange << " in scroll event " << !!m_inScrollEventCount << " in suppression scope " << !!m_suppressionCount);
 
     // FIXME: Test for running animated scrolls?
-    if (m_inScrollEventCount) {
+    if (m_inScrollEventCount || m_suppressionCount) {
         m_anchoringSuppressedByStyleChange = false;
         clearAnchor();
         return;
@@ -630,6 +630,17 @@ void ScrollAnchoringController::didDispatchScrollEvent()
 {
     ASSERT(m_inScrollEventCount);
     --m_inScrollEventCount;
+}
+
+void ScrollAnchoringController::startSuppressingScrollAnchoring()
+{
+    ++m_suppressionCount;
+}
+
+void ScrollAnchoringController::stopSuppressingScrollAnchoring()
+{
+    ASSERT(m_suppressionCount);
+    --m_suppressionCount;
 }
 
 } // namespace WebCore

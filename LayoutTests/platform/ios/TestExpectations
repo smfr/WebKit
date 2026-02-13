@@ -8474,6 +8474,4 @@ webkit.org/b/307091 inspector/network/intercept-aborted-request.html [ Skip ]
 # Requires mousedown
 media/caption-display-settings/caption-display-settings-default-anchorBounds.html [ Skip ]
 
-webkit.org/b/307682 editing/execCommand/insert-line-break-no-scroll.html [ Failure ]
-
 webkit.org/b/307582 compositing/overflow/rtl-scrollbar-layer-positioning.html [ Failure ]
