@@ -1,6 +1,7 @@
 Modules/push-api/PushDatabase.cpp
 Modules/webaudio/AudioWorkletGlobalScope.cpp
 accessibility/AXObjectCache.cpp
+[ iOS ] accessibility/AccessibilityNodeObject.cpp
 accessibility/AccessibilityObject.cpp
 accessibility/AccessibilityRenderObject.cpp
 [ iOS ] accessibility/cocoa/AXTextMarkerCocoa.mm
@@ -32,8 +33,10 @@ editing/cocoa/WebContentReaderCocoa.mm
 [ Mac ] editing/mac/FrameSelectionMac.mm
 editing/markup.cpp
 [ iOS ] html/HTMLAnchorElement.cpp
+[ iOS ] html/HTMLImageElement.cpp
 [ iOS ] html/HTMLImageLoader.cpp
 html/HTMLInputElement.cpp
+[ iOS ] html/HTMLPictureElement.cpp
 html/HTMLStyleElement.cpp
 html/HTMLTextFormControlElement.cpp
 html/ValidationMessage.cpp
@@ -121,6 +124,7 @@ page/AutoscrollController.cpp
 page/DragController.cpp
 page/ElementTargetingController.cpp
 page/EventHandler.cpp
+[ iOS ] page/FocusController.cpp
 page/FrameSnapshotting.cpp
 page/FrameView.cpp
 page/ImageOverlayController.cpp
@@ -134,6 +138,7 @@ page/PageColorSampler.cpp
 page/PrintContext.cpp
 page/ResizeObservation.cpp
 page/SpatialNavigation.cpp
+[ iOS ] page/cocoa/ContentChangeObserver.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
 [ Mac ] page/mac/EventHandlerMac.mm
@@ -152,12 +157,11 @@ platform/graphics/ca/PlatformCALayer.mm
 platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm
 platform/graphics/cg/CGSubimageCacheWithTimer.cpp
 [ iOS ] platform/ios/DragImageIOS.mm
-[ iOS ] platform/ios/PasteboardIOS.mm
 platform/ios/PlaybackSessionInterfaceIOS.mm
 platform/ios/WebAVPlayerController.mm
 [ iOS ] platform/ios/WebVideoFullscreenControllerAVKit.mm
 platform/network/mac/ResourceHandleMac.mm
-rendering/AccessibilityRegionContext.cpp
+[ macOS ] rendering/AccessibilityRegionContext.cpp
 rendering/AncestorSubgridIterator.cpp
 rendering/AutoTableLayout.cpp
 rendering/BackgroundPainter.cpp
@@ -210,7 +214,6 @@ rendering/RenderLayerModelObject.cpp
 rendering/RenderLayerScrollableArea.cpp
 rendering/RenderLayoutState.cpp
 rendering/RenderLineBoxList.cpp
-[ iOS ] rendering/RenderLineBreak.cpp
 rendering/RenderListBox.cpp
 rendering/RenderListItem.cpp
 rendering/RenderListMarker.cpp
@@ -221,6 +224,7 @@ rendering/RenderObject.cpp
 rendering/RenderObject.h
 rendering/RenderQuote.cpp
 rendering/RenderReplaced.cpp
+[ iOS ] rendering/RenderSelectFallbackButton.cpp
 rendering/RenderTable.cpp
 rendering/RenderTableCell.cpp
 rendering/RenderTableCellInlines.h
@@ -241,6 +245,7 @@ rendering/TextAutoSizing.cpp
 rendering/TextBoxPainter.cpp
 rendering/TextBoxTrimmer.cpp
 rendering/TextDecorationPainter.cpp
+[ iOS ] rendering/cocoa/RenderThemeCocoa.mm
 [ iOS ] rendering/ios/RenderThemeIOS.mm
 rendering/line/BreakingContext.h
 rendering/line/LineInlineHeaders.h

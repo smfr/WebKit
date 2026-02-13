@@ -15,9 +15,11 @@ Modules/webaudio/OscillatorNode.cpp
 Modules/webaudio/PannerNode.cpp
 Modules/webaudio/ScriptProcessorNode.cpp
 Modules/webaudio/StereoPannerNode.cpp
+[ iOS ] Modules/webdatabase/DatabaseTracker.cpp
 [ iOS ] accessibility/AccessibilityNodeObject.cpp
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
+[ iOS ] bindings/js/CommonVM.cpp
 bindings/js/JSAbortSignalCustom.cpp
 bindings/js/JSAudioWorkletProcessorCustom.cpp
 bindings/js/JSCSSRuleListCustom.cpp
@@ -55,14 +57,19 @@ bindings/js/ScriptModuleLoader.cpp
 bindings/js/StructuredClone.cpp
 css/SelectorChecker.cpp
 css/ShorthandSerializer.cpp
+[ iOS ] dom/Document.cpp
 dom/Node.cpp
 dom/Position.cpp
 dom/SpaceSplitString.cpp
 dom/TreeScope.cpp
+[ iOS ] editing/FrameSelection.cpp
+[ iOS ] editing/cocoa/DataDetection.mm
 [ iOS ] editing/ios/DictationCommandIOS.cpp
 [ iOS ] editing/ios/EditorIOS.mm
 [ iOS ] html/HTMLAnchorElement.cpp
+[ iOS ] html/HTMLImageElement.cpp
 [ iOS ] html/HTMLImageLoader.cpp
+[ iOS ] html/HTMLPictureElement.cpp
 inspector/InspectorAuditAccessibilityObject.cpp
 inspector/agents/InspectorAnimationAgent.cpp
 inspector/agents/InspectorCSSAgent.cpp
@@ -73,21 +80,31 @@ inspector/agents/InspectorPageAgent.cpp
 inspector/agents/page/PageCanvasAgent.cpp
 inspector/agents/page/PageDOMDebuggerAgent.cpp
 inspector/agents/page/PageNetworkAgent.cpp
+[ iOS ] loader/cache/CachedRawResource.cpp
 [ iOS ] page/Chrome.cpp
 page/EventHandler.cpp
 page/FocusController.cpp
+[ iOS ] page/LocalDOMWindow.cpp
+[ iOS ] page/LocalFrameView.cpp
 [ iOS ] page/Quirks.cpp
+[ iOS ] page/cocoa/ContentChangeObserver.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
+[ iOS ] page/scrolling/AsyncScrollingCoordinator.cpp
 [ iOS ] platform/audio/ios/AudioSessionIOS.mm
-[ iOS ] platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm
 platform/graphics/filters/software/FEMorphologySoftwareApplier.cpp
+[ iOS ] platform/PreviewConverter.cpp
+[ iOS ] platform/audio/ios/MediaSessionManagerIOS.mm
 [ iOS ] platform/ios/DragImageIOS.mm
-[ iOS ] platform/ios/LegacyTileGrid.mm
 [ iOS ] platform/ios/WebVideoFullscreenControllerAVKit.mm
 rendering/RenderCounter.cpp
+[ iOS ] rendering/RenderImage.cpp
 rendering/RenderLayer.cpp
+[ iOS ] rendering/RenderLayerCompositor.cpp
+[ iOS ] rendering/RenderSelectFallbackButton.cpp
 rendering/RenderTreeAsText.cpp
+[ iOS ] rendering/cocoa/RenderThemeCocoa.mm
 [ iOS ] rendering/ios/RenderThemeIOS.mm
 style/ElementRuleCollector.cpp
+[ iOS ] style/StyleScopeRuleSets.cpp
 testing/Internals.cpp

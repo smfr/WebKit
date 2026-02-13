@@ -26,6 +26,7 @@ accessibility/AccessibilityObjectInlines.h
 accessibility/AccessibilityProgressIndicator.cpp
 accessibility/AccessibilityRenderObject.cpp
 accessibility/cocoa/AccessibilityObjectCocoa.mm
+[ iOS ] accessibility/ios/AXObjectCacheIOS.mm
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
 [ Mac ] accessibility/mac/AXObjectCacheMac.mm
@@ -89,6 +90,9 @@ dom/ContainerNode.cpp
 dom/ContainerNodeAlgorithms.cpp
 dom/ContentVisibilityDocumentState.cpp
 dom/CurrentScriptIncrementer.h
+[ iOS ] dom/DataTransfer.cpp
+[ iOS ] dom/DeviceMotionController.cpp
+[ iOS ] dom/DeviceOrientationController.cpp
 dom/Document.cpp
 dom/DocumentFullscreen.cpp
 dom/Element.cpp
@@ -171,10 +175,10 @@ html/CollectionTraversalInlines.h
 [ iOS ] html/ColorInputType.cpp
 html/FTPDirectoryDocument.cpp
 html/FormAssociatedElement.cpp
-[ iOS ] html/HTMLAnchorElement.cpp
 html/HTMLFormElement.cpp
 html/HTMLInputElement.cpp
 html/HTMLLinkElement.cpp
+[ iOS ] html/HTMLMediaElement.cpp
 html/HTMLMetaElement.cpp
 html/HTMLNameCollectionInlines.h
 html/HTMLOptionsCollection.cpp
@@ -348,6 +352,7 @@ page/ScrollBehavior.cpp
 page/SettingsBase.cpp
 page/SpatialNavigation.cpp
 page/VisualViewport.cpp
+[ iOS ] page/cocoa/ContentChangeObserver.cpp
 page/cocoa/PageCocoa.mm
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
@@ -376,6 +381,7 @@ platform/graphics/ca/TileController.cpp
 platform/graphics/ca/TileCoverageMap.cpp
 platform/graphics/ca/cocoa/WebTiledBackingLayer.mm
 platform/graphics/cg/CGSubimageCacheWithTimer.cpp
+[ iOS ] platform/graphics/cocoa/TextTrackRepresentationCocoa.mm
 [ iOS ] platform/ios/DeviceMotionClientIOS.mm
 [ iOS ] platform/ios/DeviceOrientationClientIOS.mm
 [ iOS ] platform/ios/PlatformScreenIOS.mm
@@ -460,7 +466,6 @@ rendering/RenderLayerCompositor.cpp
 rendering/RenderLayerModelObject.cpp
 rendering/RenderLayerScrollableArea.cpp
 rendering/RenderLayoutState.cpp
-[ iOS ] rendering/RenderLineBreak.cpp
 rendering/RenderListBox.cpp
 rendering/RenderListItem.cpp
 rendering/RenderListMarker.cpp
@@ -499,6 +504,7 @@ rendering/TextAutoSizing.h
 rendering/TextBoxPainter.cpp
 rendering/TextBoxTrimmer.cpp
 rendering/TextDecorationPainter.cpp
+[ iOS ] rendering/cocoa/RenderThemeCocoa.mm
 [ iOS ] rendering/ios/RenderThemeIOS.mm
 rendering/line/BreakingContext.h
 rendering/line/LineInlineHeaders.h

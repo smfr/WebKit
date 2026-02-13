@@ -41,7 +41,6 @@ Modules/webaudio/AudioSummingJunction.cpp
 Modules/webaudio/AudioWorkletGlobalScope.cpp
 Modules/webaudio/AudioWorkletMessagingProxy.cpp
 Modules/webaudio/AudioWorkletNode.cpp
-[ iOS ] Modules/webaudio/ChannelMergerNode.cpp
 Modules/webaudio/ConvolverNode.cpp
 Modules/webaudio/DefaultAudioDestinationNode.cpp
 Modules/webaudio/DynamicsCompressorNode.cpp
@@ -314,7 +313,6 @@ editing/ApplyStyleCommand.cpp
 editing/BreakBlockquoteCommand.cpp
 editing/CompositeEditCommand.cpp
 editing/DeleteSelectionCommand.cpp
-[ iOS ] editing/EditCommand.cpp
 editing/Editing.cpp
 editing/Editor.cpp
 editing/EditorCommand.cpp
@@ -442,6 +440,7 @@ layout/integration/inline/LayoutIntegrationInlineContentBuilder.cpp
 layout/integration/inline/LayoutIntegrationLineLayout.cpp
 loader/ApplicationManifestLoader.cpp
 loader/CrossOriginPreflightChecker.cpp
+[ iOS ] loader/DocumentLoader.cpp
 loader/FrameLoadRequest.cpp
 [ iOS ] loader/FrameLoader.cpp
 loader/MediaResourceLoader.cpp
@@ -461,6 +460,7 @@ mathml/MathMLSelectElement.cpp
 page/AutoscrollController.cpp
 page/Chrome.cpp
 [ Mac ] page/ContextMenuController.cpp
+[ iOS ] page/DOMTimer.cpp
 page/DebugPageOverlays.h
 page/DragController.cpp
 page/ElementTargetingController.cpp
@@ -506,6 +506,7 @@ page/VisualViewport.cpp
 page/WheelEventTestMonitor.cpp
 page/WheelEventTestMonitor.h
 page/WindowOrWorkerGlobalScope.cpp
+[ iOS ] page/cocoa/ContentChangeObserver.cpp
 page/cocoa/EventHandlerCocoa.mm
 page/cocoa/PageCocoa.mm
 page/cocoa/ResourceUsageOverlayCocoa.mm
@@ -527,6 +528,7 @@ page/scrolling/ScrollingCoordinator.cpp
 page/text-extraction/TextExtraction.cpp
 page/writing-tools/WritingToolsController.mm
 platform/DragImage.cpp
+[ iOS ] platform/PreviewConverter.cpp
 platform/ScrollAnimationSmooth.cpp
 platform/ScrollView.cpp
 platform/ScrollableArea.cpp
@@ -592,6 +594,7 @@ platform/graphics/filters/software/FETurbulenceSoftwareApplier.cpp
 platform/graphics/opentype/OpenTypeMathData.cpp
 platform/graphics/transforms/TransformOperations.cpp
 platform/graphics/transforms/TransformOperationsSharedPrimitivesPrefix.h
+[ iOS ] platform/audio/ios/AudioSessionIOS.mm
 [ iOS ] platform/ios/DeviceMotionClientIOS.mm
 [ iOS ] platform/ios/DeviceOrientationClientIOS.mm
 [ iOS ] platform/ios/LegacyTileGrid.mm
@@ -604,6 +607,8 @@ platform/graphics/transforms/TransformOperationsSharedPrimitivesPrefix.h
 platform/mediastream/RealtimeOutgoingAudioSource.cpp
 platform/mediastream/RealtimeOutgoingVideoSource.cpp
 platform/mediastream/cocoa/IncomingAudioMediaStreamTrackRendererUnit.cpp
+[ iOS ] platform/mediastream/ios/CoreAudioCaptureSourceIOS.mm
+[ iOS ] platform/mediastream/mac/CoreAudioCaptureUnit.cpp
 platform/mediastream/mac/MediaStreamTrackAudioSourceProviderCocoa.cpp
 platform/mediastream/mac/RealtimeOutgoingAudioSourceCocoa.cpp
 platform/mediastream/mac/WebAudioSourceProviderCocoa.mm
@@ -649,7 +654,6 @@ rendering/RenderLayerCompositor.cpp
 rendering/RenderLayerFilters.cpp
 rendering/RenderLayerModelObject.cpp
 rendering/RenderLayerScrollableArea.cpp
-[ iOS ] rendering/RenderLineBreak.cpp
 rendering/RenderListBox.cpp
 rendering/RenderListItem.cpp
 rendering/RenderListMarker.cpp
@@ -672,6 +676,7 @@ rendering/RenderTextControlSingleLine.cpp
 rendering/RenderTextControlSingleLine.h
 rendering/RenderTextFragment.cpp
 rendering/RenderTheme.cpp
+[ iOS ] rendering/cocoa/RenderThemeCocoa.mm
 rendering/RenderTreeAsText.cpp
 rendering/RenderView.cpp
 rendering/RenderViewTransitionCapture.cpp

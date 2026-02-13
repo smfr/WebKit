@@ -19,6 +19,7 @@ dom/Node.cpp
 dom/Node.h
 dom/TreeScope.h
 layout/formattingContexts/inline/InlineItemsBuilder.h
+[ iOS ] page/cocoa/ContentChangeObserver.h
 platform/PODInterval.h
 [ iOS ] platform/audio/ios/AudioSessionIOS.mm
 platform/graphics/filters/software/FEConvolveMatrixSoftwareApplier.h
@@ -27,6 +28,7 @@ platform/graphics/filters/software/FEMorphologySoftwareApplier.h
 platform/graphics/filters/software/FETurbulenceSoftwareApplier.h
 [ iOS ] platform/graphics/ios/DisplayRefreshMonitorIOS.mm
 [ iOS ] platform/ios/wak/WAKWindow.h
+[ iOS ] platform/mediastream/ios/CoreAudioCaptureSourceIOS.mm
 rendering/PaintInfo.h
 rendering/RenderLayer.h
 rendering/RenderLayerBacking.cpp

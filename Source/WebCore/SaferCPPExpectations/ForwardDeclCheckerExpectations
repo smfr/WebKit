@@ -50,6 +50,7 @@ layout/formattingContexts/inline/InlineItemsBuilder.cpp
 layout/formattingContexts/inline/InlineLine.h
 layout/integration/inline/LayoutIntegrationLineLayout.h
 layout/layouttree/LayoutElementBox.h
+[ iOS ] page/cocoa/ContentChangeObserver.h
 [ Mac ] page/mac/ImageOverlayControllerMac.mm
 [ Mac ] page/mac/ServicesOverlayController.mm
 page/scrolling/ScrollingStateNode.h
@@ -57,14 +58,12 @@ page/scrolling/ScrollingStateNode.h
 platform/PODRedBlackTree.h
 platform/Scrollbar.h
 platform/cocoa/TelephoneNumberDetectorCocoa.cpp
-[ iOS ] platform/cocoa/WebAVPlayerLayerView.mm
 platform/graphics/ImageBufferContextSwitcher.h
 platform/graphics/ca/PlatformCALayer.h
 platform/graphics/ca/TileController.cpp
 [ iOS ] platform/ios/DeviceMotionClientIOS.h
 [ iOS ] platform/ios/LegacyTileCache.h
 platform/mediastream/libwebrtc/LibWebRTCDav1dDecoder.cpp
-[ iOS ] platform/text/TextBoundaries.cpp
 rendering/MarkedText.h
 rendering/RenderLayerBacking.cpp
 rendering/RenderLayerCompositor.cpp
