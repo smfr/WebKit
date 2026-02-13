@@ -161,6 +161,16 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
     self._protectedWorldConfiguration->setInspectable(inspectable);
 }
 
+- (BOOL)nodeSerializationEnabled
+{
+    return self._protectedWorldConfiguration->allowNodeSerialization();
+}
+
+- (void)setNodeSerializationEnabled:(BOOL)allow
+{
+    self._protectedWorldConfiguration->setAllowNodeSerialization(allow);
+}
+
 @end
 
 @implementation _WKContentWorldConfiguration
@@ -237,12 +247,12 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (BOOL)allowNodeSerialization
 {
-    return self._protectedWorldConfiguration->allowNodeSerialization();
+    return [self nodeSerializationEnabled];
 }
 
 - (void)setAllowNodeSerialization:(BOOL)allow
 {
-    self._protectedWorldConfiguration->setAllowNodeSerialization(allow);
+    [self setNodeSerializationEnabled:allow];
 }
 
 @end

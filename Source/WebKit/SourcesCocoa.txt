@@ -311,7 +311,6 @@ UIProcess/API/Cocoa/_WKPageLoadTiming.mm @nonARC
 UIProcess/API/Cocoa/_WKProcessPoolConfiguration.mm @nonARC
 UIProcess/API/Cocoa/_WKRemoteWebInspectorViewController.mm @nonARC
 UIProcess/API/Cocoa/_WKResourceLoadInfo.mm @nonARC
-UIProcess/API/Cocoa/_WKSerializedNode.mm @nonARC
 UIProcess/API/Cocoa/_WKSessionState.mm @nonARC
 UIProcess/API/Cocoa/_WKSpatialBackdropSource.mm @nonARC
 UIProcess/API/Cocoa/_WKSystemPreferences.mm @nonARC
@@ -364,6 +363,7 @@ UIProcess/API/Cocoa/WKFormInfo.mm @nonARC
 UIProcess/API/Cocoa/WKFrameInfo.mm @nonARC
 UIProcess/API/Cocoa/WKHTTPCookieStore.mm @nonARC
 UIProcess/API/Cocoa/WKJSScriptingBuffer.mm @nonARC
+UIProcess/API/Cocoa/WKJSSerializedNode.mm @nonARC
 UIProcess/API/Cocoa/WKMenuItemIdentifiers.mm @nonARC
 UIProcess/API/Cocoa/WKNavigation.mm @nonARC
 UIProcess/API/Cocoa/WKNavigationAction.mm @nonARC

@@ -52,6 +52,13 @@ WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
 /*! @abstract A boolean value indicating whether the behavior that elements with a name attribute overrides builtin methods on document object should be enabled or not. */
 @property (nonatomic) BOOL legacyBuiltinOverridesEnabled;
 
+/*! @abstract A boolean indicating whether or not `window.webkit.serializeNode` is available.
+ @discussion JavaScript can call `window.webkit.serializeNode` with a return value to create a `WKJSSerializedNode`
+ object for the application to use in future JavaScript programs.
+ Refer to the `WKJSSerializedNode` documentation for more information.
+ */
+@property (nonatomic) BOOL nodeSerializationEnabled WK_API_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA));
+
 /*! @abstract A boolean indicating whether the JavaScript in this world is visible to the Web Inspector. */
 @property (nonatomic, getter=isInspectable) BOOL inspectable;
 

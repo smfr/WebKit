@@ -41,6 +41,7 @@
 #import <WebKit/WKFrameInfo.h>
 #import <WebKit/WKHTTPCookieStore.h>
 #import <WebKit/WKJSScriptingBuffer.h>
+#import <WebKit/WKJSSerializedNode.h>
 #import <WebKit/WKNavigation.h>
 #import <WebKit/WKNavigationAction.h>
 #import <WebKit/WKNavigationDelegate.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,14 +23,36 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <WebKit/WKJSSerializedNode.h>
+#import <WebKit/WKFoundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*! A `WKJSSerializedNode` object contains the serialized representation of a DOM node
+ @discussion There are various ways that JavaScript executing inside web content results in some return value
+ being passed up to the WebKit application.
+ Examples include calls to `[WKWebView evaluateJavaScript:...]`, `[WKWebView callAsyncJavaScript:...]`, and the
+ body of a `WKScriptMessage`.
+
+ When application JavaScript returns a JavaScript value, the default behavior is to try to convert it to a foundational type.
+ e.g. a JavaScript Number becomes an NSNumber, or a JavaScript array becomes an NSArray, etc.
+
+ When the return value is a DOM node, the default conversion is to "stringify" it and return that to the application as an NSString.
+ If the JavaScript instead calls `window.webkit.serializeNode(...)` then WebKit will create a serialized representation of
+ that node as the return value.
+
+ The node is an opaque object as far as the application is concerned, but it can be used as an argument to future JavaScript programs
+ via `[WKWebView callAsyncJavaScript:...]`
+
+ Unlike `WKJSHandle` - which keeps an actual JavaScript object alive in its originating context - a `WKJSSerializedNode` is not attached
+ to a live JavaScript object, and it can be used as an argument to a JavaScript program running in any context.
+ e.g. In a different frame, or after a navigation.
+ */
 WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
-@interface _WKSerializedNode : WKJSSerializedNode
+@interface WKJSSerializedNode : NSObject
+
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
+
 @end
 
 NS_ASSUME_NONNULL_END

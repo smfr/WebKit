@@ -24,6 +24,7 @@
  */
 
 #import "APISerializedNode.h"
+#import "WKJSSerializedNode.h"
 #import "WKObject.h"
 #import "_WKSerializedNode.h"
 #import <wtf/AlignedStorage.h>
@@ -36,7 +37,7 @@ template<> struct WrapperTraits<API::SerializedNode> {
 
 }
 
-@interface _WKSerializedNode () <WKObject> {
+@interface WKJSSerializedNode () <WKObject> {
 @package
     AlignedStorage<API::SerializedNode> _node;
 }

@@ -1184,6 +1184,8 @@
 		5110AE0D133C16CB0072717A /* WKIconDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 5110AE0B133C16CB0072717A /* WKIconDatabase.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		51130EC8294466AF00E076C5 /* _WKNotificationDataInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 51130EC5294466AE00E076C5 /* _WKNotificationDataInternal.h */; };
 		51130ECA294466AF00E076C5 /* _WKNotificationData.h in Headers */ = {isa = PBXBuildFile; fileRef = 51130EC7294466AF00E076C5 /* _WKNotificationData.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		5116CE712F3F983F00968E09 /* WKJSSerializedNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 5116CE6E2F3F983800968E09 /* WKJSSerializedNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5116CE722F3F983F00968E09 /* WKJSSerializedNodeInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 5116CE702F3F983800968E09 /* WKJSSerializedNodeInternal.h */; };
 		511F7D411EB1BCF500E47B83 /* WebsiteDataStoreParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 511F7D401EB1BCEE00E47B83 /* WebsiteDataStoreParameters.h */; };
 		511FD1132C51AF4300BD8163 /* _WKMockUserNotificationCenter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 511FD1102C51848900BD8163 /* _WKMockUserNotificationCenter.mm */; };
 		511FD1142C51AF4F00BD8163 /* _WKMockUserNotificationCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 511FD10F2C51848900BD8163 /* _WKMockUserNotificationCenter.h */; };
@@ -5906,6 +5908,9 @@
 		51130EC5294466AE00E076C5 /* _WKNotificationDataInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKNotificationDataInternal.h; sourceTree = "<group>"; };
 		51130EC6294466AF00E076C5 /* _WKNotificationData.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = _WKNotificationData.mm; sourceTree = "<group>"; };
 		51130EC7294466AF00E076C5 /* _WKNotificationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKNotificationData.h; sourceTree = "<group>"; };
+		5116CE6E2F3F983800968E09 /* WKJSSerializedNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKJSSerializedNode.h; sourceTree = "<group>"; };
+		5116CE6F2F3F983800968E09 /* WKJSSerializedNode.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WKJSSerializedNode.mm; sourceTree = "<group>"; };
+		5116CE702F3F983800968E09 /* WKJSSerializedNodeInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKJSSerializedNodeInternal.h; sourceTree = "<group>"; };
 		511F7D3F1EB1BCEE00E47B83 /* WebsiteDataStoreParameters.serialization.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebsiteDataStoreParameters.serialization.in; sourceTree = "<group>"; };
 		511F7D401EB1BCEE00E47B83 /* WebsiteDataStoreParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebsiteDataStoreParameters.h; sourceTree = "<group>"; };
 		511FD10F2C51848900BD8163 /* _WKMockUserNotificationCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _WKMockUserNotificationCenter.h; sourceTree = "<group>"; };
@@ -9133,8 +9138,6 @@
 		FAF27D2E2D2850D400F1F0BB /* CoreIPCPKSecureElementPass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreIPCPKSecureElementPass.h; sourceTree = "<group>"; };
 		FAF27D2F2D2850D400F1F0BB /* CoreIPCPKSecureElementPass.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CoreIPCPKSecureElementPass.mm; sourceTree = "<group>"; };
 		FAFFC3572E2AB10000CCC89C /* _WKSerializedNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _WKSerializedNode.h; sourceTree = "<group>"; };
-		FAFFC3582E2AB10000CCC89C /* _WKSerializedNode.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = _WKSerializedNode.mm; sourceTree = "<group>"; };
-		FAFFC3592E2AB10000CCC89C /* _WKSerializedNodeInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _WKSerializedNodeInternal.h; sourceTree = "<group>"; };
 		FAFFC35A2E2AB12400CCC89C /* APISerializedNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APISerializedNode.h; sourceTree = "<group>"; };
 		FAFFC35B2E2AB12400CCC89C /* APISerializedNode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = APISerializedNode.cpp; sourceTree = "<group>"; };
 		FC7104512E0ED22A00CC0B24 /* WebInspectorBackendProxy.messages.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebInspectorBackendProxy.messages.in; sourceTree = "<group>"; };
@@ -12766,8 +12769,6 @@
 				49FBEFFE239B012F00BD032F /* _WKResourceLoadStatisticsThirdParty.mm */,
 				49FBF008239F08E000BD032F /* _WKResourceLoadStatisticsThirdPartyInternal.h */,
 				FAFFC3572E2AB10000CCC89C /* _WKSerializedNode.h */,
-				FAFFC3582E2AB10000CCC89C /* _WKSerializedNode.mm */,
-				FAFFC3592E2AB10000CCC89C /* _WKSerializedNodeInternal.h */,
 				1A002D3F196B329400B9AD44 /* _WKSessionState.h */,
 				1A002D3E196B329400B9AD44 /* _WKSessionState.mm */,
 				1A002D42196B337000B9AD44 /* _WKSessionStateInternal.h */,
@@ -12929,6 +12930,9 @@
 				514246BD2F3F85EE002A3AEA /* WKJSScriptingBuffer.h */,
 				514246BC2F3F85DE002A3AEA /* WKJSScriptingBuffer.mm */,
 				514246BE2F3F85EE002A3AEA /* WKJSScriptingBufferInternal.h */,
+				5116CE6E2F3F983800968E09 /* WKJSSerializedNode.h */,
+				5116CE6F2F3F983800968E09 /* WKJSSerializedNode.mm */,
+				5116CE702F3F983800968E09 /* WKJSSerializedNodeInternal.h */,
 				1AB40EE31BF677E300BA81BE /* WKMenuItemIdentifiers.mm */,
 				1AB40EE41BF677E300BA81BE /* WKMenuItemIdentifiersPrivate.h */,
 				1A5B1C4F1898606F004FCF9B /* WKNavigation.h */,
@@ -19215,6 +19219,8 @@
 				FA84D6692E579F38004BDAA4 /* WKJSHandleRef.h in Headers */,
 				514246BF2F3F85EE002A3AEA /* WKJSScriptingBuffer.h in Headers */,
 				514246C02F3F85EE002A3AEA /* WKJSScriptingBufferInternal.h in Headers */,
+				5116CE712F3F983F00968E09 /* WKJSSerializedNode.h in Headers */,
+				5116CE722F3F983F00968E09 /* WKJSSerializedNodeInternal.h in Headers */,
 				2DD5E129210ADC7B00DB6012 /* WKKeyboardScrollingAnimator.h in Headers */,
 				51E8284E2B21395A009119F9 /* WKKeyedCoder.h in Headers */,
 				51A9E10B1315CD18009E7031 /* WKKeyValueStorageManager.h in Headers */,

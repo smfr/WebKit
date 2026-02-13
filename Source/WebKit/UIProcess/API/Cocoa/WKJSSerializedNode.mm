@@ -24,15 +24,15 @@
  */
 
 #import "config.h"
-#import "_WKSerializedNodeInternal.h"
+#import "WKJSSerializedNodeInternal.h"
 
 #import <WebCore/WebCoreObjCExtras.h>
 
-@implementation _WKSerializedNode
+@implementation WKJSSerializedNode
 
 - (void)dealloc
 {
-    if (WebCoreObjCScheduleDeallocateOnMainRunLoop(_WKSerializedNode.class, self))
+    if (WebCoreObjCScheduleDeallocateOnMainRunLoop(WKJSSerializedNode.class, self))
         return;
     SUPPRESS_UNRETAINED_ARG _node->API::SerializedNode::~SerializedNode();
     [super dealloc];
@@ -43,4 +43,7 @@
     return *_node;
 }
 
+@end
+
+@implementation _WKSerializedNode
 @end
