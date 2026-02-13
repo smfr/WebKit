@@ -443,6 +443,8 @@ std::optional<Inspector::Protocol::CSS::PseudoId> InspectorCSSAgent::protocolVal
         return Inspector::Protocol::CSS::PseudoId::TargetText;
     case PseudoElementType::Checkmark:
         return Inspector::Protocol::CSS::PseudoId::Checkmark;
+    case PseudoElementType::PickerIcon:
+        return Inspector::Protocol::CSS::PseudoId::PickerIcon;
     case PseudoElementType::ViewTransition:
         return Inspector::Protocol::CSS::PseudoId::ViewTransition;
     case PseudoElementType::ViewTransitionGroup:

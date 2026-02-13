@@ -1093,6 +1093,13 @@ select:not([multiple]):-internal-uses-menulist > button:first-child {
     /* FIXME: add display: contents; once it works as expected */
 }
 
+select::picker-icon {
+    /* FIXME: Switch to disclosure-open counter once it works */
+    content: "\25BC" / "";
+    display: block;
+    margin-inline-start: auto;
+}
+
 optgroup {
     font-weight: bolder;
 }

@@ -27,11 +27,13 @@
 #include "RenderTreeBuilderFormControls.h"
 
 #include "HTMLInputElement.h"
+#include "HTMLSelectElement.h"
 #include "InputType.h"
 #include "RenderBlockFlow.h"
 #include "RenderBlockInlines.h"
 #include "RenderButton.h"
 #include "RenderDescendantIterator.h"
+#include "RenderMenuList.h"
 #include "RenderTreeBuilderBlock.h"
 #include "RenderTreeUpdaterGeneratedContent.h"
 #include "Settings.h"
@@ -86,59 +88,62 @@ void RenderTreeBuilder::FormControls::updateAfterDescendants(RenderElement& rend
             return;
 
         if (inputType->isCheckable())
-            updateCheckmark(renderer);
+            updatePseudoElement(PseudoElementType::Checkmark, renderer);
+        return;
+    }
+
+    if (RefPtr select = dynamicDowncast<HTMLSelectElement>(renderer.element()); select && select->usesMenuList()) {
+        updatePseudoElement(PseudoElementType::PickerIcon, renderer);
+        return;
     }
 }
 
-void RenderTreeBuilder::FormControls::updateCheckmark(RenderElement& renderer)
+void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type, RenderElement& renderer)
 {
-    RefPtr inputElement = dynamicDowncast<HTMLInputElement>(renderer.element());
-    ASSERT(inputElement);
-
-    auto pseudoStyle = renderer.getCachedPseudoStyle({ PseudoElementType::Checkmark });
+    auto pseudoStyle = renderer.getCachedPseudoStyle({ type });
     if (!pseudoStyle)
         return;
 
-    auto shouldHaveCheckmarkRenderer = [&]() -> bool {
-        return renderer.style().appearance() == StyleAppearance::Base && pseudoStyle->display() != DisplayType::None;
+    auto shouldHavePseudoElementRenderer = [&]() -> bool {
+        return renderer.style().usedAppearance() == StyleAppearance::Base && pseudoStyle->display() != DisplayType::None;
     };
 
-    auto existingCheckmark = [&]() -> CheckedPtr<RenderBlockFlow> {
+    auto existingPseudoElement = [&]() -> CheckedPtr<RenderElement> {
         for (CheckedRef child : childrenOfType<RenderElement>(renderer)) {
-            if (child->style().pseudoElementType() == PseudoElementType::Checkmark)
-                return dynamicDowncast<RenderBlockFlow>(child);
+            if (child->style().pseudoElementType() == type)
+                return child;
         }
         return nullptr;
     }();
 
-    if (!shouldHaveCheckmarkRenderer()) {
-        if (existingCheckmark)
-            m_builder.destroy(*existingCheckmark);
+    if (!shouldHavePseudoElementRenderer()) {
+        if (existingPseudoElement)
+            m_builder.destroy(*existingPseudoElement);
         return;
     }
 
-    if (existingCheckmark && existingCheckmark->style().content() == pseudoStyle->content()) {
-        auto checkmarkStyle = RenderStyle::clone(*pseudoStyle);
-        existingCheckmark->setStyle(WTF::move(checkmarkStyle));
-        RenderTreeUpdater::GeneratedContent::updateStyleForContentRenderers(*existingCheckmark, existingCheckmark->style());
+    if (existingPseudoElement && existingPseudoElement->style().content() == pseudoStyle->content()) {
+        auto pseudoElementStyle = RenderStyle::clone(*pseudoStyle);
+        existingPseudoElement->setStyle(WTF::move(pseudoElementStyle));
+        RenderTreeUpdater::GeneratedContent::updateStyleForContentRenderers(*existingPseudoElement, existingPseudoElement->style());
         return;
     }
 
-    if (existingCheckmark) {
-        m_builder.destroy(*existingCheckmark);
-        existingCheckmark = nullptr;
+    if (existingPseudoElement) {
+        m_builder.destroy(*existingPseudoElement);
+        existingPseudoElement = nullptr;
     }
 
     Ref document = renderer.document();
-    auto checkmarkStyle = RenderStyle::clone(*pseudoStyle);
+    auto pseudoElementStyle = RenderStyle::clone(*pseudoStyle);
 
-    RenderPtr<RenderBlockFlow> checkmark = createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, document, WTF::move(checkmarkStyle));
-    checkmark->initializeStyle();
+    RenderPtr<RenderBlockFlow> pseudoElement = createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, document, WTF::move(pseudoElementStyle));
+    pseudoElement->initializeStyle();
 
-    if (checkmark->style().hasContent())
-        RenderTreeUpdater::GeneratedContent::createContentRenderers(m_builder, *checkmark, checkmark->style(), PseudoElementType::Checkmark);
+    if (pseudoElement->style().hasContent())
+        RenderTreeUpdater::GeneratedContent::createContentRenderers(m_builder, *pseudoElement, pseudoElement->style(), type);
 
-    m_builder.attach(renderer, WTF::move(checkmark));
+    m_builder.attach(renderer, WTF::move(pseudoElement));
 }
 
 } // namespace WebCore

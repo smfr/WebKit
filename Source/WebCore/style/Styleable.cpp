@@ -90,6 +90,16 @@ const std::optional<const Styleable> Styleable::fromRenderer(const RenderElement
         }
         break;
     }
+    case PseudoElementType::PickerIcon: {
+        /* FIXME: Optimize this to avoid the full ancestor walk. */
+        auto* ancestor = renderer.parent();
+        while (ancestor) {
+            if (ancestor->element())
+                return Styleable(*ancestor->element(), Style::PseudoElementIdentifier { PseudoElementType::PickerIcon });
+            ancestor = ancestor->parent();
+        }
+        break;
+    }
     case PseudoElementType::ViewTransitionGroup:
     case PseudoElementType::ViewTransitionImagePair:
     case PseudoElementType::ViewTransitionNew:
@@ -136,6 +146,14 @@ RenderElement* Styleable::renderer() const
             auto* markerRenderer = renderListItem->markerRenderer();
             if (markerRenderer && !markerRenderer->style().hasUsedContentNone())
                 return markerRenderer;
+        }
+        break;
+    case PseudoElementType::PickerIcon:
+        if (!element.renderer())
+            return nullptr;
+        for (CheckedRef child : childrenOfType<RenderElement>(*element.renderer())) {
+            if (child->style().pseudoElementType() == PseudoElementType::PickerIcon)
+                return child.ptr();
         }
         break;
     case PseudoElementType::ViewTransition:

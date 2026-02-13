@@ -944,6 +944,7 @@ TextStream& operator<<(TextStream& ts, PseudoElementType pseudoElementType)
     case PseudoElementType::SpellingError: ts << "spelling-error"_s; break;
     case PseudoElementType::TargetText: ts << "target-text"_s; break;
     case PseudoElementType::Checkmark: ts << "checkmark"_s; break;
+    case PseudoElementType::PickerIcon: ts << "picker-icon"_s; break;
     case PseudoElementType::ViewTransition: ts << "view-transition"_s; break;
     case PseudoElementType::ViewTransitionGroup: ts << "view-transition-group"_s; break;
     case PseudoElementType::ViewTransitionImagePair: ts << "view-transition-image-pair"_s; break;

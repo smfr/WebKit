@@ -47,7 +47,7 @@ public:
 private:
     RenderBlock& findOrCreateParentForChild(RenderButton&);
 
-    void updateCheckmark(RenderElement&);
+    void updatePseudoElement(PseudoElementType, RenderElement&);
 
     RenderTreeBuilder& m_builder;
 };

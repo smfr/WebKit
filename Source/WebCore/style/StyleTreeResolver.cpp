@@ -44,6 +44,7 @@
 #include "HTMLMeterElement.h"
 #include "HTMLNames.h"
 #include "HTMLProgressElement.h"
+#include "HTMLSelectElement.h"
 #include "HTMLSlotElement.h"
 #include "LoaderStrategy.h"
 #include "LocalFrame.h"
@@ -419,6 +420,9 @@ auto TreeResolver::resolveElement(Element& element, const RenderStyle* existingS
 
     if (m_document->settings().cssAppearanceBaseEnabled())
         resolveAndAddPseudoElementStyle({ PseudoElementType::Checkmark });
+
+    if (RefPtr select = dynamicDowncast<HTMLSelectElement>(element); select && select->usesMenuList())
+        resolveAndAddPseudoElementStyle({ PseudoElementType::PickerIcon });
 
     if (isDocumentElement && m_document->hasViewTransitionPseudoElementTree()) {
         resolveAndAddPseudoElementStyle({ PseudoElementType::ViewTransition });

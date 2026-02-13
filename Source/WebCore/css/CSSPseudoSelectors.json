@@ -555,6 +555,9 @@
             "argument": "required",
             "settings-flag": "htmlEnhancedSelectEnabled"
         },
+        "picker-icon": {
+            "settings-flag": "htmlEnhancedSelectEnabled"
+        },
         "placeholder": {
             "aliases": [
                 "-webkit-input-placeholder"

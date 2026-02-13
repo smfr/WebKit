@@ -1520,6 +1520,7 @@ static FunctionType constructFragmentsInternal(const CSSSelector& rootSelector, 
             case CSSSelector::PseudoElement::InternalWritingSuggestions:
             case CSSSelector::PseudoElement::Marker:
             case CSSSelector::PseudoElement::Picker:
+            case CSSSelector::PseudoElement::PickerIcon:
             case CSSSelector::PseudoElement::WebKitResizer:
             case CSSSelector::PseudoElement::WebKitScrollbar:
             case CSSSelector::PseudoElement::WebKitScrollbarButton:
