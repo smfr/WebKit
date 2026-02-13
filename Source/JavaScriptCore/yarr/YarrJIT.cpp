@@ -3508,7 +3508,7 @@ class YarrGenerator final : public YarrJITInfo {
                             break;
 
                         unsigned strideLength = endIndex - beginIndex;
-#if CPU(ARM64)
+#if CPU(ARM64) || CPU(X86_64)
                         // Try SIMD nibble table optimization first for any number of candidates.
                         // This includes the scalar loop internally for tail processing,
                         // following the same pattern as generateMultiPatternSIMDSearch.
@@ -6159,7 +6159,12 @@ class YarrGenerator final : public YarrJITInfo {
         if (totalOffset.hasOverflowed())
             return std::nullopt;
 
-#if CPU(ARM64)
+#if CPU(X86_64)
+        if (!MacroAssembler::supportsAVX())
+            return std::nullopt;
+#endif
+
+#if CPU(ARM64) || CPU(X86_64)
         JIT_COMMENT(m_jit, "BitInTable SIMD search");
 
         // ==================== SETUP CONSTANTS (OUTSIDE LOOP) ====================
@@ -6173,7 +6178,7 @@ class YarrGenerator final : public YarrJITInfo {
         //   - High nibble ((c >> 4) & 0x07) selects which bit within that entry
         // This allows checking membership via:
         //   nibble_table[low_nibble] & (1 << high_nibble)
-        // SIMD can test 16 characters simultaneously using TBL + CMTST.
+        // SIMD can test 16 characters simultaneously using TBL/PSHUFB + CMTST/PAND+PCMPEQB.
         auto fromBitmap = [](const BoyerMooreBitmap::Map& bitmap) -> v128_t {
             v128_t table { };
             for (unsigned i = 0; i < BoyerMooreBitmap::mapSize; ++i) {
@@ -6186,7 +6191,7 @@ class YarrGenerator final : public YarrJITInfo {
             return table;
         };
 
-        // vectorTemp0 = nibble_table (16 bytes, for TBL lookup)
+        // vectorTemp0 = nibble_table (16 bytes, for TBL/PSHUFB lookup)
         FPRReg nibbleTableFPR = m_regs.vectorTemp0;
         m_jit.move128ToVector(fromBitmap(bitmap), nibbleTableFPR);
 
@@ -6235,16 +6240,25 @@ class YarrGenerator final : public YarrJITInfo {
         m_jit.vectorAnd(SIMDInfo { SIMDLane::v128, SIMDSignMode::None }, m_regs.vectorInput0, lowNibbleMaskFPR, m_regs.vectorScratch0);
 
         // Step 2: Extract high nibbles ((input >> 4) & 0x0F) -> vectorScratch1
+#if CPU(ARM64)
+        // Use byte-wise shift (USHR)
         m_jit.vectorUshrInt8(m_regs.vectorInput0, 4, m_regs.vectorScratch1);
+#elif CPU(X86_64)
+        // Use word-wise shift (VPSRLW). This shifts 16-bit lanes, but since we
+        // immediately AND with 0x0F, the cross-byte contamination is masked out.
+        m_jit.vectorUshr8(SIMDInfo { SIMDLane::i16x8, SIMDSignMode::Unsigned }, m_regs.vectorInput0, MacroAssembler::TrustedImm32(4), m_regs.vectorScratch1);
+#endif
         m_jit.vectorAnd(SIMDInfo { SIMDLane::v128, SIMDSignMode::None }, m_regs.vectorScratch1, lowNibbleMaskFPR, m_regs.vectorScratch1);
 
-        // Step 3: TBL lookup row = nibble_table[lo] -> vectorScratch2
+        // Step 3: TBL/PSHUFB lookup row = nibble_table[lo] -> vectorScratch2
         m_jit.vectorSwizzle(nibbleTableFPR, m_regs.vectorScratch0, m_regs.vectorScratch2);
 
-        // Step 4: TBL lookup mask = hi_lookup[hi] -> vectorScratch3
+        // Step 4: TBL/PSHUFB lookup mask = hi_lookup[hi] -> vectorScratch3
         m_jit.vectorSwizzle(highNibbleLookupFPR, m_regs.vectorScratch1, m_regs.vectorScratch3);
 
-        // Step 5: CMTST - test if (row & mask) != 0 for each lane -> vectorScratch0
+        // Step 5: Test if character is in bitmap for each lane
+#if CPU(ARM64)
+        // CMTST - test if (row & mask) != 0 for each lane -> vectorScratch0
         m_jit.vectorTest(SIMDInfo { SIMDLane::i8x16, SIMDSignMode::Unsigned }, m_regs.vectorScratch2, m_regs.vectorScratch3, m_regs.vectorScratch0);
 
         // Step 6: Narrow the 128-bit result to 64 bits using SHRN
@@ -6259,6 +6273,18 @@ class YarrGenerator final : public YarrJITInfo {
 
         // Check if any match found
         auto matchInVector = m_jit.branchTest64(MacroAssembler::NonZero, m_regs.regT0);
+#elif CPU(X86_64)
+        // Compute (row & mask) and compare with mask to test if (row & mask) == mask
+        // This is equivalent to testing (row & mask) != 0 because mask has exactly one bit set.
+        m_jit.vectorAnd(SIMDInfo { SIMDLane::v128, SIMDSignMode::None }, m_regs.vectorScratch2, m_regs.vectorScratch3, m_regs.vectorScratch0);
+        m_jit.compareIntegerVector(MacroAssembler::Equal, SIMDInfo { SIMDLane::i8x16, SIMDSignMode::None }, m_regs.vectorScratch0, m_regs.vectorScratch3, m_regs.vectorScratch0);
+
+        // PMOVMSKB extracts the high bit of each byte into a 16-bit mask directly
+        m_jit.vectorBitmask(SIMDInfo { SIMDLane::i8x16, SIMDSignMode::None }, m_regs.vectorScratch0, m_regs.regT0, m_regs.vectorScratch1);
+
+        // Check if any match found
+        auto matchInVector = m_jit.branchTest32(MacroAssembler::NonZero, m_regs.regT0);
+#endif
 
         // ==================== NO MATCH - ADVANCE ====================
 
@@ -6272,6 +6298,7 @@ class YarrGenerator final : public YarrJITInfo {
 
         matchInVector.link(&m_jit);
 
+#if CPU(ARM64)
         // Find exact position using RBIT + CLZ
         // RBIT reverses bits so first match becomes highest bit
         // CLZ counts leading zeros to find position
@@ -6280,6 +6307,10 @@ class YarrGenerator final : public YarrJITInfo {
 
         // Character index = bit position / 4 (since SHRN compressed by 4)
         m_jit.urshift64(MacroAssembler::TrustedImm32(2), m_regs.regT0);
+#elif CPU(X86_64)
+        // BSF/TZCNT directly gives the byte index (no division needed since PMOVMSKB gives one bit per byte)
+        m_jit.countTrailingZeros32(m_regs.regT0, m_regs.regT0);
+#endif
 
         // Add to current index
         m_jit.add32(m_regs.regT0, m_regs.index);
