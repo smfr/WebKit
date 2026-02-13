@@ -388,6 +388,9 @@ static Vector<LayoutUnit> rowSizesForFirstIterationColumnSizing(const TrackSizin
             [](const CSS::Keyword::MinContent&) -> LayoutUnit {
                 return LayoutUnit::max();
             },
+            [](const CSS::Keyword::MaxContent&) {
+                return LayoutUnit::max();
+            },
             [](const auto&) -> LayoutUnit {
                 ASSERT_NOT_IMPLEMENTED_YET();
                 return { };
