@@ -515,11 +515,8 @@
             "/webkit/WebKitWebView/client-side-certificate": {
                 "expected": {"all": {"status": ["FAIL", "PASS"], "bug": "webkit.org/b/264507"}}
             },
-            "/webkit/WebKitWebView/web-socket-tls-errors": {
-                "expected": {"all": {"status": ["TIMEOUT", "CRASH", "FAIL", "TIMEOUT"], "bug": "webkit.org/b/286063"}}
-            },
             "/webkit/WebKitWebView/web-socket-client-side-certificate": {
-                "expected": {"all": {"status": ["TIMEOUT", "CRASH", "TIMEOUT"], "bug": "webkit.org/b/286063"}}
+                "expected": {"all": {"status": ["CRASH", "TIMEOUT", "FAIL"], "bug": "webkit.org/b/307757"}}
             }
         }
     },
