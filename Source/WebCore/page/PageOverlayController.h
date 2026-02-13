@@ -51,7 +51,6 @@ public:
 
     GraphicsLayer& layerWithDocumentOverlays();
     GraphicsLayer& layerWithViewOverlays();
-    Ref<GraphicsLayer> protectedLayerWithViewOverlays();
 
     const Vector<Ref<PageOverlay>>& pageOverlays() const { return m_pageOverlays; }
 
@@ -85,10 +84,8 @@ private:
     void createRootLayersIfNeeded();
 
     WEBCORE_EXPORT GraphicsLayer* NODELETE documentOverlayRootLayer() const;
-    RefPtr<GraphicsLayer> protectedDocumentOverlayRootLayer() const;
 
     WEBCORE_EXPORT GraphicsLayer* NODELETE viewOverlayRootLayer() const;
-    RefPtr<GraphicsLayer> protectedViewOverlayRootLayer() const;
 
     void installedPageOverlaysChanged();
     void attachViewOverlayLayers();
@@ -104,8 +101,6 @@ private:
     bool shouldSkipLayerInDump(const GraphicsLayer*, OptionSet<LayerTreeAsTextOptions>) const override;
     bool shouldDumpPropertyForLayer(const GraphicsLayer*, ASCIILiteral propertyName, OptionSet<LayerTreeAsTextOptions>) const override;
     void tiledBackingUsageChanged(const GraphicsLayer*, bool) override;
-
-    Ref<Page> NODELETE protectedPage() const;
 
     WeakRef<Page> m_page;
     RefPtr<GraphicsLayer> m_documentOverlayRootLayer;

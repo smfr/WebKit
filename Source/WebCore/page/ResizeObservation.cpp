@@ -123,11 +123,6 @@ FloatSize ResizeObservation::snappedContentBoxSize() const
     return m_lastObservationSizes.contentBoxLogicalSize; // FIXME: Need to pixel snap.
 }
 
-RefPtr<Element> ResizeObservation::protectedTarget() const
-{
-    return m_target.get();
-}
-
 std::optional<ResizeObservation::BoxSizes> ResizeObservation::elementSizeChanged() const
 {
     auto currentSizes = computeObservedSizes();

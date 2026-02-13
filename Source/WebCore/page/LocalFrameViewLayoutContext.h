@@ -229,11 +229,9 @@ private:
     void enablePercentHeightResolveFor(const RenderBox& flexItem);
 
     LocalFrame& frame() const;
-    Ref<LocalFrame> protectedFrame();
-    LocalFrameView& NODELETE view() const;
+    LocalFrameView& view() const;
     RenderView* renderView() const;
     Document* document() const;
-    RefPtr<Document> NODELETE protectedDocument() const;
 
     SingleThreadWeakRef<LocalFrameView> m_frameView;
     Timer m_layoutTimer;

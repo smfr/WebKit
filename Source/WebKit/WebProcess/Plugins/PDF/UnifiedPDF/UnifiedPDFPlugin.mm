@@ -266,7 +266,7 @@ void UnifiedPDFPlugin::teardown()
     if (m_scrollingNodeID && page) {
         RefPtr scrollingCoordinator = page->scrollingCoordinator();
         scrollingCoordinator->unparentChildrenAndDestroyNode(*m_scrollingNodeID);
-        frame->coreLocalFrame()->protectedView()->removePluginScrollableAreaForScrollingNodeID(*m_scrollingNodeID);
+        protect(frame->coreLocalFrame()->view())->removePluginScrollableAreaForScrollingNodeID(*m_scrollingNodeID);
     }
 
     [[NSNotificationCenter defaultCenter] removeObserver:m_pdfMutationObserver.get() name:mutationObserverNotificationString().createNSString().get() object:m_pdfDocument.get()];
@@ -683,7 +683,7 @@ void UnifiedPDFPlugin::createScrollingNodeIfNecessary()
         layer->setScrollingNodeID(*m_scrollingNodeID);
 #endif
 
-    protect(m_frame)->coreLocalFrame()->protectedView()->setPluginScrollableAreaForScrollingNodeID(*m_scrollingNodeID, *this);
+    protect(protect(m_frame)->coreLocalFrame()->view())->setPluginScrollableAreaForScrollingNodeID(*m_scrollingNodeID, *this);
 
     scrollingCoordinator->setScrollingNodeScrollableAreaGeometry(*m_scrollingNodeID, *this);
 

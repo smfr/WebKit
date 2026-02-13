@@ -283,7 +283,7 @@ static const IntegerSchema& colorFeatureSchema()
         "color"_s,
         OptionSet<MediaQueryDynamicDependency>(),
         [](auto& context) {
-            return screenDepthPerComponent(context.document->frame()->mainFrame().protectedVirtualView().get());
+            return screenDepthPerComponent(protect(context.document->frame()->mainFrame().virtualView()).get());
         }
     };
     return schema;
@@ -298,7 +298,7 @@ static const IdentifierSchema& colorGamutFeatureSchema()
         [](auto& context) {
             // FIXME: At some point we should start detecting displays that support more colors.
             MatchingIdentifiers identifiers { CSSValueSRGB };
-            if (screenSupportsExtendedColor(context.document->protectedFrame()->mainFrame().protectedVirtualView().get()))
+            if (screenSupportsExtendedColor(protect(protect(context.document->frame())->mainFrame().virtualView()).get()))
                 identifiers.append(CSSValueP3);
             return identifiers;
         }
@@ -385,7 +385,7 @@ static const IdentifierSchema& dynamicRangeFeatureSchema()
                     return true;
                 if (frame->settings().forcedSupportsHighDynamicRangeValue() == ForcedAccessibilityValue::Off)
                     return false;
-                return screenSupportsHighDynamicRange(frame->mainFrame().protectedVirtualView().get());
+                return screenSupportsHighDynamicRange(protect(frame->mainFrame().virtualView()).get());
             }();
 
             MatchingIdentifiers identifiers { CSSValueStandard };

@@ -75,7 +75,6 @@ public:
     Ref<DOMStringList> ancestorOrigins() const;
 
     DOMWindow* window() { return m_window.get(); }
-    RefPtr<DOMWindow> protectedWindow();
 
     const URL& url() const;
 

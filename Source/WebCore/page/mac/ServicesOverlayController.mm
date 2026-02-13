@@ -679,17 +679,17 @@ void ServicesOverlayController::handleClick(const IntPoint& clickPoint, DataDete
 
 void ServicesOverlayController::scheduleRenderingUpdate(OptionSet<RenderingUpdateStep> requestedSteps)
 {
-    protectedPage()->scheduleRenderingUpdate(requestedSteps);
+    protect(m_page)->scheduleRenderingUpdate(requestedSteps);
 }
 
 float ServicesOverlayController::deviceScaleFactor() const
 {
-    return protectedPage()->deviceScaleFactor();
+    return protect(m_page)->deviceScaleFactor();
 }
 
 RefPtr<GraphicsLayer> ServicesOverlayController::createGraphicsLayer(GraphicsLayerClient& client)
 {
-    return GraphicsLayer::create(protectedPage()->chrome().client().graphicsLayerFactory(), client);
+    return GraphicsLayer::create(protect(m_page)->chrome().client().graphicsLayerFactory(), client);
 }
 
 #endif

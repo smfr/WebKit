@@ -194,7 +194,7 @@ void EventHandler::focusDocumentView()
     }
 
     RELEASE_ASSERT(page == m_frame->page());
-    page->focusController().setFocusedFrame(protectedFrame().ptr());
+    page->focusController().setFocusedFrame(protect(m_frame).ptr());
 }
 
 bool EventHandler::passWidgetMouseDownEventToWidget(const MouseEventWithHitTestResults& event)
@@ -862,7 +862,7 @@ void EventHandler::determineWheelEventTarget(const PlatformWheelEvent& wheelEven
     if (wheelEvent.shouldResetLatching() || wheelEvent.isNonGestureEvent())
         return;
 
-    page->scrollLatchingController().updateAndFetchLatchingStateForFrame(protectedFrame(), wheelEvent, wheelEventTarget, scrollableArea, isOverWidget);
+    page->scrollLatchingController().updateAndFetchLatchingStateForFrame(protect(m_frame), wheelEvent, wheelEventTarget, scrollableArea, isOverWidget);
 }
 
 bool EventHandler::processWheelEventForScrolling(const PlatformWheelEvent& wheelEvent, const WeakPtr<ScrollableArea>& scrollableArea, OptionSet<EventHandling> eventHandling)

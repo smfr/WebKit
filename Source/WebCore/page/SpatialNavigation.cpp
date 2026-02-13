@@ -362,7 +362,7 @@ bool scrollInDirection(LocalFrame* frame, FocusDirection direction)
 bool scrollInDirection(const ContainerNode& container, FocusDirection direction)
 {
     if (is<Document>(container))
-        return scrollInDirection(downcast<Document>(container).protectedFrame().get(), direction);
+        return scrollInDirection(protect(downcast<Document>(container).frame()).get(), direction);
 
     if (!canScrollInDirection(container, direction))
         return false;
@@ -442,7 +442,7 @@ bool canScrollInDirection(const ContainerNode& container, FocusDirection directi
         return false;
 
     if (is<Document>(container))
-        return canScrollInDirection(downcast<Document>(container).protectedFrame().get(), direction);
+        return canScrollInDirection(protect(downcast<Document>(container).frame()).get(), direction);
 
     if (!isScrollableNode(container))
         return false;
@@ -517,10 +517,10 @@ LayoutRect nodeRectInAbsoluteCoordinates(const ContainerNode& containerNode, boo
     ASSERT(containerNode.renderer() && !containerNode.document().view()->needsLayout());
 
     if (is<Document>(containerNode))
-        return frameRectInAbsoluteCoordinates(downcast<Document>(containerNode).protectedFrame().get());
+        return frameRectInAbsoluteCoordinates(protect(downcast<Document>(containerNode).frame()).get());
 
     if (CheckedPtr renderer = containerNode.renderer()) {
-        auto rect = rectToAbsoluteCoordinates(containerNode.document().protectedFrame().get(), renderer->absoluteBoundingBoxRect());
+        auto rect = rectToAbsoluteCoordinates(protect(containerNode.document().frame()).get(), renderer->absoluteBoundingBoxRect());
         // For authors that use border instead of outline in their CSS, we compensate by ignoring the border when calculating
         // the rect of the focused element.
         if (ignoreBorder) {
@@ -758,7 +758,7 @@ LayoutRect virtualRectForAreaElementAndDirection(HTMLAreaElement* area, FocusDir
     ASSERT(area->imageElement());
     // Area elements tend to overlap more than other focusable elements. We flatten the rect of the area elements
     // to minimize the effect of overlapping areas.
-    LayoutRect rect = virtualRectForDirection(direction, rectToAbsoluteCoordinates(area->document().protectedFrame().get(), area->computeRect(protect(area->imageElement()->renderer()).get())), 1);
+    LayoutRect rect = virtualRectForDirection(direction, rectToAbsoluteCoordinates(protect(area->document().frame()).get(), area->computeRect(protect(area->imageElement()->renderer()).get())), 1);
     return rect;
 }
 

@@ -231,7 +231,7 @@ static RetainPtr<CAKeyframeAnimation> createBounceAnimation(CFTimeInterval durat
 static RetainPtr<CABasicAnimation> createContentCrossfadeAnimation(CFTimeInterval duration, WebCore::TextIndicator& textIndicator)
 {
     RetainPtr crossfadeAnimation = [CABasicAnimation animationWithKeyPath:@"contents"];
-    RefPtr contentsImage = textIndicator.protectedContentImage()->nativeImage();
+    RefPtr contentsImage = protect(textIndicator.contentImage())->nativeImage();
     [crossfadeAnimation setToValue:(__bridge id)contentsImage->platformImage().get()];
     [crossfadeAnimation setFillMode:kCAFillModeForwards];
     [crossfadeAnimation setRemovedOnCompletion:NO];

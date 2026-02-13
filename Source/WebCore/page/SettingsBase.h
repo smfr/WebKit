@@ -135,7 +135,6 @@ public:
 
     WEBCORE_EXPORT void resetToConsistentState();
 
-    WEBCORE_EXPORT RefPtr<Page> NODELETE protectedPage() const;
     WeakPtr<Page> page() const { return m_page; }
 
 protected:

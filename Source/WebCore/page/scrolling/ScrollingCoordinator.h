@@ -246,7 +246,6 @@ protected:
     virtual void willCommitTree(FrameIdentifier) { }
 
     WEBCORE_EXPORT Page* NODELETE page() const;
-    WEBCORE_EXPORT RefPtr<Page> protectedPage() const;
 
 private:
     virtual bool hasVisibleSlowRepaintViewportConstrainedObjects(const LocalFrameView&) const;

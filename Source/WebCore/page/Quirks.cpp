@@ -1113,7 +1113,7 @@ bool Quirks::shouldEnableRTCEncodedStreamsQuirk() const
 {
     QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
 
-    return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldEnableRTCEncodedStreamsQuirk) && protectedDocument() && protectedDocument()->settings().rtcEncodedStreamsQuirkEnabled();
+    return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldEnableRTCEncodedStreamsQuirk) && m_document && protect(m_document)->settings().rtcEncodedStreamsQuirkEnabled();
 }
 #endif
 
@@ -1250,11 +1250,6 @@ Quirks::StorageAccessResult Quirks::requestStorageAccessAndHandleClick(Completio
         });
     });
     return Quirks::StorageAccessResult::ShouldCancelEvent;
-}
-
-RefPtr<Document> Quirks::protectedDocument() const
-{
-    return m_document.get();
 }
 
 void Quirks::triggerOptionalStorageAccessIframeQuirk(const URL& frameURL, CompletionHandler<void()>&& completionHandler) const
@@ -1785,7 +1780,7 @@ bool Quirks::shouldUseEphemeralPartitionedStorageForDOMCookies(const URL& url) c
 {
     QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
 
-    auto firstPartyDomain = RegistrableDomain(protectedDocument()->firstPartyForCookies()).string();
+    auto firstPartyDomain = RegistrableDomain(protect(m_document)->firstPartyForCookies()).string();
     auto domain = RegistrableDomain(url).string();
 
     // rdar://113830141
@@ -1811,7 +1806,7 @@ bool Quirks::needsLaxSameSiteCookieQuirk(const URL& requestURL) const
 {
     QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
 
-    auto url = protectedDocument()->url();
+    auto url = protect(m_document)->url();
     return url.protocolIs("https"_s) && url.host() == "login.microsoftonline.com"_s && requestURL.protocolIs("https"_s) && requestURL.host() == "www.bing.com"_s;
 }
 
@@ -2411,7 +2406,7 @@ URL Quirks::topDocumentURL() const
     if (!m_topDocumentURLForTesting.isEmpty()) [[unlikely]]
         return m_topDocumentURLForTesting;
 
-    return protectedDocument()->topURL();
+    return protect(m_document)->topURL();
 }
 
 void Quirks::setTopDocumentURLForTesting(URL&& url)

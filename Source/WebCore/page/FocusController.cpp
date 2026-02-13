@@ -511,7 +511,7 @@ void FocusController::setFocusedFrame(Frame* frame, BroadcastFocusedFrame broadc
     }
 
     if (shouldBroadcast)
-        protectedPage()->chrome().focusedFrameChanged(frame);
+        protect(m_page)->chrome().focusedFrameChanged(frame);
 
     m_isChangingFocusedFrame = false;
 }
@@ -528,7 +528,7 @@ LocalFrame* FocusController::focusedOrMainFrame() const
 
 void FocusController::setFocused(bool focused)
 {
-    protectedPage()->setActivityState(focused ? m_activityState | ActivityState::IsFocused : m_activityState - ActivityState::IsFocused);
+    protect(m_page)->setActivityState(focused ? m_activityState | ActivityState::IsFocused : m_activityState - ActivityState::IsFocused);
 }
 
 void FocusController::setFocusedInternal(bool focused)
@@ -736,7 +736,7 @@ FocusableElementSearchResult FocusController::findFocusableElementInDocumentOrde
     if (shouldFocusElement == ShouldFocusElement::No)
         return findResult;
 
-    setFocusedFrame(newDocument->protectedFrame().get());
+    setFocusedFrame(protect(newDocument->frame()).get());
 
     if (caretBrowsing) {
         VisibleSelection newSelection(firstPositionInOrBeforeNode(element.get()), Affinity::Downstream);
@@ -1109,14 +1109,9 @@ void FocusController::setActivityState(OptionSet<ActivityState> activityState)
     }
 }
 
-Ref<Page> FocusController::protectedPage() const
-{
-    return m_page.get();
-}
-
 void FocusController::setActive(bool active)
 {
-    protectedPage()->setActivityState(active ? m_activityState | ActivityState::WindowIsActive : m_activityState - ActivityState::WindowIsActive);
+    protect(m_page)->setActivityState(active ? m_activityState | ActivityState::WindowIsActive : m_activityState - ActivityState::WindowIsActive);
 }
 
 void FocusController::setActiveInternal(bool active)

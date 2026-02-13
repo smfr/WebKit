@@ -188,7 +188,7 @@ void EventHandler::focusDocumentView()
     }
 
     RELEASE_ASSERT(page == m_frame->page());
-    page->focusController().setFocusedFrame(protectedFrame().ptr());
+    page->focusController().setFocusedFrame(protect(m_frame).ptr());
 }
 
 bool EventHandler::passWidgetMouseDownEventToWidget(const MouseEventWithHitTestResults& event)
@@ -466,7 +466,7 @@ void EventHandler::mouseDown(WebEvent *event)
     BEGIN_BLOCK_OBJC_EXCEPTIONS
 
     // FIXME: Why is this here? EventHandler::handleMousePressEvent() calls it.
-    protectedFrame()->loader().resetMultipleFormSubmissionProtection();
+    protect(m_frame)->loader().resetMultipleFormSubmissionProtection();
 
     m_mouseDownView = nil;
 
@@ -514,7 +514,7 @@ void EventHandler::mouseMoved(WebEvent *event)
         // Run style recalc to be able to capture content changes as the result of the mouse move event.
         document->updateStyleIfNeeded();
 #if ENABLE(CONTENT_CHANGE_OBSERVER)
-        callOnMainThread([frame = protectedFrame()] {
+        callOnMainThread([frame = protect(m_frame)] {
             // This is called by WebKitLegacy only.
             if (RefPtr document = frame->document())
                 document->contentChangeObserver().willNotProceedWithFixedObservationTimeWindow();

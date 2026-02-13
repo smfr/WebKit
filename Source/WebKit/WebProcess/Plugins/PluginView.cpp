@@ -424,7 +424,7 @@ void PluginView::initializePlugin()
 
 #if PLATFORM(COCOA)
     if (plugin->isComposited() && frame()) {
-        frame()->protectedView()->enterCompositingMode();
+        protect(frame()->view())->enterCompositingMode();
         m_pluginElement->invalidateStyleAndLayerComposition();
     }
     plugin->visibilityDidChange(isVisible());
@@ -929,7 +929,7 @@ IntRect PluginView::clipRectInWindowCoordinates() const
     RefPtr frame = this->frame();
 
     // Get the window clip rect for the plugin element (in window coordinates).
-    IntRect windowClipRect = frame->protectedView()->windowClipRectForFrameOwner(m_pluginElement.ptr(), true);
+    IntRect windowClipRect = protect(frame->view())->windowClipRectForFrameOwner(m_pluginElement.ptr(), true);
 
     // Intersect the two rects to get the view clip rect in window coordinates.
     frameRectInWindowCoordinates.intersect(windowClipRect);
@@ -946,7 +946,7 @@ void PluginView::focusPluginElement()
     if (RefPtr page = frame->page())
         page->focusController().setFocusedElement(pluginElement.ptr(), frame.get());
     else
-        frame->protectedDocument()->setFocusedElement(pluginElement.ptr());
+        protect(frame->document())->setFocusedElement(pluginElement.ptr());
 }
 
 void PluginView::pendingResourceRequestTimerFired()

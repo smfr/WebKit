@@ -72,11 +72,9 @@ public:
     WEBCORE_EXPORT GPU* gpu();
 
     Page* page();
-    RefPtr<Page> protectedPage();
 
     const Document* document() const;
     Document* document();
-    RefPtr<Document> protectedDocument();
 
     void setAppBadge(std::optional<unsigned long long>, Ref<DeferredPromise>&&);
     void clearAppBadge(Ref<DeferredPromise>&&);

@@ -970,7 +970,7 @@ void WebLocalFrameLoaderClient::dispatchDecidePolicyForResponse(const ResourceRe
     uint64_t listenerID = protectedFrame->setUpPolicyListener(WTF::move(function), WebFrame::ForNavigationAction::No);
 
     bool isShowingInitialAboutBlank = m_localFrame->loader().stateMachine().isDisplayingInitialEmptyDocument();
-    auto activeDocumentCOOPValue = m_localFrame->document() ? m_localFrame->protectedDocument()->crossOriginOpenerPolicy().value : CrossOriginOpenerPolicyValue::SameOrigin;
+    auto activeDocumentCOOPValue = m_localFrame->document() ? protect(m_localFrame->document())->crossOriginOpenerPolicy().value : CrossOriginOpenerPolicyValue::SameOrigin;
 
     webPage->sendWithAsyncReply(Messages::WebPageProxy::DecidePolicyForResponse(protectedFrame->info(), navigationID, response, request, canShowResponse, downloadAttribute, isShowingInitialAboutBlank, activeDocumentCOOPValue), [frame = protectedFrame, listenerID] (PolicyDecision&& policyDecision) {
         frame->didReceivePolicyDecision(listenerID, WTF::move(policyDecision));
@@ -1108,7 +1108,7 @@ void WebLocalFrameLoaderClient::dispatchWillSendSubmitEvent(Ref<FormState>&& for
     Ref form = formState->form();
 
     ASSERT(formState->sourceDocument().frame());
-    auto sourceFrame = WebFrame::fromCoreFrame(*formState->sourceDocument().protectedFrame());
+    auto sourceFrame = WebFrame::fromCoreFrame(*protect(formState->sourceDocument().frame()));
     ASSERT(sourceFrame);
 
     webPage->injectedBundleFormClient().willSendSubmitEvent(webPage.get(), form.ptr(), m_frame.ptr(), sourceFrame.get(), formState->textFieldValues());

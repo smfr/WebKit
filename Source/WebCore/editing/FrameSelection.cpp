@@ -2495,7 +2495,7 @@ void FrameSelection::setFocusedElementIfNeeded(OptionSet<SetSelectionOption> opt
     if (caretBrowsing) {
         if (RefPtr anchor = enclosingAnchorElement(m_selection.base())) {
             CheckedRef focusController { document->page()->focusController() };
-            focusController->setFocusedElement(anchor.get(), document->protectedFrame().get());
+            focusController->setFocusedElement(anchor.get(), protect(document->frame()).get());
             return;
         }
     }
@@ -2510,7 +2510,7 @@ void FrameSelection::setFocusedElementIfNeeded(OptionSet<SetSelectionOption> opt
                 FocusOptions focusOptions;
                 if (options & SetSelectionOption::ForBindings)
                     focusOptions.trigger = FocusTrigger::Bindings;
-                protect(document->page())->focusController().setFocusedElement(target.get(), document->protectedFrame().get(), focusOptions);
+                protect(document->page())->focusController().setFocusedElement(target.get(), protect(document->frame()).get(), focusOptions);
                 return;
             }
             target = target->parentOrShadowHostElement();
@@ -2519,7 +2519,7 @@ void FrameSelection::setFocusedElementIfNeeded(OptionSet<SetSelectionOption> opt
     }
 
     if (caretBrowsing)
-        protect(document->page())->focusController().setFocusedElement(nullptr, document->protectedFrame().get());
+        protect(document->page())->focusController().setFocusedElement(nullptr, protect(document->frame()).get());
 }
 
 void DragCaretController::paintDragCaret(LocalFrame* frame, GraphicsContext& p, const LayoutPoint& paintOffset) const

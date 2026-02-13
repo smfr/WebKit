@@ -205,7 +205,6 @@ public:
     DragEventTargetData performDragAndDrop(const PlatformMouseEvent&, std::unique_ptr<Pasteboard>&&, OptionSet<DragOperation>, bool draggingFiles, const HitTestResult&, DragData&&);
     void updateDragStateAfterEditDragIfNeeded(Element& rootEditableElement);
     static Element* draggedElement();
-    static RefPtr<Element> protectedDraggedElement();
 #endif
 
     void scheduleHoverStateUpdate();
@@ -660,8 +659,6 @@ private:
 
     bool isCapturingMouseEventsElement() const { return m_capturingMouseEventsElement || m_isCapturingRootElementForMouseEvents; }
     void resetCapturingMouseEventsElement();
-
-    Ref<LocalFrame> NODELETE protectedFrame() const;
 
     WeakRef<LocalFrame> m_frame;
     RefPtr<Node> m_mousePressNode;

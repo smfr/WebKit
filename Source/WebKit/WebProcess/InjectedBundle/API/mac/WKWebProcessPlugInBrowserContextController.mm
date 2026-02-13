@@ -404,7 +404,7 @@ static void setUpResourceLoadClient(WKWebProcessPlugInBrowserContextController *
     if (!webCoreMainFrame)
         return nil;
 
-    return WebKit::toWKDOMDocument(webCoreMainFrame->protectedDocument().get());
+    return WebKit::toWKDOMDocument(protect(webCoreMainFrame->document()).get());
 }
 
 - (WKDOMRange *)selectedRange

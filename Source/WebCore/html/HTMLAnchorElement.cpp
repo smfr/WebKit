@@ -353,7 +353,7 @@ void HTMLAnchorElement::sendPings(const URL& destinationURL)
     Ref document = this->document();
     SpaceSplitString pingURLs(pingValue, SpaceSplitString::ShouldFoldCase::No);
     for (auto& pingURL : pingURLs)
-        PingLoader::sendPing(*document->protectedFrame(), document->completeURL(pingURL), destinationURL);
+        PingLoader::sendPing(*protect(document->frame()), document->completeURL(pingURL), destinationURL);
 }
 
 #if USE(SYSTEM_PREVIEW)

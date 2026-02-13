@@ -242,7 +242,6 @@ public:
 
 private:
     void notifyPopupOpeningObservers() const;
-    Ref<Page> protectedPage() const;
 
     WeakRef<Page> m_page;
     const UniqueRef<ChromeClient> m_client;

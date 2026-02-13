@@ -280,8 +280,8 @@ bool WebInspectorBackend::canAttachWindow()
     RefPtr localMainFrame = RefPtr { m_page.get() }->localMainFrame();
     if (!localMainFrame)
         return false;
-    unsigned inspectedPageHeight = localMainFrame->protectedView()->visibleHeight();
-    unsigned inspectedPageWidth = localMainFrame->protectedView()->visibleWidth();
+    unsigned inspectedPageHeight = protect(localMainFrame->view())->visibleHeight();
+    unsigned inspectedPageWidth = protect(localMainFrame->view())->visibleWidth();
     unsigned maximumAttachedHeight = inspectedPageHeight * maximumAttachedHeightRatio;
     return minimumAttachedHeight <= maximumAttachedHeight && minimumAttachedWidth <= inspectedPageWidth;
 }

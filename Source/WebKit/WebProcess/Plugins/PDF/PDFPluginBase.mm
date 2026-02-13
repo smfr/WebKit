@@ -134,7 +134,7 @@ PluginInfo PDFPluginBase::pluginInfo()
 }
 
 PDFPluginBase::PDFPluginBase(HTMLPlugInElement& element)
-    : m_frame(*WebFrame::fromCoreFrame(*protect(element.document())->protectedFrame()))
+    : m_frame(*WebFrame::fromCoreFrame(*protect(element.document().frame())))
     , m_element(element)
 #if HAVE(INCREMENTAL_PDF_APIS)
     , m_incrementalPDFLoadingEnabled(element.document().settings().incrementalPDFLoadingEnabled())
@@ -942,13 +942,13 @@ IntRect PDFPluginBase::convertFromScrollbarToContainingView(const Scrollbar& scr
     IntRect rect = scrollbarRect;
     rect.move(scrollbar.location() - view->location());
 
-    return view->frame()->protectedView()->convertFromRendererToContainingView(protect(view->pluginElement().renderer()).get(), rect);
+    return protect(view->frame()->view())->convertFromRendererToContainingView(protect(view->pluginElement().renderer()).get(), rect);
 }
 
 IntRect PDFPluginBase::convertFromContainingViewToScrollbar(const Scrollbar& scrollbar, const IntRect& parentRect) const
 {
     Ref view = *m_view;
-    IntRect rect = view->frame()->protectedView()->convertFromContainingViewToRenderer(protect(view->pluginElement().renderer()).get(), parentRect);
+    IntRect rect = protect(view->frame()->view())->convertFromContainingViewToRenderer(protect(view->pluginElement().renderer()).get(), parentRect);
     rect.move(view->location() - scrollbar.location());
 
     return rect;
@@ -960,13 +960,13 @@ IntPoint PDFPluginBase::convertFromScrollbarToContainingView(const Scrollbar& sc
     IntPoint point = scrollbarPoint;
     point.move(scrollbar.location() - view->location());
 
-    return view->frame()->protectedView()->convertFromRendererToContainingView(protect(view->pluginElement().renderer()).get(), point);
+    return protect(view->frame()->view())->convertFromRendererToContainingView(protect(view->pluginElement().renderer()).get(), point);
 }
 
 IntPoint PDFPluginBase::convertFromContainingViewToScrollbar(const Scrollbar& scrollbar, const IntPoint& parentPoint) const
 {
     Ref view = *m_view;
-    IntPoint point = view->frame()->protectedView()->convertFromContainingViewToRenderer(protect(view->pluginElement().renderer()).get(), parentPoint);
+    IntPoint point = protect(view->frame()->view())->convertFromContainingViewToRenderer(protect(view->pluginElement().renderer()).get(), parentPoint);
     point.move(view->location() - scrollbar.location());
 
     return point;

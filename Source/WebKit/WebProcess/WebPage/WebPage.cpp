@@ -2498,7 +2498,7 @@ void WebPage::drawRect(GraphicsContext& graphicsContext, const IntRect& rect)
     GraphicsContextStateSaver stateSaver(graphicsContext);
     graphicsContext.clip(rect);
 
-    m_mainFrame->coreLocalFrame()->protectedView()->paint(graphicsContext, rect);
+    protect(m_mainFrame->coreLocalFrame()->view())->paint(graphicsContext, rect);
 
 #if PLATFORM(GTK) || PLATFORM(WIN) || PLATFORM(PLAYSTATION)
     if (!m_page->settings().acceleratedCompositingEnabled() && m_page->inspectorController().enabled() && m_page->inspectorController().shouldShowOverlay()) {
@@ -2967,7 +2967,7 @@ void WebPage::viewportPropertiesDidChange(const ViewportArguments& viewportArgum
 
 FloatSize WebPage::screenSizeForFingerprintingProtections(const LocalFrame& frame, FloatSize defaultSize) const
 {
-    return frame.view() ? FloatSize { frame.protectedView()->unobscuredContentRectIncludingScrollbars().size() } : defaultSize;
+    return frame.view() ? FloatSize { protect(frame.view())->unobscuredContentRectIncludingScrollbars().size() } : defaultSize;
 }
 
 #endif // !PLATFORM(IOS_FAMILY)
@@ -3324,7 +3324,7 @@ static DestinationColorSpace snapshotColorSpace(SnapshotOptions options, WebPage
 {
 #if USE(CG)
     if (options.contains(SnapshotOption::UseScreenColorSpace)) {
-        auto screenColorSpace = WebCore::screenColorSpace(protect(protect(page.corePage())->mainFrame())->protectedVirtualView().get());
+        auto screenColorSpace = WebCore::screenColorSpace(protect(protect(protect(page.corePage())->mainFrame())->virtualView()).get());
 #if HAVE(SUPPORT_HDR_DISPLAY)
         if (options.contains(SnapshotOption::AllowHDR) && protect(page.corePage())->drawsHDRContent()) {
             if (auto extendedScreenColorSpace = screenColorSpace.asExtended())
@@ -4263,7 +4263,7 @@ void WebPage::setInitialFocus(bool forward, bool isKeyboardEventValid, const std
     RefPtr frame = focusController->focusedOrMainFrame();
     if (!frame)
         return completionHandler();
-    frame->protectedDocument()->setFocusedElement(nullptr);
+    protect(frame->document())->setFocusedElement(nullptr);
 
     if (isKeyboardEventValid && event && event->type() == WebEventType::KeyDown) {
         PlatformKeyboardEvent platformEvent(platform(CheckedRef { *event }));
@@ -6066,7 +6066,7 @@ bool WebPage::hasRichlyEditableSelection() const
 
 void WebPage::changeSpellingToWord(const String& word)
 {
-    replaceSelectionWithText(corePage()->focusController().protectedFocusedOrMainFrame().get(), word);
+    replaceSelectionWithText(protect(corePage()->focusController().focusedOrMainFrame()).get(), word);
 }
 
 void WebPage::unmarkAllMisspellings()
@@ -7529,7 +7529,7 @@ void WebPage::setAutoSizingShouldExpandToViewHeight(bool shouldExpand)
     m_autoSizingShouldExpandToViewHeight = shouldExpand;
 
     if (RefPtr localMainFrame = dynamicDowncast<WebCore::LocalFrame>(corePage()->mainFrame()))
-        localMainFrame->protectedView()->setAutoSizeFixedMinimumHeight(shouldExpand ? m_viewSize.height() : 0);
+        protect(localMainFrame->view())->setAutoSizeFixedMinimumHeight(shouldExpand ? m_viewSize.height() : 0);
 }
 
 void WebPage::setViewportSizeForCSSViewportUnits(std::optional<WebCore::FloatSize> viewportSize)
@@ -7540,7 +7540,7 @@ void WebPage::setViewportSizeForCSSViewportUnits(std::optional<WebCore::FloatSiz
     m_viewportSizeForCSSViewportUnits = viewportSize;
     if (m_viewportSizeForCSSViewportUnits) {
         if (RefPtr localMainFrame = dynamicDowncast<WebCore::LocalFrame>(corePage()->mainFrame()))
-            localMainFrame->protectedView()->setSizeForCSSDefaultViewportUnits(*m_viewportSizeForCSSViewportUnits);
+            protect(localMainFrame->view())->setSizeForCSSDefaultViewportUnits(*m_viewportSizeForCSSViewportUnits);
     }
 }
 
@@ -7799,7 +7799,7 @@ void WebPage::didCommitLoad(WebFrame* frame)
 
 #if ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
     if (coreFrame->isMainFrame() && !usesEphemeralSession()) {
-        if (RefPtr loader = coreFrame->protectedDocument()->loader(); loader
+        if (RefPtr loader = protect(coreFrame->document())->loader(); loader
             && loader->advancedPrivacyProtections().contains(AdvancedPrivacyProtections::BaselineProtections))
             WEBPAGE_RELEASE_LOG(AdvancedPrivacyProtections, "didCommitLoad: advanced privacy protections enabled in non-ephemeral session");
     }
@@ -8096,7 +8096,7 @@ unsigned WebPage::extendIncrementalRenderingSuppression()
 
     m_activeRenderingSuppressionTokens.add(token);
     if (RefPtr localMainFrame = this->localMainFrame())
-        localMainFrame->protectedView()->setVisualUpdatesAllowedByClient(false);
+        protect(localMainFrame->view())->setVisualUpdatesAllowedByClient(false);
 
     m_maximumRenderingSuppressionToken = token;
 
@@ -8109,7 +8109,7 @@ void WebPage::stopExtendingIncrementalRenderingSuppression(unsigned token)
         return;
 
     if (RefPtr localMainFrame = this->localMainFrame())
-        localMainFrame->protectedView()->setVisualUpdatesAllowedByClient(!shouldExtendIncrementalRenderingSuppression());
+        protect(localMainFrame->view())->setVisualUpdatesAllowedByClient(!shouldExtendIncrementalRenderingSuppression());
 }
 
 WebCore::ScrollPinningBehavior WebPage::scrollPinningBehavior()
@@ -8121,7 +8121,7 @@ void WebPage::setScrollPinningBehavior(WebCore::ScrollPinningBehavior pinning)
 {
     m_internals->scrollPinningBehavior = pinning;
     if (RefPtr localMainFrame = this->localMainFrame())
-        localMainFrame->protectedView()->setScrollPinningBehavior(m_internals->scrollPinningBehavior);
+        protect(localMainFrame->view())->setScrollPinningBehavior(m_internals->scrollPinningBehavior);
 }
 
 void WebPage::setScrollbarOverlayStyle(std::optional<WebCore::ScrollbarOverlayStyle> scrollbarStyle)
@@ -8129,7 +8129,7 @@ void WebPage::setScrollbarOverlayStyle(std::optional<WebCore::ScrollbarOverlaySt
     m_scrollbarOverlayStyle = scrollbarStyle;
 
     if (RefPtr localMainFrame = this->localMainFrame())
-        localMainFrame->protectedView()->recalculateScrollbarOverlayStyle();
+        protect(localMainFrame->view())->recalculateScrollbarOverlayStyle();
 }
 
 Ref<DocumentLoader> WebPage::createDocumentLoader(LocalFrame& frame, ResourceRequest&& request, SubstituteData&& substituteData, ResourceRequest&& originalRequest)

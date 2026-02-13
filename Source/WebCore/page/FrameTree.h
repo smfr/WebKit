@@ -101,8 +101,6 @@ private:
 
     template<typename F> RefPtr<Frame> find(const AtomString& name, F&& nameGetter, Frame& activeFrame) const;
 
-    Ref<Frame> protectedThisFrame() const;
-
     WeakRef<Frame> m_thisFrame;
 
     WeakPtr<Frame> m_parent;

@@ -1011,11 +1011,6 @@ LocalDOMWindow* LocalFrame::window() const
     return document() ? document()->window() : nullptr;
 }
 
-RefPtr<LocalDOMWindow> LocalFrame::protectedWindow() const
-{
-    return window();
-}
-
 DOMWindow* LocalFrame::virtualWindow() const
 {
     return window();

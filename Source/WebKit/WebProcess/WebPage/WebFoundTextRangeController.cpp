@@ -544,7 +544,7 @@ Vector<WebCore::FloatRect> WebFoundTextRangeController::rectsForTextMatchesInRec
 
         for (auto rect : protect(document->markers())->renderedRectsForMarkers(WebCore::DocumentMarkerType::TextMatch)) {
             if (!localFrame->isMainFrame())
-                rect = mainFrameView->windowToContents(localFrame->protectedView()->contentsToWindow(enclosingIntRect(rect)));
+                rect = mainFrameView->windowToContents(protect(localFrame->view())->contentsToWindow(enclosingIntRect(rect)));
 
             if (rect.isEmpty() || !rect.intersects(clipRect))
                 continue;

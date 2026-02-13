@@ -69,7 +69,6 @@ public:
 
     void recomputeRegion();
     PageOverlay& overlay() { return *m_overlay; }
-    Ref<PageOverlay> protectedOverlay() { return *m_overlay; }
 
     void setRegionChanged() { m_regionChanged = true; }
 
@@ -312,7 +311,7 @@ private:
 
 bool InteractionRegionOverlay::updateRegion()
 {
-    protectedOverlay()->setNeedsDisplay();
+    protect(overlay())->setNeedsDisplay();
     return true;
 }
 
@@ -697,7 +696,7 @@ private:
 
     bool updateRegion() final
     {
-        protectedOverlay()->setNeedsDisplay();
+        protect(overlay())->setNeedsDisplay();
         return true;
     }
     void drawRect(PageOverlay&, GraphicsContext&, const IntRect& dirtyRect) final;
@@ -805,7 +804,7 @@ void RegionOverlay::recomputeRegion()
         return;
 
     if (updateRegion())
-        protectedOverlay()->setNeedsDisplay();
+        protect(overlay())->setNeedsDisplay();
 
     m_regionChanged = false;
 }
@@ -847,7 +846,7 @@ Ref<RegionOverlay> DebugPageOverlays::ensureRegionOverlayForPage(Page& page, Reg
 void DebugPageOverlays::showRegionOverlay(Page& page, RegionType regionType)
 {
     Ref visualizer = ensureRegionOverlayForPage(page, regionType);
-    page.pageOverlayController().installPageOverlay(visualizer->protectedOverlay(), PageOverlay::FadeMode::DoNotFade);
+    page.pageOverlayController().installPageOverlay(protect(visualizer->overlay()), PageOverlay::FadeMode::DoNotFade);
 }
 
 void DebugPageOverlays::hideRegionOverlay(Page& page, RegionType regionType)
@@ -858,7 +857,7 @@ void DebugPageOverlays::hideRegionOverlay(Page& page, RegionType regionType)
     auto& visualizer = it->value[indexOf(regionType)];
     if (!visualizer)
         return;
-    page.pageOverlayController().uninstallPageOverlay(visualizer->protectedOverlay(), PageOverlay::FadeMode::DoNotFade);
+    page.pageOverlayController().uninstallPageOverlay(protect(visualizer->overlay()), PageOverlay::FadeMode::DoNotFade);
     visualizer = nullptr;
 }
 

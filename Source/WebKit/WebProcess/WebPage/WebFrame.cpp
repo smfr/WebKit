@@ -458,7 +458,7 @@ void WebFrame::createProvisionalFrame(ProvisionalFrameCreationParameters&& param
     m_provisionalFrame = localFrame.ptr();
     m_frameIDBeforeProvisionalNavigation = parameters.frameIDBeforeProvisionalNavigation;
     localFrame->init();
-    localFrame->protectedDocument()->setURL(URL { aboutBlankURL() });
+    protect(localFrame->document())->setURL(URL { aboutBlankURL() });
 
     if (parameters.layerHostingContextIdentifier)
         setLayerHostingContextIdentifier(*parameters.layerHostingContextIdentifier);
@@ -630,7 +630,7 @@ void WebFrame::startDownload(const WebCore::ResourceRequest& request, const Stri
         return;
     }
     RefPtr localFrame = dynamicDowncast<LocalFrame>(m_coreFrame.get());
-    auto topOrigin = localFrame && localFrame->document() ? std::optional { localFrame->protectedDocument()->topOrigin().data() } : std::nullopt;
+    auto topOrigin = localFrame && localFrame->document() ? std::optional { protect(localFrame->document())->topOrigin().data() } : std::nullopt;
     auto policyDownloadID = *std::exchange(m_policyDownloadID, std::nullopt);
 
     std::optional<NavigatingToAppBoundDomain> isAppBound = NavigatingToAppBoundDomain::No;
@@ -646,7 +646,7 @@ void WebFrame::convertMainResourceLoadToDownload(DocumentLoader* documentLoader,
         return;
     }
     RefPtr localFrame = dynamicDowncast<LocalFrame>(m_coreFrame.get());
-    auto topOrigin = localFrame && localFrame->document() ? std::optional { localFrame->protectedDocument()->topOrigin().data() } : std::nullopt;
+    auto topOrigin = localFrame && localFrame->document() ? std::optional { protect(localFrame->document())->topOrigin().data() } : std::nullopt;
     auto policyDownloadID = *std::exchange(m_policyDownloadID, std::nullopt);
 
     RefPtr mainResourceLoader = documentLoader->mainResourceLoader();
@@ -1382,7 +1382,7 @@ bool WebFrame::handleContextMenuEvent(const PlatformMouseEvent& platformMouseEve
     RefPtr coreLocalFrame = dynamicDowncast<LocalFrame>(coreFrame());
     if (!coreLocalFrame)
         return false;
-    IntPoint point = coreLocalFrame->protectedView()->windowToContents(flooredIntPoint(platformMouseEvent.position()));
+    IntPoint point = protect(coreLocalFrame->view())->windowToContents(flooredIntPoint(platformMouseEvent.position()));
     constexpr OptionSet<HitTestRequest::Type> hitType { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent,  HitTestRequest::Type::AllowChildFrameContent };
     HitTestResult result = coreLocalFrame->eventHandler().hitTestResultAtPoint(point, hitType);
 

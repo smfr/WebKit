@@ -521,7 +521,6 @@ public:
     void scheduleValidationMessageUpdate(ValidatedFormListedElement&, HTMLElement&);
 
     WEBCORE_EXPORT ScrollingCoordinator* scrollingCoordinator();
-    WEBCORE_EXPORT RefPtr<ScrollingCoordinator> protectedScrollingCoordinator();
 
     WEBCORE_EXPORT String scrollingStateTreeAsText();
     WEBCORE_EXPORT String synchronousScrollingReasonsAsText();

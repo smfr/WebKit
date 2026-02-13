@@ -132,11 +132,6 @@ void FrameTree::replaceChild(Frame& oldChild, Frame& newChild)
         oldPreviousSibling->tree().m_nextSibling = &newChild;
 }
 
-Ref<Frame> FrameTree::protectedThisFrame() const
-{
-    return m_thisFrame.get();
-}
-
 static bool inScope(Frame& frame, TreeScope& scope)
 {
     RefPtr localFrame = dynamicDowncast<LocalFrame>(frame);

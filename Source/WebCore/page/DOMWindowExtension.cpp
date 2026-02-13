@@ -58,11 +58,6 @@ LocalFrame* DOMWindowExtension::frame() const
     return window ? window->localFrame() : nullptr;
 }
 
-RefPtr<LocalFrame> DOMWindowExtension::protectedFrame() const
-{
-    return frame();
-}
-
 void DOMWindowExtension::suspendForBackForwardCache()
 {
     // Calling out to the client might result in this DOMWindowExtension being destroyed
@@ -83,7 +78,7 @@ void DOMWindowExtension::resumeFromBackForwardCache()
 
     m_disconnectedFrame = nullptr;
 
-    protectedFrame()->loader().client().dispatchDidReconnectDOMWindowExtensionToGlobalObject(this);
+    protect(frame())->loader().client().dispatchDidReconnectDOMWindowExtensionToGlobalObject(this);
 }
 
 void DOMWindowExtension::willDestroyGlobalObjectInCachedFrame()

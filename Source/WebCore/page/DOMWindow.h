@@ -105,7 +105,6 @@ public:
 
     const GlobalWindowIdentifier& identifier() const { return m_identifier; }
     virtual Frame* frame() const = 0;
-    RefPtr<Frame> protectedFrame() const;
 
     enum class DOMWindowType : bool { Local, Remote };
     bool isLocalDOMWindow() const { return m_type == DOMWindowType::Local; }
@@ -126,7 +125,6 @@ public:
 
     WindowProxy* opener() const;
     WEBCORE_EXPORT Document* documentIfLocal();
-    RefPtr<Document> protectedDocumentIfLocal();
 
     WindowProxy* top() const;
     WindowProxy* parent() const;

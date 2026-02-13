@@ -555,7 +555,7 @@ Vector<FloatRect> FindController::rectsForTextMatchesInRect(IntRect clipRect)
 
         for (FloatRect rect : protect(document->markers())->renderedRectsForMarkers(DocumentMarkerType::TextMatch)) {
             if (!localFrame->isMainFrame())
-                rect = mainFrameView->windowToContents(localFrame->protectedView()->contentsToWindow(enclosingIntRect(rect)));
+                rect = mainFrameView->windowToContents(protect(localFrame->view())->contentsToWindow(enclosingIntRect(rect)));
 
             if (rect.isEmpty() || !rect.intersects(clipRect))
                 continue;
@@ -621,7 +621,7 @@ void FindController::drawRect(PageOverlay&, GraphicsContext& graphicsContext, co
         return;
 
     if (RefPtr selectedFrame = frameWithSelection(protect(protect(m_webPage)->corePage()))) {
-        auto findIndicatorRect = selectedFrame->protectedView()->contentsToRootView(enclosingIntRect(protect(selectedFrame->selection())->selectionBounds(FrameSelection::ClipToVisibleContent::No)));
+        auto findIndicatorRect = protect(selectedFrame->view())->contentsToRootView(enclosingIntRect(protect(selectedFrame->selection())->selectionBounds(FrameSelection::ClipToVisibleContent::No)));
 
         if (findIndicatorRect != m_findIndicatorRect) {
             // We are underneath painting, so it's not safe to mutate the layer tree synchronously.

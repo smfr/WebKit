@@ -59,7 +59,7 @@ InjectedBundleDOMWindowExtension* InjectedBundleDOMWindowExtension::get(DOMWindo
 }
 
 InjectedBundleDOMWindowExtension::InjectedBundleDOMWindowExtension(WebFrame* frame, InjectedBundleScriptWorld* world)
-    : m_coreExtension(DOMWindowExtension::create(frame->coreLocalFrame() ? protect(frame->coreLocalFrame())->protectedWindow().get() : nullptr, protect(world->coreWorld()).get()))
+    : m_coreExtension(DOMWindowExtension::create(frame->coreLocalFrame() ? protect(protect(frame->coreLocalFrame())->window()).get() : nullptr, protect(world->coreWorld()).get()))
 {
     allExtensions().add(m_coreExtension.get(), *this);
 }

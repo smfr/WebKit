@@ -90,11 +90,6 @@ Chrome::~Chrome()
     m_client->chromeDestroyed();
 }
 
-Ref<Page> Chrome::protectedPage() const
-{
-    return m_page;
-}
-
 void Chrome::invalidateRootView(const IntRect& updateRect)
 {
     m_client->invalidateRootView(updateRect);
@@ -113,7 +108,7 @@ void Chrome::invalidateContentsForSlowScroll(const IntRect& updateRect)
 void Chrome::scroll(const IntSize& scrollDelta, const IntRect& rectToScroll, const IntRect& clipRect)
 {
     m_client->scroll(scrollDelta, rectToScroll, clipRect);
-    InspectorInstrumentation::didScroll(protectedPage());
+    InspectorInstrumentation::didScroll(protect(m_page));
 }
 
 IntPoint Chrome::screenToRootView(const IntPoint& point) const
@@ -306,7 +301,7 @@ bool Chrome::runJavaScriptConfirm(LocalFrame& frame, const String& message)
 {
     // Defer loads in case the client method runs a new event loop that would
     // otherwise cause the load to continue while we're in the middle of executing JavaScript.
-    PageGroupLoadDeferrer deferrer(protectedPage(), true);
+    PageGroupLoadDeferrer deferrer(protect(m_page), true);
 
     notifyPopupOpeningObservers();
     return m_client->runJavaScriptConfirm(frame, frame.displayStringModifiedByEncoding(message));
@@ -316,7 +311,7 @@ bool Chrome::runJavaScriptPrompt(LocalFrame& frame, const String& prompt, const 
 {
     // Defer loads in case the client method runs a new event loop that would
     // otherwise cause the load to continue while we're in the middle of executing JavaScript.
-    PageGroupLoadDeferrer deferrer(protectedPage(), true);
+    PageGroupLoadDeferrer deferrer(protect(m_page), true);
 
     notifyPopupOpeningObservers();
     String displayPrompt = frame.displayStringModifiedByEncoding(prompt);
@@ -335,7 +330,7 @@ void Chrome::mouseDidMoveOverElement(const HitTestResult& result, OptionSet<Plat
     getToolTip(result, toolTip, toolTipDirection);
     m_client->mouseDidMoveOverElement(result, modifiers, toolTip, toolTipDirection);
 
-    InspectorInstrumentation::mouseDidMoveOverElement(protectedPage(), result, modifiers);
+    InspectorInstrumentation::mouseDidMoveOverElement(protect(m_page), result, modifiers);
 }
 
 void Chrome::getToolTip(const HitTestResult& result, String& toolTip, TextDirection& toolTipDirection)
@@ -577,7 +572,7 @@ PlatformDisplayID Chrome::displayID() const
 
 void Chrome::windowScreenDidChange(PlatformDisplayID displayID, std::optional<FramesPerSecond> nominalFrameInterval)
 {
-    protectedPage()->windowScreenDidChange(displayID, nominalFrameInterval);
+    protect(m_page)->windowScreenDidChange(displayID, nominalFrameInterval);
 }
 
 RefPtr<PopupMenu> Chrome::createPopupMenu(PopupMenuClient& client) const

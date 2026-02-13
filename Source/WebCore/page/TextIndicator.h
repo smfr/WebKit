@@ -167,7 +167,6 @@ public:
     Image* contentImageWithHighlight() const { return m_data.contentImageWithHighlight.get(); }
     Image* contentImageWithoutSelection() const { return m_data.contentImageWithoutSelection.get(); }
     Image* contentImage() const { return m_data.contentImage.get(); }
-    RefPtr<Image> protectedContentImage() const { return contentImage(); }
 
     TextIndicatorPresentationTransition presentationTransition() const { return m_data.presentationTransition; }
     void setPresentationTransition(TextIndicatorPresentationTransition transition) { m_data.presentationTransition = transition; }

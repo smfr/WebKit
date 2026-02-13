@@ -149,7 +149,7 @@ size_t ResizeObserver::gatherObservations(size_t deeperThan)
                 m_activeObservations.append(observation.get());
                 {
                     Locker locker { m_observationTargetsLock };
-                    m_activeObservationTargets.append(*observation->protectedTarget());
+                    m_activeObservationTargets.append(*protect(observation->target()));
                 }
                 minObservedDepth = std::min(depth, minObservedDepth);
             } else
@@ -250,7 +250,7 @@ bool ResizeObserver::removeTarget(Element& target)
 void ResizeObserver::removeAllTargets()
 {
     for (auto& observation : m_observations) {
-        bool removed = removeTarget(*observation->protectedTarget());
+        bool removed = removeTarget(*protect(observation->target()));
         ASSERT_UNUSED(removed, removed);
     }
     {

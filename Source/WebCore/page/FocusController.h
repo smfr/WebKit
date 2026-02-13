@@ -62,7 +62,6 @@ public:
     Frame* focusedFrame() const { return m_focusedFrame.get(); }
     LocalFrame* focusedLocalFrame() const { return dynamicDowncast<LocalFrame>(m_focusedFrame.get()); }
     WEBCORE_EXPORT LocalFrame* focusedOrMainFrame() const;
-    RefPtr<LocalFrame> protectedFocusedOrMainFrame() const { return focusedOrMainFrame(); }
 
     WEBCORE_EXPORT bool setInitialFocus(FocusDirection, KeyboardEvent*);
     bool advanceFocus(FocusDirection, KeyboardEvent*, bool initialFocus = false);
@@ -130,7 +129,6 @@ private:
     void findFocusCandidateInContainer(const ContainerNode&, const LayoutRect& startingRect, FocusDirection, const FocusEventData&, FocusCandidate& closest);
 
     void focusRepaintTimerFired();
-    Ref<Page> NODELETE protectedPage() const;
 
     WeakRef<Page> m_page;
     WeakPtr<Frame> m_focusedFrame;

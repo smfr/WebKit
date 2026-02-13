@@ -112,7 +112,7 @@ bool DOMWindow::closed() const
 
 void DOMWindow::close(Document& document)
 {
-    if (document.canNavigate(protectedFrame().get()) != CanNavigateState::Able)
+    if (document.canNavigate(protect(frame()).get()) != CanNavigateState::Able)
         return;
     close();
 }
@@ -149,11 +149,6 @@ FrameConsoleClient* DOMWindow::console() const
 {
     RefPtr frame = dynamicDowncast<LocalFrame>(this->frame());
     return frame ? &frame->console() : nullptr;
-}
-
-RefPtr<Frame> DOMWindow::protectedFrame() const
-{
-    return frame();
 }
 
 WebCoreOpaqueRoot root(DOMWindow* window)
@@ -250,11 +245,6 @@ Document* DOMWindow::documentIfLocal()
     if (!localThis)
         return nullptr;
     return localThis->document();
-}
-
-RefPtr<Document> DOMWindow::protectedDocumentIfLocal()
-{
-    return documentIfLocal();
 }
 
 ExceptionOr<Document*> DOMWindow::document() const

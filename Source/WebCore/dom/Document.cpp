@@ -2174,7 +2174,7 @@ void Document::removeVisualUpdatePreventedReasons(OptionSet<VisualUpdatesPrevent
             if (frame()->isMainFrame()) {
                 frameView->addPaintPendingMilestones(LayoutMilestone::DidFirstPaintAfterSuppressedIncrementalRendering);
                 if (page->requestedLayoutMilestones() & LayoutMilestone::DidFirstLayoutAfterSuppressedIncrementalRendering)
-                    protectedFrame()->loader().didReachLayoutMilestone(LayoutMilestone::DidFirstLayoutAfterSuppressedIncrementalRendering);
+                    protect(frame())->loader().didReachLayoutMilestone(LayoutMilestone::DidFirstLayoutAfterSuppressedIncrementalRendering);
             }
         }
         m_visualUpdatesAllowedChangeRequiresLayoutMilestones = false;
@@ -3466,7 +3466,7 @@ void Document::createRenderTree()
 
 void Document::didBecomeCurrentDocumentInFrame()
 {
-    protect(protectedFrame()->script())->updateDocument();
+    protect(frame()->script())->updateDocument();
 
     // Many of these functions have event handlers which can detach the frame synchronously, so we must check repeatedly in this function.
     if (!m_frame)
@@ -3532,7 +3532,7 @@ void Document::willDetachPage()
     contentChangeObserver().willDetachPage();
 #endif
     if (window() && frame())
-        InspectorInstrumentation::frameWindowDiscarded(protectedFrame().releaseNonNull(), protect(window()).get());
+        InspectorInstrumentation::frameWindowDiscarded(protect(frame()).releaseNonNull(), protect(window()).get());
 }
 
 void Document::attachToCachedFrame(CachedFrameBase& cachedFrame)
@@ -4085,7 +4085,7 @@ ExceptionOr<void> Document::open(Document* entryDocument)
             frame->loader().policyChecker().stopCheck();
         // Null-checking m_frame again as `policyChecker().stopCheck()` may have cleared it.
         if (isNavigating && m_frame)
-            protectedFrame()->loader().stopAllLoaders();
+            protect(this->frame())->loader().stopAllLoaders();
     }
 
     removeAllEventListeners();
@@ -5409,7 +5409,7 @@ void Document::updateViewportArguments()
         return;
 
     page->chrome().dispatchViewportPropertiesDidChange(viewportArguments());
-    page->chrome().didReceiveDocType(protectedFrame().releaseNonNull());
+    page->chrome().didReceiveDocType(protect(frame()).releaseNonNull());
 }
 
 void Document::metaElementThemeColorChanged(HTMLMetaElement& metaElement)
@@ -8054,7 +8054,7 @@ void Document::applyPendingXSLTransformsTimerFired()
         if (!processor->transformToString(*this, resultMIMEType, newSource, resultEncoding))
             continue;
         // FIXME: If the transform failed we should probably report an error (like Mozilla does).
-        processor->createDocumentFromSource(newSource, resultEncoding, resultMIMEType, this, protectedFrame().get());
+        processor->createDocumentFromSource(newSource, resultEncoding, resultMIMEType, this, protect(frame()).get());
     }
 }
 
@@ -9656,7 +9656,7 @@ bool Document::allowsContentJavaScript() const
         return !m_contextDocument || m_contextDocument->allowsContentJavaScript();
     }
 
-    return protectedFrame()->loader().client().allowsContentJavaScriptFromMostRecentNavigation() == AllowsContentJavaScript::Yes;
+    return protect(frame())->loader().client().allowsContentJavaScriptFromMostRecentNavigation() == AllowsContentJavaScript::Yes;
 }
 
 Element* eventTargetElementForDocument(Document* document)
@@ -10086,7 +10086,7 @@ void Document::didAssociateFormControlsTimerFired()
 
     if (RefPtr page = this->page(); page && !controls.isEmpty()) {
         ASSERT(m_frame);
-        page->chrome().client().didAssociateFormControls(controls, protectedFrame().releaseNonNull());
+        page->chrome().client().didAssociateFormControls(controls, protect(frame()).releaseNonNull());
     }
 
     for (Ref control : controls) {

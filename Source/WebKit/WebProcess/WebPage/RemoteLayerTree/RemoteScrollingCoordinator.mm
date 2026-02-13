@@ -165,19 +165,19 @@ void RemoteScrollingCoordinator::startMonitoringWheelEvents(bool clearLatchingSt
 
 void RemoteScrollingCoordinator::receivedWheelEventWithPhases(WebCore::PlatformWheelEventPhase phase, WebCore::PlatformWheelEventPhase momentumPhase)
 {
-    if (auto monitor = protectedPage()->wheelEventTestMonitor())
+    if (auto monitor = protect(page())->wheelEventTestMonitor())
         monitor->receivedWheelEventWithPhases(phase, momentumPhase);
 }
 
 void RemoteScrollingCoordinator::startDeferringScrollingTestCompletionForNode(WebCore::ScrollingNodeID nodeID, OptionSet<WebCore::WheelEventTestMonitor::DeferReason> reason)
 {
-    if (auto monitor = protectedPage()->wheelEventTestMonitor())
+    if (auto monitor = protect(page())->wheelEventTestMonitor())
         monitor->deferForReason(nodeID, reason);
 }
 
 void RemoteScrollingCoordinator::stopDeferringScrollingTestCompletionForNode(WebCore::ScrollingNodeID nodeID, OptionSet<WebCore::WheelEventTestMonitor::DeferReason> reason)
 {
-    if (auto monitor = protectedPage()->wheelEventTestMonitor())
+    if (auto monitor = protect(page())->wheelEventTestMonitor())
         monitor->removeDeferralForReason(nodeID, reason);
 }
 

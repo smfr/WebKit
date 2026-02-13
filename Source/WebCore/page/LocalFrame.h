@@ -151,7 +151,6 @@ public:
     WEBCORE_EXPORT ~LocalFrame();
 
     WEBCORE_EXPORT LocalDOMWindow* window() const;
-    WEBCORE_EXPORT RefPtr<LocalDOMWindow> protectedWindow() const;
 
     void addDestructionObserver(FrameDestructionObserver&);
     void removeDestructionObserver(FrameDestructionObserver&);
@@ -159,9 +158,7 @@ public:
     WEBCORE_EXPORT void willDetachPage();
 
     inline Document* document() const; // Defined in LocalFrameInlines.h
-    inline RefPtr<Document> protectedDocument() const; // Defined in LocalFrameInlines.h
     inline LocalFrameView* view() const; // Defined in DocumentView.h
-    inline RefPtr<LocalFrameView> protectedView() const; // Defined in DocumentView.h.
     WEBCORE_EXPORT RefPtr<const LocalFrame> localMainFrame() const;
     WEBCORE_EXPORT RefPtr<LocalFrame> localMainFrame();
 
@@ -179,6 +176,7 @@ public:
     ScriptController& script() { return m_script; }
     const ScriptController& script() const { return m_script; }
     void resetScript();
+    FrameView* NODELETE virtualView() const final;
 
     bool isRootFrame() const final { return m_rootFrame.get() == this; }
     const LocalFrame& rootFrame() const { return *m_rootFrame; }
@@ -391,7 +389,6 @@ private:
     std::optional<DocumentSecurityPolicy> frameDocumentSecurityPolicy() const final;
     String frameURLProtocol() const final;
 
-    FrameView* NODELETE virtualView() const final;
     void disconnectView() final;
     DOMWindow* virtualWindow() const final;
     void reinitializeDocumentSecurityContext() final;

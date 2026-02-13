@@ -55,7 +55,6 @@ public:
     void willDetachGlobalObjectFromFrame() final;
 
     WEBCORE_EXPORT LocalFrame* frame() const;
-    RefPtr<LocalFrame> protectedFrame() const;
     DOMWrapperWorld& world() const { return m_world; }
 
 private:
