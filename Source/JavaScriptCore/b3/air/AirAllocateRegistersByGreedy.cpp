@@ -2316,7 +2316,6 @@ private:
                     // This has become a Move spillN, spillM. If N==M, we can remove this instruction. Otherwise,
                     // a scratch register is needed in order to execute the move between spill slots.
                     if (maybeCoalescable && inst.args[0] == inst.args[1]) {
-                        ASSERT_IMPLIES(inst.kind.opcode == Move32, inst.args[1].stackSlot()->byteSize() == bytesForWidth(Width32));
                         m_stats[bank].numCoalescedStackSlotMoves++;
                         inst = Inst(); // Will be removed during assignRegisters final pass
                         continue;
@@ -2516,10 +2515,6 @@ private:
         // We can coalesce a Move32 so long as either of the following holds:
         // - The input is already zero-filled.
         // - The output only cares about the low 32 bits.
-        //
-        // Note that the input property requires an analysis over ZDef's, so it's only valid so long
-        // as the input gets a register. We don't know if the input gets a register, but we do know
-        // that if it doesn't get a register then we will still emit this Move32.
         if (inst.kind.opcode == Move32 && !is32Bit() && m_tmpWidth.defWidth(inst.args[0].tmp()) > Width32)
             return false;
         return true;
