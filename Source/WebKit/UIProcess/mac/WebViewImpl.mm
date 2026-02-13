@@ -206,8 +206,6 @@ SOFT_LINK_CLASS(AVKit, AVTouchBarScrubber)
 static NSString * const WKMediaExitFullScreenItem = @"WKMediaExitFullScreenItem";
 #endif // HAVE(TOUCH_BAR) && ENABLE(WEB_PLAYBACK_CONTROLS_MANAGER)
 
-WTF_DECLARE_CF_TYPE_TRAIT(CGImage);
-
 @interface NSApplication ()
 - (BOOL)isSpeaking;
 - (void)speakString:(NSString *)string;
@@ -5640,7 +5638,7 @@ NSTextInputContext *WebViewImpl::inputContext()
     if (!m_page->editorState().isContentEditable)
         return nil;
 
-    return [protect(m_view.get()) _web_superInputContext];
+    return [protect(m_view) _web_superInputContext];
 }
 
 NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
@@ -5651,7 +5649,7 @@ NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
     if (!m_page->editorState().isContentEditable && !m_page->editorState().selectionIsRange)
         return nil;
 
-    return [protect(m_view.get()) _web_superInputContext];
+    return [protect(m_view) _web_superInputContext];
 }
 
 void WebViewImpl::unmarkText()

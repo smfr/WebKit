@@ -654,8 +654,6 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     [window exitFullScreenMode:self];
 }
 
-WTF_DECLARE_CF_TYPE_TRAIT(CGImage);
-
 static RetainPtr<CGImageRef> takeWindowSnapshot(CGSWindowID windowID, bool captureAtNominalResolution)
 {
     CGSWindowCaptureOptions options = kCGSCaptureIgnoreGlobalClipShape;

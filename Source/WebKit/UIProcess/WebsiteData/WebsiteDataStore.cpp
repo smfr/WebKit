@@ -140,7 +140,7 @@ WorkQueue& WebsiteDataStore::websiteDataStoreIOQueueSingleton()
 void WebsiteDataStore::forEachWebsiteDataStore(NOESCAPE Function<void(WebsiteDataStore&)>&& function)
 {
     for (auto& dataStore : allDataStores().values())
-        function(protect(dataStore.get()));
+        function(protect(dataStore));
 }
 
 Ref<WebsiteDataStore> WebsiteDataStore::createNonPersistent()
@@ -282,7 +282,7 @@ Ref<WebsiteDataStore> WebsiteDataStore::dataStoreForIdentifier(const WTF::UUID& 
     InitializeWebKit2();
     for (auto& dataStore : allDataStores().values()) {
         if (dataStore->configuration().identifier() == uuid)
-            return protect(dataStore.get());
+            return protect(dataStore);
     }
 
     Ref configuration = WebsiteDataStoreConfiguration::create(uuid);
@@ -2566,7 +2566,7 @@ void WebsiteDataStore::forwardAppBoundDomainsToITPIfInitialized(CompletionHandle
     propagateAppBoundDomains(protectedGlobalDefaultDataStore().get(), *appBoundDomains);
 
     for (auto& store : allDataStores().values())
-        propagateAppBoundDomains(protect(store.get()).ptr(), *appBoundDomains);
+        propagateAppBoundDomains(protect(store).ptr(), *appBoundDomains);
 }
 
 void WebsiteDataStore::setAppBoundDomainsForITP(const HashSet<WebCore::RegistrableDomain>& domains, CompletionHandler<void()>&& completionHandler)
@@ -2595,7 +2595,7 @@ void WebsiteDataStore::forwardManagedDomainsToITPIfInitialized(CompletionHandler
     propagateManagedDomains(protectedGlobalDefaultDataStore().get(), *managedDomains);
 
     for (auto& store : allDataStores().values())
-        propagateManagedDomains(protect(store.get()).ptr(), *managedDomains);
+        propagateManagedDomains(protect(store).ptr(), *managedDomains);
 }
 
 void WebsiteDataStore::setManagedDomainsForITP(const HashSet<WebCore::RegistrableDomain>& domains, CompletionHandler<void()>&& completionHandler)

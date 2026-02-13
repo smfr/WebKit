@@ -4014,7 +4014,7 @@ FOR_EACH_PRIVATE_WKCONTENTVIEW_ACTION(FORWARD_ACTION_TO_WKCONTENTVIEW)
 
 - (void)_frames:(void (^)(_WKFrameTreeNode *))completionHandler
 {
-    _page->getAllFrames([completionHandler = makeBlockPtr(completionHandler), page = protect(*_page.get())] (std::optional<WebKit::FrameTreeNodeData>&& data) {
+    _page->getAllFrames([completionHandler = makeBlockPtr(completionHandler), page = protect(*_page)] (std::optional<WebKit::FrameTreeNodeData>&& data) {
         if (!data)
             return completionHandler(nil);
         completionHandler(wrapper(API::FrameTreeNode::create(WTF::move(*data), page.get())).get());
@@ -4023,7 +4023,7 @@ FOR_EACH_PRIVATE_WKCONTENTVIEW_ACTION(FORWARD_ACTION_TO_WKCONTENTVIEW)
 
 - (void)_frameTrees:(void (^)(NSSet<_WKFrameTreeNode *> *))completionHandler
 {
-    _page->getAllFrameTrees([completionHandler = makeBlockPtr(completionHandler), page = protect(*_page.get())] (Vector<WebKit::FrameTreeNodeData>&& vector) {
+    _page->getAllFrameTrees([completionHandler = makeBlockPtr(completionHandler), page = protect(*_page)] (Vector<WebKit::FrameTreeNodeData>&& vector) {
         auto set = adoptNS([[NSMutableSet alloc] initWithCapacity:vector.size()]);
         for (auto& data : vector)
             [set addObject:wrapper(API::FrameTreeNode::create(WTF::move(data), page.get())).get()];

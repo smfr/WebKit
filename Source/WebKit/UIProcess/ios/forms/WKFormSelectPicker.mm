@@ -897,7 +897,7 @@ static const CGFloat groupHeaderCollapseButtonTransitionDuration = 0.3f;
 
 - (void)didTapHeader:(id)sender
 {
-    [protect(_tableViewController.get()) didTapSelectPickerGroupHeaderView:self];
+    [protect(_tableViewController) didTapSelectPickerGroupHeaderView:self];
     [self setCollapsed:!_collapsed animated:YES];
 }
 

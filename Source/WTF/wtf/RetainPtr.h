@@ -343,6 +343,9 @@ ALWAYS_INLINE CLANG_POINTER_CONVERSION RetainPtr<T> protect(const RetainPtr<T>& 
     return ptr;
 }
 
+template<typename T>
+RetainPtr<T> protect(RetainPtr<T>&&) = delete;
+
 template<typename T> struct IsSmartPtr<RetainPtr<T>> {
     static constexpr bool value = true;
     static constexpr bool isNullable = true;

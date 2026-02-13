@@ -1439,12 +1439,12 @@ void PageClientImpl::scheduleVisibleContentRectUpdate()
 
 bool PageClientImpl::isPotentialTapInProgress() const
 {
-    return [m_contentView.get() isPotentialTapInProgress];
+    return [protect(m_contentView) isPotentialTapInProgress];
 }
 
 bool PageClientImpl::canStartNavigationSwipeAtLastInteractionLocation() const
 {
-    return [m_contentView.get() _canStartNavigationSwipeAtLastInteractionLocation];
+    return [protect(m_contentView) _canStartNavigationSwipeAtLastInteractionLocation];
 }
 
 #if ENABLE(PDF_PAGE_NUMBER_INDICATOR)

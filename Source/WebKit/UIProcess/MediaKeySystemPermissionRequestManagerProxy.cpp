@@ -62,7 +62,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(MediaKeySystemPermissionRequestManagerProxy);
 
 const Logger& MediaKeySystemPermissionRequestManagerProxy::logger() const
 {
-    return protect(m_page.get())->logger();
+    return protect(m_page)->logger();
 }
 #endif
 

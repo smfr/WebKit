@@ -768,7 +768,7 @@ WebPageProxy* WebProcessProxy::webPage(PageIdentifier pageID)
 WebPageProxy* WebProcessProxy::audioCapturingWebPage()
 {
     for (WeakRef page : globalPageMap().values()) {
-        if (protect(page.get())->hasActiveAudioStream())
+        if (protect(page)->hasActiveAudioStream())
             return page.ptr();
     }
     return nullptr;
