@@ -168,6 +168,13 @@ void setLinkedOnOrAfterEverythingForTesting()
 #endif
 }
 
+#if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
+void setAccessibilityIsolatedTreeEnabled(bool isEnabled)
+{
+    DeprecatedGlobalSettings::setIsAccessibilityIsolatedTreeEnabled(isEnabled);
+}
+#endif
+
 void installMockGamepadProvider()
 {
 #if ENABLE(GAMEPAD)
