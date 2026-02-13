@@ -1922,17 +1922,17 @@ ConsistentQueryParameterFilteringInternalQuirkEnabled:
 
 ConsistentQueryParameterFilteringQuirkEnabled:
   type: bool
-  status: internal
+  status: stable
   category: dom
   humanReadableName: "Consistent Query Parameter Filtering"
   humanReadableDescription: "Enable consistent query parameter filtering"
   defaultValue:
     WebKitLegacy:
-      default: false
+      default: true
     WebKit:
-      default: false
+      default: true
     WebCore:
-      default: false
+      default: true
 
 ContactPickerAPIEnabled:
   type: bool

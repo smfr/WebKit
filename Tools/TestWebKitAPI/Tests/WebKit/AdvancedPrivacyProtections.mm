@@ -202,8 +202,7 @@ static RetainPtr<TestWKWebView> createWebViewWithAdvancedPrivacyProtections(BOOL
             }
 
             if ([feature.key isEqualToString:@"ConsistentQueryParameterFilteringQuirkEnabled"]) {
-                if (enableConsistentLinkDecorationFiltering)
-                    [[configuration preferences] _setEnabled:YES forFeature:feature];
+                [[configuration preferences] _setEnabled:(enableConsistentLinkDecorationFiltering ? YES : NO) forFeature:feature];
                 featuresRemaining--;
             }
 
