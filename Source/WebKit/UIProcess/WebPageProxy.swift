@@ -57,6 +57,41 @@ extension WebKit.WebPageProxy {
         }
     }
 
+    @MainActor
+    func selectText(
+        at point: WebCore.IntPoint,
+        by granularity: WebCore.TextGranularity,
+        isInteractingWithFocusedElement: Bool
+    ) async {
+        await withCheckedContinuation { continuation in
+            selectTextWithGranularityAtPoint(
+                point,
+                granularity,
+                isInteractingWithFocusedElement,
+                consuming: .init({ continuation.resume() }, WTF.ThreadLikeAssertion(WTF.CurrentThreadLike()))
+            )
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    func updateSelection(
+        withExtentPoint point: WebCore.IntPoint,
+        by granularity: WebCore.TextGranularity,
+        isInteractingWithFocusedElement: Bool,
+        source: WebKit.TextInteractionSource,
+    ) async -> Bool {
+        await withCheckedContinuation { continuation in
+            updateSelectionWithExtentPointAndBoundary(
+                point,
+                granularity,
+                isInteractingWithFocusedElement,
+                source,
+                consuming: .init({ continuation.resume(returning: $0) }, WTF.ThreadLikeAssertion(WTF.CurrentThreadLike()))
+            )
+        }
+    }
+
     private borrowing func editorStateCopy() -> WebKit.EditorState {
         unsafe __editorStateUnsafe().pointee
     }

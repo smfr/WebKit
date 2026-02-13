@@ -34,6 +34,9 @@ private import CxxStdlib
 extension WKTextSelectionController {
     private weak let view: WKWebView?
 
+    @nonobjc
+    private var currentRangeSelectionGranularity: NSTextSelection.Granularity? = nil
+
     init(view: WKWebView) {
         self.view = view
         super.init()
@@ -85,7 +88,7 @@ extension WKTextSelectionController {
             return false
         }
 
-        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Checking if text is selected at point \(point.debugDescription)...")
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
 
         let editorState = unsafe page.editorState
         let hasSelection = unsafe !editorState.selectionIsNone
@@ -129,7 +132,7 @@ extension WKTextSelectionController {
             return
         }
 
-        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))...")
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
 
         Task.immediate {
             await page.selectPosition(
@@ -210,7 +213,7 @@ extension WKTextSelectionController {
         }
 
         Logger.viewGestures.log(
-            "[pageProxyID=\(page.logIdentifier())] \(#function) point \(point.debugDescription) clickCount \(clickCount)"
+            "[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point)) clickCount: \(clickCount)"
         )
 
         Task.immediate {
@@ -233,7 +236,7 @@ extension WKTextSelectionController {
             return
         }
 
-        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] Showing context menu at point \(point.debugDescription)...")
+        Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
 
         let timestamp = GetCurrentEventTime()
         let windowNumber = unsafe impl.windowNumber()
@@ -283,6 +286,25 @@ extension WKTextSelectionController {
         Logger.viewGestures.log(
             "[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point)) granularity: \(String(reflecting: granularity))"
         )
+
+        currentRangeSelectionGranularity = granularity
+
+        let webGranularity: WebCore.TextGranularity = switch granularity {
+        case .character: .CharacterGranularity
+        case .word: .WordGranularity
+        case .line: .LineGranularity
+        case .sentence: .SentenceGranularity
+        case .paragraph: .ParagraphGranularity
+        @unknown default: .CharacterGranularity
+        }
+
+        Task.immediate {
+            await page.selectText(
+                at: WebCore.IntPoint(point),
+                by: webGranularity,
+                isInteractingWithFocusedElement: true // FIXME: Properly handle the case where this isn't actually true.
+            )
+        }
     }
 
     @objc(continueRangeSelectionAtPoint:)
@@ -292,6 +314,29 @@ extension WKTextSelectionController {
         }
 
         Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
+
+        guard let currentRangeSelectionGranularity else {
+            assertionFailure("continueRangeSelection was called with a nil currentRangeSelectionGranularity")
+            return
+        }
+
+        let webGranularity: WebCore.TextGranularity = switch currentRangeSelectionGranularity {
+        case .character: .CharacterGranularity
+        case .word: .WordGranularity
+        case .line: .LineGranularity
+        case .sentence: .SentenceGranularity
+        case .paragraph: .ParagraphGranularity
+        @unknown default: .CharacterGranularity
+        }
+
+        Task.immediate {
+            await page.updateSelection(
+                withExtentPoint: WebCore.IntPoint(point),
+                by: webGranularity,
+                isInteractingWithFocusedElement: true, // FIXME: Properly handle the case where this isn't actually true.
+                source: .Mouse
+            )
+        }
     }
 
     @objc(endRangeSelectionAtPoint:)
@@ -301,6 +346,13 @@ extension WKTextSelectionController {
         }
 
         Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
+
+        guard currentRangeSelectionGranularity != nil else {
+            assertionFailure("endRangeSelection was called with a nil currentRangeSelectionGranularity")
+            return
+        }
+
+        currentRangeSelectionGranularity = nil
     }
 
     @objc(selectionManager:makeDraggingSessionWithGesture:)
