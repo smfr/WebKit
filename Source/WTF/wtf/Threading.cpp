@@ -258,7 +258,7 @@ void Thread::entryPoint(NewThreadContext* newThreadContext)
     function();
 }
 
-Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, ThreadType threadType, QOS qos, SchedulingPolicy schedulingPolicy)
+Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, ThreadType threadType, QOS qos, SchedulingPolicy schedulingPolicy, StackAllocationSpecification stackSpec)
 {
     WTF::initialize();
 
@@ -268,7 +268,12 @@ Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, Thr
     {
         MutexLocker locker(context->mutex);
         context->ref(); // Adopted by Thread::entryPoint
-        bool success = thread->establishHandle(context.get(), stackSize(threadType), qos, schedulingPolicy);
+        if (stackSpec.kind() == StackAllocationSpecification::Kind::Default) {
+            auto maybeSize = stackSize(threadType);
+            if (maybeSize)
+                stackSpec = StackAllocationSpecification::RequestSize(maybeSize.value());
+        }
+        bool success = thread->establishHandle(context.get(), stackSpec, qos, schedulingPolicy);
         RELEASE_ASSERT(success);
 
 #if HAVE(STACK_BOUNDS_FOR_NEW_THREAD)

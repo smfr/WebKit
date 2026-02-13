@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,61 +20,45 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#pragma once
-
-#if ENABLE(JIT)
-
-#include "JITPlan.h"
-#include <wtf/AutomaticThread.h>
-#include <wtf/Platform.h>
+#include "config.h"
 #include <wtf/SequesteredAutomaticThread.h>
 
-namespace JSC {
+#include <wtf/SequesteredImmortalHeap.h>
+#include <wtf/TZoneMallocInlines.h>
 
-class JITWorklist;
-class Safepoint;
+namespace WTF {
 
 #if USE(PROTECTED_JIT_STACKS)
-using JITWorklistThreadBase = SequesteredAutomaticThread;
-#else
-using JITWorklistThreadBase = AutomaticThread;
-#endif
 
-class JITWorklistThread final : public JITWorklistThreadBase {
-    WTF_MAKE_TZONE_ALLOCATED(JITWorklistThread);
-    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(JITWorklistThread);
+SequesteredStack::SequesteredStack(size_t stackSize, size_t guardSize)
+    : m_handle(SequesteredImmortalHeap::instance().stackAllocator().allocate(stackSize, guardSize).handle, { })
+{ }
 
-    class WorkScope;
+void SequesteredStack::StackHandleFreer::operator()(StackHandle* handle) const noexcept {
+    if (!handle)
+        return;
+    SequesteredImmortalHeap::instance().stackAllocator().deallocate(handle);
+}
 
-    friend class Safepoint;
-    friend class WorkScope;
-    friend class JITWorklist;
+SequesteredAutomaticThread::SequesteredAutomaticThread(const AbstractLocker& locker, Box<Lock> lock, Ref<AutomaticThreadCondition>&& condition, Seconds timeout, size_t stackSize)
+    : AutomaticThread(locker, lock, WTF::move(condition), ThreadType::Compiler, timeout)
+    , m_stack(SequesteredStack(stackSize))
+{
+}
 
-public:
-    JITWorklistThread(const AbstractLocker&, JITWorklist&);
+SequesteredAutomaticThread::~SequesteredAutomaticThread()
+{
+    ASSERT(!m_hasUnderlyingThread);
+}
 
-    ASCIILiteral name() const final;
+StackAllocationSpecification SequesteredAutomaticThread::stackSpecification()
+{
+    return StackAllocationSpecification::CustomStack(m_stack.span());
+}
 
-    const Safepoint* safepoint() const { return m_safepoint; }
+#endif // USE(PROTECTED_JIT_STACKS)
 
-private:
-    PollResult poll(const AbstractLocker&) final;
-    WorkResult work() final;
-
-    void threadDidStart() final;
-
-    void threadIsStopping(const AbstractLocker&) final;
-
-    Lock m_rightToRun;
-    JITWorklist& m_worklist;
-    RefPtr<JITPlan> m_plan { nullptr };
-    unsigned m_planLoad { 0 };
-    Safepoint* m_safepoint { nullptr };
-};
-
-} // namespace JSC
-
-#endif // ENABLE(JIT)
+} // namespace WTF

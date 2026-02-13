@@ -31,6 +31,7 @@
 #pragma once
 
 #include <mutex>
+#include <optional>
 #include <stdint.h>
 #include <wtf/Atomics.h>
 #include <wtf/Compiler.h>
@@ -43,6 +44,7 @@
 #include <wtf/PlatformRegisters.h>
 #include <wtf/Ref.h>
 #include <wtf/RefPtr.h>
+#include <wtf/StackAllocation.h>
 #include <wtf/StackBounds.h>
 #include <wtf/StackStats.h>
 #include <wtf/ThreadAssertions.h>
@@ -143,13 +145,18 @@ public:
         Realtime,
     };
 
+    // These are not necessarily the system defaults, but they are what WebKit
+    // chooses to be the default for newly created WTF::Threads
+    static constexpr QOS defaultQOS = QOS::UserInitiated;
+    static constexpr SchedulingPolicy defaultSchedulingPolicy = SchedulingPolicy::Other;
+
 #if HAVE(QOS_CLASSES)
     static dispatch_qos_class_t dispatchQOSClass(QOS);
 #endif
 
     // Returns nullptr if thread creation failed.
     // The thread name must be a literal since on some platforms it's passed in to the thread.
-    WTF_EXPORT_PRIVATE static Ref<Thread> create(ASCIILiteral threadName, Function<void()>&&, ThreadType = ThreadType::Unknown, QOS = QOS::UserInitiated, SchedulingPolicy = SchedulingPolicy::Other);
+    WTF_EXPORT_PRIVATE static Ref<Thread> create(ASCIILiteral threadName, Function<void()>&&, ThreadType = ThreadType::Unknown, QOS = defaultQOS, SchedulingPolicy = defaultSchedulingPolicy, StackAllocationSpecification = { });
 
     // Returns Thread object.
     static Thread& currentSingleton();
@@ -321,7 +328,7 @@ protected:
     void initializeInThread();
 
     // Internal platform-specific Thread establishment implementation.
-    bool establishHandle(NewThreadContext&, std::optional<size_t> stackSize, QOS, SchedulingPolicy);
+    bool establishHandle(NewThreadContext&, StackAllocationSpecification, QOS, SchedulingPolicy);
 
 #if USE(PTHREADS)
     void establishPlatformSpecificHandle(PlatformThreadHandle);
