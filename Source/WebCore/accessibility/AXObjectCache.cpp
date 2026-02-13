@@ -5968,9 +5968,11 @@ bool AXObjectCache::addRelation(Element& origin, const QualifiedName& attribute)
     auto& value = origin.attributeWithoutSynchronization(attribute);
     if (value.isNull()) {
         if (CheckedPtr defaultARIA = origin.customElementDefaultARIAIfExists()) {
-            for (auto& target : defaultARIA->elementsForAttribute(origin, attribute)) {
-                if (addRelation(origin, target, relation))
-                    addedRelation = true;
+            if (std::optional elements = defaultARIA->elementsForAttribute(origin, attribute)) {
+                for (auto& target : *elements) {
+                    if (addRelation(origin, target, relation))
+                        addedRelation = true;
+                }
             }
         }
         return addedRelation;

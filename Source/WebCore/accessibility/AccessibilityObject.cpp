@@ -4117,8 +4117,10 @@ Vector<Ref<Element>> AccessibilityObject::elementsFromAttribute(const QualifiedN
     if (auto elementsFromAttribute = element->elementsArrayForAttributeInternal(attribute))
         return elementsFromAttribute.value();
 
-    if (auto* defaultARIA = element->customElementDefaultARIAIfExists())
-        return defaultARIA->elementsForAttribute(*element, attribute);
+    if (auto* defaultARIA = element->customElementDefaultARIAIfExists()) {
+        if (std::optional elements = defaultARIA->elementsForAttribute(*element, attribute))
+            return *elements;
+    }
 
     return { };
 }
