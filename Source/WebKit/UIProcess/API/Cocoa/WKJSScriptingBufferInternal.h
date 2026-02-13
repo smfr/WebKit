@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2025-2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,12 +23,22 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <WebKit/WKJSScriptingBuffer.h>
+#import "APIJSBuffer.h"
+#import "WKJSScriptingBuffer.h"
+#import "WKObject.h"
+#import "_WKJSBuffer.h"
+#import <wtf/AlignedStorage.h>
 
-NS_ASSUME_NONNULL_BEGIN
+namespace WebKit {
 
-WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
-@interface _WKJSBuffer : WKJSScriptingBuffer
+template<> struct WrapperTraits<API::JSBuffer> {
+    using WrapperClass = _WKJSBuffer;
+};
+
+}
+
+@interface WKJSScriptingBuffer () <WKObject> {
+@package
+    AlignedStorage<API::JSBuffer> _buffer;
+}
 @end
-
-NS_ASSUME_NONNULL_END

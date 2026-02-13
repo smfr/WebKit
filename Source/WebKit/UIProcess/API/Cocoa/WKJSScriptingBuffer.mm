@@ -23,21 +23,47 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "APIJSBuffer.h"
-#import "WKObject.h"
+#import "config.h"
+#import "WKJSScriptingBufferInternal.h"
+
+#import "NetworkCacheData.h"
+#import "WKNSData.h"
 #import "_WKJSBuffer.h"
-#import <wtf/AlignedStorage.h>
+#import <WebCore/SharedBuffer.h>
+#import <WebCore/SharedMemory.h>
+#import <WebCore/WebCoreObjCExtras.h>
+#import <wtf/FileSystem.h>
 
-namespace WebKit {
+@implementation WKJSScriptingBuffer
 
-template<> struct WrapperTraits<API::JSBuffer> {
-    using WrapperClass = _WKJSBuffer;
-};
+- (instancetype)initWithData:(NSData *)data
+{
+    if (!(self = [super init]))
+        return nil;
 
+    Ref sharedBuffer = WebCore::SharedBuffer::create(data);
+    RefPtr sharedMemory = WebCore::SharedMemory::copyBuffer(sharedBuffer);
+    if (!sharedMemory)
+        return nil;
+    API::Object::constructInWrapper<API::JSBuffer>(self, sharedMemory.releaseNonNull());
+
+    return self;
 }
 
-@interface _WKJSBuffer () <WKObject> {
-@package
-    AlignedStorage<API::JSBuffer> _buffer;
+- (void)dealloc
+{
+    if (WebCoreObjCScheduleDeallocateOnMainRunLoop(WKJSScriptingBuffer.class, self))
+        return;
+    SUPPRESS_UNRETAINED_ARG _buffer->API::JSBuffer::~JSBuffer();
+    [super dealloc];
 }
+
+- (API::Object&)_apiObject
+{
+    return *_buffer;
+}
+
+@end
+
+@implementation _WKJSBuffer
 @end

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,12 +23,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <WebKit/WKJSScriptingBuffer.h>
+#import <WebKit/WKFoundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*! A WKJSScriptingBuffer object exposes an application controlled data buffer to JavaScript.
+ @discussion JavaScript has access to various WebKit extensions via the `window.webkit` object.
+ One such feature is `window.webkit.buffers` which provides access to named data buffers that can be
+ provided by the WebKit application.
+
+ To provide a data buffer to JavaScript the application first creates a `WKJSScriptingBuffer` object.
+ It then adds it to the appropriate `WKUserContentController` with an application provided name.
+
+ For example, if the application creates a `WKJSScriptingBuffer` and adds it to a web view's `WKUserContentController`
+ with the name `"mybuffer"`, then JavaScript can access it by referencing `window.webkit.buffers.mybuffer`
+ */
 WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
-@interface _WKJSBuffer : WKJSScriptingBuffer
+@interface WKJSScriptingBuffer : NSObject
+
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
+
+/*! @abstract Initializes the newly created `WKJSScriptingBuffer` object with the passed in `NSData` data
+ @param data The data to provide to the `window.webkit.buffers` JavaScript object.
+*/
+- (nullable instancetype)initWithData:(NSData *)data;
+
 @end
 
 NS_ASSUME_NONNULL_END
