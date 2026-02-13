@@ -112,7 +112,6 @@ static bool canCacheFrame(LocalFrame& frame, DiagnosticLoggingClient& diagnostic
 
     if (!document->frame()) {
         PCLOG("   -Document is detached from frame"_s);
-        ASSERT_NOT_REACHED();
         return false;
     }
 

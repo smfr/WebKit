@@ -4598,10 +4598,9 @@ void FrameLoader::loadItem(HistoryItem& item, HistoryItem* fromItem, FrameLoadTy
     m_requestedHistoryItem = item;
     RefPtr currentItem = history().currentItem();
 
-    bool sameDocumentNavigation = currentItem && item.shouldDoSameDocumentNavigationTo(*currentItem);
-
-    // If we're continuing this history navigation in a new process, then doing a same document navigation never makes sense.
-    ASSERT(!sameDocumentNavigation || shouldTreatAsContinuingLoad == ShouldTreatAsContinuingLoad::No);
+    // If we're continuing this history navigation in a new process, we cannot perform a same document navigation.
+    // Otherwise, the load won't commit and navigation won't complete.
+    bool sameDocumentNavigation = currentItem && item.shouldDoSameDocumentNavigationTo(*currentItem) && shouldTreatAsContinuingLoad == ShouldTreatAsContinuingLoad::No;
 
     // Check if Navigation API should handle this traversal
     if (frame().document() && frame().document()->settings().navigationAPIEnabled() && shouldDispatchNavigateEventForHistoryTraversal(item, fromItem)) {
