@@ -621,7 +621,7 @@ void RenderLayerBacking::createPrimaryGraphicsLayer()
 #if USE(CA)
     if (!compositor().acceleratedDrawingEnabled() && renderer().isRenderHTMLCanvas()) {
         const RefPtr canvas = downcast<HTMLCanvasElement>(renderer().element());
-        if (canvas->shouldAccelerate(canvas->size()))
+        if (canvas->shouldAccelerate())
             m_graphicsLayer->setAcceleratesDrawing(true);
     }
 #endif    

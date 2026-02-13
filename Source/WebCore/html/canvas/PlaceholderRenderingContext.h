@@ -72,6 +72,10 @@ public:
 
     PlaceholderRenderingContextSource& source() const { return m_source; }
 
+    RefPtr<ImageBuffer> surfaceBufferToImageBuffer(SurfaceBuffer) final;
+    bool isSurfaceBufferTransparentBlack(SurfaceBuffer) const final;
+    void didUpdateCanvasSizeProperties(bool) final;
+
 private:
     PlaceholderRenderingContext(HTMLCanvasElement&);
     void setContentsToLayer(GraphicsLayer&) final;
@@ -79,6 +83,7 @@ private:
     bool isOpaque() const final { return m_opaque; }
 
     const Ref<PlaceholderRenderingContextSource> m_source;
+    RefPtr<ImageBuffer> m_buffer;
     bool m_opaque { false };
 };
 
