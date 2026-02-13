@@ -55,7 +55,6 @@ namespace WebCore {
 class CachedPage;
 class Document;
 class FormData;
-class FrameTree;
 class HistoryItem;
 class Image;
 class ResourceRequest;
@@ -165,7 +164,6 @@ public:
     WEBCORE_EXPORT HistoryItem* childItemWithTarget(const AtomString&);
     WEBCORE_EXPORT HistoryItem* childItemWithFrameID(FrameIdentifier);
     HistoryItem* childItemWithDocumentSequenceNumber(long long number);
-    HistoryItem* childItemForFrame(LocalFrame&);
     WEBCORE_EXPORT const Vector<Ref<HistoryItem>>& children() const;
     void clearChildren();
 

@@ -200,9 +200,8 @@ std::optional<uint64_t> Frame::indexInFrameTreeSiblings() const
     if (!tree().parent())
         return std::nullopt;
 
-    const auto& parentTree = tree().parent()->tree();
-    for (uint64_t i = 0; i < parentTree.childCount(); i++) {
-        if (this == parentTree.child(i))
+    for (uint64_t i = 0; i < tree().parent()->tree().childCount(); i++) {
+        if (RefPtr child = tree().parent()->tree().child(i); child->frameID() == this->frameID())
             return i;
     }
 
