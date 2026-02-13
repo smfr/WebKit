@@ -2861,8 +2861,6 @@ sub generateBuildSystemFromCMakeProject
         } else {
             push @args, '-DVCPKG_TARGET_TRIPLET=x64-windows-webkit'
         }
-        push @args, '-DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe"';
-        push @args, '-DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe"';
     } elsif (isPlayStation()) {
         my $toolChainFile = $ENV{'CMAKE_TOOLCHAIN_FILE'} || "Platform/PlayStation5";
         push @args, '-DCMAKE_TOOLCHAIN_FILE=' . $toolChainFile;
