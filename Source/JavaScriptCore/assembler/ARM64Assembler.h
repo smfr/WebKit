@@ -329,7 +329,7 @@ public:
         JumpCompareAndBranchFixedSize = JUMP_ENUM_WITH_SIZE(7, 2 * sizeof(uint32_t)),
         JumpTestBitFixedSize = JUMP_ENUM_WITH_SIZE(8, 2 * sizeof(uint32_t)),
     };
-    enum JumpLinkType {
+    enum JumpLinkType : uint8_t {
         LinkInvalid = JUMP_ENUM_WITH_SIZE(0, 0),
         LinkJumpNoCondition = JUMP_ENUM_WITH_SIZE(1, 1 * sizeof(uint32_t)),
         LinkJumpConditionDirect = JUMP_ENUM_WITH_SIZE(2, 1 * sizeof(uint32_t)),
@@ -465,9 +465,13 @@ public:
                 BranchType m_branchType : 2 { BranchType_JMP };
             } realTypes { };
             struct CopyTypes {
+#if OS(WINDOWS)
+                uint64_t content[5];
+#else
                 uint64_t content[3];
+#endif
             } copyTypes;
-            static_assert(sizeof(RealTypes) == sizeof(CopyTypes), "LinkRecord's CopyStruct size equals to RealStruct");
+            static_assert(sizeof(RealTypes) <= sizeof(CopyTypes), "LinkRecord's CopyStruct size must be <= CopyStruct");
         } data;
     };
 
@@ -3947,6 +3951,8 @@ public:
             linuxPageFlush(current, current + page);
 
         linuxPageFlush(current, end);
+#elif OS(WINDOWS)
+        FlushInstructionCache(GetCurrentProcess(), code, size);
 #else
 #error "The cacheFlush support is missing on this platform."
 #endif

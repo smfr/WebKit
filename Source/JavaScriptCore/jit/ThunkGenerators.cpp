@@ -897,6 +897,23 @@ typedef MathThunkCallingConvention(*MathThunk)(MathThunkCallingConvention);
     } \
     static MathThunk UnaryDoubleOpWrapper(function) = &function##Thunk;
 
+#elif CPU(ARM64) && OS(WINDOWS)
+
+#define defineUnaryDoubleOpWrapper(function) \
+    __asm__( \
+        ".text\n" \
+        ".align 2\n" \
+        ".globl " SYMBOL_STRING(function##Thunk) "\n" \
+        HIDE_SYMBOL(function##Thunk) "\n" \
+        SYMBOL_STRING(function##Thunk) ":" "\n" \
+        "b " GLOBAL_REFERENCE(function) "\n" \
+    ); \
+    extern "C" { \
+        MathThunkCallingConvention function##Thunk(MathThunkCallingConvention); \
+        JSC_ANNOTATE_JIT_OPERATION(function##Thunk); \
+    } \
+    static MathThunk UnaryDoubleOpWrapper(function) = &function##Thunk;
+
 #elif CPU(ARM64)
 
 #define defineUnaryDoubleOpWrapper(function) \

@@ -682,7 +682,9 @@ endif ()
 
 if (MSVC)
     add_compile_options(/wd4206)
-    add_compile_options(-mcx16)
+    if (WTF_CPU_X86_64)
+        add_compile_options(-mcx16)
+    endif ()
 endif ()
 
 WEBKIT_FRAMEWORK_DECLARE(bmalloc)

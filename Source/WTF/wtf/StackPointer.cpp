@@ -93,6 +93,20 @@ __asm__(
     ".previous" "\n"
 );
 
+#elif CPU(ARM64) && OS(WINDOWS)
+__asm__(
+    ".text" "\n"
+    ".align 4" "\n"
+    ".globl " SYMBOL_STRING(currentStackPointer) "\n"
+    SYMBOL_STRING(currentStackPointer) ":" "\n"
+
+    "mov x0, sp" "\n"
+    "ret" "\n"
+
+    ".section .drectve" "\n"
+    ".ascii \"-export:currentStackPointer\"" "\n"
+);
+
 #elif CPU(ARM64)
 __asm__(
     ".text" "\n"

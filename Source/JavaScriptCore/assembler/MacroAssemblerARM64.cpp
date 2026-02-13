@@ -329,7 +329,11 @@ static_assert(JIT_PROBE_STACK_INITIALIZATION_FUNCTION_PTR_TAG == JITProbeStackIn
 // See https://bugs.webkit.org/show_bug.cgi?id=175512 for details.
 __asm__(
     ".text" "\n"
+#if OS(WINDOWS)
+    ".align 4" "\n"
+#else
     ".balign 16" "\n"
+#endif
     ".globl " SYMBOL_STRING(ctiMasmProbeTrampoline) "\n"
     HIDE_SYMBOL(ctiMasmProbeTrampoline) "\n"
     SYMBOL_STRING(ctiMasmProbeTrampoline) ":" "\n"
@@ -576,7 +580,9 @@ __asm__(
 #else
     "ret" "\n"
 #endif
+#if !OS(WINDOWS)
     ".previous" "\n"
+#endif
 );
 
 void MacroAssembler::probe(Probe::Function function, void* arg)
