@@ -1115,6 +1115,42 @@ TEST(AdvancedPrivacyProtections, ConsistentlyFilterQueryParametersOnSource)
     EXPECT_WK_STREQ(expectedDestination, result);
 }
 
+TEST(AdvancedPrivacyProtections, ConsistentlyFilterQueryParametersOnSourceAfterRedirect)
+{
+    QueryParameterRequestSwizzler swizzler { @[ @"foo" ], @[ @"" ], @[ @"" ] };
+
+    HTTPServer server({
+        { "/source.html"_s,      { "<a href='https://consistentQueryParameterFiltering.internal/bounce.html'>Link</a>"_s } },
+        { "/bounce.html"_s,      { 302, {{"Location"_s, "https://site.example/destination.html?foo=123"_s }}, "redirecting..."_s } },
+        { "/destination.html"_s, { "<script>window.result = location.href;</script>"_s } },
+    }, HTTPServer::Protocol::HttpsProxy);
+
+    RetainPtr storeConfiguration = adoptNS([[_WKWebsiteDataStoreConfiguration alloc] initNonPersistentConfiguration]);
+    [storeConfiguration setProxyConfiguration:@{
+        (NSString *)kCFStreamPropertyHTTPSProxyHost: @"127.0.0.1",
+        (NSString *)kCFStreamPropertyHTTPSProxyPort: @(server.port())
+    }];
+
+    RetainPtr dataStore = adoptNS([[WKWebsiteDataStore alloc] _initWithConfiguration:storeConfiguration.get()]);
+
+    RetainPtr webView = createWebViewLinkDecorationFiltering(YES, dataStore.get());
+
+    RetainPtr navigationDelegate = adoptNS([TestNavigationDelegate new]);
+    [webView setNavigationDelegate:navigationDelegate.get()];
+    [navigationDelegate allowAnyTLSCertificate];
+
+    [webView loadRequest:adoptNS([[NSURLRequest alloc] initWithURL:adoptNS([[NSURL alloc] initWithString:@"https://consistentQueryParameterFiltering.internal/source.html"]).get()]).get()];
+    [navigationDelegate waitForDidFinishNavigation];
+
+    [webView evaluateJavaScript:@"document.querySelector('a').click()" completionHandler:nil];
+    [navigationDelegate waitForDidFinishNavigation];
+
+    NSString *result = [webView objectByEvaluatingJavaScript:@"window.result"];
+    NSString *expectedDestination = @"https://site.example/destination.html";
+    EXPECT_WK_STREQ(expectedDestination, webView.get().URL.absoluteString);
+    EXPECT_WK_STREQ(expectedDestination, result);
+}
+
 TEST(AdvancedPrivacyProtections, ConsistentlyFilterQueryParametersOnDestination)
 {
     QueryParameterRequestSwizzler swizzler { @[ @"foo" ], @[ @"" ], @[ @"" ] };
