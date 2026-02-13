@@ -51,6 +51,14 @@
 #import <wtf/text/MakeString.h>
 #import <pal/cocoa/WebPrivacySoftLink.h>
 
+#if USE(APPLE_INTERNAL_SDK) && __has_include(<WebKitAdditions/WebPrivacyHelpersAdditions.mm>)
+#import <WebKitAdditions/WebPrivacyHelpersAdditions.mm>
+#endif
+
+#if !defined(IS_REQUEST_UNCONDITIONALLY_BLOCKABLE)
+#define IS_REQUEST_UNCONDITIONALLY_BLOCKABLE(domain) false
+#endif
+
 #if HAVE(SYSTEM_SUPPORT_FOR_ADVANCED_PRIVACY_PROTECTIONS)
 SOFT_LINK_LIBRARY_OPTIONAL(libnetwork)
 SOFT_LINK_OPTIONAL(libnetwork, nw_context_set_tracker_lookup_callback, void, __cdecl, (nw_context_t, nw_context_tracker_lookup_callback_t))
@@ -762,6 +770,9 @@ bool isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvan
     TrackerDomainLookupInfo::populateIfNeeded();
 
     auto domain = WebCore::RegistrableDomain { URL { makeString("http://"_s, request.url().host()) } };
+    if (IS_REQUEST_UNCONDITIONALLY_BLOCKABLE(domain))
+        return true;
+
     if (auto info = TrackerDomainLookupInfo::find(domain.string()); info.owner().length()) {
         if (info.canBlock() == TrackerDomainLookupInfo::CanBlock::No)
             return false;
