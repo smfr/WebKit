@@ -247,7 +247,7 @@ bool GPUProcessConnection::dispatchMessage(IPC::Connection& connection, IPC::Dec
 
 #if PLATFORM(COCOA) && ENABLE(MEDIA_STREAM)
     if (decoder.messageReceiverName() == Messages::UserMediaCaptureManager::messageReceiverName()) {
-        WebProcess::singleton().userMediaCaptureManager().didReceiveMessageFromGPUProcess(connection, decoder);
+        protect(WebProcess::singleton().userMediaCaptureManager())->didReceiveMessageFromGPUProcess(connection, decoder);
         return true;
     }
 
