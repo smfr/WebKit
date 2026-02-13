@@ -80,11 +80,6 @@ NetworkSocketChannel::~NetworkSocketChannel()
     }
 }
 
-Ref<NetworkConnectionToWebProcess> NetworkSocketChannel::protectedConnectionToWebProcess()
-{
-    return m_connectionToWebProcess.get();
-}
-
 void NetworkSocketChannel::sendString(std::span<const uint8_t> message, CompletionHandler<void()>&& callback)
 {
     protect(m_socket)->sendString(message, WTF::move(callback));
@@ -103,7 +98,7 @@ void NetworkSocketChannel::finishClosingIfPossible()
     }
     ASSERT(m_state == State::Closing);
     m_state = State::Closed;
-    protectedConnectionToWebProcess()->removeSocketChannel(m_identifier);
+    protect(m_connectionToWebProcess)->removeSocketChannel(m_identifier);
 }
 
 void NetworkSocketChannel::close(int32_t code, const String& reason)

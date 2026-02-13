@@ -88,7 +88,7 @@ bool WebExtensionAPIExtension::parseViewFilters(NSDictionary *filter, std::optio
 
 bool WebExtensionAPIExtension::isPropertyAllowed(const ASCIILiteral& name, WebPage*)
 {
-    if (protectedExtensionContext()->isUnsupportedAPI(propertyPath(), name)) [[unlikely]]
+    if (protect(extensionContext())->isUnsupportedAPI(propertyPath(), name)) [[unlikely]]
         return false;
 
     // This method was removed in manifest version 3.
@@ -110,7 +110,7 @@ JSValue *WebExtensionAPIExtension::getBackgroundPage(JSContextRef context)
 {
     // Documentation: https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/API/extension/getBackgroundPage
 
-    auto backgroundPage = protectedExtensionContext()->backgroundPage();
+    auto backgroundPage = protect(extensionContext())->backgroundPage();
     if (!backgroundPage)
         return toJSValue(context, JSValueMakeNull(context));
 

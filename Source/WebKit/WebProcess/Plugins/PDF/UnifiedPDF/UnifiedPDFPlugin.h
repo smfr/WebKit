@@ -260,7 +260,6 @@ private:
     void didInvalidateDataDetectorHighlightOverlayRects();
 
     PDFDataDetectorOverlayController& dataDetectorOverlayController() { return *m_dataDetectorOverlayController; }
-    Ref<PDFDataDetectorOverlayController> protectedDataDetectorOverlayController();
 #endif
 
     const PDFDocumentLayout& documentLayout() const { return m_documentLayout; }

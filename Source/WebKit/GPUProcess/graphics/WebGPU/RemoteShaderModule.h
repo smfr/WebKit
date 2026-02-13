@@ -77,10 +77,6 @@ private:
     RemoteShaderModule& operator=(RemoteShaderModule&&) = delete;
 
     WebCore::WebGPU::ShaderModule& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::ShaderModule> NODELETE protectedBacking();
-    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
-    Ref<WebGPU::ObjectHeap> protectedObjectHeap() const { return m_objectHeap; }
-    Ref<RemoteGPU> protectedGPU() const { return m_gpu; }
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

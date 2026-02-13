@@ -61,8 +61,6 @@ private:
     IDToGeolocationMap m_idToGeolocationMap;
     GeolocationToIDMap m_geolocationToIDMap;
 
-    Ref<WebPage> protectedPage() const;
-
     WeakRef<WebPage> m_page;
 };
 

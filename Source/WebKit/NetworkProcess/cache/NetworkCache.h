@@ -248,8 +248,6 @@ private:
 
     std::optional<Seconds> maxAgeCap(Entry&, const WebCore::ResourceRequest&, PAL::SessionID);
 
-    Ref<Storage> protectedStorage() const { return m_storage; }
-
     const Ref<Storage> m_storage;
     const Ref<NetworkProcess> m_networkProcess;
 

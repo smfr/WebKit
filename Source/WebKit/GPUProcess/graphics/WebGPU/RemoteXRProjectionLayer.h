@@ -95,10 +95,6 @@ private:
     RemoteXRProjectionLayer& operator=(const RemoteXRProjectionLayer&) = delete;
     RemoteXRProjectionLayer& operator=(RemoteXRProjectionLayer&&) = delete;
 
-    Ref<WebCore::WebGPU::XRProjectionLayer> NODELETE protectedBacking();
-    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection();
-    Ref<RemoteGPU> protectedGPU() const;
-
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
     void destruct();
 #if PLATFORM(COCOA)

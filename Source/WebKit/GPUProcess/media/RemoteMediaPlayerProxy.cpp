@@ -163,7 +163,7 @@ Ref<MediaPromise> RemoteMediaPlayerProxy::commitAllTransactions()
     if (!manager || !manager->gpuConnectionToWebProcess())
         return MediaPromise::createAndReject(PlatformMediaError::ClientDisconnected);
 
-    return protectedConnection()->sendWithPromisedReply<MediaPromiseConverter>(Messages::MediaPlayerPrivateRemote::CommitAllTransactions { }, m_id);
+    return protect(m_webProcessConnection)->sendWithPromisedReply<MediaPromiseConverter>(Messages::MediaPlayerPrivateRemote::CommitAllTransactions { }, m_id);
 }
 
 void RemoteMediaPlayerProxy::getConfiguration(RemoteMediaPlayerConfiguration& configuration)
@@ -365,7 +365,7 @@ void RemoteMediaPlayerProxy::didLoadingProgress(CompletionHandler<void(bool)>&& 
 {
     protect(m_player)->didLoadingProgress(WTF::move(completionHandler));
 
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::ReportGPUMemoryFootprint(WTF::memoryFootprint()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::ReportGPUMemoryFootprint(WTF::memoryFootprint()), m_id);
 }
 
 void RemoteMediaPlayerProxy::setPresentationSize(const WebCore::IntSize& size)
@@ -423,7 +423,7 @@ void RemoteMediaPlayerProxy::mediaPlayerNetworkStateChanged()
 {
     updateCachedState(true);
     m_cachedState.networkState = protect(m_player)->networkState();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::NetworkStateChanged(m_cachedState), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::NetworkStateChanged(m_cachedState), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerReadyStateChanged()
@@ -454,17 +454,17 @@ void RemoteMediaPlayerProxy::mediaPlayerReadyStateChanged()
     m_cachedState.didPassCORSAccessCheck = player->didPassCORSAccessCheck();
     m_cachedState.documentIsCrossOrigin = player->isCrossOrigin(m_configuration.documentSecurityOrigin.securityOrigin());
 
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::ReadyStateChanged(m_cachedState, newReadyState), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::ReadyStateChanged(m_cachedState, newReadyState), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerVolumeChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::VolumeChanged(protect(m_player)->volume()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::VolumeChanged(protect(m_player)->volume()), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerMuteChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::MuteChanged(protect(m_player)->muted()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::MuteChanged(protect(m_player)->muted()), m_id);
 }
 
 static MediaTimeUpdateData timeUpdateData(const MediaPlayer& player, MediaTime time)
@@ -479,7 +479,7 @@ static MediaTimeUpdateData timeUpdateData(const MediaPlayer& player, MediaTime t
 void RemoteMediaPlayerProxy::mediaPlayerSeeked(const MediaTime& time)
 {
     ALWAYS_LOG(LOGIDENTIFIER, time);
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::Seeked(timeUpdateData(*protect(m_player), time)), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::Seeked(timeUpdateData(*protect(m_player), time)), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerTimeChanged()
@@ -488,14 +488,14 @@ void RemoteMediaPlayerProxy::mediaPlayerTimeChanged()
 
     RefPtr player = m_player;
     m_cachedState.duration = player->duration();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::TimeChanged(m_cachedState, timeUpdateData(*player, player->currentTime())), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::TimeChanged(m_cachedState, timeUpdateData(*player, player->currentTime())), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerDurationChanged()
 {
     updateCachedState(true);
     m_cachedState.duration = protect(m_player)->duration();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::DurationChanged(m_cachedState), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::DurationChanged(m_cachedState), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerRateChanged()
@@ -504,12 +504,12 @@ void RemoteMediaPlayerProxy::mediaPlayerRateChanged()
     sendCachedState();
 
     RefPtr player = m_player;
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::RateChanged(player->effectiveRate(), timeUpdateData(*player, player->currentTime())), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::RateChanged(player->effectiveRate(), timeUpdateData(*player, player->currentTime())), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerEngineFailedToLoad()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::EngineFailedToLoad(protect(m_player)->platformErrorCode()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::EngineFailedToLoad(protect(m_player)->platformErrorCode()), m_id);
 }
 
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA)
@@ -547,7 +547,7 @@ String RemoteMediaPlayerProxy::mediaPlayerNetworkInterfaceName() const
 
 void RemoteMediaPlayerProxy::mediaPlayerGetRawCookies(const URL& url, WebCore::MediaPlayerClient::GetRawCookiesCallback&& completionHandler) const
 {
-    protectedConnection()->sendWithAsyncReply(Messages::MediaPlayerPrivateRemote::GetRawCookies(url), WTF::move(completionHandler), m_id);
+    protect(m_webProcessConnection)->sendWithAsyncReply(Messages::MediaPlayerPrivateRemote::GetRawCookies(url), WTF::move(completionHandler), m_id);
 }
 #endif
 
@@ -590,7 +590,7 @@ void RemoteMediaPlayerProxy::mediaPlayerPlaybackStateChanged()
 {
     RefPtr player = m_player;
     m_cachedState.paused = player->paused();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::PlaybackStateChanged(m_cachedState.paused, timeUpdateData(*player, player->currentTime())), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::PlaybackStateChanged(m_cachedState.paused, timeUpdateData(*player, player->currentTime())), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerBufferedTimeRangesChanged()
@@ -621,7 +621,7 @@ void RemoteMediaPlayerProxy::mediaPlayerCharacteristicChanged()
     m_cachedState.hasClosedCaptions = player->hasClosedCaptions();
     m_cachedState.languageOfPrimaryAudioTrack = player->languageOfPrimaryAudioTrack();
 
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::CharacteristicChanged(m_cachedState), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::CharacteristicChanged(m_cachedState), m_id);
 }
 
 bool RemoteMediaPlayerProxy::mediaPlayerRenderingCanBeAccelerated()
@@ -632,7 +632,7 @@ bool RemoteMediaPlayerProxy::mediaPlayerRenderingCanBeAccelerated()
 #if !PLATFORM(COCOA)
 void RemoteMediaPlayerProxy::mediaPlayerRenderingModeChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::RenderingModeChanged(), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::RenderingModeChanged(), m_id);
 }
 
 void RemoteMediaPlayerProxy::requestHostingContext(LayerHostingContextCallback&& completionHandler)
@@ -649,7 +649,7 @@ void RemoteMediaPlayerProxy::addRemoteAudioTrackProxy(WebCore::AudioTrackPrivate
         return;
 
 #if !RELEASE_LOG_DISABLED
-    track.setLogger(protectedMediaPlayerLogger(), mediaPlayerLogIdentifier());
+    track.setLogger(protect(m_logger), mediaPlayerLogIdentifier());
 #endif
 
     for (auto& audioTrack : m_audioTracks) {
@@ -682,7 +682,7 @@ void RemoteMediaPlayerProxy::addRemoteVideoTrackProxy(WebCore::VideoTrackPrivate
         return;
 
 #if !RELEASE_LOG_DISABLED
-    track.setLogger(protectedMediaPlayerLogger(), mediaPlayerLogIdentifier());
+    track.setLogger(protect(m_logger), mediaPlayerLogIdentifier());
 #endif
 
     for (auto& videoTrack : m_videoTracks) {
@@ -715,7 +715,7 @@ void RemoteMediaPlayerProxy::addRemoteTextTrackProxy(WebCore::InbandTextTrackPri
         return;
 
 #if !RELEASE_LOG_DISABLED
-    track.setLogger(protectedMediaPlayerLogger(), mediaPlayerLogIdentifier());
+    track.setLogger(protect(m_logger), mediaPlayerLogIdentifier());
 #endif
 
     for (auto& textTrack : m_textTracks) {
@@ -747,7 +747,7 @@ void RemoteMediaPlayerProxy::mediaPlayerDidAddAudioTrack(WebCore::AudioTrackPriv
 
 void RemoteMediaPlayerProxy::mediaPlayerDidRemoveAudioTrack(WebCore::AudioTrackPrivate& track)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteAudioTrack(track.id()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteAudioTrack(track.id()), m_id);
     m_audioTracks.removeFirstMatching([&track] (auto& current) {
         return track.id() == current->id();
     });
@@ -760,7 +760,7 @@ void RemoteMediaPlayerProxy::mediaPlayerDidAddVideoTrack(WebCore::VideoTrackPriv
 
 void RemoteMediaPlayerProxy::mediaPlayerDidRemoveVideoTrack(WebCore::VideoTrackPrivate& track)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteVideoTrack(track.id()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteVideoTrack(track.id()), m_id);
     m_videoTracks.removeFirstMatching([&track] (auto& current) {
         return track.id() == current->id();
     });
@@ -773,7 +773,7 @@ void RemoteMediaPlayerProxy::mediaPlayerDidAddTextTrack(WebCore::InbandTextTrack
 
 void RemoteMediaPlayerProxy::mediaPlayerDidRemoveTextTrack(WebCore::InbandTextTrackPrivate& track)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteTextTrack(track.id()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::RemoveRemoteTextTrack(track.id()), m_id);
     m_textTracks.removeFirstMatching([&track] (auto& current) {
         return track.id() == current->id();
     });
@@ -786,18 +786,18 @@ void RemoteMediaPlayerProxy::textTrackRepresentationBoundsChanged(const IntRect&
 
 void RemoteMediaPlayerProxy::mediaPlayerResourceNotSupported()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::ResourceNotSupported(), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::ResourceNotSupported(), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerSizeChanged()
 {
     m_cachedState.naturalSize = protect(m_player)->naturalSize();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::SizeChanged(m_cachedState.naturalSize), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::SizeChanged(m_cachedState.naturalSize), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerActiveSourceBuffersChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::ActiveSourceBuffersChanged(), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::ActiveSourceBuffersChanged(), m_id);
 }
 
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA)
@@ -818,19 +818,19 @@ RefPtr<ArrayBuffer> RemoteMediaPlayerProxy::mediaPlayerCachedKeyForKeyId(const S
 
 void RemoteMediaPlayerProxy::mediaPlayerKeyNeeded(const SharedBuffer& message)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::MediaPlayerKeyNeeded(message.span()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::MediaPlayerKeyNeeded(message.span()), m_id);
 }
 #endif
 
 #if ENABLE(ENCRYPTED_MEDIA)
 void RemoteMediaPlayerProxy::mediaPlayerInitializationDataEncountered(const String& initDataType, RefPtr<ArrayBuffer>&& initData)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::InitializationDataEncountered(initDataType, initData->mutableSpan()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::InitializationDataEncountered(initDataType, initData->mutableSpan()), m_id);
 }
 
 void RemoteMediaPlayerProxy::mediaPlayerWaitingForKeyChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::WaitingForKeyChanged(protect(m_player)->waitingForKey()), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::WaitingForKeyChanged(protect(m_player)->waitingForKey()), m_id);
 }
 #endif
 
@@ -841,7 +841,7 @@ void RemoteMediaPlayerProxy::mediaPlayerCurrentPlaybackTargetIsWirelessChanged(b
     m_cachedState.wirelessPlaybackTargetName = player->wirelessPlaybackTargetName();
     m_cachedState.wirelessPlaybackTargetType = player->wirelessPlaybackTargetType();
     sendCachedState();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::CurrentPlaybackTargetIsWirelessChanged(isCurrentPlaybackTargetWireless), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::CurrentPlaybackTargetIsWirelessChanged(isCurrentPlaybackTargetWireless), m_id);
 }
 
 void RemoteMediaPlayerProxy::setWirelessVideoPlaybackDisabled(bool disabled)
@@ -902,14 +902,14 @@ CachedResourceLoader* RemoteMediaPlayerProxy::mediaPlayerCachedResourceLoader() 
 
 Ref<PlatformMediaResourceLoader> RemoteMediaPlayerProxy::mediaPlayerCreateResourceLoader()
 {
-    auto loader = RemoteMediaResourceLoader::create(*this, protectedConnection());
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::CreateResourceLoader(loader->identifier()), m_id);
+    auto loader = RemoteMediaResourceLoader::create(*this, protect(m_webProcessConnection));
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::CreateResourceLoader(loader->identifier()), m_id);
     return loader;
 }
 
 void RemoteMediaPlayerProxy::destroyResourceLoader(RemoteMediaResourceLoaderIdentifier loaderIdentifier)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::DestroyResourceLoader(loaderIdentifier), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::DestroyResourceLoader(loaderIdentifier), m_id);
 }
 
 bool RemoteMediaPlayerProxy::doesHaveAttribute(const AtomString&, AtomString*) const
@@ -987,7 +987,7 @@ void RemoteMediaPlayerProxy::timerFired()
 
 void RemoteMediaPlayerProxy::currentTimeChanged(const MediaTime& mediaTime)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::CurrentTimeChanged(timeUpdateData(*protect(m_player), mediaTime)), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::CurrentTimeChanged(timeUpdateData(*protect(m_player), mediaTime)), m_id);
 }
 
 void RemoteMediaPlayerProxy::videoFrameForCurrentTimeIfChanged(CompletionHandler<void(std::optional<RemoteVideoFrameProxy::Properties>&&, bool)>&& completionHandler)
@@ -1001,7 +1001,7 @@ void RemoteMediaPlayerProxy::videoFrameForCurrentTimeIfChanged(CompletionHandler
         m_videoFrameForCurrentTime = videoFrame;
         changed = true;
         if (videoFrame)
-            result = protectedVideoFrameObjectHeap()->add(videoFrame.releaseNonNull());
+            result = protect(m_videoFrameObjectHeap)->add(videoFrame.releaseNonNull());
     }
     completionHandler(WTF::move(result), changed);
 }
@@ -1054,7 +1054,7 @@ void RemoteMediaPlayerProxy::updateCachedState(bool forceCurrentTimeUpdate)
 void RemoteMediaPlayerProxy::sendCachedState()
 {
     updateCachedState();
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::UpdateCachedState(m_cachedState), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::UpdateCachedState(m_cachedState), m_id);
     m_cachedState.bufferedRanges = std::nullopt;
 }
 
@@ -1135,7 +1135,7 @@ void RemoteMediaPlayerProxy::setShouldContinueAfterKeyNeeded(bool should)
 
 void RemoteMediaPlayerProxy::notifyActiveSourceBuffersChanged()
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::ActiveSourceBuffersChanged(), m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::ActiveSourceBuffersChanged(), m_id);
 }
 
 void RemoteMediaPlayerProxy::applicationWillResignActive()
@@ -1222,7 +1222,7 @@ void RemoteMediaPlayerProxy::updateCachedVideoMetrics()
             return;
         if (result) {
             protectedThis->m_cachedState.videoMetrics = *result;
-            protectedThis->protectedConnection()->send(Messages::MediaPlayerPrivateRemote::UpdatePlaybackQualityMetrics(WTF::move(*result)), protectedThis->m_id);
+            protect(protectedThis->m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::UpdatePlaybackQualityMetrics(WTF::move(*result)), protectedThis->m_id);
         } else
             protectedThis->m_cachedState.videoMetrics.reset();
         protectedThis->m_hasPlaybackMetricsUpdatePending = false;
@@ -1350,11 +1350,6 @@ std::optional<SharedPreferencesForWebProcess> RemoteMediaPlayerProxy::sharedPref
     return gpuProcessConnectionToWebProcess->sharedPreferencesForWebProcess();
 }
 
-Ref<RemoteVideoFrameObjectHeap> RemoteMediaPlayerProxy::protectedVideoFrameObjectHeap() const
-{
-    return m_videoFrameObjectHeap;
-}
-
 void RemoteMediaPlayerProxy::audioOutputDeviceChanged(String&& deviceId)
 {
     m_configuration.audioOutputDeviceId = WTF::move(deviceId);
@@ -1385,7 +1380,7 @@ void RemoteMediaPlayerProxy::setHasMessageClientForTesting(bool hasClient)
 
 void RemoteMediaPlayerProxy::sendInternalMessage(const WebCore::MessageForTesting& message)
 {
-    protectedConnection()->send(Messages::MediaPlayerPrivateRemote::SendInternalMessage { message }, m_id);
+    protect(m_webProcessConnection)->send(Messages::MediaPlayerPrivateRemote::SendInternalMessage { message }, m_id);
 }
 
 } // namespace WebKit

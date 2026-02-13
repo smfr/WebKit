@@ -235,8 +235,6 @@ private:
         void forceUseOfCachedTimeUntilNextSetTime();
 
     private:
-        Ref<const MediaPlayerPrivateRemote> protectedParent() const { return m_parent.get(); }
-
         mutable Lock m_lock;
         std::atomic<bool> m_timeIsProgressing { false };
         MediaTime m_cachedMediaTime WTF_GUARDED_BY_LOCK(m_lock);

@@ -43,8 +43,6 @@ public:
     virtual ~WebFrameInspectorTargetFrontendChannel() = default;
 
 private:
-    Ref<WebFrame> protectedFrame();
-
     ConnectionType connectionType() const override { return m_connectionType; }
     void sendMessageToFrontend(const String& message) override;
 

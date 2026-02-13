@@ -60,8 +60,6 @@ private:
     void removeAllContentRuleLists(UserContentControllerIdentifier);
     void remove(UserContentControllerIdentifier);
 
-    Ref<NetworkProcess> protectedNetworkProcess() const;
-
     HashMap<UserContentControllerIdentifier, std::unique_ptr<WebCore::ContentExtensions::ContentExtensionsBackend>> m_contentExtensionBackends;
     HashMap<UserContentControllerIdentifier, Vector<BackendCallback>> m_pendingCallbacks;
     WeakRef<NetworkProcess> m_networkProcess;

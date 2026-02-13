@@ -171,7 +171,7 @@
 #include <unistd.h>
 #endif
 
-#if PLATFORM(COCOA)
+#if ENABLE(MEDIA_STREAM)
 #include "UserMediaCaptureManager.h"
 #endif
 
@@ -324,6 +324,23 @@ WebProcess& WebProcess::singleton()
     return process.get().get();
 }
 
+WebNotificationManager& WebProcess::notificationManager()
+{
+    return *supplement<WebNotificationManager>();
+}
+
+WebGeolocationManager& WebProcess::geolocationManager()
+{
+    return *supplement<WebGeolocationManager>();
+}
+
+#if ENABLE(MEDIA_STREAM)
+UserMediaCaptureManager& WebProcess::userMediaCaptureManager()
+{
+    return *supplement<UserMediaCaptureManager>();
+}
+#endif
+
 WebProcess::WebProcess()
     : m_eventDispatcher(*this)
 #if PLATFORM(IOS_FAMILY)
@@ -446,9 +463,9 @@ void WebProcess::initializeConnection(IPC::Connection* connection)
     Ref { m_viewUpdateDispatcher }->initializeConnection(*connection);
 #endif // PLATFORM(IOS_FAMILY)
 
-    protectedWebInspectorInterruptDispatcher()->initializeConnection(*connection);
+    protect(m_webInspectorInterruptDispatcher)->initializeConnection(*connection);
 #if ENABLE(WEBASSEMBLY_DEBUGGER) && ENABLE(REMOTE_INSPECTOR)
-    protectedWasmDebuggerDispatcher()->initializeConnection(*connection);
+    protect(m_wasmDebuggerDispatcher)->initializeConnection(*connection);
 #endif
 
     for (auto& supplement : m_supplements.values())
@@ -2586,11 +2603,6 @@ RemoteMediaEngineConfigurationFactory& WebProcess::mediaEngineConfigurationFacto
     return *supplement<RemoteMediaEngineConfigurationFactory>();
 }
 #endif
-
-Ref<WebNotificationManager> WebProcess::protectedNotificationManager()
-{
-    return *supplement<WebNotificationManager>();
-}
 
 RefPtr<WebTransportSession> WebProcess::webTransportSession(WebTransportSessionIdentifier identifier)
 {

@@ -43,14 +43,9 @@ WebFrameInspectorTargetFrontendChannel::WebFrameInspectorTargetFrontendChannel(W
 {
 }
 
-Ref<WebFrame> WebFrameInspectorTargetFrontendChannel::protectedFrame()
-{
-    return m_frame.get();
-}
-
 void WebFrameInspectorTargetFrontendChannel::sendMessageToFrontend(const String& message)
 {
-    if (RefPtr page = protectedFrame()->page())
+    if (RefPtr page = protect(m_frame)->page())
         page->send(Messages::WebPageProxy::SendMessageToInspectorFrontend(m_targetId, message));
 }
 

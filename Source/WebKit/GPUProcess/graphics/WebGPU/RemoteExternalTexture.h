@@ -74,9 +74,6 @@ private:
     RemoteExternalTexture& operator=(RemoteExternalTexture&&) = delete;
 
     WebCore::WebGPU::ExternalTexture& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::ExternalTexture> NODELETE protectedBacking();
-
-    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

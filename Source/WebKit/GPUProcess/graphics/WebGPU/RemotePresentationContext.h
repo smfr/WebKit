@@ -77,10 +77,6 @@ private:
     RemotePresentationContext& operator=(RemotePresentationContext&&) = delete;
 
     WebCore::WebGPU::PresentationContext& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::PresentationContext> NODELETE protectedBacking();
-    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
-    Ref<WebGPU::ObjectHeap> NODELETE protectedObjectHeap() const;
-    Ref<RemoteGPU> protectedGPU() const { return m_gpu; }
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

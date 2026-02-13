@@ -56,8 +56,6 @@ public:
     static String toTargetID(WebCore::FrameIdentifier);
 
 private:
-    Ref<WebFrame> protectedFrame();
-
     WeakRef<WebFrame> m_frame;
     std::unique_ptr<WebFrameInspectorTargetFrontendChannel> m_channel;
 };

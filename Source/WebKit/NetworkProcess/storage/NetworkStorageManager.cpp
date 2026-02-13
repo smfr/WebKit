@@ -1964,7 +1964,7 @@ void NetworkStorageManager::getAllDatabaseNamesAndVersions(IPC::Connection& conn
 
 void NetworkStorageManager::cacheStorageOpenCache(const WebCore::ClientOrigin& origin, const String& cacheName, WebCore::DOMCacheEngine::CacheIdentifierCallback&& callback)
 {
-    protect(originStorageManager(origin))->protectedCacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef())->openCache(cacheName, WTF::move(callback));
+    protect(protect(originStorageManager(origin))->cacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef()))->openCache(cacheName, WTF::move(callback));
 }
 
 void NetworkStorageManager::cacheStorageRemoveCache(WebCore::DOMCacheIdentifier cacheIdentifier, WebCore::DOMCacheEngine::RemoveCacheIdentifierCallback&& callback)
@@ -1982,7 +1982,7 @@ void NetworkStorageManager::cacheStorageRemoveCache(WebCore::DOMCacheIdentifier 
 
 void NetworkStorageManager::cacheStorageAllCaches(const WebCore::ClientOrigin& origin, uint64_t updateCounter, WebCore::DOMCacheEngine::CacheInfosCallback&& callback)
 {
-    protect(originStorageManager(origin))->protectedCacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef())->allCaches(updateCounter, WTF::move(callback));
+    protect(protect(originStorageManager(origin))->cacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef()))->allCaches(updateCounter, WTF::move(callback));
 }
 
 void NetworkStorageManager::cacheStorageReference(IPC::Connection& connection, WebCore::DOMCacheIdentifier cacheIdentifier)
@@ -2013,7 +2013,7 @@ void NetworkStorageManager::cacheStorageDereference(IPC::Connection& connection,
 
 void NetworkStorageManager::lockCacheStorage(IPC::Connection& connection, const WebCore::ClientOrigin& origin)
 {
-    protect(originStorageManager(origin))->protectedCacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef())->lockStorage(connection.uniqueID());
+    protect(protect(originStorageManager(origin))->cacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef()))->lockStorage(connection.uniqueID());
 }
 
 void NetworkStorageManager::unlockCacheStorage(IPC::Connection& connection, const WebCore::ClientOrigin& origin)
@@ -2076,7 +2076,7 @@ void NetworkStorageManager::cacheStorageRepresentation(CompletionHandler<void(co
                 originStrings.append(makeString("\n{ \"origin\" : { \"topOrigin\" : \""_s,
                     origin.topOrigin.toString(), "\", \"clientOrigin\": \""_s,
                     origin.clientOrigin.toString(), "\" }, \"caches\" : "_s,
-                    originStorageManager->protectedCacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef())->representationString(),
+                    protect(originStorageManager->cacheStorageManager(*m_cacheStorageRegistry, origin, m_queue.copyRef()))->representationString(),
                     '}'
                 ));
             }

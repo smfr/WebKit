@@ -80,10 +80,6 @@ private:
     RemoteRenderBundleEncoder& operator=(RemoteRenderBundleEncoder&&) = delete;
 
     WebCore::WebGPU::RenderBundleEncoder& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::RenderBundleEncoder> NODELETE protectedBacking() const;
-    Ref<IPC::StreamServerConnection> NODELETE protectedStreamConnection() const;
-    Ref<WebGPU::ObjectHeap> NODELETE protectedObjectHeap() const;
-    Ref<RemoteGPU> protectedGPU() const { return m_gpu; }
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

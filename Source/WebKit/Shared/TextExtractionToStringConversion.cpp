@@ -427,7 +427,7 @@ public:
         return stringForURL(data.shortenedName, data.completedSource, ExtractedURLType::Image);
     }
 
-    Ref<JSON::Object> protectedRootJSONObject()
+    JSON::Object& rootJSONObject()
     {
         ASSERT(useJSONOutput());
         if (!m_rootJSONObject)
@@ -506,7 +506,7 @@ private:
             menuObject->setString("type"_s, "nativePopupMenu"_s);
             menuObject->setArray("items"_s, WTF::move(itemsArray));
 
-            if (RefPtr children = protectedRootJSONObject()->getArray("children"_s))
+            if (RefPtr children = protect(rootJSONObject())->getArray("children"_s))
                 children->pushObject(WTF::move(menuObject));
             return;
         }
@@ -523,7 +523,7 @@ private:
         if (!useJSONOutput())
             return;
 
-        protectedRootJSONObject()->setInteger("version"_s, version());
+        protect(rootJSONObject())->setInteger("version"_s, version());
     }
 
     uint32_t version() const
@@ -1399,7 +1399,7 @@ void convertToText(TextExtraction::Item&& item, TextExtractionOptions&& options,
     Ref aggregator = TextExtractionAggregator::create(WTF::move(options), WTF::move(completion));
 
     if (aggregator->useJSONOutput()) {
-        populateJSONForItem(aggregator->protectedRootJSONObject(), item, { }, aggregator);
+        populateJSONForItem(protect(aggregator->rootJSONObject()), item, { }, aggregator);
         return;
     }
 

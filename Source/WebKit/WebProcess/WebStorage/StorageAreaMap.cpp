@@ -367,12 +367,7 @@ void StorageAreaMap::incrementUseCount()
 void StorageAreaMap::decrementUseCount()
 {
     if (!--m_useCount)
-        protectedNamespace()->destroyStorageAreaMap(*this);
-}
-
-Ref<StorageNamespaceImpl> StorageAreaMap::protectedNamespace() const
-{
-    return m_namespace.get();
+        protect(m_namespace)->destroyStorageAreaMap(*this);
 }
 
 void StorageAreaMap::syncOneItem(const String& key, const String& value)

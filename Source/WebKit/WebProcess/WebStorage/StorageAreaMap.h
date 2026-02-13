@@ -109,8 +109,6 @@ private:
     void connectSync();
     void didConnect(std::optional<StorageAreaIdentifier>, HashMap<String, String>&&, uint64_t messageIdentifier);
 
-    Ref<StorageNamespaceImpl> protectedNamespace() const;
-
     uint64_t m_lastHandledMessageIdentifier { 0 };
     WeakRef<StorageNamespaceImpl> m_namespace;
     Ref<const WebCore::SecurityOrigin> m_securityOrigin;

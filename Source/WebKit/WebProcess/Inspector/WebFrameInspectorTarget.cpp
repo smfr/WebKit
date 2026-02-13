@@ -46,11 +46,6 @@ WebFrameInspectorTarget::WebFrameInspectorTarget(WebFrame& frame)
 
 WebFrameInspectorTarget::~WebFrameInspectorTarget() = default;
 
-Ref<WebFrame> WebFrameInspectorTarget::protectedFrame()
-{
-    return m_frame.get();
-}
-
 String WebFrameInspectorTarget::identifier() const
 {
     return toTargetID(m_frame->frameID());
@@ -73,7 +68,7 @@ void WebFrameInspectorTarget::disconnect()
     if (!m_channel)
         return;
 
-    if (RefPtr coreFrame = protectedFrame()->coreLocalFrame())
+    if (RefPtr coreFrame = protect(m_frame)->coreLocalFrame())
         protect(coreFrame->inspectorController())->disconnectFrontend(*m_channel);
 
     m_channel.reset();
@@ -81,7 +76,7 @@ void WebFrameInspectorTarget::disconnect()
 
 void WebFrameInspectorTarget::sendMessageToTargetBackend(const String& message)
 {
-    if (RefPtr coreFrame = protectedFrame()->coreLocalFrame())
+    if (RefPtr coreFrame = protect(m_frame)->coreLocalFrame())
         protect(coreFrame->inspectorController())->dispatchMessageFromFrontend(message);
 }
 

@@ -82,8 +82,6 @@ private:
     ASCIILiteral logClassName() const { return "RemoteMediaSessionCoordinator"_s; }
     WTFLogChannel& logChannel() const;
 
-    Ref<WebPage> protectedPage() const;
-
     WeakRef<WebPage> m_page;
     String m_identifier;
 };

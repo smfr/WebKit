@@ -364,11 +364,6 @@ void WebLocalFrameLoaderClient::dispatchDidDispatchOnloadEvents()
     webPage->injectedBundleLoaderClient().didHandleOnloadEventsForFrame(*webPage, m_frame);
 }
 
-Ref<WebCore::LocalFrame> WebLocalFrameLoaderClient::protectedLocalFrame() const
-{
-    return m_localFrame.get();
-}
-
 void WebLocalFrameLoaderClient::dispatchDidReceiveServerRedirectForProvisionalLoad()
 {
     RefPtr webPage = m_frame->page();
@@ -924,7 +919,7 @@ LocalFrame* WebLocalFrameLoaderClient::dispatchCreatePage(const NavigationAction
     // Just call through to the chrome client.
     WindowFeatures windowFeatures;
     windowFeatures.noopener = newFrameOpenerPolicy == NewFrameOpenerPolicy::Suppress;
-    RefPtr newPage = webPage->corePage()->chrome().createWindow(protectedLocalFrame(), { }, windowFeatures, navigationAction);
+    RefPtr newPage = webPage->corePage()->chrome().createWindow(protect(m_localFrame), { }, windowFeatures, navigationAction);
     if (!newPage)
         return nullptr;
     
@@ -1483,7 +1478,7 @@ void WebLocalFrameLoaderClient::prepareForDataSourceReplacement()
 
 Ref<DocumentLoader> WebLocalFrameLoaderClient::createDocumentLoader(ResourceRequest&& request, SubstituteData&& substituteData, ResourceRequest&& originalRequest)
 {
-    return protect(m_frame->page())->createDocumentLoader(protectedLocalFrame(), WTF::move(request), WTF::move(substituteData), WTF::move(originalRequest));
+    return protect(m_frame->page())->createDocumentLoader(protect(m_localFrame), WTF::move(request), WTF::move(substituteData), WTF::move(originalRequest));
 }
 
 Ref<DocumentLoader> WebLocalFrameLoaderClient::createDocumentLoader(ResourceRequest&& request, SubstituteData&& substituteData)
@@ -1493,7 +1488,7 @@ Ref<DocumentLoader> WebLocalFrameLoaderClient::createDocumentLoader(ResourceRequ
 
 void WebLocalFrameLoaderClient::updateCachedDocumentLoader(WebCore::DocumentLoader& loader)
 {
-    protect(m_frame->page())->updateCachedDocumentLoader(loader, protectedLocalFrame());
+    protect(m_frame->page())->updateCachedDocumentLoader(loader, protect(m_localFrame));
 }
 
 void WebLocalFrameLoaderClient::setTitle(const StringWithDirection& title, const URL& url)
@@ -1838,7 +1833,7 @@ void WebLocalFrameLoaderClient::dispatchWillDestroyGlobalObjectForDOMWindowExten
 void WebLocalFrameLoaderClient::didChangeScrollOffset()
 {
     if (RefPtr webPage = m_frame->page())
-        webPage->didChangeScrollOffsetForFrame(protectedLocalFrame());
+        webPage->didChangeScrollOffsetForFrame(protect(m_localFrame));
 }
 
 bool WebLocalFrameLoaderClient::allowScript(bool enabledPerSettings)

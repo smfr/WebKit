@@ -87,9 +87,6 @@ private:
     RemoteQueue& operator=(RemoteQueue&&) = delete;
 
     WebCore::WebGPU::Queue& backing() { return m_backing; }
-    Ref<WebCore::WebGPU::Queue> NODELETE protectedBacking();
-
-    Ref<WebGPU::ObjectHeap> NODELETE protectedObjectHeap() const;
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 

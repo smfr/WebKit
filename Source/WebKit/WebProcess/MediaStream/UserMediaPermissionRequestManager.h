@@ -77,8 +77,6 @@ private:
     // WebCore::MediaCanStartListener
     void mediaCanStart(WebCore::Document&) final;
 
-    Ref<WebPage> protectedPage() const;
-
     WeakRef<WebPage> m_page;
 
     HashMap<WebCore::UserMediaRequestIdentifier, Ref<WebCore::UserMediaRequest>> m_ongoingUserMediaRequests;

@@ -60,11 +60,6 @@ void UserMediaPermissionRequestManager::deref() const
     m_page->deref();
 }
 
-Ref<WebPage> UserMediaPermissionRequestManager::protectedPage() const
-{
-    return m_page.get();
-}
-
 void UserMediaPermissionRequestManager::startUserMediaRequest(UserMediaRequest& request)
 {
     RefPtr document = request.document();
@@ -100,7 +95,7 @@ void UserMediaPermissionRequestManager::sendUserMediaRequest(UserMediaRequest& u
     ASSERT(webFrame);
 
     RefPtr topLevelDocumentOrigin = userRequest.topLevelDocumentOrigin();
-    protectedPage()->send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(userRequest.identifier(), webFrame->info(), userRequest.userMediaDocumentOrigin()->data(), topLevelDocumentOrigin->data(), userRequest.request()));
+    protect(m_page)->send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(userRequest.identifier(), webFrame->info(), userRequest.userMediaDocumentOrigin()->data(), topLevelDocumentOrigin->data(), userRequest.request()));
 }
 
 void UserMediaPermissionRequestManager::cancelUserMediaRequest(UserMediaRequest& request)
@@ -165,7 +160,7 @@ void UserMediaPermissionRequestManager::enumerateMediaDevices(Document& document
         return;
     }
 
-    protectedPage()->sendWithAsyncReply(Messages::WebPageProxy::EnumerateMediaDevicesForFrame { WebFrame::fromCoreFrame(*frame)->frameID(), document.securityOrigin().data(), document.topOrigin().data() }, WTF::move(completionHandler));
+    protect(m_page)->sendWithAsyncReply(Messages::WebPageProxy::EnumerateMediaDevicesForFrame { WebFrame::fromCoreFrame(*frame)->frameID(), document.securityOrigin().data(), document.topOrigin().data() }, WTF::move(completionHandler));
 }
 
 #if USE(GSTREAMER)
@@ -201,7 +196,7 @@ UserMediaClient::DeviceChangeObserverToken UserMediaPermissionRequestManager::ad
         updateCaptureDevices(ShouldNotify::No);
         WebCore::RealtimeMediaSourceCenter::singleton().addDevicesChangedObserver(*this);
 #else
-        protectedPage()->send(Messages::WebPageProxy::BeginMonitoringCaptureDevices());
+        protect(m_page)->send(Messages::WebPageProxy::BeginMonitoringCaptureDevices());
 #endif
     }
     return identifier;
@@ -215,7 +210,7 @@ void UserMediaPermissionRequestManager::removeDeviceChangeObserver(UserMediaClie
 
 void UserMediaPermissionRequestManager::updateCaptureState(const WebCore::Document& document, bool isActive, WebCore::MediaProducerMediaCaptureKind kind, CompletionHandler<void(std::optional<WebCore::Exception>&&)>&& completionHandler)
 {
-    protectedPage()->updateCaptureState(document, isActive, kind, WTF::move(completionHandler));
+    protect(m_page)->updateCaptureState(document, isActive, kind, WTF::move(completionHandler));
 }
 
 void UserMediaPermissionRequestManager::captureDevicesChanged()

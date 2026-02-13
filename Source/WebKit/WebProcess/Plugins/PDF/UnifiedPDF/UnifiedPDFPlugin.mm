@@ -422,11 +422,6 @@ void UnifiedPDFPlugin::enableDataDetection()
 #endif
 }
 
-Ref<PDFDataDetectorOverlayController> UnifiedPDFPlugin::protectedDataDetectorOverlayController()
-{
-    return dataDetectorOverlayController();
-}
-
 void UnifiedPDFPlugin::handleClickForDataDetectionResult(const DataDetectorElementInfo& dataDetectorElementInfo, const IntPoint& clickPointInPluginSpace)
 {
     RefPtr page = this->page();
@@ -445,7 +440,7 @@ void UnifiedPDFPlugin::didInvalidateDataDetectorHighlightOverlayRects()
 {
     auto lastKnownMousePositionInDocumentSpace = convertDown<FloatPoint>(CoordinateSpace::Plugin, CoordinateSpace::PDFDocumentLayout, lastKnownMousePositionInView());
     auto pageIndex = protect(m_presentationController)->pageIndexForDocumentPoint(lastKnownMousePositionInDocumentSpace);
-    protectedDataDetectorOverlayController()->didInvalidateHighlightOverlayRects(pageIndex);
+    protect(m_dataDetectorOverlayController)->didInvalidateHighlightOverlayRects(pageIndex);
 }
 
 #endif
@@ -1167,7 +1162,7 @@ void UnifiedPDFPlugin::didBeginMagnificationGesture()
     m_inMagnificationGesture = true;
 
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
-    protectedDataDetectorOverlayController()->hideActiveHighlightOverlay();
+    protect(m_dataDetectorOverlayController)->hideActiveHighlightOverlay();
 #endif
 }
 
@@ -2017,7 +2012,7 @@ bool UnifiedPDFPlugin::handleMouseEvent(const WebMouseEvent& event)
     }
 
 #if ENABLE(UNIFIED_PDF_DATA_DETECTION)
-    if (protectedDataDetectorOverlayController()->handleMouseEvent(event, pageIndex))
+    if (protect(m_dataDetectorOverlayController)->handleMouseEvent(event, pageIndex))
         return true;
 #endif
 
