@@ -124,10 +124,11 @@ static bool hasScrollableBlockOverflow(const PlacedGridItem&)
     return false;
 }
 
-LayoutUnit usedInlineSizeForGridItem(const PlacedGridItem& placedGridItem, LayoutUnit borderAndPadding, LayoutUnit columnsSize)
+LayoutUnit usedInlineSizeForGridItem(const PlacedGridItem& placedGridItem, LayoutUnit borderAndPadding,
+    const TrackSizingFunctionsList& trackSizingFunctions, LayoutUnit columnsSize, const IntegrationUtils& integrationUtils)
 {
     auto& inlineAxisSizes = placedGridItem.inlineAxisSizes();
-    ASSERT(inlineAxisSizes.minimumSize.isFixed() && (inlineAxisSizes.maximumSize.isFixed() || inlineAxisSizes.maximumSize.isNone()));
+    ASSERT(inlineAxisSizes.maximumSize.isFixed() || inlineAxisSizes.maximumSize.isNone());
 
     auto& preferredSize = inlineAxisSizes.preferredSize;
     if (preferredSize.isAuto()) {
@@ -151,7 +152,7 @@ LayoutUnit usedInlineSizeForGridItem(const PlacedGridItem& placedGridItem, Layou
             && !marginStart.isAuto() && !marginEnd.isAuto()) {
             auto& usedZoom = placedGridItem.usedZoom();
 
-            auto minimumSize = LayoutUnit { inlineAxisSizes.minimumSize.tryFixed()->resolveZoom(usedZoom) };
+            auto minimumSize = GridLayoutUtils::usedInlineMinimumSize(placedGridItem, trackSizingFunctions, borderAndPadding, columnsSize, integrationUtils);
             auto maximumSize = [&inlineAxisSizes, &usedZoom] {
                 auto& computedMaximumSize = inlineAxisSizes.maximumSize;
                 if (computedMaximumSize.isNone())
@@ -274,9 +275,12 @@ static LayoutUnit automaticMinimumBlockSize(const PlacedGridItem& gridItem, Layo
     return contentBasedMinimumSize();
 }
 
-LayoutUnit usedBlockSizeForGridItem(const PlacedGridItem& placedGridItem, LayoutUnit borderAndPadding, LayoutUnit rowsSize)
+LayoutUnit usedBlockSizeForGridItem(const PlacedGridItem& placedGridItem, LayoutUnit borderAndPadding,
+    const TrackSizingFunctionsList& trackSizingFunctions, LayoutUnit rowsSize, const IntegrationUtils& integrationUtils)
 {
     auto& blockAxisSizes = placedGridItem.blockAxisSizes();
+    ASSERT(blockAxisSizes.maximumSize.isFixed() || blockAxisSizes.maximumSize.isNone());
+
     auto& preferredSize = blockAxisSizes.preferredSize;
     if (preferredSize.isAuto()) {
         // Grid item calculations for automatic sizes in a given dimensions vary by their
@@ -299,7 +303,7 @@ LayoutUnit usedBlockSizeForGridItem(const PlacedGridItem& placedGridItem, Layout
             && !marginStart.isAuto() && !marginEnd.isAuto()) {
             auto& usedZoom = placedGridItem.usedZoom();
 
-            auto minimumSize = LayoutUnit { blockAxisSizes.minimumSize.tryFixed()->resolveZoom(usedZoom) };
+            auto minimumSize = GridLayoutUtils::usedBlockMinimumSize(placedGridItem, trackSizingFunctions, borderAndPadding, rowsSize, integrationUtils);
             auto maximumSize = [&blockAxisSizes, &usedZoom] {
                 auto& computedMaximumSize = blockAxisSizes.maximumSize;
                 if (computedMaximumSize.isNone())

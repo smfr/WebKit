@@ -74,7 +74,8 @@ private:
     UsedTrackSizes performGridSizingAlgorithm(const PlacedGridItems&, const TrackSizingFunctionsList&, const TrackSizingFunctionsList&, const GridLayoutConstraints&,
         const StyleContentAlignmentData& usedJustifyContent, const StyleContentAlignmentData& usedAlignContent) const;
 
-    std::pair<UsedInlineSizes, UsedBlockSizes> layoutGridItems(const PlacedGridItems&, const GridAreaSizes&) const;
+    std::pair<UsedInlineSizes, UsedBlockSizes> layoutGridItems(const PlacedGridItems&, const GridAreaSizes&,
+        const TrackSizingFunctionsList& columnTrackSizingFunctions, const TrackSizingFunctionsList& rowTrackSizingFunctions) const;
 
     static Vector<UsedMargins> computeInlineMargins(const PlacedGridItems&, const Style::ZoomFactor&);
     static Vector<UsedMargins> computeBlockMargins(const PlacedGridItems&, const Style::ZoomFactor&);
