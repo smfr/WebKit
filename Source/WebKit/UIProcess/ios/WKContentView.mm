@@ -1157,7 +1157,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
 
     RefPtr page = _page.get();
 
-    if (!page->preferences().twoUpPDFDisplayModeSupportEnabled())
+    if (!protect(page->preferences())->twoUpPDFDisplayModeSupportEnabled())
         return;
 
     auto pdfDisplayMode = page->pdfDisplayMode();
