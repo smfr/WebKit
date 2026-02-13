@@ -537,10 +537,11 @@ private:
                 return;
             }
             Ref clonedChunk = resultOrException.releaseReturnValue();
-            if (!byobCanceled)
+            if (!byobCanceled && byobBranch)
                 byobBranch->protectedController()->respondWithNewView(*globalObject, chunk);
-            otherBranch->protectedController()->enqueue(*globalObject, clonedChunk);
-        } else if (!byobCanceled)
+            if (otherBranch)
+                otherBranch->protectedController()->enqueue(*globalObject, clonedChunk);
+        } else if (!byobCanceled && byobBranch)
             byobBranch->protectedController()->respondWithNewView(*globalObject, chunk);
 
         m_state->setReading(false);
