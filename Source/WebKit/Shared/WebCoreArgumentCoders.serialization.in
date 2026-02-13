@@ -4241,7 +4241,6 @@ enum class WebCore::IncludeSecureCookies : bool;
 header: <WebCore/ScrollingStateNode.h>
 [OptionSet] enum class WebCore::ScrollingStateNodeProperty : uint64_t {
     Layer
-    ChildNodes
     ScrollableAreaSize
     TotalContentsSize
     ReachableContentsSize
@@ -4281,6 +4280,9 @@ header: <WebCore/ScrollingStateNode.h>
     FooterLayer
     BehaviorForFixedElements
     ObscuredContentInsets
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    BannerViewHeight
+#endif
     VisualViewportIsSmallerThanLayoutViewport
     AsyncFrameOrOverflowScrollingEnabled
     WheelEventGesturesBecomeNonBlocking
@@ -4297,6 +4299,7 @@ header: <WebCore/ScrollingStateNode.h>
     OverflowScrollingNode
     KeyboardScrollData
     OverlayScrollbarsEnabled
+    ChildNodes
     LayerHostingContextIdentifier
 };
 #endif
