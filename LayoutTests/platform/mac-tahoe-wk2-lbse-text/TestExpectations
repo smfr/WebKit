@@ -275,7 +275,6 @@ imported/w3c/web-platform-tests/svg/embedded/image-modify-href-4.svg            
 imported/w3c/web-platform-tests/svg/embedded/image-remove-href-1.svg                                   [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/embedded/image-remove-href-2.svg                                   [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/embedded/image-remove-href-3.svg                                   [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/svg/linking/reftests/svgview-viewbox-override-multiple.html            [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/painting/marker-009.svg                                            [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/painting/reftests/non-scaling-stroke-001.html                      [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/svg/painting/reftests/non-scaling-stroke-002.html                      [ ImageOnlyFailure ]
@@ -330,15 +329,6 @@ svg/custom/use-nested.svg                          [ ImageOnlyFailure ]
 # SMIL animation issues
 svg/animations/animateMotion-additive-1.svg [ ImageOnlyFailure ]
 svg/stroke/animated-non-scaling-stroke.html [ ImageOnlyFailure ]
-
-# SVGViewSpec / svgView() support broken
-svg/custom/linking-a-03-b-all.svg               [ ImageOnlyFailure ]
-svg/custom/linking-a-03-b-transform.svg         [ ImageOnlyFailure ]
-svg/custom/linking-a-03-b-viewBox-transform.svg [ ImageOnlyFailure ]
-svg/custom/linking-a-03-b-viewBox.svg           [ ImageOnlyFailure ]
-svg/custom/linking-uri-01-b.svg                 [ ImageOnlyFailure ]
-svg/custom/multiple-view-elements.html          [ ImageOnlyFailure ]
-svg/dom/complex-svgView-specification.html      [ ImageOnlyFailure ]
 
 # Empty viewBox doesn't disable rendering for inline SVG documents
 svg/custom/viewBox-empty.html [ ImageOnlyFailure ]

@@ -714,7 +714,11 @@ bool SVGSVGElement::scrollToFragment(StringView fragmentIdentifier)
 
     auto invalidateView = [&](RenderElement& renderer) {
         if (renderer.document().settings().layerBasedSVGEngineEnabled()) {
-            renderer.repaint();
+            if (CheckedPtr svgRoot = dynamicDowncast<RenderSVGRoot>(renderer)) {
+                ASSERT(svgRoot->viewportContainer());
+                svgRoot->checkedViewportContainer()->updateHasSVGTransformFlags();
+            }
+            updateSVGRendererForElementChange();
             return;
         }
 
