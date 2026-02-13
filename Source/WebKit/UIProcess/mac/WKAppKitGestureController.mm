@@ -53,6 +53,10 @@
 #import <wtf/UUID.h>
 #import <wtf/WeakPtr.h>
 
+#if __has_include(<WebKitAdditions/WKAppKitGestureControllerAdditionsBefore.mm>)
+#import <WebKitAdditions/WKAppKitGestureControllerAdditionsBefore.mm>
+#endif
+
 #define WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(pageID, fmt, ...) RELEASE_LOG(ViewGestures, "[pageProxyID=%llu] %s: " fmt, pageID, std::source_location::current().function_name(), ##__VA_ARGS__)
 
 static WebCore::FloatSize translationInView(NSPanGestureRecognizer *gesture, WKWebView *view)
@@ -108,7 +112,11 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
     bool _isMomentumActive;
 }
 
+#if __has_include(<WebKitAdditions/WKAppKitGestureControllerAdditionsImpl.mm>)
+#import <WebKitAdditions/WKAppKitGestureControllerAdditionsImpl.mm>
+#elif __has_include(<WebKitAdditions/WKAppKitGestureControllerAdditions.mm>)
 #import <WebKitAdditions/WKAppKitGestureControllerAdditions.mm>
+#endif
 
 - (instancetype)initWithPage:(std::reference_wrapper<WebKit::WebPageProxy>)page viewImpl:(std::reference_wrapper<WebKit::WebViewImpl>)viewImpl
 {
