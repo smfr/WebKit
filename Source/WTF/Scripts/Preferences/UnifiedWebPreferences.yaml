@@ -5517,17 +5517,20 @@ ModelElementEnabled:
 
 ModelElementImmersiveEnabled:
   type: bool
-  status: testable
+  status: stable
   category: javascript
   condition: ENABLE(MODEL_ELEMENT_IMMERSIVE)
   humanReadableName: "Immersive <model> API"
   humanReadableDescription: "Enable <model> element immersive API"
   defaultValue:
     WebKitLegacy:
+      "ENABLE(MODEL_ELEMENT_IMMERSIVE)": true
       default: false
     WebKit:
+      "ENABLE(MODEL_ELEMENT_IMMERSIVE)": true
       default: false
     WebCore:
+      "ENABLE(MODEL_ELEMENT_IMMERSIVE)": true
       default: false
   disableInLockdownMode: true
   sharedPreferenceForWebProcess: true
