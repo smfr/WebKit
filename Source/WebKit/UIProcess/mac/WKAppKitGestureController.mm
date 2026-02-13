@@ -100,6 +100,9 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
     return -delta;
 }
 
+@interface WKAppKitGestureController () <NSGestureRecognizerDelegatePrivate>
+@end
+
 @implementation WKAppKitGestureController {
     WeakPtr<WebKit::WebPageProxy> _page;
     WeakPtr<WebKit::WebViewImpl> _viewImpl;
@@ -543,7 +546,7 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
 {
     WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(RefPtr { _page.get() }->logIdentifier(), "Gesture: %@", gestureRecognizer);
 
-    if (gestureRecognizer == _doubleClickGestureRecognizer.get()) {
+    if (gestureRecognizer == _doubleClickGestureRecognizer) {
         CheckedPtr viewImpl = _viewImpl.get();
         if (!viewImpl || !viewImpl->allowsMagnification())
             return NO;
@@ -555,6 +558,18 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
     }
 
     return YES;
+}
+
+- (BOOL)_isScrollOrZoomGestureRecognizer:(NSGestureRecognizer *)gesture
+{
+    // FIXME: Should we account for any system pan gesture recognizers?
+    return gesture == _panGestureRecognizer || [gesture isKindOfClass:[NSMagnificationGestureRecognizer class]];
+}
+
+- (BOOL)_gestureRecognizer:(NSGestureRecognizer *)preventingGestureRecognizer canPreventGestureRecognizer:(NSGestureRecognizer *)preventedGestureRecognizer
+{
+    bool isOurClickGesture = preventingGestureRecognizer == _singleClickGestureRecognizer || preventingGestureRecognizer == _secondaryClickGestureRecognizer;
+    return !isOurClickGesture || ![self _isScrollOrZoomGestureRecognizer:preventedGestureRecognizer];
 }
 
 @end

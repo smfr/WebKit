@@ -180,6 +180,14 @@ typedef NS_ENUM(NSInteger, NSScrollPocketEdge) {
 @end
 #endif
 
+@protocol NSGestureRecognizerDelegatePrivate <NSGestureRecognizerDelegate>
+
+@optional
+
+- (BOOL)_gestureRecognizer:(NSGestureRecognizer *)preventingGestureRecognizer canPreventGestureRecognizer:(NSGestureRecognizer *)preventedGestureRecognizer;
+
+@end
+
 #endif
 
 @interface NSPopover (IPI)
