@@ -98,7 +98,7 @@ void PDFDiscretePresentationController::teardown()
 
 bool PDFDiscretePresentationController::supportsDisplayMode(PDFDisplayMode mode) const
 {
-    return PDFDocumentLayout::isDiscreteDisplayMode(mode);
+    return isDiscretePDFDisplayMode(mode);
 }
 
 void PDFDiscretePresentationController::willChangeDisplayMode(PDFDisplayMode newMode)

@@ -111,17 +111,11 @@ public:
     void setDisplayMode(PDFDisplayMode displayMode) { m_displayMode = displayMode; }
     PDFDisplayMode displayMode() const { return m_displayMode; }
 
-    constexpr static bool isSinglePageDisplayMode(PDFDisplayMode mode) { return mode == PDFDisplayMode::SinglePageDiscrete || mode == PDFDisplayMode::SinglePageContinuous; }
-    constexpr static bool isTwoUpDisplayMode(PDFDisplayMode mode) { return mode == PDFDisplayMode::TwoUpDiscrete || mode == PDFDisplayMode::TwoUpContinuous; }
+    bool isSinglePageDisplayMode() const { return isSinglePagePDFDisplayMode(m_displayMode); }
+    bool isTwoUpDisplayMode() const { return isTwoUpPDFDisplayMode(m_displayMode); }
 
-    constexpr static bool isScrollingDisplayMode(PDFDisplayMode mode) { return mode == PDFDisplayMode::SinglePageContinuous || mode == PDFDisplayMode::TwoUpContinuous; }
-    constexpr static bool isDiscreteDisplayMode(PDFDisplayMode mode) { return mode == PDFDisplayMode::SinglePageDiscrete || mode == PDFDisplayMode::TwoUpDiscrete; }
-
-    bool isSinglePageDisplayMode() const { return isSinglePageDisplayMode(m_displayMode); }
-    bool isTwoUpDisplayMode() const { return isTwoUpDisplayMode(m_displayMode); }
-
-    bool isScrollingDisplayMode() const { return isScrollingDisplayMode(m_displayMode); }
-    bool isDiscreteDisplayMode() const { return isDiscreteDisplayMode(m_displayMode); }
+    bool isScrollingDisplayMode() const { return isScrollingPDFDisplayMode(m_displayMode); }
+    bool isDiscreteDisplayMode() const { return isDiscretePDFDisplayMode(m_displayMode); }
 
     unsigned pagesPerRow() const { return isSinglePageDisplayMode() ? 1 : 2; }
 

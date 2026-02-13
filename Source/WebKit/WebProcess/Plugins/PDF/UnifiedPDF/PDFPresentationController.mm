@@ -49,10 +49,10 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(PDFPresentationController);
 
 RefPtr<PDFPresentationController> PDFPresentationController::createForMode(PDFDisplayMode mode, UnifiedPDFPlugin& plugin)
 {
-    if (PDFDocumentLayout::isScrollingDisplayMode(mode))
+    if (isScrollingPDFDisplayMode(mode))
         return adoptRef(*new PDFScrollingPresentationController { plugin });
 
-    if (PDFDocumentLayout::isDiscreteDisplayMode(mode))
+    if (isDiscretePDFDisplayMode(mode))
         return adoptRef(*new PDFDiscretePresentationController { plugin });
 
     ASSERT_NOT_REACHED();

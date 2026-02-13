@@ -1160,8 +1160,7 @@ static void storeAccessibilityRemoteConnectionInformation(id element, pid_t pid,
     if (!protect(page->preferences())->twoUpPDFDisplayModeSupportEnabled())
         return;
 
-    auto pdfDisplayMode = page->pdfDisplayMode();
-    BOOL isSinglePage = pdfDisplayMode == WebKit::PDFDisplayMode::SinglePageDiscrete || pdfDisplayMode == WebKit::PDFDisplayMode::SinglePageContinuous;
+    BOOL isSinglePage = WebKit::isSinglePagePDFDisplayMode(page->pdfDisplayMode());
     if (isSinglePage)
         return;
 

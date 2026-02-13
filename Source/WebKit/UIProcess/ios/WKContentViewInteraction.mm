@@ -15391,7 +15391,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
             if (!page)
                 return;
 
-            BOOL isSinglePage = page->pdfDisplayMode() == WebKit::PDFDisplayMode::SinglePageContinuous;
+            BOOL isSinglePage = WebKit::isSinglePagePDFDisplayMode(page->pdfDisplayMode());
             BOOL isSinglePageAction = [action.identifier isEqualToString:WKPDFActionSinglePageIdentifier];
 
             if (isSinglePage == isSinglePageAction)
@@ -15403,7 +15403,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         RetainPtr singlePageAction = [UIAction actionWithTitle:WebCore::contextMenuItemPDFSinglePage().createNSString().get() image:nil identifier:WKPDFActionSinglePageIdentifier handler:actionHandler];
         RetainPtr twoPagesAction = [UIAction actionWithTitle:WebCore::contextMenuItemPDFTwoPages().createNSString().get() image:nil identifier:WKPDFActionTwoPagesIdentifier handler:actionHandler];
 
-        if (protect(strongSelf->_page)->pdfDisplayMode() == WebKit::PDFDisplayMode::SinglePageContinuous)
+        if (WebKit::isSinglePagePDFDisplayMode(protect(strongSelf->_page)->pdfDisplayMode()))
             [singlePageAction setState:UIMenuElementStateOn];
         else
             [twoPagesAction setState:UIMenuElementStateOn];
