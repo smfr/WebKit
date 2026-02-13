@@ -69,7 +69,7 @@ bool RTCDTMFSender::canInsertDTMF() const
     if (!m_sender || m_sender->isStopped())
         return false;
 
-    auto currentDirection = m_sender->currentTransceiverDirection();
+    auto currentDirection = protect(m_sender)->currentTransceiverDirection();
     if (!currentDirection)
         return false;
     if (*currentDirection != RTCRtpTransceiverDirection::Sendrecv && *currentDirection != RTCRtpTransceiverDirection::Sendonly)

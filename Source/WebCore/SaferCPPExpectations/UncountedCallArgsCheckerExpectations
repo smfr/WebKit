@@ -6,13 +6,9 @@ Modules/filesystem/FileSystemFileHandle.cpp
 Modules/mediasession/MediaMetadata.cpp
 Modules/mediasession/MediaSession.cpp
 [ Mac ] Modules/mediasession/MediaSessionCoordinator.cpp
-Modules/mediastream/MediaStreamTrack.cpp
 Modules/mediastream/MediaStreamTrackProcessor.cpp
-Modules/mediastream/RTCDTMFSender.cpp
-Modules/mediastream/RTCDataChannelRemoteHandler.cpp
 Modules/mediastream/RTCEncodedFrame.cpp
 Modules/mediastream/RTCPeerConnection.cpp
-Modules/mediastream/RTCRtpReceiver.cpp
 Modules/mediastream/RTCRtpSFrameTransform.cpp
 Modules/mediastream/RTCRtpSender.cpp
 Modules/mediastream/RTCRtpTransform.cpp
@@ -20,8 +16,6 @@ Modules/mediastream/libwebrtc/LibWebRTCObservers.h
 [ Mac ] Modules/model-element/scenekit/SceneKitModelPlayer.mm
 Modules/pictureinpicture/HTMLVideoElementPictureInPicture.cpp
 Modules/push-api/PushManager.cpp
-Modules/push-api/PushSubscription.cpp
-Modules/remoteplayback/RemotePlayback.cpp
 Modules/speech/SpeechSynthesis.cpp
 [ iOS ] Modules/system-preview/ARKitBadgeSystemImage.mm
 Modules/webaudio/AnalyserNode.cpp
