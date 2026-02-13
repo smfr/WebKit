@@ -1291,7 +1291,7 @@ bool DragController::startDrag(LocalFrame& src, const DragState& state, OptionSe
         dragImage = DragImage { createDragImageForNode(src, *modelElement) };
 
         PasteboardImage pasteboardImage;
-        pasteboardImage.suggestedName = modelElement->currentSrc().lastPathComponent().toString();
+        pasteboardImage.suggestedName = modelElement->model()->filename();
         pasteboardImage.resourceMIMEType = modelElement->model()->mimeType();
         pasteboardImage.resourceData = modelElement->model()->data();
         dataTransfer->pasteboard().write(pasteboardImage);

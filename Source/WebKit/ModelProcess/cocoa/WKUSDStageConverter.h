@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,37 +25,17 @@
 
 #pragma once
 
-#include <WebCore/SharedBuffer.h>
-#include <wtf/RefCounted.h>
-#include <wtf/URL.h>
-#include <wtf/text/WTFString.h>
+#import <Foundation/Foundation.h>
+#import <wtf/Platform.h>
 
-namespace WTF {
-class TextStream;
-}
+#if ENABLE(MODEL_PROCESS)
 
-namespace WebCore {
+NS_HEADER_AUDIT_BEGIN(nullability, sendability)
 
-class Model final : public RefCounted<Model> {
-public:
-    WEBCORE_EXPORT static Ref<Model> create(Ref<SharedBuffer>&&, String, URL, bool isConverted = false);
-    WEBCORE_EXPORT ~Model();
+@interface WKUSDStageConverter : NSObject
++ (nullable NSData *)convert:(NSData *)data;
+@end
 
-    Ref<SharedBuffer> data() const { return m_data; }
-    const String& mimeType() const { return m_mimeType; }
-    const URL& url() const { return m_url; }
-    bool isConverted() const { return m_isConverted; }
-    WEBCORE_EXPORT String filename() const;
+NS_HEADER_AUDIT_END(nullability, sendability)
 
-private:
-    explicit Model(Ref<SharedBuffer>&&, String, URL, bool isConverted);
-
-    Ref<SharedBuffer> m_data;
-    String m_mimeType;
-    URL m_url;
-    bool m_isConverted { false };
-};
-
-WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, const Model&);
-
-} // namespace WebCore
+#endif // ENABLE(MODEL_PROCESS)

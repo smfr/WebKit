@@ -246,6 +246,9 @@ private:
     // ModelPlayerClient overrides.
     void didFinishLoading(ModelPlayer&) final;
     void didFailLoading(ModelPlayer&, const ResourceError&) final;
+#if ENABLE(MODEL_PROCESS)
+    void didConvertModelData(ModelPlayer&, Ref<SharedBuffer>&& convertedData, const String& convertedMIMEType) final;
+#endif
     void didUnload(ModelPlayer&) final;
     void didUpdate(ModelPlayer&) final;
 #if ENABLE(MODEL_ELEMENT_ENTITY_TRANSFORM)

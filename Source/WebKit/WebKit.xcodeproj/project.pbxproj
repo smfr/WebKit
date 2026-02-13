@@ -1773,6 +1773,8 @@
 		86E9F1292EC4D44500BCC96D /* CoreIPCCGColorSpace.mm in Sources */ = {isa = PBXBuildFile; fileRef = 86E9F1282EC4D44500BCC96D /* CoreIPCCGColorSpace.mm */; };
 		86EB7204298D310A00C1DC77 /* SecItemShim.h in Headers */ = {isa = PBXBuildFile; fileRef = 86EB7202298D310900C1DC77 /* SecItemShim.h */; };
 		86F9536518FF58F5001DB2EF /* ProcessAssertion.h in Headers */ = {isa = PBXBuildFile; fileRef = 86F9536018FF4FD4001DB2EF /* ProcessAssertion.h */; };
+		8BFE6BF82F3C2F1300E82291 /* WKUSDStageConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFE6BF72F3C2F1300E82291 /* WKUSDStageConverter.swift */; };
+		8BFE6BF92F3C2F1300E82291 /* WKUSDStageConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFE6BF62F3C2F1300E82291 /* WKUSDStageConverter.h */; };
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		909854ED12BC4E18000AD080 /* WebMemorySampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 905620E912BC248B000799B6 /* WebMemorySampler.h */; };
 		9197940523DBC4BB00257892 /* InspectorBrowserAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = 9197940323DBC4BB00257892 /* InspectorBrowserAgent.h */; };
@@ -7285,6 +7287,8 @@
 		86F4FE1E2A98B9AE007378EE /* RemoteGraphicsContextGLInitializationState.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = RemoteGraphicsContextGLInitializationState.serialization.in; sourceTree = "<group>"; };
 		86F4FE282A98C162007378EE /* SharedVideoFrame.serialization.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = SharedVideoFrame.serialization.in; sourceTree = "<group>"; };
 		86F9536018FF4FD4001DB2EF /* ProcessAssertion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessAssertion.h; sourceTree = "<group>"; };
+		8BFE6BF62F3C2F1300E82291 /* WKUSDStageConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKUSDStageConverter.h; sourceTree = "<group>"; };
+		8BFE6BF72F3C2F1300E82291 /* WKUSDStageConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKUSDStageConverter.swift; sourceTree = "<group>"; };
 		8CFECE931490F140002AAA32 /* EditorState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EditorState.cpp; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* WebKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WebKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -11860,6 +11864,8 @@
 				540D14C72B840E9A007FD5DE /* ModelProcessModelPlayerProxy.mm */,
 				54BD52C82B99787A00B9EF66 /* WKModelProcessModelLayer.h */,
 				54BD52C72B99787A00B9EF66 /* WKModelProcessModelLayer.mm */,
+				8BFE6BF62F3C2F1300E82291 /* WKUSDStageConverter.h */,
+				8BFE6BF72F3C2F1300E82291 /* WKUSDStageConverter.swift */,
 			);
 			path = cocoa;
 			sourceTree = "<group>";
@@ -19407,6 +19413,7 @@
 				51D124351E6DF652002B2820 /* WKURLSchemeTask.h in Headers */,
 				5C62FDF91EFC271C00CE072E /* WKURLSchemeTaskPrivate.h in Headers */,
 				316B8B642054B55800BD4A62 /* WKUSDPreviewView.h in Headers */,
+				8BFE6BF92F3C2F1300E82291 /* WKUSDStageConverter.h in Headers */,
 				1AFA3AC918E61C61003CCBAE /* WKUserContentController.h in Headers */,
 				1AAF08A4192682DA00B6390C /* WKUserContentControllerInternal.h in Headers */,
 				7C89D2B61A6B0DD9003A5FDE /* WKUserContentControllerPrivate.h in Headers */,
@@ -22152,6 +22159,7 @@
 				07152D072F2F037D00B56C0E /* WKTextSelectionController.swift in Sources */,
 				076897F02D07B330006F9FA7 /* WKUIDelegateAdapter.swift in Sources */,
 				079A4DB02D73EA4A00CA387F /* WKURLSchemeHandlerAdapter.swift in Sources */,
+				8BFE6BF82F3C2F1300E82291 /* WKUSDStageConverter.swift in Sources */,
 				079A4DA52D72CE3F00CA387F /* WKWebpagePreferences+Extras.swift in Sources */,
 				07642AEF2DEABBA100561888 /* WKWebsiteDataStore+SwiftOverlay.swift in Sources */,
 				F4E038F82F230571003A8F3A /* WKWebView+SystemTextExtraction.swift in Sources */,
