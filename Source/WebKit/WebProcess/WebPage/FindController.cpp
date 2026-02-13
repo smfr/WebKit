@@ -620,7 +620,7 @@ void FindController::drawRect(PageOverlay&, GraphicsContext& graphicsContext, co
     if (!m_isShowingFindIndicator)
         return;
 
-    if (RefPtr selectedFrame = frameWithSelection(protect(m_webPage)->corePage())) {
+    if (RefPtr selectedFrame = frameWithSelection(protect(protect(m_webPage)->corePage()))) {
         auto findIndicatorRect = selectedFrame->protectedView()->contentsToRootView(enclosingIntRect(protect(selectedFrame->selection())->selectionBounds(FrameSelection::ClipToVisibleContent::No)));
 
         if (findIndicatorRect != m_findIndicatorRect) {
