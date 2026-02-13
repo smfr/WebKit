@@ -452,10 +452,6 @@ struct PerWebProcessState {
     BOOL _didScrollSinceLastTimerFire;
     BOOL _needsScrollend;
 
-#if PLATFORM(IOS_FAMILY)
-    RefPtr<RunLoop::DispatchTimer> _pendingInteractiveObscuredInsetsChangeTimer;
-#endif
-
     // This value tracks the current adjustment added to the bottom inset due to the keyboard sliding out from the bottom
     // when computing obscured content insets. This is used when updating the visible content rects where we should not
     // include this adjustment.

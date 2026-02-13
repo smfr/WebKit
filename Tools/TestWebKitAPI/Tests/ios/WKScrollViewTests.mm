@@ -41,7 +41,6 @@
 #import <WebKit/WKPreferencesPrivate.h>
 #import <WebKit/WKWebViewPrivate.h>
 #import <WebKit/WKWebViewPrivateForTesting.h>
-#import <WebKit/WKWebViewPrivateForTestingIOS.h>
 #import <WebKit/_WKFeature.h>
 #import <wtf/BlockPtr.h>
 #import <wtf/darwin/DispatchExtras.h>
@@ -51,10 +50,6 @@ constexpr CGFloat whiteColorComponents[4] = { 1, 1, 1, 1 };
 
 @interface UIView (TestWebKitAPI)
 - (BOOL)_appearsBeforeViewInSubviewOrder:(UIView *)view;
-@end
-
-@interface WKWebView (WKScrollViewTestsInternal)
-- (void)_scheduleForcedVisibleContentRectUpdate;
 @end
 
 @implementation UIView (TestWebKitAPI)
@@ -899,114 +894,6 @@ TEST(WKScrollViewTests, ContentInsetAdjustmentBehaviorChangeAfterViewportFitChan
     EXPECT_EQ([scrollView adjustedContentInset], insets);
 
     EXPECT_WK_STREQ([webView stringByEvaluatingJavaScript:@"document.body.clientWidth"], "280");
-}
-
-TEST(WKScrollViewTests, VisibleContentRectUpdatesDuringInteractiveObscuredInsetsChangeAreThrottled)
-{
-    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 400, 800)]);
-
-    auto insets = UIEdgeInsetsMake(50, 0, 0, 0);
-    [webView _setObscuredInsets:insets];
-
-    RetainPtr scrollView = [webView scrollView];
-    [scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-    [scrollView setContentInset:insets];
-
-    [webView synchronouslyLoadTestPageNamed:@"simple-tall"];
-    [webView waitForNextPresentationUpdate];
-
-    [scrollView setContentOffset:CGPointMake(0, 500)];
-    [webView waitForNextVisibleContentRectUpdate];
-
-    [webView _beginInteractiveObscuredInsetsChange];
-
-    // First scroll within interactive mode triggers a timer.
-    [scrollView setContentOffset:CGPointMake(0, 510)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_TRUE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    // Second scroll should be throttled too.
-    [scrollView setContentOffset:CGPointMake(0, 520)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_TRUE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-}
-
-TEST(WKScrollViewTests, ThrottledVisibleContentRectUpdateTimerCancelledWhenEndingInteractiveUpdates)
-{
-    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 400, 800)]);
-
-    auto insets = UIEdgeInsetsMake(50, 0, 0, 0);
-    [webView _setObscuredInsets:insets];
-
-    RetainPtr scrollView = [webView scrollView];
-    [scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-    [scrollView setContentInset:insets];
-
-    [webView synchronouslyLoadTestPageNamed:@"simple-tall"];
-    [webView waitForNextPresentationUpdate];
-
-    [scrollView setContentOffset:CGPointMake(0, 500)];
-    [webView waitForNextVisibleContentRectUpdate];
-
-    [webView _beginInteractiveObscuredInsetsChange];
-
-    // First scroll within interactive mode triggers a timer.
-    [scrollView setContentOffset:CGPointMake(0, 510)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_TRUE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    // Second scroll should be throttled too.
-    [scrollView setContentOffset:CGPointMake(0, 520)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_TRUE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    // Ending interactive mode should cancel the timer.
-    [webView _endInteractiveObscuredInsetsChange];
-    EXPECT_FALSE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    // Verify we can still do normal updates
-    [webView waitForNextVisibleContentRectUpdate];
-    [scrollView setContentOffset:CGPointMake(0, 510)];
-    [webView waitForNextPresentationUpdate];
-
-    [scrollView setContentOffset:CGPointMake(0, 520)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_FALSE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-}
-
-TEST(WKScrollViewTests, ForcedVisibleContentRectUpdateCancelsPendingThrottleTimer)
-{
-    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 400, 800)]);
-
-    auto insets = UIEdgeInsetsMake(50, 0, 0, 0);
-    [webView _setObscuredInsets:insets];
-
-    RetainPtr scrollView = [webView scrollView];
-    [scrollView setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
-    [scrollView setContentInset:insets];
-
-    [webView synchronouslyLoadTestPageNamed:@"simple-tall"];
-    [webView waitForNextPresentationUpdate];
-
-    [scrollView setContentOffset:CGPointMake(0, 500)];
-    [webView waitForNextVisibleContentRectUpdate];
-
-    [webView _beginInteractiveObscuredInsetsChange];
-
-    // First scroll within interactive mode triggers a timer.
-    [scrollView setContentOffset:CGPointMake(0, 510)];
-    [webView waitForNextPresentationUpdate];
-
-    // Second scroll should be throttled too.
-    [scrollView setContentOffset:CGPointMake(0, 520)];
-    [webView waitForNextPresentationUpdate];
-    EXPECT_TRUE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    // Force an update which should cancel pending throttle timer.
-    [webView _scheduleForcedVisibleContentRectUpdate];
-    EXPECT_FALSE([webView _hasPendingVisibleContentRectUpdateTimerForTesting]);
-
-    [webView _endInteractiveObscuredInsetsChange];
 }
 
 } // namespace TestWebKitAPI
