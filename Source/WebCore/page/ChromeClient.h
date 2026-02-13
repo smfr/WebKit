@@ -344,6 +344,7 @@ public:
     virtual void allowImmersiveElement(CompletionHandler<void(bool)>&& completion) const { completion(false); }
     virtual void presentImmersiveElement(const LayerHostingContextIdentifier, CompletionHandler<void(bool)>&& completion) const { completion(false); }
     virtual void dismissImmersiveElement(CompletionHandler<void()>&& completion) const { completion(); }
+    virtual bool supportsImmersiveElement() const { return false; }
 #endif
 
 #if ENABLE(APP_HIGHLIGHTS)

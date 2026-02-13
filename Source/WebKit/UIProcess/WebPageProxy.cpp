@@ -12565,6 +12565,10 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
     parameters.gamepadAccessRequiresExplicitConsent = m_configuration->gamepadAccessRequiresExplicitConsent();
 #endif
 
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    parameters.allowsImmersiveEnvironments = m_configuration->allowsImmersiveEnvironments();
+#endif
+
     Ref preferences = m_preferences;
 #if PLATFORM(COCOA)
     parameters.smartInsertDeleteEnabled = m_isSmartInsertDeleteEnabled;

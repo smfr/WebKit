@@ -1640,6 +1640,22 @@ static WebKit::AttributionOverrideTesting toAttributionOverrideTesting(_WKAttrib
 #endif
 }
 
+- (void)_setAllowsImmersiveEnvironments:(BOOL)allows
+{
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    _pageConfiguration->setAllowsImmersiveEnvironments(allows);
+#endif
+}
+
+- (BOOL)_allowsImmersiveEnvironments
+{
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    return _pageConfiguration->allowsImmersiveEnvironments();
+#else
+    return false;
+#endif
+}
+
 #endif // PLATFORM(VISION)
 
 @end

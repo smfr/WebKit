@@ -1690,6 +1690,12 @@ void WebChromeClient::dismissImmersiveElement(CompletionHandler<void()>&& comple
     else
         completion();
 }
+
+bool WebChromeClient::supportsImmersiveElement() const
+{
+    RefPtr page = m_page.get();
+    return page && page->allowsImmersiveEnvironments();
+}
 #endif
 
 #if ENABLE(APP_HIGHLIGHTS)

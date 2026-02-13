@@ -1728,6 +1728,7 @@ public:
     void presentImmersiveElement(const WebCore::LayerHostingContextIdentifier, CompletionHandler<void(bool)>&&);
     void dismissImmersiveElement(CompletionHandler<void()>&&);
     void exitImmersive() const;
+    bool allowsImmersiveEnvironments() const;
 #endif
 
     void flushPendingEditorStateUpdate();
@@ -3290,6 +3291,10 @@ private:
 
     bool m_backgroundTextExtractionEnabled { false };
     bool m_isPopup { false };
+
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    bool m_allowsImmersiveEnvironments { false };
+#endif
 };
 
 #if !PLATFORM(IOS_FAMILY)

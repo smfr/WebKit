@@ -317,6 +317,10 @@ void TestController::platformCreateWebView(WKPageConfigurationRef configuration,
     [cocoaConfiguration _setLongPressActionsEnabled:options.longPressActionsEnabled()];
 #endif
 
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    [cocoaConfiguration _setAllowsImmersiveEnvironments:YES];
+#endif
+
     if (options.enableAttachmentElement())
         [cocoaConfiguration _setAttachmentElementEnabled:YES];
     if (options.enableAttachmentWideLayout())

@@ -716,6 +716,9 @@ WebPage::WebPage(PageIdentifier pageID, WebPageCreationParameters&& parameters)
 #endif
     , m_backgroundTextExtractionEnabled(parameters.backgroundTextExtractionEnabled)
     , m_isPopup(parameters.isPopup)
+#if ENABLE(MODEL_ELEMENT_IMMERSIVE)
+    , m_allowsImmersiveEnvironments(parameters.allowsImmersiveEnvironments)
+#endif
 {
     WEBPAGE_RELEASE_LOG(Loading, "constructor:");
 
@@ -8041,6 +8044,11 @@ void WebPage::exitImmersive() const
 {
     if (RefPtr localTopDocument = this->localTopDocument(); RefPtr protectedImmersive = localTopDocument->immersiveIfExists())
         protectedImmersive->exitImmersive();
+}
+
+bool WebPage::allowsImmersiveEnvironments() const
+{
+    return m_allowsImmersiveEnvironments;
 }
 #endif
 
