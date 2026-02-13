@@ -824,13 +824,15 @@ void RenderSVGText::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
             return;
         }
 
+        GraphicsContextStateSaver stateSaver(paintInfo.context());
+
         if (paintInfo.phase == PaintPhase::Outline || paintInfo.phase == PaintPhase::SelfOutline) {
+            paintInfo.context().resetClip();
             RenderBlock::paint(paintInfo, paintOffset);
             return;
         }
 
         ASSERT(paintInfo.phase == PaintPhase::Foreground);
-        GraphicsContextStateSaver stateSaver(paintInfo.context());
 
         auto coordinateSystemOriginTranslation = adjustedPaintOffset - nominalSVGLayoutLocation();
         paintInfo.context().translate(coordinateSystemOriginTranslation.width(), coordinateSystemOriginTranslation.height());

@@ -294,9 +294,6 @@ svg/foreignObject/filter.html                 [ ImageOnlyFailure ]
 svg/foreignObject/vertical-foreignObject.html [ ImageOnlyFailure ]
 svg/overflow/overflow-on-foreignObject.svg    [ ImageOnlyFailure ]
 
-# Outline / focus-ring support
-svg/custom/focus-ring.svg [ ImageOnlyFailure ]
-
 # Text rendering visually different
 svg/W3C-SVG-1.1/text-text-05-t.svg                 [ ImageOnlyFailure ]
 svg/hittest/text-multiple-dx-values.svg            [ ImageOnlyFailure ]

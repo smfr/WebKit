@@ -203,5 +203,15 @@ bool RenderSVGContainer::nodeAtPoint(const HitTestRequest& request, HitTestResul
     return false;
 }
 
+void RenderSVGContainer::addFocusRingRects(Vector<LayoutRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject* container) const
+{
+    if (needsHasSVGTransformFlags())
+        return RenderSVGModelObject::addFocusRingRects(rects, additionalOffset, container);
+    auto repaintBoundingBox = enclosingLayoutRect(repaintRectInLocalCoordinates());
+    if (repaintBoundingBox.size().isEmpty())
+        return;
+    rects.append(repaintBoundingBox);
+}
+
 }
 
