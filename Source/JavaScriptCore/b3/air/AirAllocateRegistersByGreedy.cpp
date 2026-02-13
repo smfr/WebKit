@@ -1733,7 +1733,7 @@ private:
         };
 
         Reg bestEvictReg;
-        float minSpillCost = unspillableCost;
+        float minSpillCost = tmpData.spillCost();
         m_visited.resize(m_code.numTmps(bank));
         LiveRange& liveRange = tmpData.liveRange;
         Width width = widthForConflicts<bank>(tmp);
