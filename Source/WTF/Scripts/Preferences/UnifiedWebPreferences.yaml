@@ -8412,9 +8412,9 @@ TwoUpPDFDisplayModeSupportEnabled:
     WebKitLegacy:
       default: false
     WebKit:
-      default: false
+      default: true
     WebCore:
-      default: false
+      default: true
 
 UAVisualTransitionDetectionEnabled:
   type: bool
