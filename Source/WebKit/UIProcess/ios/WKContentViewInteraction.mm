@@ -15369,7 +15369,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 - (BOOL)shouldShowPDFDisplayOptions
 {
-    return protect(_page->preferences())->twoUpPDFDisplayModeSupportEnabled();
+    return protect(_page->preferences())->twoUpPDFDisplayModeSupportEnabled() && self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular;
 }
 
 - (void)continueContextMenuInteractionWithPDFDisplayOptions:(void(^)(UIContextMenuConfiguration *))continueWithContextMenuConfiguration
