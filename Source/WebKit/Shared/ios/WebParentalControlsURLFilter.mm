@@ -112,12 +112,14 @@ void WebParentalControlsURLFilter::allowURL(const URL& url, CompletionHandler<vo
 
 void WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary()
 {
+#if !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
     ASSERT(isMainRunLoop());
     static bool initialized = false;
     if (!initialized) {
         WebCore::ParentalControlsURLFilter::setGlobalFilter(WebParentalControlsURLFilter::create());
         initialized = true;
     }
+#endif
 }
 
 } // namespace WebKit
