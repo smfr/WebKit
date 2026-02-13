@@ -301,7 +301,6 @@ UIProcess/API/Cocoa/_WKInspectorExtension.mm @nonARC
 UIProcess/API/Cocoa/_WKInspectorTesting.mm @nonARC
 UIProcess/API/Cocoa/_WKInspectorWindow.mm @nonARC
 UIProcess/API/Cocoa/_WKInternalDebugFeature.mm @nonARC
-UIProcess/API/Cocoa/_WKJSHandle.mm @nonARC
 UIProcess/API/Cocoa/_WKLinkIconParameters.mm @nonARC
 UIProcess/API/Cocoa/_WKModalContainerInfo.mm @nonARC
 UIProcess/API/Cocoa/_WKNotificationData.mm @nonARC
@@ -362,6 +361,7 @@ UIProcess/API/Cocoa/WKFindResult.mm @nonARC
 UIProcess/API/Cocoa/WKFormInfo.mm @nonARC
 UIProcess/API/Cocoa/WKFrameInfo.mm @nonARC
 UIProcess/API/Cocoa/WKHTTPCookieStore.mm @nonARC
+UIProcess/API/Cocoa/WKJSHandle.mm @nonARC
 UIProcess/API/Cocoa/WKJSScriptingBuffer.mm @nonARC
 UIProcess/API/Cocoa/WKJSSerializedNode.mm @nonARC
 UIProcess/API/Cocoa/WKMenuItemIdentifiers.mm @nonARC
