@@ -43,6 +43,12 @@ LayoutUnit computeGapValue(const Style::GapGutter& gap)
     return { };
 }
 
+LayoutUnit totalGuttersSize(size_t tracksCount, LayoutUnit gapsSize)
+{
+    ASSERT(tracksCount);
+    return gapsSize * (tracksCount - 1);
+}
+
 static bool spansAutoMinTrackSizingFunction(WTF::Range<size_t> spannedTrackIndexes, const TrackSizingFunctionsList& trackSizingFunctions)
 {
     for (auto trackIndex : std::views::iota(spannedTrackIndexes.begin(), spannedTrackIndexes.end())) {

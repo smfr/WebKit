@@ -321,12 +321,6 @@ static void resolveIntrinsicTrackSizes(UnsizedTracks& unsizedTracks, const Place
     }
 }
 
-static LayoutUnit totalGuttersSize(size_t tracksCount, LayoutUnit gapsSize)
-{
-    ASSERT(tracksCount);
-    return gapsSize * (tracksCount - 1);
-}
-
 // https://drafts.csswg.org/css-grid-1/#algo-terms
 // Equal to the available grid space minus the sum of the base sizes of all the grid tracks (including gutters),
 // floored at zero. If available grid space is indefinite, the free space is indefinite as well.
@@ -338,7 +332,7 @@ static std::optional<LayoutUnit> computeFreeSpace(std::optional<LayoutUnit> avai
     auto sumOfBaseSizes = std::accumulate(unsizedTracks.begin(), unsizedTracks.end(), 0_lu, [](LayoutUnit sum, const UnsizedTrack& unsizedTrack) {
         return unsizedTrack.baseSize + sum;
     });
-    auto guttersSize = totalGuttersSize(unsizedTracks.size(), gapSize);
+    auto guttersSize = GridLayoutUtils::totalGuttersSize(unsizedTracks.size(), gapSize);
 
     return std::max({ }, *availableGridSpace - (sumOfBaseSizes + guttersSize));
 }
@@ -557,7 +551,7 @@ LayoutUnit TrackSizingAlgorithm::findSizeOfFr(const UnsizedTracks& tracks, const
 
     // https://www.w3.org/TR/css-grid-1/#algo-terms
     // free space = available grid space - sum of base sizes - gutters.
-    LayoutUnit totalGutters = totalGuttersSize(tracks.size(), gapSize);
+    LayoutUnit totalGutters = GridLayoutUtils::totalGuttersSize(tracks.size(), gapSize);
 
     InflexibleTrackState state;
     FrSizeComponents components;

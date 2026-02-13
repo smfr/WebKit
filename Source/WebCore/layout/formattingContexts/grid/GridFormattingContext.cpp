@@ -166,7 +166,7 @@ static Style::GridTemplateList gridTemplateListWithPercentagesConvertedToAuto(co
     return Style::GridTemplateList { WTF::move(transformedList) };
 }
 
-void GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
+UsedTrackSizes GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
 {
     auto unplacedGridItems = constructUnplacedGridItems();
     CheckedRef gridStyle = root().style();
@@ -217,6 +217,7 @@ void GridFormattingContext::layout(GridLayoutConstraints layoutConstraints)
     };
     mapGridItemLocationsToGrid();
     setGridItemGeometries(gridItemRects);
+    return usedTrackSizes;
 }
 
 PlacedGridItems GridFormattingContext::constructPlacedGridItems(const GridAreas& gridAreas) const

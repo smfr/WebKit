@@ -37,6 +37,7 @@ struct GridItemSizingFunctions;
 namespace GridLayoutUtils {
 
 LayoutUnit computeGapValue(const Style::GapGutter&);
+LayoutUnit totalGuttersSize(size_t tracksCount, LayoutUnit gapsSize);
 
 LayoutUnit usedInlineSizeForGridItem(const PlacedGridItem&, LayoutUnit borderAndPadding, const TrackSizingFunctionsList&, LayoutUnit columnsSize, const IntegrationUtils&);
 LayoutUnit usedBlockSizeForGridItem(const PlacedGridItem&, LayoutUnit borderAndPadding, const TrackSizingFunctionsList&, LayoutUnit rowsSize, const IntegrationUtils&);
