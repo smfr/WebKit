@@ -139,26 +139,28 @@ extension WKTextSelectionController {
         }
     }
 
-    @objc(handleClickAtPoint:clickCount:)
-    func handleClick(at point: NSPoint, clickCount: Int) {
-        Task.immediate {
-            await handleClickInternal(at: point, clickCount: clickCount)
-        }
-    }
-
     @MainActor
-    private func handleClickInternal(at point: NSPoint, clickCount: Int) async {
-        // The `point` location is relative to the view.
-
+    private func handleDoubleClick(at point: NSPoint) async {
         guard let view, let page = view._protectedPage().get() else {
             return
         }
 
-        Logger.viewGestures.log(
-            "[pageProxyID=\(page.logIdentifier())] \(#function) point \(point.debugDescription) clickCount \(clickCount)"
+        // Select the nearest word and then open a context menu.
+
+        await page.selectWithGesture(
+            at: WebCore.IntPoint(point),
+            type: .OneFingerDoubleTap,
+            state: .Ended,
+            isInteractingWithFocusedElement: true, // FIXME: Properly handle the case where this isn't actually true.
         )
 
-        guard clickCount == 1 else {
+        let pointInGlobalCoordinateSpace = view.convert(point, to: nil)
+        showContextMenu(at: pointInGlobalCoordinateSpace)
+    }
+
+    @MainActor
+    private func handleSingleClick(at point: NSPoint) async {
+        guard let view, let page = view._protectedPage().get() else {
             return
         }
 
@@ -196,6 +198,30 @@ extension WKTextSelectionController {
         if clickLocationIsNearCaret || caretLocationIsSame {
             let pointInGlobalCoordinateSpace = view.convert(point, to: nil)
             showContextMenu(at: pointInGlobalCoordinateSpace)
+        }
+    }
+
+    @objc(handleClickAtPoint:clickCount:)
+    func handleClick(at point: NSPoint, clickCount: Int) {
+        // The `point` location is relative to the view.
+
+        guard let view, let page = view._protectedPage().get() else {
+            return
+        }
+
+        Logger.viewGestures.log(
+            "[pageProxyID=\(page.logIdentifier())] \(#function) point \(point.debugDescription) clickCount \(clickCount)"
+        )
+
+        Task.immediate {
+            switch clickCount {
+            case 1:
+                await handleSingleClick(at: point)
+            case 2:
+                await handleDoubleClick(at: point)
+            default:
+                break
+            }
         }
     }
 
