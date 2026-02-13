@@ -295,9 +295,6 @@ svg/foreignObject/filter.html                 [ ImageOnlyFailure ]
 svg/foreignObject/vertical-foreignObject.html [ ImageOnlyFailure ]
 svg/overflow/overflow-on-foreignObject.svg    [ ImageOnlyFailure ]
 
-# TODO: Test needs to be adapted (see test), then it will pass with LBSE, but fail legacy -- leaving it as-is for now.
-svg/transforms/svgsvgelement-transform.svg [ ImageOnlyFailure ]
-
 # Outline / focus-ring support
 svg/custom/focus-ring.svg [ ImageOnlyFailure ]
 
