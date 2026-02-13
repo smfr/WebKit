@@ -35,6 +35,7 @@ namespace WebKit {
 
 class WebParentalControlsURLFilter final : public WebCore::ParentalControlsURLFilter {
 public:
+    static void setSharedParentalControlsURLFilterIfNecessary();
     static Ref<WebParentalControlsURLFilter> create();
     ~WebParentalControlsURLFilter();
 

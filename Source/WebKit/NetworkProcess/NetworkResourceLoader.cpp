@@ -280,7 +280,9 @@ void NetworkResourceLoader::startContentFiltering(ResourceRequest&& request, Com
         completionHandler(WTF::move(request));
         return;
     }
-    NetworkProcess::setSharedParentalControlsURLFilterIfNecessary();
+#if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER) && !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
+    WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary();
+#endif
     m_contentFilter = ContentFilter::create(*this);
     RefPtr contentFilter = m_contentFilter;
 #if HAVE(AUDIT_TOKEN)

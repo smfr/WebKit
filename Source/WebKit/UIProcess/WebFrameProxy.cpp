@@ -85,6 +85,10 @@
 #include <WebCore/ParentalControlsURLFilterParameters.h>
 #endif
 
+#if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER)
+#include "WebParentalControlsURLFilter.h"
+#endif
+
 #define MESSAGE_CHECK(assertion) MESSAGE_CHECK_BASE(assertion, process().connection())
 
 namespace WebKit {
@@ -447,6 +451,10 @@ bool WebFrameProxy::didHandleContentFilterUnblockNavigation(const ResourceReques
             return true;
         }
     }
+#endif
+
+#if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER) && !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
+    WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary();
 #endif
 
     m_contentFilterUnblockHandler.requestUnblockAsync([page](bool unblocked) {

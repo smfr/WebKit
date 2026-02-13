@@ -37,6 +37,10 @@
 #include <WebCore/LocalFrameLoaderClient.h>
 #include <wtf/TZoneMallocInlines.h>
 
+#if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER)
+#include "WebParentalControlsURLFilter.h"
+#endif
+
 namespace WebKit {
 using namespace WebCore;
 
@@ -52,7 +56,9 @@ PendingDownload::PendingDownload(IPC::Connection* parentProcessConnection, Netwo
     relaxAdoptionRequirement();
 
 #if ENABLE(CONTENT_FILTERING)
-    NetworkProcess::setSharedParentalControlsURLFilterIfNecessary();
+#if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER) && !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
+    WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary();
+#endif
 #endif
 
 #if HAVE(WEBCONTENTRESTRICTIONS)

@@ -110,6 +110,16 @@ void WebParentalControlsURLFilter::allowURL(const URL& url, CompletionHandler<vo
     });
 }
 
+void WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary()
+{
+    ASSERT(isMainRunLoop());
+    static bool initialized = false;
+    if (!initialized) {
+        WebCore::ParentalControlsURLFilter::setGlobalFilter(WebParentalControlsURLFilter::create());
+        initialized = true;
+    }
+}
+
 } // namespace WebKit
 
 #endif
