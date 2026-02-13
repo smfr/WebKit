@@ -1129,7 +1129,7 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
         issueRepaintForOutlineAuto(hasOutlineAuto ? outlineStyleForRepaint().usedOutlineSize() : oldStyle->usedOutlineSize());
     }
 
-    if (settings().cssScrollAnchoringEnabled() && style().scrollAnchoringSuppressionStyleDidChange(oldStyle)) {
+    if (settings().cssScrollAnchoringEnabled() && (diff >= Style::DifferenceResult::Layout) && style().scrollAnchoringSuppressionStyleDidChange(oldStyle)) {
         auto findNearestScrollAnchoringController = [](const RenderElement& renderer) -> CheckedPtr<ScrollAnchoringController> {
             // At this point we can't find the appropriate enclosing ScrollAnchoringController, because we haven't done layout.
             // We will, however, have created a ScrollAnchoringController for potentially scrollable ancestors, so store

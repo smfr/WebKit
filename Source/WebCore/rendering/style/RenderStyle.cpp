@@ -167,7 +167,7 @@ bool RenderStyle::scrollAnchoringSuppressionStyleDidChange(const RenderStyle* ot
     if (position() != other->position())
         return true;
 
-    if (m_computedStyle.m_nonInheritedData->surroundData.ptr() && other->m_computedStyle.m_nonInheritedData->surroundData.ptr()) {
+    if (m_computedStyle.m_nonInheritedData->surroundData.ptr() != other->m_computedStyle.m_nonInheritedData->surroundData.ptr()) {
         SUPPRESS_UNCOUNTED_LOCAL auto& surroundData = m_computedStyle.m_nonInheritedData->surroundData.get();
         SUPPRESS_UNCOUNTED_LOCAL auto& otherSurroundData = other->m_computedStyle.m_nonInheritedData->surroundData.get();
         if (surroundData.margin != otherSurroundData.margin)
@@ -182,9 +182,24 @@ bool RenderStyle::scrollAnchoringSuppressionStyleDidChange(const RenderStyle* ot
         }
     }
 
-    if (hasTransformRelatedProperty() != other->hasTransformRelatedProperty() || transform() != other->transform())
-        return true;
+    if (m_computedStyle.m_nonInheritedData->miscData.ptr() != other->m_computedStyle.m_nonInheritedData->miscData.ptr()) {
+        SUPPRESS_UNCOUNTED_LOCAL auto& miscData = m_computedStyle.m_nonInheritedData->miscData.get();
+        SUPPRESS_UNCOUNTED_LOCAL auto& otherMiscData = other->m_computedStyle.m_nonInheritedData->miscData.get();
+        if (miscData.transform != otherMiscData.transform)
+            return true;
+    }
 
+    // The spec doesn't list `translate`, `rotate`, `scale` but test them here.
+    // https://github.com/w3c/csswg-drafts/issues/13489
+    if (m_computedStyle.m_nonInheritedData->rareData.ptr() != other->m_computedStyle.m_nonInheritedData->rareData.ptr()) {
+        SUPPRESS_UNCOUNTED_LOCAL auto& rareData = m_computedStyle.m_nonInheritedData->rareData.get();
+        SUPPRESS_UNCOUNTED_LOCAL auto& otherRareData = other->m_computedStyle.m_nonInheritedData->rareData.get();
+        if (rareData.translate != otherRareData.translate
+            || rareData.rotate != otherRareData.rotate
+            || rareData.scale != otherRareData.scale) {
+            return true;
+        }
+    }
     return false;
 }
 
