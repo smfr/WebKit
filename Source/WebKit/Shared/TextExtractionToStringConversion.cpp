@@ -36,10 +36,38 @@
 #include <wtf/text/MakeString.h>
 #include <wtf/text/StringBuilder.h>
 #include <wtf/text/StringToIntegerConversion.h>
+#include <wtf/unicode/CharacterNames.h>
 
 namespace WebKit {
 
 using namespace WebCore;
+
+static String removeZeroWidthCharacters(const String& string)
+{
+    if (string.is8Bit())
+        return string;
+
+    return string.removeCharacters([](char16_t character) {
+        switch (character) {
+        case zeroWidthSpace:
+        case zeroWidthNonJoiner:
+        case zeroWidthJoiner:
+        case zeroWidthNoBreakSpace:
+        case wordJoiner:
+        case functionApplication:
+        case invisibleTimes:
+        case invisibleSeparator:
+            return true;
+        default:
+            return false;
+        }
+    });
+}
+
+static bool isEmptyMarkdownListItem(StringView line)
+{
+    return line == "-"_s || line == "- "_s;
+}
 
 std::optional<FrameAndNodeIdentifiers> parseFrameAndNodeIdentifiers(StringView identifierString)
 {
@@ -208,6 +236,22 @@ public:
         m_lines.removeAllMatching([](auto& line) {
             return line.first.isEmpty();
         });
+
+        if (useMarkdownOutput()) {
+            m_lines.removeAllMatching([](auto& line) {
+                return isEmptyMarkdownListItem(line.first);
+            });
+        }
+
+        if (m_lines.size() > 1) {
+            Vector<std::pair<String, TextExtractionLine>> unduplicatedLines;
+            unduplicatedLines.reserveInitialCapacity(m_lines.size());
+            for (auto& line : m_lines) {
+                if (unduplicatedLines.isEmpty() || unduplicatedLines.last().first != line.first)
+                    unduplicatedLines.append(WTF::move(line));
+            }
+            m_lines = WTF::move(unduplicatedLines);
+        }
 
         if (useTextTreeOutput() || useHTMLOutput()) {
             return makeStringByJoining(m_lines.map([](auto& stringAndLine) {
@@ -686,7 +730,7 @@ static void addJSONTextContent(Ref<JSON::Object>&& jsonObject, const TextExtract
         if (filteredText.isEmpty())
             return;
 
-        auto content = filteredText.trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace);
+        auto content = removeZeroWidthCharacters(filteredText.trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace));
         aggregator->applyReplacements(content);
 
         if (content.isEmpty())
@@ -891,7 +935,7 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
             aggregator->applyReplacements(filteredText);
 
             if (aggregator->onlyIncludeText()) {
-                aggregator->addResult(currentLine, { escapeString(filteredText.trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace)) });
+                aggregator->addResult(currentLine, { escapeString(removeZeroWidthCharacters(filteredText.trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace))) });
                 return;
             }
 
@@ -913,7 +957,7 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
                     }
                 }
 
-                auto trimmedContent = filteredText.substring(startIndex, endIndex - startIndex + 1);
+                auto trimmedContent = removeZeroWidthCharacters(filteredText.substring(startIndex, endIndex - startIndex + 1));
                 if (aggregator->useHTMLOutput()) {
                     if (!closingTag.isEmpty()) {
                         aggregator->appendToLine(currentLine.lineIndex, makeString(escapeStringForHTML(trimmedContent), closingTag));
