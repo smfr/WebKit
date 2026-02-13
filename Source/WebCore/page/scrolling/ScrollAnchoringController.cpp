@@ -84,7 +84,10 @@ bool ScrollAnchoringController::shouldMaintainScrollAnchor() const
 
 void ScrollAnchoringController::scrollPositionDidChange()
 {
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollableArea::scrollPositionChanged() to " << m_owningScrollableArea->scrollPosition() << " - clearing scroll anchor");
+    if (m_isUpdatingScrollPositionForAnchoring)
+        return;
+
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController::scrollPositionChanged() to " << m_owningScrollableArea->scrollPosition() << " - clearing scroll anchor");
     clearAnchor();
     updateScrollableAreaRegistration();
 }
