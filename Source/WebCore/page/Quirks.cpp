@@ -1827,7 +1827,7 @@ bool Quirks::needsConsistentQueryParameterFilteringQuirk(const URL& url) const
 
     if (enableQuirk && !wasLoggedOnce) {
         RELEASE_LOG(Loading, "Quirks::needsConsistentQueryParameterFilteringQuirk: Enabling consistent privacy protections");
-        m_document->addConsoleMessage(MessageSource::Other, MessageLevel::Info, makeString("Enabling consistent privacy protections on \""_s, lowercaseURL.string(), "\""_s));
+        protect(m_document)->addConsoleMessage(MessageSource::Other, MessageLevel::Info, makeString("Enabling consistent privacy protections on \""_s, lowercaseURL.string(), "\""_s));
         wasLoggedOnce = true;
     }
 
