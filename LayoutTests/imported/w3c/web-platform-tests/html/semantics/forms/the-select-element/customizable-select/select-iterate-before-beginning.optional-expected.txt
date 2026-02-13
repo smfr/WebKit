@@ -1,9 +1,6 @@
 button
   one
-
-
-
-  two
+two
 
 FAIL Attempting to focus the previous option while focused on the first option should not crash. assert_equals: The first option should be focused after opening the select. expected Element node <option class="one">one</option> but got Element node <select id="s1">
   <button>button</button>

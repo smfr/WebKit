@@ -1,8 +1,5 @@
 
 
-
-
-
 FAIL Keyboard navigation forwards and backwards should visit each option with optgroups. assert_equals: First option should be initially focused. expected Element node <option class="one">one</option> but got Element node <select>
   <optgroup label="group1">
     <option class="o...

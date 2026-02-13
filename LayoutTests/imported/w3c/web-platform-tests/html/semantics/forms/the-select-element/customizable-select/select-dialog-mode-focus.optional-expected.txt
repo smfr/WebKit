@@ -1,25 +1,7 @@
 
-
-
-
-  Elephant
-  Tiger
-  Kangaroo
-  Dolphin
-  Giraffe
-  Panda
-
-
-  Zebra
-  Koala
-    Hippopotamus
-  Rhinoceros
-    Flamingo
-    Crocodile
-
-    Chimpanzee
-
-
+Elephant Tiger Kangaroo  Dolphin
+Giraffe  Panda
+Zebra  Koala  Hippopotamus Rhinoceros  Flamingo  Crocodile  Chimpanzee
 
 FAIL In dialog mode the first focusable element should get focus. assert_equals: The anchor should be focused. expected Element node <a id="interactive1" href="https://www.example.com/">Elep... but got Element node <select id="target">
   <div></div>

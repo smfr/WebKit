@@ -1,8 +1,4 @@
-
-
-  alpha
-  bravo
-  charlie
+alpha bravo charlie
 
 FAIL Type to search should focus but not select an option until selection is confirmed. assert_equals: The `bravo` option should be focused after pressing `b`. expected Element node <option id="bravo">bravo</option> but got Element node <select id="target">
   <option></option>

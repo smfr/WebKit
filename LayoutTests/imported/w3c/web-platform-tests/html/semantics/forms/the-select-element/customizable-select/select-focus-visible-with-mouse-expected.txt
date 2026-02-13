@@ -1,5 +1,4 @@
-
-  option
+option
 
 FAIL Select should not match :focus-visible when using mouse. assert_equals: Nothing should be :focus-visible after opening select with mouse. expected null but got Element node <select>
   <option>option</option>

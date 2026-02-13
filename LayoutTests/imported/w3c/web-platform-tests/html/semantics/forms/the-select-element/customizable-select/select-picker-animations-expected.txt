@@ -1,6 +1,4 @@
-
-  one
-  two
+one two
 
 PASS select::picker(select) should support author provided top layer animations.
 

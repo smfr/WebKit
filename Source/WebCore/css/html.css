@@ -1057,35 +1057,87 @@ select {
     appearance: auto;
     border: 1px solid;
     -webkit-rtl-ordering: logical;
-#if !(defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY)
-    color: CanvasText;
-    background-color: Canvas;
-#endif
 }
+
+/* FIXME: Implement revert-rule CSS keyword so we can de-duplicate some of this. */
 
 select:-internal-uses-menulist {
 #if defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY
-    padding-block: 0;
-    padding-inline: 0.4em;
-    color: -apple-system-blue;
-    font: 11px system-ui;
-    border-color: -webkit-control-background;
+    padding-inline: -internal-auto-base(0.4em, 0.5em);
+    color: -internal-auto-base(-apple-system-blue, inherit);
+    font: -internal-auto-base(11px system-ui, inherit);
+    border-color: -internal-auto-base(-webkit-control-background, initial);
+    border-radius: -internal-auto-base(initial, 0.5em);
 #if defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: -internal-auto-base(rgba(0, 0, 0, 0.04), transparent);
 #else
-    background-color: -apple-system-opaque-secondary-fill;
+    background-color: -internal-auto-base(-apple-system-opaque-secondary-fill, transparent);
 #endif /* defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION */
 #else
-    border-radius: 5px;
+    padding-inline: -internal-auto-base(0, 0.5em);
+    color: -internal-auto-base(CanvasText, inherit);
+    background-color: -internal-auto-base(Canvas, transparent);
+    border-radius: -internal-auto-base(5px, 0.5em);
+    font: -internal-auto-base(-webkit-small-control, inherit);
 #endif /* defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY */
-    align-items: center;
-    white-space: pre;
-    cursor: default;
+    padding-block: -internal-auto-base(0, 0.25em);
+    align-items: -internal-auto-base(center, unset);
+    white-space: -internal-auto-base(pre, initial);
+    cursor: -internal-auto-base(default, inherit);
+    gap: -internal-auto-base(initial, 0.5em);
+
+    -webkit-rtl-ordering: -internal-auto-base(logical, inherit);
+    text-shadow: -internal-auto-base(none, inherit);
+    text-transform: -internal-auto-base(none, initial);
+    letter-spacing: -internal-auto-base(normal, inherit);
+    word-spacing: -internal-auto-base(normal, inherit);
+}
+
+select:-internal-uses-menulist:enabled:hover {
+#if defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY
+#if defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION
+    background-color: -internal-auto-base(rgba(0, 0, 0, 0.04), color-mix(in lab, currentColor 10%, transparent));
+#else
+    background-color: -internal-auto-base(-apple-system-opaque-secondary-fill, color-mix(in lab, currentColor 10%, transparent));
+#endif /* defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION */
+#else
+    background-color: -internal-auto-base(Canvas, color-mix(in lab, currentColor 10%, transparent));
+#endif /* defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY */
+}
+
+select:-internal-uses-menulist:enabled:active {
+#if defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY
+#if defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION
+    background-color: -internal-auto-base(rgba(0, 0, 0, 0.04), color-mix(in lab, currentColor 20%, transparent));
+#else
+    background-color: -internal-auto-base(-apple-system-opaque-secondary-fill, color-mix(in lab, currentColor 20%, transparent));
+#endif /* defined(WTF_PLATFORM_VISION) && WTF_PLATFORM_VISION */
+#else
+    background-color: -internal-auto-base(Canvas, color-mix(in lab, currentColor 20%, transparent));
+#endif /* defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY */
+}
+
+select:-internal-uses-menulist:disabled {
+#if defined(WTF_PLATFORM_IOS_FAMILY) && WTF_PLATFORM_IOS_FAMILY
+    background-color: -internal-auto-base(-apple-system-opaque-secondary-fill-disabled, transparent);
+    color: -internal-auto-base(-apple-system-tertiary-label, color-mix(in lab, currentColor 50%, transparent));
+#else
+    color: -internal-auto-base(GrayText, color-mix(in lab, currentColor 50%, transparent));
+#endif
+}
+
+select:-internal-uses-menulist:not([popover]) {
+    display: -internal-auto-base(inline-block, inline-flex);
 }
 
 select:not(:-internal-uses-menulist) {
+    background-color: Canvas;
     border-style: inset;
     border-color: gray;
+}
+
+select:not(:-internal-uses-menulist):enabled {
+    color: CanvasText;
 }
 
 select:not([multiple]):-internal-uses-menulist > button:first-child {

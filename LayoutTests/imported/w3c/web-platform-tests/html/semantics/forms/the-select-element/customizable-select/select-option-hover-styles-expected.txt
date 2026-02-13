@@ -1,7 +1,4 @@
-
-  one
-  two
-  disabled
+one two disabled
 
 FAIL Hover styles should be present for appearance:base-select options. assert_equals: Option background-color while hovering. expected "lab(0 0 0 / 0.1)" but got "rgba(0, 0, 0, 0)"
 
