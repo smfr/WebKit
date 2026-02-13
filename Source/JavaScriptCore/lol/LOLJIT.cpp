@@ -40,6 +40,7 @@
 #include "JITBitAndGenerator.h"
 #include "JITBitOrGenerator.h"
 #include "JITBitXorGenerator.h"
+#include "JITDivGenerator.h"
 #include "JITInlines.h"
 #include "JITLeftShiftGenerator.h"
 #include "JITSizeStatistics.h"
@@ -2954,6 +2955,54 @@ void LOLJIT::emit_op_mod(const JSInstruction* currentInstruction)
 #else
 #error "Unsupported Architecture"
 #endif
+
+void LOLJIT::emit_op_div(const JSInstruction* currentInstruction)
+{
+    auto bytecode = currentInstruction->as<OpDiv>();
+    auto allocations = m_fastAllocator.allocate(*this, bytecode, m_bytecodeIndex);
+    auto [ leftRegs, rightRegs ] = allocations.uses;
+    auto [ resultRegs ] = allocations.defs;
+
+    VirtualRegister op1 = bytecode.m_lhs;
+    VirtualRegister op2 = bytecode.m_rhs;
+
+    BinaryArithProfile* arithProfile = nullptr;
+    if (shouldEmitProfiling())
+        arithProfile = &m_unlinkedCodeBlock->binaryArithProfile(bytecode.m_profileIndex);
+
+    SnippetOperand leftOperand(bytecode.m_operandTypes.first());
+    SnippetOperand rightOperand(bytecode.m_operandTypes.second());
+
+    if (isOperandConstantInt(op1))
+        leftOperand.setConstInt32(getOperandConstantInt(op1));
+#if USE(JSVALUE64)
+    else if (isOperandConstantDouble(op1))
+        leftOperand.setConstDouble(getOperandConstantDouble(op1));
+#endif
+    else if (isOperandConstantInt(op2))
+        rightOperand.setConstInt32(getOperandConstantInt(op2));
+#if USE(JSVALUE64)
+    else if (isOperandConstantDouble(op2))
+        rightOperand.setConstDouble(getOperandConstantDouble(op2));
+#endif
+
+    RELEASE_ASSERT(!leftOperand.isConst() || !rightOperand.isConst());
+
+    JITDivGenerator gen(leftOperand, rightOperand, resultRegs, leftRegs, rightRegs,
+        fpRegT0, fpRegT1, s_scratch, fpRegT2, arithProfile);
+
+    gen.generateFastPath(*this);
+
+    if (gen.didEmitFastPath()) {
+        gen.endJumpList().link(this);
+        addSlowCase(gen.slowPathJumpList());
+    } else {
+        // No fast path emitted - always go slow path.
+        addSlowCase(jump());
+    }
+
+    m_fastAllocator.releaseScratches(allocations);
+}
 
 void LOLJIT::emit_op_negate(const JSInstruction* currentInstruction)
 {
