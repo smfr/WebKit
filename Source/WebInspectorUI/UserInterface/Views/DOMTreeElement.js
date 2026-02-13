@@ -814,38 +814,39 @@ WI.DOMTreeElement = class DOMTreeElement extends WI.TreeElement
         let isNonShadowEditable = isEditableNode && (!this.representedObject.isInUserAgentShadowTree() || WI.DOMManager.supportsEditingUserAgentShadowTrees());
         let alreadyEditingHTML = this._htmlEditElement && WI.isBeingEdited(this._htmlEditElement);
         let openTagTreeElement = this.isElementCloseTag ? this.treeOutline.findTreeElement(this.representedObject) : this;
+        let selectedTreeElements = this.treeOutline.selectedTreeElements;
 
         if (isEditableNode) {
             if (!DOMTreeElement.ForbiddenClosingTagElements.has(this.representedObject.nodeNameInCorrectCase())) {
-                subMenus.add.appendItem(WI.UIString("Child", "A submenu item of 'Add' to append DOM nodes to the selected DOM node"), () => {
+                subMenus.add?.appendItem(WI.UIString("Child", "A submenu item of 'Add' to append DOM nodes to the selected DOM node"), () => {
                     openTagTreeElement._addHTML();
                 }, alreadyEditingHTML);
             }
 
-            subMenus.add.appendItem(WI.UIString("Previous Sibling", "A submenu item of 'Add' to add DOM nodes before the selected DOM node"), () => {
+            subMenus.add?.appendItem(WI.UIString("Previous Sibling", "A submenu item of 'Add' to add DOM nodes before the selected DOM node"), () => {
                 openTagTreeElement._addPreviousSibling();
             }, alreadyEditingHTML);
 
-            subMenus.add.appendItem(WI.UIString("Next Sibling", "A submenu item of 'Add' to add DOM nodes after the selected DOM node"), () => {
+            subMenus.add?.appendItem(WI.UIString("Next Sibling", "A submenu item of 'Add' to add DOM nodes after the selected DOM node"), () => {
                 openTagTreeElement._addNextSibling();
             }, alreadyEditingHTML);
         }
 
         if (isNonShadowEditable) {
-            subMenus.add.appendItem(WI.UIString("Attribute"), () => {
+            subMenus.add?.appendItem(WI.UIString("Attribute"), () => {
                 openTagTreeElement._addNewAttribute();
             });
         }
 
         if (this.editable) {
-            subMenus.edit.appendItem(WI.UIString("HTML"), () => {
+            subMenus.edit?.appendItem(WI.UIString("HTML"), () => {
                 this._editAsHTML();
             }, alreadyEditingHTML);
         }
 
         if (isNonShadowEditable) {
             if (attributeName) {
-                subMenus.edit.appendItem(WI.UIString("Attribute"), () => {
+                subMenus.edit?.appendItem(WI.UIString("Attribute"), () => {
                     this._startEditingAttribute(attributeNode, event.target);
                 }, WI.isBeingEdited(attributeNode));
             }
@@ -853,14 +854,14 @@ WI.DOMTreeElement = class DOMTreeElement extends WI.TreeElement
             if (InspectorBackend.hasCommand("DOM.setNodeName") && !DOMTreeElement.UneditableTagNames.has(this.representedObject.nodeNameInCorrectCase())) {
                 let tagNameNode = event.target.closest(".html-tag-name");
 
-                subMenus.edit.appendItem(WI.UIString("Tag", "A submenu item of 'Edit' to change DOM element's tag name"), () => {
+                subMenus.edit?.appendItem(WI.UIString("Tag", "A submenu item of 'Edit' to change DOM element's tag name"), () => {
                     this._startEditingTagName(tagNameNode);
                 }, WI.isBeingEdited(tagNameNode));
             }
         }
 
         if (textNode && this.editable) {
-            subMenus.edit.appendItem(WI.UIString("Text"), () => {
+            subMenus.edit?.appendItem(WI.UIString("Text"), () => {
                 this._startEditingTextNode(textNode);
             }, WI.isBeingEdited(textNode));
         }
@@ -885,40 +886,42 @@ WI.DOMTreeElement = class DOMTreeElement extends WI.TreeElement
             });
         }
 
-        if (attributeName) {
-            subMenus.copy.appendItem(WI.UIString("Attribute"), () => {
-                let text = attributeName;
-                let attributeValue = this.representedObject.getAttribute(attributeName);
-                if (attributeValue)
-                    text += "=\"" + attributeValue.replace(/"/g, "\\\"") + "\"";
-                InspectorFrontendHost.copyText(text);
-            });
-        }
+        if (selectedTreeElements.length === 1) {
+            if (attributeName) {
+                subMenus.copy.appendItem(WI.UIString("Attribute"), () => {
+                    let text = attributeName;
+                    let attributeValue = this.representedObject.getAttribute(attributeName);
+                    if (attributeValue)
+                        text += "=\"" + attributeValue.replace(/"/g, "\\\"") + "\"";
+                    InspectorFrontendHost.copyText(text);
+                });
+            }
 
-        if (textNode && textNode.textContent.length) {
-            subMenus.copy.appendItem(WI.UIString("Text"), () => {
-                InspectorFrontendHost.copyText(textNode.textContent);
-            });
-        }
+            if (textNode?.textContent.length) {
+                subMenus.copy.appendItem(WI.UIString("Text"), () => {
+                    InspectorFrontendHost.copyText(textNode.textContent);
+                });
+            }
 
-        if (this.editable && (!this.selected || this.treeOutline.selectedTreeElements.length === 1)) {
-            subMenus.delete.appendItem(WI.UIString("Node"), () => {
-                this.remove();
-            });
-        }
+            if (this.editable) {
+                subMenus.delete.appendItem(WI.UIString("Node"), () => {
+                    this.remove();
+                });
+            }
 
-        if (attributeName && isNonShadowEditable) {
-            subMenus.delete.appendItem(WI.UIString("Attribute"), () => {
-                this.representedObject.removeAttribute(attributeName);
-            });
+            if (attributeName && isNonShadowEditable) {
+                subMenus.delete.appendItem(WI.UIString("Attribute"), () => {
+                    this.representedObject.removeAttribute(attributeName);
+                });
+            }
         }
 
         for (let subMenu of Object.values(subMenus))
             contextMenu.pushItem(subMenu);
 
         if (this.treeOutline.editable) {
-            if (this.selected && this.treeOutline && this.treeOutline.selectedTreeElements.length > 1) {
-                let forceHidden = !this.treeOutline.selectedTreeElements.every((treeElement) => treeElement.isNodeHidden);
+            if (this.selected && selectedTreeElements.length > 1) {
+                let forceHidden = !selectedTreeElements.every((treeElement) => treeElement.isNodeHidden);
                 let label = forceHidden ? WI.UIString("Hide Elements") : WI.UIString("Show Elements");
                 contextMenu.appendItem(label, () => {
                     this.treeOutline.toggleSelectedElementsVisibility(forceHidden);
