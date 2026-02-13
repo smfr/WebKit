@@ -41,6 +41,8 @@
 #endif
 
 #if ENABLE(OVERLAY_REGIONS_REMOTE_EFFECT)
+#import "UIKitSPI.h"
+#import "WKBaseScrollView.h"
 #import <wtf/cocoa/VectorCocoa.h>
 #endif
 
