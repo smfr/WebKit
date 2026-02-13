@@ -26,18 +26,18 @@ function moveTextMarker(axElement, marker, number) {
 
 function testIntersectRanges(axElement, elementRange, range1, range2) {
     output += `${axElement.domIdentifier}, ${axElement.role}\n`;
-    output += `elementRange: ${axElement.textMarkerRangeDebugDescription(elementRange)}\n`;
-    output += `range1: ${axElement.textMarkerRangeDebugDescription(range1)}\n`;
-    output += `range2: ${axElement.textMarkerRangeDebugDescription(range2)}\n`;
+    output += `elementRange: '${axElement.stringForTextMarkerRange(elementRange)}'\n`;
+    output += `range1: '${axElement.stringForTextMarkerRange(range1)}'\n`;
+    output += `range2: '${axElement.stringForTextMarkerRange(range2)}'\n`;
 
     intersection = axElement.intersectTextMarkerRanges(elementRange, range1);
-    output += `elementRange range1 intersection: ${axElement.textMarkerRangeDebugDescription(intersection)}\n`;
+    output += `elementRange range1 intersection: '${axElement.stringForTextMarkerRange(intersection)}'\n`;
 
     intersection = axElement.intersectTextMarkerRanges(elementRange, range2);
-    output += `elementRange range2 intersection: ${axElement.textMarkerRangeDebugDescription(intersection)}\n`;
+    output += `elementRange range2 intersection: '${axElement.stringForTextMarkerRange(intersection)}'\n`;
 
     intersection = axElement.intersectTextMarkerRanges(range1, range2);
-    output += `range1 range2 intersection: ${axElement.textMarkerRangeDebugDescription(intersection)}\n\n`;
+    output += `range1 range2 intersection: '${axElement.stringForTextMarkerRange(intersection)}'\n\n`;
 }
 
 if (window.accessibilityController) {
