@@ -128,6 +128,9 @@ enum class WheelEventProcessingSteps : uint8_t;
 enum class WheelScrollGestureState : uint8_t;
 
 #if ENABLE(DRAG_SUPPORT)
+// The link drag hysteresis is much larger than the others because there
+// needs to be enough space to cancel the link press without starting a link drag,
+// and because dragging links is rare.
 inline constexpr int LinkDragHysteresis = 40;
 inline constexpr int ImageDragHysteresis = 5;
 inline constexpr int TextDragHysteresis = 3;
@@ -137,6 +140,7 @@ inline constexpr int GeneralDragHysteresis = 3;
 
 #if ENABLE(IOS_GESTURE_EVENTS) || ENABLE(MAC_GESTURE_EVENTS)
 inline constexpr float GestureUnknown = 0;
+// FIXME: Share this constant with EventHandler and SliderThumbElement.
 inline constexpr unsigned InvalidTouchIdentifier = 0;
 #endif
 
