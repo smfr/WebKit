@@ -470,7 +470,10 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
                     return GridAvoidanceReason::GridItemHasUnsupportedRowPlacement;
 
                 ASSERT(rowEnd.isExplicit());
-                explicitlyPlacedItemsInRowCount.resize(rowStartLineNumber + 1);
+                size_t rowIndex = rowStartLineNumber + 1;
+                auto rowsCount = explicitlyPlacedItemsInRowCount.size();
+                if (rowIndex > rowsCount)
+                    explicitlyPlacedItemsInRowCount.insertFill(rowsCount, 0, rowIndex - rowsCount);
                 ++explicitlyPlacedItemsInRowCount[rowStartLineNumber];
                 return { };
             },
