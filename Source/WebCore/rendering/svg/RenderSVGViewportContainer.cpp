@@ -149,11 +149,13 @@ void RenderSVGViewportContainer::updateLayerTransform()
         // An empty viewBox disables the rendering -- dirty the visible descendant status!
         if (useSVGSVGElement->hasEmptyViewBox() && hasCurrentViewEmptyViewBox)
             layer()->dirtyVisibleContentStatus();
-        else if (auto viewBoxTransform = viewBoxToViewTransform(useSVGSVGElement, viewportSize); !viewBoxTransform.isIdentity()) {
-            if (m_supplementalLayerTransform.isIdentity())
-                m_supplementalLayerTransform = viewBoxTransform;
-            else
-                m_supplementalLayerTransform.multiply(viewBoxTransform);
+        else if (!useSVGSVGElement->viewBox().isEmpty()) {
+            if (auto viewBoxTransform = viewBoxToViewTransform(useSVGSVGElement, viewportSize); !viewBoxTransform.isIdentity()) {
+                if (m_supplementalLayerTransform.isIdentity())
+                    m_supplementalLayerTransform = viewBoxTransform;
+                else
+                    m_supplementalLayerTransform.multiply(viewBoxTransform);
+            }
         }
     }
 
@@ -177,8 +179,10 @@ LayoutRect RenderSVGViewportContainer::overflowClipRect(const LayoutPoint& locat
         if (useSVGSVGElement->hasEmptyViewBox())
             return { };
 
-        if (auto viewBoxTransform = viewBoxToViewTransform(useSVGSVGElement, viewportSize()); !viewBoxTransform.isIdentity())
-            clipRect = enclosingLayoutRect(viewBoxTransform.inverse().value_or(AffineTransform { }).mapRect(viewport()));
+        if (!useSVGSVGElement->viewBox().isEmpty()) {
+            if (auto viewBoxTransform = viewBoxToViewTransform(useSVGSVGElement, viewportSize()); !viewBoxTransform.isIdentity())
+                clipRect = enclosingLayoutRect(viewBoxTransform.inverse().value_or(AffineTransform { }).mapRect(viewport()));
+        }
     }
 
     clipRect.moveBy(location);
