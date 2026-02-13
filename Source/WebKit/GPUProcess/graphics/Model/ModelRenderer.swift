@@ -24,6 +24,8 @@
 #if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
 
 internal import QuartzCore
+@_weakLinked internal import USDKit
+@_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_weakLinked @_spi(RealityCoreRendererAPI) @_spi(Private) internal import RealityKit
 internal import simd
 

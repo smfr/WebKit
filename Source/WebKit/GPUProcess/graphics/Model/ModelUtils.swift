@@ -25,6 +25,8 @@
 
 @_weakLinked internal import DirectResource
 internal import Metal
+@_weakLinked internal import USDKit
+@_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
 @_weakLinked @_spi(SGInternal) internal import RealityKit
 
