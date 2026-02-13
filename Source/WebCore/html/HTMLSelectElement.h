@@ -41,6 +41,7 @@
 namespace WebCore {
 
 class HTMLOptionsCollection;
+class SelectPopoverElement;
 class ShadowRoot;
 
 #if !PLATFORM(IOS_FAMILY)
@@ -183,6 +184,10 @@ public:
     void registerSelectedContentElement();
     void unregisterSelectedContentElement();
 
+    bool usesBaseAppearancePicker() const;
+    SelectPopoverElement* pickerPopoverElement() const;
+    void hidePickerPopoverElement();
+
 protected:
     HTMLSelectElement(const QualifiedName&, Document&, HTMLFormElement*);
 
@@ -266,6 +271,8 @@ private:
 
     void didAddUserAgentShadowRoot(ShadowRoot&) final;
 
+    void showPickerInternal();
+
     // TypeAheadDataSource functions.
     int indexOfSelectedOption() const final;
     int optionCount() const final;
@@ -290,6 +297,7 @@ private:
     std::optional<int> m_lastActiveIndex;
 
     WeakPtr<HTMLSlotElement, WeakPtrImplWithEventTargetData> m_buttonSlot;
+    WeakPtr<SelectPopoverElement, WeakPtrImplWithEventTargetData> m_popover;
 
 #if !PLATFORM(IOS_FAMILY)
     RefPtr<PopupMenu> m_popup;

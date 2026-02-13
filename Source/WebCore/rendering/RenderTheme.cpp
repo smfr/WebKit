@@ -73,6 +73,7 @@
 #include "SearchFieldCancelButtonPart.h"
 #include "SearchFieldPart.h"
 #include "SearchFieldResultsPart.h"
+#include "SelectPopoverElement.h"
 #include "SliderThumbElement.h"
 #include "SliderThumbPart.h"
 #include "SliderTrackPart.h"
@@ -131,7 +132,7 @@ StyleAppearance RenderTheme::adjustAppearanceForElement(RenderStyle& style, cons
 
     auto appearance = style.usedAppearance();
     if (appearance == StyleAppearance::BaseSelect) {
-        if (is<HTMLSelectElement>(element)) [[likely]] {
+        if (is<HTMLSelectElement>(element) || is<SelectPopoverElement>(element)) [[likely]] {
             style.setUsedAppearance(StyleAppearance::Base);
             return StyleAppearance::Base;
         }

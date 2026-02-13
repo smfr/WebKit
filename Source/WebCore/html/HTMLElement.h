@@ -96,6 +96,8 @@ public:
     virtual bool isSearchFieldResultsButtonElement() const { return false; }
     virtual bool isDataListButtonElement() const { return false; }
     virtual bool isSelectFallbackButtonElement() const { return false; }
+    virtual bool isSelectPopoverElement() const { return false; }
+    virtual void popoverWasHidden() { }
 
     bool willRespondToMouseMoveEvents() const override;
     bool willRespondToMouseClickEventsWithEditability(Editability) const override;

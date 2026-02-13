@@ -47,6 +47,7 @@
 #include "PaintWorkletGlobalScope.h"
 #include "RenderStyle+GettersInlines.h"
 #include "RenderStyle+SettersInlines.h"
+#include "SelectPopoverElement.h"
 #include "Settings.h"
 #include "StyleAdjuster.h"
 #include "StyleBuilderGenerated.h"
@@ -562,7 +563,13 @@ Ref<CSSValue> Builder::resolveInternalAutoBaseFunction(CSSValue& value)
         return value;
 
     // usedAppearance() is inaccurate at this stage of style resolution, check against both `appearance: base-select` & `appearance: base`.
-    bool isAppearanceBase = m_state->style().appearance() == StyleAppearance::Base || (is<HTMLSelectElement>(m_state->element()) && m_state->style().appearance() == StyleAppearance::BaseSelect);
+    bool isAppearanceBase = [&] {
+        if (m_state->style().appearance() == StyleAppearance::Base)
+            return true;
+        if (m_state->style().appearance() != StyleAppearance::BaseSelect)
+            return false;
+        return is<HTMLSelectElement>(m_state->element()) || is<SelectPopoverElement>(m_state->element());
+    }();
     RefPtr result = const_cast<CSSValue*>(isAppearanceBase ? functionValue->item(1) : functionValue->item(0));
 
     if (!result)

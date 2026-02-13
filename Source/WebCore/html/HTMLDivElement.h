@@ -34,6 +34,7 @@ public:
     static Ref<HTMLDivElement> create(const QualifiedName&, Document&);
 
 protected:
+    HTMLDivElement(Document&);
     HTMLDivElement(const QualifiedName&, Document&, OptionSet<TypeFlag> = { });
 
 private:

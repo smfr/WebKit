@@ -31,12 +31,14 @@
 #include "ContainerNodeInlines.h"
 #include "Document.h"
 #include "ElementAncestorIteratorInlines.h"
+#include "EventNames.h"
 #include "HTMLDataListElement.h"
 #include "HTMLHRElement.h"
 #include "HTMLNames.h"
 #include "HTMLOptGroupElement.h"
 #include "HTMLSelectElement.h"
 #include "HTMLSelectedContentElement.h"
+#include "MouseEvent.h"
 #include "NodeName.h"
 #include "NodeRenderStyle.h"
 #include "NodeTraversal.h"
@@ -45,6 +47,7 @@
 #include "RenderTheme.h"
 #include "ScriptDisallowedScope.h"
 #include "ScriptElement.h"
+#include "SelectPopoverElement.h"
 #include "StyleResolver.h"
 #include "Text.h"
 #include <wtf/Ref.h>
@@ -146,9 +149,18 @@ void HTMLOptionElement::finishParsingChildren()
 bool HTMLOptionElement::isFocusable() const
 {
     RefPtr select = ownerSelectElement();
-    if (select && select->usesMenuList())
+    if (select && select->usesMenuList() && !select->usesBaseAppearancePicker())
         return false;
     return HTMLElement::isFocusable();
+}
+
+bool HTMLOptionElement::rendererIsNeeded(const RenderStyle&)
+{
+    RefPtr select = ownerSelectElement();
+    if (!select)
+        return false;
+
+    return select->document().settings().htmlEnhancedSelectEnabled() && select->usesBaseAppearancePicker();
 }
 
 String HTMLOptionElement::text() const
@@ -185,6 +197,23 @@ bool HTMLOptionElement::accessKeyAction(bool)
         return true;
     }
     return false;
+}
+
+void HTMLOptionElement::defaultEventHandler(Event& event)
+{
+    RefPtr select = ownerSelectElement();
+    if (!select || !select->document().settings().htmlEnhancedSelectEnabled() || !select->usesBaseAppearancePicker())
+        return HTMLElement::defaultEventHandler(event);
+
+    RefPtr mouseEvent = dynamicDowncast<MouseEvent>(event);
+    if (event.type() == eventNames().mousedownEvent && mouseEvent && mouseEvent->button() == MouseButton::Left) {
+        select->setSelectedIndex(index());
+        select->hidePickerPopoverElement();
+        event.setDefaultHandled();
+        return;
+    }
+
+    HTMLElement::defaultEventHandler(event);
 }
 
 HTMLFormElement* HTMLOptionElement::form() const

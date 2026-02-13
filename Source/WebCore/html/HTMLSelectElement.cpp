@@ -31,6 +31,7 @@
 #include "AXObjectCache.h"
 #include "Chrome.h"
 #include "ChromeClient.h"
+#include "CommonAtomStrings.h"
 #include "ContainerNodeInlines.h"
 #include "CSSFontSelector.h"
 #include "DOMFormData.h"
@@ -46,6 +47,7 @@
 #include "GenericCachedHTMLCollection.h"
 #include "HTMLButtonElement.h"
 #include "HTMLDataListElement.h"
+#include "HTMLDivElement.h"
 #include "HTMLFormElement.h"
 #include "HTMLHRElement.h"
 #include "HTMLNames.h"
@@ -67,6 +69,7 @@
 #include "RenderTheme.h"
 #include "ScriptDisallowedScope.h"
 #include "SelectFallbackButtonElement.h"
+#include "SelectPopoverElement.h"
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "SlotAssignment.h"
@@ -178,7 +181,20 @@ void HTMLSelectElement::didAddUserAgentShadowRoot(ShadowRoot& root)
     root.appendChild(buttonSlot);
     m_buttonSlot = WTF::move(buttonSlot);
 
-    root.appendChild(HTMLSlotElement::create(slotTag, document));
+    if (!document->settings().htmlEnhancedSelectEnabled()) {
+        root.appendChild(HTMLSlotElement::create(slotTag, document));
+        return;
+    }
+
+    Ref popover = SelectPopoverElement::create(document);
+    ScriptDisallowedScope::EventAllowedScope popoverScope { popover };
+    popover->setAttributeWithoutSynchronization(popoverAttr, autoAtom());
+    popover->setUserAgentPart(pickerSelectAtom());
+
+    popover->appendChild(HTMLSlotElement::create(slotTag, document));
+
+    root.appendChild(popover);
+    m_popover = WTF::move(popover);
 }
 
 HTMLSelectElement* HTMLSelectElement::findOwnerSelect(ContainerNode* startNode, ExcludeOptGroup excludeOptGroup)
@@ -311,6 +327,36 @@ bool HTMLSelectElement::usesMenuListDeprecated() const
 #else
     return !m_multiple;
 #endif
+}
+
+bool HTMLSelectElement::usesBaseAppearancePicker() const
+{
+    if (m_multiple || m_size > 1)
+        return false;
+
+    RefPtr popover = m_popover;
+    if (!popover)
+        return false;
+
+    ASSERT(document().settings().htmlEnhancedSelectEnabled());
+
+    CheckedPtr computedStyle = popover->computedStyle();
+    return computedStyle && computedStyle->usedAppearance() == StyleAppearance::Base;
+}
+
+SelectPopoverElement* HTMLSelectElement::pickerPopoverElement() const
+{
+    return m_popover;
+}
+
+void HTMLSelectElement::hidePickerPopoverElement()
+{
+    RefPtr popover = m_popover;
+    if (!popover)
+        return;
+
+    setPopupIsVisible(false);
+    popover->hidePopover();
 }
 
 int HTMLSelectElement::activeSelectionStartListIndex() const
@@ -458,16 +504,14 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
 {
     if (!HTMLFormControlElement::childShouldCreateRenderer(child))
         return false;
-#if !PLATFORM(IOS_FAMILY)
     if (!usesMenuList())
         return is<HTMLOptionElement>(child) || is<HTMLOptGroupElement>(child) || validationMessageShadowTreeContains(child);
-#endif
     if (child.isInShadowTree() && child.containingShadowRoot() == userAgentShadowRoot())
         return true;
-    if (usesMenuList() && is<HTMLButtonElement>(child)) {
-        if (&child == childrenOfType<HTMLButtonElement>(*this).first())
-            return true;
-    }
+    if (is<HTMLButtonElement>(child) && &child == childrenOfType<HTMLButtonElement>(*this).first())
+        return true;
+    if (usesBaseAppearancePicker())
+        return true;
     return validationMessageShadowTreeContains(child);
 }
 
@@ -1316,7 +1360,7 @@ bool HTMLSelectElement::platformHandleKeydownEvent(KeyboardEvent* event)
             // gets called from RenderMenuList::valueChanged, which gets called
             // after the user makes a selection from the menu.
             saveLastSelection();
-            showPopup(); // showPopup() may run JS and cause the renderer to get destroyed.
+            showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
             event->setDefaultHandled();
         }
         return true;
@@ -1414,7 +1458,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
                 // gets called from RenderMenuList::valueChanged, which gets called
                 // after the user makes a selection from the menu.
                 saveLastSelection();
-                showPopup(); // showPopup() may run JS and cause the renderer to get destroyed.
+                showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
                 handled = true;
             }
         } else if (RenderTheme::singleton().popsMenuByArrowKeys()) {
@@ -1431,7 +1475,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
                 // gets called from RenderMenuList::valueChanged, which gets called
                 // after the user makes a selection from the menu.
                 saveLastSelection();
-                showPopup(); // showPopup() may run JS and cause the renderer to get destroyed.
+                showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
                 handled = true;
             } else if (keyCode == '\r') {
                 if (RefPtr form = this->form())
@@ -1451,14 +1495,14 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
         protect(document())->updateStyleIfNeeded();
 
         if (renderer() && usesMenuList()) {
-            ASSERT(!m_popupIsVisible);
+            ASSERT(usesBaseAppearancePicker() || !m_popupIsVisible);
             // Save the selection so it can be compared to the new
             // selection when we call onChange during selectOption,
             // which gets called from RenderMenuList::valueChanged,
             // which gets called after the user makes a selection from
             // the menu.
             saveLastSelection();
-            showPopup(); // showPopup() may run JS and cause the renderer to get destroyed.
+            showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
         }
 #endif
         event.setDefaultHandled();
@@ -1882,6 +1926,20 @@ bool HTMLSelectElement::isOpen() const
     return m_popupIsVisible;
 }
 
+void HTMLSelectElement::showPickerInternal()
+{
+    if (!usesBaseAppearancePicker()) {
+#if !PLATFORM(IOS_FAMILY)
+        showPopup();
+#endif
+        return;
+    }
+    if (RefPtr popover = m_popover) {
+        setPopupIsVisible(true);
+        popover->showPopoverInternal(this);
+    }
+}
+
 ExceptionOr<void> HTMLSelectElement::showPicker()
 {
     RefPtr frame = document().frame();
@@ -1900,9 +1958,7 @@ ExceptionOr<void> HTMLSelectElement::showPicker()
     if (!window || !window->consumeTransientActivation())
         return Exception { ExceptionCode::NotAllowedError, "Select showPicker() requires a user gesture."_s };
 
-#if !PLATFORM(IOS_FAMILY)
-    showPopup(); // showPopup() may run JS and cause the renderer to get destroyed.
-#endif
+    showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
 
     return { };
 }

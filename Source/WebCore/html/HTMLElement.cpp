@@ -1256,6 +1256,7 @@ ExceptionOr<void> HTMLElement::hidePopoverInternal(FocusPreviousElement focusPre
     std::optional<Style::PseudoClassChangeInvalidation> styleInvalidation;
     if (parentNode())
         styleInvalidation.emplace(*this, CSSSelector::PseudoClass::PopoverOpen, false);
+    popoverWasHidden();
     popoverData()->setVisibilityState(PopoverVisibilityState::Hidden);
 
     if (fireEvents == FireEvents::Yes)

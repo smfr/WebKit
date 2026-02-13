@@ -149,6 +149,7 @@
 #include "HTMLPictureElement.h"
 #include "HTMLPlugInElement.h"
 #include "HTMLScriptElement.h"
+#include "HTMLSelectElement.h"
 #include "HTMLStyleElement.h"
 #include "HTMLTitleElement.h"
 #include "HTMLUnknownElement.h"
@@ -288,6 +289,7 @@
 #include "SecurityOriginPolicy.h"
 #include "SecurityPolicy.h"
 #include "SegmentedString.h"
+#include "SelectPopoverElement.h"
 #include "SelectorQuery.h"
 #include "SerializedNode.h"
 #include "ServiceWorkerClientData.h"
@@ -11098,6 +11100,11 @@ void Document::handlePopoverLightDismiss(const PointerEvent& event, Node& target
                                 invokerPopover = WTF::move(popover);
                             else if (RefPtr popover = button->popoverTargetElement(); popover && isShowingAutoPopover(*popover))
                                 invokerPopover = WTF::move(popover);
+                        } else if (settings().htmlEnhancedSelectEnabled()) {
+                            if (RefPtr select = dynamicDowncast<HTMLSelectElement>(*htmlElement)) {
+                                if (RefPtr popover = select->pickerPopoverElement(); popover && isShowingAutoPopover(*popover))
+                                    invokerPopover = WTF::move(popover);
+                            }
                         }
                     }
                     if (clickedPopover && invokerPopover)

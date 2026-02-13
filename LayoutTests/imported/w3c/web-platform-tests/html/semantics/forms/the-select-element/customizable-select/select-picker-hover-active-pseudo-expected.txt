@@ -1,7 +1,9 @@
-  button
 
-PASS defaultbutton: select should match :hover and :active when interacting with button.
-FAIL defaultbutton: select should not match :hover or :active when interacting with elements in the picker. assert_true: select should be open after clicking it. expected true got false
-PASS custombutton: select should match :hover and :active when interacting with button.
-FAIL custombutton: select should not match :hover or :active when interacting with elements in the picker. assert_true: select should be open after clicking it. expected true got false
+  button
+  option
+
+FAIL defaultbutton: select should match :hover and :active when interacting with button. assert_false: select should be closed at the end of the test. expected false got true
+FAIL defaultbutton: select should not match :hover or :active when interacting with elements in the picker. assert_false: select should be closed at the start of the test. expected false got true
+FAIL custombutton: select should match :hover and :active when interacting with button. assert_false: select should be closed at the end of the test. expected false got true
+FAIL custombutton: select should not match :hover or :active when interacting with elements in the picker. assert_false: select should be closed at the start of the test. expected false got true
 

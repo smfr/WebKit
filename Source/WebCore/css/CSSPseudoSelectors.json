@@ -50,6 +50,7 @@
             "conditional": "ENABLE(FULLSCREEN_API)"
         },
         "-internal-media-document": {},
+        "-internal-select-popover": {},
         "-internal-uses-menulist": {},
         "-webkit-any": {
             "argument": "required",

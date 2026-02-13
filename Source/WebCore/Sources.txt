@@ -1805,6 +1805,7 @@ html/shadow/DateTimeSymbolicFieldElement.cpp
 html/shadow/MediaControlTextTrackContainerElement.cpp
 html/shadow/ProgressShadowElement.cpp
 html/shadow/SelectFallbackButtonElement.cpp
+html/shadow/SelectPopoverElement.cpp
 html/shadow/SliderThumbElement.cpp
 html/shadow/SpinButtonElement.cpp
 html/shadow/TextControlInnerElements.cpp
