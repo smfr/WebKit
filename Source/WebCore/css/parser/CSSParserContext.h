@@ -74,7 +74,6 @@ struct CSSParserContext {
     bool colorLayersEnabled : 1 { false };
     bool targetTextPseudoElementEnabled : 1 { false };
     bool htmlEnhancedSelectEnabled : 1 { false };
-    bool cssAnchorPositioningEnabled : 1 { false };
     bool cssRandomFunctionEnabled : 1 { false };
     bool cssTreeCountingFunctionsEnabled : 1 { false };
     bool cssURLModifiersEnabled : 1 { false };

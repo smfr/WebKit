@@ -59,9 +59,9 @@ static void applyUASheetBehaviorsToContext(CSSParserContext& context)
 #if HAVE(CORE_MATERIAL)
     context.propertySettings.useSystemAppearance = true;
 #endif
+    context.propertySettings.cssAnchorPositioningEnabled = true;
     context.cssInternalAutoBaseParsingEnabled = true;
     context.htmlEnhancedSelectEnabled = true;
-    context.cssAnchorPositioningEnabled = true;
 }
 
 CSSParserContext::CSSParserContext(CSSParserMode mode, const URL& baseURL)
@@ -160,7 +160,6 @@ void add(Hasher& hasher, const CSSParserContext& context)
         context.cssTextTransformMathAutoEnabled,
         context.cssInternalAutoBaseParsingEnabled,
         context.cssMathDepthEnabled,
-        context.cssAnchorPositioningEnabled,
         context.openPseudoClassEnabled
     );
     add(hasher, context.baseURL, context.charset, context.propertySettings, context.mode, bits);
