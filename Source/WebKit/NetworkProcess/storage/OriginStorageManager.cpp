@@ -79,7 +79,7 @@ public:
     LocalStorageManager* existingLocalStorageManager() { return m_localStorageManager.get(); }
     SessionStorageManager& sessionStorageManager(StorageAreaRegistry&);
     SessionStorageManager* existingSessionStorageManager() { return m_sessionStorageManager.get(); }
-    IDBStorageManager& idbStorageManager(IDBStorageRegistry&, IDBStorageManager::QuotaCheckFunction&&);
+    IDBStorageManager& idbStorageManager(IDBStorageRegistry&, IDBStorageManager::QuotaCheckFunction&&, bool useSQLiteMemoryBackingStore);
     IDBStorageManager* existingIDBStorageManager() { return m_idbStorageManager.get(); }
     CacheStorageManager& cacheStorageManager(CacheStorageRegistry&, const WebCore::ClientOrigin&, CacheStorageManager::QuotaCheckFunction&&, Ref<WorkQueue>&&);
     CacheStorageManager* existingCacheStorageManager() { return m_cacheStorageManager.get(); }
@@ -237,11 +237,10 @@ SessionStorageManager& OriginStorageManager::StorageBucket::sessionStorageManage
     return *m_sessionStorageManager;
 }
 
-IDBStorageManager& OriginStorageManager::StorageBucket::idbStorageManager(IDBStorageRegistry& registry, IDBStorageManager::QuotaCheckFunction&& quotaCheckFunction)
+IDBStorageManager& OriginStorageManager::StorageBucket::idbStorageManager(IDBStorageRegistry& registry, IDBStorageManager::QuotaCheckFunction&& quotaCheckFunction, bool useSQLiteMemoryBackingStore)
 {
     if (!m_idbStorageManager)
-        m_idbStorageManager = makeUnique<IDBStorageManager>(resolvedIDBStoragePath(), registry, WTF::move(quotaCheckFunction));
-
+        m_idbStorageManager = makeUnique<IDBStorageManager>(resolvedIDBStoragePath(), registry, WTF::move(quotaCheckFunction), useSQLiteMemoryBackingStore);
     return *m_idbStorageManager;
 }
 
@@ -719,7 +718,7 @@ SessionStorageManager* OriginStorageManager::existingSessionStorageManager()
     return defaultBucket().existingSessionStorageManager();
 }
 
-IDBStorageManager& OriginStorageManager::idbStorageManager(IDBStorageRegistry& registry)
+IDBStorageManager& OriginStorageManager::idbStorageManager(IDBStorageRegistry& registry, bool useSQLiteMemoryBackingStore)
 {
     return defaultBucket().idbStorageManager(registry, [quotaManager = ThreadSafeWeakPtr { this->quotaManager() }](uint64_t spaceRequested, CompletionHandler<void(bool)>&& completionHandler) mutable {
         auto strongReference = quotaManager.get();
@@ -729,7 +728,7 @@ IDBStorageManager& OriginStorageManager::idbStorageManager(IDBStorageRegistry& r
         strongReference->requestSpace(spaceRequested, [completionHandler = WTF::move(completionHandler)](auto decision) mutable {
             completionHandler(decision == OriginQuotaManager::Decision::Grant);
         });
-    });
+    }, useSQLiteMemoryBackingStore);
 }
 
 IDBStorageManager* OriginStorageManager::existingIDBStorageManager()

@@ -533,6 +533,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     Modules/indexeddb/server/MemoryBackingStoreTransaction.h
     Modules/indexeddb/server/MemoryIDBBackingStore.h
     Modules/indexeddb/server/SQLiteIDBBackingStore.h
+    Modules/indexeddb/server/SQLiteMemoryIDBBackingStore.h
     Modules/indexeddb/server/SQLiteIDBTransaction.h
     Modules/indexeddb/server/ServerOpenDBRequest.h
     Modules/indexeddb/server/UniqueIDBDatabase.h

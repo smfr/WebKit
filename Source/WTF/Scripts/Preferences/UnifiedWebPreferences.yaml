@@ -3843,6 +3843,21 @@ IndexedDBAPIEnabled:
   sharedPreferenceForWebProcess: true
   richJavaScript: true
 
+IndexedDBSQLiteMemoryBackingStoreEnabled:
+  type: bool
+  status: stable
+  category: dom
+  humanReadableName: "IndexedDB SQLite Memory Backing Store"
+  humanReadableDescription: "Use SQLite in-memory database for ephemeral IndexedDB instead of MemoryIDBBackingStore"
+  defaultValue:
+    WebKitLegacy:
+      default: true
+    WebKit:
+      default: true
+    WebCore:
+      default: true
+  sharedPreferenceForWebProcess: true
+
 InlineMediaPlaybackRequiresPlaysInlineAttribute:
   type: bool
   status: embedder

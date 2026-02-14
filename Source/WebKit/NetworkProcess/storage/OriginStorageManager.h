@@ -28,6 +28,7 @@
 #include "Connection.h"
 #include "OriginQuotaManager.h"
 #include "WebsiteDataType.h"
+#include <wtf/Function.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/text/WTFString.h>
 
@@ -76,7 +77,7 @@ public:
     LocalStorageManager* existingLocalStorageManager();
     SessionStorageManager& sessionStorageManager(StorageAreaRegistry&);
     SessionStorageManager* existingSessionStorageManager();
-    IDBStorageManager& idbStorageManager(IDBStorageRegistry&);
+    IDBStorageManager& idbStorageManager(IDBStorageRegistry&, bool useSQLiteMemoryBackingStore);
     IDBStorageManager* existingIDBStorageManager();
     CacheStorageManager& cacheStorageManager(CacheStorageRegistry&, const WebCore::ClientOrigin&, Ref<WorkQueue>&&);
     CacheStorageManager* existingCacheStorageManager();

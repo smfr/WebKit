@@ -165,6 +165,7 @@ private:
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess(IPC::Connection&) const;
     bool isStorageTypeEnabled(IPC::Connection&, WebCore::StorageType) const;
     bool isStorageAreaTypeEnabled(IPC::Connection&, StorageAreaBase::StorageType) const;
+    bool useSQLiteMemoryBackingStore() const;
 
     void writeOriginToFileIfNecessary(const WebCore::ClientOrigin&, StorageAreaBase* = nullptr);
     enum class ShouldWriteOriginFile : bool { No, Yes };
@@ -330,6 +331,7 @@ private:
     using ConnectionSitesMap = HashMap<IPC::Connection::UniqueID, HashSet<WebCore::RegistrableDomain>>;
     std::optional<ConnectionSitesMap> m_allowedSitesForConnections WTF_GUARDED_BY_CAPABILITY(workQueue());
     HashMap<IPC::Connection::UniqueID, SharedPreferencesForWebProcess> m_preferencesForConnections WTF_GUARDED_BY_CAPABILITY(workQueue());
+    bool m_useSQLiteMemoryBackingStore WTF_GUARDED_BY_CAPABILITY(workQueue()) { false };
 };
 
 } // namespace WebKit

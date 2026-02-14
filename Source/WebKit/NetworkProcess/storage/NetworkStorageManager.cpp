@@ -344,6 +344,10 @@ void NetworkStorageManager::updateSharedPreferencesForConnection(IPC::Connection
         if (auto iter = m_preferencesForConnections.find(connection); iter != m_preferencesForConnections.end())
             iter->value = preferences;
 
+        // Use SQLite in-memory backing store if any connection enables it.
+        if (preferences.indexedDBSQLiteMemoryBackingStoreEnabled)
+            m_useSQLiteMemoryBackingStore = true;
+
         RunLoop::mainSingleton().dispatch([protectedThis = WTF::move(protectedThis)] { });
     });
 }
@@ -1725,19 +1729,19 @@ void NetworkStorageManager::openDatabase(IPC::Connection& connection, const WebC
 {
     MESSAGE_CHECK(requestData.requestIdentifier().connectionIdentifier(), connection);
     Ref connectionToClient = m_idbStorageRegistry->ensureConnectionToClient(connection.uniqueID(), *requestData.requestIdentifier().connectionIdentifier());
-    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry))->openDatabase(connectionToClient, requestData);
+    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry, useSQLiteMemoryBackingStore()))->openDatabase(connectionToClient, requestData);
 }
 
 void NetworkStorageManager::openDBRequestCancelled(const WebCore::IDBOpenRequestData& requestData)
 {
-    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry))->openDBRequestCancelled(requestData);
+    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry, useSQLiteMemoryBackingStore()))->openDBRequestCancelled(requestData);
 }
 
 void NetworkStorageManager::deleteDatabase(IPC::Connection& connection, const WebCore::IDBOpenRequestData& requestData)
 {
     MESSAGE_CHECK(requestData.requestIdentifier().connectionIdentifier(), connection);
     Ref connectionToClient = m_idbStorageRegistry->ensureConnectionToClient(connection.uniqueID(), *requestData.requestIdentifier().connectionIdentifier());
-    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry))->deleteDatabase(connectionToClient, requestData);
+    protect(protect(originStorageManager(requestData.databaseIdentifier().origin()))->idbStorageManager(*m_idbStorageRegistry, useSQLiteMemoryBackingStore()))->deleteDatabase(connectionToClient, requestData);
 }
 
 void NetworkStorageManager::establishTransaction(WebCore::IDBDatabaseConnectionIdentifier databaseConnectionIdentifier, const WebCore::IDBTransactionInfo& transactionInfo)
@@ -1765,7 +1769,7 @@ void NetworkStorageManager::databaseConnectionClosed(WebCore::IDBDatabaseConnect
     }
 
     if (databaseIdentifier.isValid())
-        protect(protect(originStorageManager(databaseIdentifier.origin()))->idbStorageManager(*m_idbStorageRegistry))->tryCloseDatabase(databaseIdentifier);
+        protect(protect(originStorageManager(databaseIdentifier.origin()))->idbStorageManager(*m_idbStorageRegistry, useSQLiteMemoryBackingStore()))->tryCloseDatabase(databaseIdentifier);
 }
 
 void NetworkStorageManager::abortOpenAndUpgradeNeeded(WebCore::IDBDatabaseConnectionIdentifier databaseConnectionIdentifier, const std::optional<WebCore::IDBResourceIdentifier>& transactionIdentifier)
@@ -1958,7 +1962,7 @@ void NetworkStorageManager::getAllDatabaseNamesAndVersions(IPC::Connection& conn
 {
     MESSAGE_CHECK(requestIdentifier.connectionIdentifier(), connection);
     Ref connectionToClient = m_idbStorageRegistry->ensureConnectionToClient(connection.uniqueID(), *requestIdentifier.connectionIdentifier());
-    auto result = protect(protect(originStorageManager(origin))->idbStorageManager(*m_idbStorageRegistry))->getAllDatabaseNamesAndVersions();
+    auto result = protect(protect(originStorageManager(origin))->idbStorageManager(*m_idbStorageRegistry, useSQLiteMemoryBackingStore()))->getAllDatabaseNamesAndVersions();
     connectionToClient->didGetAllDatabaseNamesAndVersions(requestIdentifier, WTF::move(result));
 }
 
@@ -2313,6 +2317,12 @@ std::optional<SharedPreferencesForWebProcess> NetworkStorageManager::sharedPrefe
         return std::nullopt;
 
     return iter->value;
+}
+
+bool NetworkStorageManager::useSQLiteMemoryBackingStore() const
+{
+    assertIsCurrent(workQueue());
+    return m_useSQLiteMemoryBackingStore;
 }
 
 void NetworkStorageManager::queryCacheStorage(WebCore::ClientOrigin&& origin, WebCore::RetrieveRecordsOptions&& options, String&& cacheName, CompletionHandler<void(std::optional<WebCore::DOMCacheEngine::Record>&&)>&& callback)
