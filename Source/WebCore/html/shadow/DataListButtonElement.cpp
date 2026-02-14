@@ -28,7 +28,6 @@
 
 #include "Event.h"
 #include "EventNames.h"
-#include "HTMLNames.h"
 #include "MouseEvent.h"
 #include "StyleAppearance.h"
 #include <wtf/TZoneMallocInlines.h>
@@ -37,15 +36,13 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(DataListButtonElement);
 
-using namespace HTMLNames;
-
 Ref<DataListButtonElement> DataListButtonElement::create(Document& document, DataListButtonOwner& owner)
 {
     return adoptRef(*new DataListButtonElement(document, owner));
 }
 
 DataListButtonElement::DataListButtonElement(Document& document, DataListButtonOwner& owner)
-    : HTMLDivElement(divTag, document)
+    : HTMLDivElement(document)
     , m_owner(owner)
 {
 }

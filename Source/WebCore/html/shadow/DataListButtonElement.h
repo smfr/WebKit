@@ -50,10 +50,10 @@ public:
 private:
     explicit DataListButtonElement(Document&, DataListButtonOwner&);
 
-    bool isDataListButtonElement() const override { return true; }
+    bool isDataListButtonElement() const final { return true; }
 
-    void defaultEventHandler(Event&) override;
-    bool isDisabledFormControl() const override;
+    void defaultEventHandler(Event&) final;
+    bool isDisabledFormControl() const final;
 
     DataListButtonOwner& m_owner;
 };

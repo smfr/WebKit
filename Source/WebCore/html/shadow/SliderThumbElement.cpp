@@ -200,7 +200,7 @@ Ref<SliderThumbElement> SliderThumbElement::create(Document& document)
 }
 
 SliderThumbElement::SliderThumbElement(Document& document)
-    : HTMLDivElement(HTMLNames::divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -600,7 +600,7 @@ Ref<Element> SliderThumbElement::cloneElementWithoutAttributesAndChildren(Docume
 // --------------------------------
 
 inline SliderContainerElement::SliderContainerElement(Document& document)
-    : HTMLDivElement(HTMLNames::divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 

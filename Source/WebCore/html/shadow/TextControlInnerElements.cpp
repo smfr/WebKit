@@ -71,7 +71,7 @@ using namespace CSS::Literals;
 using namespace HTMLNames;
 
 TextControlInnerContainer::TextControlInnerContainer(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -117,7 +117,7 @@ std::optional<Style::UnadjustedStyle> TextControlInnerContainer::resolveCustomSt
 }
 
 TextControlInnerElement::TextControlInnerElement(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -154,7 +154,7 @@ std::optional<Style::UnadjustedStyle> TextControlInnerElement::resolveCustomStyl
 // MARK: TextControlInnerTextElement
 
 inline TextControlInnerTextElement::TextControlInnerTextElement(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks )
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -219,7 +219,7 @@ std::optional<Style::UnadjustedStyle> TextControlInnerTextElement::resolveCustom
 // MARK: TextControlPlaceholderElement
 
 inline TextControlPlaceholderElement::TextControlPlaceholderElement(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -260,7 +260,7 @@ static inline bool searchFieldStyleHasExplicitlySpecifiedTextFieldAppearance(con
 }
 
 inline SearchFieldResultsButtonElement::SearchFieldResultsButtonElement(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
@@ -333,7 +333,7 @@ bool SearchFieldResultsButtonElement::willRespondToMouseClickEventsWithEditabili
 // MARK: SearchFieldCancelButtonElement
 
 inline SearchFieldCancelButtonElement::SearchFieldCancelButtonElement(Document& document)
-    : HTMLDivElement(divTag, document, TypeFlag::HasCustomStyleResolveCallbacks)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
 {
 }
 
