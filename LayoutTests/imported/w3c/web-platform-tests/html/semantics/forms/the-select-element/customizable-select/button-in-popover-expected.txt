@@ -1,5 +1,7 @@
 invoker
-one two  popover button other text
+one
+two
+popover button other text
 
 FAIL Buttons in the popover should be rendered and should not close the popover when clicked. assert_false: Clicking invoker button should close select. expected false got true
 FAIL Non-interactive content in the popover should not close the popover when clicked. assert_false: Select should be closed at the start of the test. expected false got true

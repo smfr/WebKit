@@ -5770,6 +5770,7 @@ imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customiz
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-initial-focus-display-animation.html [ Skip ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/switch-picker-appearance.html [ Skip ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-click-picker-light-dismiss.tentative.html [ Skip ]
+imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-iterate-before-beginning.optional.html [ Pass Failure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/select-tab-navigation.tentative.html [ Skip ]
 imported/w3c/web-platform-tests/uievents/click/auxclick_event.html [ Skip ]
 imported/w3c/web-platform-tests/uievents/click/click_event_target_child_parent.html [ Skip ]

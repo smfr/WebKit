@@ -1,5 +1,7 @@
   Reset option two
-option one option two option three
+option one
+option two
+option three
 
 FAIL Basic functionality of select picker and appearance assert_equals: expected "none" but got ""
 FAIL Basic functionality of select picker with appearance:auto assert_equals: expected "none" but got ""

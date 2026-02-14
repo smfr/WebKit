@@ -1,4 +1,7 @@
-one two three
+
+one
+two
+three
  custom button
 
 Harness Error (FAIL), message = Test named 'defaultbutton: When the listbox is open, the enter key should commit the selected option.' specified 1 'cleanup' function, and 1 failed.

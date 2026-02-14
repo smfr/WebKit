@@ -1,4 +1,6 @@
- one two
+
+one
+two
 
 FAIL Clicking the invoker button and dragging to an option should choose that option and close the picker. assert_false: select should be closed after pointerUp() on second option. expected false got true
 FAIL mouse: Releasing the pointer on an option positioned on top of the invoker button should not close the picker. assert_false: select should close after clicking and dragging to second option. expected false got true
