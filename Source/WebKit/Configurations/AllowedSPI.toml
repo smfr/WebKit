@@ -282,14 +282,6 @@ selectors = [
 ]
 requires = ["HAVE_PASSKIT_DELEGATED_REQUEST"]
 
-[[temporary-usage]]
-request = "rdar://168622817"
-cleanup = "rdar://169487203"
-selectors = [
-    { name = "evaluateURL:mainDocumentURL:completionHandler:", class = "BEWebContentFilter" },
-]
-requires = ["HAVE_WEBCONTENTRESTRICTIONS_TRANSITIVE_TRUST"]
-
 [[staging]]
 request = "rdar://169648700"
 cleanup = "rdar://169648700"
