@@ -49,6 +49,7 @@
 #include <WebCore/ShareableBitmap.h>
 #include <WebCore/WindowEventLoop.h>
 #include <wtf/SetForScope.h>
+#include <wtf/SystemTracing.h>
 
 #if USE(GLIB_EVENT_LOOP)
 #include <wtf/glib/RunLoopSourcePriority.h>
