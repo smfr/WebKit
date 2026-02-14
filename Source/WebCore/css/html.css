@@ -1160,18 +1160,19 @@ select::picker-icon {
     background-color: -internal-auto-base(transparent, Canvas);
     margin: 0;
     inset: auto;
-    min-inline-size: anchor-size(self-inline);
+    min-inline-size: -internal-auto-base(unset, anchor-size(self-inline));
     min-block-size: 1lh;
     /* Go to the edge of the viewport, and add scrollbars if needed. */
     max-block-size: stretch;
     overflow: auto;
     /* Below and span-right, by default. */
-    position-area: block-end span-inline-end;
-    position-try-order: most-block-size;
-    position-try-fallbacks:
+    position-area: -internal-auto-base(unset, block-end span-inline-end);
+    position-try-order: -internal-auto-base(unset, most-block-size);
+    position-try-fallbacks: -internal-auto-base(unset,
         block-start span-inline-end,   /* First try above and span-right. */
         block-end span-inline-start,   /* Then below but span-left. */
-        block-start span-inline-start; /* Then above and span-left. */
+        block-start span-inline-start); /* Then above and span-left. */
+
     display: -internal-auto-base(contents, none);
 }
 
