@@ -403,38 +403,21 @@ nothing to commit, working tree clean
                     ][:int(args[2].split('=')[-1])])
                 )
             ), mocks.Subprocess.Route(
+                self.executable, '--no-replace-objects', 'log', re.compile(r'.+'),
+                cwd=self.path,
+                generator=lambda *args, **kwargs: self.log(args[3], args, path, git_svn)
+            ), mocks.Subprocess.Route(
                 self.executable, 'log', re.compile(r'.+'),
                 cwd=self.path,
-                generator=lambda *args, **kwargs: mocks.ProcessCompletion(
-                    returncode=0,
-                    stdout='\n'.join([
-                        'commit {hash}\n'
-                        'Author: {author} <{email}>\n'
-                        'Date:   {date}\n'
-                        '\n{log}\n'.format(
-                            hash=commit.hash,
-                            author=commit.author.name,
-                            email=commit.author.email,
-                            date=commit.timestamp if '--date=unix' in args else datetime.fromtimestamp(commit.timestamp + time.timezone, timezone.utc).strftime('%a %b %d %H:%M:%S %Y +0000'),
-                            log='\n'.join(
-                                [
-                                    ('    ' + line) if line else '' for line in commit.message.splitlines()
-                                ] + (['    git-svn-id: https://svn.{}/repository/{}/trunk@{} 268f45cc-cd09-0410-ab3c-d52691b4dbfc'.format(
-                                    self.remote.split('@')[-1].split(':')[0],
-                                    os.path.basename(path),
-                                    commit.revision,
-                                )] if git_svn else [])
-                            )
-                        ) for commit in self.rev_list(args[2])
-                    ])
-                )
+                generator=lambda *args, **kwargs: self.log(args[2], args, path, git_svn)
+            ), mocks.Subprocess.Route(
+                self.executable, '--no-replace-objects', 'rev-list', '--count', '--no-merges', re.compile(r'.+'),
+                cwd=self.path,
+                generator=lambda *args, **kwargs: self.rev_list_count(args[5]),
             ), mocks.Subprocess.Route(
                 self.executable, 'rev-list', '--count', '--no-merges', re.compile(r'.+'),
                 cwd=self.path,
-                generator=lambda *args, **kwargs: mocks.ProcessCompletion(
-                    returncode=0,
-                    stdout='{}\n'.format(self.count(args[4]))
-                ) if self.find(args[4]) else mocks.ProcessCompletion(returncode=128),
+                generator=lambda *args, **kwargs: self.rev_list_count(args[4]),
             ), mocks.Subprocess.Route(
                 self.executable, 'rev-list', re.compile(r'.+'),
                 cwd=self.path,
@@ -894,6 +877,39 @@ nothing to commit, working tree clean
     def count(self, something):
         rev_list = self.rev_list(something)
         return len(rev_list)
+
+    def rev_list_count(self, ref):
+        """Helper for git rev-list --count --no-merges"""
+        return mocks.ProcessCompletion(
+            returncode=0,
+            stdout='{}\n'.format(self.count(ref))
+        ) if self.find(ref) else mocks.ProcessCompletion(returncode=128)
+
+    def log(self, ref, args, path, git_svn):
+        """Helper for git log"""
+        return mocks.ProcessCompletion(
+            returncode=0,
+            stdout='\n'.join([
+                'commit {hash}\n'
+                'Author: {author} <{email}>\n'
+                'Date:   {date}\n'
+                '\n{log}\n'.format(
+                    hash=commit.hash,
+                    author=commit.author.name,
+                    email=commit.author.email,
+                    date=commit.timestamp if '--date=unix' in args else datetime.fromtimestamp(commit.timestamp + time.timezone, timezone.utc).strftime('%a %b %d %H:%M:%S %Y +0000'),
+                    log='\n'.join(
+                        [
+                            ('    ' + line) if line else '' for line in commit.message.splitlines()
+                        ] + (['    git-svn-id: https://svn.{}/repository/{}/trunk@{} 268f45cc-cd09-0410-ab3c-d52691b4dbfc'.format(
+                            self.remote.split('@')[-1].split(':')[0],
+                            os.path.basename(path),
+                            commit.revision,
+                        )] if git_svn else [])
+                    )
+                ) for commit in self.rev_list(ref)
+            ])
+        )
 
     def branches_on(self, commit):
         result = set()

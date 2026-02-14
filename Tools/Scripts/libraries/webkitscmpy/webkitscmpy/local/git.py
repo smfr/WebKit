@@ -132,7 +132,7 @@ class Git(Scm):
             try:
                 self._last_populated[branch] = time.time()
                 log = subprocess.Popen(
-                    [self.repo.executable(), 'log', '{}/{}'.format(remote, branch) if remote else branch, '--no-decorate', '--date=unix', '--'],
+                    [self.repo.executable(), '--no-replace-objects', 'log', '{}/{}'.format(remote, branch) if remote else branch, '--no-decorate', '--date=unix', '--'],
                     cwd=self.repo.root_path,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -607,7 +607,7 @@ class Git(Scm):
 
     def _commit_count(self, native_parameter):
         revision_count = run(
-            [self.executable(), 'rev-list', '--count', '--no-merges', native_parameter],
+            [self.executable(), '--no-replace-objects', 'rev-list', '--count', '--no-merges', native_parameter],
             cwd=self.root_path, capture_output=True, encoding='utf-8',
         )
         if revision_count.returncode:
