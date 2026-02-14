@@ -2017,7 +2017,7 @@ http/tests/resourceLoadStatistics/omit-referrer-for-navigation-ephemeral.html [ 
 http/tests/resourceLoadStatistics/cname-cloaking-top-cname-sub-3p-cname.https.html [ Failure ]
 http/tests/resourceLoadStatistics/cname-cloaking-top-no-cname-sub-3p-cname.https.html [ Failure ]
 
-webkit.org/b/296786 http/tests/resourceLoadStatistics/do-not-switch-session-on-navigation-to-prevalent-without-interaction.py [ Timeout Pass ]
+webkit.org/b/296786 http/tests/resourceLoadStatistics/do-not-switch-session-on-navigation-to-prevalent-without-interaction.py [ Failure Pass ]
 
 webkit.org/b/296787 http/tests/resourceLoadStatistics/website-data-removal-for-site-navigated-to-with-link-decoration-js-cookie-checking.html [ Failure ]
 webkit.org/b/296787 http/tests/resourceLoadStatistics/website-data-removal-for-site-without-user-interaction-js-cookie-checking.html [ Failure ]
