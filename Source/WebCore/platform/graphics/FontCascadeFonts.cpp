@@ -587,7 +587,7 @@ const CachedShapedText* FontCascadeFonts::getOrCreateCachedShapedText(const Text
 
     auto codePath = fontCascade.codePath(run);
     auto width = 0.f;
-    auto glyphBuffer = fontCascade.layoutText(codePath, run, 0, run.length(), FontCascade::ForTextEmphasisOrNot::NotForTextEmphasis, &width);
+    auto glyphBuffer = fontCascade.layoutText(codePath, run, 0, run.length(), FontCascade::ForTextEmphasis::No, &width);
     glyphBuffer.flatten();
 
     cacheEntry->width = width;

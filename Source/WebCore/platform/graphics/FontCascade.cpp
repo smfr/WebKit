@@ -165,7 +165,7 @@ void FontCascade::update(RefPtr<FontSelector>&& fontSelector) const
     FontCache::forCurrentThread()->updateFontCascade(*this);
 }
 
-GlyphBuffer FontCascade::layoutText(CodePath codePathToUse, const TextRun& run, unsigned from, unsigned to, ForTextEmphasisOrNot forTextEmphasis, float* outWidth) const
+GlyphBuffer FontCascade::layoutText(CodePath codePathToUse, const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
 {
     if (shouldUseComplexTextController(codePathToUse))
         return layoutComplexText(run, from, to, forTextEmphasis, outWidth);
@@ -194,7 +194,7 @@ void FontCascade::drawEmphasisMarks(GraphicsContext& context, const TextRun& run
 
     unsigned destination = to.value_or(run.length());
 
-    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination, ForTextEmphasisOrNot::ForTextEmphasis);
+    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination, ForTextEmphasis::Yes);
     glyphBuffer.flatten();
 
     if (glyphBuffer.isEmpty())
@@ -1466,11 +1466,11 @@ float FontCascade::floatEmphasisMarkHeight(const AtomString& mark) const
     return { };
 }
 
-GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasisOrNot forTextEmphasis, float* outWidth) const
+GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
 {
     GlyphBuffer glyphBuffer;
 
-    WidthIterator it(*this, run, 0, false, forTextEmphasis == ForTextEmphasisOrNot::ForTextEmphasis);
+    WidthIterator it(*this, run, 0, false, forTextEmphasis == ForTextEmphasis::Yes);
     // FIXME: Using separate glyph buffers for the prefix and the suffix is incorrect when kerning or
     // ligatures are enabled.
     GlyphBuffer localGlyphBuffer;
@@ -1505,11 +1505,11 @@ GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, uns
     return glyphBuffer;
 }
 
-GlyphBuffer FontCascade::layoutComplexText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasisOrNot forTextEmphasis, float* outWidth) const
+GlyphBuffer FontCascade::layoutComplexText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
 {
     GlyphBuffer glyphBuffer;
 
-    ComplexTextController controller(*this, run, false, 0, forTextEmphasis == ForTextEmphasisOrNot::ForTextEmphasis);
+    ComplexTextController controller(*this, run, false, 0, forTextEmphasis == ForTextEmphasis::Yes);
     GlyphBuffer glyphBufferForStartingIndex;
     controller.advance(from, &glyphBufferForStartingIndex);
     float widthBeforeSegment = controller.totalAdvance().width();
