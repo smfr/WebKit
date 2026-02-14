@@ -1090,11 +1090,18 @@ URL WebPage::allowedQueryParametersForAdvancedPrivacyProtections(const URL& url)
 }
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-void WebPage::setMediaEnvironment(const String& mediaEnvironment)
+void WebPage::setMediaPlaybackEnvironment(const String& environment)
 {
-    m_mediaEnvironment = mediaEnvironment;
+    m_mediaPlaybackEnvironment = environment;
     if (RefPtr gpuProcessConnection = WebProcess::singleton().existingGPUProcessConnection())
-        gpuProcessConnection->setMediaEnvironment(identifier(), mediaEnvironment);
+        gpuProcessConnection->setMediaPlaybackEnvironment(identifier(), environment);
+}
+
+void WebPage::setDisplayCaptureEnvironment(const String& environment)
+{
+    m_displayCaptureEnvironment = environment;
+    if (RefPtr gpuProcessConnection = WebProcess::singleton().existingGPUProcessConnection())
+        gpuProcessConnection->setDisplayCaptureEnvironment(identifier(), environment);
 }
 #endif
 

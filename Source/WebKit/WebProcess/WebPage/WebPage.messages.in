@@ -859,7 +859,8 @@ messages -> WebPage WantsAsyncDispatchMessage {
 #endif
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-    SetMediaEnvironment(String mediaEnvironment)
+    SetMediaPlaybackEnvironment(String environment)
+    SetDisplayCaptureEnvironment(String environment)
 #endif
 
 #if ENABLE(WRITING_TOOLS)

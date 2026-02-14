@@ -263,8 +263,10 @@ public:
 #endif
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-    String mediaEnvironment(WebCore::PageIdentifier);
-    void setMediaEnvironment(WebCore::PageIdentifier, const String&);
+    String mediaPlaybackEnvironment(WebCore::PageIdentifier);
+    void setMediaPlaybackEnvironment(WebCore::PageIdentifier, const String&);
+    String displayCaptureEnvironment(WebCore::PageIdentifier);
+    void setDisplayCaptureEnvironment(WebCore::PageIdentifier, const String&);
 #endif
 
 #if ENABLE(IPC_TESTING_API)
@@ -450,7 +452,8 @@ private:
 #endif
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-    HashMap<WebCore::PageIdentifier, String> m_mediaEnvironments;
+    HashMap<WebCore::PageIdentifier, String> m_mediaPlaybackEnvironments;
+    HashMap<WebCore::PageIdentifier, String> m_displayCaptureEnvironments;
 #endif
 
 #if ENABLE(ROUTING_ARBITRATION) && HAVE(AVAUDIO_ROUTING_ARBITER)

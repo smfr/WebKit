@@ -3341,6 +3341,7 @@ void WebPageProxy::dispatchActivityStateChange()
 
 #if ENABLE(EXTENSION_CAPABILITIES)
     updateMediaCapability();
+    updateDisplayCaptureCapability();
 #endif
 
 #if PLATFORM(COCOA)
@@ -7820,8 +7821,10 @@ void WebPageProxy::didCommitLoadForFrame(IPC::Connection& connection, FrameIdent
 #endif
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-    if (frame->isMainFrame())
+    if (frame->isMainFrame()) {
         resetMediaCapability();
+        resetDisplayCaptureCapability();
+    }
 #endif
 
 #if ENABLE(IMAGE_ANALYSIS)
@@ -14951,6 +14954,10 @@ void WebPageProxy::updateReportedMediaCaptureState()
         if (systemAudioCaptureChanged)
             pageClient->systemAudioCaptureChanged();
     }
+
+#if ENABLE(EXTENSION_CAPABILITIES)
+    updateDisplayCaptureCapability();
+#endif
 }
 
 void WebPageProxy::videoControlsManagerDidChange()

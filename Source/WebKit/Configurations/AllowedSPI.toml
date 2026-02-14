@@ -606,3 +606,10 @@ selectors = [
     { name = "_setUseVisionAlternateScrollIndicatorRendering:", class = "UIScrollView" },
 ]
 requires = ["PLATFORM_VISION"]
+
+ [[staging]]
+request = "rdar://170178645"
+selectors = [
+    { name = "screenCaptureWithEnvironment:", class = "BEProcessCapability" },
+]
+requires = ["ENABLE_EXTENSION_CAPABILITIES"]
