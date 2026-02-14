@@ -204,6 +204,11 @@ extension WKTextSelectionController {
         }
     }
 
+    @objc(handleClickAtPoint:)
+    func handleClick(at point: NSPoint) {
+        handleClick(at: point, clickCount: 1)
+    }
+
     @objc(handleClickAtPoint:clickCount:)
     func handleClick(at point: NSPoint, clickCount: Int) {
         // The `point` location is relative to the view.
