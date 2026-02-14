@@ -124,7 +124,7 @@ ExceptionOr<void> AudioWorkletGlobalScope::registerProcessor(String&& name, Ref<
     if (!addResult.isNewEntry)
         return Exception { ExceptionCode::NotSupportedError, "A processor was already registered with this name"_s };
 
-    auto* messagingProxy = thread()->messagingProxy();
+    RefPtr messagingProxy = thread()->messagingProxy();
     if (!messagingProxy)
         return Exception { ExceptionCode::InvalidStateError };
 

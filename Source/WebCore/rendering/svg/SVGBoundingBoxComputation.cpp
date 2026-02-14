@@ -258,7 +258,7 @@ void SVGBoundingBoxComputation::adjustBoxForClippingAndEffects(const SVGBounding
     }
 
     if (includeFilter) {
-        if (auto* referencedFilterRenderer = m_renderer->svgFilterResourceFromStyle()) {
+        if (CheckedPtr referencedFilterRenderer = m_renderer->svgFilterResourceFromStyle()) {
             auto repaintRectCalculation = options.contains(DecorationOption::CalculateFastRepaintRect) ? RepaintRectCalculation::Fast : RepaintRectCalculation::Accurate;
 
             auto resourceRect = referencedFilterRenderer->resourceBoundingBox(m_renderer, repaintRectCalculation);

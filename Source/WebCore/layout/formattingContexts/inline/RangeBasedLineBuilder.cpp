@@ -145,10 +145,10 @@ bool RangeBasedLineBuilder::isEligibleForRangeInlineLayout(const InlineFormattin
         for (auto& inlineItem : inlineItemList) {
             if (!inlineItem.isInlineBoxStart())
                 return false;
-            auto& inlineBox = inlineItem.layoutBox();
+            CheckedRef inlineBox = inlineItem.layoutBox();
             if (inlineFormattingContext.geometryForBox(inlineBox).horizontalMarginBorderAndPadding())
                 return true;
-            if (inlineBox.style().boxDecorationBreak() != Style::ComputedStyle::initialBoxDecorationBreak())
+            if (inlineBox->style().boxDecorationBreak() != Style::ComputedStyle::initialBoxDecorationBreak())
                 return true;
         }
         ASSERT_NOT_REACHED();
@@ -168,9 +168,9 @@ bool RangeBasedLineBuilder::isEligibleForRangeInlineLayout(const InlineFormattin
         if (!inlineItems.hasTextAndLineBreakOnlyContent() || inlineItems.requiresVisualReordering() || !placedFloats.isEmpty() || inlineItems.hasTextAutospace())
             return false;
 
-        auto& rootStyle = inlineFormattingContext.root().style();
-        auto& inlineBoxStyle = inlineItemList.first().layoutBox().style();
-        if (inlineBoxStyle.textAlign() != rootStyle.textAlign())
+        CheckedRef rootStyle = inlineFormattingContext.root().style();
+        CheckedRef inlineBoxStyle = inlineItemList.first().layoutBox().style();
+        if (inlineBoxStyle->textAlign() != rootStyle->textAlign())
             return false;
         if (!TextOnlySimpleLineBuilder::isEligibleForSimplifiedInlineLayoutByStyle(inlineFormattingContext.root()) || !TextOnlySimpleLineBuilder::isEligibleForSimplifiedInlineLayoutByStyle(inlineItemList.first().layoutBox()))
             return false;

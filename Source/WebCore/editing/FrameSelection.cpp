@@ -515,7 +515,7 @@ void FrameSelection::setSelection(const VisibleSelection& selection, OptionSet<S
         options.contains(SetSelectionOption::OnlyAllowForwardScrolling) ? OnlyAllowForwardScrolling::Yes : OnlyAllowForwardScrolling::No);
 
     if (options & SetSelectionOption::IsUserTriggered) {
-        if (auto* client = document->editor().client())
+        if (CheckedPtr client = document->editor().client())
             client->didEndUserTriggeredSelectionChanges();
     }
 }
@@ -541,7 +541,7 @@ void FrameSelection::setNeedsSelectionUpdate(RevealSelectionAfterUpdate revealMo
     if (revealMode == RevealSelectionAfterUpdate::Forced)
         m_selectionRevealMode = SelectionRevealMode::Reveal;
     m_pendingSelectionUpdate = true;
-    if (RenderView* view = m_document->renderView())
+    if (CheckedPtr view = m_document->renderView())
         view->selection().clear();
 }
 
@@ -598,7 +598,7 @@ void DragCaretController::nodeWillBeRemoved(Node& node)
     if (!removingNodeRemovesPosition(node, m_position.deepEquivalent()))
         return;
 
-    if (RenderView* view = node.document().renderView())
+    if (CheckedPtr view = node.document().renderView())
         view->selection().clear();
 
     // It's important to avoid updating style or layout here, since we're in the middle of removing the node from the document.
@@ -1576,7 +1576,7 @@ bool FrameSelection::modify(Alteration alter, SelectionDirection direction, Text
     }
 
     if (m_document && AXObjectCache::accessibilityEnabled()) {
-        if (AXObjectCache* cache = m_document->existingAXObjectCache())
+        if (CheckedPtr cache = m_document->existingAXObjectCache())
             cache->setTextSelectionIntent(textSelectionIntent(alter, direction, granularity));
     }
 
@@ -1773,7 +1773,7 @@ void FrameSelection::willBeRemovedFromFrame()
     caretAnimator().stop();
 #endif
 
-    if (auto* view = m_document->renderView())
+    if (CheckedPtr view = m_document->renderView())
         view->selection().clear();
 
     setSelectionWithoutUpdatingAppearance(VisibleSelection(), defaultSetSelectionOptions() | SetSelectionOption::DoNotNotifyEditorClients,
@@ -2436,9 +2436,9 @@ void FrameSelection::updateAppearance()
     // We can get into a state where the selection endpoints map to the same VisiblePosition when a selection is deleted
     // because we don't yet notify the FrameSelection of text removal.
     if (CheckedPtr view = document->renderView(); startPos.isNotNull() && endPos.isNotNull() && selection.visibleStart() != selection.visibleEnd()) {
-        RenderObject* startRenderer = startPos.deprecatedNode()->renderer();
+        CheckedPtr startRenderer = startPos.deprecatedNode()->renderer();
         int startOffset = startPos.deprecatedEditingOffset();
-        RenderObject* endRenderer = endPos.deprecatedNode()->renderer();
+        CheckedPtr endRenderer = endPos.deprecatedNode()->renderer();
         int endOffset = endPos.deprecatedEditingOffset();
         ASSERT(startOffset >= 0 && endOffset >= 0);
         view->selection().set({ startRenderer, endRenderer, static_cast<unsigned>(startOffset), static_cast<unsigned>(endOffset) });
@@ -2748,7 +2748,7 @@ void FrameSelection::setShouldShowBlockCursor(bool shouldShowBlockCursor)
 
 void FrameSelection::updateAppearanceAfterUpdatingRendering()
 {
-    if (auto* client = m_document->editor().client())
+    if (CheckedPtr client = m_document->editor().client())
         client->updateEditorStateAfterLayoutIfEditabilityChanged();
 
     setCaretRectNeedsUpdate();

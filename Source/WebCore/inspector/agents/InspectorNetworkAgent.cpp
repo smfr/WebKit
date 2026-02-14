@@ -416,7 +416,7 @@ void InspectorNetworkAgent::willSendRequest(ResourceLoaderIdentifier identifier,
 
     auto protocolResourceType = ResourceUtilities::resourceTypeToProtocol(type);
 
-    Document* document = loader && loader->frame() ? loader->frame()->document() : nullptr;
+    RefPtr document = loader && loader->frame() ? loader->frame()->document() : nullptr;
     auto initiatorObject = buildInitiatorObject(document, &request);
 
     String url = loader ? loader->url().string() : request.url().string();
@@ -733,7 +733,7 @@ Ref<Inspector::Protocol::Network::Initiator> InspectorNetworkAgent::buildInitiat
         initiatorObject->setLineNumber(document->scriptableDocumentParser()->textPosition().m_line.oneBasedInt());
     }
 
-    auto domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent();
+    CheckedPtr domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent();
     if (domAgent && resourceRequest) {
         if (auto inspectorInitiatorNodeIdentifier = resourceRequest->inspectorInitiatorNodeIdentifier()) {
             if (!initiatorObject) {
@@ -948,7 +948,7 @@ Inspector::Protocol::ErrorStringOr<void> InspectorNetworkAgent::setResourceCachi
 void InspectorNetworkAgent::loadResource(const Inspector::Protocol::Network::FrameId& frameId, const String& urlString, Ref<LoadResourceCallback>&& callback)
 {
     Inspector::Protocol::ErrorString errorString;
-    auto* context = scriptExecutionContext(errorString, frameId);
+    RefPtr context = scriptExecutionContext(errorString, frameId);
     if (!context) {
         callback->sendFailure(errorString);
         return;

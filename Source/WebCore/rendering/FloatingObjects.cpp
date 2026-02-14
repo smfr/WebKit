@@ -61,7 +61,7 @@ FloatingObject::FloatingObject(RenderBox& renderer)
         m_type = FloatLeft;
     else if (type == UsedFloat::Right)
         m_type = FloatRight;
-    if (auto* containingBlock = renderer.containingBlock())
+    if (CheckedPtr containingBlock = renderer.containingBlock())
         m_hasAncestorWithOverflowClip = containingBlock->effectiveOverflowX() == Overflow::Clip || containingBlock->effectiveOverflowY() == Overflow::Clip;
 }
 

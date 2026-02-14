@@ -237,9 +237,9 @@ float LegacyInlineTextBox::textPos() const
 
 TextRun LegacyInlineTextBox::createTextRun() const
 {
-    const auto& style = lineStyle();
-    TextRun textRun { text(), textPos(), 0, ExpansionBehavior::forbidAll(), direction(), style.rtlOrdering() == Order::Visual, !renderer().canUseSimpleFontCodePath() };
-    textRun.setTabSize(!style.collapseWhiteSpace(), Style::toPlatform(style.tabSize()));
+    CheckedRef style = lineStyle();
+    TextRun textRun { text(), textPos(), 0, ExpansionBehavior::forbidAll(), direction(), style->rtlOrdering() == Order::Visual, !renderer().canUseSimpleFontCodePath() };
+    textRun.setTabSize(!style->collapseWhiteSpace(), Style::toPlatform(style->tabSize()));
     return textRun;
 }
 

@@ -334,7 +334,7 @@ SQLiteStatementAutoResetScope PushDatabase::cachedStatementOnQueue(ASCIILiteral 
     }
 
     auto statementRef = makeUniqueRefFromNonNullUniquePtr(WTF::move(statement));
-    auto statementPtr = statementRef.ptr();
+    CheckedPtr statementPtr = statementRef.ptr();
     m_statements.add(query, WTF::move(statementRef));
     return SQLiteStatementAutoResetScope(statementPtr);
 }

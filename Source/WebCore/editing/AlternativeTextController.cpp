@@ -547,24 +547,24 @@ void AlternativeTextController::markPrecedingWhitespaceForDeletedAutocorrectionA
 bool AlternativeTextController::processMarkersOnTextToBeReplacedByResult(const TextCheckingResult& result, const SimpleRange& rangeWithAlternative, const String& stringToBeReplaced)
 {
     Ref document = m_document.get();
-    auto& markers = document->markers();
-    if (markers.hasMarkers(rangeWithAlternative, DocumentMarkerType::Replacement)) {
+    CheckedRef markers = document->markers();
+    if (markers->hasMarkers(rangeWithAlternative, DocumentMarkerType::Replacement)) {
         if (result.type == TextCheckingType::Correction)
             recordSpellcheckerResponseForModifiedCorrection(rangeWithAlternative, stringToBeReplaced, result.replacement);
         return false;
     }
 
-    if (markers.hasMarkers(rangeWithAlternative, DocumentMarkerType::RejectedCorrection))
+    if (markers->hasMarkers(rangeWithAlternative, DocumentMarkerType::RejectedCorrection))
         return false;
 
-    if (markers.hasMarkers(rangeWithAlternative, DocumentMarkerType::AcceptedCandidate))
+    if (markers->hasMarkers(rangeWithAlternative, DocumentMarkerType::AcceptedCandidate))
         return false;
 
     auto precedingCharacterRange = makeSimpleRange(makeDeprecatedLegacyPosition(rangeWithAlternative.start).previous(), rangeWithAlternative.start);
     if (!precedingCharacterRange)
         return false;
 
-    for (auto& marker : markers.markersInRange(*precedingCharacterRange, DocumentMarkerType::DeletedAutocorrection)) {
+    for (auto& marker : markers->markersInRange(*precedingCharacterRange, DocumentMarkerType::DeletedAutocorrection)) {
         if (marker->description() == stringToBeReplaced)
             return false;
     }

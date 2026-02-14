@@ -664,7 +664,7 @@ bool LocalFrame::requestDOMPasteAccess(DOMPasteAccessCategory pasteAccessCategor
     case DOMPasteAccessPolicy::Denied:
         return false;
     case DOMPasteAccessPolicy::NotRequestedYet: {
-        auto* client = editor().client();
+        CheckedPtr client = editor().client();
         if (!client)
             return false;
 

@@ -78,6 +78,8 @@ public:
 
     void scrollDidEnd() final;
 
+    bool isScrollableOrRubberbandable() final;
+
 private:
     bool isVisibleToHitTesting() const final;
 
@@ -152,7 +154,6 @@ private:
     bool forceUpdateScrollbarsOnMainThreadForPerformanceTesting() const final;
 
     ScrollableArea* enclosingScrollableArea() const final;
-    bool isScrollableOrRubberbandable() final;
     bool hasScrollableOrRubberbandableAncestor() final;
     IntRect scrollableAreaBoundingBox(bool* = nullptr) const final;
     bool mockScrollbarsControllerEnabled() const final;

@@ -98,7 +98,7 @@ static DragImageRef createDragImageFromSnapshot(RefPtr<ImageBuffer> snapshot, No
 
     ImageOrientation orientation;
     if (node) {
-        auto* elementRenderer = dynamicDowncast<RenderElement>(node->renderer());
+        CheckedPtr elementRenderer = dynamicDowncast<RenderElement>(node->renderer());
         if (!elementRenderer)
             return nullptr;
 
@@ -136,13 +136,13 @@ struct ScopedFrameSelectionState {
     ScopedFrameSelectionState(LocalFrame& frame)
         : frame(frame)
     {
-        if (auto* renderView = frame.contentRenderer())
+        if (CheckedPtr renderView = frame.contentRenderer())
             selection = renderView->selection().get();
     }
 
     ~ScopedFrameSelectionState()
     {
-        if (auto* renderView = frame->contentRenderer()) {
+        if (CheckedPtr renderView = frame->contentRenderer()) {
             ASSERT(selection);
             renderView->selection().set(selection.value(), RenderSelection::RepaintMode::Nothing);
         }
@@ -157,7 +157,7 @@ struct ScopedFrameSelectionState {
 DragImageRef createDragImageForRange(LocalFrame& frame, const SimpleRange& range, bool forceBlackText)
 {
     protect(frame.document())->updateLayout();
-    RenderView* view = frame.contentRenderer();
+    CheckedPtr view = frame.contentRenderer();
     if (!view)
         return nullptr;
 
@@ -177,8 +177,8 @@ DragImageRef createDragImageForRange(LocalFrame& frame, const SimpleRange& range
 
     const ScopedFrameSelectionState selectionState(frame);
 
-    RenderObject* startRenderer = start.deprecatedNode()->renderer();
-    RenderObject* endRenderer = end.deprecatedNode()->renderer();
+    CheckedPtr startRenderer = start.deprecatedNode()->renderer();
+    CheckedPtr endRenderer = end.deprecatedNode()->renderer();
     if (!startRenderer || !endRenderer)
         return nullptr;
 
@@ -201,7 +201,7 @@ DragImageRef createDragImageForImage(LocalFrame& frame, Node& node, IntRect& ima
 {
     ScopedNodeDragEnabler enableDrag(frame, node);
 
-    RenderObject* renderer = node.renderer();
+    CheckedPtr renderer = node.renderer();
     if (!renderer)
         return nullptr;
 

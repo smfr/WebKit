@@ -1027,7 +1027,7 @@ bool EventHandler::handleMouseDraggedEvent(const MouseEventWithHitTestResults& e
     if (event.event().button() != MouseButton::Left || !targetNode)
         return false;
 
-    RenderObject* renderer = targetNode->renderer();
+    CheckedPtr renderer = targetNode->renderer();
     if (!renderer) {
         RefPtr parent = targetNode->parentOrShadowHostElement();
         if (!parent)
@@ -1137,7 +1137,7 @@ void EventHandler::updateSelectionForMouseDrag(const HitTestResult& hitTestResul
     // Special case to limit selection to the containing block for SVG text.
     // FIXME: Isn't there a better non-SVG-specific way to do this?
     if (RefPtr selectionBaseNode = newSelection.base().deprecatedNode()) {
-        if (RenderObject* selectionBaseRenderer = selectionBaseNode->renderer()) {
+        if (CheckedPtr selectionBaseRenderer = selectionBaseNode->renderer()) {
             if (selectionBaseRenderer->isRenderSVGText()) {
                 if (target->renderer()->containingBlock() != selectionBaseRenderer->containingBlock())
                     return;
@@ -1429,7 +1429,7 @@ bool EventHandler::scrollOverflow(ScrollDirection direction, ScrollGranularity g
         node = m_mousePressNode;
     
     if (node) {
-        auto r = node->renderer();
+        CheckedPtr r = node->renderer();
         if (r && !r->isRenderListBox() && r->enclosingBox().scroll(direction, granularity)) {
             setFrameWasScrolledByUser();
             return true;
@@ -1450,7 +1450,7 @@ bool EventHandler::logicalScrollOverflow(ScrollLogicalDirection direction, Scrol
         node = m_mousePressNode;
     
     if (node) {
-        auto r = node->renderer();
+        CheckedPtr r = node->renderer();
         if (r && !r->isRenderListBox() && r->enclosingBox().logicalScroll(direction, granularity)) {
             setFrameWasScrolledByUser();
             return true;
@@ -1667,12 +1667,12 @@ std::optional<Cursor> EventHandler::selectCursor(const HitTestResult& result, bo
     if (!node)
         return std::nullopt;
 
-    auto renderer = node->renderer();
+    CheckedPtr renderer = node->renderer();
     if (RefPtr element = dynamicDowncast<Element>(*node); element && result.pseudoElementIdentifier()) {
-        auto* pseudoElementRenderer = Styleable(*element, result.pseudoElementIdentifier()).renderer();
-        renderer = pseudoElementRenderer ? pseudoElementRenderer : renderer;
+        CheckedPtr pseudoElementRenderer = Styleable(*element, result.pseudoElementIdentifier()).renderer();
+        renderer = pseudoElementRenderer ? pseudoElementRenderer.get() : renderer;
     }
-    auto* style = renderer ? &renderer->style() : nullptr;
+    CheckedPtr style = renderer ? &renderer->style() : nullptr;
     bool horizontalText = !style || style->writingMode().isHorizontal();
     const Cursor& iBeam = horizontalText ? iBeamCursor() : verticalTextCursor();
 
@@ -1754,16 +1754,16 @@ std::optional<Cursor> EventHandler::selectCursor(const HitTestResult& result, bo
             return handCursor();
 
         bool inResizer = false;
-        auto resizerRenderer = renderer;
+        CheckedPtr resizerRenderer = renderer;
 
         if (is<RenderText>(resizerRenderer))
             resizerRenderer = resizerRenderer->parent();
 
         if (resizerRenderer && resizerRenderer->hasLayer()) {
-            auto& layerRenderer = downcast<RenderLayerModelObject>(*resizerRenderer);
-            inResizer = layerRenderer.layer()->isPointInResizeControl(roundedIntPoint(result.localPoint()));
+            CheckedRef layerRenderer = downcast<RenderLayerModelObject>(*resizerRenderer);
+            inResizer = layerRenderer->layer()->isPointInResizeControl(roundedIntPoint(result.localPoint()));
             if (inResizer)
-                return layerRenderer.shouldPlaceVerticalScrollbarOnLeft() ? southWestResizeCursor() : southEastResizeCursor();
+                return layerRenderer->shouldPlaceVerticalScrollbarOnLeft() ? southWestResizeCursor() : southEastResizeCursor();
         }
 
         // During selection, use an I-beam regardless of the content beneath the cursor.
@@ -2187,22 +2187,21 @@ ScrollableArea* EventHandler::enclosingScrollableArea(Node* node) const
         if (is<HTMLHtmlElement>(*ancestor) || is<HTMLDocument>(*ancestor))
             break;
 
-        auto renderer = ancestor->renderer();
+        CheckedPtr renderer = ancestor->renderer();
         if (!renderer)
             continue;
 
         if (auto* renderListBox = dynamicDowncast<RenderListBox>(*renderer)) {
-            auto* scrollableArea = static_cast<ScrollableArea*>(renderListBox);
-            if (scrollableArea->isScrollableOrRubberbandable())
-                return scrollableArea;
+            if (renderListBox->isScrollableOrRubberbandable())
+                return renderListBox;
         }
 
-        if (RefPtr plugin = dynamicDowncast<RenderEmbeddedObject>(renderer)) {
-            if (auto* scrollableArea = plugin->scrollableArea()) {
+        if (auto* plugin = dynamicDowncast<RenderEmbeddedObject>(*renderer)) {
+            if (CheckedPtr scrollableArea = plugin->scrollableArea()) {
                 Ref frame = m_frame.get();
                 RefPtr page = frame->page();
                 if (!page || page->chrome().client().usePluginRendererScrollableArea(frame))
-                    return scrollableArea;
+                    return scrollableArea.unsafeGet();
             }
         }
 
@@ -2969,7 +2968,7 @@ RefPtr<Element> EventHandler::textRecognitionCandidateElement() const
     if (candidateElement->hasEditableStyle())
         return nullptr;
 
-    auto renderer = candidateElement->renderer();
+    CheckedPtr renderer = candidateElement->renderer();
     if (!is<RenderImage>(renderer))
         return nullptr;
 
@@ -3212,12 +3211,12 @@ void EventHandler::notifyScrollableAreasOfMouseEvents(const AtomString& eventTyp
     if (!frameView)
         return;
 
-    auto scrollableAreaForLastNode = enclosingScrollableArea(lastElementUnderMouse);
-    auto scrollableAreaForNodeUnderMouse = enclosingScrollableArea(elementUnderMouse);
+    CheckedPtr scrollableAreaForLastNode = enclosingScrollableArea(lastElementUnderMouse);
+    CheckedPtr scrollableAreaForNodeUnderMouse = enclosingScrollableArea(elementUnderMouse);
 
     if (!!lastElementUnderMouse != !!elementUnderMouse) {
         if (elementUnderMouse) {
-            if (scrollableAreaForNodeUnderMouse != frameView)
+            if (scrollableAreaForNodeUnderMouse.get() != frameView.get())
                 frameView->mouseEnteredContentArea();
             if (scrollableAreaForNodeUnderMouse)
                 scrollableAreaForNodeUnderMouse->mouseEnteredContentArea();
@@ -3225,7 +3224,7 @@ void EventHandler::notifyScrollableAreasOfMouseEvents(const AtomString& eventTyp
             if (scrollableAreaForLastNode)
                 scrollableAreaForLastNode->mouseExitedContentArea();
 
-            if (scrollableAreaForLastNode != frameView)
+            if (scrollableAreaForLastNode.get() != frameView.get())
                 frameView->mouseExitedContentArea();
         }
         return;
@@ -3240,17 +3239,17 @@ void EventHandler::notifyScrollableAreasOfMouseEvents(const AtomString& eventTyp
     if (eventType == eventNames().mousemoveEvent) {
         frameView->mouseMovedInContentArea();
 
-        if (!movedBetweenScrollableaAreas && scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse != frameView)
+        if (!movedBetweenScrollableaAreas && scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse.get() != frameView.get())
             scrollableAreaForNodeUnderMouse->mouseMovedInContentArea();
     }
 
     if (!movedBetweenScrollableaAreas)
         return;
 
-    if (scrollableAreaForLastNode && scrollableAreaForLastNode != frameView)
+    if (scrollableAreaForLastNode && scrollableAreaForLastNode.get() != frameView.get())
         scrollableAreaForLastNode->mouseExitedContentArea();
 
-    if (scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse != frameView)
+    if (scrollableAreaForNodeUnderMouse && scrollableAreaForNodeUnderMouse.get() != frameView.get())
         scrollableAreaForNodeUnderMouse->mouseEnteredContentArea();
 }
 
@@ -3649,10 +3648,10 @@ bool EventHandler::handleWheelEventInAppropriateEnclosingBox(Node* startNode, co
     if (!startNode->renderer())
         return false;
 
-    RenderBox& initialEnclosingBox = startNode->renderer()->enclosingBox();
+    CheckedRef initialEnclosingBox = startNode->renderer()->enclosingBox();
 
     // RenderListBox is special because it's a ScrollableArea that the scrolling tree doesn't know about.
-    if (CheckedPtr renderListBox = dynamicDowncast<RenderListBox>(initialEnclosingBox))
+    if (CheckedPtr renderListBox = dynamicDowncast<RenderListBox>(initialEnclosingBox.get()))
         handleWheelEventPhaseInScrollableArea(*renderListBox, wheelEvent);
 
     if (!shouldHandleEvent)
@@ -3668,7 +3667,7 @@ bool EventHandler::handleWheelEventInAppropriateEnclosingBox(Node* startNode, co
         return nullptr;
     };
 
-    RenderBox* currentEnclosingBox = &initialEnclosingBox;
+    CheckedPtr currentEnclosingBox = initialEnclosingBox.ptr();
 #if PLATFORM(MAC)
     auto biasedDelta = ScrollingEffectsController::wheelDeltaBiasingTowardsVertical(FloatSize(wheelEvent.deltaX(), wheelEvent.deltaY()));
 #else
@@ -3676,7 +3675,7 @@ bool EventHandler::handleWheelEventInAppropriateEnclosingBox(Node* startNode, co
 #endif
     
     while (currentEnclosingBox) {
-        if (auto* boxScrollableArea = scrollableAreaForBox(*currentEnclosingBox)) {
+        if (CheckedPtr boxScrollableArea = scrollableAreaForBox(*currentEnclosingBox)) {
             auto platformEvent = wheelEvent.underlyingPlatformEvent();
             bool scrollingWasHandled;
             if (platformEvent) {
@@ -3901,7 +3900,7 @@ bool EventHandler::sendContextMenuEventForKey()
             location = IntPoint(x, y);
         }
     } else if (focusedElement) {
-        RenderBoxModelObject* box = focusedElement->renderBoxModelObject();
+        CheckedPtr box = focusedElement->renderBoxModelObject();
         if (!box)
             return false;
 
@@ -4370,9 +4369,9 @@ static void setInitialKeyboardSelection(LocalFrame& frame, SelectionDirection di
     if (!document)
         return;
 
-    FrameSelection& selection = frame.selection();
+    CheckedRef selection = frame.selection();
 
-    if (!selection.isNone())
+    if (!selection->isNone())
         return;
 
     RefPtr focusedElement = document->focusedElement();
@@ -4396,16 +4395,16 @@ static void setInitialKeyboardSelection(LocalFrame& frame, SelectionDirection di
     }
 
     AXTextStateChangeIntent intent(AXTextStateChangeType::SelectionMove, AXTextSelection { AXTextSelectionDirection::Discontiguous, AXTextSelectionGranularity::Unknown, false });
-    selection.setSelection(visiblePosition, FrameSelection::defaultSetSelectionOptions(UserTriggered::Yes), intent);
+    selection->setSelection(visiblePosition, FrameSelection::defaultSetSelectionOptions(UserTriggered::Yes), intent);
 }
 
 static void handleKeyboardSelectionMovement(LocalFrame& frame, KeyboardEvent& event)
 {
-    FrameSelection& selection = frame.selection();
+    CheckedRef selection = frame.selection();
 
     bool isCommanded = event.getModifierState("Meta"_s);
     bool isOptioned = event.getModifierState("Alt"_s);
-    bool isSelection = !selection.isNone();
+    bool isSelection = !selection->isNone();
 
     FrameSelection::Alteration alternation = event.getModifierState("Shift"_s) ? FrameSelection::Alteration::Extend : FrameSelection::Alteration::Move;
     SelectionDirection direction = SelectionDirection::Forward;
@@ -4437,7 +4436,7 @@ static void handleKeyboardSelectionMovement(LocalFrame& frame, KeyboardEvent& ev
     }
 
     if (isSelection)
-        selection.modify(alternation, direction, granularity, UserTriggered::Yes);
+        selection->modify(alternation, direction, granularity, UserTriggered::Yes);
     else
         setInitialKeyboardSelection(frame, direction);
 
@@ -4572,7 +4571,7 @@ static void removeDraggedContentDocumentMarkersFromAllFramesInPage(Page& page)
     });
 
     if (RefPtr localMainFrame = page.localMainFrame()) {
-        if (auto* mainFrameRenderer = localMainFrame->contentRenderer())
+        if (CheckedPtr mainFrameRenderer = localMainFrame->contentRenderer())
             mainFrameRenderer->repaintRootContents();
     }
 }
@@ -4768,7 +4767,7 @@ bool EventHandler::handleDrag(const MouseEventWithHitTestResults& event, CheckDr
 
         if (RefPtr draggedElement = this->draggedElement(); draggedElement && dragState().type == DragSourceAction::DHTML && !dragState().dataTransfer->hasDragImage()) {
             protect(draggedElement->document())->updateStyleIfNeeded();
-            if (auto* renderer = draggedElement->renderer()) {
+            if (CheckedPtr renderer = draggedElement->renderer()) {
                 auto absolutePosition = renderer->localToAbsolute();
                 auto delta = m_mouseDownContentsPosition - roundedIntPoint(absolutePosition);
                 dragState().dataTransfer->setDragImage(draggedElement.releaseNonNull(), delta.width(), delta.height());
@@ -4782,7 +4781,7 @@ bool EventHandler::handleDrag(const MouseEventWithHitTestResults& event, CheckDr
         }
 
         if (draggedElement() && dragState().type.containsAny({ DragSourceAction::DHTML, DragSourceAction::Image })) {
-            if (auto* renderImage = dynamicDowncast<RenderImage>(draggedElement()->renderer())) {
+            if (CheckedPtr renderImage = dynamicDowncast<RenderImage>(draggedElement()->renderer())) {
                 auto* image = renderImage->cachedImage();
                 if (image && !image->isCORSSameOrigin())
                     dragState().restrictedOriginForImageData = SecurityOrigin::create(image->url());
@@ -5076,7 +5075,7 @@ bool EventHandler::startKeyboardScrollAnimationOnDocument(ScrollDirection direct
 
 bool EventHandler::startKeyboardScrollAnimationOnRenderBoxLayer(ScrollDirection direction, ScrollGranularity granularity, RenderBox* renderBox, bool isKeyRepeat)
 {
-    auto* scrollableArea = renderBox->layer() ? renderBox->layer()->scrollableArea() : nullptr;
+    CheckedPtr scrollableArea = renderBox->layer() ? renderBox->layer()->scrollableArea() : nullptr;
     if (!scrollableArea)
         return false;
 
@@ -5097,7 +5096,7 @@ bool EventHandler::startKeyboardScrollAnimationOnRenderBoxAndItsAncestors(Scroll
 
 bool EventHandler::startKeyboardScrollAnimationOnPlugin(ScrollDirection direction, ScrollGranularity granularity, RenderEmbeddedObject& pluginRenderer, bool isKeyRepeat)
 {
-    auto* scrollableArea = pluginRenderer.scrollableArea();
+    CheckedPtr scrollableArea = pluginRenderer.scrollableArea();
     if (!scrollableArea)
         return false;
 
@@ -5119,17 +5118,17 @@ bool EventHandler::startKeyboardScrollAnimationOnEnclosingScrollableContainer(Sc
         node = m_mousePressNode;
 
     if (node) {
-        auto renderer = node->renderer();
+        CheckedPtr renderer = node->renderer();
         if (!renderer)
             return false;
 
-        if (RefPtr plugin = dynamicDowncast<RenderEmbeddedObject>(renderer)) {
+        if (RefPtr plugin = dynamicDowncast<RenderEmbeddedObject>(renderer.get())) {
             if (startKeyboardScrollAnimationOnPlugin(direction, granularity, *plugin, isKeyRepeat))
                 return true;
         }
 
-        RenderBox& renderBox = renderer->enclosingBox();
-        if (!renderer->isRenderListBox() && startKeyboardScrollAnimationOnRenderBoxAndItsAncestors(direction, granularity, &renderBox, isKeyRepeat))
+        CheckedRef renderBox = renderer->enclosingBox();
+        if (!renderer->isRenderListBox() && startKeyboardScrollAnimationOnRenderBoxAndItsAncestors(direction, granularity, renderBox.ptr(), isKeyRepeat))
             return true;
     }
     return false;
@@ -5152,7 +5151,7 @@ bool EventHandler::shouldUseSmoothKeyboardScrollingForFocusedScrollableArea()
     if (!m_frame->settings().eventHandlerDrivenSmoothKeyboardScrollingEnabled())
         return false;
 
-    auto scrollableArea = focusedScrollableArea();
+    CheckedPtr scrollableArea = focusedScrollableArea();
     if (!scrollableArea)
         return false;
 

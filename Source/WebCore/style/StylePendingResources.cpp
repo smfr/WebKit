@@ -106,7 +106,7 @@ void loadPendingResources(RenderStyle& style, Document& document, const Element*
         loadPendingImage(document, shapeValueImage.get(), element, LoadPolicy::Anonymous);
 
     // Are there other pseudo-elements that need resource loading? 
-    if (auto* firstLineStyle = style.getCachedPseudoStyle({ PseudoElementType::FirstLine }))
+    if (CheckedPtr firstLineStyle = style.getCachedPseudoStyle({ PseudoElementType::FirstLine }))
         loadPendingResources(*firstLineStyle, document, element);
 }
 

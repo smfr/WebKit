@@ -173,7 +173,7 @@ void MatchResultCache::update(CachedMatchResult& result, const RenderStyle& styl
 
 void MatchResultCache::updateForFastPathInherit(const Element& element, const RenderStyle& parentStyle)
 {
-    auto entry = m_entries.get(element);
+    CheckedPtr entry = m_entries.get(element);
     if (!entry)
         return;
     entry->unadjustedStyle.style->fastPathInheritFrom(parentStyle);

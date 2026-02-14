@@ -499,9 +499,9 @@ inline bool RenderElement::canEstablishContainingBlockWithTransform() const
 
 inline RenderObject* RenderElement::firstInFlowChild() const
 {
-    if (auto* firstChild = this->firstChild()) {
+    if (CheckedPtr firstChild = this->firstChild()) {
         if (firstChild->isInFlow())
-            return firstChild;
+            return firstChild.unsafeGet();
         return firstChild->nextInFlowSibling();
     }
     return nullptr;
@@ -509,9 +509,9 @@ inline RenderObject* RenderElement::firstInFlowChild() const
 
 inline RenderObject* RenderElement::lastInFlowChild() const
 {
-    if (auto* lastChild = this->lastChild()) {
+    if (CheckedPtr lastChild = this->lastChild()) {
         if (lastChild->isInFlow())
-            return lastChild;
+            return lastChild.unsafeGet();
         return lastChild->previousInFlowSibling();
     }
     return nullptr;

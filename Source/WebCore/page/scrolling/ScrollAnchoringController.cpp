@@ -316,7 +316,7 @@ AnchorSearchStatus ScrollAnchoringController::examinePriorityCandidate(RenderEle
 {
     CheckedPtr scrollerBox = scrollableAreaBox();
 
-    RenderElement* ancestor = &renderer;
+    CheckedPtr<RenderElement> ancestor = &renderer;
     while (ancestor && ancestor != scrollerBox.get()) {
         if (ancestor->style().overflowAnchor() == OverflowAnchor::None)
             return AnchorSearchStatus::Exclude;
@@ -448,8 +448,8 @@ AnchorSearchStatus ScrollAnchoringController::findAnchorInOutOfFlowObjects(Rende
     if (!outOfFlowBoxes)
         return AnchorSearchStatus::Exclude;
 
-    for (auto& outOfFlowBox : *outOfFlowBoxes) {
-        auto status = findAnchorRecursive(&outOfFlowBox);
+    for (CheckedRef outOfFlowBox : *outOfFlowBoxes) {
+        auto status = findAnchorRecursive(outOfFlowBox.ptr());
         if (isViableStatus(status))
             return status;
     }

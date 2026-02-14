@@ -1079,14 +1079,14 @@ void HTMLInputElement::setChecked(bool isChecked, WasSetByJavaScript wasCheckedB
 
     if (auto* buttons = radioButtonGroups())
         buttons->updateCheckedState(*this);
-    if (auto* renderer = this->renderer(); renderer && renderer->style().hasUsedAppearance())
+    if (CheckedPtr renderer = this->renderer(); renderer && renderer->style().hasUsedAppearance())
         renderer->repaint();
     updateValidity();
 
     // Ideally we'd do this from the render tree (matching
     // RenderTextView), but it's not possible to do it at the moment
     // because of the way the code is structured.
-    if (auto* renderer = this->renderer()) {
+    if (CheckedPtr renderer = this->renderer()) {
         if (CheckedPtr cache = renderer->document().existingAXObjectCache())
             cache->checkedStateChanged(*this);
     }
@@ -1102,7 +1102,7 @@ void HTMLInputElement::setIndeterminate(bool newValue)
     Style::PseudoClassChangeInvalidation indeterminateInvalidation(*this, CSSSelector::PseudoClass::Indeterminate, newValue);
     m_isIndeterminate = newValue;
 
-    if (auto* renderer = this->renderer(); renderer && renderer->style().hasUsedAppearance())
+    if (CheckedPtr renderer = this->renderer(); renderer && renderer->style().hasUsedAppearance())
         renderer->repaint();
 
     if (CheckedPtr cache = document().existingAXObjectCache())
@@ -2261,7 +2261,7 @@ void HTMLInputElement::invalidateStyleOnFocusChangeIfNeeded()
     if (!isTextField())
         return;
     // Focus change may affect the result of shouldTruncateText().
-    if (auto* style = renderStyle(); style && style->textOverflow() == TextOverflow::Ellipsis)
+    if (CheckedPtr style = renderStyle(); style && style->textOverflow() == TextOverflow::Ellipsis)
         invalidateStyleForSubtreeInternal();
 }
 

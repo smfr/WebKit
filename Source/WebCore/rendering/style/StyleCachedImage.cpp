@@ -324,7 +324,7 @@ RefPtr<Image> StyleCachedImage::image(const RenderElement* renderer, const Float
 {
     ASSERT(!m_isPending);
 
-    if (auto renderSVGResource = this->renderSVGResource(renderer))
+    if (CheckedPtr renderSVGResource = this->renderSVGResource(renderer))
         return SVGResourceImage::create(*renderSVGResource, m_url);
 
     if (auto renderSVGResource = this->legacyRenderSVGResource(renderer))

@@ -356,7 +356,7 @@ void InspectorTimelineAgent::didEnqueueFirstContentfulPaint()
 void InspectorTimelineAgent::didEnqueueLargestContentfulPaint(Element* element, unsigned area)
 {
     Inspector::Protocol::DOM::NodeId nodeID = 0;
-    if (auto* domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent())
+    if (CheckedPtr domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent())
         nodeID = domAgent->pushNodeToFrontend(element);
 
     appendRecord(TimelineRecordFactory::createLargestContentfulPaintData(nodeID, area), TimelineRecordType::LargestContentfulPaint, false);
@@ -440,7 +440,7 @@ void InspectorTimelineAgent::toggleScriptProfilerInstrument(InstrumentState stat
 
 void InspectorTimelineAgent::toggleHeapInstrument(InstrumentState state)
 {
-    if (auto* heapAgent = Ref { m_instrumentingAgents.get() }->persistentWebHeapAgent()) {
+    if (CheckedPtr heapAgent = Ref { m_instrumentingAgents.get() }->persistentWebHeapAgent()) {
         if (state == InstrumentState::Start) {
             if (shouldStartHeapInstrument())
                 std::ignore = heapAgent->startTracking();
@@ -490,7 +490,7 @@ void InspectorTimelineAgent::toggleTimelineInstrument(InstrumentState state)
 
 void InspectorTimelineAgent::toggleAnimationInstrument(InstrumentState state)
 {
-    if (auto* animationAgent = Ref { m_instrumentingAgents.get() }->persistentAnimationAgent()) {
+    if (CheckedPtr animationAgent = Ref { m_instrumentingAgents.get() }->persistentAnimationAgent()) {
         if (state == InstrumentState::Start)
             std::ignore = animationAgent->startTracking();
         else

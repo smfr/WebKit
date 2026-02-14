@@ -195,9 +195,9 @@ FloatRect SVGClipPathElement::calculateClipContentRepaintRect(RepaintRectCalcula
             continue;
         if (!renderer->isRenderSVGShape() && !renderer->isRenderSVGText() && !childNode->hasTagName(SVGNames::useTag))
             continue;
-        auto& style = renderer->style();
+        CheckedRef style = renderer->style();
         // For <use> elements, skip visibility check on the <use> itself, check target instead.
-        if (style.display() == Style::DisplayType::None || (style.usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
+        if (style->display() == Style::DisplayType::None || (style->usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
             continue;
 
         // For <use> elements, verify the target is visible and valid

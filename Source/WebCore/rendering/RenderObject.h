@@ -1417,18 +1417,18 @@ inline RenderObject::SetLayoutNeededForbiddenScope::SetLayoutNeededForbiddenScop
 
 inline RenderObject* RenderObject::previousInFlowSibling() const
 {
-    auto* previousSibling = this->previousSibling();
+    CheckedPtr previousSibling = this->previousSibling();
     while (previousSibling && !previousSibling->isInFlow())
         previousSibling = previousSibling->previousSibling();
-    return previousSibling;
+    return previousSibling.unsafeGet();
 }
 
 inline RenderObject* RenderObject::nextInFlowSibling() const
 {
-    auto* nextSibling = this->nextSibling();
+    CheckedPtr nextSibling = this->nextSibling();
     while (nextSibling && !nextSibling->isInFlow())
         nextSibling = nextSibling->nextSibling();
-    return nextSibling;
+    return nextSibling.unsafeGet();
 }
 
 #if ENABLE(MATHML)

@@ -83,11 +83,11 @@ InlineLayoutUnit TextUtil::width(const InlineTextBox& inlineTextBox, const FontC
         else
             width = fontCascade.widthForTextUsingSimplifiedMeasuring(view);
     } else {
-        auto& style = inlineTextBox.style();
-        auto directionalOverride = isOverride(style.unicodeBidi());
-        auto run = WebCore::TextRun { StringView(text).substring(from, to - from), contentLogicalLeft, { }, ExpansionBehavior::defaultBehavior(), directionalOverride ? style.writingMode().bidiDirection() : TextDirection::LTR, directionalOverride };
-        if (!style.collapseWhiteSpace() && !style.tabSize().isZero())
-            run.setTabSize(true, Style::toPlatform(style.tabSize()));
+        CheckedRef style = inlineTextBox.style();
+        auto directionalOverride = isOverride(style->unicodeBidi());
+        auto run = WebCore::TextRun { StringView(text).substring(from, to - from), contentLogicalLeft, { }, ExpansionBehavior::defaultBehavior(), directionalOverride ? style->writingMode().bidiDirection() : TextDirection::LTR, directionalOverride };
+        if (!style->collapseWhiteSpace() && !style->tabSize().isZero())
+            run.setTabSize(true, Style::toPlatform(style->tabSize()));
         // FIXME: consider moving this to TextRun ctor
         run.setTextSpacingState(spacingState);
         width = fontCascade.width(run, { }, glyphOverflow);
@@ -112,10 +112,10 @@ InlineLayoutUnit TextUtil::width(const InlineTextItem& inlineTextItem, const Fon
     RELEASE_ASSERT(to <= inlineTextItem.end());
 
     if (inlineTextItem.isWhitespace()) {
-        auto& inlineTextBox = inlineTextItem.inlineTextBox();
+        CheckedRef inlineTextBox = inlineTextItem.inlineTextBox();
         auto singleWhiteSpace = from - to == 1 || !TextUtil::shouldPreserveSpacesAndTabs(inlineTextBox);
         if (singleWhiteSpace)
-            return std::max(0.f, singleSpaceWidth(fontCascade, inlineTextBox.canUseSimplifiedContentMeasuring()));
+            return std::max(0.f, singleSpaceWidth(fontCascade, inlineTextBox->canUseSimplifiedContentMeasuring()));
     }
     return width(inlineTextItem.inlineTextBox(), fontCascade, from, to, contentLogicalLeft, useTrailingWhitespaceMeasuringOptimization, spacingState, glyphOverflow);
 }

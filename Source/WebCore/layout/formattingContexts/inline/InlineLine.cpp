@@ -88,7 +88,7 @@ Line::Result Line::close()
 {
     auto trailingClonedDecorationWidth = [&] {
         auto decorationWidth = InlineLayoutUnit { };
-        for (auto* inlineBox : m_inlineBoxListWithClonedDecorationEnd) {
+        for (CheckedPtr inlineBox : m_inlineBoxListWithClonedDecorationEnd) {
             auto& boxGeometry = formattingContext().geometryForBox(*inlineBox);
             decorationWidth += boxGeometry.borderEnd() + boxGeometry.paddingEnd();
         }
@@ -189,10 +189,10 @@ const Box* Line::removeOverflowingOutOfFlowContent()
     }
     if (!lastTrailingOutOfFlowItemIndex)
         return { };
-    auto* lastTrailingOpaqueBox = &m_runs[*lastTrailingOutOfFlowItemIndex].layoutBox();
+    CheckedPtr lastTrailingOpaqueBox = &m_runs[*lastTrailingOutOfFlowItemIndex].layoutBox();
     m_runs.removeAt(*lastTrailingOutOfFlowItemIndex, m_runs.size() - *lastTrailingOutOfFlowItemIndex);
     ASSERT(!m_runs.isEmpty());
-    return lastTrailingOpaqueBox;
+    return lastTrailingOpaqueBox.unsafeGet();
 }
 
 void Line::handleTrailingHangingContent(std::optional<IntrinsicWidthMode> intrinsicWidthMode, InlineLayoutUnit horizontalAvailableSpaceForContent, bool isLastFormattedLine)
@@ -951,11 +951,11 @@ InlineLayoutUnit Line::Run::removeTrailingWhitespace()
         // While LTR content could also suffer from slightly incorrect content width after trimming trailing whitespace (see TextUtil::width)
         // it hardly produces visually observable result.
         // FIXME: This may still incorrectly leave some content on the line (vs. re-measuring also at ::expand).
-        auto& inlineTextBox = downcast<InlineTextBox>(*m_layoutBox);
+        CheckedRef inlineTextBox = downcast<InlineTextBox>(*m_layoutBox);
         auto startPosition = *m_lastNonWhitespaceContentStart;
         auto endPosition = m_textContent.start + m_textContent.length;
         RELEASE_ASSERT(startPosition < endPosition - trailingTrimmableContentLength);
-        if (inlineTextBox.content()[endPosition - 1] == space)
+        if (inlineTextBox->content()[endPosition - 1] == space)
             trimmedWidth = TextUtil::trailingWhitespaceWidth(inlineTextBox, m_style.fontCascade(), startPosition, endPosition);
     }
     m_textContent.length -= trailingTrimmableContentLength;

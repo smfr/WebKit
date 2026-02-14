@@ -317,7 +317,7 @@ bool hasOffscreenRect(const Node& node, FocusDirection direction)
         break;
     }
 
-    auto* render = node.renderer();
+    CheckedPtr render = node.renderer();
     if (!render)
         return true;
 
@@ -390,7 +390,7 @@ bool scrollInDirection(const ContainerNode& container, FocusDirection direction)
             return false;
         }
 
-        if (auto* scrollableArea = renderBox->enclosingLayer()->scrollableArea())
+        if (CheckedPtr scrollableArea = renderBox->enclosingLayer()->scrollableArea())
             scrollableArea->scrollByRecursively(IntSize(dx, dy));
         return true;
     }
@@ -524,10 +524,10 @@ LayoutRect nodeRectInAbsoluteCoordinates(const ContainerNode& containerNode, boo
         // For authors that use border instead of outline in their CSS, we compensate by ignoring the border when calculating
         // the rect of the focused element.
         if (ignoreBorder) {
-            auto& style = renderer->style();
-            rect.move(Style::evaluate<LayoutUnit>(style.usedBorderLeftWidth(), Style::ZoomNeeded { }), Style::evaluate<LayoutUnit>(style.usedBorderTopWidth(), Style::ZoomNeeded { }));
-            rect.setWidth(rect.width() - Style::evaluate<LayoutUnit>(style.usedBorderLeftWidth(), Style::ZoomNeeded { }) - Style::evaluate<LayoutUnit>(style.usedBorderRightWidth(), Style::ZoomNeeded { }));
-            rect.setHeight(rect.height() - Style::evaluate<LayoutUnit>(style.usedBorderTopWidth(), Style::ZoomNeeded { }) - Style::evaluate<LayoutUnit>(style.usedBorderBottomWidth(), Style::ZoomNeeded { }));
+            CheckedRef style = renderer->style();
+            rect.move(Style::evaluate<LayoutUnit>(style->usedBorderLeftWidth(), Style::ZoomNeeded { }), Style::evaluate<LayoutUnit>(style->usedBorderTopWidth(), Style::ZoomNeeded { }));
+            rect.setWidth(rect.width() - Style::evaluate<LayoutUnit>(style->usedBorderLeftWidth(), Style::ZoomNeeded { }) - Style::evaluate<LayoutUnit>(style->usedBorderRightWidth(), Style::ZoomNeeded { }));
+            rect.setHeight(rect.height() - Style::evaluate<LayoutUnit>(style->usedBorderTopWidth(), Style::ZoomNeeded { }) - Style::evaluate<LayoutUnit>(style->usedBorderBottomWidth(), Style::ZoomNeeded { }));
         }
         return rect;
     }

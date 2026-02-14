@@ -61,8 +61,8 @@ InlineLayoutUnit LineBoxVerticalAligner::computeLogicalHeightAndAlign(LineBox& l
                 if (inlineLevelBox.hasTextEmphasis())
                     return false;
                 // Baseline aligned, non-stretchy direct children are considered to be simple for now.
-                auto& layoutBox = inlineLevelBox.layoutBox();
-                if (&layoutBox.parent() != &rootInlineBox.layoutBox() || !WTF::holdsAlternative<CSS::Keyword::Baseline>(inlineLevelBox.verticalAlign()))
+                CheckedRef layoutBox = inlineLevelBox.layoutBox();
+                if (&layoutBox->parent() != &rootInlineBox.layoutBox() || !WTF::holdsAlternative<CSS::Keyword::Baseline>(inlineLevelBox.verticalAlign()))
                     return false;
 
                 if (inlineLevelBox.isAtomicInlineBox()) {
@@ -351,10 +351,10 @@ std::optional<InlineLevelBox::AscentAndDescent> LineBoxVerticalAligner::layoutBo
     auto maximumAscent = std::optional<InlineLayoutUnit> { };
     auto maximumDescent = std::optional<InlineLayoutUnit> { };
     auto& inlineBox = nonRootInlineLevelBoxes[inlineBoxIndex];
-    auto& inlineBoxParent = inlineBox.layoutBox().parent();
+    CheckedRef inlineBoxParent = inlineBox.layoutBox().parent();
     for (size_t index = inlineBoxIndex + 1; index < nonRootInlineLevelBoxes.size(); ++index) {
         auto& descendantInlineLevelBox = nonRootInlineLevelBoxes[index];
-        if (&descendantInlineLevelBox.layoutBox().parent() == &inlineBoxParent) {
+        if (&descendantInlineLevelBox.layoutBox().parent() == inlineBoxParent.ptr()) {
             // We are at the end of the descendant list.
             break;
         }

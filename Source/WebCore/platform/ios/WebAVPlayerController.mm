@@ -901,7 +901,7 @@ Class webAVPlayerControllerClassSingleton()
     }
 
     if (WebAVPlayerControllerIsPlayingOnSecondScreenObserverContext == context) {
-        if (auto* delegate = self.delegate)
+        if (CheckedPtr<PlaybackSessionModel> delegate = self.delegate)
             delegate->setPlayingOnSecondScreen(_playingOnSecondScreen);
         return;
     }

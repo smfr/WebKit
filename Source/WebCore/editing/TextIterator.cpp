@@ -450,14 +450,14 @@ static bool isRendererAccessible(const RenderObject* renderer, TextIteratorBehav
     if (!renderer)
         return false;
 
-    auto& style = renderer->style();
-    if (style.usedUserSelect() == UserSelect::None && behaviors.contains(TextIteratorBehavior::IgnoresUserSelectNone))
+    CheckedRef style = renderer->style();
+    if (style->usedUserSelect() == UserSelect::None && behaviors.contains(TextIteratorBehavior::IgnoresUserSelectNone))
         return false;
 
     if (renderer->isSkippedContent()) {
         if (!behaviors.contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser))
             return false;
-        return style.usedContentVisibility() == ContentVisibility::Auto || style.autoRevealsWhenFound();
+        return style->usedContentVisibility() == ContentVisibility::Auto || style->autoRevealsWhenFound();
     }
 
     return true;
@@ -1306,7 +1306,7 @@ void SimplifiedBackwardsTextIterator::advance()
         // Don't handle node if we start iterating at [node, 0].
         if (!m_handledNode && !(m_node == m_endContainer && !m_endOffset)) {
             CheckedPtr renderer = m_node->renderer();
-            if (auto* renderText = dynamicDowncast<RenderText>(renderer.get())) {
+            if (CheckedPtr renderText = dynamicDowncast<RenderText>(renderer.get())) {
                 if (renderText->style().visibility() == Visibility::Visible && m_offset > 0)
                     m_handledNode = handleTextNode();
             } else if (isRendererReplacedElement(renderer.get(), m_behaviors)) {

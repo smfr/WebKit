@@ -375,7 +375,7 @@ void InlineFormattingContext::layoutFloatContentOnly(const ConstraintsForInlineC
 
     for (auto& inlineItem : inlineContentCache.inlineItems().content()) {
         if (inlineItem.isFloat()) {
-            auto& floatBox = inlineItem.layoutBox();
+            CheckedRef floatBox = inlineItem.layoutBox();
 
             integrationUtils().layoutWithFormattingContextForBox(downcast<ElementBox>(floatBox));
 
@@ -475,7 +475,7 @@ void InlineFormattingContext::resetBoxGeometriesForDiscardedContent(const Inline
         geometryForBox(inlineItem.layoutBox()).reset();
     }
 
-    for (auto* floatBox : suspendedFloats)
+    for (CheckedPtr floatBox : suspendedFloats)
         geometryForBox(*floatBox).reset();
 }
 

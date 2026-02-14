@@ -127,9 +127,9 @@ static Ref<JSON::ArrayOf<Inspector::Protocol::Animation::Keyframe>> buildObjectF
     const auto& blendingKeyframes = keyframeEffect.blendingKeyframes();
     const auto& parsedKeyframes = keyframeEffect.parsedKeyframes();
 
-    if (auto* styleOriginatedAnimation = dynamicDowncast<StyleOriginatedAnimation>(keyframeEffect.animation())) {
-        auto* target = keyframeEffect.target();
-        auto* renderer = keyframeEffect.renderer();
+    if (RefPtr styleOriginatedAnimation = dynamicDowncast<StyleOriginatedAnimation>(keyframeEffect.animation())) {
+        RefPtr target = keyframeEffect.target();
+        CheckedPtr renderer = keyframeEffect.renderer();
 
         // Synthesize CSS style declarations for each keyframe so the frontend can display them.
 
@@ -140,7 +140,7 @@ static Ref<JSON::ArrayOf<Inspector::Protocol::Animation::Keyframe>> buildObjectF
             auto& blendingKeyframe = blendingKeyframes[i];
 
             ASSERT(blendingKeyframe.style());
-            auto& style = *blendingKeyframe.style();
+            CheckedRef style = *blendingKeyframe.style();
 
             auto keyframePayload = Inspector::Protocol::Animation::Keyframe::create()
                 .setOffset(blendingKeyframe.offset())
@@ -339,7 +339,7 @@ Inspector::Protocol::ErrorStringOr<Ref<Inspector::Protocol::DOM::Styleable>> Ins
     m_animationsIgnoringTargetChanges.remove(*animation);
 
     Ref agents = m_instrumentingAgents.get();
-    auto* domAgent = agents->persistentDOMAgent();
+    CheckedPtr domAgent = agents->persistentDOMAgent();
     if (!domAgent)
         return makeUnexpected("DOM domain must be enabled"_s);
 
@@ -429,8 +429,8 @@ static bool isDelayed(const ComputedEffectTiming& computedTiming)
 
 void InspectorAnimationAgent::willApplyKeyframeEffect(const Styleable& target, KeyframeEffect& keyframeEffect, const ComputedEffectTiming& computedTiming)
 {
-    auto* animation = keyframeEffect.animation();
-    RefPtr styleOriginatedAnimation = dynamicDowncast<StyleOriginatedAnimation>(animation);
+    RefPtr animation = keyframeEffect.animation();
+    RefPtr styleOriginatedAnimation = dynamicDowncast<StyleOriginatedAnimation>(animation.get());
     if (!styleOriginatedAnimation)
         return;
 
@@ -477,14 +477,14 @@ void InspectorAnimationAgent::willApplyKeyframeEffect(const Styleable& target, K
         .release();
 
     if (ensureResult.isNewEntry) {
-        if (auto* domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent()) {
+        if (CheckedPtr domAgent = Ref { m_instrumentingAgents.get() }->persistentDOMAgent()) {
             if (auto nodeId = domAgent->pushStyleableElementToFrontend(target))
                 event->setNodeId(nodeId);
         }
 
-        if (auto* cssAnimation = dynamicDowncast<CSSAnimation>(animation))
+        if (RefPtr cssAnimation = dynamicDowncast<CSSAnimation>(animation.get()))
             event->setAnimationName(cssAnimation->animationName());
-        else if (auto* cssTransition = dynamicDowncast<CSSTransition>(animation))
+        else if (RefPtr cssTransition = dynamicDowncast<CSSTransition>(animation.get()))
             event->setTransitionProperty(cssTransition->transitionProperty());
         else
             ASSERT_NOT_REACHED();
@@ -609,10 +609,10 @@ String InspectorAnimationAgent::findAnimationId(WebAnimation& animation)
 
 WebAnimation* InspectorAnimationAgent::assertAnimation(Inspector::Protocol::ErrorString& errorString, const String& animationId)
 {
-    auto* animation = m_animationIdMap.get(animationId);
+    RefPtr animation = m_animationIdMap.get(animationId);
     if (!animation)
         errorString = "Missing animation for given animationId"_s;
-    return animation;
+    return animation.unsafeGet();
 }
 
 void InspectorAnimationAgent::bindAnimation(WebAnimation& animation, RefPtr<Inspector::Protocol::Console::StackTrace> backtrace)

@@ -76,7 +76,7 @@ static bool isValidSampleLocation(Document& document, const IntPoint& location)
     for (auto& hitTestNode : hitTestResult.listBasedTestResult()) {
         Ref node = hitTestNode.get();
 
-        auto* renderer = node->renderer();
+        CheckedPtr renderer = node->renderer();
         if (!renderer)
             return false;
 

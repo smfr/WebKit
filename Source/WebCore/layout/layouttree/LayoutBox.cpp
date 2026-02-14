@@ -429,7 +429,7 @@ bool Box::isDescendantOf(const Box& box) const
 
 bool Box::isDescendantOfWithinFormattingContext(const Box& box) const
 {
-    for (auto* ancestor = &parent(); !ancestor->establishesFormattingContext(); ancestor = &ancestor->parent()) {
+    for (CheckedPtr ancestor = &parent(); !ancestor->establishesFormattingContext(); ancestor = &ancestor->parent()) {
         if (ancestor == &box)
             return true;
     }
@@ -440,7 +440,7 @@ bool Box::isInFormattingContextEstablishedBy(const ElementBox& formattingContext
 {
     ASSERT(formattingContextRoot.establishesFormattingContext());
 
-    auto* ancestor = &parent();
+    CheckedPtr ancestor = &parent();
     while (true) {
         if (ancestor->establishesFormattingContext())
             break;

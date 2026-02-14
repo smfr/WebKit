@@ -66,7 +66,7 @@ UpdateScrollInfoAfterLayoutTransaction::~UpdateScrollInfoAfterLayoutTransaction(
 
 static bool isObjectAncestorContainerOf(RenderElement& ancestor, RenderElement& descendant)
 {
-    for (auto* renderer = &descendant; renderer; renderer = renderer->container()) {
+    for (CheckedPtr renderer = &descendant; renderer; renderer = renderer->container()) {
         if (renderer == &ancestor)
             return true;
     }
@@ -414,7 +414,7 @@ void LocalFrameViewLayoutContext::markForUpdateLayerPositionsAfterSVGTransformCh
 
 void LocalFrameViewLayoutContext::updateCompositingLayersAfterLayout()
 {
-    auto* renderView = this->renderView();
+    CheckedPtr renderView = this->renderView();
     if (!renderView)
         return;
 
@@ -459,7 +459,7 @@ bool LocalFrameViewLayoutContext::needsLayoutInternal() const
     // This can return true in cases where the document does not have a body yet.
     // Document::shouldScheduleLayout takes care of preventing us from scheduling
     // layout in that case.
-    auto* renderView = this->renderView();
+    CheckedPtr renderView = this->renderView();
     return isLayoutPending()
         || (renderView && renderView->needsLayout())
         || subtreeLayoutRoot()
@@ -473,7 +473,7 @@ void LocalFrameViewLayoutContext::setNeedsLayoutAfterViewConfigurationChange()
         return;
     }
 
-    if (auto* renderView = this->renderView()) {
+    if (CheckedPtr renderView = this->renderView()) {
         ASSERT(!document()->inHitTesting());
         renderView->setNeedsLayout();
         scheduleLayout();
@@ -540,14 +540,14 @@ void LocalFrameViewLayoutContext::unscheduleLayout()
 void LocalFrameViewLayoutContext::scheduleSubtreeLayout(RenderElement& layoutRoot)
 {
     ASSERT(renderView());
-    auto& renderView = *this->renderView();
+    CheckedRef renderView = *this->renderView();
 
     // Try to catch unnecessary work during render tree teardown.
-    ASSERT(!renderView.renderTreeBeingDestroyed());
+    ASSERT(!renderView->renderTreeBeingDestroyed());
     ASSERT(frame().view() == &view());
 
-    if (renderView.needsLayout() && !subtreeLayoutRoot()) {
-        layoutRoot.markContainingBlocksForLayout(&renderView);
+    if (renderView->needsLayout() && !subtreeLayoutRoot()) {
+        layoutRoot.markContainingBlocksForLayout(renderView.ptr());
         return;
     }
 
@@ -559,13 +559,13 @@ void LocalFrameViewLayoutContext::scheduleSubtreeLayout(RenderElement& layoutRoo
         return;
     }
 
-    auto* subtreeLayoutRoot = this->subtreeLayoutRoot();
+    CheckedPtr subtreeLayoutRoot = this->subtreeLayoutRoot();
     if (subtreeLayoutRoot == &layoutRoot)
         return;
 
     if (!subtreeLayoutRoot) {
         // We already have a pending (full) layout. Just mark the subtree for layout.
-        layoutRoot.markContainingBlocksForLayout(&renderView);
+        layoutRoot.markContainingBlocksForLayout(renderView.ptr());
         InspectorInstrumentation::didInvalidateLayout(protect(frame()));
         return;
     }
@@ -587,7 +587,7 @@ void LocalFrameViewLayoutContext::scheduleSubtreeLayout(RenderElement& layoutRoo
     }
     // Two disjoint subtrees need layout. Mark both of them and issue a full layout instead.
     convertSubtreeLayoutToFullLayout();
-    layoutRoot.markContainingBlocksForLayout(&renderView);
+    layoutRoot.markContainingBlocksForLayout(renderView.ptr());
     InspectorInstrumentation::didInvalidateLayout(protect(frame()));
 }
 

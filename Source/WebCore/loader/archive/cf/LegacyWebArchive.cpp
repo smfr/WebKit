@@ -596,7 +596,7 @@ static void addSubresourcesForAttachmentElementsIfNecessary(LocalFrame& frame, c
     if (identifiers.isEmpty())
         return;
 
-    auto* editorClient = frame.editor().client();
+    CheckedPtr editorClient = frame.editor().client();
     if (!editorClient)
         return;
 

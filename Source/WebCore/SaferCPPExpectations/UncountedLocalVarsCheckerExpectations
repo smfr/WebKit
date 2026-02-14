@@ -4,7 +4,6 @@ Modules/webaudio/AudioDestinationNode.cpp
 Modules/webaudio/AudioNode.cpp
 Modules/webaudio/AudioNodeInput.cpp
 Modules/webaudio/AudioParam.cpp
-Modules/webaudio/AudioWorkletGlobalScope.cpp
 Modules/webaudio/AudioWorkletNode.cpp
 Modules/webaudio/ChannelSplitterNode.cpp
 Modules/webaudio/ConstantSourceNode.cpp
@@ -78,7 +77,6 @@ inspector/agents/InspectorDOMAgent.cpp
 inspector/agents/InspectorNetworkAgent.cpp
 inspector/agents/InspectorPageAgent.cpp
 inspector/agents/page/PageCanvasAgent.cpp
-inspector/agents/page/PageDOMDebuggerAgent.cpp
 inspector/agents/page/PageNetworkAgent.cpp
 [ iOS ] loader/cache/CachedRawResource.cpp
 [ iOS ] page/Chrome.cpp
@@ -91,10 +89,10 @@ page/FocusController.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
 [ iOS ] page/ios/FrameIOS.mm
 [ iOS ] page/scrolling/AsyncScrollingCoordinator.cpp
-[ iOS ] platform/audio/ios/AudioSessionIOS.mm
-platform/graphics/filters/software/FEMorphologySoftwareApplier.cpp
 [ iOS ] platform/PreviewConverter.cpp
+[ iOS ] platform/audio/ios/AudioSessionIOS.mm
 [ iOS ] platform/audio/ios/MediaSessionManagerIOS.mm
+platform/graphics/filters/software/FEMorphologySoftwareApplier.cpp
 [ iOS ] platform/ios/DragImageIOS.mm
 [ iOS ] platform/ios/WebVideoFullscreenControllerAVKit.mm
 rendering/RenderCounter.cpp

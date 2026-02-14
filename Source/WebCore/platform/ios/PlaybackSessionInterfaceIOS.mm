@@ -59,23 +59,23 @@ PlaybackSessionInterfaceIOS::~PlaybackSessionInterfaceIOS()
 
 void PlaybackSessionInterfaceIOS::initialize()
 {
-    auto& model = *m_playbackSessionModel;
+    CheckedRef model = *m_playbackSessionModel;
 
-    durationChanged(model.duration());
-    currentTimeChanged(model.currentTime(), [[NSProcessInfo processInfo] systemUptime]);
-    bufferedTimeChanged(model.bufferedTime());
+    durationChanged(model->duration());
+    currentTimeChanged(model->currentTime(), [[NSProcessInfo processInfo] systemUptime]);
+    bufferedTimeChanged(model->bufferedTime());
     OptionSet<PlaybackSessionModel::PlaybackState> playbackState;
-    if (model.isPlaying())
+    if (model->isPlaying())
         playbackState.add(PlaybackSessionModel::PlaybackState::Playing);
-    if (model.isStalled())
+    if (model->isStalled())
         playbackState.add(PlaybackSessionModel::PlaybackState::Stalled);
-    rateChanged(playbackState, model.playbackRate(), model.defaultPlaybackRate());
-    seekableRangesChanged(model.seekableRanges(), model.seekableTimeRangesLastModifiedTime(), model.liveUpdateInterval());
-    canPlayFastReverseChanged(model.canPlayFastReverse());
-    audioMediaSelectionOptionsChanged(model.audioMediaSelectionOptions(), model.audioMediaSelectedIndex());
-    legibleMediaSelectionOptionsChanged(model.legibleMediaSelectionOptions(), model.legibleMediaSelectedIndex());
-    externalPlaybackChanged(model.externalPlaybackEnabled(), model.externalPlaybackTargetType(), model.externalPlaybackLocalizedDeviceName());
-    wirelessVideoPlaybackDisabledChanged(model.wirelessVideoPlaybackDisabled());
+    rateChanged(playbackState, model->playbackRate(), model->defaultPlaybackRate());
+    seekableRangesChanged(model->seekableRanges(), model->seekableTimeRangesLastModifiedTime(), model->liveUpdateInterval());
+    canPlayFastReverseChanged(model->canPlayFastReverse());
+    audioMediaSelectionOptionsChanged(model->audioMediaSelectionOptions(), model->audioMediaSelectedIndex());
+    legibleMediaSelectionOptionsChanged(model->legibleMediaSelectionOptions(), model->legibleMediaSelectedIndex());
+    externalPlaybackChanged(model->externalPlaybackEnabled(), model->externalPlaybackTargetType(), model->externalPlaybackLocalizedDeviceName());
+    wirelessVideoPlaybackDisabledChanged(model->wirelessVideoPlaybackDisabled());
 }
 
 void PlaybackSessionInterfaceIOS::invalidate()

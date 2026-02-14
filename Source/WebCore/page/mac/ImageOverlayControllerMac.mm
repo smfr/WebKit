@@ -167,7 +167,7 @@ bool ImageOverlayController::handleDataDetectorAction(const HTMLElement& element
     if (!dataDetectionResult)
         return false;
 
-    auto* renderer = element.renderer();
+    CheckedPtr renderer = element.renderer();
     if (!renderer)
         return false;
 

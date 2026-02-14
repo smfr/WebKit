@@ -271,7 +271,7 @@ AcceleratedEffect::AcceleratedEffect(const KeyframeEffect& effect, const IntRect
             continue;
 
         auto values = [&]() -> AcceleratedEffectValues {
-            if (auto* style = srcKeyframe.style())
+            if (CheckedPtr style = srcKeyframe.style())
                 return { *style, borderBoxRect, renderLayerModelObject.get() };
             return { };
         }();

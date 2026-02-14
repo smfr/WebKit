@@ -79,9 +79,9 @@ RefPtr<Image> StyleGradientImage::image(const RenderElement* renderer, const Flo
     if (size.isEmpty())
         return nullptr;
 
-    auto& style = isForFirstLine ? renderer->firstLineStyle() : renderer->style();
+    CheckedRef style = isForFirstLine ? renderer->firstLineStyle() : renderer->style();
 
-    bool cacheable = m_knownCacheableBarringFilter && style.appleColorFilter().isNone();
+    bool cacheable = m_knownCacheableBarringFilter && style->appleColorFilter().isNone();
     if (cacheable) {
         if (auto* result = const_cast<StyleGradientImage&>(*this).cachedImageForSize(size))
             return result;

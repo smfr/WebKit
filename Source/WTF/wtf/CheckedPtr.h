@@ -260,6 +260,42 @@ inline bool is(const CheckedPtr<ArgType, ArgPtrTraits>& source)
     return is<ExpectedType>(source.get());
 }
 
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline ExpectedType& downcast(CheckedPtr<ArgType, ArgPtrTraits>& source)
+{
+    return downcast<ExpectedType>(source.get());
+}
+
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline ExpectedType& downcast(const CheckedPtr<ArgType, ArgPtrTraits>& source)
+{
+    return downcast<ExpectedType>(source.get());
+}
+
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline const ExpectedType& downcast(CheckedPtr<const ArgType, ArgPtrTraits>& source)
+{
+    return downcast<ExpectedType>(source.get());
+}
+
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline CheckedPtr<match_constness_t<ArgType, ExpectedType>> dynamicDowncast(CheckedPtr<ArgType, ArgPtrTraits>& source)
+{
+    return dynamicDowncast<ExpectedType>(source.get());
+}
+
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline CheckedPtr<match_constness_t<ArgType, ExpectedType>> dynamicDowncast(const CheckedPtr<ArgType, ArgPtrTraits>& source)
+{
+    return dynamicDowncast<ExpectedType>(source.get());
+}
+
+template<typename ExpectedType, typename ArgType, typename ArgPtrTraits>
+inline const CheckedPtr<match_constness_t<ArgType, ExpectedType>> dynamicDowncast(CheckedPtr<const ArgType, ArgPtrTraits>& source)
+{
+    return dynamicDowncast<ExpectedType>(source.get());
+}
+
 template<typename P> struct HashTraits<CheckedPtr<P>> : SimpleClassHashTraits<CheckedPtr<P>> {
     static P* emptyValue() { return nullptr; }
     static bool isEmptyValue(const CheckedPtr<P>& value) { return !value; }

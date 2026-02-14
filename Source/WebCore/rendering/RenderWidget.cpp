@@ -110,7 +110,7 @@ RenderWidget::RenderWidget(Type type, HTMLFrameOwnerElement& element, RenderStyl
 void RenderWidget::willBeDestroyed()
 {
     if (CheckedPtr cache = document().existingAXObjectCache()) {
-        if (auto* parent = this->parent())
+        if (CheckedPtr parent = this->parent())
             cache->childrenChanged(*parent);
         cache->remove(*this);
     }

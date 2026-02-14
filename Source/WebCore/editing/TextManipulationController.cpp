@@ -397,7 +397,7 @@ TextManipulationController::ManipulationUnit TextManipulationController::createU
 
 bool TextManipulationController::shouldExcludeNodeBasedOnStyle(const Node& node)
 {
-    auto* style = node.renderStyle();
+    CheckedPtr style = node.renderStyle();
     if (!style)
         return false;
 
@@ -600,7 +600,7 @@ void TextManipulationController::scheduleObservationUpdate()
     m_didScheduleObservationUpdate = true;
 
     m_document->eventLoop().queueTask(TaskSource::InternalAsyncTask, [weakThis = WeakPtr { *this }] {
-        auto* controller = weakThis.get();
+        CheckedPtr controller = weakThis.get();
         if (!controller)
             return;
 
@@ -744,8 +744,8 @@ TextManipulationController::ManipulationResult TextManipulationController::compl
             if (!box || !box->hasVisualOverflow())
                 continue;
 
-            auto& style = box->style();
-            if (style.width().isFixed() && style.height().isFixed() && !style.hasOutOfFlowPosition() && !style.hasClip()) {
+            CheckedRef style = box->style();
+            if (style->width().isFixed() && style->height().isFixed() && !style->hasOutOfFlowPosition() && !style->hasClip()) {
                 element->setInlineStyleProperty(CSSPropertyOverflowX, CSSValueHidden);
                 element->setInlineStyleProperty(CSSPropertyOverflowY, CSSValueAuto);
             }

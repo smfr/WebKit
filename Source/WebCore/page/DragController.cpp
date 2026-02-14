@@ -816,7 +816,7 @@ RefPtr<Element> DragController::draggableElement(const LocalFrame* sourceFrame, 
     if (auto attachment = enclosingAttachmentElement(*startElement)) {
         auto& selection = sourceFrame->selection().selection();
         bool isSingleAttachmentSelection = selection.start() == Position(attachment.get(), Position::PositionIsBeforeAnchor) && selection.end() == Position(attachment.get(), Position::PositionIsAfterAnchor);
-        auto* renderer = attachment->renderer();
+        CheckedPtr renderer = attachment->renderer();
         if (!renderer || renderer->style().userDrag() == UserDrag::None)
             return nullptr;
 
@@ -833,7 +833,7 @@ RefPtr<Element> DragController::draggableElement(const LocalFrame* sourceFrame, 
         return selectionDragElement;
 
     for (RefPtr element = startElement; element; element = element->parentOrShadowHostElement()) {
-        auto* renderer = element->renderer();
+        CheckedPtr renderer = element->renderer();
         if (!renderer)
             continue;
 

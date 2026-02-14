@@ -90,7 +90,7 @@ void ImageOverlayController::selectionQuadsDidChange(LocalFrame& frame, const Ve
         return;
     }
 
-    auto overlayHostRenderer = overlayHost->renderer();
+    CheckedPtr overlayHostRenderer = overlayHost->renderer();
     if (!overlayHostRenderer) {
         uninstallPageOverlayIfNeeded();
         return;

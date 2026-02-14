@@ -789,11 +789,11 @@ static ContainerNode* findEnclosingScrollableContainer(ContainerNode* node, cons
         if (is<HTMLHtmlElement>(*candidate) || is<HTMLDocument>(*candidate))
             return nullptr;
 
-        RenderBox* box = candidate->renderBox();
+        CheckedPtr box = candidate->renderBox();
         if (!box || !box->canBeScrolledAndHasScrollableArea())
             continue;
 
-        auto* scrollableArea = scrollableAreaForBox(*box);
+        CheckedPtr scrollableArea = scrollableAreaForBox(*box);
         if (!scrollableArea)
             continue;
 
@@ -823,11 +823,11 @@ static bool eventTargetIsPlatformWidget(Element* eventTarget)
 
 static WeakPtr<ScrollableArea> scrollableAreaForContainerNode(ContainerNode& container)
 {
-    auto box = container.renderBox();
+    CheckedPtr box = container.renderBox();
     if (!box)
         return { };
 
-    auto scrollableAreaPtr = scrollableAreaForBox(*box);
+    CheckedPtr scrollableAreaPtr = scrollableAreaForBox(*box);
     if (!scrollableAreaPtr)
         return { };
     

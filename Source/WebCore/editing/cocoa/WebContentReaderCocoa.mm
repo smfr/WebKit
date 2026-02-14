@@ -243,7 +243,7 @@ static bool contentTypeIsSuitableForInlineImageRepresentation(const String& cont
 
 static bool supportsClientSideAttachmentData(const LocalFrame& frame)
 {
-    if (auto* client = frame.editor().client())
+    if (CheckedPtr client = frame.editor().client())
         return client->supportsClientSideAttachmentData();
 
     return false;

@@ -140,7 +140,7 @@ std::optional<DetectedItem> DataDetection::detectItemAroundHitTestResult(const H
     RefPtr<Node> node = hitTestResult.innerNonSharedNode();
     if (!node)
         return { };
-    auto renderer = node->renderer();
+    CheckedPtr renderer = node->renderer();
     if (!renderer)
         return { };
 

@@ -202,7 +202,7 @@ void RenderSVGModelObject::mapAbsoluteToLocalPoint(OptionSet<MapCoordinatesMode>
     if (isTransformed())
         mode.remove(IsFixed);
 
-    auto* container = parent();
+    CheckedPtr container = parent();
     if (!container)
         return;
 

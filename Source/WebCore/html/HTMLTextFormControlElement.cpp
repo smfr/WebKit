@@ -730,7 +730,7 @@ void HTMLTextFormControlElement::setInnerTextValue(String&& value)
 
 #if PLATFORM(COCOA) || USE(ATSPI)
         if (textIsChanged && renderer()) {
-            if (AXObjectCache* cache = document().existingAXObjectCache())
+            if (CheckedPtr cache = document().existingAXObjectCache())
                 cache->deferTextReplacementNotificationForTextControl(*this, previousValue);
         }
 #endif
@@ -819,7 +819,7 @@ String HTMLTextFormControlElement::valueWithHardLineBreaks() const
     if (!innerText || innerText->textContent().isEmpty())
         return value();
 
-    RenderTextControlInnerBlock* renderer = innerText->renderer();
+    CheckedPtr renderer = innerText->renderer();
     if (!renderer)
         return value();
 

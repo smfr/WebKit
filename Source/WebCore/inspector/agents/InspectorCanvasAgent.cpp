@@ -534,16 +534,16 @@ void InspectorCanvasAgent::recordAction(CanvasRenderingContext& canvasRenderingC
 
     // Only enqueue one microtask for all actively recording canvases.
     if (m_recordingCanvasIdentifiers.isEmpty()) {
-        if (auto* scriptExecutionContext = inspectorCanvas->scriptExecutionContext()) {
+        if (RefPtr scriptExecutionContext = inspectorCanvas->scriptExecutionContext()) {
             scriptExecutionContext->eventLoop().queueMicrotask([weakThis = WeakPtr { *this }] {
                 if (!weakThis)
                     return;
 
-                auto& canvasAgent = *weakThis;
+                CheckedRef canvasAgent = *weakThis;
 
-                auto identifiers = copyToVector(canvasAgent.m_recordingCanvasIdentifiers);
+                auto identifiers = copyToVector(canvasAgent->m_recordingCanvasIdentifiers);
                 for (auto& identifier : identifiers) {
-                    auto inspectorCanvas = canvasAgent.m_identifierToInspectorCanvas.get(identifier);
+                    auto inspectorCanvas = canvasAgent->m_identifierToInspectorCanvas.get(identifier);
                     if (!inspectorCanvas)
                         continue;
 
@@ -551,10 +551,10 @@ void InspectorCanvasAgent::recordAction(CanvasRenderingContext& canvasRenderingC
                     // FIXME: <https://webkit.org/b/201651> Web Inspector: Canvas: support canvas recordings for WebGPUDevice
 
                     if (canvasRenderingContext.hasActiveInspectorCanvasCallTracer())
-                        canvasAgent.didFinishRecordingCanvasFrame(canvasRenderingContext);
+                        canvasAgent->didFinishRecordingCanvasFrame(canvasRenderingContext);
                 }
 
-                canvasAgent.m_recordingCanvasIdentifiers.clear();
+                canvasAgent->m_recordingCanvasIdentifiers.clear();
             });
         }
     }

@@ -370,26 +370,26 @@ CheckedPtr<EditorClient> Editor::checkedClient() const
 
 TextCheckerClient* Editor::textChecker() const
 {
-    if (EditorClient* owner = client())
+    if (CheckedPtr owner = client())
         return owner->textChecker();
     return 0;
 }
 
 void Editor::handleKeyboardEvent(KeyboardEvent& event)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->handleKeyboardEvent(event);
 }
 
 void Editor::handleInputMethodKeydown(KeyboardEvent& event)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->handleInputMethodKeydown(event);
 }
 
 void Editor::didDispatchInputMethodKeydown(KeyboardEvent& event)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->didDispatchInputMethodKeydown(event);
 }
 
@@ -840,7 +840,7 @@ void Editor::respondToChangedContents(const VisibleSelection& endingSelection)
 {
     if (AXObjectCache::accessibilityEnabled()) {
         if (RefPtr node = endingSelection.start().deprecatedNode()) {
-            if (AXObjectCache* cache = document().existingAXObjectCache())
+            if (CheckedPtr cache = document().existingAXObjectCache())
                 cache->onEditableTextValueChanged(*node.get());
         }
     }
@@ -1331,7 +1331,7 @@ void Editor::unappliedEditing(EditCommandComposition& composition)
 #endif
 
     m_lastEditCommand = nullptr;
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerRedoStep(composition);
     respondToChangedContents(newSelection);
 }
@@ -1359,7 +1359,7 @@ void Editor::reappliedEditing(EditCommandComposition& composition)
 #endif
 
     m_lastEditCommand = nullptr;
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerUndoStep(composition);
     respondToChangedContents(newSelection);
 }
@@ -1394,7 +1394,7 @@ void Editor::clear()
     m_lastEditCommand = nullptr;
     if (m_compositionNode) {
         m_compositionNode = nullptr;
-        if (EditorClient* client = this->client())
+        if (CheckedPtr client = this->client())
             client->discardedComposition(protectedDocument());
     }
     m_customCompositionUnderlines.clear();
@@ -1853,7 +1853,7 @@ void Editor::renderLayerDidScroll(const RenderLayer& layer)
     if (!startContainer)
         return;
 
-    auto* startContainerRenderer = startContainer->renderer();
+    CheckedPtr startContainerRenderer = startContainer->renderer();
     if (!startContainerRenderer)
         return;
 
@@ -2108,7 +2108,7 @@ void Editor::redo()
 void Editor::registerCustomUndoStep(Ref<CustomUndoStep>&& undoStep)
 {
     ASSERT(document().settings().undoManagerAPIEnabled());
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerUndoStep(WTF::move(undoStep));
 }
 
@@ -2381,7 +2381,7 @@ void Editor::confirmOrCancelCompositionAndNotifyClient()
 
     confirmComposition();
 
-    if (auto editorClient = client()) {
+    if (CheckedPtr editorClient = client()) {
         editorClient->respondToChangedSelection(frame.get());
         editorClient->discardedComposition(document);
     }
@@ -2429,7 +2429,7 @@ public:
     ~SetCompositionScope()
     {
         m_document->editor().setIgnoreSelectionChanges(false);
-        if (auto* editorClient = m_document->editor().client())
+        if (CheckedPtr editorClient = m_document->editor().client())
             editorClient->didUpdateComposition();
     }
 
@@ -2668,7 +2668,7 @@ void Editor::setComposition(const String& text, const Vector<CompositionUnderlin
                     range.location += baseOffset;
             }
 
-            if (auto renderer = baseTextNode->renderer())
+            if (CheckedPtr renderer = baseTextNode->renderer())
                 renderer->repaint();
 
             unsigned start = std::min(baseOffset + selectionStart, extentOffset);
@@ -3459,7 +3459,7 @@ void Editor::markAndReplaceFor(const SpellCheckRequest& request, const Vector<Te
             } else if (canEdit() && shouldInsertText(replacement, rangeToReplace, EditorInsertAction::Typed)) {
                 correctSpellcheckingPreservingTextCheckingParagraph(paragraph, rangeToReplace, replacement, { resultLocation, resultLength });
 
-                if (AXObjectCache* cache = document->existingAXObjectCache()) {
+                if (CheckedPtr cache = document->existingAXObjectCache()) {
                     if (RefPtr root = document->selection().selection().rootEditableElement())
                         cache->onAutocorrectionOccured(*root.get());
                 }
@@ -4656,7 +4656,7 @@ FontAttributes Editor::fontAttributesAtSelectionStart()
             nodeToRemove->remove();
     });
 
-    auto* style = styleForSelectionStart(nodeToRemove);
+    CheckedPtr style = styleForSelectionStart(nodeToRemove);
     if (!style)
         return { };
 
@@ -4756,7 +4756,7 @@ FontAttributes Editor::fontAttributesAtSelectionStart()
 
 PromisedAttachmentInfo Editor::promisedAttachmentInfo(Element& element)
 {
-    auto* client = this->client();
+    CheckedPtr client = this->client();
     if (!client || !client->supportsClientSideAttachmentData())
         return { };
 
@@ -4779,25 +4779,25 @@ PromisedAttachmentInfo Editor::promisedAttachmentInfo(Element& element)
 
 void Editor::registerAttachmentIdentifier(const String& identifier, const String& contentType, const String& preferredFileName, Ref<FragmentedSharedBuffer>&& data)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerAttachmentIdentifier(identifier, contentType, preferredFileName, WTF::move(data));
 }
 
 void Editor::registerAttachmentIdentifier(const String& identifier, const String& contentType, const String& filePath)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerAttachmentIdentifier(identifier, contentType, filePath);
 }
 
 void Editor::registerAttachments(Vector<SerializedAttachmentData>&& data)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->registerAttachments(WTF::move(data));
 }
 
 void Editor::registerAttachmentIdentifier(const String& identifier, const AttachmentAssociatedElement& element)
 {
-    auto* client = this->client();
+    CheckedPtr client = this->client();
     if (!client)
         return;
 
@@ -4844,7 +4844,7 @@ void Editor::registerAttachmentIdentifier(const String& identifier, const Attach
 
 void Editor::cloneAttachmentData(const String& fromIdentifier, const String& toIdentifier)
 {
-    if (auto* client = this->client())
+    if (CheckedPtr client = this->client())
         client->cloneAttachmentData(fromIdentifier, toIdentifier);
 }
 
@@ -5000,7 +5000,7 @@ RefPtr<Font> Editor::fontForSelection(bool& hasMultipleFonts)
         RefPtr<Node> nodeToRemove;
         RefPtr<Font> font;
         {
-            auto* style = styleForSelectionStart(nodeToRemove);
+            CheckedPtr style = styleForSelectionStart(nodeToRemove);
             if (!style)
                 return nullptr;
             ScriptDisallowedScope::InMainThread scriptDisallowedScope;
@@ -5027,7 +5027,7 @@ RefPtr<Font> Editor::fontForSelection(bool& hasMultipleFonts)
 
     RefPtr<Font> font;
     for (Ref node : intersectingNodes(*range)) {
-        auto renderer = node->renderer();
+        CheckedPtr renderer = node->renderer();
         if (!renderer)
             continue;
         Ref primaryFont = renderer->style().fontCascade().primaryFont();

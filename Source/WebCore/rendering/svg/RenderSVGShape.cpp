@@ -428,7 +428,7 @@ std::unique_ptr<Path> RenderSVGShape::createPath() const
 
 void RenderSVGShape::styleWillChange(Style::Difference diff, const RenderStyle& newStyle)
 {
-    auto* oldStyle = hasInitializedStyle() ? &style() : nullptr;
+    CheckedPtr oldStyle = hasInitializedStyle() ? &style() : nullptr;
     if (oldStyle) {
         if (diff == Style::DifferenceResult::Layout)
             setNeedsShapeUpdate();

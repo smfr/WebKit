@@ -201,8 +201,8 @@ void StyleCrossfadeImage::imageChanged(CachedImage*, const IntRect*)
     if (!m_inputImagesAreReady)
         return;
     for (auto entry : clients()) {
-        auto& client = entry.key;
-        client.imageChanged(static_cast<WrappedImagePtr>(this));
+        CheckedRef client = entry.key;
+        client->imageChanged(static_cast<WrappedImagePtr>(this));
     }
 }
 

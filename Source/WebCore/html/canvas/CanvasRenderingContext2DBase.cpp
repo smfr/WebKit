@@ -1644,7 +1644,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLImageElement& imag
     if (imageElement.allowsOrientationOverride()) {
         if (CheckedPtr renderer = imageElement.renderer())
             orientation = Style::toPlatform(renderer->style().imageOrientation()).orientation();
-        else if (auto* computedStyle = imageElement.computedStyle())
+        else if (CheckedPtr computedStyle = imageElement.computedStyle())
             orientation = Style::toPlatform(computedStyle->imageOrientation()).orientation();
     }
 
@@ -3237,8 +3237,8 @@ void CanvasRenderingContext2DBase::setLetterSpacing(const String& letterSpacing)
     if (!unitAllowedForSpacing(rawLength->unit))
         return;
 
-    auto& fontCascade = fontProxy()->fontCascade();
-    double pixels = Style::computeUnzoomedNonCalcLengthDouble(rawLength->value, rawLength->unit, CSSPropertyLetterSpacing, &fontCascade);
+    CheckedRef fontCascade = fontProxy()->fontCascade();
+    double pixels = Style::computeUnzoomedNonCalcLengthDouble(rawLength->value, rawLength->unit, CSSPropertyLetterSpacing, fontCascade.ptr());
 
     modifiableState().letterSpacing = CSS::serializationForCSS(CSS::defaultSerializationContext(), *rawLength);
     modifiableState().font.setLetterSpacing(pixels);
@@ -3265,8 +3265,8 @@ void CanvasRenderingContext2DBase::setWordSpacing(const String& wordSpacing)
     if (!unitAllowedForSpacing(rawLength->unit))
         return;
 
-    auto& fontCascade = fontProxy()->fontCascade();
-    double pixels = Style::computeUnzoomedNonCalcLengthDouble(rawLength->value, rawLength->unit, CSSPropertyWordSpacing, &fontCascade);
+    CheckedRef fontCascade = fontProxy()->fontCascade();
+    double pixels = Style::computeUnzoomedNonCalcLengthDouble(rawLength->value, rawLength->unit, CSSPropertyWordSpacing, fontCascade.ptr());
 
     modifiableState().wordSpacing = CSS::serializationForCSS(CSS::defaultSerializationContext(), *rawLength);
     modifiableState().font.setWordSpacing(pixels);

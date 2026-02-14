@@ -180,8 +180,8 @@ void StyleFilterImage::imageChanged(CachedImage*, const IntRect*)
         return;
 
     for (auto entry : clients()) {
-        auto& client = entry.key;
-        client.imageChanged(static_cast<WrappedImagePtr>(this));
+        CheckedRef client = entry.key;
+        client->imageChanged(static_cast<WrappedImagePtr>(this));
     }
 }
 

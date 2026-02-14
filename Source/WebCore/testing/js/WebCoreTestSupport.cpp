@@ -241,7 +241,7 @@ void setupNewlyCreatedServiceWorker(uint64_t serviceWorkerIdentifier)
 {
     auto identifier = AtomicObjectIdentifier<ServiceWorkerIdentifierType>(serviceWorkerIdentifier);
     SWContextManager::singleton().postTaskToServiceWorker(identifier, [identifier] (ServiceWorkerGlobalScope& globalScope) {
-        auto* script = globalScope.script();
+        CheckedPtr script = globalScope.script();
         if (!script)
             return;
 

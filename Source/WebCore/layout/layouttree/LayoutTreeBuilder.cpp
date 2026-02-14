@@ -219,11 +219,11 @@ std::unique_ptr<Box> TreeBuilder::createLayoutBox(const ElementBox& parentContai
             tableWrapperBoxStyle.setMarginBox(Style::MarginBox { renderer.style().marginBox() });
 
             childLayoutBox = createContainer(Box::ElementAttributes { Box::NodeType::TableWrapperBox, Box::IsAnonymous::Yes }, WTF::move(tableWrapperBoxStyle));
-        } else if (auto* replacedRenderer = dynamicDowncast<RenderReplaced>(renderer)) {
+        } else if (CheckedPtr replacedRenderer = dynamicDowncast<RenderReplaced>(renderer)) {
             auto replacedAttributes = ElementBox::ReplacedAttributes {
                 replacedRenderer->intrinsicSize()
             };
-            if (auto* imageRenderer = dynamicDowncast<RenderImage>(*replacedRenderer)) {
+            if (CheckedPtr imageRenderer = dynamicDowncast<RenderImage>(*replacedRenderer)) {
                 if (imageRenderer->shouldDisplayBrokenImageIcon())
                     replacedAttributes.intrinsicRatio = 1;
                 if (imageRenderer->cachedImage())
@@ -283,13 +283,13 @@ std::unique_ptr<Box> TreeBuilder::createLayoutBox(const ElementBox& parentContai
 void TreeBuilder::buildTableStructure(const RenderTable& tableRenderer, ElementBox& tableWrapperBox)
 {
     // Create caption and table box.
-    auto* tableChild = tableRenderer.firstChild();
+    CheckedPtr tableChild = tableRenderer.firstChild();
     while (is<RenderTableCaption>(tableChild)) {
-        auto& captionRenderer = *tableChild;
-        auto newCaptionBox = createLayoutBox(tableWrapperBox, captionRenderer);
-        auto& captionBox = appendChild(tableWrapperBox, WTF::move(newCaptionBox));
-        auto& captionContainer = downcast<ElementBox>(captionBox);
-        buildSubTree(downcast<RenderElement>(captionRenderer), captionContainer);
+        CheckedRef captionRenderer = *tableChild;
+        auto newCaptionBox = createLayoutBox(tableWrapperBox, captionRenderer.get());
+        CheckedRef captionBox = appendChild(tableWrapperBox, WTF::move(newCaptionBox));
+        CheckedRef captionContainer = downcast<ElementBox>(captionBox.get());
+        buildSubTree(downcast<RenderElement>(captionRenderer.get()), captionContainer.get());
         tableChild = tableChild->nextSibling();
     }
 
@@ -302,12 +302,12 @@ void TreeBuilder::buildTableStructure(const RenderTable& tableRenderer, ElementB
         tableBoxStyle.setBoxSizing(BoxSizing::BorderBox);
     auto isAnonymous = tableRenderer.isAnonymous() ? Box::IsAnonymous::Yes : Box::IsAnonymous::No;
     auto newTableBox = createContainer(Box::ElementAttributes { Box::NodeType::TableBox, isAnonymous }, WTF::move(tableBoxStyle));
-    auto& tableBox = appendChild(tableWrapperBox, WTF::move(newTableBox));
-    auto* sectionRenderer = tableChild;
+    CheckedRef tableBox = appendChild(tableWrapperBox, WTF::move(newTableBox));
+    CheckedPtr sectionRenderer = tableChild;
     while (sectionRenderer) {
-        auto& sectionBox = appendChild(tableBox, createLayoutBox(tableBox, *sectionRenderer));
-        auto& sectionContainer = downcast<ElementBox>(sectionBox);
-        buildSubTree(downcast<RenderElement>(*sectionRenderer), sectionContainer);
+        CheckedRef sectionBox = appendChild(tableBox.get(), createLayoutBox(tableBox.get(), *sectionRenderer));
+        CheckedRef sectionContainer = downcast<ElementBox>(sectionBox.get());
+        buildSubTree(downcast<RenderElement>(*sectionRenderer), sectionContainer.get());
         sectionRenderer = sectionRenderer->nextSibling();
     }
     auto addMissingTableCells = [&] (auto& tableBody) {
@@ -348,22 +348,22 @@ void TreeBuilder::buildTableStructure(const RenderTable& tableRenderer, ElementB
         }
     };
 
-    for (auto& section : childrenOfType<ElementBox>(tableBox)) {
+    for (CheckedRef section : childrenOfType<ElementBox>(tableBox.get())) {
         // FIXME: Check if headers and footers need the same treatment.
-        if (!section.isTableBody())
+        if (!section->isTableBody())
             continue;
-        addMissingTableCells(section);
+        addMissingTableCells(section.get());
     }
 }
 
 void TreeBuilder::buildSubTree(const RenderElement& parentRenderer, ElementBox& parentContainer)
 {
-    for (auto& childRenderer : childrenOfType<RenderObject>(parentRenderer)) {
-        auto& childLayoutBox = appendChild(parentContainer, createLayoutBox(parentContainer, childRenderer));
-        if (childLayoutBox.isTableWrapperBox())
-            buildTableStructure(downcast<RenderTable>(childRenderer), downcast<ElementBox>(childLayoutBox));
-        else if (auto* elementBox = dynamicDowncast<ElementBox>(childLayoutBox))
-            buildSubTree(downcast<RenderElement>(childRenderer), *elementBox);
+    for (CheckedRef childRenderer : childrenOfType<RenderObject>(parentRenderer)) {
+        CheckedRef childLayoutBox = appendChild(parentContainer, createLayoutBox(parentContainer, childRenderer.get()));
+        if (childLayoutBox->isTableWrapperBox())
+            buildTableStructure(downcast<RenderTable>(childRenderer.get()), downcast<ElementBox>(childLayoutBox.get()));
+        else if (CheckedPtr elementBox = dynamicDowncast<ElementBox>(childLayoutBox.get()))
+            buildSubTree(downcast<RenderElement>(childRenderer.get()), *elementBox);
     }
 }
 
