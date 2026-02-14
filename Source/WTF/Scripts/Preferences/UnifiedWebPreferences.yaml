@@ -10062,7 +10062,7 @@ WindowFocusRestricted:
 
 WirelessPlaybackMediaPlayerEnabled:
   type: bool
-  status: unstable
+  status: internal
   category: media
   humanReadableName: "Wireless Playback Media Player"
   humanReadableDescription: "Enable wireless playback via MediaPlayerPrivateWirelessPlayback"
@@ -10071,7 +10071,7 @@ WirelessPlaybackMediaPlayerEnabled:
     WebCore:
       default: false
     WebKit:
-      default: false
+      default: true
     WebKitLegacy:
       default: false
   disableInLockdownMode: true
