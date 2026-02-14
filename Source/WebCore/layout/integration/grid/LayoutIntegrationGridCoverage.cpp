@@ -52,6 +52,7 @@ enum class GridAvoidanceReason : uint8_t {
     GridHasOutOfFlowChild,
     GridHasNonVisibleOverflow,
     GridItemIsReplacedElement,
+    GridItemDoesNotHaveElement,
     GridIsEmpty,
     GridHasNonInitialMinWidth,
     GridHasNonInitialMaxWidth,
@@ -235,9 +236,6 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
 
     CheckedRef renderGridStyle = renderGrid.style();
 
-    if (!renderGridStyle->height().isFixed())
-        ADD_REASON_AND_RETURN_IF_NEEDED(GridHasNonFixedHeight, reasons, reasonCollectionMode);
-
     if (renderGridStyle->display() == DisplayType::InlineGrid)
         ADD_REASON_AND_RETURN_IF_NEEDED(GridNeedsBaseline, reasons, reasonCollectionMode);
 
@@ -365,7 +363,11 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
     for (CheckedRef gridItem : childrenOfType<RenderBox>(renderGrid)) {
         // We do not yet support grid item sizing spec for replaced elements.
         // See: https://drafts.csswg.org/css-grid/#grid-item-sizing
-        if (protect(gridItem->element())->isReplaced())
+        RefPtr gridItemElement = gridItem->element();
+        if (!gridItemElement)
+            ADD_REASON_AND_RETURN_IF_NEEDED(GridItemDoesNotHaveElement, reasons, reasonCollectionMode);
+
+        if (gridItemElement->isReplaced())
             ADD_REASON_AND_RETURN_IF_NEEDED(GridItemIsReplacedElement, reasons, reasonCollectionMode);
 
         CheckedRef gridItemStyle = gridItem->style();
@@ -575,6 +577,9 @@ static void printReason(GridAvoidanceReason reason, TextStream& stream)
         break;
     case GridAvoidanceReason::GridHasNonVisibleOverflow:
         stream << "grid has non-visible overflow";
+        break;
+    case GridAvoidanceReason::GridItemDoesNotHaveElement:
+        stream << "grid item does not have a corresponding element";
         break;
     case GridAvoidanceReason::GridItemIsReplacedElement:
         stream << "grid item is a replaced element";
