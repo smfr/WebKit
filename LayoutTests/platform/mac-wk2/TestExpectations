@@ -2493,3 +2493,5 @@ webkit.org/b/307822 [ Tahoe ] webanimations/no-scheduling-while-filling-non-acce
 webkit.org/b/307835 streams/blob-and-tee.html [ Skip ]
 
 webkit.org/b/307850 media/modern-media-controls/tracks-support/audio-single-track.html [ Pass Timeout ]
+
+webkit.org/b/307886 [ Release arm64 ] js/dom/promise-stack-overflow.html [ Pass Failure ]
