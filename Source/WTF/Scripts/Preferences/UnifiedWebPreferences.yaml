@@ -3441,17 +3441,17 @@ GridLanesEnabled:
 
 HTMLEnhancedSelectEnabled:
    type: bool
-   status: testable
-   category: css
+   status: stable
+   category: dom
    humanReadableName: "Enhanced HTML select element"
    humanReadableDescription: "Enable enhanced HTML select element"
    defaultValue:
      WebKitLegacy:
-       default: false
+       default: true
      WebKit:
-       default: false
+       default: true
      WebCore:
-       default: false
+       default: true
 
 HTMLEnhancedSelectParsingEnabled:
    type: bool
