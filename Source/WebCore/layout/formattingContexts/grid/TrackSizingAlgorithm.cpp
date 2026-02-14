@@ -422,7 +422,9 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
     ASSERT(gridItems.size() == gridItemSpanList.size());
 
     // 1. Initialize Track Sizes
-    auto unsizedTracks = initializeTrackSizes(trackSizingFunctions);
+    // GridFormattingContext should have transformed a percentage track to auto if there was no
+    // available space so it should not matter what the alternate value we pass in here is.
+    auto unsizedTracks = initializeTrackSizes(trackSizingFunctions, availableGridSpace.value_or(0_lu));
 
     // 2. Resolve Intrinsic Track Sizes
     resolveIntrinsicTrackSizes(unsizedTracks, gridItems, gridItemComputedSizesList, borderAndPaddingList, gridItemSpanList, oppositeAxisConstraints, gridItemSizingFunctions, trackSizingFunctions);
@@ -457,9 +459,9 @@ TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, co
 }
 
 // https://www.w3.org/TR/css-grid-1/#algo-init
-UnsizedTracks TrackSizingAlgorithm::initializeTrackSizes(const TrackSizingFunctionsList& trackSizingFunctionsList)
+UnsizedTracks TrackSizingAlgorithm::initializeTrackSizes(const TrackSizingFunctionsList& trackSizingFunctionsList, LayoutUnit availableGridSpace)
 {
-    return trackSizingFunctionsList.map([](const TrackSizingFunctions& trackSizingFunctions) -> UnsizedTrack {
+    return trackSizingFunctionsList.map([&availableGridSpace](const TrackSizingFunctions& trackSizingFunctions) -> UnsizedTrack {
         // For each track, if the track’s min track sizing function is:
         auto baseSize = [&] -> LayoutUnit {
             auto& minTrackSizingFunction = trackSizingFunctions.min;
@@ -470,11 +472,8 @@ UnsizedTracks TrackSizingAlgorithm::initializeTrackSizes(const TrackSizingFuncti
                 auto& trackBreadthLength = minTrackSizingFunction.length();
                 if (auto fixedValue = trackBreadthLength.tryFixed())
                     return LayoutUnit { fixedValue->resolveZoom(Style::ZoomNeeded { }) };
-
-                if (auto percentValue = trackBreadthLength.tryPercentage()) {
-                    ASSERT_NOT_IMPLEMENTED_YET();
-                    return { };
-                }
+                if (trackBreadthLength.isPercentOrCalculated())
+                    return Style::evaluate<LayoutUnit>(trackBreadthLength, availableGridSpace, Style::ZoomNeeded { });
 
             }
 
@@ -497,6 +496,8 @@ UnsizedTracks TrackSizingAlgorithm::initializeTrackSizes(const TrackSizingFuncti
                 auto trackBreadthLength = maxTrackSizingFunction.length();
                 if (auto fixedValue = trackBreadthLength.tryFixed())
                     return LayoutUnit { fixedValue->resolveZoom(Style::ZoomNeeded { }) };
+                if (trackBreadthLength.isPercentOrCalculated())
+                    return Style::evaluate<LayoutUnit>(trackBreadthLength, availableGridSpace, Style::ZoomNeeded { });
             }
 
             // An intrinsic sizing function

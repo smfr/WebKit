@@ -289,8 +289,6 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
                 // MaxTrackBreadth to the same value we only need to check one.
                 if (!trackSize.isBreadth())
                     return GridAvoidanceReason::GridHasUnsupportedGridTemplateColumns;
-                if (trackSize.minTrackBreadth().isPercentOrCalculated())
-                    return GridAvoidanceReason::GridHasUnsupportedGridTemplateColumns;
                 return { };
             },
             [&](const Vector<String>& names) -> std::optional<GridAvoidanceReason> {
@@ -325,8 +323,6 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
                 // Since a GridTrackSize type of Breadth sets the MinTrackBreadth and
                 // MaxTrackBreadth to the same value we only need to check one.
                 if (!trackSize.isBreadth())
-                    return GridAvoidanceReason::GridHasUnsupportedGridTemplateRows;
-                if (trackSize.minTrackBreadth().isPercentOrCalculated())
                     return GridAvoidanceReason::GridHasUnsupportedGridTemplateRows;
                 return { };
             },

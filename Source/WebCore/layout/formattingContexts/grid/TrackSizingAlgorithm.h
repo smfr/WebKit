@@ -58,7 +58,7 @@ public:
 
 private:
 
-    static UnsizedTracks initializeTrackSizes(const TrackSizingFunctionsList&);
+    static UnsizedTracks initializeTrackSizes(const TrackSizingFunctionsList&, LayoutUnit availableGridSpace);
 
     // Flex track infrastructure
     static FlexTracks collectFlexTracks(const UnsizedTracks&);
