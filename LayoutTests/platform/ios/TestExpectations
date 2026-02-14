@@ -8487,3 +8487,5 @@ webkit.org/b/307582 compositing/overflow/rtl-scrollbar-layer-positioning.html [ 
 webkit.org/b/307835 streams/blob-and-tee.html [ Skip ]
 
 webkit.org/b/307882 webgl/lose-context-after-context-lost.html [ Failure ]
+
+webkit.org/b/307889 http/tests/multipart/multipart-async-image.html [ Pass Failure ]
