@@ -66,7 +66,7 @@ private:
 
     // Needed by `toJS<IDLUnion<IDLUint8ClampedArray, ...>, const ImageDataArray&>()`
     template<typename IDL, bool needsState, bool needsGlobalObject> friend struct JSConverterOverloader;
-    using DataVariant = Variant<RefPtr<JSC::Uint8ClampedArray>, RefPtr<JSC::Float16Array>>;
+    using DataVariant = Variant<Ref<JSC::Uint8ClampedArray>, Ref<JSC::Float16Array>>;
     operator DataVariant() const;
 
     Ref<JSC::ArrayBufferView> m_arrayBufferView;

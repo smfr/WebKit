@@ -99,9 +99,10 @@ void GPUQueue::onSubmittedWorkDone(OnSubmittedWorkDonePromise&& promise)
 static GPUSize64 computeElementSize(const BufferSource& data)
 {
     return WTF::switchOn(data.variant(),
-        [&](const RefPtr<JSC::ArrayBufferView>& bufferView) {
+        [&](const Ref<JSC::ArrayBufferView>& bufferView) {
             return static_cast<GPUSize64>(JSC::elementSize(bufferView->getType()));
-        }, [&](const RefPtr<JSC::ArrayBuffer>&) {
+        },
+        [&](const Ref<JSC::ArrayBuffer>&) {
             return static_cast<GPUSize64>(1);
         }
     );
@@ -116,7 +117,7 @@ ExceptionOr<void> GPUQueue::writeBuffer(
 {
     auto elementSize = computeElementSize(data);
     auto dataOffset = elementSize * optionalDataOffset;
-    auto dataSize = data.length();
+    auto dataSize = data.byteLength();
     auto contentSize = optionalSize.has_value() ? (elementSize * optionalSize.value()) : (dataSize - dataOffset);
 
     if (dataOffset > dataSize || dataOffset + contentSize > dataSize || (contentSize % 4))

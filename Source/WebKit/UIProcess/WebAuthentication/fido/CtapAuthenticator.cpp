@@ -65,7 +65,7 @@ static Vector<Vector<PublicKeyCredentialDescriptor>> batchesForCredentials(Vecto
 {
     Vector<Vector<PublicKeyCredentialDescriptor>> batches;
     for (auto credential : credentials) {
-        if (maxCredentialIDLength && BufferSource { credential.id } .length() > *maxCredentialIDLength)
+        if (maxCredentialIDLength && credential.id.byteLength() > *maxCredentialIDLength)
             continue;
         if (!batches.size() || batches.last().size() >= maxBatchSize)
             batches.append({ });

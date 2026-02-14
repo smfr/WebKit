@@ -247,10 +247,10 @@ ExceptionOr<void> RTCRtpSFrameTransform::createStreams()
             [&](Ref<RTCEncodedVideoFrame>& value) {
                 transformFrame(value, globalObject, transformer.get(), *readableStreamSource, context.identifier(), weakThis);
             },
-            [&](RefPtr<ArrayBuffer>& value) {
+            [&](Ref<ArrayBuffer>& value) {
                 transformFrame(value->span(), globalObject, transformer.get(), *readableStreamSource, context.identifier(), weakThis);
             },
-            [&](RefPtr<ArrayBufferView>& value) {
+            [&](Ref<ArrayBufferView>& value) {
                 transformFrame(value->span(), globalObject, transformer.get(), *readableStreamSource, context.identifier(), weakThis);
             }
         );

@@ -55,7 +55,7 @@ public:
 
     void consumeAsStream(FetchBodyOwner&, FetchBodySource&);
 
-    using Init = Variant<Ref<Blob>, RefPtr<ArrayBufferView>, RefPtr<ArrayBuffer>, Ref<DOMFormData>, Ref<URLSearchParams>, Ref<ReadableStream>, String>;
+    using Init = Variant<Ref<Blob>, Ref<ArrayBufferView>, Ref<ArrayBuffer>, Ref<DOMFormData>, Ref<URLSearchParams>, Ref<ReadableStream>, String>;
     static ExceptionOr<FetchBody> extract(Init&&, String&);
     FetchBody() = default;
     FetchBody(FetchBody&&) = default;

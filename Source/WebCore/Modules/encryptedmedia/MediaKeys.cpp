@@ -122,7 +122,7 @@ void MediaKeys::setServerCertificate(const BufferSource& serverCertificate, Ref<
     }
 
     // 2. If serverCertificate is an empty array, return a promise rejected with a new a newly created TypeError.
-    if (!serverCertificate.length()) {
+    if (!serverCertificate.byteLength()) {
         ERROR_LOG(identifier, "Rejected: empty serverCertificate");
         promise->reject(ExceptionCode::TypeError);
         return;

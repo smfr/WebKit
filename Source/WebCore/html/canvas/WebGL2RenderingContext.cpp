@@ -542,13 +542,13 @@ void WebGL2RenderingContext::pixelStorei(GCGLenum pname, GCGLint param)
 void WebGL2RenderingContext::bufferData(GCGLenum target, const ArrayBufferView& data, GCGLenum usage, GCGLuint srcOffset, GCGLuint length)
 {
     if (auto slice = sliceArrayBufferView("bufferData"_s, data, srcOffset, length))
-        WebGLRenderingContextBase::bufferData(target, BufferDataSource(slice.get()), usage);
+        WebGLRenderingContextBase::bufferData(target, BufferDataSource(slice.releaseNonNull()), usage);
 }
 
 void WebGL2RenderingContext::bufferSubData(GCGLenum target, long long offset, const ArrayBufferView& data, GCGLuint srcOffset, GCGLuint length)
 {
     if (auto slice = sliceArrayBufferView("bufferSubData"_s, data, srcOffset, length))
-        WebGLRenderingContextBase::bufferSubData(target, offset, BufferDataSource(slice.get()));
+        WebGLRenderingContextBase::bufferSubData(target, offset, BufferDataSource(slice.releaseNonNull()));
 }
 
 void WebGL2RenderingContext::copyBufferSubData(GCGLenum readTarget, GCGLenum writeTarget, GCGLint64 readOffset, GCGLint64 writeOffset, GCGLint64 size)
@@ -761,7 +761,7 @@ WebGLAny WebGL2RenderingContext::getInternalformatParameter(GCGLenum target, GCG
             return nullptr;
     }
 
-    return Int32Array::tryCreate(params.span());
+    return toWebGLAny(Int32Array::tryCreate(params.span()));
 }
 
 void WebGL2RenderingContext::invalidateFramebuffer(GCGLenum target, const Vector<GCGLenum>& attachments)
@@ -2523,7 +2523,7 @@ WebGLAny WebGL2RenderingContext::getActiveUniformBlockParameter(WebGLProgram& pr
         GCGLint size = context->getActiveUniformBlocki(program.object(), uniformBlockIndex, GraphicsContextGL::UNIFORM_BLOCK_ACTIVE_UNIFORMS);
         Vector<GCGLint> params(size, 0);
         context->getActiveUniformBlockiv(program.object(), uniformBlockIndex, pname, params);
-        return Uint32Array::tryCreate(spanReinterpretCast<const GCGLuint>(params.span()));
+        return toWebGLAny(Uint32Array::tryCreate(spanReinterpretCast<const GCGLuint>(params.span())));
     }
     case GraphicsContextGL::UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER:
     case GraphicsContextGL::UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER:

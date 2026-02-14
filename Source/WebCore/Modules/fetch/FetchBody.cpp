@@ -68,12 +68,10 @@ ExceptionOr<FetchBody> FetchBody::extract(Init&& value, String& contentType)
             contentType = HTTPHeaderValues::formURLEncodedContentType();
             return FetchBody(WTF::move(params));
         },
-        [&](RefPtr<ArrayBuffer>&& value) -> ExceptionOr<FetchBody> {
-            Ref<ArrayBuffer> buffer = value.releaseNonNull();
+        [&](Ref<ArrayBuffer>&& buffer) -> ExceptionOr<FetchBody> {
             return FetchBody(WTF::move(buffer));
         },
-        [&](RefPtr<ArrayBufferView>&& value) -> ExceptionOr<FetchBody> {
-            Ref<ArrayBufferView> buffer = value.releaseNonNull();
+        [&](Ref<ArrayBufferView>&& buffer) -> ExceptionOr<FetchBody> {
             return FetchBody(WTF::move(buffer));
         },
         [&](Ref<ReadableStream>&& stream) -> ExceptionOr<FetchBody> {

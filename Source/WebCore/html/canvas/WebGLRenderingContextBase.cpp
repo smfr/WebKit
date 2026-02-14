@@ -1912,9 +1912,9 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::ACTIVE_TEXTURE:
         return getUnsignedIntParameter(pname);
     case GraphicsContextGL::ALIASED_LINE_WIDTH_RANGE:
-        return getWebGLFloatArrayParameter(pname);
+        return toWebGLAny(getWebGLFloatArrayParameter(pname));
     case GraphicsContextGL::ALIASED_POINT_SIZE_RANGE:
-        return getWebGLFloatArrayParameter(pname);
+        return toWebGLAny(getWebGLFloatArrayParameter(pname));
     case GraphicsContextGL::ALPHA_BITS:
         if (!m_framebufferBinding && !m_attributes.alpha)
             return 0;
@@ -1924,7 +1924,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::BLEND:
         return getBooleanParameter(pname);
     case GraphicsContextGL::BLEND_COLOR:
-        return getWebGLFloatArrayParameter(pname);
+        return toWebGLAny(getWebGLFloatArrayParameter(pname));
     case GraphicsContextGL::BLEND_DST_ALPHA:
         return getUnsignedIntParameter(pname);
     case GraphicsContextGL::BLEND_DST_RGB:
@@ -1940,11 +1940,11 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::BLUE_BITS:
         return getIntParameter(pname);
     case GraphicsContextGL::COLOR_CLEAR_VALUE:
-        return getWebGLFloatArrayParameter(pname);
+        return toWebGLAny(getWebGLFloatArrayParameter(pname));
     case GraphicsContextGL::COLOR_WRITEMASK:
         return getBooleanArrayParameter(pname);
     case GraphicsContextGL::COMPRESSED_TEXTURE_FORMATS:
-        return Uint32Array::tryCreate(m_compressedTextureFormats.span());
+        return toWebGLAny(Uint32Array::tryCreate(m_compressedTextureFormats.span()));
     case GraphicsContextGL::CULL_FACE:
         return getBooleanParameter(pname);
     case GraphicsContextGL::CULL_FACE_MODE:
@@ -1960,7 +1960,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::DEPTH_FUNC:
         return getUnsignedIntParameter(pname);
     case GraphicsContextGL::DEPTH_RANGE:
-        return getWebGLFloatArrayParameter(pname);
+        return toWebGLAny(getWebGLFloatArrayParameter(pname));
     case GraphicsContextGL::DEPTH_TEST:
         return getBooleanParameter(pname);
     case GraphicsContextGL::DEPTH_WRITEMASK:
@@ -2011,7 +2011,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::MAX_VERTEX_UNIFORM_VECTORS:
         return getIntParameter(pname);
     case GraphicsContextGL::MAX_VIEWPORT_DIMS:
-        return getWebGLIntArrayParameter(pname);
+        return toWebGLAny(getWebGLIntArrayParameter(pname));
     case GraphicsContextGL::PACK_ALIGNMENT:
         return m_packParameters.alignment;
     case GraphicsContextGL::POLYGON_OFFSET_FACTOR:
@@ -2039,7 +2039,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::SAMPLES:
         return getIntParameter(pname);
     case GraphicsContextGL::SCISSOR_BOX:
-        return getWebGLIntArrayParameter(pname);
+        return toWebGLAny(getWebGLIntArrayParameter(pname));
     case GraphicsContextGL::SCISSOR_TEST:
         return getBooleanParameter(pname);
     case GraphicsContextGL::SHADING_LANGUAGE_VERSION:
@@ -2099,7 +2099,7 @@ WebGLAny WebGLRenderingContextBase::getParameter(GCGLenum pname)
     case GraphicsContextGL::VERSION:
         return "WebGL 1.0"_str;
     case GraphicsContextGL::VIEWPORT:
-        return getWebGLIntArrayParameter(pname);
+        return toWebGLAny(getWebGLIntArrayParameter(pname));
     case GraphicsContextGL::FRAGMENT_SHADER_DERIVATIVE_HINT_OES: // OES_standard_derivatives
         if (m_oesStandardDerivatives)
             return getUnsignedIntParameter(GraphicsContextGL::FRAGMENT_SHADER_DERIVATIVE_HINT_OES);
@@ -2592,7 +2592,7 @@ WebGLAny WebGLRenderingContextBase::getUniform(WebGLProgram& program, WebGLUnifo
         graphicsContextGL()->getUniformfv(program.object(), location, valueSpan);
         if (length == 1)
             return value[0];
-        return Float32Array::tryCreate(valueSpan);
+        return toWebGLAny(Float32Array::tryCreate(valueSpan));
     }
     case GraphicsContextGL::INT: {
         std::array<GCGLint, 4> value = { };
@@ -2600,7 +2600,7 @@ WebGLAny WebGLRenderingContextBase::getUniform(WebGLProgram& program, WebGLUnifo
         graphicsContextGL()->getUniformiv(program.object(), location, valueSpan);
         if (length == 1)
             return value[0];
-        return Int32Array::tryCreate(valueSpan);
+        return toWebGLAny(Int32Array::tryCreate(valueSpan));
     }
     case GraphicsContextGL::UNSIGNED_INT: {
         std::array<GCGLuint, 4> value = { };
@@ -2608,7 +2608,7 @@ WebGLAny WebGLRenderingContextBase::getUniform(WebGLProgram& program, WebGLUnifo
         graphicsContextGL()->getUniformuiv(program.object(), location, valueSpan);
         if (length == 1)
             return value[0];
-        return Uint32Array::tryCreate(valueSpan);
+        return toWebGLAny(Uint32Array::tryCreate(valueSpan));
     }
     case GraphicsContextGL::BOOL: {
         std::array<GCGLint, 4> value = { };
@@ -2682,11 +2682,11 @@ WebGLAny WebGLRenderingContextBase::getVertexAttrib(GCGLuint index, GCGLenum pna
     case GraphicsContextGL::CURRENT_VERTEX_ATTRIB: {
         switch (m_vertexAttribValue[index].type) {
         case GraphicsContextGL::FLOAT:
-            return Float32Array::tryCreate(std::span { m_vertexAttribValue[index].fValue });
+            return toWebGLAny(Float32Array::tryCreate(std::span { m_vertexAttribValue[index].fValue }));
         case GraphicsContextGL::INT:
-            return Int32Array::tryCreate(std::span { m_vertexAttribValue[index].iValue });
+            return toWebGLAny(Int32Array::tryCreate(std::span { m_vertexAttribValue[index].iValue }));
         case GraphicsContextGL::UNSIGNED_INT:
-            return Uint32Array::tryCreate(std::span { m_vertexAttribValue[index].uiValue });
+            return toWebGLAny(Uint32Array::tryCreate(std::span { m_vertexAttribValue[index].uiValue }));
         default:
             ASSERT_NOT_REACHED();
             break;

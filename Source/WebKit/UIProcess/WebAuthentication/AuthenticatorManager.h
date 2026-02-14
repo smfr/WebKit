@@ -61,7 +61,7 @@ public:
     const static size_t maxTransportNumber;
 
     static Ref<AuthenticatorManager> create();
-    virtual ~AuthenticatorManager() = default;
+    virtual ~AuthenticatorManager();
 
     void handleRequest(WebAuthenticationRequestData&&, Callback&&);
     void cancelRequest(const WebCore::PageIdentifier&, const std::optional<WebCore::FrameIdentifier>&); // Called from WebPageProxy/WebProcessProxy.
@@ -126,9 +126,14 @@ private:
     void restartDiscovery();
     void dispatchPanelClientCall(Function<void(const API::WebAuthenticationPanel&)>&&) const;
 
+    TransportSet getTransports(const Variant<WebCore::PublicKeyCredentialCreationOptions, WebCore::PublicKeyCredentialRequestOptions>&) const;
+
     // Request: We only allow one request per time. A new request will cancel any pending ones.
-    WebAuthenticationRequestData m_pendingRequestData;
-    Callback m_pendingCompletionHandler; // Should not be invoked directly, use invokePendingCompletionHandler.
+    struct Request {
+        WebAuthenticationRequestData data;
+        Callback completionHandler; // Should not be invoked directly, use invokePendingCompletionHandler.
+    };
+    std::optional<Request> m_pendingRequest;
     RunLoop::Timer m_requestTimeOutTimer;
     RefPtr<AuthenticatorPresenterCoordinator> m_presenter;
 
