@@ -6975,11 +6975,11 @@ ScriptTrackingPrivacyNetworkRequestBlockingLatchEnabled:
   exposed: [ WebKit ]
   defaultValue:
     WebKitLegacy:
-      default: false
+      default: true
     WebKit:
-      default: false
+      default: true
     WebCore:
-      default: false
+      default: true
 
 ScriptTrackingPrivacyProtectionsEnabled:
   type: bool
