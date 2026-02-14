@@ -188,7 +188,7 @@ void ScriptExecutionContext::checkConsistency() const
     for (auto& destructionObserver : m_destructionObservers)
         ASSERT(destructionObserver.scriptExecutionContext() == this);
 
-    // This can run on the GC thread.
+    // This can run on a GC thread.
     for (SUPPRESS_UNCOUNTED_LOCAL auto& activeDOMObject : m_activeDOMObjects) {
         ASSERT(activeDOMObject.scriptExecutionContext() == this);
         activeDOMObject.assertSuspendIfNeededWasCalled();
@@ -633,7 +633,7 @@ bool ScriptExecutionContext::hasPendingActivity() const
 {
     checkConsistency();
 
-    // This runs on the GC thread.
+    // This runs on a GC thread.
     for (SUPPRESS_UNCOUNTED_LOCAL auto& activeDOMObject : m_activeDOMObjects) {
         if (activeDOMObject.hasPendingActivity())
             return true;

@@ -889,7 +889,7 @@ bool HTMLCanvasElement::virtualHasPendingActivity() const
 {
 #if ENABLE(WEBGL)
     if (m_hasRelevantWebGLEventListener) {
-        // This runs on the GC thread.
+        // This runs on a GC thread.
         SUPPRESS_UNCOUNTED_LOCAL auto* context = dynamicDowncast<WebGLRenderingContextBase>(m_context.get());
         // WebGL rendering context may fire contextlost / contextrestored events at any point.
         return context && !context->isContextUnrecoverablyLost();

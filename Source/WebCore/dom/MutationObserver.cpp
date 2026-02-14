@@ -184,7 +184,7 @@ void MutationObserver::setHasTransientRegistration(Document& document)
 
 bool MutationObserver::isReachableFromOpaqueRoots(JSC::AbstractSlotVisitor& visitor) const
 {
-    // We cannot use Ref here since this gets called on the GC thread.
+    // We cannot use Ref here since this gets called on a GC thread.
     SUPPRESS_UNCOUNTED_LOCAL for (auto& registration : m_registrations) {
         if (registration.isReachableFromOpaqueRoots(visitor))
             return true;

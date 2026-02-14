@@ -235,7 +235,7 @@ public:
     // Testing support
     RateLimiter& rateLimiterForTesting() { return m_rateLimiter; }
 
-    NavigateEvent* ongoingNavigateEvent() { return m_ongoingNavigateEvent.get(); } // This may get called on the GC thread.
+    NavigateEvent* ongoingNavigateEvent() { return m_ongoingNavigateEvent.get(); } // This may get called on a GC thread.
     bool hasInterceptedOngoingNavigateEvent() const { return m_ongoingNavigateEvent && m_ongoingNavigateEvent->wasIntercepted(); }
 
     void updateNavigationEntry(Ref<HistoryItem>&&, ShouldCopyStateObjectFromCurrentEntry);

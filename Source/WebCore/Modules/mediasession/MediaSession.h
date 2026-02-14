@@ -226,7 +226,7 @@ void MediaSession::visitActionHandlers(Visitor& visitor) const
     Locker lock { m_actionHandlersLock };
     for (auto& actionHandler : m_actionHandlers) {
         if (actionHandler.value) {
-            // We are not ref'ing here as this function may get called from the GC thread.
+            // We are not ref'ing here as this function may get called from a GC thread.
             SUPPRESS_UNCOUNTED_ARG actionHandler.value->visitJSFunction(visitor);
         }
     }

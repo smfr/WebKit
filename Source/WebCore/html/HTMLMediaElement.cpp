@@ -645,7 +645,7 @@ HTMLMediaElement::HTMLMediaElement(const QualifiedName& tagName, Document& docum
     , m_processingPreferenceChange(false)
     , m_volumeLocked(defaultVolumeLocked())
     , m_opaqueRootProvider(WTF::Observer<WebCoreOpaqueRoot()>::create([weakThis = WeakPtr { *this }] {
-        // This gets called on the GC thread so we cannot ref `this`.
+        // This gets called on a GC thread so we cannot ref `this`.
         return weakThis->opaqueRoot();
     }))
 #if USE(AUDIO_SESSION)
