@@ -418,11 +418,12 @@ auto TreeResolver::resolveElement(Element& element, const RenderStyle* existingS
     resolveAndAddPseudoElementStyle({ PseudoElementType::After });
     resolveAndAddPseudoElementStyle({ PseudoElementType::Backdrop });
 
-    if (m_document->settings().cssAppearanceBaseEnabled())
-        resolveAndAddPseudoElementStyle({ PseudoElementType::Checkmark });
-
-    if (RefPtr select = dynamicDowncast<HTMLSelectElement>(element); select && select->usesMenuList())
-        resolveAndAddPseudoElementStyle({ PseudoElementType::PickerIcon });
+    if (update.style->usedAppearance() == StyleAppearance::Base) {
+        if (RefPtr input = dynamicDowncast<HTMLInputElement>(element); input && input->isCheckable())
+            resolveAndAddPseudoElementStyle({ PseudoElementType::Checkmark });
+        if (RefPtr select = dynamicDowncast<HTMLSelectElement>(element); select && select->usesMenuList())
+            resolveAndAddPseudoElementStyle({ PseudoElementType::PickerIcon });
+    }
 
     if (isDocumentElement && m_document->hasViewTransitionPseudoElementTree()) {
         resolveAndAddPseudoElementStyle({ PseudoElementType::ViewTransition });

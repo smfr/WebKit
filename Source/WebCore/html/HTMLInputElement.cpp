@@ -1975,6 +1975,11 @@ bool HTMLInputElement::isSwitch() const
     return m_inputType->isSwitch();
 }
 
+bool HTMLInputElement::isCheckable() const
+{
+    return m_inputType && m_inputType->isCheckable();
+}
+
 bool HTMLInputElement::isRangeControl() const
 {
     return m_inputType->isRangeControl();

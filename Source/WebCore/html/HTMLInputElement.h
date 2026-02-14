@@ -149,6 +149,7 @@ public:
     bool isSecureField() const { return isPasswordField() || autofilledAndObscured(); }
     bool isCheckbox() const;
     bool isSwitch() const;
+    bool isCheckable() const;
     bool isRangeControl() const;
     WEBCORE_EXPORT bool isColorControl() const;
     // FIXME: It's highly likely that any call site calling this function should instead
