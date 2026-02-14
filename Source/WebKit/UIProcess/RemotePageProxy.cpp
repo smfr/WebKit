@@ -103,6 +103,13 @@ RemotePageProxy::RemotePageProxy(WebPageProxy& page, WebProcessProxy& process, c
 
     if (RefPtr client = protectedPage->pageClient())
         client->didStartUsingProcessForSiteIsolation(process);
+
+    protectedPage->takeActivitiesOnRemotePage(*this);
+
+#if PLATFORM(MAC) && USE(RUNNINGBOARD)
+    if (protectedPage->preferences().backgroundWebContentRunningBoardThrottlingEnabled())
+        m_process->setRunningBoardThrottlingEnabled();
+#endif
 }
 
 void RemotePageProxy::disconnect()
@@ -145,13 +152,6 @@ void RemotePageProxy::injectPageIntoNewProcess()
         ASSERT_NOT_REACHED();
         return;
     }
-
-#if PLATFORM(MAC) && USE(RUNNINGBOARD)
-    if (page->preferences().backgroundWebContentRunningBoardThrottlingEnabled())
-        m_process->setRunningBoardThrottlingEnabled();
-#endif
-
-    page->takeActivitiesOnRemotePage(*this);
 
     Ref drawingArea = *page->drawingArea();
     m_drawingArea = RemotePageDrawingAreaProxy::create(drawingArea.get(), m_process);

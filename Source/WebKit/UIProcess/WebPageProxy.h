@@ -3590,6 +3590,12 @@ private:
     bool hasValidCapturingActivity() const;
     bool hasValidMutedCaptureAssertion() const;
 
+    bool hasValidMainFrameVisibleActivity() const;
+    bool hasValidMainFrameAudibleActivity() const;
+    bool hasValidMainFrameCapturingActivity() const;
+    bool hasValidMainFrameMutedCaptureAssertion() const;
+    bool hasValidMainFrameNetworkActivity() const;
+
 #if PLATFORM(IOS_FAMILY)
     void takeOpeningAppLinkActivity();
     void dropOpeningAppLinkActivity();

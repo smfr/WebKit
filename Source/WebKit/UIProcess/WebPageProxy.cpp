@@ -696,7 +696,7 @@ void WebPageProxy::dropNetworkActivity()
 
 bool WebPageProxy::hasValidVisibleActivity() const
 {
-    bool hasValidVisibleActivity = m_mainFrameProcessActivityState->hasValidVisibleActivity();
+    bool hasValidVisibleActivity = hasValidMainFrameVisibleActivity();
     protect(browsingContextGroup())->forEachRemotePage(*this, [&](auto& remotePageProxy) {
         hasValidVisibleActivity &= remotePageProxy.processActivityState().hasValidVisibleActivity();
     });
@@ -705,7 +705,7 @@ bool WebPageProxy::hasValidVisibleActivity() const
 
 bool WebPageProxy::hasValidAudibleActivity() const
 {
-    bool hasValidAudibleActivity = m_mainFrameProcessActivityState->hasValidAudibleActivity();
+    bool hasValidAudibleActivity = hasValidMainFrameAudibleActivity();
     protect(browsingContextGroup())->forEachRemotePage(*this, [&](auto& remotePageProxy) {
         hasValidAudibleActivity &= remotePageProxy.processActivityState().hasValidAudibleActivity();
     });
@@ -714,7 +714,7 @@ bool WebPageProxy::hasValidAudibleActivity() const
 
 bool WebPageProxy::hasValidCapturingActivity() const
 {
-    bool hasValidCapturingActivity = m_mainFrameProcessActivityState->hasValidCapturingActivity();
+    bool hasValidCapturingActivity = hasValidMainFrameCapturingActivity();
     protect(browsingContextGroup())->forEachRemotePage(*this, [&](auto& remotePageProxy) {
         hasValidCapturingActivity &= remotePageProxy.processActivityState().hasValidCapturingActivity();
     });
@@ -723,7 +723,7 @@ bool WebPageProxy::hasValidCapturingActivity() const
 
 bool WebPageProxy::hasValidMutedCaptureAssertion() const
 {
-    bool hasValidMutedCaptureAssertion = m_mainFrameProcessActivityState->hasValidMutedCaptureAssertion();
+    bool hasValidMutedCaptureAssertion = hasValidMainFrameMutedCaptureAssertion();
     protect(browsingContextGroup())->forEachRemotePage(*this, [&](auto& remotePageProxy) {
         hasValidMutedCaptureAssertion &= remotePageProxy.processActivityState().hasValidMutedCaptureAssertion();
     });
@@ -737,6 +737,31 @@ bool WebPageProxy::hasValidNetworkActivity() const
         hasValidNetworkActivity &= remotePageProxy.processActivityState().hasValidNetworkActivity();
     });
     return hasValidNetworkActivity;
+}
+
+bool WebPageProxy::hasValidMainFrameVisibleActivity() const
+{
+    return m_mainFrameProcessActivityState->hasValidVisibleActivity();
+}
+
+bool WebPageProxy::hasValidMainFrameAudibleActivity() const
+{
+    return m_mainFrameProcessActivityState->hasValidAudibleActivity();
+}
+
+bool WebPageProxy::hasValidMainFrameCapturingActivity() const
+{
+    return m_mainFrameProcessActivityState->hasValidCapturingActivity();
+}
+
+bool WebPageProxy::hasValidMainFrameMutedCaptureAssertion() const
+{
+    return m_mainFrameProcessActivityState->hasValidMutedCaptureAssertion();
+}
+
+bool WebPageProxy::hasValidMainFrameNetworkActivity() const
+{
+    return m_mainFrameProcessActivityState->hasValidNetworkActivity();
 }
 
 #if PLATFORM(IOS_FAMILY)
@@ -17627,19 +17652,19 @@ void WebPageProxy::networkRequestsInProgressDidChange()
 
 void WebPageProxy::takeActivitiesOnRemotePage(RemotePageProxy& remotePage)
 {
-    if (hasValidVisibleActivity())
+    if (hasValidMainFrameVisibleActivity())
         remotePage.processActivityState().takeVisibleActivity();
 
-    if (hasValidAudibleActivity())
+    if (hasValidMainFrameAudibleActivity())
         remotePage.processActivityState().takeAudibleActivity();
 
-    if (hasValidCapturingActivity())
+    if (hasValidMainFrameCapturingActivity())
         remotePage.processActivityState().takeCapturingActivity();
 
-    if (hasValidMutedCaptureAssertion())
+    if (hasValidMainFrameMutedCaptureAssertion())
         remotePage.processActivityState().takeMutedCaptureAssertion();
 
-    if (hasValidNetworkActivity())
+    if (hasValidMainFrameNetworkActivity())
         remotePage.processActivityState().takeNetworkActivity();
 }
 
