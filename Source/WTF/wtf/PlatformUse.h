@@ -280,13 +280,14 @@
 #define USE_DARWIN_REGISTER_MACROS 1
 #endif
 
-#if HAVE(PTHREAD_JIT_PERMISSIONS_API)
+// Use OS(MACOS) to pick up JSCOnly ports on Mac.
+#if OS(MACOS) || PLATFORM(MACCATALYST) || (PLATFORM(IOS_FAMILY) && TARGET_OS_SIMULATOR)
 #if USE(APPLE_INTERNAL_SDK)
 /* Always use the macro on internal builds */
 #define USE_PTHREAD_JIT_PERMISSIONS_API 0 
-#else // !USE(APPLE_INTERNAL_SDK)
+#else
 #define USE_PTHREAD_JIT_PERMISSIONS_API 1
-#endif // USE(APPLE_INTERNAL_SDK)
+#endif
 #endif
 
 #if PLATFORM(COCOA)

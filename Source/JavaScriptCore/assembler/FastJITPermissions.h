@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2026 Apple Inc. All rights reserved.
+ * Copyright (C) 2020 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +26,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <wtf/Assertions.h>
 #include <wtf/Platform.h>
 
 enum class MemoryRestriction {
@@ -41,6 +40,7 @@ enum class MemoryRestriction {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-modular-include-in-module"
 #include <WebKitAdditions/FastJITPermissionsAdditions.h>
+#include <WebKitAdditions/JSGlobalObjectAdditions.h>
 #pragma clang diagnostic pop
 #endif
 
@@ -64,6 +64,10 @@ static ALWAYS_INLINE void threadSelfRestrict()
 #else // Not defined(OS_THREAD_SELF_RESTRICT) && defined(OS_THREAD_SELF_RESTRICT_SUPPORTED)
 #if OS(DARWIN) && CPU(ARM64)
 
+#include <JavaScriptCore/JSCConfig.h>
+
+#include <wtf/Platform.h>
+
 #if USE(INLINE_JIT_PERMISSIONS_API)
 #include <BrowserEngineCore/BEMemory.h>
 
@@ -81,6 +85,7 @@ static ALWAYS_INLINE bool threadSelfRestrictSupported()
 template <MemoryRestriction restriction>
 static ALWAYS_INLINE void threadSelfRestrict()
 {
+    ASSERT(g_jscConfig.useFastJITPermissions);
     if constexpr (restriction == MemoryRestriction::kRwxToRw)
         be_memory_inline_jit_restrict_rwx_to_rw_with_witness();
     else if constexpr (restriction == MemoryRestriction::kRwxToRx)
@@ -105,6 +110,7 @@ static ALWAYS_INLINE bool threadSelfRestrictSupported()
 template <MemoryRestriction restriction>
 static ALWAYS_INLINE void threadSelfRestrict()
 {
+    ASSERT(g_jscConfig.useFastJITPermissions);
     if constexpr (restriction == MemoryRestriction::kRwxToRw)
         pthread_jit_write_protect_np(false);
     else if constexpr (restriction == MemoryRestriction::kRwxToRx)

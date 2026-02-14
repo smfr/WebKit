@@ -27,6 +27,7 @@
 
 #include <JavaScriptCore/AssemblerCommon.h>
 #include <JavaScriptCore/ExecutableMemoryHandle.h>
+#include <JavaScriptCore/FastJITPermissions.h>
 #include <JavaScriptCore/JITCompilationEffort.h>
 #include <JavaScriptCore/JSCConfig.h>
 #include <JavaScriptCore/JSCPtrTag.h>
@@ -34,7 +35,6 @@
 #include <bit>
 #include <limits>
 #include <wtf/Assertions.h>
-#include <wtf/FastJITPermissions.h>
 #include <wtf/ForbidHeapAllocation.h>
 #include <wtf/Gigacage.h>
 #include <wtf/Lock.h>
