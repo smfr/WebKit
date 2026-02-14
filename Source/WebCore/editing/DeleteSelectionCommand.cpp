@@ -96,7 +96,7 @@ static bool isSpecialHTMLElement(const Node& node)
     if (!renderer)
         return false;
 
-    if (renderer->style().display() == DisplayType::Table || renderer->style().display() == DisplayType::InlineTable)
+    if (renderer->style().display() == Style::DisplayType::BlockTable || renderer->style().display() == Style::DisplayType::InlineTable)
         return true;
 
     if (renderer->style().isFloating())

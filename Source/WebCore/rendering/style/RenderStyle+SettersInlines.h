@@ -202,9 +202,9 @@ inline void RenderStyle::setUsedPositionOptionIndex(std::optional<size_t> index)
     m_computedStyle.setUsedPositionOptionIndex(index);
 }
 
-inline void RenderStyle::setEffectiveDisplay(DisplayType effectiveDisplay)
+inline void RenderStyle::setDisplayMaintainingOriginalDisplay(Style::DisplayType display)
 {
-    m_computedStyle.setEffectiveDisplay(effectiveDisplay);
+    m_computedStyle.setDisplayMaintainingOriginalDisplay(display);
 }
 
 // MARK: - Cache used values

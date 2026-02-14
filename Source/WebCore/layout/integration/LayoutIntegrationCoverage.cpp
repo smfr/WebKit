@@ -110,7 +110,7 @@ static EnumSet<FlexAvoidanceReason> canUseForFlexLayoutWithReason(const RenderFl
         ADD_REASON_AND_RETURN_IF_NEEDED(NoFlexLayoutIsNeeded, reasons, includeReasons);
 
     auto& flexBoxStyle = flexBox.style();
-    if (flexBoxStyle.display() == DisplayType::InlineFlex)
+    if (flexBoxStyle.display() == Style::DisplayType::InlineFlex)
         ADD_REASON_AND_RETURN_IF_NEEDED(FlexBoxNeedsBaseline, reasons, includeReasons);
 
     auto isColumnDirection = flexBoxStyle.flexDirection() == FlexDirection::Column || flexBoxStyle.flexDirection() == FlexDirection::ColumnReverse;
@@ -132,7 +132,7 @@ static EnumSet<FlexAvoidanceReason> canUseForFlexLayoutWithReason(const RenderFl
     auto isFlexBoxInsideBFC = [&] {
         // FIXME: This may be somewhat expensive in some deeply nested cases.
         for (auto* containingBlock = flexBox.containingBlock(); containingBlock && !is<RenderView>(*containingBlock); containingBlock = containingBlock->containingBlock()) {
-            if (containingBlock->style().display() != DisplayType::Block)
+            if (containingBlock->style().display() != Style::DisplayType::BlockFlow)
                 return false;
             if (containingBlock->createsNewFormattingContext())
                 return true;

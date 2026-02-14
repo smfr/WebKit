@@ -458,7 +458,7 @@ std::optional<ElementUpdate> TreeResolver::resolvePseudoElement(Element& element
 
     if (pseudoElementIdentifier.type == PseudoElementType::Backdrop && !element.isInTopLayer())
         return { };
-    if (pseudoElementIdentifier.type == PseudoElementType::Marker && elementUpdate.style->display() != DisplayType::ListItem)
+    if (pseudoElementIdentifier.type == PseudoElementType::Marker && elementUpdate.style->display() != DisplayType::BlockFlowListItem)
         return { };
 
     auto userAgentShadowTreeEnclosingResolver = [&] -> Resolver* {
@@ -576,7 +576,7 @@ std::optional<ElementUpdate> TreeResolver::resolveAncestorPseudoElement(Element&
 static bool isChildInBlockFormattingContext(const RenderStyle& style)
 {
     // FIXME: Incomplete. There should be shared code with layout for this.
-    if (style.display() != DisplayType::Block && style.display() != DisplayType::ListItem)
+    if (style.display() != DisplayType::BlockFlow && style.display() != DisplayType::BlockFlowListItem)
         return false;
     if (style.hasOutOfFlowPosition())
         return false;
@@ -589,7 +589,7 @@ static bool isChildInBlockFormattingContext(const RenderStyle& style)
 
 std::optional<ResolvedStyle> TreeResolver::resolveAncestorFirstLinePseudoElement(Element& element, const ElementUpdate& elementUpdate)
 {
-    if (elementUpdate.style->display() == DisplayType::Inline) {
+    if (elementUpdate.style->display() == DisplayType::InlineFlow) {
         auto* parent = boxGeneratingParent();
         if (!parent)
             return { };
@@ -646,14 +646,14 @@ std::optional<ResolvedStyle> TreeResolver::resolveAncestorFirstLetterPseudoEleme
         if (parent().resolvedFirstLineAndLetterChild)
             return nullptr;
 
-        bool skipInlines = elementUpdate.style->display() == DisplayType::Inline;
+        bool skipInlines = elementUpdate.style->display() == DisplayType::InlineFlow;
         if (!skipInlines && !isChildInBlockFormattingContext(*elementUpdate.style))
             return nullptr;
 
         for (auto& parent : m_parentStack | std::views::reverse) {
             if (parent.style.display() == DisplayType::Contents)
                 continue;
-            if (skipInlines && parent.style.display() == DisplayType::Inline)
+            if (skipInlines && parent.style.display() == DisplayType::InlineFlow)
                 continue;
             skipInlines = false;
 

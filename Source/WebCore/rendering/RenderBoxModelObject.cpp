@@ -221,7 +221,7 @@ void RenderBoxModelObject::updateFromStyle()
     // we only check for bits that could possibly be set to true.
     const auto& styleToUse = style();
     setHasVisibleBoxDecorations(hasVisibleBoxDecorationStyle());
-    setInline(styleToUse.isDisplayInlineType());
+    setInline(Style::isDisplayInlineType(styleToUse.display()));
     setPositionState(styleToUse.position());
     setHorizontalWritingMode(styleToUse.writingMode().isHorizontal());
     setPaintContainmentApplies(shouldApplyPaintContainment());

@@ -508,7 +508,7 @@ bool TextOnlySimpleLineBuilder::isEligibleForSimplifiedInlineLayoutByStyle(const
             return false;
         if (style.textIndent() != Style::ComputedStyle::initialTextIndent())
             return false;
-        if (style.textAlignLast() == Style::TextAlignLast::Justify || style.textAlign() == Style::TextAlign::Justify || style.display() == DisplayType::RubyAnnotation)
+        if (style.textAlignLast() == Style::TextAlignLast::Justify || style.textAlign() == Style::TextAlign::Justify || style.display() == Style::DisplayType::RubyText)
             return false;
         if (style.boxDecorationBreak() == BoxDecorationBreak::Clone)
             return false;

@@ -293,7 +293,7 @@ RenderBlock::~RenderBlock()
 void RenderBlock::styleWillChange(Style::Difference diff, const RenderStyle& newStyle)
 {
     const RenderStyle* oldStyle = hasInitializedStyle() ? &style() : nullptr;
-    setBlockLevelReplacedOrAtomicInline(newStyle.isDisplayInlineType());
+    setBlockLevelReplacedOrAtomicInline(Style::isDisplayInlineType(newStyle.display()));
     if (oldStyle) {
         removeOutOfFlowBoxesIfNeededOnStyleChange(*this, *oldStyle, newStyle);
         if (isLegend() && !oldStyle->isFloating() && newStyle.isFloating())
@@ -1307,8 +1307,8 @@ bool RenderBlock::establishesIndependentFormattingContextIgnoringDisplayType(con
     }
 
     auto isBlockBoxWithPotentiallyScrollableOverflow = [&] {
-        return style.isDisplayBlockLevel()
-            && style.doesDisplayGenerateBlockContainer()
+        return Style::isDisplayBlockType(style.display())
+            && Style::doesDisplayGenerateBlockContainer(style.display())
             && hasNonVisibleOverflow()
             && style.overflowX() != Overflow::Clip
             && style.overflowX() != Overflow::Visible;
@@ -1320,7 +1320,7 @@ bool RenderBlock::establishesIndependentFormattingContextIgnoringDisplayType(con
         || style.usedContain().contains(Style::ContainValue::Layout)
         || style.containerType() != ContainerType::Normal
         || WebCore::shouldApplyPaintContainment(style, *protect(element()))
-        || (style.isDisplayBlockLevel() && !style.blockStepSize().isNone());
+        || (Style::isDisplayBlockType(style.display()) && !style.blockStepSize().isNone());
 }
 
 bool RenderBlock::establishesIndependentFormattingContext() const
@@ -1353,7 +1353,7 @@ bool RenderBlock::createsNewFormattingContext() const
     if (isBlockContainer() && !style.alignContent().isNormal())
         return true;
     return isNonReplacedAtomicInlineLevelBox()
-        || style.isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox()
+        || Style::isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox(style.display())
         || isFlexItemIncludingDeprecated()
         || isRenderTable()
         || isRenderTableCell()
@@ -1364,7 +1364,7 @@ bool RenderBlock::createsNewFormattingContext() const
         || isRenderOrLegacyRenderSVGForeignObject()
         || style.specifiesColumns()
         || style.columnSpan() == ColumnSpan::All
-        || style.display() == DisplayType::FlowRoot
+        || style.display() == Style::DisplayType::BlockFlowRoot
         || establishesIndependentFormattingContext();
 }
 

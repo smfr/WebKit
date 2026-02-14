@@ -36,11 +36,32 @@
 
 namespace WebCore {
 
-inline bool RenderObject::hasTransformOrPerspective() const { return hasTransformRelatedProperty() && (isTransformed() || style().hasPerspective()); }
-inline bool RenderObject::isAtomicInlineLevelBox() const { return style().isDisplayInlineType() && !(style().display() == DisplayType::Inline && !isBlockLevelReplacedOrAtomicInline()); }
-inline bool RenderObject::isTransformed() const { return hasTransformRelatedProperty() && (style().affectsTransform() || hasSVGTransform()); }
-inline LocalFrameViewLayoutContext& RenderObject::layoutContext() const { return view().frameView().layoutContext(); }
-inline TreeScope& RenderObject::treeScopeForSVGReferences() const { return Ref { m_node.get() }->treeScopeForSVGReferences(); }
+inline bool RenderObject::hasTransformOrPerspective() const
+{
+    return hasTransformRelatedProperty() && (isTransformed() || style().hasPerspective());
+}
+
+inline bool RenderObject::isAtomicInlineLevelBox() const
+{
+    auto display = style().display();
+    return Style::isDisplayInlineType(display)
+        && !(display == Style::DisplayType::InlineFlow && !isBlockLevelReplacedOrAtomicInline());
+}
+
+inline bool RenderObject::isTransformed() const
+{
+    return hasTransformRelatedProperty() && (style().affectsTransform() || hasSVGTransform());
+}
+
+inline LocalFrameViewLayoutContext& RenderObject::layoutContext() const
+{
+    return view().frameView().layoutContext();
+}
+
+inline TreeScope& RenderObject::treeScopeForSVGReferences() const
+{
+    return Ref { m_node.get() }->treeScopeForSVGReferences();
+}
 
 inline const RenderStyle& RenderObject::firstLineStyle() const
 {

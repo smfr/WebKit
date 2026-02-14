@@ -3403,6 +3403,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
 
     style/values/css2/StyleZIndex.h
 
+    style/values/display/StyleDisplay.h
     style/values/display/StyleOrder.h
 
     style/values/easing/StyleEasingFunction.h

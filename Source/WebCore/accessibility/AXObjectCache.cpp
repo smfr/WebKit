@@ -502,7 +502,7 @@ bool AXObjectCache::isNodeVisible(const Node* node) const
         return false;
 
     CheckedRef style = renderer->style();
-    if (style->display() == DisplayType::None)
+    if (style->display() == Style::DisplayType::None)
         return false;
 
     CheckedPtr renderLayer = renderer->enclosingLayer();
@@ -5530,7 +5530,7 @@ bool isVisibilityHidden(const RenderStyle& style)
 // https://www.w3.org/TR/wai-aria/#dfn-hidden
 bool isRenderHidden(const RenderStyle& style)
 {
-    return style.display() == DisplayType::None || isVisibilityHidden(style);
+    return style.display() == Style::DisplayType::None || isVisibilityHidden(style);
 }
 
 bool isRenderHidden(const RenderStyle* style)

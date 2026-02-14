@@ -33,6 +33,7 @@
 #include "LayoutIntegrationBoxTreeUpdater.h"
 #include "RenderGrid.h"
 #include "RenderView.h"
+#include "StylePrimitiveKeyword+Logging.h"
 #include "UsedTrackSizes.h"
 #include <wtf/CheckedPtr.h>
 #include <wtf/CheckedRef.h>

@@ -420,8 +420,8 @@ void ComputedStyleBase::NonInheritedFlags::dumpDifferences(TextStream& ts, const
     if (*this == other)
         return;
 
-    LOG_IF_DIFFERENT_WITH_CAST(DisplayType, effectiveDisplay);
-    LOG_IF_DIFFERENT_WITH_CAST(DisplayType, originalDisplay);
+    LOG_IF_DIFFERENT_WITH_CAST(Style::DisplayType, display);
+    LOG_IF_DIFFERENT_WITH_CAST(Style::DisplayType, originalDisplay);
     LOG_IF_DIFFERENT_WITH_CAST(Overflow, overflowX);
     LOG_IF_DIFFERENT_WITH_CAST(Overflow, overflowY);
     LOG_IF_DIFFERENT_WITH_CAST(Clear, clear);

@@ -59,7 +59,7 @@ RenderStyle resolveForDocument(const Document& document)
 
     auto documentStyle = RenderStyle::create();
 
-    documentStyle.setDisplay(DisplayType::Block);
+    documentStyle.setDisplay(DisplayType::BlockFlow);
     documentStyle.setRTLOrdering(document.visuallyOrdered() ? WebCore::Order::Visual : WebCore::Order::Logical);
     documentStyle.setZoom(!document.printing() ? renderView.frame().pageZoomFactor() : 1);
     if (auto frameScaleFactor = renderView.frame().frameScaleFactor(); frameScaleFactor != 1) {

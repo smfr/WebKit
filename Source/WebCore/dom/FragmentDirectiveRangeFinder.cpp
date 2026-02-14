@@ -62,7 +62,7 @@ enum class WordBounded : bool { No, Yes };
 // https://wicg.github.io/scroll-to-text-fragment/#search-invisible
 static bool isSearchInvisible(const Node& node)
 {
-    if (!node.renderStyle() || node.renderStyle()->display() == DisplayType::None)
+    if (!node.renderStyle() || node.renderStyle()->display() == Style::DisplayType::None)
         return true;
     
     // FIXME: If the node serializes as void.
@@ -239,7 +239,7 @@ static std::optional<SimpleRange> rangeOfStringInRange(const String& query, Simp
         Vector<Ref<Text>> textNodeList;
         // FIXME: this is O^2 since treeOrder will also do traversal, optimize.
         while (currentNode && currentNode->isDescendantOf(blockAncestor) && is_lteq(treeOrder(BoundaryPoint(*currentNode, 0), searchRange.end))) {
-            if (CheckedPtr renderElement = dynamicDowncast<RenderElement>(currentNode->renderer()); renderElement && renderElement->style().isDisplayBlockLevel())
+            if (CheckedPtr renderElement = dynamicDowncast<RenderElement>(currentNode->renderer()); renderElement && Style::isDisplayBlockType(renderElement->style().display()))
                 break;
 
             if (isSearchInvisible(*currentNode)) {

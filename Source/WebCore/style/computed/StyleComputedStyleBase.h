@@ -100,7 +100,6 @@ enum class ContentPosition : uint8_t;
 enum class ContentVisibility : uint8_t;
 enum class CursorType : uint8_t;
 enum class CursorVisibility : bool;
-enum class DisplayType : uint8_t;
 enum class DominantBaseline : uint8_t;
 enum class EmptyCell : bool;
 enum class EventListenerRegionType : uint64_t;
@@ -391,6 +390,7 @@ struct Zoom;
 struct ZoomFactor;
 
 enum class Change : uint8_t;
+enum class DisplayType : uint8_t;
 enum class GridTrackSizingDirection : bool;
 enum class ImageOrientation : bool;
 enum class PositionTryOrder : uint8_t;
@@ -540,9 +540,8 @@ public:
     // No setter. Set via `ComputedStyleProperties::setDisplay()`.
     inline constexpr DisplayType originalDisplay() const;
 
-    // `effectiveDisplay()` getter is an alias of `ComputedStyleProperties::display()`.
-    inline DisplayType effectiveDisplay() const;
-    inline void setEffectiveDisplay(DisplayType);
+    // Sets the value of `display`, but leaves the value of `originalDisplay` unchanged.
+    inline void setDisplayMaintainingOriginalDisplay(DisplayType);
 
     inline StyleAppearance usedAppearance() const;
     inline void setUsedAppearance(StyleAppearance);
@@ -743,8 +742,8 @@ public:
         void dumpDifferences(TextStream&, const NonInheritedFlags&) const;
 #endif
 
-        PREFERRED_TYPE(DisplayType) unsigned effectiveDisplay : 5;
-        PREFERRED_TYPE(DisplayType) unsigned originalDisplay : 5;
+        PREFERRED_TYPE(Style::DisplayType) unsigned display : 5;
+        PREFERRED_TYPE(Style::DisplayType) unsigned originalDisplay : 5;
         PREFERRED_TYPE(Overflow) unsigned overflowX : 3;
         PREFERRED_TYPE(Overflow) unsigned overflowY : 3;
         PREFERRED_TYPE(Clear) unsigned clear : 3;

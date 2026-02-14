@@ -52,7 +52,7 @@ public:
     static RenderStyle cloneIncludingPseudoElements(const RenderStyle&);
     static std::unique_ptr<RenderStyle> clonePtr(const RenderStyle&);
 
-    static RenderStyle createAnonymousStyleWithDisplay(const RenderStyle& parentStyle, DisplayType);
+    static RenderStyle createAnonymousStyleWithDisplay(const RenderStyle& parentStyle, Style::DisplayType);
     static RenderStyle createStyleInheritingFromPseudoStyle(const RenderStyle& pseudoStyle);
 
     void inheritFrom(const RenderStyle&);
@@ -164,11 +164,10 @@ public:
     inline void setIsEffectivelyTransparent(bool);
 
     // No setter. Set via `RenderStyleProperties::setDisplay()`.
-    inline constexpr DisplayType originalDisplay() const;
+    inline constexpr Style::DisplayType originalDisplay() const;
 
-    // `effectiveDisplay()` getter is an alias of `RenderStyleProperties::display()`.
-    inline DisplayType effectiveDisplay() const;
-    inline void setEffectiveDisplay(DisplayType);
+    // Sets the value of `display`, but leaves the value of `originalDisplay` unchanged.
+    inline void setDisplayMaintainingOriginalDisplay(Style::DisplayType);
 
     inline StyleAppearance usedAppearance() const;
     inline void setUsedAppearance(StyleAppearance);
@@ -520,20 +519,6 @@ public:
     inline bool isReverseFlexDirection() const;
     inline bool isRowFlexDirection() const;
     inline bool isSkippedRootOrSkippedContent() const;
-    constexpr bool isDisplayInlineType() const;
-    constexpr bool isOriginalDisplayInlineType() const;
-    constexpr bool isDisplayFlexibleOrGridFormattingContextBox() const;
-    constexpr bool isDisplayDeprecatedFlexibleBox() const;
-    constexpr bool isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const;
-    constexpr bool isDisplayRegionType() const;
-    constexpr bool isDisplayBlockLevel() const;
-    constexpr bool isOriginalDisplayBlockType() const;
-    constexpr bool isDisplayTableOrTablePart() const;
-    constexpr bool isInternalTableBox() const;
-    constexpr bool isRubyContainerOrInternalRubyBox() const;
-    constexpr bool isOriginalDisplayListItemType() const;
-
-    constexpr bool doesDisplayGenerateBlockContainer() const;
 
     inline bool specifiesColumns() const;
 
@@ -570,19 +555,6 @@ private:
 
     inline bool hasAutoLeftAndRight() const;
     inline bool hasAutoTopAndBottom() const;
-
-    static constexpr bool isDisplayInlineType(DisplayType);
-    static constexpr bool isDisplayBlockType(DisplayType);
-    static constexpr bool isDisplayFlexibleBox(DisplayType);
-    static constexpr bool isDisplayGridFormattingContextBox(DisplayType);
-    static constexpr bool isDisplayGridBox(DisplayType);
-    static constexpr bool isDisplayGridLanesBox(DisplayType);
-    static constexpr bool isDisplayFlexibleOrGridFormattingContextBox(DisplayType);
-    static constexpr bool isDisplayDeprecatedFlexibleBox(DisplayType);
-    static constexpr bool isDisplayListItemType(DisplayType);
-    static constexpr bool isDisplayTableOrTablePart(DisplayType);
-    static constexpr bool isInternalTableBox(DisplayType);
-    static constexpr bool isRubyContainerOrInternalRubyBox(DisplayType);
 
     const Style::NonInheritedData& nonInheritedData() const { return computedStyle().nonInheritedData(); }
     const Style::ComputedStyle::NonInheritedFlags& nonInheritedFlags() const { return computedStyle().nonInheritedFlags(); }

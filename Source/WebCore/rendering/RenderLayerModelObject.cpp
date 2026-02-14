@@ -148,9 +148,9 @@ void RenderLayerModelObject::styleDidChange(Style::Difference diff, const Render
     // Position changes and other types of display changes are handled elsewhere.
     if ((oldStyle && isOutOfFlowPositioned() && parent() && (parent() != containingBlock()))
         && (style().position() == oldStyle->position())
-        && (style().isOriginalDisplayInlineType() != oldStyle->isOriginalDisplayInlineType())
-        && ((style().isOriginalDisplayBlockType()) || (style().isOriginalDisplayInlineType()))
-        && ((oldStyle->isOriginalDisplayBlockType()) || (oldStyle->isOriginalDisplayInlineType())))
+        && (Style::isDisplayInlineType(style().originalDisplay()) != Style::isDisplayInlineType(oldStyle->originalDisplay()))
+        && (Style::isDisplayBlockType(style().originalDisplay()) || Style::isDisplayInlineType(style().originalDisplay()))
+        && (Style::isDisplayBlockType(oldStyle->originalDisplay()) || Style::isDisplayInlineType(oldStyle->originalDisplay())))
             parent()->setChildNeedsLayout();
 
     bool gainedOrLostLayer = false;
@@ -307,7 +307,7 @@ bool RenderLayerModelObject::shouldPaintSVGRenderer(const PaintInfo& paintInfo, 
     if (!paintInfo.shouldPaintWithinRoot(*this))
         return false;
 
-    if (style().usedVisibility() == Visibility::Hidden || style().display() == DisplayType::None)
+    if (style().usedVisibility() == Visibility::Hidden || style().display() == Style::DisplayType::None)
         return false;
 
     return true;

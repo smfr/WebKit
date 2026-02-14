@@ -1683,7 +1683,7 @@ bool LocalFrameView::styleHidesScrollbarWithOrientation(ScrollbarOrientation ori
     scrollbarState.scrollbarPart = ScrollbarBGPart;
     scrollbarState.orientation = orientation;
     auto scrollbarStyle = renderer->getUncachedPseudoStyle({ PseudoElementType::WebKitScrollbar, scrollbarState }, &renderer->style());
-    return scrollbarStyle && scrollbarStyle->display() == DisplayType::None;
+    return scrollbarStyle && scrollbarStyle->display() == Style::DisplayType::None;
 }
 
 NativeScrollbarVisibility LocalFrameView::horizontalNativeScrollbarVisibility() const

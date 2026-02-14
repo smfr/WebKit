@@ -895,7 +895,7 @@ Vector<String> Element::getAttributeNames() const
 bool Element::hasFocusableStyle() const
 {
     auto isFocusableStyle = [](const RenderStyle* style) {
-        return style && style->display() != DisplayType::None && style->display() != DisplayType::Contents
+        return style && style->display() != Style::DisplayType::None && style->display() != Style::DisplayType::Contents
             && style->visibility() == Visibility::Visible && !style->effectiveInert()
             && (style->usedContentVisibility() != ContentVisibility::Hidden || style->contentVisibility() != ContentVisibility::Visible);
     };
@@ -2800,7 +2800,7 @@ bool Element::hasDisplayContents() const
     if (!hasRareData())
         return false;
     auto* style = elementRareData()->displayContentsOrNoneStyle();
-    return style && style->display() == DisplayType::Contents;
+    return style && style->display() == Style::DisplayType::Contents;
 }
 
 bool Element::hasDisplayNone() const
@@ -2808,7 +2808,7 @@ bool Element::hasDisplayNone() const
     if (!hasRareData())
         return false;
     auto* style = elementRareData()->displayContentsOrNoneStyle();
-    return style && style->display() == DisplayType::None;
+    return style && style->display() == Style::DisplayType::None;
 }
 
 void Element::storeDisplayContentsOrNoneStyle(std::unique_ptr<RenderStyle> style)
@@ -2817,7 +2817,7 @@ void Element::storeDisplayContentsOrNoneStyle(std::unique_ptr<RenderStyle> style
     // Normally style is held in renderers but display:contents doesn't generate one.
     // This is kept distinct from ElementRareData::computedStyle() which can update outside style resolution.
     // This way renderOrDisplayContentsStyle() always returns consistent styles matching the rendering state.
-    ASSERT(style && (style->display() == DisplayType::Contents || style->display() == DisplayType::None));
+    ASSERT(style && (style->display() == Style::DisplayType::Contents || style->display() == Style::DisplayType::None));
     ASSERT(!renderer() || isPseudoElement());
     ensureElementRareData().setDisplayContentsOrNoneStyle(WTF::move(style));
 }
@@ -3050,7 +3050,7 @@ const AtomString& Element::imageSourceURL() const
 
 bool Element::rendererIsNeeded(const RenderStyle& style)
 {
-    return style.display() != DisplayType::None && style.display() != DisplayType::Contents;
+    return style.display() != Style::DisplayType::None && style.display() != Style::DisplayType::Contents;
 }
 
 RenderPtr<RenderElement> Element::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
@@ -4691,7 +4691,7 @@ const RenderStyle* Element::resolveComputedStyle(ResolveComputedStyleMode mode)
                 rootmost = element;
                 continue;
             }
-            if (mode == ResolveComputedStyleMode::RenderedOnly && existing->display() == DisplayType::None) {
+            if (mode == ResolveComputedStyleMode::RenderedOnly && existing->display() == Style::DisplayType::None) {
                 isInDisplayNoneTree = true;
                 // Invalid ancestor style may still affect this display:none style.
                 rootmost = nullptr;
@@ -4742,7 +4742,7 @@ const RenderStyle* Element::resolveComputedStyle(ResolveComputedStyleMode mode)
         rareData.setComputedStyle(WTF::move(style));
         element->clearStateFlag(StateFlag::IsComputedStyleInvalidFlag);
 
-        if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->display() == DisplayType::None)
+        if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->display() == Style::DisplayType::None)
             return nullptr;
     }
 
@@ -6281,7 +6281,7 @@ bool Element::checkVisibility(const CheckVisibilityOptions& options)
         return false;
 
     // See https://github.com/w3c/csswg-drafts/issues/9478.
-    if (style->display() == DisplayType::Contents)
+    if (style->display() == Style::DisplayType::Contents)
         return false;
 
     if ((options.visibilityProperty || options.checkVisibilityCSS) && style->visibility() != Visibility::Visible)
@@ -6308,7 +6308,7 @@ bool Element::checkVisibility(const CheckVisibilityOptions& options)
 
     for (RefPtr ancestor = this; ancestor; ancestor = ancestor->parentElementInComposedTree()) {
         CheckedPtr ancestorStyle = ancestor->computedStyle();
-        if (ancestorStyle->display() == DisplayType::None)
+        if (ancestorStyle->display() == Style::DisplayType::None)
             return false;
 
         if ((options.opacityProperty || options.checkOpacity) && ancestorStyle->opacity().isTransparent())

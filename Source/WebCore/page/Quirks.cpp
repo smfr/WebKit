@@ -2171,7 +2171,7 @@ bool Quirks::needsFacebookStoriesCreationFormQuirk(const Element& element, const
     if (m_facebookStoriesCreationFormContainer)
         return m_facebookStoriesCreationFormContainer.get() == &element;
 
-    if (computedStyle.display() != DisplayType::None)
+    if (computedStyle.display() != Style::DisplayType::None)
         return false;
 
     if (accessibilityRole(element) != AccessibilityRole::LandmarkNavigation)
@@ -2273,7 +2273,7 @@ std::optional<Quirks::TikTokOverflowingContentQuirkType> Quirks::needsTikTokOver
     if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::NeedsTikTokOverflowingContentQuirk))
         return { };
 
-    if (parentStyle.display() != DisplayType::Flex)
+    if (parentStyle.display() != Style::DisplayType::BlockFlex)
         return { };
 
     if (parentStyle.position() != PositionType::Fixed)
@@ -2320,7 +2320,7 @@ bool Quirks::needsInstagramResizingReelsQuirk(const Element& element, const Rend
     if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::NeedsInstagramResizingReelsQuirk))
         return false;
 
-    if (elementStyle.display() != DisplayType::Block)
+    if (elementStyle.display() != Style::DisplayType::BlockFlow)
         return false;
 
     if (elementStyle.isOverflowVisible())
@@ -2329,7 +2329,7 @@ bool Quirks::needsInstagramResizingReelsQuirk(const Element& element, const Rend
     if (!elementStyle.width().isAuto())
         return false;
 
-    if (parentStyle.display() != DisplayType::Flex)
+    if (parentStyle.display() != Style::DisplayType::BlockFlex)
         return false;
 
     if (!parentStyle.width().isPercent())

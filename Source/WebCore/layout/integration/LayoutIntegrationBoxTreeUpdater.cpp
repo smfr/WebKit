@@ -176,16 +176,16 @@ void BoxTreeUpdater::tearDown()
 
 void BoxTreeUpdater::adjustStyleIfNeeded(const RenderElement& renderer, RenderStyle& style, RenderStyle* firstLineStyle)
 {
-    auto adjustStyle = [&] (auto& styleToAdjust) {
+    auto adjustStyle = [&](auto& styleToAdjust) {
         // If we end up here with a box that has a table display type, just treat it as a regular block-level box.
-        if (styleToAdjust.isInternalTableBox() || styleToAdjust.display() == DisplayType::TableCaption) {
-            styleToAdjust.setDisplay(DisplayType::Block);
+        if (Style::isInternalTableBox(styleToAdjust.display()) || styleToAdjust.display() == Style::DisplayType::TableCaption) {
+            styleToAdjust.setDisplay(Style::DisplayType::BlockFlow);
             return;
         }
 
         if (is<RenderBlock>(renderer)) {
-            if (styleToAdjust.display() == DisplayType::Inline)
-                styleToAdjust.setDisplay(DisplayType::InlineBlock);
+            if (styleToAdjust.display() == Style::DisplayType::InlineFlow)
+                styleToAdjust.setDisplay(Style::DisplayType::InlineFlowRoot);
 
             if (renderer.isAnonymousBlock()) {
                 auto& anonBlockParentStyle = renderer.parent()->style();
@@ -217,21 +217,21 @@ void BoxTreeUpdater::adjustStyleIfNeeded(const RenderElement& renderer, RenderSt
 
             auto isSupportedInlineDisplay = [&] {
                 auto display = styleToAdjust.display();
-                if (display == DisplayType::RubyBase || display == DisplayType::RubyAnnotation)
-                    return renderInline->parent()->style().display() == DisplayType::Ruby;
+                if (display == Style::DisplayType::RubyBase || display == Style::DisplayType::RubyText)
+                    return renderInline->parent()->style().display() == Style::DisplayType::InlineRuby;
                 if (is<RenderSVGInline>(*renderInline))
-                    return display == DisplayType::Inline;
-                return styleToAdjust.isDisplayInlineType();
+                    return display == Style::DisplayType::InlineFlow;
+                return Style::isDisplayInlineType(display);
             };
             if (!isSupportedInlineDisplay())
-                styleToAdjust.setDisplay(DisplayType::Inline);
+                styleToAdjust.setDisplay(Style::DisplayType::InlineFlow);
             return;
         }
 
         if (auto* renderLineBreak = dynamicDowncast<RenderLineBreak>(renderer)) {
             if (!styleToAdjust.hasOutOfFlowPosition()) {
                 // Force in-flow display value to inline (see webkit.org/b/223151).
-                styleToAdjust.setDisplay(DisplayType::Inline);
+                styleToAdjust.setDisplay(Style::DisplayType::InlineFlow);
             }
             styleToAdjust.setFloating(Float::None);
             // Clear property should only apply on block elements, however,
@@ -252,7 +252,7 @@ UniqueRef<Layout::Box> BoxTreeUpdater::createLayoutBox(RenderObject& renderer)
     std::unique_ptr<RenderStyle> firstLineStyle = firstLineStyleFor(renderer);
 
     if (auto* textRenderer = dynamicDowncast<RenderText>(renderer)) {
-        auto style = RenderStyle::createAnonymousStyleWithDisplay(textRenderer->style(), DisplayType::Inline);
+        auto style = RenderStyle::createAnonymousStyleWithDisplay(textRenderer->style(), Style::DisplayType::InlineFlow);
         auto isCombinedText = [&] {
             auto* combineTextRenderer = dynamicDowncast<RenderCombineText>(*textRenderer);
             return combineTextRenderer && combineTextRenderer->isCombined();
@@ -406,7 +406,7 @@ void BoxTreeUpdater::updateStyle(const RenderObject& renderer)
     if (auto* renderText = dynamicDowncast<RenderText>(renderer)) {
         if (auto* inlineTextBox = dynamicDowncast<Layout::InlineTextBox>(*layoutBox)) {
             updateContentCharacteristic(*renderText, *inlineTextBox);
-            inlineTextBox->updateStyle(RenderStyle::createAnonymousStyleWithDisplay(renderText->style(), DisplayType::Inline), firstLineStyleFor(*renderText));
+            inlineTextBox->updateStyle(RenderStyle::createAnonymousStyleWithDisplay(renderText->style(), Style::DisplayType::InlineFlow), firstLineStyleFor(*renderText));
             return;
         }
         ASSERT_NOT_REACHED();

@@ -204,7 +204,7 @@ bool RenderTreeBuilder::isRebuildRootForChildren(const RenderElement& renderer)
     // This can greatly simplify the code needed to maintain the correct structure.
 
     auto display = renderer.style().display();
-    if (display == DisplayType::Ruby || display == DisplayType::RubyBlock)
+    if (display == Style::DisplayType::InlineRuby || display == Style::DisplayType::BlockRuby)
         return true;
 
     return false;
@@ -309,7 +309,7 @@ void RenderTreeBuilder::attachInternal(RenderElement& parent, RenderPtr<RenderOb
         return;
     }
 
-    if (parent.style().display() == DisplayType::Ruby || parent.style().display() == DisplayType::RubyBlock) {
+    if (parent.style().display() == Style::DisplayType::InlineRuby || parent.style().display() == Style::DisplayType::BlockRuby) {
         auto& parentCandidate = rubyBuilder().findOrCreateParentForStyleBasedRubyChild(parent, *child, beforeChild);
         if (&parentCandidate == &parent) {
             rubyBuilder().attachForStyleBasedRuby(parentCandidate, WTF::move(child), beforeChild);

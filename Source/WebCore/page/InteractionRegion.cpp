@@ -532,7 +532,7 @@ std::optional<InteractionRegion> interactionRegionForRenderedRegion(const Render
     }
 
     // The parent will get its own InteractionRegion.
-    if (!isOriginalMatch && !matchedElementIsGuardContainer && !isPhoto && !isInlineNonBlock && !renderer.style().isDisplayTableOrTablePart())
+    if (!isOriginalMatch && !matchedElementIsGuardContainer && !isPhoto && !isInlineNonBlock && !Style::isDisplayTableOrTablePart(renderer.style().display()))
         return std::nullopt;
 
     // FIXME: Consider allowing rotation / skew - rdar://127499446.

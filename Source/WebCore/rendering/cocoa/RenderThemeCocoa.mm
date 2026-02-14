@@ -1765,7 +1765,7 @@ bool RenderThemeCocoa::adjustColorWellSwatchOverlayStyleForVectorBasedControls(R
     if (!formControlRefreshEnabled(element))
         return false;
 
-    style.setDisplay(DisplayType::None);
+    style.setDisplay(Style::DisplayType::None);
 
     return true;
 #endif

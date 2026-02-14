@@ -4653,7 +4653,7 @@ static RefPtr<Element> flattenedParent(Element* element)
         return nullptr;
     RefPtr parent = element->parentElementInComposedTree();
     while (parent) {
-        if (!parent->isConnected() || parent->computedStyle()->display() != DisplayType::Contents)
+        if (!parent->isConnected() || parent->computedStyle()->display() != Style::DisplayType::Contents)
             break;
         parent = parent->parentElementInComposedTree();
     }

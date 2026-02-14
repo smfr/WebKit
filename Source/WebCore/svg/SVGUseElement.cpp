@@ -354,7 +354,7 @@ SVGGraphicsElement* SVGUseElement::visibleTargetGraphicsElement() const
         return nullptr;
 
     auto& style = renderer->style();
-    if (style.display() == DisplayType::None || style.usedVisibility() != Visibility::Visible)
+    if (style.display() == Style::DisplayType::None || style.usedVisibility() != Visibility::Visible)
         return nullptr;
 
     // Spec: "If a <use> element is a child of a clipPath element, it must directly

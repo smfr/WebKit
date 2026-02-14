@@ -482,7 +482,7 @@ template<CSSPropertyID propertyID> struct MarginEdgeSharedAdaptor {
 
             if (value.isPercentOrCalculated()) {
                 // RenderBox gives a marginRight() that is the distance between the right-edge of the child box
-                // and the right-edge of the containing box, when display == DisplayType::Block. Let's calculate the absolute
+                // and the right-edge of the containing box, when display == DisplayType::BlockFlow. Let's calculate the absolute
                 // value of the specified margin-right % instead of relying on RenderBox's marginRight() value.
                 return functor(Length<> { evaluateMinimum<float>(value, box->containingBlockLogicalWidthForContent(), state.style.usedZoomForLength()) });
             }
@@ -919,15 +919,15 @@ template<> struct PropertyExtractorAdaptor<CSSPropertyGridAutoFlow> {
             switch (gridFlow.packing()) {
             case GridAutoFlow::Packing::Dense:
                 if (!state.style.gridTemplateRows().isNone() && state.style.gridTemplateColumns().isNone()
-                    && (state.style.display() == DisplayType::GridLanes || state.style.display() == DisplayType::InlineGridLanes))
+                    && (state.style.display() == DisplayType::BlockGridLanes || state.style.display() == DisplayType::InlineGridLanes))
                     return functor(SpaceSeparatedTuple { CSS::Keyword::Row { }, CSS::Keyword::Dense { } });
                 return functor(CSS::Keyword::Dense { });
             case GridAutoFlow::Packing::Sparse:
                 return functor(CSS::Keyword::Row { });
             }
         default:
-            ASSERT(state.style.display() != DisplayType::GridLanes && state.style.display() != DisplayType::InlineGridLanes
-                && state.style.display() != DisplayType::Grid && state.style.display() != DisplayType::InlineGrid);
+            ASSERT(state.style.display() != DisplayType::BlockGridLanes && state.style.display() != DisplayType::InlineGridLanes
+                && state.style.display() != DisplayType::BlockGrid && state.style.display() != DisplayType::InlineGrid);
             switch (gridFlow.packing()) {
             case GridAutoFlow::Packing::Dense:
                 return functor(CSS::Keyword::Dense { });

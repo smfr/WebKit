@@ -435,7 +435,7 @@ bool RenderBlockFlow::willCreateColumns(std::optional<unsigned> desiredColumnCou
         return false;
     if (isRenderSVGBlock())
         return false;
-    if (style().display() == DisplayType::RubyBlock || style().display() == DisplayType::RubyAnnotation)
+    if (style().display() == Style::DisplayType::BlockRuby || style().display() == Style::DisplayType::RubyText)
         return false;
 #if ENABLE(MATHML)
     if (isRenderMathMLBlock())
@@ -1302,7 +1302,7 @@ void RenderBlockFlow::adjustFloatingBlock(const MarginInfo& marginInfo)
 
 void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox& child, LayoutUnit logicalTop)
 {
-    if (child.style().isOriginalDisplayInlineType())
+    if (Style::isDisplayInlineType(child.style().originalDisplay()))
         setStaticInlinePositionForChild(child, staticInlinePositionForOriginalDisplayInline(logicalTop));
     else
         setStaticInlinePositionForChild(child, startOffsetForContent());
@@ -1610,7 +1610,7 @@ LayoutUnit RenderBlockFlow::collapseMarginsWithChildInfo(RenderBox* child, Margi
 bool RenderBlockFlow::isChildEligibleForMarginTrim(Style::MarginTrimSide marginTrimSide, const RenderBox& child) const
 {
     ASSERT(style().marginTrim().contains(marginTrimSide));
-    if (!child.style().isDisplayBlockLevel())
+    if (!Style::isDisplayBlockType(child.style().display()))
         return false;
     // https://drafts.csswg.org/css-box-4/#margin-trim-block
     // 3.3.1. Trimming Block Container Content
@@ -2456,7 +2456,7 @@ void RenderBlockFlow::updateStylesForColumnChildren(const RenderStyle* oldStyle)
 {
     auto columnsNeedLayout = oldStyle && (oldStyle->columnCount() != style().columnCount() || oldStyle->columnWidth() != style().columnWidth()); 
     for (auto* child = firstChildBox(); child && (child->isRenderFragmentedFlow() || child->isRenderMultiColumnSet()); child = child->nextSiblingBox()) {
-        child->setStyle(RenderStyle::createAnonymousStyleWithDisplay(style(), DisplayType::Block));
+        child->setStyle(RenderStyle::createAnonymousStyleWithDisplay(style(), Style::DisplayType::BlockFlow));
         if (columnsNeedLayout)
             child->setNeedsLayoutAndPreferredWidthsUpdate();
     }
@@ -4100,7 +4100,7 @@ RenderBlockFlow::InlineContentStatus RenderBlockFlow::markInlineContentDirtyForL
             if (hasParentRelativeHeightOrTop)
                 hasSimpleOutOfFlowContentOnly = false;
 
-            if (hasSimpleOutOfFlowContentOnly && style.isOriginalDisplayInlineType())
+            if (hasSimpleOutOfFlowContentOnly && Style::isDisplayInlineType(style.originalDisplay()))
                 hasSimpleOutOfFlowContentOnly = hasSimpleStaticPositionForInlineLevelOutOfFlowContentByStyle;
         } else
             hasSimpleOutOfFlowContentOnly = false;
@@ -4269,7 +4269,7 @@ void RenderBlockFlow::setStaticPositionsForSimpleOutOfFlowContent()
 #ifndef NDEBUG
     ASSERT(!hasLineIfEmpty());
     for (auto walker = InlineWalker(*this); !walker.atEnd(); walker.advance()) {
-        if (walker.current()->style().isDisplayInlineType()) {
+        if (Style::isDisplayInlineType(walker.current()->style().display())) {
             ASSERT(hasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(style()));
             break;
         }
@@ -4672,7 +4672,7 @@ RenderObject* InlineMinMaxIterator::next()
         if (is<RenderInline>(*candidate) || candidate->isRenderTextOrLineBreak() || candidate->isFloating() || candidate->isBlockLevelReplacedOrAtomicInline())
             break;
 
-        if (candidate->style().isDisplayBlockLevel()) {
+        if (Style::isDisplayBlockType(candidate->style().display())) {
             ASSERT(candidate->settings().blocksInInlineLayoutEnabled());
             break;
         }
@@ -4742,7 +4742,7 @@ static inline std::optional<std::pair<const RenderText&, const RenderText&>> tra
         if (is<RenderInline>(renderer))
             return true;
         auto& renderBox = downcast<RenderBoxModelObject>(renderer);
-        return !renderBox.isInFlow() || renderBox.style().display() == DisplayType::RubyAnnotation;
+        return !renderBox.isInFlow() || renderBox.style().display() == Style::DisplayType::RubyText;
     };
 
     auto walker = InlineWalker(blockContainer, rubyBase.firstInFlowChild());
@@ -4857,7 +4857,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
         auto isInterlinearTypeAnnotation = [&] {
             if (CheckedPtr renderBlock = dynamicDowncast<RenderBlock>(*child)) {
                 auto& style = renderBlock->style();
-                return style.display() == DisplayType::RubyAnnotation && (!style.isInterCharacterRubyPosition() || styleToUse.writingMode().isVerticalTypographic());
+                return style.display() == Style::DisplayType::RubyText && (!style.isInterCharacterRubyPosition() || styleToUse.writingMode().isVerticalTypographic());
             }
             return false;
         };
@@ -4904,7 +4904,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             continue;
         }
 
-        if (child->style().isDisplayBlockLevel() && !child->isFloating() && is<RenderBox>(*child)) {
+        if (Style::isDisplayBlockType(child->style().display()) && !child->isFloating() && is<RenderBox>(*child)) {
             ASSERT(settings().blocksInInlineLayoutEnabled());
 
             resetLineForForcedLineBreak();
@@ -4976,13 +4976,13 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
                 childMin += bpm;
                 childMax += bpm;
 
-                if (childStyle.display() == DisplayType::RubyBase && !childIterator.isEndOfInline())
+                if (childStyle.display() == Style::DisplayType::RubyBase && !childIterator.isEndOfInline())
                     rubyBaseContentStack.append({ inlineMin, inlineMax, false });
 
                 inlineMin += childMin;
                 inlineMax += childMax;
 
-                if (childStyle.display() == DisplayType::RubyBase && childIterator.isEndOfInline()) {
+                if (childStyle.display() == Style::DisplayType::RubyBase && childIterator.isEndOfInline()) {
                     if (!rubyBaseContentStack.isEmpty()) {
                         auto rubyBaseStart = rubyBaseContentStack.last();
                         auto baseHasBreakingPositionAfter = hasTrailingSoftWrapOpportunity(*renderInline, *this);

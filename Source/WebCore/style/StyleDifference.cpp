@@ -477,7 +477,7 @@ public:
             || a.nonInheritedFlags().originalDisplay != b.nonInheritedFlags().originalDisplay)
             return true;
 
-        if (static_cast<DisplayType>(a.nonInheritedFlags().effectiveDisplay) >= DisplayType::Table) {
+        if (static_cast<DisplayType>(a.nonInheritedFlags().display) >= DisplayType::BlockTable) {
             if (a.inheritedFlags().borderCollapse != b.inheritedFlags().borderCollapse
                 || a.inheritedFlags().emptyCells != b.inheritedFlags().emptyCells
                 || a.inheritedFlags().captionSide != b.inheritedFlags().captionSide
@@ -498,7 +498,7 @@ public:
                 return true;
         }
 
-        if (static_cast<DisplayType>(a.nonInheritedFlags().effectiveDisplay) == DisplayType::ListItem) {
+        if (static_cast<DisplayType>(a.nonInheritedFlags().display) == DisplayType::BlockFlowListItem) {
             if (a.inheritedFlags().listStylePosition != b.inheritedFlags().listStylePosition || a.inheritedRareData().listStyleType != b.inheritedRareData().listStyleType)
                 return true;
         }

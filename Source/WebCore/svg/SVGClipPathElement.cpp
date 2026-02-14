@@ -126,7 +126,7 @@ RefPtr<SVGGraphicsElement> SVGClipPathElement::shouldApplyPathClipping() const
         if (is<RenderSVGText>(renderer))
             return true;
         auto& style = renderer.style();
-        if (style.display() == DisplayType::None || style.usedVisibility() != Visibility::Visible)
+        if (style.display() == Style::DisplayType::None || style.usedVisibility() != Visibility::Visible)
             return false;
         // Current shape in clip-path gets clipped too. Fall back to masking.
         return style.hasClipPath();
@@ -197,7 +197,7 @@ FloatRect SVGClipPathElement::calculateClipContentRepaintRect(RepaintRectCalcula
             continue;
         auto& style = renderer->style();
         // For <use> elements, skip visibility check on the <use> itself, check target instead.
-        if (style.display() == DisplayType::None || (style.usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
+        if (style.display() == Style::DisplayType::None || (style.usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
             continue;
 
         // For <use> elements, verify the target is visible and valid

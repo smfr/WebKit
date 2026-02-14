@@ -98,7 +98,7 @@ auto LegacyRenderSVGResourceClipper::pathOnlyClipping(GraphicsContext& context, 
         if (is<RenderSVGText>(renderer))
             return true;
         auto& style = renderer.style();
-        if (style.display() == DisplayType::None || style.usedVisibility() != Visibility::Visible)
+        if (style.display() == Style::DisplayType::None || style.usedVisibility() != Visibility::Visible)
             return false;
         // Current shape in clip-path gets clipped too. Fall back to masking.
         if (style.hasClipPath())
@@ -273,7 +273,7 @@ bool LegacyRenderSVGResourceClipper::drawContentIntoMaskImage(ImageBuffer& maskI
             return false;
         }
         const RenderStyle& style = renderer->style();
-        if (style.display() == DisplayType::None || (style.usedVisibility() != Visibility::Visible && !is<SVGUseElement>(child)))
+        if (style.display() == Style::DisplayType::None || (style.usedVisibility() != Visibility::Visible && !is<SVGUseElement>(child)))
             continue;
 
         WindRule newClipRule = style.clipRule();
@@ -312,7 +312,7 @@ void LegacyRenderSVGResourceClipper::calculateClipContentRepaintRect(RepaintRect
         if (!renderer->isRenderOrLegacyRenderSVGShape() && !renderer->isRenderSVGText() && !childNode->hasTagName(SVGNames::useTag))
             continue;
         const RenderStyle& style = renderer->style();
-        if (style.display() == DisplayType::None || (style.usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
+        if (style.display() == Style::DisplayType::None || (style.usedVisibility() != Visibility::Visible && !childNode->hasTagName(SVGNames::useTag)))
             continue;
 
         // For <use> elements, check if the clipping target is visible.

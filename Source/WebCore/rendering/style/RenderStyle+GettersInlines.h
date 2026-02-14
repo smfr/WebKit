@@ -224,14 +224,9 @@ inline std::optional<size_t> RenderStyle::usedPositionOptionIndex() const
     return m_computedStyle.usedPositionOptionIndex();
 }
 
-inline constexpr DisplayType RenderStyle::originalDisplay() const
+inline constexpr Style::DisplayType RenderStyle::originalDisplay() const
 {
     return m_computedStyle.originalDisplay();
-}
-
-inline DisplayType RenderStyle::effectiveDisplay() const
-{
-    return m_computedStyle.effectiveDisplay();
 }
 
 inline StyleAppearance RenderStyle::usedAppearance() const
@@ -828,85 +823,6 @@ inline bool RenderStyle::isCollapsibleWhiteSpace(char16_t character) const
     }
 }
 
-constexpr bool RenderStyle::isDisplayBlockType(DisplayType display)
-{
-    return display == DisplayType::Block
-        || display == DisplayType::Box
-        || display == DisplayType::Flex
-        || display == DisplayType::FlowRoot
-        || display == DisplayType::Grid
-        || display == DisplayType::GridLanes
-        || display == DisplayType::ListItem
-        || display == DisplayType::Table
-        || display == DisplayType::RubyBlock;
-}
-
-constexpr bool RenderStyle::isDisplayInlineType(DisplayType display)
-{
-    return display == DisplayType::Inline
-        || display == DisplayType::InlineBlock
-        || display == DisplayType::InlineBox
-        || display == DisplayType::InlineFlex
-        || display == DisplayType::InlineGrid
-        || display == DisplayType::InlineGridLanes
-        || display == DisplayType::InlineTable
-        || display == DisplayType::Ruby
-        || display == DisplayType::RubyBase
-        || display == DisplayType::RubyAnnotation;
-}
-
-constexpr bool RenderStyle::isDisplayRegionType() const
-{
-    return display() == DisplayType::Block
-        || display() == DisplayType::InlineBlock
-        || display() == DisplayType::TableCell
-        || display() == DisplayType::TableCaption
-        || display() == DisplayType::ListItem;
-}
-
-constexpr bool RenderStyle::isDisplayTableOrTablePart(DisplayType display)
-{
-    return display == DisplayType::Table
-        || display == DisplayType::InlineTable
-        || display == DisplayType::TableCell
-        || display == DisplayType::TableCaption
-        || display == DisplayType::TableRowGroup
-        || display == DisplayType::TableHeaderGroup
-        || display == DisplayType::TableFooterGroup
-        || display == DisplayType::TableRow
-        || display == DisplayType::TableColumnGroup
-        || display == DisplayType::TableColumn;
-}
-
-constexpr bool RenderStyle::isInternalTableBox(DisplayType display)
-{
-    // https://drafts.csswg.org/css-display-3/#layout-specific-display
-    return display == DisplayType::TableCell
-        || display == DisplayType::TableRowGroup
-        || display == DisplayType::TableHeaderGroup
-        || display == DisplayType::TableFooterGroup
-        || display == DisplayType::TableRow
-        || display == DisplayType::TableColumnGroup
-        || display == DisplayType::TableColumn;
-}
-
-constexpr bool RenderStyle::isRubyContainerOrInternalRubyBox(DisplayType display)
-{
-    return display == DisplayType::Ruby
-        || display == DisplayType::RubyAnnotation
-        || display == DisplayType::RubyBase;
-}
-
-constexpr bool RenderStyle::doesDisplayGenerateBlockContainer() const
-{
-    auto display = this->display();
-    return (display == DisplayType::Block
-        || display == DisplayType::InlineBlock
-        || display == DisplayType::FlowRoot
-        || display == DisplayType::ListItem
-        || display == DisplayType::TableCell
-        || display == DisplayType::TableCaption);
-}
 
 constexpr bool RenderStyle::preserveNewline(WhiteSpaceCollapse mode)
 {
@@ -967,7 +883,7 @@ inline bool RenderStyle::isInterCharacterRubyPosition() const
 
 inline bool generatesBox(const RenderStyle& style)
 {
-    return style.display() != DisplayType::None && style.display() != DisplayType::Contents;
+    return style.display() != Style::DisplayType::None && style.display() != Style::DisplayType::Contents;
 }
 
 inline bool isNonVisibleOverflow(Overflow overflow)
@@ -977,7 +893,7 @@ inline bool isNonVisibleOverflow(Overflow overflow)
 
 inline bool pseudoElementRendererIsNeeded(const RenderStyle* style)
 {
-    return style && style->display() != DisplayType::None && style->content().isData();
+    return style && style->display() != Style::DisplayType::None && style->content().isData();
 }
 
 inline bool isVisibleToHitTesting(const RenderStyle& style, const HitTestRequest& request)
@@ -997,11 +913,11 @@ inline bool shouldApplyLayoutContainment(const RenderStyle& style, const Element
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its principal box is an internal table box other than table-cell
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == DisplayType::None || style.display() == DisplayType::Contents)
+    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (style.isInternalTableBox() && style.display() != DisplayType::TableCell)
+    if (Style::isInternalTableBox(style.display()) && style.display() != Style::DisplayType::TableCell)
         return false;
-    if (style.isRubyContainerOrInternalRubyBox() || (style.display() == DisplayType::Inline && !element.isReplaced(&style)))
+    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -1018,13 +934,13 @@ inline bool shouldApplySizeContainment(const RenderStyle& style, const Element& 
     //   if its inner display type is table
     //   if its principal box is an internal table box
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == DisplayType::None || style.display() == DisplayType::Contents)
+    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (style.display() == DisplayType::Table || style.display() == DisplayType::InlineTable)
+    if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
         return false;
-    if (style.isInternalTableBox())
+    if (Style::isInternalTableBox(style.display()))
         return false;
-    if (style.isRubyContainerOrInternalRubyBox() || (style.display() == DisplayType::Inline && !element.isReplaced(&style)))
+    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -1038,13 +954,13 @@ inline bool shouldApplyInlineSizeContainment(const RenderStyle& style, const Ele
     //   if its inner display type is table
     //   if its principal box is an internal table box
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == DisplayType::None || style.display() == DisplayType::Contents)
+    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (style.display() == DisplayType::Table || style.display() == DisplayType::InlineTable)
+    if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
         return false;
-    if (style.isInternalTableBox())
+    if (Style::isInternalTableBox(style.display()))
         return false;
-    if (style.isRubyContainerOrInternalRubyBox() || (style.display() == DisplayType::Inline && !element.isReplaced(&style)))
+    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -1069,11 +985,11 @@ inline bool shouldApplyPaintContainment(const RenderStyle& style, const Element&
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its principal box is an internal table box other than table-cell
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == DisplayType::None || style.display() == DisplayType::Contents)
+    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (style.isInternalTableBox() && style.display() != DisplayType::TableCell)
+    if (Style::isInternalTableBox(style.display()) && style.display() != Style::DisplayType::TableCell)
         return false;
-    if (style.isRubyContainerOrInternalRubyBox() || (style.display() == DisplayType::Inline && !element.isReplaced(&style)))
+    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -1384,81 +1300,6 @@ inline bool RenderStyle::isRowFlexDirection() const
     return flexDirection() == FlexDirection::Row || flexDirection() == FlexDirection::RowReverse;
 }
 
-constexpr bool RenderStyle::isDisplayBlockLevel() const
-{
-    return isDisplayBlockType(display());
-}
-
-constexpr bool RenderStyle::isDisplayDeprecatedFlexibleBox(DisplayType display)
-{
-    return display == DisplayType::Box || display == DisplayType::InlineBox;
-}
-
-constexpr bool RenderStyle::isDisplayFlexibleBox(DisplayType display)
-{
-    return display == DisplayType::Flex || display == DisplayType::InlineFlex;
-}
-
-constexpr bool RenderStyle::isDisplayDeprecatedFlexibleBox() const
-{
-    return isDisplayDeprecatedFlexibleBox(display());
-}
-
-constexpr bool RenderStyle::isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const
-{
-    return isDisplayFlexibleOrGridFormattingContextBox() || isDisplayDeprecatedFlexibleBox();
-}
-
-constexpr bool RenderStyle::isDisplayFlexibleOrGridFormattingContextBox() const
-{
-    return isDisplayFlexibleOrGridFormattingContextBox(display());
-}
-
-constexpr bool RenderStyle::isDisplayFlexibleOrGridFormattingContextBox(DisplayType display)
-{
-    return isDisplayFlexibleBox(display) || isDisplayGridFormattingContextBox(display);
-}
-
-constexpr bool RenderStyle::isDisplayGridFormattingContextBox(DisplayType display)
-{
-    return isDisplayGridBox(display) || isDisplayGridLanesBox(display);
-}
-
-constexpr bool RenderStyle::isDisplayGridBox(DisplayType display)
-{
-    return display == DisplayType::Grid || display == DisplayType::InlineGrid;
-}
-
-constexpr bool RenderStyle::isDisplayGridLanesBox(DisplayType display)
-{
-    return display == DisplayType::GridLanes || display == DisplayType::InlineGridLanes;
-}
-
-constexpr bool RenderStyle::isDisplayInlineType() const
-{
-    return isDisplayInlineType(display());
-}
-
-constexpr bool RenderStyle::isDisplayListItemType(DisplayType display)
-{
-    return display == DisplayType::ListItem;
-}
-
-constexpr bool RenderStyle::isDisplayTableOrTablePart() const
-{
-    return isDisplayTableOrTablePart(display());
-}
-
-constexpr bool RenderStyle::isInternalTableBox() const
-{
-    return isInternalTableBox(display());
-}
-
-constexpr bool RenderStyle::isRubyContainerOrInternalRubyBox() const
-{
-    return isRubyContainerOrInternalRubyBox(display());
-}
-
 inline bool RenderStyle::isFixedTableLayout() const
 {
     return tableLayout() == TableLayoutType::Fixed 
@@ -1473,20 +1314,6 @@ inline bool RenderStyle::isFloating() const
     return floating() != Float::None;
 }
 
-constexpr bool RenderStyle::isOriginalDisplayBlockType() const
-{
-    return isDisplayBlockType(originalDisplay());
-}
-
-constexpr bool RenderStyle::isOriginalDisplayInlineType() const
-{
-    return isDisplayInlineType(originalDisplay());
-}
-
-constexpr bool RenderStyle::isOriginalDisplayListItemType() const
-{
-    return isDisplayListItemType(originalDisplay());
-}
 
 inline bool RenderStyle::isOverflowVisible() const
 {

@@ -217,61 +217,61 @@ RenderPtr<RenderElement> RenderElement::createFor(Element& element, RenderStyle&
     }
 
     switch (style.display()) {
-    case DisplayType::None:
-    case DisplayType::Contents:
+    case Style::DisplayType::None:
+    case Style::DisplayType::Contents:
         return nullptr;
-    case DisplayType::Inline:
+    case Style::DisplayType::InlineFlow:
         if (rendererTypeOverride.contains(ConstructBlockLevelRendererFor::Inline))
             return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
         return createRenderer<RenderInline>(RenderObject::Type::Inline, element, WTF::move(style));
-    case DisplayType::Block:
-    case DisplayType::FlowRoot:
-    case DisplayType::InlineBlock:
+    case Style::DisplayType::BlockFlow:
+    case Style::DisplayType::BlockFlowRoot:
+    case Style::DisplayType::InlineFlowRoot:
         return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
-    case DisplayType::ListItem:
+    case Style::DisplayType::BlockFlowListItem:
         if (rendererTypeOverride.contains(ConstructBlockLevelRendererFor::ListItem))
             return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
         return createRenderer<RenderListItem>(element, WTF::move(style));
-    case DisplayType::Flex:
-    case DisplayType::InlineFlex:
+    case Style::DisplayType::BlockFlex:
+    case Style::DisplayType::InlineFlex:
         return createRenderer<RenderFlexibleBox>(RenderObject::Type::FlexibleBox, element, WTF::move(style));
-    case DisplayType::Grid:
-    case DisplayType::InlineGrid:
-    case DisplayType::GridLanes:
-    case DisplayType::InlineGridLanes:
+    case Style::DisplayType::BlockGrid:
+    case Style::DisplayType::InlineGrid:
+    case Style::DisplayType::BlockGridLanes:
+    case Style::DisplayType::InlineGridLanes:
         return createRenderer<RenderGrid>(element, WTF::move(style));
-    case DisplayType::Box:
-    case DisplayType::InlineBox:
+    case Style::DisplayType::BlockDeprecatedFlex:
+    case Style::DisplayType::InlineDeprecatedFlex:
         return createRenderer<RenderDeprecatedFlexibleBox>(element, WTF::move(style));
-    case DisplayType::RubyBase:
+    case Style::DisplayType::RubyBase:
         return createRenderer<RenderInline>(RenderObject::Type::Inline, element, WTF::move(style));
-    case DisplayType::RubyAnnotation:
+    case Style::DisplayType::RubyText:
         return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
-    case DisplayType::Ruby:
+    case Style::DisplayType::InlineRuby:
         return createRenderer<RenderInline>(RenderObject::Type::Inline, element, WTF::move(style));
-    case DisplayType::RubyBlock:
+    case Style::DisplayType::BlockRuby:
         return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
 
     default: {
-        if (style.isDisplayTableOrTablePart() && rendererTypeOverride.contains(ConstructBlockLevelRendererFor::TableOrTablePart))
+        if (Style::isDisplayTableOrTablePart(style.display()) && rendererTypeOverride.contains(ConstructBlockLevelRendererFor::TableOrTablePart))
             return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
 
         switch (style.display()) {
-        case DisplayType::Table:
-        case DisplayType::InlineTable:
+        case Style::DisplayType::BlockTable:
+        case Style::DisplayType::InlineTable:
             return createRenderer<RenderTable>(RenderObject::Type::Table, element, WTF::move(style));
-        case DisplayType::TableCell:
+        case Style::DisplayType::TableCell:
             return createRenderer<RenderTableCell>(element, WTF::move(style));
-        case DisplayType::TableCaption:
+        case Style::DisplayType::TableCaption:
             return createRenderer<RenderTableCaption>(element, WTF::move(style));
-        case DisplayType::TableRowGroup:
-        case DisplayType::TableHeaderGroup:
-        case DisplayType::TableFooterGroup:
+        case Style::DisplayType::TableRowGroup:
+        case Style::DisplayType::TableHeaderGroup:
+        case Style::DisplayType::TableFooterGroup:
             return createRenderer<RenderTableSection>(element, WTF::move(style));
-        case DisplayType::TableRow:
+        case Style::DisplayType::TableRow:
             return createRenderer<RenderTableRow>(element, WTF::move(style));
-        case DisplayType::TableColumnGroup:
-        case DisplayType::TableColumn:
+        case Style::DisplayType::TableColumnGroup:
+        case Style::DisplayType::TableColumn:
             return createRenderer<RenderTableCol>(element, WTF::move(style));
         default:
             break;
@@ -869,7 +869,7 @@ void RenderElement::propagateStyleToAnonymousChildren(StylePropagationType propa
         if (!elementChild->isAnonymous() || elementChild->style().pseudoElementType() || elementChild->isViewTransitionContainingBlock())
             continue;
 
-        bool isBlockOrRuby = is<RenderBlock>(elementChild.get()) || elementChild->style().display() == DisplayType::Ruby;
+        bool isBlockOrRuby = is<RenderBlock>(elementChild.get()) || elementChild->style().display() == Style::DisplayType::InlineRuby;
         if (propagationType == StylePropagationType::BlockAndRubyChildren && !isBlockOrRuby)
             continue;
 
@@ -879,7 +879,7 @@ void RenderElement::propagateStyleToAnonymousChildren(StylePropagationType propa
 
         auto newStyle = [&] {
             auto display = elementChild->style().display();
-            if (display == DisplayType::RubyBase || display == DisplayType::Ruby)
+            if (display == Style::DisplayType::RubyBase || display == Style::DisplayType::InlineRuby)
                 return createAnonymousStyleForRuby(style(), display);
             return RenderStyle::createAnonymousStyleWithDisplay(style(), display);
         }();
@@ -1107,7 +1107,7 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
 
     setNeedsLayoutForStyleDifference(diff, oldStyle);
 
-    if (isOutOfFlowPositioned() && oldStyle && oldStyle->isOriginalDisplayBlockType() != style().isOriginalDisplayBlockType()) {
+    if (isOutOfFlowPositioned() && oldStyle && Style::isDisplayBlockType(oldStyle->originalDisplay()) != Style::isDisplayBlockType(style().originalDisplay())) {
         if (CheckedPtr ancestor = RenderObject::containingBlockForPositionType(PositionType::Static, *this)) {
             ancestor->setNeedsLayout();
             ancestor->setOutOfFlowChildNeedsStaticPositionLayout();

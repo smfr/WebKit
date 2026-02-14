@@ -551,7 +551,7 @@ RenderStyle HTMLTextAreaElement::createInnerTextStyle(const RenderStyle& style)
     auto textBlockStyle = RenderStyle::create();
     textBlockStyle.inheritFrom(style);
     adjustInnerTextStyle(style, textBlockStyle);
-    textBlockStyle.setDisplay(DisplayType::Block);
+    textBlockStyle.setDisplay(Style::DisplayType::BlockFlow);
     return textBlockStyle;
 }
 

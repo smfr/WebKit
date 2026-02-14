@@ -97,7 +97,7 @@ inline void ComputedStyleProperties::setBlendMode(BlendMode mode)
 inline void ComputedStyleProperties::setDisplay(DisplayType value)
 {
     m_nonInheritedFlags.originalDisplay = static_cast<unsigned>(value);
-    m_nonInheritedFlags.effectiveDisplay = static_cast<unsigned>(value);
+    m_nonInheritedFlags.display = static_cast<unsigned>(value);
 }
 
 // FIXME: Support generating properties that have their storage spread out

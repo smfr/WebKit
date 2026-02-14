@@ -76,7 +76,7 @@ Ref<HTMLButtonElement> HTMLButtonElement::create(Document& document)
 RenderPtr<RenderElement> HTMLButtonElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition& position)
 {
     // https://html.spec.whatwg.org/multipage/rendering.html#button-layout
-    if (style.isDisplayFlexibleOrGridFormattingContextBox())
+    if (Style::isDisplayFlexibleOrGridFormattingContextBox(style.display()))
         return HTMLFormControlElement::createElementRenderer(WTF::move(style), position);
     return createRenderer<RenderButton>(*this, WTF::move(style));
 }

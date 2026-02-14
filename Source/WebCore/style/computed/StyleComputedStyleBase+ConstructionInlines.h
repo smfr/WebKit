@@ -67,7 +67,7 @@ inline ComputedStyleBase::ComputedStyleBase(CreateDefaultStyleTag)
     m_inheritedFlags.autosizeStatus = 0;
 #endif
 
-    m_nonInheritedFlags.effectiveDisplay = static_cast<unsigned>(ComputedStyle::initialDisplay());
+    m_nonInheritedFlags.display = static_cast<unsigned>(ComputedStyle::initialDisplay());
     m_nonInheritedFlags.originalDisplay = static_cast<unsigned>(ComputedStyle::initialDisplay());
     m_nonInheritedFlags.overflowX = static_cast<unsigned>(ComputedStyle::initialOverflowX());
     m_nonInheritedFlags.overflowY = static_cast<unsigned>(ComputedStyle::initialOverflowY());
@@ -116,7 +116,7 @@ inline ComputedStyleBase::ComputedStyleBase(ComputedStyleBase& a, ComputedStyleB
 inline void ComputedStyleBase::NonInheritedFlags::copyNonInheritedFrom(const NonInheritedFlags& other)
 {
     // Only some flags are copied because NonInheritedFlags contains things that are not actually style data.
-    effectiveDisplay = other.effectiveDisplay;
+    display = other.display;
     originalDisplay = other.originalDisplay;
     overflowX = other.overflowX;
     overflowY = other.overflowY;

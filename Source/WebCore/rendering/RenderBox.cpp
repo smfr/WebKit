@@ -421,7 +421,7 @@ void RenderBox::styleDidChange(Style::Difference diff, const RenderStyle* oldSty
     // Changing the position from/to absolute can potentially create/remove flex/grid items, as absolutely positioned
     // children of a flex/grid box are out-of-flow, and thus, not flex/grid items. This means that we need to clear
     // any override content size set by our container, because it would likely be incorrect after the style change.
-    if (isOutOfFlowPositioned() && parent() && parent()->style().isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox())
+    if (isOutOfFlowPositioned() && parent() && Style::isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox(parent()->style().display()))
         clearOverridingSize();
 
     if (oldStyle && oldStyle->hasOutOfFlowPosition() != style().hasOutOfFlowPosition()) {
@@ -3671,7 +3671,7 @@ bool RenderBox::skipContainingBlockForPercentHeightCalculation(const RenderBox& 
     // objects, such as table-cells and flexboxes, will be treated as if they were
     // non-anonymous.
     if (containingBlock.isAnonymousForPercentageResolution())
-        return containingBlock.style().display() == DisplayType::Block || containingBlock.style().display() == DisplayType::InlineBlock;
+        return containingBlock.style().display() == Style::DisplayType::BlockFlow || containingBlock.style().display() == Style::DisplayType::InlineFlowRoot;
     
     // For quirks mode, we skip most auto-height containing blocks when computing
     // percentages.

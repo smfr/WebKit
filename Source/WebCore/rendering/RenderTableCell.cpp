@@ -673,7 +673,7 @@ static inline void markCellDirtyWhenCollapsedBorderChanges(RenderTableCell* cell
 
 void RenderTableCell::styleDidChange(Style::Difference diff, const RenderStyle* oldStyle)
 {
-    ASSERT(style().display() == DisplayType::TableCell);
+    ASSERT(style().display() == Style::DisplayType::TableCell);
     ASSERT(!row() || row()->rowIndexWasSet());
 
     RenderBlockFlow::styleDidChange(diff, oldStyle);

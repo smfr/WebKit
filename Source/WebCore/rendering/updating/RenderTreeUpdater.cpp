@@ -454,7 +454,7 @@ void RenderTreeUpdater::updateElementRenderer(Element& element, const Style::Ele
 
         // display:none cancels animations.
         auto teardownType = [&]() {
-            if (!elementUpdate.style->hasDisplayAffectedByAnimations() && elementUpdate.style->display() == DisplayType::None)
+            if (!elementUpdate.style->hasDisplayAffectedByAnimations() && elementUpdate.style->display() == Style::DisplayType::None)
                 return TeardownType::RendererUpdateCancelingAnimations;
             return TeardownType::RendererUpdate;
         }();
@@ -464,8 +464,8 @@ void RenderTreeUpdater::updateElementRenderer(Element& element, const Style::Ele
         renderingParent().didCreateOrDestroyChildRenderer = true;
     }
 
-    bool hasDisplayContents = elementUpdate.style->display() == DisplayType::Contents;
-    bool hasDisplayNonePreventingRendererCreation = elementUpdate.style->display() == DisplayType::None && !element.rendererIsNeeded(elementUpdateStyle);
+    bool hasDisplayContents = elementUpdate.style->display() == Style::DisplayType::Contents;
+    bool hasDisplayNonePreventingRendererCreation = elementUpdate.style->display() == Style::DisplayType::None && !element.rendererIsNeeded(elementUpdateStyle);
     bool hasDisplayContentsOrNone = hasDisplayContents || hasDisplayNonePreventingRendererCreation;
     if (hasDisplayContentsOrNone)
         element.storeDisplayContentsOrNoneStyle(makeUnique<RenderStyle>(WTF::move(elementUpdateStyle)));
