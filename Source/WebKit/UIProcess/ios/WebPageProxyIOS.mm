@@ -798,36 +798,6 @@ void WebPageProxy::didEndUserTriggeredZooming()
     protect(legacyMainFrameProcess())->send(Messages::WebPage::DidEndUserTriggeredZooming(), webPageIDInMainFrameProcess());
 }
 
-void WebPageProxy::potentialTapAtPosition(std::optional<WebCore::FrameIdentifier> remoteFrameID, const WebCore::FloatPoint& position, bool shouldRequestMagnificationInformation, WebKit::TapIdentifier requestID)
-{
-    hideValidationMessage();
-    sendWithAsyncReplyToProcessContainingFrame(remoteFrameID, Messages::WebPage::PotentialTapAtPosition(remoteFrameID, requestID, position, shouldRequestMagnificationInformation), Messages::WebPage::PotentialTapAtPosition::Reply { [weakThis = WeakPtr { *this }, shouldRequestMagnificationInformation, requestID] (auto data) {
-        if (!data)
-            return;
-        RefPtr protectedThis = weakThis.get();
-        if (!protectedThis)
-            return;
-        protectedThis->potentialTapAtPosition(data->targetFrameID, FloatPoint(data->transformedPoint), shouldRequestMagnificationInformation, requestID);
-    } });
-}
-
-void WebPageProxy::commitPotentialTap(std::optional<WebCore::FrameIdentifier> remoteFrameID, OptionSet<WebEventModifier> modifiers, TransactionID layerTreeTransactionIdAtLastTouchStart, WebCore::PointerID pointerId)
-{
-    sendWithAsyncReplyToProcessContainingFrame(remoteFrameID, Messages::WebPage::CommitPotentialTap(remoteFrameID, modifiers, layerTreeTransactionIdAtLastTouchStart, pointerId), Messages::WebPage::CommitPotentialTap::Reply { [weakThis = WeakPtr { *this }, modifiers, layerTreeTransactionIdAtLastTouchStart, pointerId] (auto targetFrameID) {
-        if (!targetFrameID)
-            return;
-        RefPtr protectedThis = weakThis.get();
-        if (!protectedThis)
-            return;
-        protectedThis->commitPotentialTap(targetFrameID, modifiers, layerTreeTransactionIdAtLastTouchStart, pointerId);
-    } });
-}
-
-void WebPageProxy::cancelPotentialTap()
-{
-    protect(legacyMainFrameProcess())->send(Messages::WebPage::CancelPotentialTap(), webPageIDInMainFrameProcess());
-}
-
 void WebPageProxy::tapHighlightAtPosition(const WebCore::FloatPoint& position, WebKit::TapIdentifier requestID)
 {
     protect(legacyMainFrameProcess())->send(Messages::WebPage::TapHighlightAtPosition(requestID, position), webPageIDInMainFrameProcess());
@@ -926,12 +896,6 @@ void WebPageProxy::restorePageCenterAndScale(IPC::Connection& connection, std::o
     MESSAGE_CHECK_BASE(scale > 0, connection);
     if (RefPtr pageClient = this->pageClient())
         pageClient->restorePageCenterAndScale(center, scale);
-}
-
-void WebPageProxy::didGetTapHighlightGeometries(WebKit::TapIdentifier requestID, const WebCore::Color& color, const Vector<WebCore::FloatQuad>& highlightedQuads, const WebCore::IntSize& topLeftRadius, const WebCore::IntSize& topRightRadius, const WebCore::IntSize& bottomLeftRadius, const WebCore::IntSize& bottomRightRadius, bool nodeHasBuiltInClickHandling)
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->didGetTapHighlightGeometries(requestID, color, highlightedQuads, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius, nodeHasBuiltInClickHandling);
 }
 
 void WebPageProxy::setIsShowingInputViewForFocusedElement(bool showingInputView)
@@ -1089,43 +1053,6 @@ void WebPageProxy::showPlaybackTargetPicker(bool hasVideo, const IntRect& elemen
 {
     if (RefPtr pageClient = this->pageClient())
         pageClient->showPlaybackTargetPicker(hasVideo, elementRect, policy, contextUID);
-}
-
-void WebPageProxy::commitPotentialTapFailed()
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->commitPotentialTapFailed();
-}
-
-void WebPageProxy::didNotHandleTapAsClick(const WebCore::IntPoint& point)
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->didNotHandleTapAsClick(point);
-    m_uiClient->didNotHandleTapAsClick(point);
-}
-
-void WebPageProxy::didHandleTapAsHover()
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->didHandleTapAsHover();
-}
-
-void WebPageProxy::didCompleteSyntheticClick()
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->didCompleteSyntheticClick();
-}
-
-void WebPageProxy::disableDoubleTapGesturesDuringTapIfNecessary(WebKit::TapIdentifier requestID)
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->disableDoubleTapGesturesDuringTapIfNecessary(requestID);
-}
-
-void WebPageProxy::handleSmartMagnificationInformationForPotentialTap(WebKit::TapIdentifier requestID, const WebCore::FloatRect& renderRect, bool fitEntireRect, double viewportMinimumScale, double viewportMaximumScale, bool nodeIsRootLevel, bool nodeIsPluginElement)
-{
-    if (RefPtr pageClient = this->pageClient())
-        pageClient->handleSmartMagnificationInformationForPotentialTap(requestID, renderRect, fitEntireRect, viewportMinimumScale, viewportMaximumScale, nodeIsRootLevel, nodeIsPluginElement);
 }
 
 size_t WebPageProxy::computePagesForPrintingiOS(FrameIdentifier frameID, const PrintInfo& printInfo)
@@ -1897,15 +1824,6 @@ void WebPageProxy::setPromisedDataForImage(IPC::Connection&, const String&, Shar
 }
 
 #endif
-
-#if PLATFORM(IOS_FAMILY)
-
-void WebPageProxy::isPotentialTapInProgress(CompletionHandler<void(bool)>&& completion)
-{
-    completion(protect(pageClient())->isPotentialTapInProgress());
-}
-
-#endif // PLATFORM(IOS_FAMILY)
 
 #if PLATFORM(IOS_FAMILY) && ENABLE(MODEL_PROCESS)
 RefPtr<ModelPresentationManagerProxy> WebPageProxy::modelPresentationManagerProxy() const

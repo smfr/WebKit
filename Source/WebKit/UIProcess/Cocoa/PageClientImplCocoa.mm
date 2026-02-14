@@ -33,7 +33,12 @@
 #import "WebFullScreenManagerProxy.h"
 #import "WebPageProxy.h"
 #import <WebCore/AlternativeTextUIController.h>
+#import <WebCore/Color.h>
 #import <WebCore/FixedContainerEdges.h>
+#import <WebCore/FloatQuad.h>
+#import <WebCore/FloatRect.h>
+#import <WebCore/IntRect.h>
+#import <WebCore/IntSize.h>
 #import <WebCore/TextAnimationTypes.h>
 #import <WebCore/WritingToolsTypes.h>
 #import <WebKit/WKWebViewConfigurationPrivate.h>
@@ -480,5 +485,44 @@ void PageClientImplCocoa::didCommitMainFrameData(const MainFrameData& mainFrameD
     if (mainFrameData.fixedContainerEdges)
         [webView() _updateFixedContainerEdges:*mainFrameData.fixedContainerEdges];
 }
+
+#if ENABLE(TWO_PHASE_CLICKS)
+
+// FIXME: Coalesce platform-agnostic logic with PageClientImplIOS
+
+void PageClientImplCocoa::didNotHandleTapAsClick(const WebCore::IntPoint&)
+{
+}
+
+void PageClientImplCocoa::didHandleTapAsHover()
+{
+}
+
+void PageClientImplCocoa::didCompleteSyntheticClick()
+{
+}
+
+void PageClientImplCocoa::commitPotentialTapFailed()
+{
+}
+
+void PageClientImplCocoa::didGetTapHighlightGeometries(WebKit::TapIdentifier, const WebCore::Color&, const Vector<WebCore::FloatQuad>&, const WebCore::IntSize&, const WebCore::IntSize&, const WebCore::IntSize&, const WebCore::IntSize&, bool)
+{
+}
+
+bool PageClientImplCocoa::isPotentialTapInProgress() const
+{
+    return false;
+}
+
+void PageClientImplCocoa::disableDoubleTapGesturesDuringTapIfNecessary(WebKit::TapIdentifier)
+{
+}
+
+void PageClientImplCocoa::handleSmartMagnificationInformationForPotentialTap(WebKit::TapIdentifier, const WebCore::FloatRect&, bool, double, double, bool, bool)
+{
+}
+
+#endif // ENABLE(TWO_PHASE_CLICKS)
 
 } // namespace WebKit

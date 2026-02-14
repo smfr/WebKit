@@ -44,6 +44,7 @@
 #import "SharedBufferReference.h"
 #import "TextAnimationController.h"
 #import "UserMediaCaptureManager.h"
+#import "ViewGestureGeometryCollector.h"
 #import "WKAccessibilityWebPageObjectBase.h"
 #import "WebFrame.h"
 #import "WebImage.h"
@@ -80,10 +81,13 @@
 #import <WebCore/FrameView.h>
 #import <WebCore/GraphicsContextCG.h>
 #import <WebCore/HTMLAnchorElement.h>
+#import <WebCore/HTMLAreaElement.h>
 #import <WebCore/HTMLBodyElement.h>
+#import <WebCore/HTMLFrameOwnerElement.h>
 #import <WebCore/HTMLIFrameElement.h>
 #import <WebCore/HTMLImageElement.h>
 #import <WebCore/HTMLOListElement.h>
+#import <WebCore/HTMLPlugInElement.h>
 #import <WebCore/HTMLSelectElement.h>
 #import <WebCore/HTMLTextAreaElement.h>
 #import <WebCore/HTMLTextFormControlElement.h>
@@ -106,6 +110,10 @@
 #import <WebCore/PlatformMediaSessionManager.h>
 #import <WebCore/PrintContext.h>
 #import <WebCore/Range.h>
+#import <WebCore/RemoteFrame.h>
+#import <WebCore/RemoteFrameGeometryTransformer.h>
+#import <WebCore/RemoteFrameView.h>
+#import <WebCore/RemoteUserInputEventData.h>
 #import <WebCore/RenderBoxInlines.h>
 #import <WebCore/RenderElement.h>
 #import <WebCore/RenderLayer.h>
@@ -123,6 +131,7 @@
 #import <pal/spi/cocoa/LaunchServicesSPI.h>
 #import <pal/spi/cocoa/NSAccessibilitySPI.h>
 #import <pal/spi/cocoa/QuartzCoreSPI.h>
+#import <wtf/CoroutineUtilities.h>
 #import <wtf/TZoneMallocInlines.h>
 #import <wtf/cf/VectorCF.h>
 #import <wtf/cocoa/SpanCocoa.h>
@@ -2682,6 +2691,166 @@ void WebPage::selectTextWithGranularityAtPoint(const WebCore::IntPoint& point, W
     completionHandler();
 #endif
 }
+
+#if ENABLE(TWO_PHASE_CLICKS)
+
+Awaitable<std::optional<WebCore::RemoteUserInputEventData>> WebPage::potentialTapAtPosition(std::optional<WebCore::FrameIdentifier> frameID, WebKit::TapIdentifier requestID, WebCore::FloatPoint position, bool shouldRequestMagnificationInformation)
+{
+    RefPtr localMainFrame = protect(*m_page)->localMainFrame();
+
+    if (RefPtr localRootFrame = this->localRootFrame(frameID))
+        m_potentialTapNode = localRootFrame->nodeRespondingToClickEvents(position, m_potentialTapLocation, m_potentialTapSecurityOrigin.get());
+
+    RefPtr frameOwner = dynamicDowncast<HTMLFrameOwnerElement>(m_potentialTapNode.get());
+    if (RefPtr remoteFrame = frameOwner ? dynamicDowncast<RemoteFrame>(frameOwner->contentFrame()) : nullptr) {
+        RefPtr localFrame = frameOwner->document().frame();
+        if (RefPtr frameView = localFrame ? localFrame->view() : nullptr) {
+            if (RefPtr remoteFrameView = remoteFrame->view()) {
+                RemoteFrameGeometryTransformer transformer(remoteFrameView.releaseNonNull(), frameView.releaseNonNull(), remoteFrame->frameID());
+                co_return WebCore::RemoteUserInputEventData {
+                    remoteFrame->frameID(),
+                    transformer.transformToRemoteFrameCoordinates(position)
+                };
+            }
+        }
+    }
+
+#if PLATFORM(IOS_FAMILY)
+    auto lastTouchLocation = std::exchange(m_lastTouchLocationBeforeTap, { });
+    bool ignorePotentialTap = [&] {
+        if (!m_potentialTapNode)
+            return false;
+
+        if (!localMainFrame)
+            return false;
+
+        if (!lastTouchLocation)
+            return false;
+
+        static constexpr auto maxAllowedMovementSquared = 200 * 200;
+        if ((position - *lastTouchLocation).diagonalLengthSquared() <= maxAllowedMovementSquared)
+            return false;
+
+        FloatPoint adjustedLocation;
+        RefPtr lastTouchedNode = localMainFrame->nodeRespondingToClickEvents(*lastTouchLocation, adjustedLocation, m_potentialTapSecurityOrigin.get());
+        return lastTouchedNode != m_potentialTapNode;
+    }();
+
+    if (ignorePotentialTap) {
+        RELEASE_LOG(ViewGestures, "Ignoring potential tap (distance from last touch: %.0f)", (position - *lastTouchLocation).diagonalLength());
+        m_potentialTapNode = nullptr;
+        co_return std::nullopt;
+    }
+
+    m_wasShowingInputViewForFocusedElementDuringLastPotentialTap = m_isShowingInputViewForFocusedElement;
+
+    RefPtr viewGestureGeometryCollector = m_viewGestureGeometryCollector;
+
+    if (shouldRequestMagnificationInformation && m_potentialTapNode && viewGestureGeometryCollector) {
+        FloatPoint origin = position;
+        FloatRect absoluteBoundingRect;
+        bool fitEntireRect;
+        double viewportMinimumScale;
+        double viewportMaximumScale;
+
+        viewGestureGeometryCollector->computeZoomInformationForNode(*protect(m_potentialTapNode), origin, absoluteBoundingRect, fitEntireRect, viewportMinimumScale, viewportMaximumScale);
+
+        bool nodeIsRootLevel = is<WebCore::Document>(*m_potentialTapNode) || is<WebCore::HTMLBodyElement>(*m_potentialTapNode);
+        bool nodeIsPluginElement = is<WebCore::HTMLPlugInElement>(*m_potentialTapNode);
+        send(Messages::WebPageProxy::HandleSmartMagnificationInformationForPotentialTap(requestID, absoluteBoundingRect, fitEntireRect, viewportMinimumScale, viewportMaximumScale, nodeIsRootLevel, nodeIsPluginElement));
+    }
+
+    sendTapHighlightForNodeIfNecessary(requestID, m_potentialTapNode.get(), position);
+#if ENABLE(TOUCH_EVENTS)
+    if (m_potentialTapNode && !m_potentialTapNode->allowsDoubleTapGesture())
+        send(Messages::WebPageProxy::DisableDoubleTapGesturesDuringTapIfNecessary(requestID));
+#endif
+#endif // PLATFORM(IOS_FAMILY)
+
+    co_return std::nullopt;
+}
+
+Awaitable<std::optional<WebCore::FrameIdentifier>> WebPage::commitPotentialTap(std::optional<WebCore::FrameIdentifier> frameID, OptionSet<WebEventModifier> modifiers, TransactionID lastLayerTreeTransactionId, WebCore::PointerID pointerId)
+{
+    RefPtr frameOwner = dynamicDowncast<HTMLFrameOwnerElement>(m_potentialTapNode.get());
+    RefPtr remoteFrame = frameOwner ? dynamicDowncast<RemoteFrame>(frameOwner->contentFrame()) : nullptr;
+    if (remoteFrame)
+        co_return remoteFrame->frameID();
+
+#if PLATFORM(IOS_FAMILY)
+    auto invalidTargetForSingleClick = !m_potentialTapNode;
+    if (!invalidTargetForSingleClick) {
+        bool targetRenders = m_potentialTapNode->renderer();
+        if (RefPtr element = dynamicDowncast<Element>(m_potentialTapNode); element && !targetRenders)
+            targetRenders = element->renderOrDisplayContentsStyle();
+        if (RefPtr shadowRoot = dynamicDowncast<ShadowRoot>(m_potentialTapNode); shadowRoot && !targetRenders)
+            targetRenders = protect(shadowRoot->host())->renderOrDisplayContentsStyle();
+        invalidTargetForSingleClick = !targetRenders && !is<HTMLAreaElement>(m_potentialTapNode);
+    }
+
+    RefPtr localRootFrame = this->localRootFrame(frameID);
+
+    if (invalidTargetForSingleClick) {
+        if (localRootFrame) {
+            constexpr OptionSet hitType { HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::AllowVisibleChildFrameContentOnly };
+            auto roundedPoint = IntPoint { m_potentialTapLocation };
+            auto result = localRootFrame->eventHandler().hitTestResultAtPoint(roundedPoint, hitType);
+            localRootFrame->eventHandler().setLastTouchedNode(result.innerNode());
+        }
+
+        commitPotentialTapFailed();
+        co_return std::nullopt;
+    }
+
+    if (localRootFrame)
+        localRootFrame->eventHandler().setLastTouchedNode(nullptr);
+
+    FloatPoint adjustedPoint;
+    RefPtr nodeRespondingToClick = localRootFrame ? localRootFrame->nodeRespondingToClickEvents(m_potentialTapLocation, adjustedPoint, m_potentialTapSecurityOrigin.get()) : nullptr;
+    RefPtr frameRespondingToClick = nodeRespondingToClick ? nodeRespondingToClick->document().frame() : nullptr;
+
+    if (!frameRespondingToClick) {
+        commitPotentialTapFailed();
+        co_return std::nullopt;
+    }
+
+    auto firstTransactionID = WebFrame::fromCoreFrame(*frameRespondingToClick)->firstLayerTreeTransactionIDAfterDidCommitLoad();
+    if (firstTransactionID
+        && lastLayerTreeTransactionId.processIdentifier() == firstTransactionID->processIdentifier()
+        && lastLayerTreeTransactionId.lessThanSameProcess(*firstTransactionID)) {
+        commitPotentialTapFailed();
+        co_return std::nullopt;
+    }
+
+    if (m_potentialTapNode == nodeRespondingToClick)
+        handleSyntheticClick(frameID, *nodeRespondingToClick, adjustedPoint, modifiers, pointerId);
+    else
+        commitPotentialTapFailed();
+#endif // PLATFORM(IOS_FAMILY)
+
+    m_potentialTapNode = nullptr;
+    m_potentialTapLocation = FloatPoint();
+    m_potentialTapSecurityOrigin = nullptr;
+
+    co_return std::nullopt;
+}
+
+void WebPage::cancelPotentialTap()
+{
+#if ENABLE(CONTENT_CHANGE_OBSERVER)
+    if (RefPtr localMainFrame = protect(*m_page)->localMainFrame())
+        ContentChangeObserver::didCancelPotentialTap(*localMainFrame);
+#endif
+#if PLATFORM(IOS_FAMILY)
+    cancelPotentialTapInFrame(m_mainFrame);
+#else
+    m_potentialTapNode = nullptr;
+    m_potentialTapLocation = FloatPoint();
+    m_potentialTapSecurityOrigin = nullptr;
+#endif
+}
+
+#endif // ENABLE(TWO_PHASE_CLICKS)
 
 } // namespace WebKit
 
