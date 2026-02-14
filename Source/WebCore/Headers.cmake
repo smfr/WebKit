@@ -1875,6 +1875,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     layout/formattingContexts/grid/GridItemRect.h
     layout/formattingContexts/grid/GridLayoutState.h
     layout/formattingContexts/grid/GridTypeAliases.h
+    layout/formattingContexts/grid/ImplicitGrid.h
 
     layout/formattingContexts/inline/AbstractLineBuilder.h
     layout/formattingContexts/inline/AvailableLineWidthOverride.h

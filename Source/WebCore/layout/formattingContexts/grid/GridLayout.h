@@ -65,7 +65,8 @@ private:
     auto placeGridItems(UnplacedGridItems&, const Vector<Style::GridTrackSize>& gridTemplateColumnsTrackSizes,
         const Vector<Style::GridTrackSize>& gridTemplateRowsTrackSizes, GridAutoFlowOptions);
 
-    GridDimensions calculateGridDimensions(const UnplacedGridItems&, size_t explicitColumnsCount, size_t explicitRowsCount);
+    GridDimensions calculateInitialImplicitGridDimensions(const UnplacedGridItems&, size_t explicitColumnsCount, size_t explicitRowsCount);
+    ImplicitGrid constructInitialImplicitGrid(UnplacedGridItems&, size_t explicitColumnsCount, size_t explicitRowsCount);
 
     static TrackSizingFunctions convertGridTrackSizeToTrackSizingFunctions(const Style::GridTrackSize&);
     static TrackSizingFunctionsList generateImplicitTrackSizingFunctions(size_t explicitTracksCount, size_t totalTracksCount, const Style::GridTrackSizes& gridAutoTrackSizes);

@@ -66,7 +66,7 @@ GridLayout::GridLayout(const GridFormattingContext& gridFormattingContext)
 {
 }
 
-GridDimensions GridLayout::calculateGridDimensions(const UnplacedGridItems& unplacedGridItems, size_t explicitColumnsCount, size_t explicitRowsCount)
+GridDimensions GridLayout::calculateInitialImplicitGridDimensions(const UnplacedGridItems& unplacedGridItems, size_t explicitColumnsCount, size_t explicitRowsCount)
 {
     int minimumRowIndex = 0;
     int minimumColumnIndex = 0;
@@ -107,6 +107,30 @@ GridDimensions GridLayout::calculateGridDimensions(const UnplacedGridItems& unpl
     };
 }
 
+ImplicitGrid GridLayout::constructInitialImplicitGrid(UnplacedGridItems& unplacedGridItems, size_t explicitColumnsCount, size_t explicitRowsCount)
+{
+    // Calculate grid dimensions (offsets and total size) for negative grid line positions
+    auto initialDimensions = calculateInitialImplicitGridDimensions(
+        unplacedGridItems, explicitColumnsCount, explicitRowsCount);
+
+    // Normalize all grid item positions by applying the offsets
+    for (auto& item : unplacedGridItems.nonAutoPositionedItems)
+        item.applyGridOffsets(initialDimensions.rowOffset, initialDimensions.columnOffset);
+    for (auto& item : unplacedGridItems.definiteRowPositionedItems)
+        item.applyGridOffsets(initialDimensions.rowOffset, initialDimensions.columnOffset);
+    for (auto& item : unplacedGridItems.autoPositionedItems)
+        item.applyGridOffsets(initialDimensions.rowOffset, initialDimensions.columnOffset);
+
+    ImplicitGrid implicitGrid(initialDimensions.totalColumns, initialDimensions.totalRows);
+    // 3. Determine the columns in the implicit grid.
+    // Spec: "If the largest column span among all the items without a definite column position
+    // is larger than the width of the implicit grid, add columns to the end of the implicit grid
+    // to accommodate that column span."
+    implicitGrid.determineImplicitGridColumns(unplacedGridItems.autoPositionedItems);
+
+    return implicitGrid;
+}
+
 // 8.5. Grid Item Placement Algorithm.
 // https://drafts.csswg.org/css-grid-1/#auto-placement-algo
 auto GridLayout::placeGridItems(UnplacedGridItems& unplacedGridItems, const Vector<Style::GridTrackSize>& gridTemplateColumnsTrackSizes,
@@ -118,19 +142,7 @@ auto GridLayout::placeGridItems(UnplacedGridItems& unplacedGridItems, const Vect
         size_t rowsCount;
     };
 
-    // Calculate grid dimensions (offsets and total size) for negative grid line positions
-    auto gridDimensions = calculateGridDimensions(
-        unplacedGridItems, gridTemplateColumnsTrackSizes.size(), gridTemplateRowsTrackSizes.size());
-
-    // Normalize all grid item positions by applying the offsets
-    for (auto& item : unplacedGridItems.nonAutoPositionedItems)
-        item.applyGridOffsets(gridDimensions.rowOffset, gridDimensions.columnOffset);
-    for (auto& item : unplacedGridItems.definiteRowPositionedItems)
-        item.applyGridOffsets(gridDimensions.rowOffset, gridDimensions.columnOffset);
-    for (auto& item : unplacedGridItems.autoPositionedItems)
-        item.applyGridOffsets(gridDimensions.rowOffset, gridDimensions.columnOffset);
-
-    ImplicitGrid implicitGrid(gridDimensions.totalColumns, gridDimensions.totalRows);
+    auto implicitGrid = constructInitialImplicitGrid(unplacedGridItems, gridTemplateColumnsTrackSizes.size(), gridTemplateRowsTrackSizes.size());
 
     // 1. Position anything that's not auto-positioned.
     for (auto& nonAutoPositionedItem : unplacedGridItems.nonAutoPositionedItems)
@@ -140,9 +152,10 @@ auto GridLayout::placeGridItems(UnplacedGridItems& unplacedGridItems, const Vect
     for (auto& definiteRowPositionedItem : unplacedGridItems.definiteRowPositionedItems)
         implicitGrid.insertDefiniteRowItem(definiteRowPositionedItem, autoFlowOptions);
 
-    // 3. FIXME: Process auto-positioned items (not implemented yet)
-    ASSERT(unplacedGridItems.autoPositionedItems.isEmpty());
-
+    if (!unplacedGridItems.autoPositionedItems.isEmpty()) {
+        // 4. Process auto-positioned items
+        implicitGrid.insertAutoPositionedItems(unplacedGridItems.autoPositionedItems, autoFlowOptions);
+    }
 
     return Result { implicitGrid.gridAreas(), implicitGrid.columnsCount(), implicitGrid.rowsCount() };
 }
