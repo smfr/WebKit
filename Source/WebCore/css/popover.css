@@ -11,16 +11,16 @@ dialog:popover-open {
 
 [popover] {
     position: fixed;
-    inset: 0;
     width: fit-content;
     height: fit-content;
-    margin: auto;
-    border: solid;
-    padding: 0.25em;
     overflow: auto;
 }
 
 [popover]:not(:-internal-select-popover) {
+    inset: 0;
+    margin: auto;
+    border: solid;
+    padding: 0.25em;
     color: CanvasText;
     background-color: Canvas;
 }

@@ -95,6 +95,11 @@ static const AtomString& buttonSlotName()
     return buttonSlot;
 }
 
+static bool isFirstElementChildButton(const Node& child)
+{
+    return is<HTMLButtonElement>(child) && !child.previousElementSibling();
+}
+
 class SelectSlotAssignment final : public NamedSlotAssignment {
 private:
     void hostChildElementDidChange(const Element&, ShadowRoot&) final;
@@ -113,13 +118,7 @@ void SelectSlotAssignment::hostChildElementDidChange(const Element& childElement
 
 const AtomString& SelectSlotAssignment::slotNameForHostChild(const Node& child) const
 {
-    // The first button child gets assigned to the button slot.
-    if (is<HTMLButtonElement>(child)) {
-        Ref select = downcast<HTMLSelectElement>(*child.parentNode());
-        if (&child == childrenOfType<HTMLButtonElement>(select).first())
-            return buttonSlotName();
-    }
-    return NamedSlotAssignment::defaultSlotName();
+    return isFirstElementChildButton(child) ? buttonSlotName() : NamedSlotAssignment::defaultSlotName();
 }
 
 // https://html.spec.whatwg.org/#dom-htmloptionscollection-length
@@ -508,7 +507,7 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
         return is<HTMLOptionElement>(child) || is<HTMLOptGroupElement>(child) || validationMessageShadowTreeContains(child);
     if (child.isInShadowTree() && child.containingShadowRoot() == userAgentShadowRoot())
         return true;
-    if (is<HTMLButtonElement>(child) && &child == childrenOfType<HTMLButtonElement>(*this).first())
+    if (isFirstElementChildButton(child))
         return true;
     if (usesBaseAppearancePicker())
         return true;
