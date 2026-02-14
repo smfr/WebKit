@@ -114,6 +114,7 @@ wasm/WasmBBQPlan.cpp
 wasm/WasmCallee.cpp
 wasm/WasmConstExprGenerator.cpp
 wasm/WasmFaultSignalHandler.cpp
+[ iOS ] wasm/WasmFormat.h
 wasm/WasmFunctionParser.h
 wasm/WasmIPIntGenerator.cpp
 wasm/WasmIPIntPlan.cpp
