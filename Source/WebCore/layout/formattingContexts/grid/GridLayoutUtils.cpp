@@ -120,13 +120,13 @@ static LayoutUnit blockContentSizeSuggestion(const PlacedGridItem& gridItem, con
 
 static bool hasScrollableInlineOverflow(const PlacedGridItem&)
 {
-    ASSERT_NOT_IMPLEMENTED_YET();
+    notImplemented();
     return false;
 }
 
 static bool hasScrollableBlockOverflow(const PlacedGridItem&)
 {
-    ASSERT_NOT_IMPLEMENTED_YET();
+    notImplemented();
     return false;
 }
 
@@ -196,8 +196,10 @@ static LayoutUnit automaticMinimumInlineSize(const PlacedGridItem& gridItem, Lay
     // if it spans more than one track in that axis, none of those tracks are flexible
     //
     // Otherwise, the automatic minimum size is zero, as usual.
-    if (hasScrollableInlineOverflow(gridItem))
+    if (hasScrollableInlineOverflow(gridItem)) {
+        ASSERT_NOT_IMPLEMENTED_YET();
         return { };
+    }
 
     auto gridItemColumnStartLine = gridItem.columnStartLine();
     auto gridItemColumnEndLine = gridItem.columnEndLine();
@@ -246,8 +248,10 @@ static LayoutUnit automaticMinimumBlockSize(const PlacedGridItem& gridItem, Layo
     // if it spans more than one track in that axis, none of those tracks are flexible
     //
     // Otherwise, the automatic minimum size is zero, as usual.
-    if (hasScrollableBlockOverflow(gridItem))
+    if (hasScrollableBlockOverflow(gridItem)) {
+        ASSERT_NOT_IMPLEMENTED_YET();
         return { };
+    }
 
     auto gridItemRowStartLine = gridItem.rowStartLine();
     auto gridItemRowEndLine = gridItem.rowEndLine();
