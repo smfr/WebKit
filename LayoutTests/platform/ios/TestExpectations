@@ -8485,3 +8485,5 @@ media/caption-display-settings/caption-display-settings-default-anchorBounds.htm
 webkit.org/b/307582 compositing/overflow/rtl-scrollbar-layer-positioning.html [ Failure ]
 
 webkit.org/b/307835 streams/blob-and-tee.html [ Skip ]
+
+webkit.org/b/307882 webgl/lose-context-after-context-lost.html [ Failure ]
