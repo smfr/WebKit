@@ -87,7 +87,7 @@ private:
     void processDidExit() override;
     void processWillSwap() override;
     void didRelaunchProcess() override;
-    void didStartUsingProcessForSiteIsolation(WebProcessProxy&) override;
+    void didStartUsingProcessForSiteIsolation(WebProcessProxy&, LayerHostingContextID) override;
     void didStopUsingProcessForSiteIsolation(WebProcessProxy&) override;
 
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)

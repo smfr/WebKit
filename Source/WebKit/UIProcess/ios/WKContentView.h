@@ -53,6 +53,7 @@ class WebProcessPool;
 struct MainFrameData;
 struct PageData;
 enum class ViewStabilityFlag : uint8_t;
+using LayerHostingContextID = uint32_t;
 }
 
 @interface WKContentView : WKApplicationStateTrackingView {
@@ -103,7 +104,7 @@ enum class ViewStabilityFlag : uint8_t;
 #endif
 - (void)_processWillSwap;
 - (void)_didRelaunchProcess;
-- (void)_didStartUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)webProcessProxy;
+- (void)_didStartUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)webProcessProxy contextID:(WebKit::LayerHostingContextID)contextID;
 - (void)_didStopUsingProcessForSiteIsolation:(WebKit::WebProcessProxy&)webProcessProxy;
 
 #if HAVE(VISIBILITY_PROPAGATION_VIEW)

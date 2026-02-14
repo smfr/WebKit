@@ -264,9 +264,9 @@ void PageClientImpl::didRelaunchProcess()
     [webView() _didRelaunchProcess];
 }
 
-void PageClientImpl::didStartUsingProcessForSiteIsolation(WebProcessProxy& webProcessProxy)
+void PageClientImpl::didStartUsingProcessForSiteIsolation(WebProcessProxy& webProcessProxy, LayerHostingContextID contextID)
 {
-    [contentView() _didStartUsingProcessForSiteIsolation:webProcessProxy];
+    [contentView() _didStartUsingProcessForSiteIsolation:webProcessProxy contextID:contextID];
 }
 
 void PageClientImpl::didStopUsingProcessForSiteIsolation(WebProcessProxy& webProcessProxy)

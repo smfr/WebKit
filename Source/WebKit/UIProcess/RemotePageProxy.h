@@ -82,6 +82,8 @@ struct FrameInfoData;
 struct FrameTreeCreationParameters;
 struct NavigationActionData;
 
+using LayerHostingContextID = uint32_t;
+
 enum class ProcessTerminationReason : uint8_t;
 
 class RemotePageProxy : public IPC::MessageReceiver, public RefCounted<RemotePageProxy> {
@@ -117,6 +119,11 @@ public:
 
     void disconnect();
 
+#if HAVE(VISIBILITY_PROPAGATION_VIEW)
+    void didCreateContextInWebProcessForVisibilityPropagation(LayerHostingContextID);
+    LayerHostingContextID contextIDForVisibilityPropagationInWebProcess() const { return m_contextIDForVisibilityPropagationInWebProcess; }
+#endif
+
 private:
     RemotePageProxy(WebPageProxy&, WebProcessProxy&, const WebCore::Site&, WebPageProxyMessageReceiverRegistration*, std::optional<WebCore::PageIdentifier>);
     void didReceiveMessage(IPC::Connection&, IPC::Decoder&) final;
@@ -151,6 +158,10 @@ private:
 #if ASSERT_ENABLED
     bool m_disconnected { false };
 #endif
+#if HAVE(VISIBILITY_PROPAGATION_VIEW)
+    LayerHostingContextID m_contextIDForVisibilityPropagationInWebProcess { 0 };
+#endif
+
 };
 
 }

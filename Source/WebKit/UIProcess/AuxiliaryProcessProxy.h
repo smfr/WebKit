@@ -249,7 +249,7 @@ public:
     virtual void sendProcessDidResume(ResumeReason) = 0;
     virtual void didChangeThrottleState(ProcessThrottleState);
     virtual ASCIILiteral clientName() const = 0;
-    virtual String environmentIdentifier() const { return emptyString(); }
+    virtual String environmentIdentifier();
     virtual void prepareToDropLastAssertion(CompletionHandler<void()>&& completionHandler) { completionHandler(); }
     virtual void didDropLastAssertion() { }
 
@@ -330,6 +330,7 @@ private:
 #if ENABLE(EXTENSION_CAPABILITIES)
     ExtensionCapabilityGrantMap m_extensionCapabilityGrants;
 #endif
+    String m_environmentIdentifier;
     HashMap<Vector<uint8_t>, std::pair<unsigned, std::unique_ptr<IPC::Encoder>>> m_messagesToSendOnResume;
     unsigned m_messagesToSendOnResumeIndex { 0 };
 } SWIFT_SHARED_REFERENCE(refAuxiliaryProcessProxy, derefAuxiliaryProcessProxy);

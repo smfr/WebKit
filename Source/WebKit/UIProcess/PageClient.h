@@ -234,9 +234,7 @@ class WebFullScreenManagerProxyClient;
 class InstallMissingMediaPluginsPermissionRequest;
 #endif
 
-#if HAVE(VISIBILITY_PROPAGATION_VIEW)
 using LayerHostingContextID = uint32_t;
-#endif
 
 #if PLATFORM(GTK) || PLATFORM(WPE)
 class WebKitWebResourceLoadManager;
@@ -303,7 +301,7 @@ public:
     virtual void processDidExit() = 0;
     virtual void processWillSwap() { processDidExit(); }
     virtual void didRelaunchProcess() = 0;
-    virtual void didStartUsingProcessForSiteIsolation(WebProcessProxy&) { }
+    virtual void didStartUsingProcessForSiteIsolation(WebProcessProxy&, LayerHostingContextID) { }
     virtual void didStopUsingProcessForSiteIsolation(WebProcessProxy&) { }
     virtual void processDidUpdateThrottleState() { }
     virtual void pageClosed() = 0;

@@ -654,4 +654,15 @@ AuxiliaryProcessProxy::InitializationActivityAndGrant AuxiliaryProcessProxy::ini
     };
 }
 
+String AuxiliaryProcessProxy::environmentIdentifier()
+{
+    if (m_environmentIdentifier.isEmpty()) {
+        StringBuilder builder;
+        builder.append(clientName());
+        builder.append(processID());
+        m_environmentIdentifier = builder.toString();
+    }
+    return m_environmentIdentifier;
+}
+
 } // namespace WebKit
