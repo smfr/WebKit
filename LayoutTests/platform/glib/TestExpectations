@@ -5066,7 +5066,7 @@ http/tests/performance/performance-resource-timing-redirection-cross-origin-medi
 
 webkit.org/b/304180 media/modern-media-controls/tracks-support/on-off-text-track.html [ Failure ]
 
-webkit.org/b/304272 [ Debug ] http/tests/webrtc/filtering-ice-candidate-same-origin-frame2.html [ Crash Pass ]
+webkit.org/b/304272 http/tests/webrtc/filtering-ice-candidate-same-origin-frame2.html [ Crash Pass ]
 
 webkit.org/b/150840 [ Debug ] imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-popover-exit-animation.html [ Crash Pass Timeout ]
 
