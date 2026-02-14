@@ -27,6 +27,7 @@
 #include "StreamServerConnection.h"
 
 #include "Connection.h"
+#include "MessageLog.h"
 #include "StreamConnectionWorkQueue.h"
 #include <mutex>
 #include <wtf/NeverDestroyed.h>
@@ -269,6 +270,7 @@ bool StreamServerConnection::dispatchStreamMessage(Decoder& message, StreamMessa
 #if ASSERT_ENABLED
     m_isDispatchingMessage = true;
 #endif
+    IPC::messageLog().add(message.messageName());
     receiver.didReceiveStreamMessage(*this, message);
 #if ASSERT_ENABLED
     m_isDispatchingMessage = false;

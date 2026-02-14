@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,43 +23,29 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "config.h"
+#include "MessageLog.h"
 
-#include <wtf/spi/darwin/XPCSPI.h>
-
-#ifdef __cplusplus
-
-#if !defined(__swift__)
-// IPC::MessageLog accessor functions for TAPI verification
 namespace IPC {
-template<size_t> class MessageLog;
-struct MessageLogMetadata;
-MessageLog<256>& messageLog();
-const MessageLogMetadata& messageLogMetadata();
+
+constinit MessageLog<messageLogCapacity> gMessageLog;
+
+const MessageLogMetadata gMessageLogMetadata = {
+    .version = 0,
+    .capacity = std::tuple_size_v<std::remove_reference_t<decltype(gMessageLog.bufferForTesting())>>,
+    .elementSize = sizeof(std::remove_reference_t<decltype(gMessageLog.bufferForTesting())>::value_type),
+    .size = sizeof(std::remove_reference_t<decltype(gMessageLog.bufferForTesting())>),
+    .initialValue = MessageName::Invalid
+};
+
+MessageLog<messageLogCapacity>& messageLog()
+{
+    return gMessageLog;
 }
-#endif
 
-extern "C" {
-#endif
-
-// FIXME: Remove these after <rdar://problem/30772033> is fixed.
-void NetworkServiceInitializer();
-void WebContentServiceInitializer();
-void GPUServiceInitializer();
-void ModelServiceInitializer();
-
-void ExtensionEventHandler(xpc_connection_t);
-
-#if USE(EXTENSIONKIT)
-// Declared in WKProcessExtension.h for use in extension targets. Must be declared in project
-//  headers because the extension targets cannot import the entire WebKit module (rdar://119162443).
-@interface WKGrant : NSObject
-@end
-
-@interface WKProcessExtension : NSObject
-@end
-#endif
-
-#ifdef __cplusplus
+const MessageLogMetadata& messageLogMetadata()
+{
+    return gMessageLogMetadata;
 }
-#endif
+
+} // namespace IPC

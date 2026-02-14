@@ -30,6 +30,7 @@
 #include "GeneratedSerializers.h"
 #include "Logging.h"
 #include "MessageFlags.h"
+#include "MessageLog.h"
 #include "MessageReceiveQueues.h"
 #include "WorkQueueMessageReceiver.h"
 #include <memory>
@@ -437,6 +438,8 @@ void Connection::dispatchMessageReceiverMessage(MessageReceiverType& messageRece
 #if ASSERT_ENABLED
     ++m_inDispatchMessageCount;
 #endif
+
+    messageLog().add(decoder->messageName());
 
     if (decoder->isSyncMessage()) {
         auto replyEncoder = makeUniqueRef<Encoder>(MessageName::SyncMessageReply, decoder->syncRequestID().toUInt64());
@@ -1461,6 +1464,8 @@ void Connection::dispatchMessage(UniqueRef<Decoder> message)
 
     bool oldDidReceiveInvalidMessage = m_didReceiveInvalidMessage;
     m_didReceiveInvalidMessage = false;
+
+    messageLog().add(message->messageName());
 
     if (message->isSyncMessage())
         dispatchSyncMessage(message.get());
