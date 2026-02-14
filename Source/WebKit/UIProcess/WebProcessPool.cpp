@@ -2751,6 +2751,23 @@ void WebProcessPool::observeScriptTrackingPrivacyUpdatesIfNeeded()
     controller->initializeIfNeeded();
 }
 
+void WebProcessPool::observeConsistentQueryParameterFilteringQuirkUpdatesIfNeeded()
+{
+    if (m_scriptTrackingPrivacyDataUpdateObserver)
+        return;
+
+    Ref controller = ConsistentPrivacyQuirkController::sharedSingleton();
+    m_scriptTrackingPrivacyDataUpdateObserver = controller->observeUpdates([weakThis = WeakPtr { *this }] {
+        RefPtr protectedThis = weakThis.get();
+        if (!protectedThis)
+            return;
+
+        if (auto data = ConsistentPrivacyQuirkController::sharedSingleton().cachedListData(); !data.isEmpty())
+            protectedThis->sendToAllProcesses(Messages::WebProcess::UpdateConsistentPrivacyQuirkFilter(WTF::move(data)));
+    });
+    controller->initializeIfNeeded();
+}
+
 #endif // ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
 
 #if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)

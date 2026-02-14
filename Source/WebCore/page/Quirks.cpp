@@ -1825,6 +1825,9 @@ bool Quirks::needsConsistentQueryParameterFilteringQuirk(const URL& url) const
     bool enableQuirk = m_document->settings().consistentQueryParameterFilteringInternalQuirkEnabled()
         && needsConsistentQueryParameterFilteringInternal(lowercaseURL);
 
+    if (RefPtr page = m_document->page())
+        enableQuirk |= page->requiresConsistentPrivacyQuirkForDomain(url);
+
     if (enableQuirk && !wasLoggedOnce) {
         RELEASE_LOG(Loading, "Quirks::needsConsistentQueryParameterFilteringQuirk: Enabling consistent privacy protections");
         protect(m_document)->addConsoleMessage(MessageSource::Other, MessageLevel::Info, makeString("Enabling consistent privacy protections on \""_s, lowercaseURL.string(), "\""_s));

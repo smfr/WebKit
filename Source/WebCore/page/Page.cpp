@@ -5762,6 +5762,11 @@ bool Page::shouldAllowScriptAccess(const URL& url, const SecurityOrigin& topOrig
     return chrome().client().shouldAllowScriptAccess(url, topOrigin, category);
 }
 
+bool Page::requiresConsistentPrivacyQuirkForDomain(const URL& url) const
+{
+    return chrome().client().requiresConsistentPrivacyQuirkForDomain(url);
+}
+
 bool Page::requiresScriptTrackingPrivacyProtections(const URL& scriptURL) const
 {
     RefPtr localMainFrame = dynamicDowncast<LocalFrame>(m_mainFrame.get());

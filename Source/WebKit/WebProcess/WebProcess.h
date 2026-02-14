@@ -490,6 +490,7 @@ public:
 
     bool requiresScriptTrackingPrivacyProtections(const URL&, const WebCore::SecurityOrigin& topOrigin) const;
     bool shouldAllowScriptAccess(const URL&, const WebCore::SecurityOrigin& topOrigin, WebCore::ScriptTrackingPrivacyCategory) const;
+    bool requiresConsistentPrivacyQuirkForDomain(const URL&) const;
     bool shouldBlockRequest(const URL&, const WebCore::SecurityOrigin& topOrigin);
 
     bool isLockdownModeEnabled() const { return m_isLockdownModeEnabled.value(); }
@@ -697,6 +698,7 @@ private:
     void updateDomainsWithStorageAccessQuirks(HashSet<WebCore::RegistrableDomain>&&);
 
     void updateScriptTrackingPrivacyFilter(ScriptTrackingPrivacyRules&&);
+    void updateConsistentPrivacyQuirkFilter(ScriptTrackingPrivacyRules&&);
 
 #if HAVE(DISPLAY_LINK)
     void displayDidRefresh(uint32_t displayID, const WebCore::DisplayUpdate&);
@@ -968,6 +970,7 @@ private:
 
     HashSet<WebCore::RegistrableDomain> m_domainsWithStorageAccessQuirks;
     std::unique_ptr<ScriptTrackingPrivacyFilter> m_scriptTrackingPrivacyFilter;
+    std::unique_ptr<ScriptTrackingPrivacyFilter> m_consistentPrivacyQuirkFilter;
     bool m_mediaPlaybackEnabled { false };
 
     SharedPreferencesForWebProcess m_sharedPreferencesForWebProcess;

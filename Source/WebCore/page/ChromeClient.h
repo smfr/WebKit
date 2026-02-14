@@ -696,6 +696,7 @@ public:
 
     virtual bool requiresScriptTrackingPrivacyProtections(const URL&, const SecurityOrigin& /* topOrigin */) const { return false; }
     virtual bool shouldAllowScriptAccess(const URL&, const WebCore::SecurityOrigin&, ScriptTrackingPrivacyCategory) const { return true; }
+    virtual bool requiresConsistentPrivacyQuirkForDomain(const URL&) const { return false; };
 
     virtual void animationDidFinishForElement(const Element&) { }
 

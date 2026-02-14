@@ -600,6 +600,7 @@ public:
 
 #if ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
     void observeScriptTrackingPrivacyUpdatesIfNeeded();
+    void observeConsistentQueryParameterFilteringQuirkUpdatesIfNeeded();
 #endif
 
 #if ENABLE(WEB_PROCESS_SUSPENSION_DELAY)

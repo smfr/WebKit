@@ -2441,6 +2441,14 @@ void WebProcess::updateScriptTrackingPrivacyFilter(ScriptTrackingPrivacyRules&& 
     m_scriptTrackingPrivacyFilter = WTF::makeUnique<ScriptTrackingPrivacyFilter>(WTF::move(rules));
 }
 
+void WebProcess::updateConsistentPrivacyQuirkFilter(ScriptTrackingPrivacyRules&& rules)
+{
+    if (rules.isEmpty())
+        return;
+
+    m_consistentPrivacyQuirkFilter = WTF::makeUnique<ScriptTrackingPrivacyFilter>(WTF::move(rules));
+}
+
 void WebProcess::setChildProcessDebuggabilityEnabled(bool childProcessDebuggabilityEnabled)
 {
     m_childProcessDebuggabilityEnabled = childProcessDebuggabilityEnabled;
@@ -2660,6 +2668,11 @@ bool WebProcess::requiresScriptTrackingPrivacyProtections(const URL& url, const 
 bool WebProcess::shouldAllowScriptAccess(const URL& url, const SecurityOrigin& topOrigin, ScriptTrackingPrivacyCategory category) const
 {
     return m_scriptTrackingPrivacyFilter && m_scriptTrackingPrivacyFilter->shouldAllowAccess(url, topOrigin, category);
+}
+
+bool WebProcess::requiresConsistentPrivacyQuirkForDomain(const URL& url) const
+{
+    return m_consistentPrivacyQuirkFilter && m_consistentPrivacyQuirkFilter->matches(url, SecurityOrigin::create(url));
 }
 
 bool WebProcess::shouldBlockRequest(const URL& url, const WebCore::SecurityOrigin& topOrigin)

@@ -205,6 +205,13 @@ private:
 
 #define HAVE_RESOURCE_MONITOR_URLS_GET_SOURCE 1
 
+class ConsistentPrivacyQuirkController : public ListDataController<ConsistentPrivacyQuirkController, ScriptTrackingPrivacyRules> {
+private:
+    void updateList(CompletionHandler<void()>&&) final;
+    void didUpdateCachedListData() final;
+    unsigned resourceTypeValue() const final;
+};
+
 #endif // ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
 
 } // namespace WebKit

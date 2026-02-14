@@ -556,6 +556,7 @@ private:
 
     bool requiresScriptTrackingPrivacyProtections(const URL&, const WebCore::SecurityOrigin& topOrigin) const final;
     bool shouldAllowScriptAccess(const URL&, const WebCore::SecurityOrigin& topOrigin, WebCore::ScriptTrackingPrivacyCategory) const final;
+    bool requiresConsistentPrivacyQuirkForDomain(const URL&) const final;
 
     void setIsInRedo(bool) final;
 

@@ -2362,6 +2362,11 @@ bool WebChromeClient::shouldAllowScriptAccess(const URL& url, const SecurityOrig
     return WebProcess::singleton().shouldAllowScriptAccess(url, topOrigin, category);
 }
 
+bool WebChromeClient::requiresConsistentPrivacyQuirkForDomain(const URL& url) const
+{
+    return WebProcess::singleton().requiresConsistentPrivacyQuirkForDomain(url);
+}
+
 void WebChromeClient::callAfterPendingSyntheticClick(CompletionHandler<void(SyntheticClickResult)>&& completion)
 {
     if (RefPtr page = m_page.get())
