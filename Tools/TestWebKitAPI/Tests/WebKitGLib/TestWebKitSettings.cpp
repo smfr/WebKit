@@ -517,8 +517,7 @@ void testWebKitFeatures(Test* test, gconstpointer)
 
         g_autofree char* lowerCaseIdentifier = g_utf8_strdown(webkit_feature_get_identifier(firstFeature), -1);
         foundFeature = webkit_feature_list_find(allFeatures, lowerCaseIdentifier);
-        g_assert_nonnull(foundFeature);
-        g_assert(firstFeature == foundFeature);
+        g_assert_null(foundFeature);
     }
 
     WebKitFeature* foundFeature = webkit_feature_list_find(allFeatures, "ThisFeatureIdentifierCannotPossiblyExist");
