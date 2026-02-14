@@ -111,6 +111,7 @@ public:
     RemoteGraphicsContextIdentifier contextIdentifier() const { return m_contextIdentifier; }
 
     std::unique_ptr<ThreadSafeImageBufferSetFlusher> flushFrontBufferAsync(ThreadSafeImageBufferSetFlusher::FlushType);
+    void submitDrawingCommands();
 
     void setConfiguration(RemoteImageBufferSetConfiguration&&);
     void willPrepareForDisplay();

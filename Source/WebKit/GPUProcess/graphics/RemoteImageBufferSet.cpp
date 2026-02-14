@@ -92,6 +92,13 @@ void RemoteImageBufferSet::updateConfiguration(const RemoteImageBufferSetConfigu
     clearBuffers();
 }
 
+void RemoteImageBufferSet::submitDrawingCommands()
+{
+    RefPtr frontBuffer = m_frontBuffer;
+    if (frontBuffer)
+        frontBuffer->submitDrawingCommands();
+}
+
 void RemoteImageBufferSet::endPrepareForDisplay(RenderingUpdateID renderingUpdateID, CompletionHandler<void(ImageBufferSetPrepareBufferForDisplayOutputData, RenderingUpdateID)>&& completionHandler)
 {
     m_context.reset();

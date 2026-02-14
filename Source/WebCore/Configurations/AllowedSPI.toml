@@ -107,6 +107,13 @@ symbols = [
     "CGContextStrokeArc",
 ]
 
+ [[temporary-usage]]
+ request = "rdar://170272259"
+ cleanup = "rdar://170272662"
+ symbols = [
+     "CGIOSurfaceContextFlushQueue",
+ ]
+
 [[temporary-usage]]
 request = "rdar://168696619"
 cleanup = "rdar://169487203"

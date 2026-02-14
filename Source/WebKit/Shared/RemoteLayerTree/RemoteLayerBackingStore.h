@@ -125,10 +125,12 @@ public:
     bool performDelegatedLayerDisplay();
 
     void paintContents();
+    void flush();
     virtual void prepareToDisplay() = 0;
     virtual void createContextAndPaintContents() = 0;
 
     virtual std::unique_ptr<ThreadSafeImageBufferSetFlusher> createFlusher(ThreadSafeImageBufferSetFlusher::FlushType = ThreadSafeImageBufferSetFlusher::FlushType::BackendHandlesAndDrawing) = 0;
+    virtual void submitDrawingCommands() { }
 
     WebCore::FloatSize size() const { return m_parameters.size; }
     float scale() const { return m_parameters.scale; }
@@ -208,6 +210,7 @@ protected:
     float m_maxPaintedEDRHeadroom { 1 };
     float m_maxRequestedEDRHeadroom { 1 };
 #endif
+    bool m_needsFlush { false };
 };
 
 // The subset of RemoteLayerBackingStore that gets serialized into the UI

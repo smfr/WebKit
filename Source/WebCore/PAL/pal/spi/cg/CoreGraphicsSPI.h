@@ -387,6 +387,7 @@ size_t CGIOSurfaceContextGetBitmapInfo(CGContextRef);
 void CGIOSurfaceContextSetDisplayMask(CGContextRef, uint32_t mask);
 IOSurfaceRef CGIOSurfaceContextGetSurface(CGContextRef);
 void CGIOSurfaceContextInvalidateSurface(CGContextRef);
+void CGIOSurfaceContextFlushQueue(CGContextRef);
 #endif // HAVE(IOSURFACE)
 
 #if PLATFORM(COCOA)

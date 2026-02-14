@@ -237,6 +237,15 @@ void RemoteImageBufferSetProxy::setConfiguration(RemoteImageBufferSetConfigurati
     m_remoteNeedsConfigurationUpdate = true;
 }
 
+void RemoteImageBufferSetProxy::submitDrawingCommands()
+{
+    RefPtr connection = this->connection();
+    if (!connection)
+        return;
+
+    send(Messages::RemoteImageBufferSet::SubmitDrawingCommands());
+}
+
 std::unique_ptr<ThreadSafeImageBufferSetFlusher> RemoteImageBufferSetProxy::flushFrontBufferAsync(ThreadSafeImageBufferSetFlusher::FlushType flushType)
 {
     RefPtr connection = this->connection();

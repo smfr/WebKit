@@ -45,6 +45,8 @@ SOFT_LINK_FUNCTION_MAY_FAIL_FOR_SOURCE_WITH_EXPORT(PAL, CoreGraphics, CGWindowLi
 
 #if HAVE(IOSURFACE)
 SOFT_LINK_FUNCTION_MAY_FAIL_FOR_SOURCE_WITH_EXPORT(PAL, CoreGraphics, CGIOSurfaceContextInvalidateSurface, void, (CGContextRef context), (context), PAL_EXPORT)
+
+SOFT_LINK_FUNCTION_MAY_FAIL_FOR_SOURCE_WITH_EXPORT(PAL, CoreGraphics, CGIOSurfaceContextFlushQueue, void, (CGContextRef context), (context), PAL_EXPORT)
 #endif
 
 #if HAVE(CGPATTERN_CREATE_WITH_IMAGE_TRANSFORM_STEP)

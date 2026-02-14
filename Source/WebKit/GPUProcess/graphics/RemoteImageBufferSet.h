@@ -77,6 +77,7 @@ private:
     // Messages
     void updateConfiguration(const RemoteImageBufferSetConfiguration&);
     void endPrepareForDisplay(RenderingUpdateID, CompletionHandler<void(ImageBufferSetPrepareBufferForDisplayOutputData, RenderingUpdateID)>&&);
+    void submitDrawingCommands();
 
 #if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
     void dynamicContentScalingDisplayList(CompletionHandler<void(std::optional<WebCore::DynamicContentScalingDisplayList>&&)>&&);
