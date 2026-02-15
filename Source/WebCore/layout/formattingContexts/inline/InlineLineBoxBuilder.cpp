@@ -65,7 +65,7 @@ LineBox LineBoxBuilder::build(size_t lineIndex)
         constructBlockContent(lineBox);
     else {
         constructInlineLevelBoxes(lineBox);
-        if (lineBox.hasContent()) {
+        if (lineLayoutResult.hasContentfulInlineContent()) {
             adjustIdeographicBaselineIfApplicable(lineBox);
             adjustInlineBoxHeightsForLineBoxContainIfApplicable(lineBox);
         } else {
@@ -419,13 +419,11 @@ void LineBoxBuilder::constructInlineLevelBoxes(LineBox& lineBox)
         return isFirstFormattedLine() ? layoutBox.firstLineStyle() : layoutBox.style();
     };
 
-    auto lineHasContent = false;
     auto& inlineContent = lineLayoutResult().runs;
     for (size_t index = 0; index < inlineContent.size(); ++index) {
         auto& run = inlineContent[index];
         auto& layoutBox = run.layoutBox();
         auto& style = styleToUse(layoutBox);
-        lineHasContent = lineHasContent || Line::Run::isContentfulOrHasDecoration(run, formattingContext);
         auto logicalLeft = rootInlineBox.logicalLeft() + run.logicalLeft();
 
         if (run.isText()) {
@@ -523,7 +521,6 @@ void LineBoxBuilder::constructInlineLevelBoxes(LineBox& lineBox)
         }
         ASSERT(run.isOpaque());
     }
-    lineBox.setHasContent(lineHasContent);
 }
 
 void LineBoxBuilder::constructBlockContent(LineBox& lineBox)
@@ -556,8 +553,6 @@ void LineBoxBuilder::constructBlockContent(LineBox& lineBox)
     auto blockLineLogicalTopLeft = InlineLayoutPoint { lineLayoutResult.lineGeometry.initialLogicalLeft, lineLayoutResult.lineGeometry.logicalTopLeft.y() };
     lineBox.setLogicalRect({ blockLineLogicalTopLeft, lineLayoutResult.lineGeometry.logicalWidth, blockGeometry.marginBoxHeight() });
     setVerticalPropertiesForInlineLevelBox(lineBox, lineBox.rootInlineBox());
-    // FIXME: Let's considered collapsed block boxes contentful for now (webkit.org/b/302804).
-    lineBox.setHasContent(true);
 }
 
 void LineBoxBuilder::adjustInlineBoxHeightsForLineBoxContainIfApplicable(LineBox& lineBox)
@@ -824,7 +819,7 @@ InlineLayoutUnit LineBoxBuilder::applyTextBoxTrimOnLineBoxIfNeeded(InlineLayoutU
 
 void LineBoxBuilder::computeLineBoxGeometry(LineBox& lineBox) const
 {
-    auto lineBoxLogicalHeight = applyTextBoxTrimOnLineBoxIfNeeded(LineBoxVerticalAligner { formattingContext() }.computeLogicalHeightAndAlign(lineBox), lineBox);
+    auto lineBoxLogicalHeight = applyTextBoxTrimOnLineBoxIfNeeded(LineBoxVerticalAligner { formattingContext() }.computeLogicalHeightAndAlign(lineBox, lineLayoutResult().hasContentfulInlineContent()), lineBox);
     if (formattingContext().quirks().shouldCollapseLineBoxHeight(lineLayoutResult().runs, m_outsideListMarkers.size()))
         lineBoxLogicalHeight = { };
     lineBox.setLogicalRect({ lineLayoutResult().lineGeometry.logicalTopLeft, lineLayoutResult().lineGeometry.logicalWidth, lineBoxLogicalHeight });

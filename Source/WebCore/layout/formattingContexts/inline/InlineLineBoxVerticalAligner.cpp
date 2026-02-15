@@ -42,10 +42,10 @@ LineBoxVerticalAligner::LineBoxVerticalAligner(const InlineFormattingContext& in
 {
 }
 
-InlineLayoutUnit LineBoxVerticalAligner::computeLogicalHeightAndAlign(LineBox& lineBox) const
+InlineLayoutUnit LineBoxVerticalAligner::computeLogicalHeightAndAlign(LineBox& lineBox, bool hasContentfulInlineContent) const
 {
     auto canUseSimplifiedAlignment = [&] {
-        if (!lineBox.hasContent())
+        if (!hasContentfulInlineContent)
             return true;
 
         if (rootBox().style().lineBoxContain() != Style::ComputedStyle::initialLineBoxContain())
@@ -86,14 +86,14 @@ InlineLayoutUnit LineBoxVerticalAligner::computeLogicalHeightAndAlign(LineBox& l
     };
 
     if (canUseSimplifiedAlignment())
-        return simplifiedVerticalAlignment(lineBox);
+        return simplifiedVerticalAlignment(lineBox, hasContentfulInlineContent);
     // This function (partially) implements:
     // 2.2. Layout Within Line Boxes
     // https://www.w3.org/TR/css-inline-3/#line-layout
     // 1. Compute the line box height using the layout bounds geometry. This height computation strictly uses layout bounds and not normal inline level box geometries.
     // 2. Compute the baseline/logical top position of the root inline box. Aligned boxes push the root inline box around inside the line box.
     // 3. Finally align the inline level boxes using (mostly) normal inline level box geometries.
-    ASSERT(lineBox.hasContent());
+    ASSERT(hasContentfulInlineContent);
     auto lineBoxAlignmentContent = computeLineBoxLogicalHeight(lineBox);
     computeRootInlineBoxVerticalPosition(lineBox, lineBoxAlignmentContent);
 
@@ -104,12 +104,12 @@ InlineLayoutUnit LineBoxVerticalAligner::computeLogicalHeightAndAlign(LineBox& l
     return lineBoxHeight;
 }
 
-InlineLayoutUnit LineBoxVerticalAligner::simplifiedVerticalAlignment(LineBox& lineBox) const
+InlineLayoutUnit LineBoxVerticalAligner::simplifiedVerticalAlignment(LineBox& lineBox, bool hasContentfulInlineContent) const
 {
     auto& rootInlineBox = lineBox.rootInlineBox();
     auto rootInlineBoxAscent = rootInlineBox.ascent();
 
-    if (!lineBox.hasContent()) {
+    if (!hasContentfulInlineContent) {
         rootInlineBox.setLogicalTop(-rootInlineBoxAscent);
         for (auto& inlineLevelBox : lineBox.nonRootInlineLevelBoxes()) {
             ASSERT(inlineLevelBox.layoutBox().isWordBreakOpportunity() || (inlineLevelBox.isInlineBox() && !inlineLevelBox.hasContent()));
