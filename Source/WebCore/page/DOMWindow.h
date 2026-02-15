@@ -104,7 +104,7 @@ public:
     virtual ~DOMWindow();
 
     const GlobalWindowIdentifier& identifier() const { return m_identifier; }
-    virtual Frame* frame() const = 0;
+    virtual Frame* NODELETE frame() const = 0;
 
     enum class DOMWindowType : bool { Local, Remote };
     bool isLocalDOMWindow() const { return m_type == DOMWindowType::Local; }

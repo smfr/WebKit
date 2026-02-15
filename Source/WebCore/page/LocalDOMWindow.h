@@ -110,8 +110,8 @@ public:
     void suspendForBackForwardCache();
     void resumeFromBackForwardCache();
 
-    WEBCORE_EXPORT Frame* frame() const final;
-    WEBCORE_EXPORT LocalFrame* localFrame() const;
+    WEBCORE_EXPORT Frame* NODELETE frame() const final;
+    WEBCORE_EXPORT LocalFrame* NODELETE localFrame() const;
 
     RefPtr<WebCore::MediaQueryList> matchMedia(const String&);
 
@@ -210,7 +210,7 @@ public:
 
     // DOM Level 2 AbstractView Interface
 
-    WEBCORE_EXPORT Document* document() const;
+    WEBCORE_EXPORT Document* NODELETE document() const;
 
     // CSSOM View Module
 

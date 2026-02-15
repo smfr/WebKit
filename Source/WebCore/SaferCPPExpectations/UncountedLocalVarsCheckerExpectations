@@ -50,7 +50,6 @@ bindings/js/JSResizeObserverCustom.cpp
 bindings/js/JSStylePropertyMapReadOnlyCustom.cpp
 bindings/js/JSSubscriberCustom.cpp
 bindings/js/JSTextTrackCueCustom.cpp
-bindings/js/JSWindowProxy.cpp
 bindings/js/ScriptCachedFrameData.cpp
 bindings/js/ScriptModuleLoader.cpp
 bindings/js/StructuredClone.cpp
