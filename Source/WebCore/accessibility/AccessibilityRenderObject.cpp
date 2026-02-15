@@ -1506,7 +1506,7 @@ bool AccessibilityRenderObject::computeIsIgnored() const
     if (isStyleFormatGroup())
         return false;
 
-    switch (downcast<RenderElement>(*m_renderer).style().display()) {
+    switch (downcast<RenderElement>(*m_renderer).style().display().value) {
     case Style::DisplayType::InlineRuby:
     case Style::DisplayType::BlockRuby:
     case Style::DisplayType::RubyText:
@@ -2521,7 +2521,7 @@ AccessibilityRole AccessibilityRenderObject::determineAccessibilityRole()
     if (m_renderer->isRenderOrLegacyRenderSVGRoot())
         return AccessibilityRole::SVGRoot;
 
-    switch (downcast<RenderElement>(*m_renderer).style().display()) {
+    switch (downcast<RenderElement>(*m_renderer).style().display().value) {
     case Style::DisplayType::InlineRuby:
         return AccessibilityRole::RubyInline;
     case Style::DisplayType::RubyText:

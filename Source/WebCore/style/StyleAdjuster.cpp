@@ -157,7 +157,7 @@ static bool shouldInheritTextDecorationsInEffect(const RenderStyle& style, const
     if (isAtMediaUAShadowBoundary)
         return false;
 
-    switch (style.display()) {
+    switch (style.display().value) {
     case DisplayType::InlineFlowRoot:
     case DisplayType::InlineTable:
     case DisplayType::InlineFlex:
@@ -335,10 +335,10 @@ static bool shouldInlinifyForRuby(const RenderStyle& style, const RenderStyle& p
     return hasRubyParent && !style.hasOutOfFlowPosition() && !style.isFloating();
 }
 
-static bool hasUnsupportedRubyDisplay(DisplayType display, const Element* element)
+static bool hasUnsupportedRubyDisplay(Display display, const Element* element)
 {
     // Only allow ruby elements to have ruby display types for now.
-    switch (display) {
+    switch (display.value) {
     case DisplayType::InlineRuby:
     case DisplayType::BlockRuby:
         // Test for localName so this also allows WebVTT ruby elements.
@@ -455,7 +455,7 @@ void Adjuster::adjust(RenderStyle& style) const
             }
 
             if (element->hasTagName(legendTag))
-                style.setDisplayMaintainingOriginalDisplay(blockify(style.display()));
+                style.setDisplayMaintainingOriginalDisplay(style.display().blockified());
         }
 
         if (hasUnsupportedRubyDisplay(style.display(), m_element.get()))
@@ -468,7 +468,7 @@ void Adjuster::adjust(RenderStyle& style) const
 
         // Absolute/fixed positioned elements, floating elements and the document element need block-like outside display.
         if (style.hasOutOfFlowPosition() || style.isFloating() || (m_element && m_document->documentElement() == m_element.get()))
-            style.setDisplayMaintainingOriginalDisplay(blockify(style.display()));
+            style.setDisplayMaintainingOriginalDisplay(style.display().blockified());
 
         adjustFirstLetterStyle(style);
         adjustFirstLineStyle(style);
@@ -508,28 +508,28 @@ void Adjuster::adjust(RenderStyle& style) const
             }
         }
 
-        if (isDisplayDeprecatedFlexibleBox(style.display())) {
+        if (style.display().isDeprecatedFlexibleBox()) {
             // FIXME: Since we don't support block-flow on flexible boxes yet, disallow setting
             // of block-flow to anything other than StyleWritingMode::HorizontalTb.
             // https://bugs.webkit.org/show_bug.cgi?id=46418 - Flexible box support.
             style.setWritingMode(StyleWritingMode::HorizontalTb);
         }
 
-        if (isDisplayDeprecatedFlexibleBox(m_parentBoxStyle.display()))
+        if (m_parentBoxStyle.display().isDeprecatedFlexibleBox())
             style.setFloating(Float::None);
 
         // https://www.w3.org/TR/css-display/#transformations
         // "A parent with a grid or flex display value blockifies the box’s display type."
-        if (isDisplayFlexibleOrGridFormattingContextBox(m_parentBoxStyle.display())) {
+        if (m_parentBoxStyle.display().isFlexibleOrGridFormattingContextBox()) {
             style.setFloating(Float::None);
-            style.setDisplayMaintainingOriginalDisplay(blockify(style.display()));
+            style.setDisplayMaintainingOriginalDisplay(style.display().blockified());
         }
 
         // https://www.w3.org/TR/css-ruby-1/#anon-gen-inlinize
         if (shouldInlinifyForRuby(style, m_parentBoxStyle))
-            style.setDisplayMaintainingOriginalDisplay(inlinify(style.display()));
+            style.setDisplayMaintainingOriginalDisplay(style.display().inlinified());
         // https://drafts.csswg.org/css-ruby-1/#bidi
-        if (isRubyContainerOrInternalRubyBox(style.display()))
+        if (style.display().isRubyContainerOrInternalRubyBox())
             style.setUnicodeBidi(forceBidiIsolationForRuby(style.unicodeBidi()));
     }
 
@@ -548,7 +548,7 @@ void Adjuster::adjust(RenderStyle& style) const
         }
 
         // Make sure our z-index value is only applied if the object is positioned.
-        return style.position() == PositionType::Static && !isDisplayFlexibleOrGridFormattingContextBox(parentBoxStyle.display());
+        return style.position() == PositionType::Static && !parentBoxStyle.display().isFlexibleOrGridFormattingContextBox();
     };
 
     bool hasAutoSpecifiedZIndex = hasAutoZIndex(style, m_parentBoxStyle, m_element.get());

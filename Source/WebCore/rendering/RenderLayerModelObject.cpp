@@ -148,9 +148,9 @@ void RenderLayerModelObject::styleDidChange(Style::Difference diff, const Render
     // Position changes and other types of display changes are handled elsewhere.
     if ((oldStyle && isOutOfFlowPositioned() && parent() && (parent() != containingBlock()))
         && (style().position() == oldStyle->position())
-        && (Style::isDisplayInlineType(style().originalDisplay()) != Style::isDisplayInlineType(oldStyle->originalDisplay()))
-        && (Style::isDisplayBlockType(style().originalDisplay()) || Style::isDisplayInlineType(style().originalDisplay()))
-        && (Style::isDisplayBlockType(oldStyle->originalDisplay()) || Style::isDisplayInlineType(oldStyle->originalDisplay())))
+        && (style().originalDisplay().isInlineType() != oldStyle->originalDisplay().isInlineType())
+        && (style().originalDisplay().isBlockType() || style().originalDisplay().isInlineType())
+        && (oldStyle->originalDisplay().isBlockType() || oldStyle->originalDisplay().isInlineType()))
             parent()->setChildNeedsLayout();
 
     bool gainedOrLostLayer = false;

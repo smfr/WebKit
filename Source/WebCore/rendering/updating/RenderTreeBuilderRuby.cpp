@@ -44,7 +44,7 @@ RenderTreeBuilder::Ruby::Ruby(RenderTreeBuilder& builder)
 {
 }
 
-RenderStyle createAnonymousStyleForRuby(const RenderStyle& parentStyle, Style::DisplayType display)
+RenderStyle createAnonymousStyleForRuby(const RenderStyle& parentStyle, Style::Display display)
 {
     ASSERT(display == Style::DisplayType::InlineRuby || display == Style::DisplayType::RubyBase);
 
@@ -55,7 +55,7 @@ RenderStyle createAnonymousStyleForRuby(const RenderStyle& parentStyle, Style::D
     return style;
 }
 
-static RenderPtr<RenderElement> createAnonymousRendererForRuby(RenderElement& parent, Style::DisplayType display)
+static RenderPtr<RenderElement> createAnonymousRendererForRuby(RenderElement& parent, Style::Display display)
 {
     auto style = createAnonymousStyleForRuby(parent.style(), display);
     auto ruby = createRenderer<RenderInline>(RenderObject::Type::Inline, parent.document(), WTF::move(style));

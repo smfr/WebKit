@@ -178,7 +178,7 @@ void BoxTreeUpdater::adjustStyleIfNeeded(const RenderElement& renderer, RenderSt
 {
     auto adjustStyle = [&](auto& styleToAdjust) {
         // If we end up here with a box that has a table display type, just treat it as a regular block-level box.
-        if (Style::isInternalTableBox(styleToAdjust.display()) || styleToAdjust.display() == Style::DisplayType::TableCaption) {
+        if (styleToAdjust.display().isInternalTableBox() || styleToAdjust.display() == Style::DisplayType::TableCaption) {
             styleToAdjust.setDisplay(Style::DisplayType::BlockFlow);
             return;
         }
@@ -221,7 +221,7 @@ void BoxTreeUpdater::adjustStyleIfNeeded(const RenderElement& renderer, RenderSt
                     return renderInline->parent()->style().display() == Style::DisplayType::InlineRuby;
                 if (is<RenderSVGInline>(*renderInline))
                     return display == Style::DisplayType::InlineFlow;
-                return Style::isDisplayInlineType(display);
+                return display.isInlineType();
             };
             if (!isSupportedInlineDisplay())
                 styleToAdjust.setDisplay(Style::DisplayType::InlineFlow);

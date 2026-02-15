@@ -44,7 +44,7 @@ inline bool RenderObject::hasTransformOrPerspective() const
 inline bool RenderObject::isAtomicInlineLevelBox() const
 {
     auto display = style().display();
-    return Style::isDisplayInlineType(display)
+    return display.isInlineType()
         && !(display == Style::DisplayType::InlineFlow && !isBlockLevelReplacedOrAtomicInline());
 }
 

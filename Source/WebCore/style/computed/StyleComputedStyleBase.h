@@ -250,6 +250,7 @@ struct CounterIncrement;
 struct CounterReset;
 struct CounterSet;
 struct Cursor;
+struct Display;
 struct DynamicRangeLimit;
 struct Filter;
 struct FlexBasis;
@@ -538,10 +539,10 @@ public:
     inline void setIsEffectivelyTransparent(bool);
 
     // No setter. Set via `ComputedStyleProperties::setDisplay()`.
-    inline constexpr DisplayType originalDisplay() const;
+    inline constexpr Display originalDisplay() const;
 
     // Sets the value of `display`, but leaves the value of `originalDisplay` unchanged.
-    inline void setDisplayMaintainingOriginalDisplay(DisplayType);
+    inline void setDisplayMaintainingOriginalDisplay(Display);
 
     inline StyleAppearance usedAppearance() const;
     inline void setUsedAppearance(StyleAppearance);

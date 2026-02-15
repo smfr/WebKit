@@ -52,7 +52,7 @@ public:
     static RenderStyle cloneIncludingPseudoElements(const RenderStyle&);
     static std::unique_ptr<RenderStyle> clonePtr(const RenderStyle&);
 
-    static RenderStyle createAnonymousStyleWithDisplay(const RenderStyle& parentStyle, Style::DisplayType);
+    static RenderStyle createAnonymousStyleWithDisplay(const RenderStyle& parentStyle, Style::Display);
     static RenderStyle createStyleInheritingFromPseudoStyle(const RenderStyle& pseudoStyle);
 
     void inheritFrom(const RenderStyle&);
@@ -164,10 +164,10 @@ public:
     inline void setIsEffectivelyTransparent(bool);
 
     // No setter. Set via `RenderStyleProperties::setDisplay()`.
-    inline constexpr Style::DisplayType originalDisplay() const;
+    inline constexpr Style::Display originalDisplay() const;
 
     // Sets the value of `display`, but leaves the value of `originalDisplay` unchanged.
-    inline void setDisplayMaintainingOriginalDisplay(Style::DisplayType);
+    inline void setDisplayMaintainingOriginalDisplay(Style::Display);
 
     inline StyleAppearance usedAppearance() const;
     inline void setUsedAppearance(StyleAppearance);

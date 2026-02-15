@@ -67,8 +67,8 @@ inline ComputedStyleBase::ComputedStyleBase(CreateDefaultStyleTag)
     m_inheritedFlags.autosizeStatus = 0;
 #endif
 
-    m_nonInheritedFlags.display = static_cast<unsigned>(ComputedStyle::initialDisplay());
-    m_nonInheritedFlags.originalDisplay = static_cast<unsigned>(ComputedStyle::initialDisplay());
+    m_nonInheritedFlags.display = ComputedStyle::initialDisplay().toRaw();
+    m_nonInheritedFlags.originalDisplay = ComputedStyle::initialDisplay().toRaw();
     m_nonInheritedFlags.overflowX = static_cast<unsigned>(ComputedStyle::initialOverflowX());
     m_nonInheritedFlags.overflowY = static_cast<unsigned>(ComputedStyle::initialOverflowY());
     m_nonInheritedFlags.clear = static_cast<unsigned>(ComputedStyle::initialClear());

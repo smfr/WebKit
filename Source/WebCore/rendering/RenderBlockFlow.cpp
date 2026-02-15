@@ -1300,7 +1300,7 @@ void RenderBlockFlow::adjustFloatingBlock(const MarginInfo& marginInfo)
 
 void RenderBlockFlow::updateStaticInlinePositionForChild(RenderBox& child, LayoutUnit logicalTop)
 {
-    if (Style::isDisplayInlineType(child.style().originalDisplay()))
+    if (child.style().originalDisplay().isInlineType())
         setStaticInlinePositionForChild(child, staticInlinePositionForOriginalDisplayInline(logicalTop));
     else
         setStaticInlinePositionForChild(child, startOffsetForContent());
@@ -1608,7 +1608,7 @@ LayoutUnit RenderBlockFlow::collapseMarginsWithChildInfo(RenderBox* child, Margi
 bool RenderBlockFlow::isChildEligibleForMarginTrim(Style::MarginTrimSide marginTrimSide, const RenderBox& child) const
 {
     ASSERT(style().marginTrim().contains(marginTrimSide));
-    if (!Style::isDisplayBlockType(child.style().display()))
+    if (!child.style().display().isBlockType())
         return false;
     // https://drafts.csswg.org/css-box-4/#margin-trim-block
     // 3.3.1. Trimming Block Container Content
@@ -4098,7 +4098,7 @@ RenderBlockFlow::InlineContentStatus RenderBlockFlow::markInlineContentDirtyForL
             if (hasParentRelativeHeightOrTop)
                 hasSimpleOutOfFlowContentOnly = false;
 
-            if (hasSimpleOutOfFlowContentOnly && Style::isDisplayInlineType(style.originalDisplay()))
+            if (hasSimpleOutOfFlowContentOnly && style.originalDisplay().isInlineType())
                 hasSimpleOutOfFlowContentOnly = hasSimpleStaticPositionForInlineLevelOutOfFlowContentByStyle;
         } else
             hasSimpleOutOfFlowContentOnly = false;
@@ -4267,7 +4267,7 @@ void RenderBlockFlow::setStaticPositionsForSimpleOutOfFlowContent()
 #ifndef NDEBUG
     ASSERT(!hasLineIfEmpty());
     for (auto walker = InlineWalker(*this); !walker.atEnd(); walker.advance()) {
-        if (Style::isDisplayInlineType(walker.current()->style().display())) {
+        if (walker.current()->style().display().isInlineType()) {
             ASSERT(hasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(style()));
             break;
         }
@@ -4670,7 +4670,7 @@ RenderObject* InlineMinMaxIterator::next()
         if (is<RenderInline>(*candidate) || candidate->isRenderTextOrLineBreak() || candidate->isFloating() || candidate->isBlockLevelReplacedOrAtomicInline())
             break;
 
-        if (Style::isDisplayBlockType(candidate->style().display())) {
+        if (candidate->style().display().isBlockType()) {
             ASSERT(candidate->settings().blocksInInlineLayoutEnabled());
             break;
         }
@@ -4902,7 +4902,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             continue;
         }
 
-        if (Style::isDisplayBlockType(child->style().display()) && !child->isFloating() && is<RenderBox>(*child)) {
+        if (child->style().display().isBlockType() && !child->isFloating() && is<RenderBox>(*child)) {
             ASSERT(settings().blocksInInlineLayoutEnabled());
 
             resetLineForForcedLineBreak();

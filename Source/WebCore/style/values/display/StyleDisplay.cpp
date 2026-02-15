@@ -34,7 +34,7 @@ namespace Style {
 
 // MARK: - Conversion
 
-auto CSSValueConversion<DisplayType>::operator()(BuilderState& state, const CSSValue& value) -> DisplayType
+auto CSSValueConversion<Display>::operator()(BuilderState& state, const CSSValue& value) -> Display
 {
     RefPtr primitiveValue = requiredDowncast<CSSPrimitiveValue>(state, value);
     if (!primitiveValue)
@@ -118,7 +118,7 @@ auto CSSValueConversion<DisplayType>::operator()(BuilderState& state, const CSSV
 
 // MARK: - Blending
 
-auto Blending<DisplayType>::blend(DisplayType a, DisplayType b, const BlendingContext& context) -> DisplayType
+auto Blending<Display>::blend(Display a, Display b, const BlendingContext& context) -> Display
 {
     // "In general, the display property's animation type is discrete. However, similar to interpolation of
     //  visibility, during interpolation between none and any other display value, p values between 0 and 1

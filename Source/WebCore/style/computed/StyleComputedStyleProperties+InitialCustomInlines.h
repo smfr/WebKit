@@ -150,10 +150,5 @@ constexpr PositionVisibility ComputedStyleProperties::initialPositionVisibility(
     return PositionVisibilityValue::AnchorsVisible;
 }
 
-constexpr DisplayType ComputedStyleProperties::initialDisplay()
-{
-    return DisplayType::InlineFlow;
-}
-
 } // namespace Style
 } // namespace WebCore

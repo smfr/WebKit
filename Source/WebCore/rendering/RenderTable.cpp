@@ -205,7 +205,7 @@ void RenderTable::willInsertTableColumn(RenderTableCol&, RenderObject*)
 
 void RenderTable::willInsertTableSection(RenderTableSection& child, RenderObject* beforeChild)
 {
-    switch (child.style().display()) {
+    switch (child.style().display().value) {
     case Style::DisplayType::TableHeaderGroup:
         resetSectionPointerIfNotBefore(m_head, beforeChild);
         if (!m_head)
@@ -1248,7 +1248,7 @@ void RenderTable::recalcSections() const
 
     // We need to get valid pointers to caption, head, foot and first body again
     for (auto* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-        switch (child->style().display()) {
+        switch (child->style().display().value) {
         case Style::DisplayType::TableColumn:
         case Style::DisplayType::TableColumnGroup:
             m_hasColElements = true;

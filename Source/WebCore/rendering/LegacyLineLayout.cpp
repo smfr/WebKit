@@ -99,7 +99,7 @@ bool LegacyLineLayout::shouldSkipCreatingRunsForObject(RenderObject& object)
     auto& renderElement = downcast<RenderElement>(object);
     if (renderElement.isFloating())
         return true;
-    if (renderElement.isOutOfFlowPositioned() && !Style::isDisplayInlineType(renderElement.style().originalDisplay()) && !renderElement.container()->isRenderInline())
+    if (renderElement.isOutOfFlowPositioned() && !renderElement.style().originalDisplay().isInlineType() && !renderElement.container()->isRenderInline())
         return true;
     return false;
 }

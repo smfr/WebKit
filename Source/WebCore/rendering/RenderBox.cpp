@@ -421,7 +421,7 @@ void RenderBox::styleDidChange(Style::Difference diff, const RenderStyle* oldSty
     // Changing the position from/to absolute can potentially create/remove flex/grid items, as absolutely positioned
     // children of a flex/grid box are out-of-flow, and thus, not flex/grid items. This means that we need to clear
     // any override content size set by our container, because it would likely be incorrect after the style change.
-    if (isOutOfFlowPositioned() && parent() && Style::isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox(parent()->style().display()))
+    if (isOutOfFlowPositioned() && parent() && parent()->style().display().isFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox())
         clearOverridingSize();
 
     if (oldStyle && oldStyle->hasOutOfFlowPosition() != style().hasOutOfFlowPosition()) {

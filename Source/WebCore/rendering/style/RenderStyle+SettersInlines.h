@@ -202,7 +202,7 @@ inline void RenderStyle::setUsedPositionOptionIndex(std::optional<size_t> index)
     m_computedStyle.setUsedPositionOptionIndex(index);
 }
 
-inline void RenderStyle::setDisplayMaintainingOriginalDisplay(Style::DisplayType display)
+inline void RenderStyle::setDisplayMaintainingOriginalDisplay(Style::Display display)
 {
     m_computedStyle.setDisplayMaintainingOriginalDisplay(display);
 }

@@ -224,7 +224,7 @@ inline std::optional<size_t> RenderStyle::usedPositionOptionIndex() const
     return m_computedStyle.usedPositionOptionIndex();
 }
 
-inline constexpr Style::DisplayType RenderStyle::originalDisplay() const
+inline constexpr Style::Display RenderStyle::originalDisplay() const
 {
     return m_computedStyle.originalDisplay();
 }
@@ -915,9 +915,9 @@ inline bool shouldApplyLayoutContainment(const RenderStyle& style, const Element
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
     if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (Style::isInternalTableBox(style.display()) && style.display() != Style::DisplayType::TableCell)
+    if (style.display().isInternalTableBox() && style.display() != Style::DisplayType::TableCell)
         return false;
-    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
+    if (style.display().isRubyContainerOrInternalRubyBox() || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -938,9 +938,9 @@ inline bool shouldApplySizeContainment(const RenderStyle& style, const Element& 
         return false;
     if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
         return false;
-    if (Style::isInternalTableBox(style.display()))
+    if (style.display().isInternalTableBox())
         return false;
-    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
+    if (style.display().isRubyContainerOrInternalRubyBox() || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -958,9 +958,9 @@ inline bool shouldApplyInlineSizeContainment(const RenderStyle& style, const Ele
         return false;
     if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
         return false;
-    if (Style::isInternalTableBox(style.display()))
+    if (style.display().isInternalTableBox())
         return false;
-    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
+    if (style.display().isRubyContainerOrInternalRubyBox() || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }
@@ -987,9 +987,9 @@ inline bool shouldApplyPaintContainment(const RenderStyle& style, const Element&
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
     if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
         return false;
-    if (Style::isInternalTableBox(style.display()) && style.display() != Style::DisplayType::TableCell)
+    if (style.display().isInternalTableBox() && style.display() != Style::DisplayType::TableCell)
         return false;
-    if (Style::isRubyContainerOrInternalRubyBox(style.display()) || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
+    if (style.display().isRubyContainerOrInternalRubyBox() || (style.display() == Style::DisplayType::InlineFlow && !element.isReplaced(&style)))
         return false;
     return true;
 }

@@ -1722,7 +1722,7 @@ void RenderTheme::adjustSliderThumbStyle(RenderStyle& style, const Element* elem
 void RenderTheme::adjustSwitchStyleDisplay(RenderStyle& style) const
 {
     // RenderTheme::adjustStyle() normalizes a bunch of display types to InlineBlock and Block.
-    switch (style.display()) {
+    switch (style.display().value) {
     case Style::DisplayType::InlineFlowRoot:
         style.setDisplayMaintainingOriginalDisplay(Style::DisplayType::InlineGrid);
         break;

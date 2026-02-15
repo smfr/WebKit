@@ -654,7 +654,7 @@ void LineLayout::updateRenderTreePositions(const Vector<LineAdjustment>& lineAdj
             auto delta = borderBoxLogicalTopLeft - previousStaticPosition;
             auto hasStaticInlinePositioning = layoutBox->style().hasStaticInlinePosition(renderer->isHorizontalWritingMode());
 
-            if (Style::isDisplayInlineType(layoutBox->style().originalDisplay())) {
+            if (layoutBox->style().originalDisplay().isInlineType()) {
                 blockFlow->setStaticInlinePositionForChild(renderer, borderBoxLogicalTopLeft.x());
                 if (hasStaticInlinePositioning)
                     renderer->move(delta.width(), delta.height());

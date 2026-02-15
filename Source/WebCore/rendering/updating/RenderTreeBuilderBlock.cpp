@@ -240,7 +240,7 @@ void RenderTreeBuilder::Block::attachIgnoringContinuation(RenderBlock& parent, R
             Style::DisplayType::BlockGrid,
             Style::DisplayType::InlineGrid
         };
-        return m_buildsSimpleAnonymousBlocks || parentRequiresAnonymousBlock.contains(parent.style().display());
+        return m_buildsSimpleAnonymousBlocks || parentRequiresAnonymousBlock.contains(parent.style().display().value);
     };
 
     if (!shouldBuildAnonymousBlock()) {

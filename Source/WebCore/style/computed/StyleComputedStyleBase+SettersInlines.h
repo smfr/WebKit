@@ -183,9 +183,9 @@ inline void ComputedStyleBase::setUsedPositionOptionIndex(std::optional<size_t> 
     SET_NESTED(m_nonInheritedData, rareData, usedPositionOptionIndex, index);
 }
 
-inline void ComputedStyleBase::setDisplayMaintainingOriginalDisplay(DisplayType display)
+inline void ComputedStyleBase::setDisplayMaintainingOriginalDisplay(Display display)
 {
-    m_nonInheritedFlags.display = static_cast<unsigned>(display);
+    m_nonInheritedFlags.display = display.toRaw();
 }
 
 inline void ComputedStyleBase::setUsedAppearance(StyleAppearance a)

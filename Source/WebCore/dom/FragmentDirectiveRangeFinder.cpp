@@ -239,7 +239,7 @@ static std::optional<SimpleRange> rangeOfStringInRange(const String& query, Simp
         Vector<Ref<Text>> textNodeList;
         // FIXME: this is O^2 since treeOrder will also do traversal, optimize.
         while (currentNode && currentNode->isDescendantOf(blockAncestor) && is_lteq(treeOrder(BoundaryPoint(*currentNode, 0), searchRange.end))) {
-            if (CheckedPtr renderElement = dynamicDowncast<RenderElement>(currentNode->renderer()); renderElement && Style::isDisplayBlockType(renderElement->style().display()))
+            if (CheckedPtr renderElement = dynamicDowncast<RenderElement>(currentNode->renderer()); renderElement && renderElement->style().display().isBlockType())
                 break;
 
             if (isSearchInvisible(*currentNode)) {

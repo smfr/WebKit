@@ -216,7 +216,7 @@ RenderPtr<RenderElement> RenderElement::createFor(Element& element, RenderStyle&
         }
     }
 
-    switch (style.display()) {
+    switch (style.display().value) {
     case Style::DisplayType::None:
     case Style::DisplayType::Contents:
         return nullptr;
@@ -253,10 +253,10 @@ RenderPtr<RenderElement> RenderElement::createFor(Element& element, RenderStyle&
         return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
 
     default: {
-        if (Style::isDisplayTableOrTablePart(style.display()) && rendererTypeOverride.contains(ConstructBlockLevelRendererFor::TableOrTablePart))
+        if (style.display().isTableOrTablePart() && rendererTypeOverride.contains(ConstructBlockLevelRendererFor::TableOrTablePart))
             return createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, element, WTF::move(style));
 
-        switch (style.display()) {
+        switch (style.display().value) {
         case Style::DisplayType::BlockTable:
         case Style::DisplayType::InlineTable:
             return createRenderer<RenderTable>(RenderObject::Type::Table, element, WTF::move(style));
@@ -1107,7 +1107,7 @@ void RenderElement::styleDidChange(Style::Difference diff, const RenderStyle* ol
 
     setNeedsLayoutForStyleDifference(diff, oldStyle);
 
-    if (isOutOfFlowPositioned() && oldStyle && Style::isDisplayBlockType(oldStyle->originalDisplay()) != Style::isDisplayBlockType(style().originalDisplay())) {
+    if (isOutOfFlowPositioned() && oldStyle && oldStyle->originalDisplay().isBlockType() != style().originalDisplay().isBlockType()) {
         if (CheckedPtr ancestor = RenderObject::containingBlockForPositionType(PositionType::Static, *this)) {
             ancestor->setNeedsLayout();
             ancestor->setOutOfFlowChildNeedsStaticPositionLayout();

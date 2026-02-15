@@ -752,7 +752,7 @@ const RenderStyle* TreeResolver::parentBoxStyle() const
 
 const RenderStyle* TreeResolver::parentBoxStyleForPseudoElement(const ElementUpdate& elementUpdate) const
 {
-    switch (elementUpdate.style->display()) {
+    switch (elementUpdate.style->display().value) {
     case DisplayType::None:
         return nullptr;
     case DisplayType::Contents:

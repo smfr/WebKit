@@ -42,6 +42,7 @@ enum class DisplayType : uint8_t {
     BlockGridLanes,       // Shortens to `grid-lanes`
     BlockRuby,
     BlockDeprecatedFlex,  // Shortens to `-webkit-box`
+
     InlineFlow,           // Shortens to `inline`
     InlineFlowRoot,       // Shortens to `inline-block`
     InlineTable,
@@ -71,10 +72,44 @@ enum class DisplayType : uint8_t {
     None
 };
 
+struct Display {
+    DisplayType value;
+
+    constexpr Display(DisplayType value) : value { value } { }
+
+    // Special constructor for initial value.
+    constexpr Display(CSS::Keyword::Inline) : value { DisplayType::InlineFlow } { }
+
+    static constexpr Display fromRaw(unsigned rawValue) { return static_cast<DisplayType>(rawValue); }
+    constexpr unsigned toRaw() const { return static_cast<unsigned>(value); }
+
+    constexpr Display blockified() const;
+    constexpr Display inlinified() const;
+
+    constexpr bool isBlockType() const;
+    constexpr bool isInlineType() const;
+    constexpr bool isTableOrTablePart() const;
+    constexpr bool isInternalTableBox() const;
+    constexpr bool isRubyContainerOrInternalRubyBox() const;
+    constexpr bool isGridBox() const;
+    constexpr bool isGridLanesBox() const;
+    constexpr bool isListItemType() const;
+    constexpr bool isDeprecatedFlexibleBox() const;
+    constexpr bool isFlexibleBox() const;
+    constexpr bool isGridFormattingContextBox() const;
+    constexpr bool isFlexibleOrGridFormattingContextBox() const;
+    constexpr bool isFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const;
+    constexpr bool doesGenerateBlockContainer() const;
+
+    constexpr bool operator==(const Display&) const = default;
+    constexpr bool operator==(DisplayType other) const { return value == other; }
+};
+DEFINE_TYPE_WRAPPER_GET(Display, value);
+
 // https://drafts.csswg.org/css-display/#blockify
-constexpr DisplayType blockify(DisplayType display)
+constexpr Display Display::blockified() const
 {
-    switch (display) {
+    switch (value) {
     case DisplayType::BlockFlow:
     case DisplayType::BlockFlowRoot:
     case DisplayType::BlockTable:
@@ -84,7 +119,7 @@ constexpr DisplayType blockify(DisplayType display)
     case DisplayType::BlockRuby:
     case DisplayType::BlockDeprecatedFlex:
     case DisplayType::BlockFlowListItem:
-        return display;
+        return value;
 
     case DisplayType::InlineTable:
         return DisplayType::BlockTable;
@@ -125,9 +160,9 @@ constexpr DisplayType blockify(DisplayType display)
 }
 
 // https://drafts.csswg.org/css-display/#inlinify
-constexpr DisplayType inlinify(DisplayType display)
+constexpr Display Display::inlinified() const
 {
-    switch (display) {
+    switch (value) {
     case DisplayType::BlockFlow:
         return DisplayType::InlineFlowRoot;
     case DisplayType::BlockTable:
@@ -153,7 +188,7 @@ constexpr DisplayType inlinify(DisplayType display)
     case DisplayType::InlineDeprecatedFlex:
     case DisplayType::RubyBase:
     case DisplayType::RubyText:
-        return display;
+        return value;
 
     case DisplayType::BlockFlowRoot:
     case DisplayType::BlockFlowListItem:
@@ -178,127 +213,127 @@ constexpr DisplayType inlinify(DisplayType display)
     RELEASE_ASSERT_NOT_REACHED_UNDER_CONSTEXPR_CONTEXT();
 }
 
-constexpr bool isDisplayBlockType(DisplayType display)
+constexpr bool Display::isBlockType() const
 {
-    return display == DisplayType::BlockFlow
-        || display == DisplayType::BlockFlowRoot
-        || display == DisplayType::BlockTable
-        || display == DisplayType::BlockFlex
-        || display == DisplayType::BlockGrid
-        || display == DisplayType::BlockGridLanes
-        || display == DisplayType::BlockRuby
-        || display == DisplayType::BlockDeprecatedFlex
-        || display == DisplayType::BlockFlowListItem;
+    return value == DisplayType::BlockFlow
+        || value == DisplayType::BlockFlowRoot
+        || value == DisplayType::BlockTable
+        || value == DisplayType::BlockFlex
+        || value == DisplayType::BlockGrid
+        || value == DisplayType::BlockGridLanes
+        || value == DisplayType::BlockRuby
+        || value == DisplayType::BlockDeprecatedFlex
+        || value == DisplayType::BlockFlowListItem;
 }
 
-constexpr bool isDisplayInlineType(DisplayType display)
+constexpr bool Display::isInlineType() const
 {
-    return display == DisplayType::InlineFlow
-        || display == DisplayType::InlineFlowRoot
-        || display == DisplayType::InlineTable
-        || display == DisplayType::InlineFlex
-        || display == DisplayType::InlineGrid
-        || display == DisplayType::InlineGridLanes
-        || display == DisplayType::InlineRuby
-        || display == DisplayType::InlineDeprecatedFlex
-        || display == DisplayType::RubyBase
-        || display == DisplayType::RubyText;
+    return value == DisplayType::InlineFlow
+        || value == DisplayType::InlineFlowRoot
+        || value == DisplayType::InlineTable
+        || value == DisplayType::InlineFlex
+        || value == DisplayType::InlineGrid
+        || value == DisplayType::InlineGridLanes
+        || value == DisplayType::InlineRuby
+        || value == DisplayType::InlineDeprecatedFlex
+        || value == DisplayType::RubyBase
+        || value == DisplayType::RubyText;
 }
 
-constexpr bool isDisplayTableOrTablePart(DisplayType display)
+constexpr bool Display::isTableOrTablePart() const
 {
-    return display == DisplayType::BlockTable
-        || display == DisplayType::InlineTable
-        || display == DisplayType::TableCell
-        || display == DisplayType::TableCaption
-        || display == DisplayType::TableRowGroup
-        || display == DisplayType::TableHeaderGroup
-        || display == DisplayType::TableFooterGroup
-        || display == DisplayType::TableRow
-        || display == DisplayType::TableColumnGroup
-        || display == DisplayType::TableColumn;
+    return value == DisplayType::BlockTable
+        || value == DisplayType::InlineTable
+        || value == DisplayType::TableCell
+        || value == DisplayType::TableCaption
+        || value == DisplayType::TableRowGroup
+        || value == DisplayType::TableHeaderGroup
+        || value == DisplayType::TableFooterGroup
+        || value == DisplayType::TableRow
+        || value == DisplayType::TableColumnGroup
+        || value == DisplayType::TableColumn;
 }
 
 // https://drafts.csswg.org/css-display/#internal-table-box
-constexpr bool isInternalTableBox(DisplayType display)
+constexpr bool Display::isInternalTableBox() const
 {
-    return display == DisplayType::TableCell
-        || display == DisplayType::TableRowGroup
-        || display == DisplayType::TableHeaderGroup
-        || display == DisplayType::TableFooterGroup
-        || display == DisplayType::TableRow
-        || display == DisplayType::TableColumnGroup
-        || display == DisplayType::TableColumn;
+    return value == DisplayType::TableCell
+        || value == DisplayType::TableRowGroup
+        || value == DisplayType::TableHeaderGroup
+        || value == DisplayType::TableFooterGroup
+        || value == DisplayType::TableRow
+        || value == DisplayType::TableColumnGroup
+        || value == DisplayType::TableColumn;
 }
 
 // https://drafts.csswg.org/css-display/#internal-ruby-box
-constexpr bool isRubyContainerOrInternalRubyBox(DisplayType display)
+constexpr bool Display::isRubyContainerOrInternalRubyBox() const
 {
-    return display == DisplayType::InlineRuby
-        || display == DisplayType::RubyText
-        || display == DisplayType::RubyBase;
+    return value == DisplayType::InlineRuby
+        || value == DisplayType::RubyText
+        || value == DisplayType::RubyBase;
 }
 
-constexpr bool isDisplayGridBox(DisplayType display)
+constexpr bool Display::isGridBox() const
 {
-    return display == DisplayType::BlockGrid
-        || display == DisplayType::InlineGrid;
+    return value == DisplayType::BlockGrid
+        || value == DisplayType::InlineGrid;
 }
 
-constexpr bool isDisplayGridLanesBox(DisplayType display)
+constexpr bool Display::isGridLanesBox() const
 {
-    return display == DisplayType::BlockGridLanes
-        || display == DisplayType::InlineGridLanes;
+    return value == DisplayType::BlockGridLanes
+        || value == DisplayType::InlineGridLanes;
 }
 
-constexpr bool isDisplayListItemType(DisplayType display)
+constexpr bool Display::isListItemType() const
 {
-    return display == DisplayType::BlockFlowListItem;
+    return value == DisplayType::BlockFlowListItem;
 }
 
-constexpr bool isDisplayDeprecatedFlexibleBox(DisplayType display)
+constexpr bool Display::isDeprecatedFlexibleBox() const
 {
-    return display == DisplayType::BlockDeprecatedFlex
-        || display == DisplayType::InlineDeprecatedFlex;
+    return value == DisplayType::BlockDeprecatedFlex
+        || value == DisplayType::InlineDeprecatedFlex;
 }
 
-constexpr bool isDisplayFlexibleBox(DisplayType display)
+constexpr bool Display::isFlexibleBox() const
 {
-    return display == DisplayType::BlockFlex
-        || display == DisplayType::InlineFlex;
+    return value == DisplayType::BlockFlex
+        || value == DisplayType::InlineFlex;
 }
 
-constexpr bool isDisplayGridFormattingContextBox(DisplayType display)
+constexpr bool Display::isGridFormattingContextBox() const
 {
-    return isDisplayGridBox(display)
-        || isDisplayGridLanesBox(display);
+    return isGridBox()
+        || isGridLanesBox();
 }
 
-constexpr bool isDisplayFlexibleOrGridFormattingContextBox(DisplayType display)
+constexpr bool Display::isFlexibleOrGridFormattingContextBox() const
 {
-    return isDisplayFlexibleBox(display)
-        || isDisplayGridFormattingContextBox(display);
+    return isFlexibleBox()
+        || isGridFormattingContextBox();
 }
 
-constexpr bool isDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox(DisplayType display)
+constexpr bool Display::isFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const
 {
-    return isDisplayFlexibleOrGridFormattingContextBox(display)
-        || isDisplayDeprecatedFlexibleBox(display);
+    return isFlexibleOrGridFormattingContextBox()
+        || isDeprecatedFlexibleBox();
 }
 
-constexpr bool doesDisplayGenerateBlockContainer(DisplayType display)
+constexpr bool Display::doesGenerateBlockContainer() const
 {
-    return display == DisplayType::BlockFlow
-        || display == DisplayType::BlockFlowRoot
-        || display == DisplayType::BlockFlowListItem
-        || display == DisplayType::InlineFlowRoot
-        || display == DisplayType::TableCell
-        || display == DisplayType::TableCaption;
+    return value == DisplayType::BlockFlow
+        || value == DisplayType::BlockFlowRoot
+        || value == DisplayType::BlockFlowListItem
+        || value == DisplayType::InlineFlowRoot
+        || value == DisplayType::TableCell
+        || value == DisplayType::TableCaption;
 }
 
 // MARK: - Conversion
 
-template<> struct CSSValueConversion<DisplayType> { auto operator()(BuilderState&, const CSSValue&) -> DisplayType; };
+template<> struct CSSValueConversion<Display> { auto operator()(BuilderState&, const CSSValue&) -> Display; };
 
 template<> struct ValueRepresentation<DisplayType> {
     template<typename... F> constexpr decltype(auto) operator()(DisplayType value, F&&... f)
@@ -379,10 +414,12 @@ template<> struct ValueRepresentation<DisplayType> {
 
 // MARK: - Blending
 
-template<> struct Blending<DisplayType> {
-    constexpr auto canBlend(DisplayType, DisplayType) -> bool { return false; }
-    auto blend(DisplayType, DisplayType, const BlendingContext&) -> DisplayType;
+template<> struct Blending<Display> {
+    constexpr auto canBlend(Display, Display) -> bool { return false; }
+    auto blend(Display, Display, const BlendingContext&) -> Display;
 };
 
 } // namespace Style
 } // namespace WebCore
+
+DEFINE_TUPLE_LIKE_CONFORMANCE(WebCore::Style::Display, 1)

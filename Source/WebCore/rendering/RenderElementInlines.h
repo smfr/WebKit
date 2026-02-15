@@ -53,7 +53,7 @@ inline bool RenderElement::isBlockLevelBox() const
 
     if (renderBox->isFlexItem() || renderBox->isGridItem() || renderBox->isRenderTableCell())
         return false;
-    return Style::isDisplayBlockType(style().display());
+    return style().display().isBlockType();
 }
 
 inline bool RenderElement::isAnonymousBlock() const
@@ -74,7 +74,7 @@ inline bool RenderElement::isAnonymousBlock() const
 
 inline bool RenderElement::isBlockContainer() const
 {
-    return Style::doesDisplayGenerateBlockContainer(style().display()) && !isRenderReplaced();
+    return style().display().doesGenerateBlockContainer() && !isRenderReplaced();
 }
 
 inline bool RenderElement::isBlockBox() const

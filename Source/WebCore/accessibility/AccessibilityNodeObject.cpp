@@ -3802,15 +3802,15 @@ static void appendNameToStringBuilder(StringBuilder& builder, String&& text, boo
 }
 
 
-static bool displayTypeNeedsSpace(Style::DisplayType type)
+static bool displayNeedsSpace(Style::Display display)
 {
-    return type == Style::DisplayType::BlockFlow
-        || type == Style::DisplayType::InlineFlowRoot
-        || type == Style::DisplayType::InlineFlex
-        || type == Style::DisplayType::InlineGrid
-        || type == Style::DisplayType::InlineGridLanes
-        || type == Style::DisplayType::InlineTable
-        || type == Style::DisplayType::TableCell;
+    return display == Style::DisplayType::BlockFlow
+        || display == Style::DisplayType::InlineFlowRoot
+        || display == Style::DisplayType::InlineFlex
+        || display == Style::DisplayType::InlineGrid
+        || display == Style::DisplayType::InlineGridLanes
+        || display == Style::DisplayType::InlineTable
+        || display == Style::DisplayType::TableCell;
 }
 
 static bool needsSpaceFromDisplay(AccessibilityObject& axObject)
@@ -3823,7 +3823,7 @@ static bool needsSpaceFromDisplay(AccessibilityObject& axObject)
     }
 
     if (auto* style = renderer ? &downcast<RenderElement>(*renderer).style() : axObject.style())
-        return displayTypeNeedsSpace(style->display());
+        return displayNeedsSpace(style->display());
     return false;
 }
 

@@ -229,9 +229,9 @@ inline std::optional<size_t> ComputedStyleBase::usedPositionOptionIndex() const
     return m_nonInheritedData->rareData->usedPositionOptionIndex;
 }
 
-inline constexpr Style::DisplayType ComputedStyleBase::originalDisplay() const
+inline constexpr Display ComputedStyleBase::originalDisplay() const
 {
-    return static_cast<Style::DisplayType>(m_nonInheritedFlags.originalDisplay);
+    return Display::fromRaw(m_nonInheritedFlags.originalDisplay);
 }
 
 inline StyleAppearance ComputedStyleBase::usedAppearance() const

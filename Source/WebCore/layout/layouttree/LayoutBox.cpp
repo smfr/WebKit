@@ -253,7 +253,7 @@ bool Box::isInlineLevelBox() const
 {
     // Inline level elements generate inline level boxes.
     auto display = m_style.display();
-    return is<ElementBox>(*this) && 
+    return is<ElementBox>(*this) &&
           (display == Style::DisplayType::InlineFlow
         || display == Style::DisplayType::InlineFlowRoot
         || display == Style::DisplayType::InlineTable

@@ -94,10 +94,10 @@ inline void ComputedStyleProperties::setBlendMode(BlendMode mode)
     SET(m_inheritedRareData, isInSubtreeWithBlendMode, mode != BlendMode::Normal);
 }
 
-inline void ComputedStyleProperties::setDisplay(DisplayType value)
+inline void ComputedStyleProperties::setDisplay(Display value)
 {
-    m_nonInheritedFlags.originalDisplay = static_cast<unsigned>(value);
-    m_nonInheritedFlags.display = static_cast<unsigned>(value);
+    m_nonInheritedFlags.originalDisplay = value.toRaw();
+    m_nonInheritedFlags.display = value.toRaw();
 }
 
 // FIXME: Support generating properties that have their storage spread out
