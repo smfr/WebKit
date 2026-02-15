@@ -33,10 +33,10 @@ class HTMLMeterElement final : public HTMLElement {
 public:
     static Ref<HTMLMeterElement> create(const QualifiedName&, Document&);
 
-    enum GaugeRegion {
-        GaugeRegionOptimum,
-        GaugeRegionSuboptimal,
-        GaugeRegionEvenLessGood
+    enum class GaugeRegion : uint8_t {
+        Optimum,
+        Suboptimal,
+        EvenLessGood
     };
 
     double min() const;

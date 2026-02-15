@@ -537,13 +537,13 @@ static void updateMeterPartForRenderer(MeterPart& meterPart, const RenderMeter& 
     MeterPart::GaugeRegion gaugeRegion;
 
     switch (element->gaugeRegion()) {
-    case HTMLMeterElement::GaugeRegionOptimum:
+    case HTMLMeterElement::GaugeRegion::Optimum:
         gaugeRegion = MeterPart::GaugeRegion::Optimum;
         break;
-    case HTMLMeterElement::GaugeRegionSuboptimal:
+    case HTMLMeterElement::GaugeRegion::Suboptimal:
         gaugeRegion = MeterPart::GaugeRegion::Suboptimal;
         break;
-    case HTMLMeterElement::GaugeRegionEvenLessGood:
+    case HTMLMeterElement::GaugeRegion::EvenLessGood:
         gaugeRegion = MeterPart::GaugeRegion::EvenLessGood;
         break;
     }
