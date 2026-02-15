@@ -28,7 +28,6 @@
 #include "Connection.h"
 #include "OriginQuotaManager.h"
 #include "WebsiteDataType.h"
-#include <wtf/Function.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/text/WTFString.h>
 
