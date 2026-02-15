@@ -52,6 +52,13 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(FontCascade);
 
 using namespace WTF::Unicode;
 
+TextShapingContext::TextShapingContext(const FontCascade& fontCascade)
+    : hasKerningOrLigatures(fontCascade.enableKerning() || fontCascade.requiresShaping())
+    , hasWordSpacingOrLetterSpacing(fontCascade.wordSpacing() || fontCascade.letterSpacing())
+    , hasTextSpacing(!fontCascade.textAutospace().isNoAutospace())
+{
+}
+
 Markable<FontCascade::CodePath> FontCascade::s_forcedCodePath = std::nullopt;
 
 static std::atomic<unsigned> lastFontCascadeGeneration { 0 };
@@ -295,9 +302,7 @@ float FontCascade::width(const TextRun& run, SingleThreadWeakHashSet<const Font>
             glyphOverflow = nullptr;
     }
 
-    bool hasWordSpacingOrLetterSpacing = wordSpacing() || letterSpacing();
-
-    auto* cacheEntry = fonts()->glyphGeometryCache().add(run, { }, enableKerning() || requiresShaping(), hasWordSpacingOrLetterSpacing, !textAutospace().isNoAutospace());
+    auto* cacheEntry = fonts()->glyphGeometryCache().add(run, { }, TextShapingContext { *this });
 
     if (cacheEntry && cacheEntry->width) {
         if (!glyphOverflow)

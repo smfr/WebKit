@@ -39,6 +39,16 @@
 
 namespace WebCore {
 
+class FontCascade;
+
+struct TextShapingContext {
+    bool hasKerningOrLigatures { false };
+    bool hasWordSpacingOrLetterSpacing { false };
+    bool hasTextSpacing { false };
+
+    TextShapingContext(const FontCascade&);
+};
+
 namespace TextMeasurementCacheDefaults {
 static constexpr int minInterval = -3; // A cache hit pays for about 3 cache misses.
 static constexpr int maxInterval = 20; // Sampling at this interval has almost no overhead.
@@ -140,19 +150,19 @@ public:
         return addSlowCase(text, WTF::move(entry));
     }
 
-    CachedType* add(const TextRun& run, CachedType&& entry, bool hasKerningOrLigatures, bool hasWordSpacingOrLetterSpacing, bool hasTextSpacing)
+    CachedType* add(const TextRun& run, CachedType&& entry, TextShapingContext shapingContext)
     {
         // The width cache is not really profitable unless we're doing expensive glyph transformations.
-        if (!hasKerningOrLigatures)
+        if (!shapingContext.hasKerningOrLigatures)
             return nullptr;
         // Word spacing and letter spacing can change the width of a word.
-        if (hasWordSpacingOrLetterSpacing)
+        if (shapingContext.hasWordSpacingOrLetterSpacing)
             return nullptr;
         // If we allow tabs and a tab occurs inside a word, the width of the word varies based on its position on the line.
         if (run.allowTabs())
             return nullptr;
         // width calculation with text-spacing depends on context of adjacent characters.
-        if (hasTextSpacing && invalidateCacheForTextSpacing(run))
+        if (shapingContext.hasTextSpacing && invalidateCacheForTextSpacing(run))
             return nullptr;
 
         return add(run.text(), WTF::move(entry));

@@ -572,12 +572,8 @@ void FontCascadeFonts::pruneSystemFallbacks()
 
 const CachedShapedText* FontCascadeFonts::getOrCreateCachedShapedText(const TextRun& run, const FontCascade& fontCascade)
 {
-    auto hasKerningOrLigatures = fontCascade.enableKerning() || fontCascade.requiresShaping();
-    auto hasWordSpacingOrLetterSpacing = fontCascade.wordSpacing() || fontCascade.letterSpacing();
-    auto hasTextSpacing = !fontCascade.textAutospace().isNoAutospace();
-
     // FIXME: TextMeasurementCache callers use the pattern of "adding" an empty entry as a way to perform a search with the same constraints that ::add enforces (no letter-spacing, no word-spacing, etc). We should properly encapsulate these requirements in both the ::add method and a dedicated ::find method.
-    CachedShapedText* cacheEntry = m_shapedTextCache.add(run, CachedShapedText { }, hasKerningOrLigatures, hasWordSpacingOrLetterSpacing, hasTextSpacing);
+    CachedShapedText* cacheEntry = m_shapedTextCache.add(run, CachedShapedText { }, TextShapingContext { fontCascade });
 
     if (!cacheEntry)
         return nullptr;
