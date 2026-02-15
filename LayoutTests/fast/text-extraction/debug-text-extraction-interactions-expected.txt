@@ -11,10 +11,15 @@ PASS childScroller.scrollTop is 100
 PASS scrollPageError is ""
 PASS document.scrollingElement.scrollTop is 100
 PASS invalidActionError is "Failed to resolve nodeIdentifier 4294967293"
+PASS clickDisabledError is "Click target is disabled"
+PASS textInputReadonlyError is "Target is readonly"
+PASS selectDisabledMenuItemError is "Select is disabled"
+PASS readonlyField.value is "readonly"
+PASS disabledSelect.value is "Beta"
 PASS successfullyParsed is true
 
 TEST COMPLETE
-Test
+Test  Disabled
 Subject
 
 Hello world.

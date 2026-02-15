@@ -413,6 +413,32 @@ static inline String labelText(HTMLElement& element)
     return { };
 }
 
+template<typename T>
+RefPtr<T> shadowHostOrSelfInclusiveParent(Node& node)
+{
+    if (node.isInUserAgentShadowTree())
+        return dynamicDowncast<T>(node.shadowHost());
+
+    if (RefPtr element = dynamicDowncast<T>(node))
+        return element;
+
+    return dynamicDowncast<T>(node.parentElement());
+}
+
+static bool canBeEdited(Node& node)
+{
+    if (RefPtr control = shadowHostOrSelfInclusiveParent<HTMLTextFormControlElement>(node))
+        return !control->isReadOnly();
+
+    return node.isContentEditable() || node.isRootEditableElement();
+}
+
+static bool isInDisabledFormControl(Node& node)
+{
+    RefPtr control = shadowHostOrSelfInclusiveParent<HTMLFormControlElement>(node);
+    return control && control->isDisabledFormControl();
+}
+
 enum class SkipExtraction : bool {
     Self,
     SelfAndSubtree
@@ -1565,6 +1591,9 @@ static void dispatchSimulatedClick(Node& targetNode, const String& searchText, C
         }
     }
 
+    if (isInDisabledFormControl(*element))
+        return completion(false, "Click target is disabled"_s);
+
     if (!targetRectInRootView)
         targetRectInRootView = rootViewBounds(*element);
 
@@ -1592,22 +1621,30 @@ static void dispatchSimulatedClick(NodeIdentifier identifier, const String& sear
     dispatchSimulatedClick(*foundNode, searchText, WTF::move(completion));
 }
 
-static bool selectOptionByValue(NodeIdentifier identifier, const String& optionText)
+struct SelectOptionResult {
+    bool handled { false };
+    String failureReason;
+};
+
+static SelectOptionResult selectOptionByValue(NodeIdentifier identifier, const String& optionText)
 {
     RefPtr foundNode = Node::fromIdentifier(identifier);
     if (!foundNode)
-        return false;
+        return { };
 
     if (RefPtr select = dynamicDowncast<HTMLSelectElement>(*foundNode)) {
+        if (select->isDisabledFormControl())
+            return { true, "Select is disabled"_s };
+
         if (optionText.isEmpty())
-            return false;
+            return { };
 
         addBoxShadowIfNeeded(*select, "0 0 16px #34c759"_s);
         select->setValue(optionText);
-        return select->selectedIndex() != -1;
+        return { select->selectedIndex() != -1, { } };
     }
 
-    return false;
+    return { };
 }
 
 static HTMLElement* documentBodyElement(const LocalFrame& frame)
@@ -1756,6 +1793,9 @@ static void focusAndInsertText(NodeIdentifier identifier, String&& text, bool re
     if (!foundNode)
         return completion(false, invalidNodeIdentifierDescription(identifier));
 
+    if (!canBeEdited(*foundNode))
+        return completion(false, "Target is readonly"_s);
+
     RefPtr<Element> elementToFocus;
     if (RefPtr element = dynamicDowncast<Element>(*foundNode); element && element->isTextField())
         elementToFocus = element;
@@ -1811,8 +1851,12 @@ void handleInteraction(Interaction&& interaction, LocalFrame& frame, CompletionH
     }
     case Action::SelectMenuItem: {
         if (auto identifier = interaction.nodeIdentifier) {
-            if (selectOptionByValue(*identifier, interaction.text))
-                return completion(true, interactedWithSelectElementDescription);
+            if (auto [handled, failureReason] = selectOptionByValue(*identifier, interaction.text); handled) {
+                if (failureReason.isEmpty())
+                    return completion(true, interactedWithSelectElementDescription);
+
+                return completion(false, WTF::move(failureReason));
+            }
 
             return dispatchSimulatedClick(*identifier, interaction.text, WTF::move(completion));
         }
@@ -1821,8 +1865,12 @@ void handleInteraction(Interaction&& interaction, LocalFrame& frame, CompletionH
     }
     case Action::SelectText: {
         if (auto identifier = interaction.nodeIdentifier) {
-            if (selectOptionByValue(WTF::move(*identifier), interaction.text))
-                return completion(true, interactedWithSelectElementDescription);
+            if (auto [handled, failureReason] = selectOptionByValue(WTF::move(*identifier), interaction.text); handled) {
+                if (failureReason.isEmpty())
+                    return completion(true, interactedWithSelectElementDescription);
+
+                return completion(false, WTF::move(failureReason));
+            }
         }
 
         if (interaction.text.isEmpty() && !interaction.nodeIdentifier)

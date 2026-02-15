@@ -21,11 +21,18 @@
 </head>
 <body>
     <button id="test-button" aria-label="Click Me">Test</button>
+    <button id="disabled-button" aria-label="Disabled Button" disabled>Disabled</button>
     <input type="email" placeholder="Enter some text" value="foo" />
+    <input type="text" placeholder="Readonly field" value="readonly" readonly />
     <select role="menu">
         <option>One</option>
         <option selected>Two</option>
         <option>Three</option>
+    </select>
+    <select role="menu" aria-label="Disabled menu" disabled>
+        <option>Alpha</option>
+        <option selected>Beta</option>
+        <option>Gamma</option>
     </select>
     <div contenteditable="plaintext-only">
         <h3 aria-label="Heading">Subject</h3>
@@ -41,7 +48,9 @@
 
     addEventListener("load", async () => {
         textField = document.querySelector("input");
+        readonlyField = document.querySelector("input[readonly]");
         select = document.querySelector("select");
+        disabledSelect = document.querySelector("select[disabled]");
         clickCount = document.querySelector(".click-count");
         childScroller = document.querySelector(".scroller");
         document.getElementById("test-button").addEventListener("click", () => {
@@ -96,6 +105,21 @@
             nodeIdentifier: "4294967293",
         });
 
+        clickDisabledError = await UIHelper.performTextExtractionInteraction("click", {
+            nodeIdentifier: UIHelper.nodeIdentifierFromDebugText(debugText, "Disabled Button")
+        });
+
+        textInputReadonlyError = await UIHelper.performTextExtractionInteraction("textinput", {
+            nodeIdentifier: UIHelper.nodeIdentifierFromDebugText(debugText, "Readonly field"),
+            replaceAll: true,
+            text: "modified"
+        });
+
+        selectDisabledMenuItemError = await UIHelper.performTextExtractionInteraction("selectmenuitem", {
+            nodeIdentifier: UIHelper.nodeIdentifierFromDebugText(debugText, "Disabled menu"),
+            text: "Gamma"
+        });
+
         shouldBeEqualToString("clickError", "");
         shouldBeEqualToString("clickCount.textContent", "1");
         shouldBeEqualToString("textInputError", "");
@@ -109,6 +133,11 @@
         shouldBeEqualToString("scrollPageError", "");
         shouldBe("document.scrollingElement.scrollTop", "100");
         shouldBeEqualToString("invalidActionError", "Failed to resolve nodeIdentifier 4294967293");
+        shouldBeEqualToString("clickDisabledError", "Click target is disabled");
+        shouldBeEqualToString("textInputReadonlyError", "Target is readonly");
+        shouldBeEqualToString("selectDisabledMenuItemError", "Select is disabled");
+        shouldBeEqualToString("readonlyField.value", "readonly");
+        shouldBeEqualToString("disabledSelect.value", "Beta");
 
         finishJSTest();
     });
