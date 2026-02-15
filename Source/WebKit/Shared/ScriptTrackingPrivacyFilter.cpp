@@ -29,6 +29,10 @@
 #include <WebCore/RegistrableDomain.h>
 #include <WebCore/SecurityOrigin.h>
 
+#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING)
+#include "WebPrivacyHelpers.h"
+#endif
+
 namespace WebKit {
 
 static void initializeFilterRules(Vector<ScriptTrackingPrivacyHost>&& source, HostToAllowedCategoriesMap& target, WebCore::ScriptTrackingPrivacyFlags& categoriesWithAllowedHosts)
@@ -92,6 +96,11 @@ bool ScriptTrackingPrivacyFilter::shouldAllowAccess(const URL& url, const WebCor
     if (url.isEmpty())
         return false;
 
+#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING)
+    if (category == WebCore::ScriptTrackingPrivacyCategory::NetworkRequests && !isTaintedScriptURLBlockable(url))
+        return true;
+#endif
+
     auto categoryFlag = WebCore::scriptCategoryAsFlag(category);
     if (!m_categoriesWithAllowedHosts.contains(categoryFlag))
         return false;
@@ -103,6 +112,11 @@ bool ScriptTrackingPrivacyFilter::shouldBlockRequest(const URL& url, const WebCo
 {
     if (url.isEmpty())
         return true;
+
+#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING)
+    if (!isTaintedScriptURLBlockable(url))
+        return false;
+#endif
 
     auto categoryFlag = WebCore::scriptCategoryAsFlag(ScriptTrackingPrivacyCategory::NetworkRequests);
     auto result = lookup(url, topOrigin);

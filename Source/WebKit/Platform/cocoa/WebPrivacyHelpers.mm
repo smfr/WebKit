@@ -780,12 +780,18 @@ bool isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvan
     }
     return false;
 }
+
+bool isTaintedScriptURLBlockable(const URL& url)
+{
+    return IS_REQUEST_UNCONDITIONALLY_BLOCKABLE(WebCore::RegistrableDomain { url });
+}
 #else
 
 void configureForAdvancedPrivacyProtections(NSURLSession *) { }
 bool isKnownTrackerAddressOrDomain(StringView) { return false; }
 WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&) { return WebCore::IsKnownCrossSiteTracker::No; }
 bool isRequestBlockable(const WebCore::ResourceRequest&, bool) { return false; }
+bool isTaintedScriptURLBlockable(const URL&) { return false; }
 
 #endif
 
