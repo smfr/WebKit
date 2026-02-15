@@ -40,6 +40,7 @@
 #import "WKMarketplaceKit.h"
 #import "WKPreviewWindowController.h"
 #import "WKRKEntity.h"
+#import "WKSExperienceController.h"
 #import "WKSLinearMediaPlayer.h"
 #import "WKSLinearMediaTypes.h"
 #import "WKStageMode.h"

@@ -1984,6 +1984,9 @@
 		A14F9B772B68CA6C00AD9C56 /* LinearMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14F9B752B68CA6B00AD9C56 /* LinearMediaPlayer.swift */; };
 		A1555C522E0C5B9400EB2341 /* WebKitSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1555C512E0C5B9400EB2341 /* WebKitSwift.swift */; };
 		A15EEDE61E301CEE000069B0 /* WKPasswordView.h in Headers */ = {isa = PBXBuildFile; fileRef = A15EEDE41E301CEE000069B0 /* WKPasswordView.h */; };
+		A16011A42F3BF571006B369B /* WKSExperienceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16011A32F3BF571006B369B /* WKSExperienceController.swift */; };
+		A16011A62F3BF581006B369B /* WKSExperienceController.h in Headers */ = {isa = PBXBuildFile; fileRef = A16011A52F3BF581006B369B /* WKSExperienceController.h */; };
+		A16011A72F3BF5F5006B369B /* WKSExperienceController.h in Headers */ = {isa = PBXBuildFile; fileRef = A16011A52F3BF581006B369B /* WKSExperienceController.h */; };
 		A175C44A21AA3171000037D0 /* ArgumentCodersCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = A175C44921AA3170000037D0 /* ArgumentCodersCocoa.h */; };
 		A1798B3E222D97A2000764BD /* PaymentAuthorizationPresenter.h in Headers */ = {isa = PBXBuildFile; fileRef = A1798B3D222D97A2000764BD /* PaymentAuthorizationPresenter.h */; };
 		A1798B43222D98DF000764BD /* PaymentAuthorizationViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = A1798B3F222D98B6000764BD /* PaymentAuthorizationViewController.h */; };
@@ -1993,13 +1996,20 @@
 		A181A79821ACC74B0059A316 /* WebKitAdditions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A181A79721ACAC610059A316 /* WebKitAdditions.mm */; };
 		A183494224EF467800BDC9A8 /* SharedBufferReference.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CC5DB9121488E16006CB8A8 /* SharedBufferReference.h */; };
 		A188D2E52B6B0F4E00E65A08 /* WKVisibilityPropagationView.h in Headers */ = {isa = PBXBuildFile; fileRef = A188D2E22B6B0F4E00E65A08 /* WKVisibilityPropagationView.h */; };
+		A190E9422F3DB703009615AD /* WKAVContentSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = A190E9412F3DB703009615AD /* WKAVContentSource.mm */; };
+		A190E9432F3DB703009615AD /* WKAVContentSource.h in Headers */ = {isa = PBXBuildFile; fileRef = A190E9402F3DB703009615AD /* WKAVContentSource.h */; };
 		A192C25B2B844600004B8B20 /* WKSLinearMediaPlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = A14F9B742B68CA6B00AD9C56 /* WKSLinearMediaPlayer.h */; };
 		A192C25C2B844A31004B8B20 /* WKSLinearMediaTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = A14F9B612B686DD200AD9C56 /* WKSLinearMediaTypes.h */; };
 		A19DD3C01D07D16800AC823B /* _WKWebViewPrintFormatterInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A19DD3BF1D07D16800AC823B /* _WKWebViewPrintFormatterInternal.h */; };
+		A19E65B12F3C62A600A94318 /* WKSExperienceController+Transitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19E65B02F3C62A600A94318 /* WKSExperienceController+Transitions.swift */; };
 		A1A4FE5A18DCE9FA00B5EA8A /* _WKDownload.h in Headers */ = {isa = PBXBuildFile; fileRef = A1A4FE5718DCE9FA00B5EA8A /* _WKDownload.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A1A4FE5C18DCE9FA00B5EA8A /* _WKDownloadInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = A1A4FE5918DCE9FA00B5EA8A /* _WKDownloadInternal.h */; };
 		A1A4FE6118DD54A400B5EA8A /* _WKDownloadDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = A1A4FE6018DD54A400B5EA8A /* _WKDownloadDelegate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A1AE0EC32B166439008A2563 /* ExtensionCapabilityGranter.h in Headers */ = {isa = PBXBuildFile; fileRef = A1AE0EC12B1663D4008A2563 /* ExtensionCapabilityGranter.h */; };
+		A1B849362F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B849322F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.h */; };
+		A1B849372F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.h in Headers */ = {isa = PBXBuildFile; fileRef = A1B849342F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.h */; };
+		A1B849382F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.mm in Sources */ = {isa = PBXBuildFile; fileRef = A1B849332F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.mm */; };
+		A1B849392F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm in Sources */ = {isa = PBXBuildFile; fileRef = A1B849352F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm */; };
 		A1C512C9190656E500448914 /* WebPreviewLoaderClient.h in Headers */ = {isa = PBXBuildFile; fileRef = A1C512C7190656E500448914 /* WebPreviewLoaderClient.h */; };
 		A1D4D2092B7DE6D00008C40E /* PlaybackSessionInterfaceLMK.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B9EFA2B7AA21B0051676F /* PlaybackSessionInterfaceLMK.mm */; };
 		A1D4D2372B7E7FAD0008C40E /* VideoReceiverEndpointMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = A1D4D2352B7E7FAC0008C40E /* VideoReceiverEndpointMessage.h */; };
@@ -7650,6 +7660,8 @@
 		A1555C512E0C5B9400EB2341 /* WebKitSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitSwift.swift; sourceTree = "<group>"; };
 		A15EEDE31E301CEE000069B0 /* WKPasswordView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = WKPasswordView.mm; sourceTree = "<group>"; };
 		A15EEDE41E301CEE000069B0 /* WKPasswordView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WKPasswordView.h; sourceTree = "<group>"; };
+		A16011A32F3BF571006B369B /* WKSExperienceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKSExperienceController.swift; sourceTree = "<group>"; };
+		A16011A52F3BF581006B369B /* WKSExperienceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKSExperienceController.h; sourceTree = "<group>"; };
 		A175C44921AA3170000037D0 /* ArgumentCodersCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ArgumentCodersCocoa.h; sourceTree = "<group>"; };
 		A175C44B21AA331B000037D0 /* ArgumentCodersCocoa.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ArgumentCodersCocoa.mm; sourceTree = "<group>"; };
 		A1798B3D222D97A2000764BD /* PaymentAuthorizationPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PaymentAuthorizationPresenter.h; sourceTree = "<group>"; };
@@ -7665,7 +7677,10 @@
 		A181A79721ACAC610059A316 /* WebKitAdditions.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WebKitAdditions.mm; sourceTree = "<group>"; };
 		A188D2E22B6B0F4E00E65A08 /* WKVisibilityPropagationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKVisibilityPropagationView.h; sourceTree = "<group>"; };
 		A188D2E32B6B0F4E00E65A08 /* WKVisibilityPropagationView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WKVisibilityPropagationView.mm; sourceTree = "<group>"; };
+		A190E9402F3DB703009615AD /* WKAVContentSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKAVContentSource.h; sourceTree = "<group>"; };
+		A190E9412F3DB703009615AD /* WKAVContentSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WKAVContentSource.mm; sourceTree = "<group>"; };
 		A19DD3BF1D07D16800AC823B /* _WKWebViewPrintFormatterInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKWebViewPrintFormatterInternal.h; sourceTree = "<group>"; };
+		A19E65B02F3C62A600A94318 /* WKSExperienceController+Transitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WKSExperienceController+Transitions.swift"; path = "DerivedSources/WebKit/WKSExperienceController+Transitions.swift"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1A207432D8A7A92003B1A13 /* LinearMediaKit.swiftinterface */ = {isa = PBXFileReference; lastKnownFileType = text; path = LinearMediaKit.swiftinterface; sourceTree = "<group>"; };
 		A1A207442D8A7A92003B1A13 /* QuickLook_SPI_Temp.swiftinterface */ = {isa = PBXFileReference; lastKnownFileType = text; path = QuickLook_SPI_Temp.swiftinterface; sourceTree = "<group>"; };
 		A1A4FE5718DCE9FA00B5EA8A /* _WKDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKDownload.h; sourceTree = "<group>"; };
@@ -7677,6 +7692,10 @@
 		A1AC99AA2ECF0E350011617C /* MediaPlaybackTargetSerialized.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MediaPlaybackTargetSerialized.cpp; sourceTree = "<group>"; };
 		A1AE0EC12B1663D4008A2563 /* ExtensionCapabilityGranter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionCapabilityGranter.h; sourceTree = "<group>"; };
 		A1AE0EC22B1663D4008A2563 /* ExtensionCapabilityGranter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ExtensionCapabilityGranter.mm; sourceTree = "<group>"; };
+		A1B849322F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlaybackSessionInterfaceAVKit.h; sourceTree = "<group>"; };
+		A1B849332F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PlaybackSessionInterfaceAVKit.mm; sourceTree = "<group>"; };
+		A1B849342F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoPresentationInterfaceAVKit.h; sourceTree = "<group>"; };
+		A1B849352F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VideoPresentationInterfaceAVKit.mm; sourceTree = "<group>"; };
 		A1B9CA382246E54A003D6DCA /* WebPaymentCoordinatorCocoa.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WebPaymentCoordinatorCocoa.mm; sourceTree = "<group>"; };
 		A1C512C6190656E500448914 /* WebPreviewLoaderClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebPreviewLoaderClient.cpp; path = ios/WebPreviewLoaderClient.cpp; sourceTree = "<group>"; };
 		A1C512C7190656E500448914 /* WebPreviewLoaderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebPreviewLoaderClient.h; path = ios/WebPreviewLoaderClient.h; sourceTree = "<group>"; };
@@ -15030,6 +15049,7 @@
 		A1071FAD2B643ED100E9FC57 /* WebKitSwift */ = {
 			isa = PBXGroup;
 			children = (
+				A108CE642F3BEDBD00E1E28F /* AVKit */,
 				0765D1C32DEBFF460029CDD0 /* GroupActivities */,
 				F4D59BEB2DCBD862004492FB /* IdentityDocumentServices */,
 				A14F9B602B686DAE00AD9C56 /* LinearMediaKit */,
@@ -15046,6 +15066,16 @@
 				A1555C512E0C5B9400EB2341 /* WebKitSwift.swift */,
 			);
 			path = WebKitSwift;
+			sourceTree = "<group>";
+		};
+		A108CE642F3BEDBD00E1E28F /* AVKit */ = {
+			isa = PBXGroup;
+			children = (
+				A19E65B02F3C62A600A94318 /* WKSExperienceController+Transitions.swift */,
+				A16011A52F3BF581006B369B /* WKSExperienceController.h */,
+				A16011A32F3BF571006B369B /* WKSExperienceController.swift */,
+			);
+			path = AVKit;
 			sourceTree = "<group>";
 		};
 		A14F9B332B68467F00AD9C56 /* MarketplaceKit */ = {
@@ -15073,12 +15103,18 @@
 			children = (
 				A1798B4F2230A0FE000764BD /* PaymentAuthorizationController.h */,
 				A1798B502230A0FE000764BD /* PaymentAuthorizationController.mm */,
+				A1B849322F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.h */,
+				A1B849332F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.mm */,
 				1F6B9EF82B7AA20B0051676F /* PlaybackSessionInterfaceLMK.h */,
 				1F6B9EFA2B7AA21B0051676F /* PlaybackSessionInterfaceLMK.mm */,
+				A1B849342F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.h */,
+				A1B849352F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm */,
 				1F6B9F002B7AA36F0051676F /* VideoPresentationInterfaceLMK.h */,
 				1F6B9F022B7AA4490051676F /* VideoPresentationInterfaceLMK.mm */,
 				A1D4D2352B7E7FAC0008C40E /* VideoReceiverEndpointMessage.h */,
 				A1D4D2342B7E7FAC0008C40E /* VideoReceiverEndpointMessage.mm */,
+				A190E9402F3DB703009615AD /* WKAVContentSource.h */,
+				A190E9412F3DB703009615AD /* WKAVContentSource.mm */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -18392,6 +18428,7 @@
 				BCC43ABB127B95DC00317F16 /* PlatformPopupMenuData.h in Headers */,
 				07CF2D512C2147A50064DF23 /* PlatformWritingToolsUtilities.h in Headers */,
 				F4BE0D7727AAE1CB005F0323 /* PlaybackSessionContextIdentifier.h in Headers */,
+				A1B849362F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.h in Headers */,
 				1F6B9EF92B7AA2160051676F /* PlaybackSessionInterfaceLMK.h in Headers */,
 				CDA29A1B1CBDBF4100901CCF /* PlaybackSessionManager.h in Headers */,
 				CDA29A291CBEB67A00901CCF /* PlaybackSessionManagerMessages.h in Headers */,
@@ -18626,6 +18663,7 @@
 				51632FDB2C4A1CA30038F759 /* UserNotificationsSPI.h in Headers */,
 				466BB8682B9C1F2E0010907E /* UserScriptIdentifier.h in Headers */,
 				466BB86A2B9C215B0010907E /* UserStyleSheetIdentifier.h in Headers */,
+				A1B849372F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.h in Headers */,
 				1F6B9F042B7AA5E00051676F /* VideoPresentationInterfaceLMK.h in Headers */,
 				52D5A1B01C57495A00DE34A3 /* VideoPresentationManagerProxy.h in Headers */,
 				A1D4D2372B7E7FAD0008C40E /* VideoReceiverEndpointMessage.h in Headers */,
@@ -19032,6 +19070,7 @@
 				577739952580388F0059348B /* WKASCAuthorizationPresenterDelegate.h in Headers */,
 				512F58F612A88A5400629530 /* WKAuthenticationChallenge.h in Headers */,
 				512F58F812A88A5400629530 /* WKAuthenticationDecisionListener.h in Headers */,
+				A190E9432F3DB703009615AD /* WKAVContentSource.h in Headers */,
 				37C4C08D1814AC5C003688B9 /* WKBackForwardList.h in Headers */,
 				37C4C0951814B9E6003688B9 /* WKBackForwardListInternal.h in Headers */,
 				37C4C08718149C5B003688B9 /* WKBackForwardListItem.h in Headers */,
@@ -19372,6 +19411,7 @@
 				B65437952EF31C3400ED9855 /* WKSeparatedImageView.h in Headers */,
 				BC407604124FF0270068F20A /* WKSerializedScriptValue.h in Headers */,
 				1ADE46B31954EC61000F7985 /* WKSessionStateRef.h in Headers */,
+				A16011A72F3BF5F5006B369B /* WKSExperienceController.h in Headers */,
 				BCDDB32B124EC2AB0048D13C /* WKSharedAPICast.h in Headers */,
 				1DB01943211CF002009FB3E8 /* WKShareSheet.h in Headers */,
 				513E462D1AD837560016234A /* WKSharingServicePickerDelegate.h in Headers */,
@@ -19569,6 +19609,7 @@
 				07A7EAD32DC7FBEB007E7680 /* WKMarketplaceKit.h in Headers */,
 				B66F88C22B6D202600FB1734 /* WKPreviewWindowController.h in Headers */,
 				5289527F2C7077B000D0357E /* WKRKEntity.h in Headers */,
+				A16011A62F3BF581006B369B /* WKSExperienceController.h in Headers */,
 				A14F9B762B68CA6C00AD9C56 /* WKSLinearMediaPlayer.h in Headers */,
 				A14F9B632B686DD300AD9C56 /* WKSLinearMediaTypes.h in Headers */,
 				EEA52F482D70545300D578B5 /* WKStageMode.h in Headers */,
@@ -21786,6 +21827,7 @@
 				DD4BDE7B2CA38213001A3339 /* ObjectiveCBlockConversions.swift in Sources */,
 				1CB9138F2E8C6D500002BCB7 /* PlatformUnifiedSource1-ARC.mm in Sources */,
 				1CB913932E8C71920002BCB7 /* PlatformUnifiedSource2-ARC.mm in Sources */,
+				A1B849382F3D9F02004256A1 /* PlaybackSessionInterfaceAVKit.mm in Sources */,
 				A1D4D2092B7DE6D00008C40E /* PlaybackSessionInterfaceLMK.mm in Sources */,
 				07AE8FCA2F3BCFB400A4C0CA /* PositionInformationForWebPage.mm in Sources */,
 				C15CBB3723F37ECB00300CC7 /* PreferenceObserver.mm in Sources */,
@@ -22088,6 +22130,7 @@
 				FA580B3B2DA64B5F005E4965 /* UnifiedSource180.cpp in Sources */,
 				078B04442CF1149200B453A6 /* URLSchemeHandler.swift in Sources */,
 				0D653B402F3471960022454D /* USDModel.swift in Sources */,
+				A1B849392F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm in Sources */,
 				52CDC5C62731DA0D00A3E3EB /* VirtualAuthenticatorManager.cpp in Sources */,
 				52F4B46A27E1197700FFD129 /* VirtualAuthenticatorUtils.mm in Sources */,
 				5252A51A27E048740094BEB9 /* VirtualHidConnection.cpp in Sources */,
@@ -22141,6 +22184,7 @@
 				9356F2DF2152B72300E6D5DF /* WebSWOriginStore.cpp in Sources */,
 				9356F2E12152B76600E6D5DF /* WebSWServerConnection.cpp in Sources */,
 				9356F2E02152B75200E6D5DF /* WebSWServerToContextConnection.cpp in Sources */,
+				A190E9422F3DB703009615AD /* WKAVContentSource.mm in Sources */,
 				C6A4CA0C2252899800169289 /* WKBundlePageMac.mm in Sources */,
 				2D931169212F61B200044BFE /* WKContentView.mm in Sources */,
 				2D93116A212F61B500044BFE /* WKContentViewInteraction.mm in Sources */,
@@ -22227,6 +22271,8 @@
 				EB0FBFA72B66C61E00269CC1 /* WKMarketplaceKit.swift in Sources */,
 				B66F88C02B6D1F2300FB1734 /* WKPreviewWindowController.swift in Sources */,
 				528952812C70797900D0357E /* WKRKEntity.swift in Sources */,
+				A19E65B12F3C62A600A94318 /* WKSExperienceController+Transitions.swift in Sources */,
+				A16011A42F3BF571006B369B /* WKSExperienceController.swift in Sources */,
 				EEA52F492D7055A700D578B5 /* WKStageMode.swift in Sources */,
 				440DB5B72C1914DC0021639B /* WKTextAnimationManagerIOS.swift in Sources */,
 			);

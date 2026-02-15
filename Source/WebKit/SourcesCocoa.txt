@@ -110,9 +110,12 @@ Platform/cocoa/WebKitAdditions.mm @nonARC @no-unify
 Platform/cocoa/WebPrivacyHelpers.mm @nonARC
 
 Platform/ios/PaymentAuthorizationController.mm @nonARC
+Platform/ios/PlaybackSessionInterfaceAVKit.mm @nonARC @no-unify
 Platform/ios/PlaybackSessionInterfaceLMK.mm @nonARC @no-unify
+Platform/ios/VideoPresentationInterfaceAVKit.mm @nonARC @no-unify
 Platform/ios/VideoPresentationInterfaceLMK.mm @nonARC
 Platform/ios/VideoReceiverEndpointMessage.mm @nonARC
+Platform/ios/WKAVContentSource.mm @nonARC @no-unify
 
 Platform/mac/MenuUtilities.mm @nonARC
 Platform/mac/StringUtilities.mm @nonARC

@@ -121,6 +121,13 @@ void PlaybackSessionInterfaceIOS::stopObservingNowPlayingMetadata()
 {
 }
 
+#if HAVE(AVEXPERIENCECONTROLLER)
+WKAVContentSource *PlaybackSessionInterfaceIOS::contentSource() const
+{
+    return nullptr;
+}
+#endif
+
 #if !RELEASE_LOG_DISABLED
 uint64_t PlaybackSessionInterfaceIOS::logIdentifier() const
 {

@@ -1057,6 +1057,7 @@ WEBKIT_ADDITIONS_SWIFT_FILES = \
 	UIWindowScene+Extras.swift \
 	WKWebView+WKBannerViewOverlay.swift \
 	WKWebView+SystemTextExtraction.swift \
+	WKSExperienceController+Transitions.swift \
 #
 
 $(WEBKIT_ADDITIONS_SWIFT_FILES): %.swift : %.swift.in
