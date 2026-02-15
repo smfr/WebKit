@@ -312,10 +312,10 @@ WK_GAMECONTROLLERUI_LDFLAGS_xrsimulator = $(WK_GAMECONTROLLERUI_LDFLAGS$(WK_XROS
 WK_GAMECONTROLLERUI_LDFLAGS_XROS_SINCE_26 = -Wl,-upward_framework,GameControllerUI -Wl,-weak_framework,GameControllerUI;
 
 WK_REALITY_LDFLAGS =
-WK_REALITY_LDFLAGS[sdk=macosx*] =  -weak_framework RealityKit -weak_framework _USDKit_RealityKit
+WK_REALITY_LDFLAGS[sdk=macosx*] =
 WK_REALITY_LDFLAGS[sdk=macosx26*] =
 WK_REALITY_LDFLAGS[sdk=macosx15*] =
-WK_REALITY_LDFLAGS[sdk=iphoneos*] =  -weak_framework RealityKit -weak_framework _USDKit_RealityKit
+WK_REALITY_LDFLAGS[sdk=iphoneos*] = -weak_framework RealityKit -weak_framework _USDKit_RealityKit
 WK_REALITY_LDFLAGS[sdk=iphoneos26*] =
 WK_REALITY_LDFLAGS[sdk=appletv*] =
 WK_REALITY_LDFLAGS[sdk=watchos*] =
