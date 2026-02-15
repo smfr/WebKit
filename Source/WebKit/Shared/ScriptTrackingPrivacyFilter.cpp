@@ -96,7 +96,7 @@ bool ScriptTrackingPrivacyFilter::shouldAllowAccess(const URL& url, const WebCor
     if (url.isEmpty())
         return false;
 
-#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING)
+#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING) && ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
     if (category == WebCore::ScriptTrackingPrivacyCategory::NetworkRequests && !isTaintedScriptURLBlockable(url))
         return true;
 #endif
@@ -113,7 +113,7 @@ bool ScriptTrackingPrivacyFilter::shouldBlockRequest(const URL& url, const WebCo
     if (url.isEmpty())
         return true;
 
-#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING)
+#if ENABLE(TRACKER_NETWORK_REQUEST_BLOCKING) && ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
     if (!isTaintedScriptURLBlockable(url))
         return false;
 #endif
