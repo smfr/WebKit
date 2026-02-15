@@ -39,6 +39,7 @@
 #import "NativeWebWheelEvent.h"
 #import "NavigationState.h"
 #import "PlatformWritingToolsUtilities.h"
+#import "RemoteLayerTreeCommitBundle.h"
 #import "RemoteLayerTreeNode.h"
 #import "TextExtractionFilter.h"
 #import "UndoOrRedo.h"
@@ -803,6 +804,14 @@ void PageClientImpl::setEditableElementIsFocused(bool editableElementIsFocused)
 void PageClientImpl::scrollingNodeScrollViewDidScroll(WebCore::ScrollingNodeID)
 {
     protect(m_impl)->suppressContentRelativeChildViews(WebViewImpl::ContentRelativeChildViewsSuppressionType::TemporarilyRemove);
+}
+
+void PageClientImpl::didCommitMainFrameData(const MainFrameData& mainFrameData)
+{
+    PageClientImplCocoa::didCommitMainFrameData(mainFrameData);
+#if ENABLE(SCROLL_STRETCH_NOTIFICATIONS)
+    [webView() _topScrollStretchDidChange:mainFrameData.topScrollStretch];
+#endif
 }
 
 void PageClientImpl::willBeginViewGesture()

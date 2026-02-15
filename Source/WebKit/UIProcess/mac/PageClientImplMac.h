@@ -207,6 +207,8 @@ private:
 
     void scrollingNodeScrollViewDidScroll(WebCore::ScrollingNodeID) override;
 
+    void didCommitMainFrameData(const MainFrameData&) override;
+
     void registerInsertionUndoGrouping() override;
 
     void createPDFHUD(PDFPluginIdentifier, WebCore::FrameIdentifier, const WebCore::IntRect&) override;

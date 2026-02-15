@@ -853,6 +853,9 @@ public:
     void updateBannerViewForPanGesture(NSGestureRecognizerState);
     void updateBannerViewFrame();
 #endif
+#if ENABLE(SCROLL_STRETCH_NOTIFICATIONS)
+    void topScrollStretchDidChange(uint64_t topScrollStretch);
+#endif
 
 #if ENABLE(VIDEO)
     void showCaptionDisplaySettings(WebCore::HTMLMediaElementIdentifier, const WebCore::ResolvedCaptionDisplaySettingsOptions&, CompletionHandler<void(Expected<void, WebCore::ExceptionData>&&)>&&);
@@ -1159,6 +1162,10 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     RetainPtr<CAShapeLayer> m_bannerViewMask;
     CGFloat m_bannerViewHeight { 0 };
     bool m_canShowBannerViewOverlay { false };
+#endif
+
+#if ENABLE(SCROLL_STRETCH_NOTIFICATIONS)
+    uint64_t m_cachedTopScrollStretch { 0 };
 #endif
 
 #if HAVE(INLINE_PREDICTIONS)
