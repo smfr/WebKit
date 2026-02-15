@@ -529,9 +529,6 @@ public:
     RetainPtr<CocoaView> platformView() const final;
 #endif
 
-#if ENABLE(WINDOW_PROXY_PROPERTY_ACCESS_NOTIFICATION)
-#endif
-
     std::optional<WebCore::SecurityOriginData> openerOrigin;
 };
 
