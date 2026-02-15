@@ -922,9 +922,6 @@ webkit.org/b/156077 inspector/heap/getRemoteObject.html [ Skip ]
 webkit.org/b/99036 pointer-lock/pointerlockchange-event-on-lock-lost.html [ Timeout ]
 webkit.org/b/99036 pointer-lock/pointerlockelement-null-when-pending.html [ Timeout ]
 
-webkit.org/b/207711 [ Debug ] imported/w3c/web-platform-tests/encoding/legacy-mb-korean/euc-kr/euckr-decode-cseuckr.html [ Timeout ]
-webkit.org/b/207711 [ Debug ] imported/w3c/web-platform-tests/encoding/legacy-mb-korean/euc-kr/euckr-decode-iso-ir-149.html [ Timeout ]
-
 webkit.org/b/210796 http/tests/resourceLoadStatistics/clear-in-memory-and-persistent-store-one-hour.html [ Skip ] # Timeout
 
 webkit.org/b/211566 http/tests/resourceLoadStatistics/exemptDomains/app-bound-domains-exempt-from-cookie-blocking-between-each-other.html [ Skip ]
@@ -1532,3 +1529,5 @@ webkit.org/b/306384 fast/css/object-position/object-position-img.html [ ImageOnl
 webkit.org/b/306384 fast/table/row-background-image.html [ ImageOnlyFailure ]
 webkit.org/b/306384 imported/w3c/web-platform-tests/quirks/line-height-in-list-item.html [ ImageOnlyFailure ]
 webkit.org/b/306384 scrollbars/corner-resizer-window-inactive.html [ ImageOnlyFailure ]
+
+webkit.org/b/307945 [ Debug ] platform/glib/damage/basic-propagation-002.html [ Pass Crash ]
