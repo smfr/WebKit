@@ -487,12 +487,14 @@ void ScrollingEffectsController::stopRubberBanding()
 
 bool ScrollingEffectsController::startRubberBandAnimation(const FloatSize& initialVelocity, const FloatSize& initialOverscroll)
 {
-    if (m_currentAnimation)
-        m_currentAnimation->stop();
+    if (CheckedPtr currentAnimation = m_currentAnimation.get())
+        currentAnimation->stop();
 
     m_currentAnimation = makeUnique<ScrollAnimationRubberBand>(*this);
     auto targetOffset = m_client.rubberBandTargetOffset();
-    bool started = downcast<ScrollAnimationRubberBand>(*m_currentAnimation).startRubberBandAnimation(initialVelocity, initialOverscroll, targetOffset);
+
+    CheckedPtr currentAnimation = m_currentAnimation.get();
+    bool started = downcast<ScrollAnimationRubberBand>(currentAnimation.get())->startRubberBandAnimation(initialVelocity, initialOverscroll, targetOffset);
     LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::startRubberBandAnimation() - animation " << *m_currentAnimation << " targetOffset " << targetOffset << " started " << started);
     return started;
 }
@@ -525,8 +527,8 @@ void ScrollingEffectsController::startRubberBandSnapBack()
     if (stretchAmount.isZero())
         return;
 
-    if (m_currentAnimation)
-        m_currentAnimation->stop();
+    if (CheckedPtr currentAnimation = m_currentAnimation.get())
+        currentAnimation->stop();
 
     LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::startRubberBandSnapBack() - stretchAmount " << stretchAmount);
     startRubberBandAnimation({ }, stretchAmount);

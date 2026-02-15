@@ -109,7 +109,7 @@ bool ScrollingEffectsController::startKeyboardScroll(const KeyboardScroll& scrol
 
 void ScrollingEffectsController::finishKeyboardScroll(bool immediate)
 {
-    if (auto* animationKeyboard = dynamicDowncast<ScrollAnimationKeyboard>(m_currentAnimation.get()))
+    if (CheckedPtr animationKeyboard = dynamicDowncast<ScrollAnimationKeyboard>(m_currentAnimation.get()))
         animationKeyboard->finishKeyboardScroll(immediate);
 }
 
@@ -128,7 +128,7 @@ bool ScrollingEffectsController::startAnimatedScrollToDestination(FloatPoint sta
 
 bool ScrollingEffectsController::retargetAnimatedScroll(FloatPoint newDestinationOffset)
 {
-    auto* animationSmooth = dynamicDowncast<ScrollAnimationSmooth>(m_currentAnimation.get());
+    CheckedPtr animationSmooth = dynamicDowncast<ScrollAnimationSmooth>(m_currentAnimation.get());
     if (!animationSmooth)
         return false;
     
@@ -294,7 +294,7 @@ float ScrollingEffectsController::adjustedScrollDestination(ScrollEventAxis axis
 #if ENABLE(KINETIC_SCROLLING)
 bool ScrollingEffectsController::processWheelEventForKineticScrolling(const PlatformWheelEvent& event)
 {
-    if (auto* kineticAnimation = dynamicDowncast<ScrollAnimationKinetic>(m_currentAnimation.get())) {
+    if (CheckedPtr kineticAnimation = dynamicDowncast<ScrollAnimationKinetic>(m_currentAnimation.get())) {
         m_previousKineticAnimationInfo.startTime = kineticAnimation->startTime();
         m_previousKineticAnimationInfo.initialOffset = kineticAnimation->initialOffset();
         m_previousKineticAnimationInfo.initialVelocity = kineticAnimation->initialVelocity();

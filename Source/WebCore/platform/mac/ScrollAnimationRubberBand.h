@@ -33,6 +33,7 @@ namespace WebCore {
 
 class ScrollAnimationRubberBand final: public ScrollAnimation {
     WTF_MAKE_TZONE_ALLOCATED(ScrollAnimationRubberBand);
+    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(ScrollAnimationRubberBand);
 public:
     ScrollAnimationRubberBand(ScrollAnimationClient&);
     virtual ~ScrollAnimationRubberBand();
