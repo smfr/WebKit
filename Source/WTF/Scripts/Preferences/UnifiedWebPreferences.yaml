@@ -6961,11 +6961,11 @@ ScriptTrackingPrivacyNetworkRequestBlockingEnabled:
   exposed: [ WebKit ]
   defaultValue:
     WebKitLegacy:
-      default: false
+      default: true
     WebKit:
-      default: false
+      default: true
     WebCore:
-      default: false
+      default: true
 
 ScriptTrackingPrivacyNetworkRequestBlockingLatchEnabled:
   type: bool
