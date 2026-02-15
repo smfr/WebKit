@@ -1076,7 +1076,7 @@ public:
 
     inline bool hasBrowsingContext() const; // Defined in DocumentInlines.h.
 
-    Document& contextDocument() const;
+    Document& NODELETE contextDocument() const;
     void setContextDocument(Ref<Document>&& document) { m_contextDocument = WTF::move(document); }
     
     OptionSet<ParserContentPolicy> parserContentPolicy() const { return m_parserContentPolicy; }

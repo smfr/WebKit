@@ -4,7 +4,6 @@ accessibility/AXObjectCache.cpp
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
 dom/Position.cpp
-dom/TreeScope.cpp
 editing/Editing.cpp
 [ iOS ] editing/cocoa/EditorCocoa.mm
 [ iOS ] editing/ios/DictationCommandIOS.cpp

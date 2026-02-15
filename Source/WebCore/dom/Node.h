@@ -206,9 +206,9 @@ public:
     Ref<Node> cloneNode(bool deep) const;
     WEBCORE_EXPORT ExceptionOr<Ref<Node>> cloneNodeForBindings(bool deep) const;
 
-    virtual const AtomString& localName() const;
-    virtual const AtomString& namespaceURI() const;
-    virtual const AtomString& prefix() const;
+    virtual const AtomString& NODELETE localName() const;
+    virtual const AtomString& NODELETE namespaceURI() const;
+    virtual const AtomString& NODELETE prefix() const;
     virtual ExceptionOr<void> setPrefix(const AtomString&);
     WEBCORE_EXPORT ExceptionOr<void> normalize();
 
@@ -221,12 +221,12 @@ public:
     WEBCORE_EXPORT String textContent(bool convertBRsToNewlines = false) const;
     WEBCORE_EXPORT ExceptionOr<void> setTextContent(String&&);
     
-    Node* lastDescendant() const;
-    Node* firstDescendant() const;
+    Node* NODELETE lastDescendant() const;
+    Node* NODELETE firstDescendant() const;
 
     // From the NonDocumentTypeChildNode - https://dom.spec.whatwg.org/#nondocumenttypechildnode
-    WEBCORE_EXPORT Element* previousElementSibling() const;
-    WEBCORE_EXPORT Element* nextElementSibling() const;
+    WEBCORE_EXPORT Element* NODELETE previousElementSibling() const;
+    WEBCORE_EXPORT Element* NODELETE nextElementSibling() const;
 
     // From the ChildNode - https://dom.spec.whatwg.org/#childnode
     ExceptionOr<void> before(FixedVector<NodeOrString>&&);
@@ -285,8 +285,8 @@ public:
     void setNeedsSVGRendererUpdate(bool flag) { setStateFlag(StateFlag::NeedsSVGRendererUpdate, flag); }
 
     // If this node is in a shadow tree, returns its shadow host. Otherwise, returns null.
-    WEBCORE_EXPORT Element* shadowHost() const;
-    ShadowRoot* containingShadowRoot() const;
+    WEBCORE_EXPORT Element* NODELETE shadowHost() const;
+    ShadowRoot* NODELETE containingShadowRoot() const;
     inline ShadowRoot* shadowRoot() const; // Defined in ElementRareData.h
     bool isClosedShadowHidden(const Node&) const;
 
@@ -337,7 +337,7 @@ public:
     Node& getRootNode(const GetRootNodeOptions&) const;
     
     inline WebCoreOpaqueRoot opaqueRoot() const;
-    WebCoreOpaqueRoot traverseToOpaqueRoot() const;
+    WebCoreOpaqueRoot NODELETE traverseToOpaqueRoot() const;
 
     void queueTaskKeepingThisNodeAlive(TaskSource, Function<void ()>&&);
     void queueTaskToDispatchEvent(TaskSource, Ref<Event>&&);
@@ -350,11 +350,11 @@ public:
     bool selfOrPrecedingNodesAffectDirAuto() const { return hasStateFlag(StateFlag::SelfOrPrecedingNodesAffectDirAuto); }
     void setSelfOrPrecedingNodesAffectDirAuto(bool flag) { setStateFlag(StateFlag::SelfOrPrecedingNodesAffectDirAuto, flag); }
 
-    TextDirection effectiveTextDirection() const;
-    void setEffectiveTextDirection(TextDirection);
+    TextDirection NODELETE effectiveTextDirection() const;
+    void NODELETE setEffectiveTextDirection(TextDirection);
 
     bool usesEffectiveTextDirection() const { return rareDataBitfields().usesEffectiveTextDirection; }
-    void setUsesEffectiveTextDirection(bool);
+    void NODELETE setUsesEffectiveTextDirection(bool);
 
     // Returns the enclosing event parent Element (or self) that, when clicked, would trigger a navigation.
     WEBCORE_EXPORT Element* enclosingLinkEventParentOrSelf();
@@ -376,7 +376,7 @@ public:
     bool isUserActionElement() const { return hasStateFlag(StateFlag::IsUserActionElement); }
     void setUserActionElement(bool flag) { setStateFlag(StateFlag::IsUserActionElement, flag); }
 
-    bool inRenderedDocument() const;
+    bool NODELETE inRenderedDocument() const;
     bool needsStyleRecalc() const { return styleValidity() != Style::Validity::Valid || hasInvalidRenderer(); }
     Style::Validity styleValidity() const { return styleBitfields().styleValidity(); }
     bool hasInvalidRenderer() const { return hasStateFlag(StateFlag::HasInvalidRenderer); }
@@ -429,11 +429,11 @@ public:
     WEBCORE_EXPORT LayoutRect absoluteBoundingRect(bool* isReplaced);
     inline IntRect pixelSnappedAbsoluteBoundingRect(bool* isReplaced); // Defined in NodeInlines.h
 
-    WEBCORE_EXPORT unsigned computeNodeIndex() const;
+    WEBCORE_EXPORT unsigned NODELETE computeNodeIndex() const;
 
     // Returns the DOM ownerDocument attribute. This method never returns null, except in the case
     // of a Document node.
-    WEBCORE_EXPORT Document* ownerDocument() const;
+    WEBCORE_EXPORT Document* NODELETE ownerDocument() const;
 
     // Returns the document associated with this node. A document node returns itself.
     inline Document& document() const; // Defined in NodeDocument.h
@@ -600,10 +600,10 @@ public:
     void notifyMutationObserversNodeWillDetach();
 
     unsigned connectedSubframeCount() const { return rareDataBitfields().connectedSubframeCount; }
-    void incrementConnectedSubframeCount(unsigned amount = 1);
-    void decrementConnectedSubframeCount(unsigned amount = 1);
-    void updateAncestorConnectedSubframeCountForRemoval() const;
-    void updateAncestorConnectedSubframeCountForInsertion() const;
+    void NODELETE incrementConnectedSubframeCount(unsigned amount = 1);
+    void NODELETE decrementConnectedSubframeCount(unsigned amount = 1);
+    void NODELETE updateAncestorConnectedSubframeCountForRemoval() const;
+    void NODELETE updateAncestorConnectedSubframeCountForInsertion() const;
 
 #if ENABLE(JIT)
     static constexpr ptrdiff_t typeFlagsMemoryOffset() { return OBJECT_OFFSETOF(Node, m_typeBitFields); }
@@ -803,8 +803,8 @@ private:
     void trackForDebugging();
     void materializeRareData();
 
-    Vector<Ref<MutationObserverRegistration>>* mutationObserverRegistry();
-    WeakHashSet<MutationObserverRegistration>* transientMutationObserverRegistry();
+    Vector<Ref<MutationObserverRegistration>>* NODELETE mutationObserverRegistry();
+    WeakHashSet<MutationObserverRegistration>* NODELETE transientMutationObserverRegistry();
 
     void adjustStyleValidity(Style::Validity, Style::InvalidationMode);
 
@@ -837,7 +837,7 @@ private:
     CompactUniquePtrTuple<NodeRareData, uint16_t> m_rareDataWithBitfields;
 };
 
-bool connectedInSameTreeScope(const Node*, const Node*);
+bool NODELETE connectedInSameTreeScope(const Node*, const Node*);
 
 enum TreeType { Tree, ShadowIncludingTree, ComposedTree };
 template<TreeType = Tree> ContainerNode* parent(const Node&);

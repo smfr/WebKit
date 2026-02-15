@@ -60,7 +60,7 @@ private:
     friend class CharacterData;
     ProcessingInstruction(Document&, String&& target, String&& data);
 
-    String NODELETE nodeName() const override;
+    String nodeName() const override;
     Ref<Node> cloneNodeInternal(Document&, CloningOperation, CustomElementRegistry*) const override;
     SerializedNode serializeNode(CloningOperation) const override;
 
