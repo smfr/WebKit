@@ -90,12 +90,6 @@ template<> struct VectorTraits<WebCore::HTMLConstructionSiteTask> : SimpleClassV
 
 namespace WebCore {
 
-enum WhitespaceMode {
-    AllWhitespace,
-    NotAllWhitespace,
-    WhitespaceUnknown
-};
-
 class AtomHTMLToken;
 class CustomElementRegistry;
 class Document;
