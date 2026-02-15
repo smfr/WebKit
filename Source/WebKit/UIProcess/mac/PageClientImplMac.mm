@@ -803,9 +803,6 @@ void PageClientImpl::setEditableElementIsFocused(bool editableElementIsFocused)
 void PageClientImpl::scrollingNodeScrollViewDidScroll(WebCore::ScrollingNodeID)
 {
     protect(m_impl)->suppressContentRelativeChildViews(WebViewImpl::ContentRelativeChildViewsSuppressionType::TemporarilyRemove);
-#if ENABLE(BANNER_VIEW_OVERLAYS)
-    protect(m_impl)->updateBannerViewFrame();
-#endif
 }
 
 void PageClientImpl::willBeginViewGesture()
