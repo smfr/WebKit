@@ -8398,8 +8398,6 @@ imported/w3c/web-platform-tests/css/CSS2/normal-flow/max-width-014.xht [ ImageOn
 imported/w3c/web-platform-tests/css/CSS2/normal-flow/min-width-014.xht [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/CSS2/normal-flow/width-014.xht [ ImageOnlyFailure ]
 
-webkit.org/b/263872 imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/layout-changes-on-percentage-based-timeline.html [ Pass ]
-
 webkit.org/b/303341 imported/w3c/web-platform-tests/css/css-contain/content-visibility/content-visibility-intrinsic-size-001.html [ Pass ImageOnlyFailure ]
 
 webkit.org/b/303507 http/tests/xmlhttprequest/origin-exact-matching.html [ Timeout ]
@@ -8485,8 +8483,6 @@ webkit.org/b/307091 inspector/network/intercept-aborted-request.html [ Skip ]
 media/caption-display-settings/caption-display-settings-default-anchorBounds.html [ Skip ]
 
 webkit.org/b/307582 compositing/overflow/rtl-scrollbar-layer-positioning.html [ Failure ]
-
-webkit.org/b/307835 streams/blob-and-tee.html [ Skip ]
 
 webkit.org/b/307882 webgl/lose-context-after-context-lost.html [ Failure ]
 

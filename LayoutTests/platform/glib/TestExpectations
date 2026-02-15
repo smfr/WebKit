@@ -5215,13 +5215,10 @@ webkit.org/b/307294 media/video-currenttime-monotonic.html [ Pass Timeout ]
 webkit.org/b/307294 media/video-pause-immediately.html [ Pass Timeout ]
 webkit.org/b/307294 media/video-playbackrate.html [ Pass Timeout ]
 webkit.org/b/307294 media/video-seek-past-end-paused.html [ Timeout Pass ]
-webkit.org/b/307294 media/video-zoom.html [ ImageOnlyFailure Timeout ]
 
 webkit.org/b/294295 fullscreen/full-screen-request-removed-with-raf.html [ Pass Timeout ]
 
 webkit.org/b/307368 fast/repaint/iframe-from-display-none-repaint.html [ Pass ImageOnlyFailure ]
-
-webkit.org/b/307586 imported/w3c/web-platform-tests/css/css-view-transitions/no-raf-while-render-blocked.html [ Failure ]
 
 # Note: this randomly crashes on the EWS (which runs Release+Asserts) but passes always on post-commit (Release)
 webkit.org/b/307597 imported/w3c/web-platform-tests/service-workers/service-worker/redirected-response.https.html [ Crash Pass ]

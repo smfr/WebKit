@@ -38,8 +38,6 @@ fast/forms/month/month-editable-components/month-editable-components-input-and-c
 fast/forms/month/month-editable-components/month-editable-components-user-invalid.html [ Pass ]
 fast/forms/month/month-editable-components/month-editable-components-user-valid.html [ Pass ]
 
-imported/w3c/web-platform-tests/scroll-animations/scroll-timelines/layout-changes-on-percentage-based-timeline.html [ Pass ]
-
 fast/forms/time/time-editable-components [ Pass ]
 
 imported/w3c/web-platform-tests/webvtt/rendering/cues-with-video/processing-model/bidi/u06E9_no_strong_dir.html [ Pass ]
