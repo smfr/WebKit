@@ -298,7 +298,7 @@ inline void AccessibilityObject::initializeAncestorFlags(const OptionSet<AXAnces
     m_ancestorFlags.add(flags);
 }
 
-inline std::optional<AXID> AccessibilityObject::treeID() const
+inline std::optional<AXTreeID> AccessibilityObject::treeID() const
 {
     auto* cache = axObjectCache();
     return cache ? std::optional { cache->treeID() } : std::nullopt;

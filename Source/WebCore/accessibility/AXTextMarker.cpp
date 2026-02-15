@@ -319,7 +319,7 @@ AXTextMarkerRange::AXTextMarkerRange(AXTextMarker&& start, AXTextMarker&& end)
     m_end = reverse ? WTF::move(start) : WTF::move(end);
 }
 
-AXTextMarkerRange::AXTextMarkerRange(std::optional<AXID> treeID, std::optional<AXID> objectID, unsigned start, unsigned end)
+AXTextMarkerRange::AXTextMarkerRange(std::optional<AXTreeID> treeID, std::optional<AXID> objectID, unsigned start, unsigned end)
 {
     if (start > end)
         std::swap(start, end);

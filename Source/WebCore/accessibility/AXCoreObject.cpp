@@ -2078,13 +2078,10 @@ Color defaultColor()
     return color.get();
 }
 
-bool performCustomActionPress(std::optional<AXID> treeID, AXID targetID)
+bool performCustomActionPress(AXTreeID treeID, AXID targetID)
 {
-    if (!treeID)
-        return false;
-
     return retrieveValueFromMainThreadWithTimeoutAndDefault([treeID, targetID] () -> bool {
-        if (WeakPtr<AXObjectCache> cache = AXTreeStore<AXObjectCache>::axObjectCacheForID(*treeID)) {
+        if (WeakPtr<AXObjectCache> cache = AXTreeStore<AXObjectCache>::axObjectCacheForID(treeID)) {
             if (RefPtr object = cache->objectForID(targetID))
                 return object->press();
         }

@@ -67,6 +67,7 @@ header: <wtf/JSONValues.h>
 header: <wtf/ObjectIdentifier.h>
 template: class WebKit::WebURLSchemeHandler
 template: enum class WebCore::AXIDType
+template: enum class WebCore::AXTreeIDType
 template: struct WebCore::BackgroundFetchRecordIdentifierType
 template: struct WebCore::NodeIdentifierType
 template: struct WebCore::JSHandleIdentifierType

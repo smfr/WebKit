@@ -74,7 +74,7 @@ class AccessibilityObject : public AXCoreObject {
 public:
     virtual ~AccessibilityObject();
 
-    std::optional<AXID> treeID() const final;
+    std::optional<AXTreeID> treeID() const final;
     String debugDescriptionInternal(bool, std::optional<OptionSet<AXDebugStringOption>> = std::nullopt) const final;
     virtual String extraDebugInfo() const { return emptyString(); }
 

@@ -478,7 +478,7 @@ public:
     String debugDescription(OptionSet<AXDebugStringOption> options) const { return debugDescriptionInternal(false, { options }); }
 
     inline AXID objectID() const { return m_id; }
-    virtual std::optional<AXID> treeID() const = 0;
+    virtual std::optional<AXTreeID> treeID() const = 0;
     virtual ProcessID processID() const = 0;
 
     // When the corresponding WebCore object that this accessible object
@@ -1817,7 +1817,7 @@ Color defaultColor();
 
 // Performs a press action on the target object identified by treeID and targetID.
 // Handles the tree lookup and main thread execution. Returns true if the press succeeded.
-bool performCustomActionPress(std::optional<AXID> treeID, AXID targetID);
+bool performCustomActionPress(AXTreeID, AXID targetID);
 
 // Intended to work with size-types (like IntSize) or rect-types (like LayoutRect).
 template <typename SizeOrRectType>
