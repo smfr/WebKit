@@ -60,7 +60,7 @@ public:
     void decrementCheckedPtrCount() const final { CanMakeCheckedPtr::decrementCheckedPtrCount(); }
     void setDidBeginCheckedPtrDeletion() final { CanMakeCheckedPtr::setDidBeginCheckedPtrDeletion(); }
 
-    enum ExecutionType { ASYNC_EXECUTION, IN_ORDER_EXECUTION };
+    enum class ExecutionType : uint8_t { Async, InOrder };
     void queueScriptForExecution(ScriptElement&, LoadableScript&, ExecutionType);
     bool hasPendingScripts() const { return !m_scriptsToExecuteSoon.isEmpty() || !m_scriptsToExecuteInOrder.isEmpty() || !m_pendingAsyncScripts.isEmpty(); }
     void suspend();
