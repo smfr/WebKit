@@ -58,9 +58,6 @@ NS_SWIFT_UI_ACTOR
 - (void)continueRangeSelectionAtPoint:(NSPoint)point;
 - (void)endRangeSelectionAtPoint:(NSPoint)point;
 
-// FIXME: (rdar://170015885) Remove this declaration and its definition when possible.
-- (NSDraggingSession *)selectionManager:(NSTextSelectionManager *)selectionManager makeDraggingSessionWithGesture:(NSGestureRecognizer *)gesture;
-
 @end
 
 NS_HEADER_AUDIT_END(nullability, sendability)

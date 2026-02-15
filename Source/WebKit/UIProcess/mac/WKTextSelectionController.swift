@@ -294,19 +294,10 @@ extension WKTextSelectionController {
 
         currentRangeSelectionGranularity = granularity
 
-        let webGranularity: WebCore.TextGranularity = switch granularity {
-        case .character: .CharacterGranularity
-        case .word: .WordGranularity
-        case .line: .LineGranularity
-        case .sentence: .SentenceGranularity
-        case .paragraph: .ParagraphGranularity
-        @unknown default: .CharacterGranularity
-        }
-
         Task.immediate {
             await page.selectText(
                 at: WebCore.IntPoint(point),
-                by: webGranularity,
+                by: .init(granularity),
                 isInteractingWithFocusedElement: true // FIXME: Properly handle the case where this isn't actually true.
             )
         }
@@ -325,19 +316,10 @@ extension WKTextSelectionController {
             return
         }
 
-        let webGranularity: WebCore.TextGranularity = switch currentRangeSelectionGranularity {
-        case .character: .CharacterGranularity
-        case .word: .WordGranularity
-        case .line: .LineGranularity
-        case .sentence: .SentenceGranularity
-        case .paragraph: .ParagraphGranularity
-        @unknown default: .CharacterGranularity
-        }
-
         Task.immediate {
             await page.updateSelection(
                 withExtentPoint: WebCore.IntPoint(point),
-                by: webGranularity,
+                by: .init(currentRangeSelectionGranularity),
                 isInteractingWithFocusedElement: true, // FIXME: Properly handle the case where this isn't actually true.
                 source: .Mouse
             )
@@ -359,14 +341,19 @@ extension WKTextSelectionController {
 
         currentRangeSelectionGranularity = nil
     }
+}
 
-    @objc(selectionManager:makeDraggingSessionWithGesture:)
-    func selectionManager(
-        _ selectionManager: NSTextSelectionManager,
-        makeDraggingSessionWithGesture gesture: NSGestureRecognizer
-    ) -> NSDraggingSession {
-        // This function exists to satisfy a `respondsToSelector(_:)` check, but is never actually called.
-        fatalError("This function should never be called")
+extension WebCore.TextGranularity {
+    fileprivate init(_ value: NSTextSelection.Granularity) {
+        self =
+            switch value {
+            case .character: .CharacterGranularity
+            case .word: .WordGranularity
+            case .line: .LineGranularity
+            case .sentence: .SentenceGranularity
+            case .paragraph: .ParagraphGranularity
+            @unknown default: .CharacterGranularity
+            }
     }
 }
 
