@@ -52,9 +52,12 @@ LineLayoutResult RangeBasedLineBuilder::layoutInlineContent(const LineInput& lin
     if (hasInlineBoxesOnly(m_inlineBoxCount, numberOfInlineItems)) {
         Line::RunList inlineBoxRuns;
         inlineBoxRuns.reserveCapacity(numberOfInlineItems);
+        auto hasDecoration = false;
         for (auto& inlineItem : m_inlineItemList) {
             ASSERT(inlineItem.isInlineBoxStartOrEnd());
             inlineBoxRuns.append({ Line::Run(inlineItem, inlineItem.firstLineStyle(), { }) });
+            if (inlineItem.isInlineBoxStart())
+                hasDecoration |= !!formattingContext().geometryForBox(inlineItem.layoutBox()).marginBorderAndPaddingStart();
         }
 
         auto lineRect = lineInput.initialLogicalRect;
@@ -68,7 +71,7 @@ LineLayoutResult RangeBasedLineBuilder::layoutInlineContent(const LineInput& lin
             , { }
             , { isFirstFormattedLineCandidate ? IsFirstFormattedLine::Yes : IsFirstFormattedLine::No, { } }
             , { }
-            , { LineLayoutResult::InlineContentEnding::Generic }
+            , { hasDecoration ? std::optional(LineLayoutResult::InlineContentEnding::Generic) : std::nullopt }
             , m_inlineBoxCount
             , { }
             , { }
