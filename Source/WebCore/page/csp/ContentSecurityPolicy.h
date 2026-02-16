@@ -57,6 +57,22 @@ class OrdinalNumber;
 
 namespace WebCore {
 
+// CodePosition captures source file location for CSP violation reporting.
+// This is used to preserve source location across async boundaries (e.g., microtasks).
+struct CodePosition {
+    String sourceURL;
+    OrdinalNumber line;
+    OrdinalNumber column;
+
+    CodePosition() = default;
+    CodePosition(const String& url, OrdinalNumber l, OrdinalNumber c)
+        : sourceURL(url), line(l), column(c) { }
+    CodePosition(const String& url, const TextPosition& pos)
+        : sourceURL(url), line(pos.m_line), column(pos.m_column) { }
+
+    bool isEmpty() const { return sourceURL.isEmpty() && line == OrdinalNumber::beforeFirst(); }
+};
+
 class ContentSecurityPolicyDirective;
 class ContentSecurityPolicyDirectiveList;
 class ContentSecurityPolicySource;
@@ -241,6 +257,10 @@ public:
     const HashAlgorithmSetCollection& hashesToReport();
 
     void setIsReportingToConsoleEnabled(bool value) { m_isReportingToConsoleEnabled = value; }
+
+    // Captures the current JavaScript source location from the call stack.
+    // Used to preserve source location across async boundaries for CSP violation reporting.
+    WEBCORE_EXPORT static std::optional<CodePosition> getCurrentCodePosition();
 
 private:
     void logToConsole(const String& message, const String& contextURL = String(), const OrdinalNumber& contextLine = OrdinalNumber::beforeFirst(), const OrdinalNumber& contextColumn = OrdinalNumber::beforeFirst(), JSC::JSGlobalObject* = nullptr) const;

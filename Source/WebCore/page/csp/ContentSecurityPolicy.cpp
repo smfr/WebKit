@@ -887,6 +887,21 @@ String ContentSecurityPolicy::createURLForReporting(const URL& url, const String
     return SecurityOrigin::create(url)->toString();
 }
 
+std::optional<CodePosition> ContentSecurityPolicy::getCurrentCodePosition()
+{
+    auto stack = createScriptCallStack(JSExecState::currentState(), 2);
+    if (auto* callFrame = stack->firstNonNativeCallFrame()) {
+        if (callFrame->lineNumber()) {
+            return CodePosition {
+                callFrame->preRedirectURL().isEmpty() ? callFrame->sourceURL() : callFrame->preRedirectURL(),
+                OrdinalNumber::fromOneBasedInt(callFrame->lineNumber()),
+                OrdinalNumber::fromOneBasedInt(callFrame->columnNumber())
+            };
+        }
+    }
+    return std::nullopt;
+}
+
 void ContentSecurityPolicy::reportViolation(const ContentSecurityPolicyDirective& violatedDirective, const String& blockedURL, const String& consoleMessage, JSC::JSGlobalObject* state, StringView sourceContent) const
 {
     // FIXME: Extract source file, and position from JSC::ExecState.
