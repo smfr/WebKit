@@ -70,11 +70,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
 {
+    using namespace PAL;
+
     return adoptNS([allocAVInterfaceTimelineSegmentInstance() initWithTimeRange:kCMTimeRangeZero auxiliaryContent:NO marked:NO requiresLinearPlayback:NO identifier:nil]);
 }
 
 - (instancetype)initWithModel:(WebCore::PlaybackSessionModel&)model
 {
+    using namespace PAL;
+
     self = [super init];
     if (!self)
         return nil;
@@ -82,7 +86,7 @@ static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
     _model = model;
 
     _timeRange = kCMTimeRangeZero;
-    _currentPlaybackPosition = PAL::kCMTimeZero;
+    _currentPlaybackPosition = kCMTimeZero;
     _segments = [NSArray arrayWithObject:emptyTimelineSegment().get()];
     _currentAudioOptionIndex = NSNotFound;
     _currentLegibleOptionIndex = NSNotFound;
