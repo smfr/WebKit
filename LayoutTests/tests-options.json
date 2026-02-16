@@ -3080,6 +3080,9 @@
     "imported/w3c/web-platform-tests/fetch/metadata/tools/templates/window-location.sub.html": [
         "slow"
     ],
+    "imported/w3c/web-platform-tests/fetch/range/cache-revalidate-construct-range-response.html": [
+        "slow"
+    ],
     "imported/w3c/web-platform-tests/fetch/range/non-matching-range-response.html": [
         "slow"
     ],
