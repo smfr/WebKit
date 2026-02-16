@@ -32,7 +32,7 @@ import AVKit_Private
 @implementation
 extension WKSExperienceController {
     @nonobjc
-    let experienceController: AVExperienceController
+    final let experienceController: AVExperienceController
 
     @objc(initWithContentSource:)
     init(contentSource: AVPlayerViewControllerContentSource) {
