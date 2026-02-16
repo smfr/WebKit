@@ -26,7 +26,7 @@ import OSLog
 import WebKit
 import simd
 
-#if canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
 @_weakLinked @_spi(RealityCoreTextureProcessingAPI) internal import RealityCoreTextureProcessing
