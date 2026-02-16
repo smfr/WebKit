@@ -547,7 +547,6 @@ bool CodeBlock::finishCreation(VM& vm, ScriptExecutable* ownerExecutable, Unlink
         LINK(OpIteratorNext, callLinkInfo)
         LINK(OpCallVarargs, callLinkInfo)
         LINK(OpTailCallVarargs, callLinkInfo)
-        LINK(OpTailCallForwardArguments, callLinkInfo)
         LINK(OpConstructVarargs, callLinkInfo)
         LINK(OpSuperConstructVarargs, callLinkInfo)
         LINK(OpCallIgnoreResult, callLinkInfo)
