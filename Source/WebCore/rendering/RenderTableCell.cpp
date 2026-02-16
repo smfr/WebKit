@@ -1643,7 +1643,12 @@ void RenderTableCell::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoin
     // Paint our cell background.
     paintBackgroundsBehindCell(paintInfo, paintOffset, this, paintOffset);
 
-    backgroundPainter.paintBoxShadow(paintRect, style(), Style::ShadowStyle::Inset);
+    // For collapsed borders, we expand from inner edge to outer edge for inset shadow painting.
+    LayoutRect insetShadowRect = paintRect;
+    if (table->collapseBorders())
+        insetShadowRect.expand(RectEdges<LayoutUnit> { borderTop(), borderRight(), borderBottom(), borderLeft() });
+
+    backgroundPainter.paintBoxShadow(insetShadowRect, style(), Style::ShadowStyle::Inset);
 
     if (!style().border().hasBorder() || table->collapseBorders())
         return;
