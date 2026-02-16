@@ -4127,6 +4127,15 @@
     "imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/module/inline-async-execorder.html": [
         "slow"
     ],
+    "imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/module/inline-async-onload.html": [
+        "slow"
+    ],
+    "imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/module/inline-defer-onload.html": [
+        "slow"
+    ],
+    "imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/module/inline-no-async-onload.html": [
+        "slow"
+    ],
     "imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/moving-between-documents/after-prepare-createHTMLDocument-fetch-error-external-classic.html": [
         "slow"
     ],

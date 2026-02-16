@@ -12760,6 +12760,7 @@
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/crossorigin-root-missingheader.sub.html",
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/crossorigin-root-same.sub.html",
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/crossorigin-root-wrongheader.sub.html",
+        "web-platform-tests/html/semantics/scripting-1/the-script-element/module/dynamic-import/microtasks/worklet-ref.https.html",
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/errorhandling-parseerror-dependent.html",
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/errorhandling-parseerror-dependentmultiple.html",
         "web-platform-tests/html/semantics/scripting-1/the-script-element/module/errorhandling-parseerror-root.html",
