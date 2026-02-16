@@ -602,14 +602,14 @@ inline bool RenderStyle::preserveNewline() const
     return preserveNewline(whiteSpaceCollapse());
 }
 
-inline bool RenderStyle::preserves3D() const
-{
-    return usedTransformStyle3D() == TransformStyle3D::Preserve3D;
-}
-
 inline bool RenderStyle::affectsTransform() const
 {
-    return hasTransform() || hasOffsetPath() || hasRotate() || hasScale() || hasTranslate();
+    return !transform().isNone()
+        || !offsetPath().isNone()
+        || !offsetPath().isNone()
+        || !rotate().isNone()
+        || !scale().isNone()
+        || !translate().isNone();
 }
 
 // ignore non-standard ::-webkit-scrollbar when standard properties are in use
@@ -631,11 +631,6 @@ inline bool RenderStyle::shouldPlaceVerticalScrollbarOnLeft() const
 inline bool RenderStyle::specifiesColumns() const
 {
     return !columnCount().isAuto() || !columnWidth().isAuto() || !hasInlineColumnAxis();
-}
-
-inline bool RenderStyle::autoWrap() const
-{
-    return textWrapMode() != TextWrapMode::NoWrap;
 }
 
 inline bool RenderStyle::hasExplicitlySetBorderRadius() const
@@ -881,11 +876,6 @@ inline bool RenderStyle::isInterCharacterRubyPosition() const
     return rubyPosition == RubyPosition::InterCharacter || rubyPosition == RubyPosition::LegacyInterCharacter;
 }
 
-inline bool generatesBox(const RenderStyle& style)
-{
-    return style.display() != Style::DisplayType::None && style.display() != Style::DisplayType::Contents;
-}
-
 inline bool isNonVisibleOverflow(Overflow overflow)
 {
     return overflow == Overflow::Hidden || overflow == Overflow::Scroll || overflow == Overflow::Clip;
@@ -909,11 +899,13 @@ inline bool shouldApplyLayoutContainment(const RenderStyle& style, const Element
         || style.contentVisibility() == ContentVisibility::Auto;
     if (!hasContainment)
         return false;
+
     // Giving an element layout containment has no effect if any of the following are true:
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its principal box is an internal table box other than table-cell
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
+
+    if (!style.display().doesGenerateBox())
         return false;
     if (style.display().isInternalTableBox() && style.display() != Style::DisplayType::TableCell)
         return false;
@@ -929,14 +921,16 @@ inline bool shouldApplySizeContainment(const RenderStyle& style, const Element& 
         || (style.contentVisibility() == ContentVisibility::Auto && !element.isRelevantToUser());
     if (!hasContainment)
         return false;
+
     // Giving an element size containment has no effect if any of the following are true:
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its inner display type is table
     //   if its principal box is an internal table box
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
+
+    if (!style.display().doesGenerateBox())
         return false;
-    if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
+    if (style.display().isTableBox())
         return false;
     if (style.display().isInternalTableBox())
         return false;
@@ -949,14 +943,16 @@ inline bool shouldApplyInlineSizeContainment(const RenderStyle& style, const Ele
 {
     if (!style.usedContain().contains(Style::ContainValue::InlineSize))
         return false;
+
     // Giving an element inline-size containment has no effect if any of the following are true:
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its inner display type is table
     //   if its principal box is an internal table box
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
+
+    if (!style.display().doesGenerateBox())
         return false;
-    if (style.display() == Style::DisplayType::BlockTable || style.display() == Style::DisplayType::InlineTable)
+    if (style.display().isTableBox())
         return false;
     if (style.display().isInternalTableBox())
         return false;
@@ -981,11 +977,13 @@ inline bool shouldApplyPaintContainment(const RenderStyle& style, const Element&
         || style.contentVisibility() == ContentVisibility::Auto;
     if (!hasContainment)
         return false;
+
     // Giving an element paint containment has no effect if any of the following are true:
     //   if the element does not generate a principal box (as is the case with display: contents or display: none)
     //   if its principal box is an internal table box other than table-cell
     //   if its principal box is an internal ruby box or a non-atomic inline-level box
-    if (style.display() == Style::DisplayType::None || style.display() == Style::DisplayType::Contents)
+
+    if (!style.display().doesGenerateBox())
         return false;
     if (style.display().isInternalTableBox() && style.display() != Style::DisplayType::TableCell)
         return false;
@@ -1014,76 +1012,10 @@ inline bool isSkippedContentRoot(const RenderStyle& style, const Element& elemen
 
 // MARK: has*() functions
 
-inline bool RenderStyle::hasAnimations() const
-{
-    return !animations().isInitial();
-}
-
-inline bool RenderStyle::hasAnimationsOrTransitions() const
-{
-    return hasAnimations() || hasTransitions();
-}
-
-#if HAVE(CORE_MATERIAL)
-inline bool RenderStyle::hasAppleVisualEffect() const
-{
-    return appleVisualEffect() != AppleVisualEffect::None;
-}
-
-inline bool RenderStyle::hasAppleVisualEffectRequiringBackdropFilter() const
-{
-    return appleVisualEffectNeedsBackdrop(appleVisualEffect());
-}
-
-#endif
-inline bool RenderStyle::hasAspectRatio() const
-{
-    return aspectRatio().hasRatio();
-}
-
-inline bool RenderStyle::hasAutoLeftAndRight() const
-{
-    return left().isAuto() && right().isAuto();
-}
-
-inline bool RenderStyle::hasAutoLengthContainIntrinsicSize() const
-{
-    return containIntrinsicWidth().hasAuto() || containIntrinsicHeight().hasAuto();
-}
-
-inline bool RenderStyle::hasAutoTopAndBottom() const
-{
-    return top().isAuto() && bottom().isAuto();
-}
-
-inline bool RenderStyle::hasBackdropFilter() const
-{
-    return !backdropFilter().isNone();
-}
-
 inline bool RenderStyle::hasBackground() const
 {
-    return visitedDependentBackgroundColor().isVisible() || hasBackgroundImage();
-}
-
-inline bool RenderStyle::hasBackgroundImage() const
-{
-    return Style::hasImageInAnyLayer(backgroundLayers());
-}
-
-inline bool RenderStyle::hasBlendMode() const
-{
-    return blendMode() != BlendMode::Normal;
-}
-
-inline bool RenderStyle::hasBorder() const
-{
-    return border().hasBorder();
-}
-
-inline bool RenderStyle::hasBorderImage() const
-{
-    return border().hasBorderImage();
+    return visitedDependentBackgroundColor().isVisible()
+        || Style::hasImageInAnyLayer(backgroundLayers());
 }
 
 inline bool RenderStyle::hasBorderImageOutsets() const
@@ -1091,54 +1023,9 @@ inline bool RenderStyle::hasBorderImageOutsets() const
     return !borderImageSource().isNone() && !borderImageOutset().isZero();
 }
 
-inline bool RenderStyle::hasBorderRadius() const
-{
-    return border().hasBorderRadius();
-}
-
-inline bool RenderStyle::hasBoxReflect() const
-{
-    return !boxReflect().isNone();
-}
-
-inline bool RenderStyle::hasBoxShadow() const
-{
-    return !boxShadow().isNone();
-}
-
-inline bool RenderStyle::hasClip() const
-{
-    return !clip().isAuto();
-}
-
-inline bool RenderStyle::hasClipPath() const
-{
-    return !clipPath().isNone();
-}
-
-inline bool RenderStyle::hasContent() const
-{
-    return content().isData();
-}
-
-inline bool RenderStyle::hasFill() const
-{
-    return !fill().isNone();
-}
-
-inline bool RenderStyle::hasFilter() const
-{
-    return !filter().isNone();
-}
-
 inline bool RenderStyle::hasInFlowPosition() const
 {
     return position() == PositionType::Relative || position() == PositionType::Sticky;
-}
-
-inline bool RenderStyle::hasIsolation() const
-{
-    return isolation() != Isolation::Auto;
 }
 
 inline bool RenderStyle::hasMarkers() const
@@ -1149,16 +1036,6 @@ inline bool RenderStyle::hasMarkers() const
 inline bool RenderStyle::hasMask() const
 {
     return Style::hasImageInAnyLayer(maskLayers()) || !maskBorderSource().isNone();
-}
-
-inline bool RenderStyle::hasOffsetPath() const
-{
-    return !WTF::holdsAlternative<CSS::Keyword::None>(offsetPath());
-}
-
-inline bool RenderStyle::hasOpacity() const
-{
-    return !opacity().isOpaque();
 }
 
 inline bool RenderStyle::hasOutline() const
@@ -1176,24 +1053,9 @@ inline bool RenderStyle::hasOutOfFlowPosition() const
     return position() == PositionType::Absolute || position() == PositionType::Fixed;
 }
 
-inline bool RenderStyle::hasPerspective() const
-{
-    return !perspective().isNone();
-}
-
 inline bool RenderStyle::hasPositionedMask() const
 {
     return Style::hasImageInAnyLayer(maskLayers());
-}
-
-inline bool RenderStyle::hasRotate() const
-{
-    return !rotate().isNone();
-}
-
-inline bool RenderStyle::hasScale() const
-{
-    return !scale().isNone();
 }
 
 inline bool RenderStyle::hasScrollTimelines() const
@@ -1201,54 +1063,29 @@ inline bool RenderStyle::hasScrollTimelines() const
     return !scrollTimelines().isEmpty() || !scrollTimelineNames().isNone();
 }
 
-inline bool RenderStyle::hasSnapPosition() const
-{
-    return !scrollSnapAlign().isNone();
-}
-
 inline bool RenderStyle::hasStaticBlockPosition(bool horizontal) const
 {
-    return horizontal ? hasAutoTopAndBottom() : hasAutoLeftAndRight();
+    return horizontal
+        ? (top().isAuto() && bottom().isAuto())
+        : (left().isAuto() && right().isAuto());
 }
 
 inline bool RenderStyle::hasStaticInlinePosition(bool horizontal) const
 {
-    return horizontal ? hasAutoLeftAndRight() : hasAutoTopAndBottom();
-}
-
-inline bool RenderStyle::hasStroke() const
-{
-    return !stroke().isNone();
-}
-
-inline bool RenderStyle::hasTextCombine() const
-{
-    return textCombine() != TextCombine::None;
-}
-
-inline bool RenderStyle::hasTextShadow() const
-{
-    return !textShadow().isNone();
-}
-
-inline bool RenderStyle::hasTransform() const
-{
-    return !transform().isNone() || hasOffsetPath();
+    return horizontal
+        ? (left().isAuto() && right().isAuto())
+        : (top().isAuto() && bottom().isAuto());
 }
 
 inline bool RenderStyle::hasTransformRelatedProperty() const
 {
-    return hasTransform() || hasRotate() || hasScale() || hasTranslate() || transformStyle3D() == TransformStyle3D::Preserve3D || hasPerspective();
-}
-
-inline bool RenderStyle::hasTransitions() const
-{
-    return !transitions().isInitial();
-}
-
-inline bool RenderStyle::hasTranslate() const
-{
-    return !translate().isNone();
+    return !transform().isNone()
+        || !offsetPath().isNone()
+        || !rotate().isNone()
+        || !scale().isNone()
+        || !translate().isNone()
+        || transformStyle3D() == TransformStyle3D::Preserve3D
+        || !perspective().isNone();
 }
 
 inline bool RenderStyle::hasUsedAppearance() const
@@ -1269,16 +1106,6 @@ inline bool RenderStyle::hasViewportConstrainedPosition() const
 inline bool RenderStyle::hasViewTimelines() const
 {
     return !viewTimelines().isEmpty() || !viewTimelineNames().isNone();
-}
-
-inline bool RenderStyle::hasVisibleBorder() const
-{
-    return border().hasVisibleBorder();
-}
-
-inline bool RenderStyle::hasVisibleBorderDecoration() const
-{
-    return hasVisibleBorder() || hasBorderImage();
 }
 
 inline bool RenderStyle::hasPositiveStrokeWidth() const
@@ -1308,12 +1135,6 @@ inline bool RenderStyle::isFixedTableLayout() const
             || logicalWidth().isFillAvailable() 
             || logicalWidth().isMinContent());
 }
-
-inline bool RenderStyle::isFloating() const
-{
-    return floating() != Float::None;
-}
-
 
 inline bool RenderStyle::isOverflowVisible() const
 {

@@ -181,7 +181,7 @@ RenderPtr<RenderText> Text::createTextRenderer(const RenderStyle& style)
     if (isSVGText(*this) || isSVGShadowText(*this))
         return createRenderer<RenderSVGInlineText>(*this, data());
 
-    if (style.hasTextCombine())
+    if (style.textCombine() != TextCombine::None)
         return createRenderer<RenderCombineText>(*this, data());
 
     return createRenderer<RenderText>(RenderObject::Type::Text, *this, data());

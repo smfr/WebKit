@@ -204,7 +204,9 @@ static bool gridItemHasValidWidth(const Style::PreferredSize& width)
 
 static bool canComputeAutomaticInlineSize(const RenderBox& gridItem, const StyleSelfAlignmentData& usedJustifySelf)
 {
-    return usedJustifySelf.position() == ItemPosition::Normal && !protect(gridItem.element())->isReplaced() && !gridItem.style().hasAspectRatio();
+    return usedJustifySelf.position() == ItemPosition::Normal
+        && !protect(gridItem.element())->isReplaced()
+        && !gridItem.style().aspectRatio().hasRatio();
 }
 
 static bool gridItemHasValidHeight(const Style::PreferredSize& height)
@@ -224,7 +226,9 @@ static bool gridItemHasValidHeight(const Style::PreferredSize& height)
 
 static bool canComputeAutomaticBlockSize(const RenderBox& gridItem, const StyleSelfAlignmentData& usedAlignSelf)
 {
-    return usedAlignSelf.position() == ItemPosition::Normal && !protect(gridItem.element())->isReplaced() && !gridItem.style().hasAspectRatio();
+    return usedAlignSelf.position() == ItemPosition::Normal
+        && !protect(gridItem.element())->isReplaced()
+        && !gridItem.style().aspectRatio().hasRatio();
 }
 
 static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& renderGrid, ReasonCollectionMode reasonCollectionMode)
@@ -508,7 +512,7 @@ static EnumSet<GridAvoidanceReason> gridLayoutAvoidanceReason(const RenderGrid& 
         if (gridItem->isOutOfFlowPositioned())
             ADD_REASON_AND_RETURN_IF_NEEDED(GridHasOutOfFlowChild, reasons, reasonCollectionMode);
 
-        if (gridItemStyle->hasAspectRatio())
+        if (gridItemStyle->aspectRatio().hasRatio())
             ADD_REASON_AND_RETURN_IF_NEEDED(GridItemHasAspectRatio, reasons, reasonCollectionMode);
 
         if (!gridItemStyle->isOverflowVisible())

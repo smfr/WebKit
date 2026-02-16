@@ -2156,7 +2156,7 @@ inline void ExtractorCustom::extractBorderImageWidthSerialization(ExtractorState
 
 inline Ref<CSSValue> ExtractorCustom::extractTransform(ExtractorState& state)
 {
-    if (!state.style.hasTransform())
+    if (state.style.transform().isNone() && state.style.offsetPath().isNone())
         return createCSSValue(state.pool, state.style, CSS::Keyword::None { });
 
     if (state.renderer)
@@ -2173,7 +2173,7 @@ inline Ref<CSSValue> ExtractorCustom::extractTransform(ExtractorState& state)
 
 inline void ExtractorCustom::extractTransformSerialization(ExtractorState& state, StringBuilder& builder, const CSS::SerializationContext& context)
 {
-    if (!state.style.hasTransform()) {
+    if (state.style.transform().isNone() && state.style.offsetPath().isNone()) {
         serializationForCSS(builder, context, state.style, CSS::Keyword::None { });
         return;
     }
@@ -2934,7 +2934,7 @@ inline RefPtr<CSSValue> ExtractorCustom::extractOffsetShorthand(ExtractorState& 
     bool nonInitialDistance = state.style.offsetDistance() != ComputedStyle::initialOffsetDistance();
     bool nonInitialRotate = state.style.offsetRotate() != ComputedStyle::initialOffsetRotate();
 
-    if (state.style.hasOffsetPath() || nonInitialDistance || nonInitialRotate)
+    if (!state.style.offsetPath().isNone() || nonInitialDistance || nonInitialRotate)
         innerList.append(createCSSValue(state.pool, state.style, state.style.offsetPath()));
 
     if (nonInitialDistance)

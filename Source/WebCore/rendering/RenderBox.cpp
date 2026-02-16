@@ -166,7 +166,7 @@ void RenderBox::willBeDestroyed()
         frame().eventHandler().stopAutoscrollTimer(true);
 
     if (hasInitializedStyle()) {
-        if (style().hasSnapPosition())
+        if (!style().scrollSnapAlign().isNone())
             view().unregisterBoxWithScrollSnapPositions(*this);
         if (style().containerType() != ContainerType::Normal)
             view().unregisterContainerQueryBox(*this);
@@ -294,8 +294,8 @@ void RenderBox::styleWillChange(Style::Difference diff, const RenderStyle& newSt
     } else if (isBody())
         view().repaintRootContents();
 
-    bool boxContributesSnapPositions = newStyle.hasSnapPosition();
-    if (boxContributesSnapPositions || (oldStyle && oldStyle->hasSnapPosition())) {
+    bool boxContributesSnapPositions = !newStyle.scrollSnapAlign().isNone();
+    if (boxContributesSnapPositions || (oldStyle && !oldStyle->scrollSnapAlign().isNone())) {
         if (boxContributesSnapPositions)
             view().registerBoxWithScrollSnapPositions(*this);
         else
@@ -506,7 +506,7 @@ void RenderBox::updateFromStyle()
     if (isDocElementRenderer || isViewObject)
         setHasVisibleBoxDecorations(true);
 
-    setFloating(!isOutOfFlowPositioned() && styleToUse.isFloating());
+    setFloating(!isOutOfFlowPositioned() && styleToUse.floating() != Float::None);
 
     // We also handle <body> and <html>, whose overflow applies to the viewport.
     if (!(effectiveOverflowX() == Overflow::Visible && effectiveOverflowY() == Overflow::Visible) && !isDocElementRenderer && isRenderBlock()) {
@@ -566,7 +566,7 @@ bool RenderBox::computeHasTransformRelatedProperty(const RenderStyle& styleToUse
     if (!parentRenderer)
         return false;
 
-    return parentRenderer->style().preserves3D();
+    return parentRenderer->style().usedTransformStyle3D() == TransformStyle3D::Preserve3D;
 }
 
 void RenderBox::layout()
@@ -712,7 +712,7 @@ void RenderBox::constrainLogicalMinMaxSizesByAspectRatio(LayoutUnit& computedMin
     // a size of the initial containing block and the “stretch-fit” sizing of non-replaced blocks if they have definite values.
     // See https://www.w3.org/TR/css-sizing-3/#definite
     const RenderStyle& styleToUse = style();
-    ASSERT(styleToUse.hasAspectRatio() || isRenderReplacedWithIntrinsicRatio());
+    ASSERT(styleToUse.aspectRatio().hasRatio() || isRenderReplacedWithIntrinsicRatio());
     auto logicalSize = dimension == ConstrainDimension::Width ? styleToUse.logicalWidth() : styleToUse.logicalHeight();
     // https://www.w3.org/TR/css-sizing-4/#aspect-ratio-minimum
     if (minimumSizeType == MinimumSizeIsAutomaticContentBased::Yes) {
@@ -769,7 +769,7 @@ LayoutUnit RenderBox::constrainLogicalWidthByMinMax(LayoutUnit logicalWidth, Lay
     }
     computedMinWidth = computeLogicalWidthUsing(logicalMinWidth, availableWidth, cb);
 
-    if (styleToUse.hasAspectRatio())
+    if (styleToUse.aspectRatio().hasRatio())
         constrainLogicalMinMaxSizesByAspectRatio(computedMinWidth, computedMaxWidth, logicalWidth, minimumSizeType, ConstrainDimension::Width);
 
     logicalWidth = std::min(logicalWidth, computedMaxWidth);
@@ -797,7 +797,7 @@ LayoutUnit RenderBox::constrainLogicalHeightByMinMax(LayoutUnit logicalHeight, s
     auto computedLogicalMinHeight = computeLogicalHeightUsing(logicalMinHeight, intrinsicContentHeight);
     auto maxHeight = computedLogicalMaxHeight.value_or(LayoutUnit::max());
     auto minHeight = computedLogicalMinHeight.value_or(LayoutUnit());
-    if (styleToUse.hasAspectRatio())
+    if (styleToUse.aspectRatio().hasRatio())
         constrainLogicalMinMaxSizesByAspectRatio(minHeight, maxHeight, logicalHeight, minimumSizeType, ConstrainDimension::Height);
     logicalHeight = std::min(logicalHeight, maxHeight);
     return std::max(logicalHeight, minHeight);
@@ -1231,7 +1231,9 @@ bool RenderBox::hasAlwaysPresentScrollbar(ScrollbarOrientation orientation) cons
 
 bool RenderBox::shouldInvalidatePreferredWidths() const
 {
-    return style().paddingStart().isPercentOrCalculated() || style().paddingEnd().isPercentOrCalculated() || (style().hasAspectRatio() && (hasRelativeLogicalHeight() || (isFlexItem() && hasStretchedLogicalHeight())));
+    return style().paddingStart().isPercentOrCalculated()
+        || style().paddingEnd().isPercentOrCalculated()
+        || (style().aspectRatio().hasRatio() && (hasRelativeLogicalHeight() || (isFlexItem() && hasStretchedLogicalHeight())));
 }
 
 ScrollPosition RenderBox::scrollPosition() const
@@ -1626,7 +1628,7 @@ bool RenderBox::hitTestClipPath(const HitTestLocation& hitTestLocation, const La
 
 bool RenderBox::hitTestBorderRadius(const HitTestLocation& hitTestLocation, const LayoutPoint& accumulatedOffset) const
 {
-    if (isRenderView() || !style().hasBorderRadius())
+    if (isRenderView() || !style().border().hasBorderRadius())
         return true;
 
     LayoutPoint adjustedLocation = accumulatedOffset + location();
@@ -1681,7 +1683,7 @@ BleedAvoidance RenderBox::determineBleedAvoidance(GraphicsContext& context) cons
 
     const RenderStyle& style = this->style();
 
-    if (!style.hasBackground() || !style.hasBorder() || !style.hasBorderRadius() || borderImageIsLoadedAndCanBeRendered())
+    if (!style.hasBackground() || !style.border().hasBorder() || !style.border().hasBorderRadius() || borderImageIsLoadedAndCanBeRendered())
         return BleedAvoidance::None;
 
     if (!theme().mayNeedBleedAvoidance(style))
@@ -1812,7 +1814,7 @@ void RenderBox::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& pai
                 paintCSSBorder = theme().paintBorderOnly(*this, paintInfo);
         }
 
-        if (paintCSSBorder && style().hasVisibleBorderDecoration())
+        if (paintCSSBorder && style().border().hasVisibleBorderDecoration())
             borderPainter.paintBorder(paintRect, style(), bleedAvoidance);
     }
 
@@ -1863,7 +1865,7 @@ bool RenderBox::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) c
         return false;
 
     // FIXME: Use rounded rect if border radius is present.
-    if (style().hasBorderRadius())
+    if (style().border().hasBorderRadius())
         return false;
     
     // FIXME: The background color clip is defined by the last layer.
@@ -2235,7 +2237,7 @@ bool RenderBox::pushContentsClip(PaintInfo& paintInfo, const LayoutPoint& accumu
     float deviceScaleFactor = document().deviceScaleFactor();
     FloatRect clipRect = snapRectToDevicePixels((isControlClip ? controlClipRect(accumulatedOffset) : overflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize, paintInfo.phase)), deviceScaleFactor);
     paintInfo.context().save();
-    if (style().hasBorderRadius())
+    if (style().border().hasBorderRadius())
         clipToPaddingBoxShape(paintInfo.context(), accumulatedOffset, deviceScaleFactor);
 
     paintInfo.context().clip(clipRect);
@@ -3532,7 +3534,7 @@ template<typename SizeType> std::optional<LayoutUnit> RenderBox::computeIntrinsi
         // If that happens, this code will have to change.
         if (auto* renderImage = dynamicDowncast<RenderImage>(this)) {
             auto computedFixedLogicalWidth = style().logicalWidth().tryFixed();
-            if (computedFixedLogicalWidth && !style().hasAspectRatio()) {
+            if (computedFixedLogicalWidth && !style().aspectRatio().hasRatio()) {
                 auto intrinsicRatio = renderImage->intrinsicRatio();
                 return resolveHeightForRatio(
                     borderAndPaddingLogicalWidth(),
@@ -4090,7 +4092,9 @@ void RenderBox::computeOutOfFlowPositionedLogicalWidth(LogicalExtentComputedValu
     if (usedWidth < usedMinWidth)
         usedWidth = usedMinWidth;
 
-    bool hasWidthBorderBoxAspectRatio = style().hasAspectRatio() && style().boxSizingForAspectRatio() == BoxSizing::BorderBox && style().logicalWidth().isAuto();
+    bool hasWidthBorderBoxAspectRatio = style().aspectRatio().hasRatio()
+        && style().boxSizingForAspectRatio() == BoxSizing::BorderBox
+        && style().logicalWidth().isAuto();
 
     // Set the final width value.
     computedValues.extent = hasWidthBorderBoxAspectRatio ? usedWidth : usedWidth + inlineConstraints.bordersPlusPadding();
@@ -4421,7 +4425,7 @@ bool RenderBox::avoidsFloats() const
 
 void RenderBox::addVisualEffectOverflow()
 {
-    bool hasBoxShadow = style().hasBoxShadow();
+    bool hasBoxShadow = !style().boxShadow().isNone();
     bool hasBorderImageOutsets = style().hasBorderImageOutsets();
     bool hasOutline = outlineStyleForRepaint().hasOutlineInVisualOverflow();
     if (!hasBoxShadow && !hasBorderImageOutsets && !hasOutline)
@@ -4456,7 +4460,7 @@ LayoutRect RenderBox::applyVisualEffectOverflow(const LayoutRect& borderBox) con
     LayoutUnit overflowMaxY = borderBox.maxY();
     
     // Compute box-shadow overflow first.
-    if (style().hasBoxShadow()) {
+    if (!style().boxShadow().isNone()) {
         auto shadowOutsets = Style::shadowOutsetExtent(style().boxShadow(), style().usedZoomForLength());
         // Box-shadow extent's left and top are negative when extends to left and top, respectively, so negate to convert to outsets.
         shadowOutsets.left() = -shadowOutsets.left();
@@ -4952,7 +4956,7 @@ LayoutPoint RenderBox::topLeftLocationWithFlipping() const
 
 bool RenderBox::shouldIgnoreAspectRatio() const
 {
-    return !style().hasAspectRatio() || isTablePart();
+    return !style().aspectRatio().hasRatio() || isTablePart();
 }
 
 static inline bool shouldComputeLogicalWidthFromAspectRatioAndInsets(const RenderBox& renderer)
@@ -5038,7 +5042,7 @@ std::optional<double> RenderBox::resolveAspectRatio() const
 {
     if (auto* replacedElement = dynamicDowncast<RenderReplaced>(this)) 
         return replacedElement->computeIntrinsicAspectRatio();
-    if (style().hasAspectRatio()) 
+    if (style().aspectRatio().hasRatio())
         return style().logicalAspectRatio();
     ASSERT_NOT_REACHED();
     return std::nullopt;

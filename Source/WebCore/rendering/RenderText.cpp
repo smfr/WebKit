@@ -932,7 +932,7 @@ PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point, HitT
 
 static inline std::optional<float> combineTextWidth(const RenderText& renderer, const FontCascade& fontCascade, const RenderStyle& style)
 {
-    if (!style.hasTextCombine())
+    if (style.textCombine() == TextCombine::None)
         return { };
     auto* combineTextRenderer = dynamicDowncast<RenderCombineText>(renderer);
     if (!combineTextRenderer)
@@ -1074,7 +1074,7 @@ RenderText::Widths RenderText::trimmedPreferredWidths(float leadWidth, bool& str
 
     stripFrontSpaces = collapseWhiteSpace && m_hasEndWS;
 
-    if (!style.autoWrap() || widths.min > widths.max)
+    if (style.textWrapMode() == TextWrapMode::NoWrap || widths.min > widths.max)
         widths.min = widths.max;
 
     // Compute our max widths by scanning the string for newlines.
@@ -1283,13 +1283,13 @@ void RenderText::computePreferredLogicalWidths(float leadWidth, SingleThreadWeak
 
     std::optional<LayoutUnit> firstGlyphLeftOverflow;
 
-    bool breakNBSP = style.autoWrap() && style.nbspMode() == NBSPMode::Space;
+    bool breakNBSP = style.textWrapMode() != TextWrapMode::NoWrap && style.nbspMode() == NBSPMode::Space;
     
-    bool breakAnywhere = style.lineBreak() == LineBreak::Anywhere && style.autoWrap();
+    bool breakAnywhere = style.lineBreak() == LineBreak::Anywhere && style.textWrapMode() != TextWrapMode::NoWrap;
     // Note the deliberate omission of word-wrap/overflow-wrap's break-word value from this breakAll check.
     // Those do not affect minimum preferred sizes. Note that break-word is a non-standard value for
     // word-break, but we support it as though it means break-all.
-    bool breakAll = (style.wordBreak() == WordBreak::BreakAll || style.wordBreak() == WordBreak::BreakWord || style.overflowWrap() == OverflowWrap::Anywhere) && style.autoWrap();
+    bool breakAll = (style.wordBreak() == WordBreak::BreakAll || style.wordBreak() == WordBreak::BreakWord || style.overflowWrap() == OverflowWrap::Anywhere) && style.textWrapMode() != TextWrapMode::NoWrap;
     bool keepAllWords = style.wordBreak() == WordBreak::KeepAll;
     bool canUseLineBreakShortcut = iteratorMode == TextBreakIterator::LineMode::Behavior::Default
         && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
@@ -1388,7 +1388,7 @@ void RenderText::computePreferredLogicalWidths(float leadWidth, SingleThreadWeak
             }
 
             bool isCollapsibleWhiteSpace = (j < length) && style.isCollapsibleWhiteSpace(c);
-            if (j < length && style.autoWrap())
+            if (j < length && style.textWrapMode() != TextWrapMode::NoWrap)
                 m_hasBreakableChar = true;
 
             // Add in wordSpacing to our currMaxWidth, but not if this is the last word on a line or the
@@ -1413,14 +1413,14 @@ void RenderText::computePreferredLogicalWidths(float leadWidth, SingleThreadWeak
         } else {
             // Nowrap can never be broken, so don't bother setting the
             // breakable character boolean. Pre can only be broken if we encounter a newline.
-            if (style.autoWrap() || isNewline)
+            if (style.textWrapMode() != TextWrapMode::NoWrap || isNewline)
                 m_hasBreakableChar = true;
 
             if (isNewline) { // Only set if preserveNewline was true and we saw a newline.
                 if (firstLine) {
                     firstLine = false;
                     leadWidth = 0;
-                    if (!style.autoWrap())
+                    if (style.textWrapMode() == TextWrapMode::NoWrap)
                         m_beginMinWidth = currMaxWidth;
                 }
 
@@ -1448,7 +1448,7 @@ void RenderText::computePreferredLogicalWidths(float leadWidth, SingleThreadWeak
 
     m_maxWidth = std::max(currMaxWidth, *m_maxWidth);
 
-    if (!style.autoWrap())
+    if (style.textWrapMode() == TextWrapMode::NoWrap)
         m_minWidth = m_maxWidth;
 
     if (style.whiteSpaceCollapse() == WhiteSpaceCollapse::Preserve && style.textWrapMode() == TextWrapMode::NoWrap) {

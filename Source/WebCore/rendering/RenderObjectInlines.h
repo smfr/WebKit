@@ -38,7 +38,7 @@ namespace WebCore {
 
 inline bool RenderObject::hasTransformOrPerspective() const
 {
-    return hasTransformRelatedProperty() && (isTransformed() || style().hasPerspective());
+    return hasTransformRelatedProperty() && (isTransformed() || !style().perspective().isNone());
 }
 
 inline bool RenderObject::isAtomicInlineLevelBox() const

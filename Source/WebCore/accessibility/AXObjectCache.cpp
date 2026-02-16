@@ -2421,7 +2421,7 @@ void AXObjectCache::onStyleChange(RenderText& renderText, Style::Difference diff
     if (oldStyle->verticalAlign() != newStyle.verticalAlign())
         tree->queueNodeUpdate(object->objectID(), { { AXProperty::IsSuperscript, AXProperty::IsSubscript } });
 
-    if (oldStyle->hasTextShadow() != newStyle.hasTextShadow())
+    if (oldStyle->textShadow().isNone() != newStyle.textShadow().isNone())
         tree->queueNodeUpdate(object->objectID(), { AXProperty::HasTextShadow });
 
     auto oldDecor = oldStyle->textDecorationLineInEffect();

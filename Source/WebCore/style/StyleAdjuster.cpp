@@ -133,7 +133,7 @@ static void addIntrinsicMargins(RenderStyle& style)
 
 static bool shouldInheritTextDecorationsInEffect(const RenderStyle& style, const Element* element)
 {
-    if (style.isFloating() || style.hasOutOfFlowPosition())
+    if (style.floating() != Float::None || style.hasOutOfFlowPosition())
         return false;
 
     // Media elements have a special rendering where the media controls do not use a proper containing
@@ -332,7 +332,7 @@ static bool shouldInlinifyForRuby(const RenderStyle& style, const RenderStyle& p
         || parentDisplay == DisplayType::RubyText
         || parentDisplay == DisplayType::RubyBase;
 
-    return hasRubyParent && !style.hasOutOfFlowPosition() && !style.isFloating();
+    return hasRubyParent && !style.hasOutOfFlowPosition() && style.floating() == Float::None;
 }
 
 static bool hasUnsupportedRubyDisplay(Display display, const Element* element)
@@ -373,18 +373,18 @@ static UnicodeBidi forceBidiIsolationForRuby(UnicodeBidi unicodeBidi)
 
 static bool shouldTreatAutoZIndexAsZero(const RenderStyle& style)
 {
-    return style.hasOpacity()
+    return !style.opacity().isOpaque()
         || style.hasTransformRelatedProperty()
         || style.hasMask()
-        || style.hasClipPath()
-        || style.hasBoxReflect()
-        || style.hasFilter()
-        || style.hasBackdropFilter()
+        || !style.clipPath().isNone()
+        || !style.boxReflect().isNone()
+        || !style.filter().isNone()
+        || !style.backdropFilter().isNone()
 #if HAVE(CORE_MATERIAL)
-        || style.hasAppleVisualEffect()
+        || style.appleVisualEffect() != AppleVisualEffect::None
 #endif
-        || style.hasBlendMode()
-        || style.hasIsolation()
+        || style.blendMode() != BlendMode::Normal
+        || style.isolation() != Isolation::Auto
         || style.position() == PositionType::Sticky
         || style.position() == PositionType::Fixed
         || style.willChange().canCreateStackingContext();
@@ -418,7 +418,7 @@ void Adjuster::adjustFirstLetterStyle(RenderStyle& style)
         return;
 
     // Force inline display (except for floating first-letters).
-    style.setDisplayMaintainingOriginalDisplay(style.isFloating() ? DisplayType::BlockFlow : DisplayType::InlineFlow);
+    style.setDisplayMaintainingOriginalDisplay(style.floating() != Float::None ? DisplayType::BlockFlow : DisplayType::InlineFlow);
 }
 
 void Adjuster::adjustFirstLineStyle(RenderStyle& style)
@@ -467,7 +467,7 @@ void Adjuster::adjust(RenderStyle& style) const
             style.setPosition(PositionType::Absolute);
 
         // Absolute/fixed positioned elements, floating elements and the document element need block-like outside display.
-        if (style.hasOutOfFlowPosition() || style.isFloating() || (m_element && m_document->documentElement() == m_element.get()))
+        if (style.hasOutOfFlowPosition() || style.floating() != Float::None || (m_element && m_document->documentElement() == m_element.get()))
             style.setDisplayMaintainingOriginalDisplay(style.display().blockified());
 
         adjustFirstLetterStyle(style);
@@ -559,7 +559,7 @@ void Adjuster::adjust(RenderStyle& style) const
     // properties, that are transferred to the internal RenderSVGTransformableContainer), or for the viewBox-induced transformation
     // in RenderSVGViewportContainer. They all need to return true for 'hasTransformRelatedProperty'.
     auto hasTransformRelatedProperty = [](const RenderStyle& style, const Element* element, const RenderStyle& parentStyle) {
-        if (element && element->document().settings().css3DTransformBackfaceVisibilityInteroperabilityEnabled() && style.backfaceVisibility() == BackfaceVisibility::Hidden && parentStyle.preserves3D())
+        if (element && element->document().settings().css3DTransformBackfaceVisibilityInteroperabilityEnabled() && style.backfaceVisibility() == BackfaceVisibility::Hidden && parentStyle.usedTransformStyle3D() == TransformStyle3D::Preserve3D)
             return true;
 
         if (style.hasTransformRelatedProperty())
@@ -637,7 +637,7 @@ void Adjuster::adjust(RenderStyle& style) const
 
     bool overflowIsClipOrVisible = isOverflowClipOrVisible(style.overflowY()) && isOverflowClipOrVisible(style.overflowX());
 
-    if (!overflowIsClipOrVisible && (style.display() == DisplayType::BlockTable || style.display() == DisplayType::InlineTable)) {
+    if (!overflowIsClipOrVisible && style.display().isTableBox()) {
         // Tables only support overflow:hidden and overflow:visible and ignore anything else,
         // see https://drafts.csswg.org/css2/#overflow. As a table is not a block
         // container box the rules for resolving conflicting x and y values in CSS Overflow Module
@@ -703,20 +703,20 @@ void Adjuster::adjust(RenderStyle& style) const
         adjustThemeStyle(style, m_parentStyle);
 
     // This should be kept in sync with requiresRenderingConsolidationForViewTransition
-    if (style.preserves3D()) {
+    if (style.usedTransformStyle3D() == TransformStyle3D::Preserve3D) {
         bool forceToFlat = style.overflowX() != Overflow::Visible
-            || style.hasOpacity()
             || style.overflowY() != Overflow::Visible
-            || style.hasClip()
-            || style.hasClipPath()
-            || style.hasFilter()
-            || style.hasIsolation()
+            || !style.opacity().isOpaque()
+            || !style.clip().isAuto()
+            || !style.clipPath().isNone()
+            || !style.filter().isNone()
+            || style.isolation() != Isolation::Auto
             || style.hasMask()
-            || style.hasBackdropFilter()
+            || !style.backdropFilter().isNone()
 #if HAVE(CORE_MATERIAL)
-            || style.hasAppleVisualEffect()
+            || style.appleVisualEffect() != AppleVisualEffect::None
 #endif
-            || style.hasBlendMode()
+            || style.blendMode() != BlendMode::Normal
             || !style.viewTransitionName().isNone();
         if (RefPtr element = m_element) {
             auto styleable = Styleable::fromElement(*element);
@@ -879,8 +879,8 @@ void Adjuster::adjustSVGElementStyle(RenderStyle& style, const SVGElement& svgEl
     // Some of the rules above were already enforced in StyleResolver::adjust() - for those cases assertions were added.
     if (svgElement.document().settings().layerBasedSVGEngineEnabled() && style.usedZIndex().isAuto()) {
         // adjust() has already assigned a z-index of 0 if clip / filter is present or the element is the root element.
-        ASSERT(!style.hasClipPath());
-        ASSERT(!style.hasFilter());
+        ASSERT(style.clipPath().isNone());
+        ASSERT(style.filter().isNone());
 
         if (svgElement.isOutermostSVGSVGElement()
             || svgElement.hasTagName(SVGNames::foreignObjectTag)
@@ -903,7 +903,7 @@ void Adjuster::adjustSVGElementStyle(RenderStyle& style, const SVGElement& svgEl
     // SVG text layout code expects us to be a block-level style element.
     // While in theory any block level element would work (flex, grid etc), since we construct RenderBlockFlow for both foreign object and svg text,
     // in practice only block layout happens here.
-    if ((svgElement.hasTagName(SVGNames::foreignObjectTag) || svgElement.hasTagName(SVGNames::textTag)) && generatesBox(style))
+    if ((svgElement.hasTagName(SVGNames::foreignObjectTag) || svgElement.hasTagName(SVGNames::textTag)) && style.display().doesGenerateBox())
         style.setDisplayMaintainingOriginalDisplay(DisplayType::BlockFlow);
 }
 

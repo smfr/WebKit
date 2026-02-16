@@ -2197,7 +2197,7 @@ bool Quirks::needsHotelsAnimationQuirk(Element& element, const RenderStyle& styl
     if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::NeedsHotelsAnimationQuirk))
         return false;
 
-    if (!style.hasAnimations())
+    if (style.animations().isInitial())
         return false;
 
     auto matches = Ref { element }->matches(".uitk-menu-mounted .uitk-menu-container.uitk-menu-container-autoposition.uitk-menu-container-has-intersection-root-el"_s);

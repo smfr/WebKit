@@ -96,10 +96,10 @@ static bool isSpecialHTMLElement(const Node& node)
     if (!renderer)
         return false;
 
-    if (renderer->style().display() == Style::DisplayType::BlockTable || renderer->style().display() == Style::DisplayType::InlineTable)
+    if (renderer->style().display().isTableBox())
         return true;
 
-    if (renderer->style().isFloating())
+    if (renderer->style().floating() != Float::None)
         return true;
 
     if (renderer->style().position() != PositionType::Static)

@@ -274,7 +274,7 @@ void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style
     bool innerEdgeIsRectangular = shape.innerShapeIsRectangular();
 
     paintSides(shape, {
-        style.hasBorderRadius() ? std::make_optional(style.borderRadii()) : std::nullopt,
+        style.border().hasBorderRadius() ? std::optional { style.borderRadii() } : std::nullopt,
         edges,
         decorationHasAllSolidEdges(edges),
         outerEdgeIsRectangular,

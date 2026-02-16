@@ -2016,7 +2016,7 @@ bool KeyframeEffect::preventsAcceleration() const
     // to an element, either through the underlying style, or through a keyframe.
     if (auto target = targetStyleable()) {
         if (auto* lastStyleChangeEventStyle = target->lastStyleChangeEventStyle()) {
-            if (lastStyleChangeEventStyle->hasOffsetPath())
+            if (!lastStyleChangeEventStyle->offsetPath().isNone())
                 return true;
         }
     }
@@ -3113,7 +3113,7 @@ void KeyframeEffect::lastStyleChangeEventStyleDidChange(const RenderStyle* previ
 #endif
 
     auto hasMotionPath = [](const RenderStyle* style) {
-        return style && style->hasOffsetPath();
+        return style && !style->offsetPath().isNone();
     };
 
     if (hasMotionPath(previousStyle) != hasMotionPath(currentStyle))

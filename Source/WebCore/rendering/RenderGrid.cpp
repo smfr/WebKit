@@ -104,7 +104,7 @@ bool RenderGrid::isExtrinsicallySized() const
         || !participatesInBlockLayout()
         || !gridStyle.logicalHeight().isFixed()
         || !allTracksAreExtrinsicallySized()
-        || gridStyle.hasAspectRatio()
+        || gridStyle.aspectRatio().hasRatio()
         || isSubgrid()
         || isMasonry())
         return false;
@@ -1797,7 +1797,7 @@ bool RenderGrid::willStretchItem(const RenderBox& item, LogicalBoxAxis containin
 
 bool RenderGrid::aspectRatioPrefersInline(const RenderBox& gridItem, bool blockFlowIsColumnAxis)
 {
-    if (!gridItem.style().hasAspectRatio())
+    if (!gridItem.style().aspectRatio().hasRatio())
         return false;
     LogicalBoxAxis containingAxis = blockFlowIsColumnAxis ? LogicalBoxAxis::Block : LogicalBoxAxis::Inline;
     return !selfAlignmentForGridItem(gridItem, containingAxis, StretchingMode::Explicit).isStretch();

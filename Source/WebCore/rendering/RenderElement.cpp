@@ -484,10 +484,10 @@ bool RenderElement::repaintBeforeStyleChange(Style::Difference diff, const Rende
                 auto layerMayGetDestroyed = oldStyle.position() != newStyle.position()
                     || oldStyle.usedZIndex() != newStyle.usedZIndex()
                     || oldStyle.clip() != newStyle.clip()
-                    || oldStyle.hasClip() != newStyle.hasClip()
-                    || oldStyle.hasOpacity() != newStyle.hasOpacity()
-                    || oldStyle.hasTransform() != newStyle.hasTransform()
-                    || oldStyle.hasFilter() != newStyle.hasFilter();
+                    || oldStyle.clip().isAuto() != newStyle.clip().isAuto()
+                    || oldStyle.opacity().isOpaque() != newStyle.opacity().isOpaque()
+                    || (!oldStyle.transform().isNone() || !oldStyle.offsetPath().isNone()) != (!newStyle.transform().isNone() || !newStyle.offsetPath().isNone())
+                    || oldStyle.filter().isNone() != newStyle.filter().isNone();
                 if (layerMayGetDestroyed)
                     return RequiredRepaint::RendererAndDescendantsRenderersWithLayers;
             }
@@ -502,10 +502,13 @@ bool RenderElement::repaintBeforeStyleChange(Style::Difference diff, const Rende
         if (auto* modelObject = dynamicDowncast<RenderLayerModelObject>(*this)) {
             // If we don't have a layer yet, but we are going to get one because of transform or opacity, then we need to repaint the old position of the object.
             bool hasLayer = modelObject->hasLayer();
-            bool willHaveLayer = newStyle.affectsTransform() || newStyle.hasOpacity() || newStyle.hasFilter() || newStyle.hasBackdropFilter();
+            bool willHaveLayer = newStyle.affectsTransform()
+                || !newStyle.opacity().isOpaque()
 #if HAVE(CORE_MATERIAL)
-            willHaveLayer |= newStyle.hasAppleVisualEffect();
+                || newStyle.appleVisualEffect() != AppleVisualEffect::None
 #endif
+                || !newStyle.filter().isNone()
+                || !newStyle.backdropFilter().isNone();
             if (!hasLayer && willHaveLayer)
                 return RequiredRepaint::RendererOnly;
         }
@@ -1418,7 +1421,7 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
         if (hasMask() && mustRepaintFillLayers(*this, style().maskLayers()))
             return true;
 
-        if (style().hasBorderRadius()) {
+        if (style().border().hasBorderRadius()) {
             // If the border radius changed, repaints at style change time will take care of that.
             // This code is attempting to detect whether border-radius constraining based on box size
             // affects the radii, using the outlineBoundsRect as a proxy for the border box.
@@ -1436,7 +1439,7 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
             return true;
 
         // Our fill layers are ok. Let's check border.
-        if (style().hasBorder() && borderImageIsLoadedAndCanBeRendered())
+        if (style().border().hasBorder() && borderImageIsLoadedAndCanBeRendered())
             return true;
 
         return false;
@@ -1618,7 +1621,7 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
 
 bool RenderElement::borderImageIsLoadedAndCanBeRendered() const
 {
-    ASSERT(style().hasBorder());
+    ASSERT(style().border().hasBorder());
 
     RefPtr borderImage = style().borderImageSource().tryStyleImage();
     return borderImage && borderImage->canRender(this, style().usedZoom()) && borderImage->isLoaded(this);
@@ -2335,9 +2338,9 @@ void RenderElement::adjustFragmentedFlowStateOnContainingBlockChangeIfNeeded(con
     auto mayNotBeContainingBlockForDescendantsAnymore = oldStyle.position() != m_style.position()
         || oldStyle.hasTransformRelatedProperty() != m_style.hasTransformRelatedProperty()
         || oldStyle.willChange() != newStyle.willChange()
-        || oldStyle.hasBackdropFilter() != newStyle.hasBackdropFilter()
+        || oldStyle.backdropFilter().isNone() != newStyle.backdropFilter().isNone()
 #if HAVE(CORE_MATERIAL)
-        || oldStyle.hasAppleVisualEffectRequiringBackdropFilter() != newStyle.hasAppleVisualEffectRequiringBackdropFilter()
+        || appleVisualEffectNeedsBackdrop(oldStyle.appleVisualEffect()) != appleVisualEffectNeedsBackdrop(newStyle.appleVisualEffect())
 #endif
         || oldStyle.usedContain().contains(Style::ContainValue::Layout) != newStyle.usedContain().contains(Style::ContainValue::Layout)
         || oldStyle.usedContain().contains(Style::ContainValue::Size) != newStyle.usedContain().contains(Style::ContainValue::Size);

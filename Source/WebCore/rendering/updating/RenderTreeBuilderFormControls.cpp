@@ -136,7 +136,7 @@ void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type
     RenderPtr<RenderBlockFlow> pseudoElement = createRenderer<RenderBlockFlow>(RenderObject::Type::BlockFlow, document, WTF::move(pseudoElementStyle));
     pseudoElement->initializeStyle();
 
-    if (pseudoElement->style().hasContent())
+    if (pseudoElement->style().content().isData())
         RenderTreeUpdater::GeneratedContent::createContentRenderers(m_builder, *pseudoElement, pseudoElement->style(), type);
 
     m_builder.attach(renderer, WTF::move(pseudoElement));

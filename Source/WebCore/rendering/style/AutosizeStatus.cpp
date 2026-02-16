@@ -100,7 +100,7 @@ auto AutosizeStatus::computeStatus(const RenderStyle& style) -> AutosizeStatus
     if (style.overflowX() == Overflow::Hidden)
         result.add(Fields::OverflowXHidden);
 
-    if (style.isFloating())
+    if (style.floating() != Float::None)
         result.add(Fields::Floating);
 
     return AutosizeStatus(result);

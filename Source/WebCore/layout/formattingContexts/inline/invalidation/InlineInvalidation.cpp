@@ -102,7 +102,9 @@ bool InlineInvalidation::styleWillChange(const Box& layoutBox, const RenderStyle
     auto inlineItemListNeedsUpdate = [&] {
         CheckedRef oldStyle = layoutBox.style();
 
-        auto hasInlineItemTypeChanged = oldStyle->hasOutOfFlowPosition() != newStyle.hasOutOfFlowPosition() || oldStyle->isFloating() != newStyle.isFloating() || oldStyle->display() != newStyle.display();
+        auto hasInlineItemTypeChanged = oldStyle->hasOutOfFlowPosition() != newStyle.hasOutOfFlowPosition()
+            || (oldStyle->floating() != Float::None) != (newStyle.floating() != Float::None)
+            || oldStyle->display() != newStyle.display();
         if (hasInlineItemTypeChanged)
             return true;
 

@@ -381,10 +381,10 @@ RenderElement* RenderView::rendererForRootBackground() const
 static inline bool rendererObscuresBackground(const RenderElement& rootElement)
 {
     auto& style = rootElement.style();
-    if (style.usedVisibility() != Visibility::Visible || !style.opacity().isOpaque() || style.hasTransform())
+    if (style.usedVisibility() != Visibility::Visible || !style.opacity().isOpaque() || !style.transform().isNone() || !style.offsetPath().isNone())
         return false;
 
-    if (style.hasBorderRadius())
+    if (style.border().hasBorderRadius())
         return false;
 
     if (rootElement.isComposited())

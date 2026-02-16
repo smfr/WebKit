@@ -2135,7 +2135,9 @@ static bool clippingChanged(const RenderStyle& oldStyle, const RenderStyle& newS
 
 static bool styleAffectsLayerGeometry(const RenderStyle& style)
 {
-    return style.hasClip() || style.hasClipPath() || style.hasBorderRadius();
+    return !style.clip().isAuto()
+        || !style.clipPath().isNone()
+        || style.border().hasBorderRadius();
 }
 
 static bool recompositeChangeRequiresGeometryUpdate(const RenderStyle& oldStyle, const RenderStyle& newStyle)
@@ -2164,7 +2166,7 @@ static bool recompositeChangeRequiresGeometryUpdate(const RenderStyle& oldStyle,
 
 static bool recompositeChangeRequiresChildrenGeometryUpdate(const RenderStyle& oldStyle, const RenderStyle& newStyle)
 {
-    return oldStyle.hasPerspective() != newStyle.hasPerspective()
+    return oldStyle.perspective().isNone() != newStyle.perspective().isNone()
         || oldStyle.usedTransformStyle3D() != newStyle.usedTransformStyle3D();
 }
 
@@ -3708,7 +3710,7 @@ Vector<CompositedClipData> RenderLayerCompositor::computeAncestorClippingStack(c
                 CompositedClipData clipData { const_cast<RenderLayer*>(&ancestorLayer), clipRoundedRect, true };
                 newStack.insert(0, WTF::move(clipData));
                 currentClippedLayer = &ancestorLayer;
-            } else if (box->hasNonVisibleOverflow() && box->style().hasBorderRadius()) {
+            } else if (box->hasNonVisibleOverflow() && box->style().border().hasBorderRadius()) {
                 if (haveNonScrollableClippingIntermediateLayer) {
                     pushNonScrollableClip(*currentClippedLayer, ancestorLayer);
                     haveNonScrollableClippingIntermediateLayer = false;
@@ -3899,7 +3901,7 @@ bool RenderLayerCompositor::requiresCompositingForBackfaceVisibility(RenderLayer
     
     // FIXME: workaround for webkit.org/b/132801
     auto* stackingContext = renderer.layer()->stackingContext();
-    if (stackingContext && stackingContext->renderer().style().preserves3D())
+    if (stackingContext && stackingContext->renderer().style().usedTransformStyle3D() == TransformStyle3D::Preserve3D)
         return true;
 
     return false;
@@ -4164,10 +4166,10 @@ IndirectCompositingReason RenderLayerCompositor::computeIndirectCompositingReaso
     // A layer with preserve-3d or perspective only needs to be composited if there are descendant layers that
     // will be affected by the preserve-3d or perspective.
     if (has3DTransformedDescendants) {
-        if (renderer.style().preserves3D())
+        if (renderer.style().usedTransformStyle3D() == TransformStyle3D::Preserve3D)
             return IndirectCompositingReason::Preserve3D;
     
-        if (renderer.style().hasPerspective())
+        if (!renderer.style().perspective().isNone())
             return IndirectCompositingReason::Perspective;
     }
 
@@ -4191,13 +4193,13 @@ bool RenderLayerCompositor::styleChangeMayAffectIndirectCompositingReasons(const
         return true;
     if (newStyle.isolation() != oldStyle.isolation())
         return true;
-    if (newStyle.hasTransform() != oldStyle.hasTransform())
+    if ((!newStyle.transform().isNone() || !newStyle.offsetPath().isNone()) != (!oldStyle.transform().isNone() || !oldStyle.offsetPath().isNone()))
         return true;
-    if (newStyle.boxReflect() != oldStyle.boxReflect())
+    if (newStyle.boxReflect().isNone() != oldStyle.boxReflect().isNone())
         return true;
     if (newStyle.usedTransformStyle3D() != oldStyle.usedTransformStyle3D())
         return true;
-    if (newStyle.hasPerspective() != oldStyle.hasPerspective())
+    if (newStyle.perspective().isNone() != oldStyle.perspective().isNone())
         return true;
 
     return false;
@@ -5347,9 +5349,9 @@ void RenderLayerCompositor::notifyIFramesOfCompositingChange()
 
 bool RenderLayerCompositor::layerHas3DContent(const RenderLayer& layer) const
 {
-    const RenderStyle& style = layer.renderer().style();
+    auto& style = layer.renderer().style();
 
-    if (style.preserves3D() || style.hasPerspective() || styleHas3DTransformOperation(style))
+    if (style.usedTransformStyle3D() == TransformStyle3D::Preserve3D || !style.perspective().isNone() || styleHas3DTransformOperation(style))
         return true;
 
     const_cast<RenderLayer&>(layer).updateLayerListsIfNeeded();
@@ -5768,7 +5770,7 @@ LayoutRoundedRect RenderLayerCompositor::parentRelativeScrollableRect(const Rend
             return LayoutRoundedRect { LayoutRect { } };
 
         scrollableRect = LayoutRoundedRect { box->paddingBoxRect() };
-        if (box->style().hasBorderRadius()) {
+        if (box->style().border().hasBorderRadius()) {
             auto borderShape = BorderShape::shapeForBorderRect(box->style(), box->borderBoxRect());
             scrollableRect = borderShape.deprecatedInnerRoundedRect();
         }

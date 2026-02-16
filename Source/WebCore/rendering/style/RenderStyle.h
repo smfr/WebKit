@@ -452,55 +452,19 @@ public:
 
     // MARK: - has*()
 
-    inline bool hasAnimations() const;
-    inline bool hasAnimationsOrTransitions() const;
-    inline bool hasAspectRatio() const;
-    inline bool hasAutoLengthContainIntrinsicSize() const;
-    inline bool hasBackdropFilter() const;
     inline bool hasBackground() const;
-    inline bool hasBackgroundImage() const;
-    inline bool hasBlendMode() const;
-    inline bool hasBorder() const;
-    inline bool hasBorderImage() const;
-    inline bool hasBorderRadius() const;
-    inline bool hasBoxReflect() const;
-    inline bool hasBoxShadow() const;
-    inline bool hasClip() const;
-    inline bool hasClipPath() const;
-    inline bool hasContent() const;
-    inline bool hasFill() const;
-    inline bool hasFilter() const;
     inline bool hasInlineColumnAxis() const;
-    inline bool hasIsolation() const;
     inline bool hasMarkers() const;
     inline bool hasMask() const;
-    inline bool hasOffsetPath() const;
-    inline bool hasOpacity() const;
     inline bool hasOutline() const;
     inline bool hasOutlineInVisualOverflow() const;
-    inline bool hasPerspective() const;
     inline bool hasPositionedMask() const;
-    inline bool hasRotate() const;
-    inline bool hasScale() const;
     inline bool hasScrollTimelines() const;
-    inline bool hasSnapPosition() const;
-    inline bool hasStroke() const;
-    inline bool hasTextCombine() const;
-    inline bool hasTextShadow() const;
-    inline bool hasTransform() const;
-    inline bool hasTransitions() const;
-    inline bool hasTranslate() const;
     inline bool hasUsedAppearance() const;
     inline bool hasUsedContentNone() const;
     inline bool hasViewTimelines() const;
-    inline bool hasVisibleBorder() const;
-    inline bool hasVisibleBorderDecoration() const;
     inline bool hasExplicitlySetBorderRadius() const;
     inline bool hasPositiveStrokeWidth() const;
-#if HAVE(CORE_MATERIAL)
-    inline bool hasAppleVisualEffect() const;
-    inline bool hasAppleVisualEffectRequiringBackdropFilter() const;
-#endif
 
     // Whether or not a positioned element requires normal flow x/y to be computed to determine its position.
     inline bool hasStaticInlinePosition(bool horizontal) const;
@@ -513,7 +477,6 @@ public:
 
     inline bool isColumnFlexDirection() const;
     inline bool isFixedTableLayout() const;
-    inline bool isFloating() const;
     inline bool isInterCharacterRubyPosition() const;
     inline bool isOverflowVisible() const;
     inline bool isReverseFlexDirection() const;
@@ -526,7 +489,6 @@ public:
     inline bool usesLegacyScrollbarStyle() const;
     inline bool shouldPlaceVerticalScrollbarOnLeft() const;
 
-    inline bool autoWrap() const;
     inline bool preserveNewline() const;
     inline bool collapseWhiteSpace() const;
     inline bool isCollapsibleWhiteSpace(char16_t) const;
@@ -539,7 +501,6 @@ public:
     // indicates that we are transforming. The usedTransformStyle3D is not used here because in many cases (such as for deciding
     // whether or not to establish a containing block), the computed value is what matters.
     inline bool hasTransformRelatedProperty() const;
-    inline bool preserves3D() const;
     inline bool affectsTransform() const;
 
     // MARK: - Underlying ComputedStyle
@@ -552,9 +513,6 @@ private:
 
     // This constructor is used to implement the replace operation.
     RenderStyle(RenderStyle&, RenderStyle&&);
-
-    inline bool hasAutoLeftAndRight() const;
-    inline bool hasAutoTopAndBottom() const;
 
     const Style::NonInheritedData& nonInheritedData() const { return computedStyle().nonInheritedData(); }
     const Style::ComputedStyle::NonInheritedFlags& nonInheritedFlags() const { return computedStyle().nonInheritedFlags(); }
@@ -576,7 +534,6 @@ inline float applyZoom(float, const RenderStyle&);
 constexpr BorderStyle collapsedBorderStyle(BorderStyle);
 
 inline bool pseudoElementRendererIsNeeded(const RenderStyle*);
-inline bool generatesBox(const RenderStyle&);
 inline bool isNonVisibleOverflow(Overflow);
 
 inline bool isVisibleToHitTesting(const RenderStyle&, const HitTestRequest&);

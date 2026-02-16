@@ -748,7 +748,9 @@ static bool isSVGRootWithIntrinsicAspectRatio(const RenderBox& flexItem)
 
 static bool flexItemHasAspectRatio(const RenderBox& flexItem)
 {
-    return flexItem.hasIntrinsicAspectRatio() || flexItem.style().hasAspectRatio() || isSVGRootWithIntrinsicAspectRatio(flexItem);
+    return flexItem.hasIntrinsicAspectRatio()
+        || flexItem.style().aspectRatio().hasRatio()
+        || isSVGRootWithIntrinsicAspectRatio(flexItem);
 }
 
 template<typename SizeType> std::optional<LayoutUnit> RenderFlexibleBox::computeMainAxisExtentForFlexItem(RenderBox& flexItem, const SizeType& size)
@@ -1241,7 +1243,9 @@ bool RenderFlexibleBox::flexItemHasComputableAspectRatio(const RenderBox& flexIt
 {
     if (!flexItemHasAspectRatio(flexItem))
         return false;
-    return flexItem.intrinsicSize().height() || flexItem.style().hasAspectRatio() || isSVGRootWithIntrinsicAspectRatio(flexItem);
+    return flexItem.intrinsicSize().height()
+        || flexItem.style().aspectRatio().hasRatio()
+        || isSVGRootWithIntrinsicAspectRatio(flexItem);
 }
 
 bool RenderFlexibleBox::flexItemHasComputableAspectRatioAndCrossSizeIsConsideredDefinite(const RenderBox& flexItem)

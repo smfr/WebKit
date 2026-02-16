@@ -219,7 +219,7 @@ void InlineContentBuilder::adjustDisplayLines(InlineContent& inlineContent, size
                     lineInkOverflowRect.unite(box.inkOverflow());
 
                 if (line.hasBlockLevelBox()) {
-                    if (hasSelfPaintingLayer || box.layoutBox().style().hasOpacity() || box.layoutBox().style().hasOutline()) {
+                    if (hasSelfPaintingLayer || !box.layoutBox().style().opacity().isOpaque() || box.layoutBox().style().hasOutline()) {
                         // See if the inline box has properties that affect block-in-inline painting.
                         inlineContent.setHasPaintedInlineLevelBoxes();
                     }

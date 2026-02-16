@@ -1315,7 +1315,7 @@ static void extractRenderedTokens(Vector<TokenAndBlockOffset>& tokensAndOffsets,
 
     RefPtr frameView = renderer->view().frameView();
     auto appendReplacedContentOrBackgroundImage = [&](auto& renderer) {
-        if (!renderer.style().hasBackgroundImage() && !is<RenderReplaced>(renderer))
+        if (!Style::hasImageInAnyLayer(renderer.style().backgroundLayers()) && !is<RenderReplaced>(renderer))
             return;
 
         auto absoluteRect = renderer.absoluteBoundingBoxRect();

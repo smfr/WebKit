@@ -960,7 +960,7 @@ void RenderTable::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& p
     backgroundPainter.paintBackground(rect, bleedAvoidance);
     backgroundPainter.paintBoxShadow(rect, style(), Style::ShadowStyle::Inset);
 
-    if (style().hasVisibleBorderDecoration() && !collapseBorders())
+    if (style().border().hasVisibleBorderDecoration() && !collapseBorders())
         BorderPainter { *this, paintInfo }.paintBorder(rect, style());
 
     if (bleedAvoidance == BleedAvoidance::UseTransparencyLayer)

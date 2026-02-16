@@ -252,7 +252,7 @@ void RenderTableCell::computePreferredLogicalWidths()
     if (overridingLogicalHeight)
         setOverridingBorderBoxLogicalHeight(*overridingLogicalHeight);
 
-    if (!element() || !style().autoWrap() || !element()->hasAttributeWithoutSynchronization(nowrapAttr))
+    if (!element() || style().textWrapMode() == TextWrapMode::NoWrap || !element()->hasAttributeWithoutSynchronization(nowrapAttr))
         return;
 
     auto [ logicalWidth, usedZoom ] = styleOrColLogicalWidth();
@@ -1645,7 +1645,7 @@ void RenderTableCell::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoin
 
     backgroundPainter.paintBoxShadow(paintRect, style(), Style::ShadowStyle::Inset);
 
-    if (!style().hasBorder() || table->collapseBorders())
+    if (!style().border().hasBorder() || table->collapseBorders())
         return;
 
     BorderPainter borderPainter { *this, paintInfo };

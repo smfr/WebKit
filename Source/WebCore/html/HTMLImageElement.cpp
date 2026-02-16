@@ -478,7 +478,7 @@ const AtomString& HTMLImageElement::altText() const
 
 RenderPtr<RenderElement> HTMLImageElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
 {
-    if (style.hasContent())
+    if (style.content().isData())
         return RenderElement::createFor(*this, WTF::move(style));
 
     return createRenderer<RenderImage>(RenderObject::Type::Image, *this, WTF::move(style), nullptr, m_imageDevicePixelRatio);
@@ -486,7 +486,7 @@ RenderPtr<RenderElement> HTMLImageElement::createElementRenderer(RenderStyle&& s
 
 bool HTMLImageElement::isReplaced(const RenderStyle* style) const
 {
-    return !style || !style->hasContent();
+    return !style || !style->content().isData();
 }
 
 bool HTMLImageElement::canStartSelection() const

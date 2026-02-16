@@ -187,7 +187,7 @@ static EnumSet<FlexAvoidanceReason> canUseForFlexLayoutWithReason(const RenderFl
         if (mayHaveScrollbarOrScrollableOverflow(flexItemStyle.get()))
             ADD_REASON_AND_RETURN_IF_NEEDED(FlexItemHasUnsupportedOverflow, reasons, includeReasons);
 
-        if ((is<RenderBox>(flexItem.get()) && downcast<RenderBox>(flexItem.get()).hasIntrinsicAspectRatio()) || flexItemStyle->hasAspectRatio())
+        if ((is<RenderBox>(flexItem.get()) && downcast<RenderBox>(flexItem.get()).hasIntrinsicAspectRatio()) || flexItemStyle->aspectRatio().hasRatio())
             ADD_REASON_AND_RETURN_IF_NEEDED(FlexItemHasAspectRatio, reasons, includeReasons);
 
         auto isBaseline = !flexItemStyle->alignSelf().isAuto() ? flexItemStyle->alignSelf().isBaseline() : flexBoxStyle->alignItems().isBaseline();

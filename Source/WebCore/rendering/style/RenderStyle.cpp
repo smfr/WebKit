@@ -284,7 +284,7 @@ bool RenderStyle::isIdempotentTextAutosizingCandidate(AutosizeStatus status) con
         return false;
     }
 
-    if (hasBackgroundImage() && backgroundLayers().usedFirst().repeat() == FillRepeat::NoRepeat)
+    if (auto& backgroundLayers = this->backgroundLayers(); Style::hasImageInAnyLayer(backgroundLayers) && backgroundLayers.usedFirst().repeat() == FillRepeat::NoRepeat)
         return false;
 
     return true;

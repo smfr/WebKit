@@ -112,8 +112,8 @@ void SVGRenderingContext::prepareToRenderSVGContent(RenderElement& renderer, Pai
     bool isRenderingMask = isRenderingMaskImage(*m_renderer);
     // RenderLayer takes care of root opacity.
     float opacity = (renderer.isLegacyRenderSVGRoot() || isRenderingMask) ? 1 : style.opacity().value.value;
-    bool hasBlendMode = style.hasBlendMode();
-    bool hasIsolation = style.hasIsolation();
+    bool hasBlendMode = style.blendMode() != BlendMode::Normal;
+    bool hasIsolation = style.isolation() != Isolation::Auto;
     bool isolateMaskForBlending = false;
 
     if (style.hasPositionedMask()) {

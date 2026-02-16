@@ -51,12 +51,19 @@ inline bool Box::isListItem() const { return style().display() == Style::Display
 
 inline bool Box::isContainingBlockForFixedPosition() const
 {
-    return isInitialContainingBlock() || isLayoutContainmentBox() || style().hasTransform();
+    return isInitialContainingBlock()
+        || isLayoutContainmentBox()
+        || !style().transform().isNone()
+        || !style().offsetPath().isNone();
 }
 
 inline bool Box::isContainingBlockForOutOfFlowPosition() const
 {
-    return isInitialContainingBlock() || isPositioned() || isLayoutContainmentBox() || style().hasTransform();
+    return isInitialContainingBlock()
+        || isPositioned()
+        || isLayoutContainmentBox()
+        || !style().transform().isNone()
+        || !style().offsetPath().isNone();
 }
 
 }

@@ -2966,7 +2966,7 @@ bool RenderThemeCocoa::adjustListButtonStyleForVectorBasedControls(RenderStyle& 
         return false;
 
 #if PLATFORM(IOS_FAMILY)
-    if (style.hasContent() || style.hasUsedContentNone()) {
+    if (style.content().isData() || style.hasUsedContentNone()) {
         style.setLogicalWidth(11_css_px);
         return true;
     }
@@ -3039,7 +3039,7 @@ bool RenderThemeCocoa::paintListButtonForVectorBasedControls(const RenderElement
     CheckedRef style = box.style();
 
 #if PLATFORM(IOS_FAMILY)
-    if (style->hasContent() || style->hasUsedContentNone())
+    if (style->content().isData() || style->hasUsedContentNone())
         return true;
 #endif
 

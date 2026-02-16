@@ -397,7 +397,7 @@ bool TextUtil::mayBreakInBetween(String previousContent, const RenderStyle& prev
 unsigned TextUtil::findNextBreakablePosition(CachedLineBreakIteratorFactory& lineBreakIteratorFactory, unsigned startPosition, const RenderStyle& style)
 {
     auto wordBreak = style.wordBreak();
-    auto breakNBSP = style.autoWrap() && style.nbspMode() == NBSPMode::Space;
+    auto breakNBSP = style.textWrapMode() != TextWrapMode::NoWrap && style.nbspMode() == NBSPMode::Space;
 
     if (wordBreak == WordBreak::KeepAll) {
         if (breakNBSP)

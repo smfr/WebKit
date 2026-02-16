@@ -75,7 +75,7 @@ void RenderSVGPath::updateShapeFromElement()
 
 FloatRect RenderSVGPath::adjustStrokeBoundingBoxForZeroLengthLinecaps(RepaintRectCalculation, FloatRect strokeBoundingBox) const
 {
-    if (style().hasStroke()) {
+    if (!style().stroke().isNone()) {
         // FIXME: zero-length subpaths do not respect vector-effect = non-scaling-stroke.
         float strokeWidth = this->strokeWidth();
         for (auto& zeroLengthLinecapLocation : m_zeroLengthLinecapLocations) {
@@ -100,7 +100,7 @@ static void useStrokeStyleToFill(GraphicsContext& context)
 
 void RenderSVGPath::strokeShape(GraphicsContext& context) const
 {
-    if (!style().hasStroke() || !style().strokeWidth().isPossiblyPositive())
+    if (style().stroke().isNone() || !style().strokeWidth().isPossiblyPositive())
         return;
 
     // This happens only if the layout was never been called for this element.
@@ -117,7 +117,7 @@ bool RenderSVGPath::shapeDependentStrokeContains(const FloatPoint& point, PointC
         return true;
 
     for (size_t i = 0; i < m_zeroLengthLinecapLocations.size(); ++i) {
-        ASSERT(style().hasStroke());
+        ASSERT(!style().stroke().isNone());
         float strokeWidth = this->strokeWidth();
         if (style().capStyle() == LineCap::Square) {
             if (zeroLengthSubpathRect(m_zeroLengthLinecapLocations[i], strokeWidth).contains(point))
@@ -136,7 +136,7 @@ bool RenderSVGPath::shouldStrokeZeroLengthSubpath() const
 {
     // Spec(11.4): Any zero length subpath shall not be stroked if the "stroke-linecap" property has a value of butt
     // but shall be stroked if the "stroke-linecap" property has a value of round or square
-    return style().hasStroke() && style().capStyle() != LineCap::Butt;
+    return !style().stroke().isNone() && style().capStyle() != LineCap::Butt;
 }
 
 Path* RenderSVGPath::zeroLengthLinecapPath(const FloatPoint& linecapPosition) const

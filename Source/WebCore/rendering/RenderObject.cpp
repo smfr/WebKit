@@ -1540,7 +1540,7 @@ bool RenderObject::shouldUseTransformFromContainer(const RenderElement* containe
         return true;
     if (hasLayer() && downcast<RenderLayerModelObject>(*this).layer()->anchorScrollAdjustment())
         return true;
-    if (containerObject && containerObject->style().hasPerspective())
+    if (containerObject && !containerObject->style().perspective().isNone())
         return containerObject == parent();
     return false;
 }
@@ -1556,8 +1556,8 @@ void RenderObject::getTransformFromContainer(const LayoutSize& offsetInContainer
 
     CheckedPtr perspectiveObject = parent();
 
-    if (perspectiveObject && perspectiveObject->hasLayer() && perspectiveObject->style().hasPerspective()) {
-        // Perpsective on the container affects us, so we have to factor it in here.
+    if (perspectiveObject && perspectiveObject->hasLayer() && !perspectiveObject->style().perspective().isNone()) {
+        // Perspective on the container affects us, so we have to factor it in here.
         ASSERT(perspectiveObject->hasLayer());
         FloatPoint perspectiveOrigin = downcast<RenderLayerModelObject>(*perspectiveObject).layer()->perspectiveOrigin();
 

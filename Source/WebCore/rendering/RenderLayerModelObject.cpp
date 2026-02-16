@@ -165,7 +165,7 @@ void RenderLayerModelObject::styleDidChange(Style::Difference diff, const Render
         }
     } else if (layer() && layer()->parent()) {
         gainedOrLostLayer = true;
-        if (oldStyle && oldStyle->hasBlendMode())
+        if (oldStyle && oldStyle->blendMode() != BlendMode::Normal)
             layer()->willRemoveChildWithBlendMode();
         setHasTransformRelatedProperty(false); // All transform-related properties force layers, so we know we don't have one or the object doesn't support them.
         setHasSVGTransform(false); // Same reason as for setHasTransformRelatedProperty().
@@ -398,7 +398,11 @@ void RenderLayerModelObject::applySVGTransform(TransformationMatrix& transform, 
 
     // This check does not use style.hasTransformRelatedProperty() on purpose -- we only want to know if either the 'transform' property, an
     // offset path, or the individual transform operations are set (perspective / transform-style: preserve-3d are not relevant here).
-    bool hasCSSTransform = style.hasTransform() || style.hasRotate() || style.hasTranslate() || style.hasScale();
+    bool hasCSSTransform = !style.transform().isNone()
+        || !style.offsetPath().isNone()
+        || !style.rotate().isNone()
+        || !style.translate().isNone()
+        || !style.scale().isNone();
     bool hasSVGTransform = !svgTransform.isIdentity() || preApplySVGTransformMatrix || postApplySVGTransformMatrix || supplementalTransform;
 
     // Common case: 'viewBox' set on outermost <svg> element -> 'preApplySVGTransformMatrix'

@@ -503,7 +503,7 @@ static void CallbackForContainIntrinsicSize(const Vector<Ref<ResizeObserverEntry
                 continue;
             }
             ASSERT(!isSkippedContentRoot(*box));
-            ASSERT(box->style().hasAutoLengthContainIntrinsicSize());
+            ASSERT(box->style().containIntrinsicWidth().hasAuto() || box->style().containIntrinsicHeight().hasAuto());
 
             auto contentBoxSize = entry->contentBoxSize().at(0);
             if (box->style().logicalContainIntrinsicWidth().hasAuto()) {

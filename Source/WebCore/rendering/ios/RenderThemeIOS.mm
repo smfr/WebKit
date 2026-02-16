@@ -879,7 +879,7 @@ void RenderThemeIOS::adjustSearchFieldStyle(RenderStyle& style, const Element* e
     if (!element)
         return;
 
-    if (!style.hasBorder())
+    if (!style.border().hasBorder())
         return;
 
     RenderBox* box = element->renderBox();
@@ -1733,7 +1733,7 @@ bool RenderThemeIOS::paintListButton(const RenderElement& box, const PaintInfo& 
 #endif
 
     auto& style = box.style();
-    if (style.hasContent() || style.hasUsedContentNone())
+    if (style.content().isData() || style.hasUsedContentNone())
         return false;
 
     auto& context = paintInfo.context();

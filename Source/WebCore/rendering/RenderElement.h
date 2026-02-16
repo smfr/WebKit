@@ -113,12 +113,12 @@ public:
     inline bool canContainAbsolutelyPositionedObjects(const RenderStyle* styleToUse = nullptr) const; // Defined in RenderElementStyleInlines.h.
     bool canEstablishContainingBlockWithTransform() const;
 
-    inline bool shouldApplyLayoutContainment(const RenderStyle* styleToUse = nullptr) const; // Defined in RenderElementStyleInlines.h
+    inline bool shouldApplyLayoutContainment() const; // Defined in RenderElementStyleInlines.h
     inline bool shouldApplySizeContainment() const; // Defined in RenderElementStyleInlines.h
     inline bool shouldApplyInlineSizeContainment() const; // Defined in RenderElementStyleInlines.h.
     inline bool shouldApplySizeOrInlineSizeContainment() const; // Defined in RenderElementStyleInlines.h
     inline bool shouldApplyStyleContainment() const; // Defined in RenderElementStyleInlines.h.
-    inline bool shouldApplyPaintContainment(const RenderStyle* styleToUse = nullptr) const; // Defined in RenderElementStyleInlines.h.
+    inline bool shouldApplyPaintContainment() const; // Defined in RenderElementStyleInlines.h.
     inline bool shouldApplyAnyContainment() const; // Defined in RenderElementStyleInlines.h.
 
     bool hasEligibleContainmentForSizeQuery() const;

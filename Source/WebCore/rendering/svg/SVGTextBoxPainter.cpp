@@ -191,17 +191,17 @@ void SVGTextBoxPainter<TextBoxPath>::paint()
 
     auto& style = parentRenderer.style();
 
-    bool hasFill = style.hasFill();
-    bool hasVisibleStroke = style.hasStroke() && style.strokeWidth().isPossiblyPositive();
+    bool hasFill = !style.fill().isNone();
+    bool hasVisibleStroke = !style.stroke().isNone() && style.strokeWidth().isPossiblyPositive();
 
     const RenderStyle* selectionStyle = &style;
     if (hasSelection && shouldPaintSelectionHighlight) {
         selectionStyle = parentRenderer.getCachedPseudoStyle({ PseudoElementType::Selection });
         if (selectionStyle) {
             if (!hasFill)
-                hasFill = selectionStyle->hasFill();
+                hasFill = !selectionStyle->fill().isNone();
             if (!hasVisibleStroke)
-                hasVisibleStroke = selectionStyle->hasStroke() && selectionStyle->strokeWidth().isPossiblyPositive();
+                hasVisibleStroke = !selectionStyle->stroke().isNone() && selectionStyle->strokeWidth().isPossiblyPositive();
         } else
             selectionStyle = &style;
     }
@@ -456,13 +456,13 @@ void SVGTextBoxPainter<TextBoxPath>::paintDecoration(Style::TextDecorationLine d
     for (auto type : renderer().style().paintOrder()) {
         switch (type) {
         case Style::PaintType::Fill:
-            if (decorationStyle.hasFill()) {
+            if (!decorationStyle.fill().isNone()) {
                 m_paintingResourceMode = RenderSVGResourceMode::ApplyToFill;
                 paintDecorationWithStyle(decoration, fragment, *decorationRenderer);
             }
             break;
         case Style::PaintType::Stroke:
-            if (decorationStyle.hasStroke() && decorationStyle.strokeWidth().isPossiblyPositive()) {
+            if (!decorationStyle.stroke().isNone() && decorationStyle.strokeWidth().isPossiblyPositive()) {
                 m_paintingResourceMode = RenderSVGResourceMode::ApplyToStroke;
                 paintDecorationWithStyle(decoration, fragment, *decorationRenderer);
             }

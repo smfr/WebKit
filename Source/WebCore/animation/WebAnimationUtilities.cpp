@@ -404,7 +404,7 @@ AtomString animatablePropertyAsString(AnimatableCSSProperty property)
 
 bool styleHasDisplayTransition(const RenderStyle& style)
 {
-    if (!style.hasTransitions())
+    if (style.transitions().isInitial())
         return false;
 
     for (auto& transition : style.transitions().usedValues()) {

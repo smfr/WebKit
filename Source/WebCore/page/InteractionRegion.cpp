@@ -260,11 +260,11 @@ static bool hasTransparentContainerStyle(const RenderStyle& style)
 {
     return !style.hasBackground()
         && !style.hasOutline()
-        && !style.hasBoxShadow()
-        && !style.hasClipPath()
+        && style.boxShadow().isNone()
+        && style.clipPath().isNone()
         && !style.hasExplicitlySetBorderRadius()
         // No visible borders or borders that do not create a complete box.
-        && (!style.hasVisibleBorder()
+        && (!style.border().hasVisibleBorder()
             || !(style.usedBorderTopWidth() && style.usedBorderRightWidth() && style.usedBorderBottomWidth() && style.usedBorderLeftWidth()));
 }
 
@@ -510,9 +510,9 @@ std::optional<InteractionRegion> interactionRegionForRenderedRegion(const Render
 
                 return cachedImageIsPhoto(*renderImage->cachedImage());
             }();
-        } else if (regionRenderer.style().hasBackgroundImage()) {
+        } else if (auto& backgroundLayers = regionRenderer.style().backgroundLayers(); Style::hasImageInAnyLayer(backgroundLayers)) {
             isPhoto = [&]() -> bool {
-                RefPtr backgroundImage = regionRenderer.style().backgroundLayers().usedFirst().image().tryStyleImage();
+                RefPtr backgroundImage = backgroundLayers.usedFirst().image().tryStyleImage();
                 if (!backgroundImage || !backgroundImage->cachedImage())
                     return false;
 

@@ -827,7 +827,7 @@ bool RenderImage::foregroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect,
         return false;
     auto backgroundClip = style().backgroundLayers().usedFirst().clip();
     // Background paints under borders.
-    if (backgroundClip == FillBox::BorderBox && style().hasBorder() && !borderObscuresBackground())
+    if (backgroundClip == FillBox::BorderBox && style().border().hasBorder() && !borderObscuresBackground())
         return false;
     // Background shows in padding area.
     if ((backgroundClip == FillBox::BorderBox || backgroundClip == FillBox::PaddingBox) && !Style::isKnownZero(style().paddingBox()))

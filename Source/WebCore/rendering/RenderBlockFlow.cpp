@@ -359,7 +359,7 @@ void RenderBlockFlow::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth,
         adjustIntrinsicLogicalWidthsForColumns(minLogicalWidth, maxLogicalWidth);
 
     auto resetMinimumWidthForMarqueeIfApplicable = [&] {
-        if (style().autoWrap() || !layer())
+        if (style().textWrapMode() != TextWrapMode::NoWrap || !layer())
             return;
         CheckedPtr scrollableArea = layer()->scrollableArea();
         if (!scrollableArea || !scrollableArea->marquee() || !scrollableArea->marquee()->isHorizontal())
@@ -743,7 +743,7 @@ void RenderBlockFlow::dirtyForLayoutFromPercentageHeightDescendants()
                 // If the width of an image is affected by the height of a child (e.g., an image with an aspect ratio),
                 // then we have to dirty preferred widths, since even enclosing blocks can become dirty as a result.
                 // (A horizontal flexbox that contains an inline image wrapped in an anonymous block for example.)
-                if (renderBox->hasIntrinsicAspectRatio() || renderBox->style().hasAspectRatio())
+                if (renderBox->hasIntrinsicAspectRatio() || renderBox->style().aspectRatio().hasRatio())
                     renderBox->setNeedsPreferredWidthsUpdate();
             }
         }
@@ -4775,7 +4775,7 @@ static inline std::optional<std::pair<const RenderText&, const RenderText&>> tra
 
 static inline bool hasTrailingSoftWrapOpportunity(const RenderInline& rubyBase, const RenderBlockFlow& blockContainer)
 {
-    if (!rubyBase.parent()->style().autoWrap())
+    if (rubyBase.parent()->style().textWrapMode() == TextWrapMode::NoWrap)
         return false;
 
     if (auto lastAndNextTextContent = trailingRubyBaseAndAdjacentTextContent(rubyBase, blockContainer))
@@ -4827,7 +4827,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
     // Not supporting the quirk has caused us to mis-render some real sites. (See Bugzilla 10517.) 
     bool allowImagesToBreak = !document().inQuirksMode() || !isRenderTableCell() || !styleToUse.logicalWidth().isIntrinsicOrLegacyIntrinsicOrAuto();
 
-    bool oldAutoWrap = styleToUse.autoWrap();
+    bool oldAutoWrap = styleToUse.textWrapMode() != TextWrapMode::NoWrap;
 
     InlineMinMaxIterator childIterator(*this);
 
@@ -4894,7 +4894,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
             remainingNegativeTextIndent = { };
             addedStartPunctuationHang = true;
             isPrevChildInlineFlow = false;
-            oldAutoWrap = child->parent()->style().autoWrap();
+            oldAutoWrap = child->parent()->style().textWrapMode() != TextWrapMode::NoWrap;
         };
 
         if (child->isBR()) {
@@ -4955,7 +4955,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
         // values (if any of them are larger than our current min/max). We then look at
         // the width of the last non-breakable run and use that to start a new line
         // (unless we end in whitespace).
-        auto autoWrap = child->isBlockLevelReplacedOrAtomicInline() || is<RenderText>(*child) ? child->parent()->style().autoWrap() : child->style().autoWrap();
+        auto autoWrap = child->isBlockLevelReplacedOrAtomicInline() || is<RenderText>(*child) ? (child->parent()->style().textWrapMode() != TextWrapMode::NoWrap) : (child->style().textWrapMode() != TextWrapMode::NoWrap);
         auto childMin = 0.f;
         auto childMax = 0.f;
 
@@ -5094,7 +5094,7 @@ void RenderBlockFlow::computeInlinePreferredLogicalWidths(LayoutUnit& minLogical
                 lastText = nullptr;
             }
         } else if (CheckedPtr renderText = dynamicDowncast<RenderText>(*child)) {
-            if (renderText->style().hasTextCombine()) {
+            if (renderText->style().textCombine() != TextCombine::None) {
                 if (CheckedPtr renderCombineText = dynamicDowncast<RenderCombineText>(*renderText))
                     renderCombineText->combineTextIfNeeded();
             }

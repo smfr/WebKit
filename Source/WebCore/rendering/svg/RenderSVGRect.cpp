@@ -88,7 +88,7 @@ void RenderSVGRect::updateShapeFromElement()
         boundingBoxSize);
 
     auto strokeBoundingBox = m_fillBoundingBox;
-    if (style->hasStroke())
+    if (!style->stroke().isNone())
         strokeBoundingBox.inflate(this->strokeWidth() / 2);
 
 #if USE(CG)
@@ -160,7 +160,7 @@ bool RenderSVGRect::definitelyHasSimpleStroke() const
 
 void RenderSVGRect::strokeShape(GraphicsContext& context) const
 {
-    if (!style().hasStroke() || !style().strokeWidth().isPossiblyPositive())
+    if (style().stroke().isNone() || !style().strokeWidth().isPossiblyPositive())
         return;
 
     if (hasPath()) {

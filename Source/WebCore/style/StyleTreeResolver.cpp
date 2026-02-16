@@ -779,7 +779,7 @@ ElementUpdate TreeResolver::createAnimatedElementUpdate(ResolvedStyle&& resolved
         if (auto* styleBefore = beforeResolutionStyle(element.get(), styleable.pseudoElementIdentifier))
             return styleBefore;
 
-        if (resolvedStyle.style->hasTransitions()) {
+        if (!resolvedStyle.style->transitions().isInitial()) {
             // https://drafts.csswg.org/css-transitions-2/#at-ruledef-starting-style
             // "If an element does not have a before-change style for a given style change event, the starting style is used instead."
             startingStyle = resolveStartingStyle(resolvedStyle, styleable, resolutionContext);
@@ -806,7 +806,7 @@ ElementUpdate TreeResolver::createAnimatedElementUpdate(ResolvedStyle&& resolved
         if (skipAnimationForAnchorPosition)
             return;
 
-        if (oldStyle && (oldStyle->hasTransitions() || resolvedStyle.style->hasTransitions()))
+        if (oldStyle && (!oldStyle->transitions().isInitial() || !resolvedStyle.style->transitions().isInitial()))
             styleable.updateCSSTransitions(*oldStyle, *resolvedStyle.style, newStyleOriginatedAnimations);
 
         if ((oldStyle && oldStyle->hasScrollTimelines()) || resolvedStyle.style->hasScrollTimelines())
@@ -823,7 +823,7 @@ ElementUpdate TreeResolver::createAnimatedElementUpdate(ResolvedStyle&& resolved
         // The order in which CSS Transitions and CSS Animations are updated matters since CSS Transitions define the after-change style
         // to use CSS Animations as defined in the previous style change event. As such, we update CSS Animations after CSS Transitions
         // such that when CSS Transitions are updated the CSS Animations data is the same as during the previous style change event.
-        if ((oldStyle && oldStyle->hasAnimations()) || resolvedStyle.style->hasAnimations())
+        if ((oldStyle && !oldStyle->animations().isInitial()) || !resolvedStyle.style->animations().isInitial())
             styleable.updateCSSAnimations(oldStyle, *resolvedStyle.style, resolutionContext, newStyleOriginatedAnimations, isInDisplayNoneTree);
     };
 
@@ -839,7 +839,7 @@ ElementUpdate TreeResolver::createAnimatedElementUpdate(ResolvedStyle&& resolved
             // to the old value. To remedy this, we manually patch display to be the old value if:
             // 1. the old style's display is not none, and
             // 2. the new style has display: none and specifies a transition on display.
-            if (oldStyle && oldStyle->hasTransitions() && oldStyle->display() != DisplayType::None && styleHasDisplayTransition(*newStyle) && newStyle->display() == DisplayType::None)
+            if (oldStyle && !oldStyle->transitions().isInitial() && oldStyle->display() != DisplayType::None && styleHasDisplayTransition(*newStyle) && newStyle->display() == DisplayType::None)
                 newStyle->setDisplay(oldStyle->display());
             return { WTF::move(newStyle), OptionSet<AnimationImpact> { } };
         }
@@ -1340,7 +1340,7 @@ void TreeResolver::resolveComposedTree()
         if (!m_didSeePendingStylesheet)
             m_didSeePendingStylesheet = hasLoadingStylesheet(m_document->styleScope(), element.get(), !shouldIterateChildren);
 
-        if (!parent.resolvedFirstLineAndLetterChild && style && generatesBox(*style) && supportsFirstLineAndLetterPseudoElement(*style))
+        if (!parent.resolvedFirstLineAndLetterChild && style && style->display().doesGenerateBox() && supportsFirstLineAndLetterPseudoElement(*style))
             parent.resolvedFirstLineAndLetterChild = true;
 
         if (!shouldIterateChildren) {

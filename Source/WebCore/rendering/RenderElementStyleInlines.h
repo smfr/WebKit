@@ -30,41 +30,41 @@
 
 namespace WebCore {
 
-inline bool RenderElement::hasBackdropFilter() const { return style().hasBackdropFilter(); }
+inline bool RenderElement::hasBackdropFilter() const { return !style().backdropFilter().isNone(); }
 inline bool RenderElement::hasBackground() const { return style().hasBackground(); }
-inline bool RenderElement::hasBlendMode() const { return style().hasBlendMode(); }
-inline bool RenderElement::hasClip() const { return isOutOfFlowPositioned() && style().hasClip(); }
+inline bool RenderElement::hasBlendMode() const { return style().blendMode() != BlendMode::Normal; }
+inline bool RenderElement::hasClip() const { return isOutOfFlowPositioned() && !style().clip().isAuto(); }
 inline bool RenderElement::hasClipOrNonVisibleOverflow() const { return hasClip() || hasNonVisibleOverflow(); }
-inline bool RenderElement::hasClipPath() const { return style().hasClipPath(); }
-inline bool RenderElement::hasFilter() const { return style().hasFilter(); }
+inline bool RenderElement::hasClipPath() const { return !style().clipPath().isNone(); }
+inline bool RenderElement::hasFilter() const { return !style().filter().isNone(); }
 inline bool RenderElement::hasHiddenBackface() const { return style().backfaceVisibility() == BackfaceVisibility::Hidden; }
-inline bool RenderElement::hasMask() const { return style().hasMask(); }
+inline bool RenderElement::hasMask() const { return Style::hasImageInAnyLayer(style().maskLayers()) || !style().maskBorderSource().isNone(); }
 inline bool RenderElement::hasOutline() const { return style().hasOutline() || hasOutlineAnnotation(); }
 inline bool RenderElement::hasShapeOutside() const { return !style().shapeOutside().isNone(); }
-inline bool RenderElement::isTransparent() const { return style().hasOpacity(); }
+inline bool RenderElement::isTransparent() const { return !style().opacity().isOpaque(); }
 inline float RenderElement::opacity() const { return style().opacity().value.value; }
 inline FloatRect RenderElement::transformReferenceBoxRect() const { return transformReferenceBoxRect(style()); }
 inline FloatRect RenderElement::transformReferenceBoxRect(const RenderStyle& style) const { return referenceBoxRect(transformBoxToCSSBoxType(style.transformBox())); }
 
 #if HAVE(CORE_MATERIAL)
-inline bool RenderElement::hasAppleVisualEffect() const { return style().hasAppleVisualEffect(); }
-inline bool RenderElement::hasAppleVisualEffectRequiringBackdropFilter() const { return style().hasAppleVisualEffectRequiringBackdropFilter(); }
+inline bool RenderElement::hasAppleVisualEffect() const { return style().appleVisualEffect() != AppleVisualEffect::None; }
+inline bool RenderElement::hasAppleVisualEffectRequiringBackdropFilter() const { return appleVisualEffectNeedsBackdrop(style().appleVisualEffect()); }
 #endif
 
 inline bool RenderElement::mayContainOutOfFlowPositionedObjects(const RenderStyle* styleToUse) const
 {
     auto& style = styleToUse ? *styleToUse : this->style();
     return isRenderView()
-    || (canEstablishContainingBlockWithTransform() && (styleToUse ? styleToUse->hasTransformRelatedProperty() : hasTransformRelatedProperty()))
-    || (style.hasBackdropFilter() && !isDocumentElementRenderer())
-    || (style.hasFilter() && !isDocumentElementRenderer())
+        || (canEstablishContainingBlockWithTransform() && (styleToUse ? styleToUse->hasTransformRelatedProperty() : hasTransformRelatedProperty()))
+        || (!style.backdropFilter().isNone() && !isDocumentElementRenderer())
+        || (!style.filter().isNone() && !isDocumentElementRenderer())
 #if HAVE(CORE_MATERIAL)
-    || (style.hasAppleVisualEffectRequiringBackdropFilter() && !isDocumentElementRenderer())
+        || (appleVisualEffectNeedsBackdrop(style.appleVisualEffect()) && !isDocumentElementRenderer())
 #endif
-    || isRenderOrLegacyRenderSVGForeignObject()
-    || shouldApplyLayoutContainment(styleToUse)
-    || shouldApplyPaintContainment(styleToUse)
-    || isViewTransitionContainingBlock();
+        || isRenderOrLegacyRenderSVGForeignObject()
+        || (element() && WebCore::shouldApplyLayoutContainment(style, *element()))
+        || (element() && WebCore::shouldApplyPaintContainment(style, *element()))
+        || isViewTransitionContainingBlock();
 }
 
 inline bool RenderElement::canContainAbsolutelyPositionedObjects(const RenderStyle* styleToUse) const
@@ -84,30 +84,44 @@ inline bool RenderElement::canContainFixedPositionObjects(const RenderStyle* sty
 
 inline bool RenderElement::createsGroupForStyle(const RenderStyle& style)
 {
-    return style.hasOpacity()
-    || style.hasMask()
-    || style.hasClipPath()
-    || style.hasFilter()
-    || style.hasBackdropFilter()
+    return !style.opacity().isOpaque()
+        || Style::hasImageInAnyLayer(style.maskLayers())
+        || !style.maskBorderSource().isNone()
+        || !style.clipPath().isNone()
+        || !style.filter().isNone()
+        || !style.backdropFilter().isNone()
 #if HAVE(CORE_MATERIAL)
-    || style.hasAppleVisualEffect()
+        || style.appleVisualEffect() != AppleVisualEffect::None
 #endif
-    || style.hasBlendMode();
+        || style.blendMode() != BlendMode::Normal;
 }
 
 inline bool RenderElement::shouldApplyAnyContainment() const
 {
-    return shouldApplyLayoutContainment() || shouldApplySizeContainment() || shouldApplyInlineSizeContainment() || shouldApplyStyleContainment() || shouldApplyPaintContainment();
+    RefPtr element = this->element();
+    if (!element)
+        return false;
+
+    return WebCore::shouldApplyLayoutContainment(style(), *element)
+        || WebCore::shouldApplySizeContainment(style(), *element)
+        || WebCore::shouldApplyInlineSizeContainment(style(), *element)
+        || WebCore::shouldApplyStyleContainment(style(), *element)
+        || WebCore::shouldApplyPaintContainment(style(), *element);
 }
 
 inline bool RenderElement::shouldApplySizeOrInlineSizeContainment() const
 {
-    return shouldApplySizeContainment() || shouldApplyInlineSizeContainment();
+    RefPtr element = this->element();
+    if (!element)
+        return false;
+
+    return WebCore::shouldApplySizeContainment(style(), *element)
+        || WebCore::shouldApplyInlineSizeContainment(style(), *element);
 }
 
-inline bool RenderElement::shouldApplyLayoutContainment(const RenderStyle* styleToUse) const
+inline bool RenderElement::shouldApplyLayoutContainment() const
 {
-    return element() && WebCore::shouldApplyLayoutContainment(styleToUse ? *styleToUse : style(), *element());
+    return element() && WebCore::shouldApplyLayoutContainment(style(), *element());
 }
 
 inline bool RenderElement::shouldApplySizeContainment() const
@@ -125,9 +139,9 @@ inline bool RenderElement::shouldApplyStyleContainment() const
     return element() && WebCore::shouldApplyStyleContainment(style(), *element());
 }
 
-inline bool RenderElement::shouldApplyPaintContainment(const RenderStyle* styleToUse) const
+inline bool RenderElement::shouldApplyPaintContainment() const
 {
-    return element() && WebCore::shouldApplyPaintContainment(styleToUse ? *styleToUse : style(), *element());
+    return element() && WebCore::shouldApplyPaintContainment(style(), *element());
 }
 
 inline bool RenderElement::visibleToHitTesting(const std::optional<HitTestRequest>& request) const

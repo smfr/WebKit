@@ -895,7 +895,7 @@ Vector<String> Element::getAttributeNames() const
 bool Element::hasFocusableStyle() const
 {
     auto isFocusableStyle = [](const RenderStyle* style) {
-        return style && style->display() != Style::DisplayType::None && style->display() != Style::DisplayType::Contents
+        return style && style->display().doesGenerateBox()
             && style->visibility() == Visibility::Visible && !style->effectiveInert()
             && (style->usedContentVisibility() != ContentVisibility::Hidden || style->contentVisibility() != ContentVisibility::Visible);
     };
@@ -3050,7 +3050,7 @@ const AtomString& Element::imageSourceURL() const
 
 bool Element::rendererIsNeeded(const RenderStyle& style)
 {
-    return style.display() != Style::DisplayType::None && style.display() != Style::DisplayType::Contents;
+    return style.display().doesGenerateBox();
 }
 
 RenderPtr<RenderElement> Element::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)

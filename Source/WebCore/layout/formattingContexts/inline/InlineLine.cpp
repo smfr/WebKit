@@ -990,7 +990,7 @@ bool Line::Run::isContentfulOrHasDecoration(const Run& run, const InlineFormatti
 
 bool Line::Run::hasTextCombine() const
 {
-    return m_style.hasTextCombine();
+    return m_style.textCombine() != TextCombine::None;
 }
 
 InlineLayoutUnit Line::Run::letterSpacing() const

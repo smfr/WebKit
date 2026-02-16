@@ -88,6 +88,7 @@ struct Display {
 
     constexpr bool isBlockType() const;
     constexpr bool isInlineType() const;
+    constexpr bool isTableBox() const;
     constexpr bool isTableOrTablePart() const;
     constexpr bool isInternalTableBox() const;
     constexpr bool isRubyContainerOrInternalRubyBox() const;
@@ -100,6 +101,7 @@ struct Display {
     constexpr bool isFlexibleOrGridFormattingContextBox() const;
     constexpr bool isFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox() const;
     constexpr bool doesGenerateBlockContainer() const;
+    constexpr bool doesGenerateBox() const;
 
     constexpr bool operator==(const Display&) const = default;
     constexpr bool operator==(DisplayType other) const { return value == other; }
@@ -240,6 +242,12 @@ constexpr bool Display::isInlineType() const
         || value == DisplayType::RubyText;
 }
 
+constexpr bool Display::isTableBox() const
+{
+    return value == DisplayType::BlockTable
+        || value == DisplayType::InlineTable;
+}
+
 constexpr bool Display::isTableOrTablePart() const
 {
     return value == DisplayType::BlockTable
@@ -329,6 +337,12 @@ constexpr bool Display::doesGenerateBlockContainer() const
         || value == DisplayType::InlineFlowRoot
         || value == DisplayType::TableCell
         || value == DisplayType::TableCaption;
+}
+
+constexpr bool Display::doesGenerateBox() const
+{
+    return value != DisplayType::Contents
+        && value != DisplayType::None;
 }
 
 // MARK: - Conversion
