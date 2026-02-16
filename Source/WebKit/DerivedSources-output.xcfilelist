@@ -466,6 +466,12 @@ $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentControl
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentMobileDocumentRequest+Extras.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentMobileDocumentRequest.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentRawRequest.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/ModelBridge.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/ModelParameters.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/ModelUtils.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/ModelIBLTextures.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/ModelRenderer.swift
+$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/USDModel.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentRequest.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentPresentmentResponse.swift
 $(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKIdentityDocumentRawRequestValidator.swift

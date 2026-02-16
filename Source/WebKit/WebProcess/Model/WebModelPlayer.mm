@@ -33,6 +33,7 @@
 #import "ModelInlineConverters.h"
 #import "ModelTypes.h"
 #import "RemoteGPUProxy.h"
+#import "WebKitSwiftSoftLink.h"
 #import <WebCore/Document.h>
 #import <WebCore/FloatPoint3D.h>
 #import <WebCore/GPU.h>
@@ -289,7 +290,7 @@ void WebModelPlayer::load(WebCore::Model& modelSource, WebCore::LayoutSize size)
             protectedThis->m_displayBuffers = WTF::move(surfaceHandles);
     });
 
-    m_modelLoader = adoptNS([[WKBridgeModelLoader alloc] init]);
+    m_modelLoader = adoptNS([allocWKBridgeModelLoaderInstance() init]);
     Ref protectedThis = Ref { *this };
     [m_modelLoader setCallbacksWithModelUpdatedCallback:^(WKBridgeUpdateMesh *updateRequest) {
         ensureOnMainThreadWithProtectedThis([updateRequest] (Ref<WebModelPlayer> protectedThis) {

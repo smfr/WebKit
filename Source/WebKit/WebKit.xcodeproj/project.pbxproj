@@ -247,15 +247,16 @@
 		07FE63E82ED11D5900D5ED9E /* ClassStructPtr.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FE63E72ED11D5900D5ED9E /* ClassStructPtr.h */; };
 		07FEBC9A2E035A8B004A6D5D /* WKMouseDeviceObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FEBC992E035950004A6D5D /* WKMouseDeviceObserver.swift */; };
 		0D4599052C86B00F00435F48 /* WKDigitalCredentialsPicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D9D28E72C81473B002CB4C7 /* WKDigitalCredentialsPicker.h */; };
+		0D4C005A2F4182F100DF1BBF /* ModelUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B392F3453C40022454D /* ModelUtils.swift */; };
+		0D4C005B2F4182F100DF1BBF /* ModelIBLTextures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B352F3453C40022454D /* ModelIBLTextures.swift */; };
+		0D4C005C2F4182F100DF1BBF /* ModelBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B342F3453C40022454D /* ModelBridge.swift */; };
+		0D4C005D2F4182F100DF1BBF /* ModelParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B362F3453C40022454D /* ModelParameters.swift */; };
+		0D4C005E2F4182F100DF1BBF /* USDModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B3A2F3453C40022454D /* USDModel.swift */; };
+		0D4C005F2F4182F100DF1BBF /* ModelRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B372F3453C40022454D /* ModelRenderer.swift */; };
+		0D4C00632F41905000DF1BBF /* ModelTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D653B382F3453C40022454D /* ModelTypes.h */; };
 		0D653B3B2F3459210022454D /* Float3.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D653B322F3453C40022454D /* Float3.h */; };
 		0D653B3C2F34592B0022454D /* Float4x4.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D653B332F3453C40022454D /* Float4x4.h */; };
 		0D653B3D2F3459340022454D /* ModelTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D653B382F3453C40022454D /* ModelTypes.h */; };
-		0D653B3E2F34718F0022454D /* ModelBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B342F3453C40022454D /* ModelBridge.swift */; };
-		0D653B3F2F3471960022454D /* ModelIBLTextures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B352F3453C40022454D /* ModelIBLTextures.swift */; };
-		0D653B402F3471960022454D /* USDModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B3A2F3453C40022454D /* USDModel.swift */; };
-		0D653B412F3471960022454D /* ModelParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B362F3453C40022454D /* ModelParameters.swift */; };
-		0D653B422F3471960022454D /* ModelRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B372F3453C40022454D /* ModelRenderer.swift */; };
-		0D653B432F3471960022454D /* ModelUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D653B392F3453C40022454D /* ModelUtils.swift */; };
 		0D9649182E7489AF000F9CDA /* ModelDowncastConvertToBackingContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D9649122E748610000F9CDA /* ModelDowncastConvertToBackingContext.h */; };
 		0DD656D42C8F0A4400278C3B /* DigitalCredentialsCoordinator.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D20EA1C2C59E2F900CA61BD /* DigitalCredentialsCoordinator.h */; };
 		0E97D74D200E900400BF6643 /* SafeBrowsingSPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E97D74C200E8FF300BF6643 /* SafeBrowsingSPI.h */; };
@@ -19592,6 +19593,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D4C00632F41905000DF1BBF /* ModelTypes.h in Headers */,
 				A14F9B672B686E0200AD9C56 /* WebKitSwift.h in Headers */,
 				0765D1C42DEBFF7E0029CDD0 /* WKGroupSession.h in Headers */,
 				F4D59C002DCBDC9F004492FB /* WKIdentityDocumentPresentmentController.h in Headers */,
@@ -21815,11 +21817,6 @@
 				E326F4DC2CA6C44F00182187 /* LogStream.mm in Sources */,
 				9B4790912531563200EC11AB /* MessageArgumentDescriptions.cpp in Sources */,
 				EBA8D3B627A5E33F00CB7900 /* MockPushServiceConnection.mm in Sources */,
-				0D653B3E2F34718F0022454D /* ModelBridge.swift in Sources */,
-				0D653B3F2F3471960022454D /* ModelIBLTextures.swift in Sources */,
-				0D653B412F3471960022454D /* ModelParameters.swift in Sources */,
-				0D653B422F3471960022454D /* ModelRenderer.swift in Sources */,
-				0D653B432F3471960022454D /* ModelUtils.swift in Sources */,
 				57B826452304F14000B72EB0 /* NearFieldSoftLink.mm in Sources */,
 				C1C1B30F2540F50D00D9100B /* NetworkConnectionToWebProcessMac.mm in Sources */,
 				41E242E026E0C908009A8C64 /* NetworkRTCUtilitiesCocoa.mm in Sources */,
@@ -22129,7 +22126,6 @@
 				FA580B4D2DA64B5F005E4965 /* UnifiedSource179.cpp in Sources */,
 				FA580B3B2DA64B5F005E4965 /* UnifiedSource180.cpp in Sources */,
 				078B04442CF1149200B453A6 /* URLSchemeHandler.swift in Sources */,
-				0D653B402F3471960022454D /* USDModel.swift in Sources */,
 				A1B849392F3D9F02004256A1 /* VideoPresentationInterfaceAVKit.mm in Sources */,
 				52CDC5C62731DA0D00A3E3EB /* VirtualAuthenticatorManager.cpp in Sources */,
 				52F4B46A27E1197700FFD129 /* VirtualAuthenticatorUtils.mm in Sources */,
@@ -22253,8 +22249,14 @@
 				E838FCB02DE90BF800703353 /* ISO18013MobileDocumentRequest+Extras.swift in Sources */,
 				A14F9B772B68CA6C00AD9C56 /* LinearMediaPlayer.swift in Sources */,
 				A14F9B642B686DD300AD9C56 /* LinearMediaTypes.swift in Sources */,
+				0D4C005C2F4182F100DF1BBF /* ModelBridge.swift in Sources */,
+				0D4C005B2F4182F100DF1BBF /* ModelIBLTextures.swift in Sources */,
+				0D4C005D2F4182F100DF1BBF /* ModelParameters.swift in Sources */,
+				0D4C005F2F4182F100DF1BBF /* ModelRenderer.swift in Sources */,
+				0D4C005A2F4182F100DF1BBF /* ModelUtils.swift in Sources */,
 				0785E8002CBCDFFD00F68126 /* PlatformIntelligenceTextEffectView.swift in Sources */,
 				DD5697CD2DC06F7700050321 /* rdar150228472.swift in Sources */,
+				0D4C005E2F4182F100DF1BBF /* USDModel.swift in Sources */,
 				A1555C522E0C5B9400EB2341 /* WebKitSwift.swift in Sources */,
 				0765D1C52DEBFF840029CDD0 /* WKGroupSession.swift in Sources */,
 				F46C34352DCD369B00B476F8 /* WKIdentityDocumentPresentmentController.swift in Sources */,
@@ -22368,9 +22370,7 @@
 		};
 		58E7CD782E78575C00338ED0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 58E7CD662E78561D00338ED0 /* WebContentEnhancedSecurityExtension */;
 			targetProxy = 58E7CD772E78575C00338ED0 /* PBXContainerItemProxy */;
 		};
@@ -22401,9 +22401,7 @@
 		};
 		5C400E6A29DB8AB500446F6F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 5C139DA129DB82E500D5117B /* WebContentCaptivePortalExtension */;
 			targetProxy = 5C400E6929DB8AB500446F6F /* PBXContainerItemProxy */;
 		};
@@ -22419,25 +22417,19 @@
 		};
 		5CE4B60729CEBB760038F565 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 5CA5A2C929CBBA1A000F1046 /* WebContentExtension */;
 			targetProxy = 5CE4B60629CEBB760038F565 /* PBXContainerItemProxy */;
 		};
 		5CE4B62329CF880B0038F565 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 5CE4B61529CF877F0038F565 /* GPUExtension */;
 			targetProxy = 5CE4B62229CF880B0038F565 /* PBXContainerItemProxy */;
 		};
 		5CE4B62529CF880B0038F565 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = 5CE4B60829CF87680038F565 /* NetworkingExtension */;
 			targetProxy = 5CE4B62429CF880B0038F565 /* PBXContainerItemProxy */;
 		};
