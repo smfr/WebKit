@@ -100,22 +100,6 @@ InlineLayoutUnit InlineFormattingUtils::logicalTopForNextLine(const LineLayoutRe
     return ceil(nextafter(lineLogicalRect.bottom(), std::numeric_limits<float>::max()));
 }
 
-ContentWidthAndMargin InlineFormattingUtils::inlineBlockContentWidthAndMargin(const Box&, const HorizontalConstraints&, const OverriddenHorizontalValues&) const
-{
-    ASSERT_NOT_IMPLEMENTED_YET();
-    // 10.3.9 'Inline-block', non-replaced elements in normal flow
-    // 10.3.10 'Inline-block', replaced elements in normal flow
-    return { };
-}
-
-ContentHeightAndMargin InlineFormattingUtils::inlineBlockContentHeightAndMargin(const Box&, const HorizontalConstraints&, const OverriddenVerticalValues&) const
-{
-    ASSERT_NOT_IMPLEMENTED_YET();
-    // 10.6.2 Inline replaced elements, block-level replaced elements in normal flow, 'inline-block' replaced elements in normal flow and floating replaced elements
-    // 10.6.6 Complicated cases
-    return { };
-}
-
 bool InlineFormattingUtils::inlineLevelBoxAffectsLineBox(const InlineLevelBox& inlineLevelBox) const
 {
     if (!inlineLevelBox.mayStretchLineBox())
