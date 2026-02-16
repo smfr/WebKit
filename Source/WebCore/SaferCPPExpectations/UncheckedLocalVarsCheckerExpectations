@@ -19,6 +19,7 @@ layout/formattingContexts/inline/InlineLineBoxBuilder.cpp
 layout/formattingContexts/inline/InlineLineBuilder.cpp
 layout/formattingContexts/inline/InlineQuirks.cpp
 layout/formattingContexts/inline/IntrinsicWidthHandler.cpp
+layout/formattingContexts/inline/TextOnlySimpleLineBuilder.cpp
 layout/formattingContexts/inline/display/InlineDisplayContentBuilder.cpp
 layout/formattingContexts/table/TableFormattingContext.cpp
 layout/formattingContexts/table/TableLayout.cpp
