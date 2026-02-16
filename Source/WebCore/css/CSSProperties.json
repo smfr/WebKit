@@ -2046,7 +2046,8 @@
                 "entry",
                 "exit",
                 "entry-crossing",
-                "exit-crossing"
+                "exit-crossing",
+                "scroll"
             ],
             "codegen-properties": {
                 "coordinated-value-list-property": true,
@@ -2072,7 +2073,8 @@
                 "entry",
                 "exit",
                 "entry-crossing",
-                "exit-crossing"
+                "exit-crossing",
+                "scroll"
             ],
             "codegen-properties": {
                 "coordinated-value-list-property": true,
@@ -15152,7 +15154,7 @@
             }
         },
         "<timeline-range-name>": {
-            "grammar": "cover | contain | entry | exit | entry-crossing | exit-crossing",
+            "grammar": "cover | contain | entry | exit | entry-crossing | exit-crossing | scroll",
             "exported": true,
             "specification": {
                 "category": "scroll-animations",

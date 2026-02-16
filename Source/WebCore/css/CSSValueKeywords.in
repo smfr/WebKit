@@ -1090,6 +1090,7 @@ entry
 exit
 entry-crossing
 exit-crossing
+// scroll
 
 //
 // CSS_PROP_ZOOM
