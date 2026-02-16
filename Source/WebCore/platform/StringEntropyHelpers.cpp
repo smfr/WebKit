@@ -148,14 +148,29 @@ String lowEntropyLastPathComponent(const URL& url, const String& fallbackName, c
     if (url.protocolIsData() || url.protocolIsBlob() || url.protocolIsJavaScript())
         return fallbackName;
 
-    String result;
-    auto component = url.lastPathComponent();
-    if (isProbablyHumanReadable(component))
-        result = component.toString();
-    else if (auto fullStopIndex = component.reverseFind('.'); fullStopIndex != notFound)
-        result = makeString(fallbackName, component.right(component.length() - fullStopIndex));
-    else
-        result = fallbackName;
+    auto result = [&url, &fallbackName] -> String {
+        auto component = url.lastPathComponent();
+        if (isProbablyHumanReadable(component))
+            return component.toString();
+
+        auto fullStopIndex = component.reverseFind('.');
+        if (fullStopIndex == notFound || fullStopIndex >= component.length() - 1)
+            return fallbackName;
+
+        auto extensionWithoutFullStop = component.right(component.length() - fullStopIndex - 1);
+        auto firstNonAlphaNumericCharacterIndex = extensionWithoutFullStop.find([](char16_t character) {
+            return !u_isalpha(character) && !u_isdigit(character);
+        });
+
+        if (firstNonAlphaNumericCharacterIndex != notFound)
+            extensionWithoutFullStop = extensionWithoutFullStop.left(firstNonAlphaNumericCharacterIndex);
+
+        if (extensionWithoutFullStop.isEmpty())
+            return fallbackName;
+
+        return makeString(fallbackName, '.', WTF::move(extensionWithoutFullStop));
+    }();
+
     return MIMETypeRegistry::appendFileExtensionIfNecessary(WTF::move(result), mimeType);
 }
 
