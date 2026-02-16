@@ -4364,7 +4364,7 @@ void UnifiedPDFPlugin::setDisplayModeAndUpdateLayout(PDFDisplayMode mode)
         wantsWheelEventsChanged();
 }
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
 
 std::pair<URL, FloatRect> UnifiedPDFPlugin::linkURLAndBoundsForAnnotation(PDFAnnotation *annotation) const
 {
@@ -4401,48 +4401,7 @@ std::optional<FloatRect> UnifiedPDFPlugin::highlightRectForTapAtPoint(FloatPoint
     return rect;
 }
 
-void UnifiedPDFPlugin::handleSyntheticClick(PlatformMouseEvent&& event)
-{
-#if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
-    auto pointInRootView = event.position();
-    if (RetainPtr annotation = annotationForRootViewPoint(IntPoint(pointInRootView))) {
-        if (annotationIsLinkWithDestination(annotation.get()))
-            followLinkAnnotation(annotation.get(), { WTF::move(event) });
-        clearSelection();
-        return;
-    }
-
-    RetainPtr selection = m_currentSelection;
-    if (selection && event.shiftKey()) {
-        auto [page, pointInPage] = rootViewToPage(FloatPoint(pointInRootView));
-        if (!page)
-            return;
-
-        [selection addSelection:protect(selectionAtPoint(pointInPage, page.get(), TextGranularity::WordGranularity)).get()];
-
-        auto [startPage, startPointInPage] = selectionCaretPointInPage(selection.get(), SelectionEndpoint::Start);
-        if (!startPage)
-            return;
-
-        auto [endPage, endPointInPage] = selectionCaretPointInPage(selection.get(), SelectionEndpoint::End);
-        if (!endPage)
-            return;
-
-        setCurrentSelection(selectionBetweenPoints(startPointInPage, startPage.get(), endPointInPage, endPage.get()));
-        return;
-    }
-#else
-    UNUSED_PARAM(event);
-#endif
-
-    clearSelection();
-}
-
-void UnifiedPDFPlugin::clearSelection()
-{
-    resetInitialSelection();
-    setCurrentSelection({ });
-}
+#if PLATFORM(IOS_FAMILY)
 
 #if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
 
@@ -4534,35 +4493,6 @@ void UnifiedPDFPlugin::resetInitialSelection()
     m_initialSelectionStart = { nil, { } };
 }
 
-#if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
-
-PDFSelection *UnifiedPDFPlugin::selectionBetweenPoints(FloatPoint fromPoint, PDFPage *fromPage, FloatPoint toPoint, PDFPage *toPage) const
-{
-    return [pdfDocument() selectionFromPage:fromPage atPoint:fromPoint toPage:toPage atPoint:toPoint withGranularity:PDFSelectionGranularityCharacter];
-}
-
-PDFSelection *UnifiedPDFPlugin::selectionAtPoint(FloatPoint pointInPage, PDFPage *page, TextGranularity granularity) const
-{
-    if (granularity == TextGranularity::DocumentGranularity)
-        return [pdfDocument() selectionForEntireDocument];
-
-    return [pdfDocument() selectionFromPage:page atPoint:pointInPage toPage:page atPoint:pointInPage withGranularity:[&] {
-        switch (granularity) {
-        case TextGranularity::CharacterGranularity:
-            return PDFSelectionGranularityCharacter;
-        case TextGranularity::WordGranularity:
-            return PDFSelectionGranularityWord;
-        case TextGranularity::LineGranularity:
-            return PDFSelectionGranularityLine;
-        default:
-            ASSERT_NOT_REACHED();
-            return PDFSelectionGranularityCharacter;
-        }
-    }()];
-}
-
-#endif // HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
-
 SelectionEndpoint UnifiedPDFPlugin::extendInitialSelection(FloatPoint pointInRootView, TextGranularity granularity)
 {
 #if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
@@ -4602,67 +4532,6 @@ SelectionEndpoint UnifiedPDFPlugin::extendInitialSelection(FloatPoint pointInRoo
     UNUSED_PARAM(pointInRootView);
 #endif
     return SelectionEndpoint::Start;
-}
-
-auto UnifiedPDFPlugin::selectionCaretPointInPage(PDFSelection *selection, SelectionEndpoint endpoint) const -> PageAndPoint
-{
-    bool isStart = endpoint == SelectionEndpoint::Start;
-    RetainPtr pages = [selection pages];
-    RetainPtr page = isStart ? [pages firstObject] : [pages lastObject];
-    if (!page)
-        return { nil, { } };
-
-    RetainPtr selectionsByLine = [selection selectionsByLine];
-    RetainPtr selectedLine = isStart ? [selectionsByLine firstObject] : [selectionsByLine lastObject];
-    FloatRect boundsInRootView;
-
-    AffineTransform cumulativeTransform = [page transformForBox:kPDFDisplayBoxMediaBox];
-    bool appliedLineTransform = false;
-    [selectedLine enumerateRectsAndTransformsForPage:page.get() usingBlock:[&, protectedThis = Ref { *this }](CGRect rect, CGAffineTransform transform) {
-        if (std::exchange(appliedLineTransform, true)) {
-            ASSERT_NOT_REACHED();
-            return;
-        }
-
-        boundsInRootView = protectedThis->pageToRootView({ CGRectApplyAffineTransform(rect, transform) }, page.get());
-        cumulativeTransform *= transform;
-    }];
-
-    if (boundsInRootView.isEmpty())
-        return { nil, { } };
-
-    if (!appliedLineTransform)
-        return { nil, { } };
-
-    auto rotationInRadians = atan2(cumulativeTransform.b(), cumulativeTransform.a());
-    if (!std::isfinite(rotationInRadians))
-        return { nil, { } };
-
-    // FIXME: Account for RTL text and vertical writing mode.
-    return rootViewToPage([&] -> FloatPoint {
-        int clockwiseRotationAngle = static_cast<int>(360 + 90 * std::round(-rad2deg(rotationInRadians) / 90)) % 360;
-        switch (clockwiseRotationAngle) {
-        case 0:
-            // The start/end points are along the left/right edges, respectively.
-            return { isStart ? boundsInRootView.x() : boundsInRootView.maxX(), boundsInRootView.y() + (boundsInRootView.height() / 2) };
-        case 90:
-            // The start/end points are along the top/bottom edges, respectively.
-            return { boundsInRootView.x() + (boundsInRootView.width() / 2), isStart ? boundsInRootView.y() : boundsInRootView.maxY() };
-        case 180:
-            // The start/end points are along the right/left edges, respectively.
-            return { isStart ? boundsInRootView.maxX() : boundsInRootView.x(), boundsInRootView.y() + (boundsInRootView.height() / 2) };
-        case 270:
-            // The start/end points are along the bottom/top edges, respectively.
-            return { boundsInRootView.x() + (boundsInRootView.width() / 2), isStart ? boundsInRootView.maxY() : boundsInRootView.y() };
-        }
-        ASSERT_NOT_REACHED();
-        return boundsInRootView.center();
-    }());
-}
-
-auto UnifiedPDFPlugin::selectionCaretPointInPage(SelectionEndpoint endpoint) const -> PageAndPoint
-{
-    return selectionCaretPointInPage(RetainPtr { m_currentSelection }.get(), endpoint);
 }
 
 bool UnifiedPDFPlugin::platformPopulateEditorStateIfNeeded(EditorState& state) const
@@ -4738,6 +4607,8 @@ bool UnifiedPDFPlugin::platformPopulateEditorStateIfNeeded(EditorState& state) c
     return true;
 }
 
+#endif // PLATFORM(IOS_FAMILY)
+
 CursorContext UnifiedPDFPlugin::cursorContext(FloatPoint pointInRootView) const
 {
     CursorContext context;
@@ -4759,6 +4630,8 @@ CursorContext UnifiedPDFPlugin::cursorContext(FloatPoint pointInRootView) const
 #endif
     return context;
 }
+
+#if PLATFORM(IOS_FAMILY)
 
 DocumentEditingContext UnifiedPDFPlugin::documentEditingContext(DocumentEditingContextRequest&& request) const
 {
@@ -4796,6 +4669,147 @@ DocumentEditingContext UnifiedPDFPlugin::documentEditingContext(DocumentEditingC
 }
 
 #endif // PLATFORM(IOS_FAMILY)
+
+#endif // ENABLE(TWO_PHASE_CLICKS)
+
+#if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
+
+PDFSelection *UnifiedPDFPlugin::selectionBetweenPoints(FloatPoint fromPoint, PDFPage *fromPage, FloatPoint toPoint, PDFPage *toPage) const
+{
+    return [pdfDocument() selectionFromPage:fromPage atPoint:fromPoint toPage:toPage atPoint:toPoint withGranularity:PDFSelectionGranularityCharacter];
+}
+
+PDFSelection *UnifiedPDFPlugin::selectionAtPoint(FloatPoint pointInPage, PDFPage *page, TextGranularity granularity) const
+{
+    if (granularity == TextGranularity::DocumentGranularity)
+        return [pdfDocument() selectionForEntireDocument];
+
+    return [pdfDocument() selectionFromPage:page atPoint:pointInPage toPage:page atPoint:pointInPage withGranularity:[&] {
+        switch (granularity) {
+        case TextGranularity::CharacterGranularity:
+            return PDFSelectionGranularityCharacter;
+        case TextGranularity::WordGranularity:
+            return PDFSelectionGranularityWord;
+        case TextGranularity::LineGranularity:
+            return PDFSelectionGranularityLine;
+        default:
+            ASSERT_NOT_REACHED();
+            return PDFSelectionGranularityCharacter;
+        }
+    }()];
+}
+
+#endif // HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
+
+auto UnifiedPDFPlugin::selectionCaretPointInPage(PDFSelection *selection, SelectionEndpoint endpoint) const -> PageAndPoint
+{
+    bool isStart = endpoint == SelectionEndpoint::Start;
+    RetainPtr pages = [selection pages];
+    RetainPtr page = isStart ? [pages firstObject] : [pages lastObject];
+    if (!page)
+        return { nil, { } };
+
+    RetainPtr selectionsByLine = [selection selectionsByLine];
+    RetainPtr selectedLine = isStart ? [selectionsByLine firstObject] : [selectionsByLine lastObject];
+    FloatRect boundsInRootView;
+
+    AffineTransform cumulativeTransform = [page transformForBox:kPDFDisplayBoxMediaBox];
+    bool appliedLineTransform = false;
+    [selectedLine enumerateRectsAndTransformsForPage:page.get() usingBlock:[&, protectedThis = Ref { *this }](CGRect rect, CGAffineTransform transform) {
+        if (std::exchange(appliedLineTransform, true)) {
+            ASSERT_NOT_REACHED();
+            return;
+        }
+
+        boundsInRootView = protectedThis->pageToRootView({ CGRectApplyAffineTransform(rect, transform) }, page.get());
+        cumulativeTransform *= transform;
+    }];
+
+    if (boundsInRootView.isEmpty())
+        return { nil, { } };
+
+    if (!appliedLineTransform)
+        return { nil, { } };
+
+    auto rotationInRadians = atan2(cumulativeTransform.b(), cumulativeTransform.a());
+    if (!std::isfinite(rotationInRadians))
+        return { nil, { } };
+
+    // FIXME: Account for RTL text and vertical writing mode.
+    return rootViewToPage([&] -> FloatPoint {
+        int clockwiseRotationAngle = static_cast<int>(360 + 90 * std::round(-rad2deg(rotationInRadians) / 90)) % 360;
+        switch (clockwiseRotationAngle) {
+        case 0:
+            // The start/end points are along the left/right edges, respectively.
+            return { isStart ? boundsInRootView.x() : boundsInRootView.maxX(), boundsInRootView.y() + (boundsInRootView.height() / 2) };
+        case 90:
+            // The start/end points are along the top/bottom edges, respectively.
+            return { boundsInRootView.x() + (boundsInRootView.width() / 2), isStart ? boundsInRootView.y() : boundsInRootView.maxY() };
+        case 180:
+            // The start/end points are along the right/left edges, respectively.
+            return { isStart ? boundsInRootView.maxX() : boundsInRootView.x(), boundsInRootView.y() + (boundsInRootView.height() / 2) };
+        case 270:
+            // The start/end points are along the bottom/top edges, respectively.
+            return { boundsInRootView.x() + (boundsInRootView.width() / 2), isStart ? boundsInRootView.maxY() : boundsInRootView.y() };
+        }
+        ASSERT_NOT_REACHED();
+        return boundsInRootView.center();
+    }());
+}
+
+auto UnifiedPDFPlugin::selectionCaretPointInPage(SelectionEndpoint endpoint) const -> PageAndPoint
+{
+    return selectionCaretPointInPage(RetainPtr { m_currentSelection }.get(), endpoint);
+}
+
+#if ENABLE(TWO_PHASE_CLICKS)
+
+void UnifiedPDFPlugin::clearSelection()
+{
+#if PLATFORM(IOS_FAMILY)
+    resetInitialSelection();
+#endif
+    setCurrentSelection({ });
+}
+
+void UnifiedPDFPlugin::handleSyntheticClick(PlatformMouseEvent&& event)
+{
+#if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
+    auto pointInRootView = event.position();
+    if (RetainPtr annotation = annotationForRootViewPoint(IntPoint(pointInRootView))) {
+        if (annotationIsLinkWithDestination(annotation.get()))
+            followLinkAnnotation(annotation.get(), { WTF::move(event) });
+        clearSelection();
+        return;
+    }
+
+    RetainPtr selection = m_currentSelection;
+    if (selection && event.shiftKey()) {
+        auto [page, pointInPage] = rootViewToPage(FloatPoint(pointInRootView));
+        if (!page)
+            return;
+
+        [selection addSelection:protect(selectionAtPoint(pointInPage, page.get(), TextGranularity::WordGranularity)).get()];
+
+        auto [startPage, startPointInPage] = selectionCaretPointInPage(selection.get(), SelectionEndpoint::Start);
+        if (!startPage)
+            return;
+
+        auto [endPage, endPointInPage] = selectionCaretPointInPage(selection.get(), SelectionEndpoint::End);
+        if (!endPage)
+            return;
+
+        setCurrentSelection(selectionBetweenPoints(startPointInPage, startPage.get(), endPointInPage, endPage.get()));
+        return;
+    }
+#else
+    UNUSED_PARAM(event);
+#endif
+
+    clearSelection();
+}
+
+#endif
 
 FloatRect UnifiedPDFPlugin::pageToRootView(FloatRect rectInPage, PDFPage *page) const
 {

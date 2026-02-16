@@ -322,17 +322,22 @@ public:
     uint64_t streamedBytes() const;
     std::optional<WebCore::FrameIdentifier> rootFrameID() const final;
 
-#if PLATFORM(IOS_FAMILY)
-    virtual void setSelectionRange(WebCore::FloatPoint /* pointInRootView */, WebCore::TextGranularity) { }
-    virtual void clearSelection() { }
+#if ENABLE(TWO_PHASE_CLICKS)
     virtual std::pair<URL, WebCore::FloatRect> linkURLAndBoundsAtPoint(WebCore::FloatPoint /* pointInRootView */) const { return { }; }
     virtual std::tuple<URL, WebCore::FloatRect, RefPtr<WebCore::TextIndicator>> linkDataAtPoint(WebCore::FloatPoint /* pointInRootView */) { return { }; }
     virtual std::optional<WebCore::FloatRect> highlightRectForTapAtPoint(WebCore::FloatPoint /* pointInRootView */) const { return std::nullopt; }
-    virtual void handleSyntheticClick(WebCore::PlatformMouseEvent&&) { }
+    virtual CursorContext cursorContext(WebCore::FloatPoint /* pointInRootView */) const { return { }; }
+#if PLATFORM(IOS_FAMILY)
+    virtual void setSelectionRange(WebCore::FloatPoint /* pointInRootView */, WebCore::TextGranularity) { }
     virtual SelectionWasFlipped moveSelectionEndpoint(WebCore::FloatPoint /* pointInRootView */, SelectionEndpoint);
     virtual SelectionEndpoint extendInitialSelection(WebCore::FloatPoint /* pointInRootView */, WebCore::TextGranularity);
-    virtual CursorContext cursorContext(WebCore::FloatPoint /* pointInRootView */) const { return { }; }
     virtual DocumentEditingContext documentEditingContext(DocumentEditingContextRequest&&) const;
+#endif
+#endif
+
+#if ENABLE(TWO_PHASE_CLICKS)
+    virtual void handleSyntheticClick(WebCore::PlatformMouseEvent&&) { }
+    virtual void clearSelection() { }
 #endif
 
     bool populateEditorStateIfNeeded(EditorState&) const;

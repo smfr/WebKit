@@ -99,17 +99,19 @@ public:
     void mainFramePageScaleFactorDidChange();
     double pageScaleFactor() const;
     void pluginScaleFactorDidChange();
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
     std::pair<URL, WebCore::FloatRect> linkURLAndBoundsAtPoint(WebCore::FloatPoint pointInRootView) const;
     std::tuple<URL, WebCore::FloatRect, RefPtr<WebCore::TextIndicator>> linkDataAtPoint(WebCore::FloatPoint pointInRootView);
     std::optional<WebCore::FloatRect> highlightRectForTapAtPoint(WebCore::FloatPoint pointInRootView) const;
+    CursorContext cursorContext(WebCore::FloatPoint pointInRootView) const;
     void handleSyntheticClick(WebCore::PlatformMouseEvent&&);
-    void setSelectionRange(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity);
     void clearSelection();
+#if PLATFORM(IOS_FAMILY)
+    void setSelectionRange(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity);
     SelectionWasFlipped moveSelectionEndpoint(WebCore::FloatPoint pointInRootView, SelectionEndpoint);
     SelectionEndpoint extendInitialSelection(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity);
-    CursorContext cursorContext(WebCore::FloatPoint pointInRootView) const;
     DocumentEditingContext documentEditingContext(DocumentEditingContextRequest&&) const;
+#endif
 #endif
 
     bool populateEditorStateIfNeeded(EditorState&) const;
