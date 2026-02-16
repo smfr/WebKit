@@ -912,9 +912,13 @@ class YarrGenerator final : public YarrJITInfo {
             PatternTerm& nextTerm = alternative->m_terms[i + 1];
 
             // We can move BMP only character classes after fixed character terms.
+            // When not decoding surrogate pairs (Char8 mode), only swap if the character class
+            // has no non-BMP characters. Otherwise the swapped pattern could be passed to
+            // byteCodeCompilePattern (on JIT allocation failure) and then executed against a
+            // Char16 string where the changed term order would cause misreads of surrogate pairs.
             if ((term.type == PatternTerm::Type::CharacterClass)
                 && (term.quantityType == QuantifierType::FixedCount)
-                && (!m_decodeSurrogatePairs || (term.characterClass->hasOneCharacterSize() && !term.m_invert))
+                && ((!m_decodeSurrogatePairs && !term.characterClass->hasNonBMPCharacters()) || (term.characterClass->hasOneCharacterSize() && !term.m_invert))
                 && (nextTerm.type == PatternTerm::Type::PatternCharacter)
                 && (nextTerm.quantityType == QuantifierType::FixedCount)) {
                 PatternTerm termCopy = term;
