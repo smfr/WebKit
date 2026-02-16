@@ -13226,7 +13226,7 @@
             "inherited": true,
             "initial": "@TapHighlightColor",
             "codegen-properties": {
-                "enable-if": "ENABLE_TOUCH_EVENTS",
+                "enable-if": "ENABLE_CSS_TAP_HIGHLIGHT_COLOR",
                 "color-property": true,
                 "computed-style-initial-custom": true,
                 "computed-style-initial-inline": false,

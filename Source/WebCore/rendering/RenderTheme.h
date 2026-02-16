@@ -202,7 +202,7 @@ public:
     virtual Color platformFocusRingColor(OptionSet<StyleColorOptions>) const { return Color::black; }
     static float platformFocusRingWidth() { return 3; }
     static float platformFocusRingOffset(float outlineWidth) { return std::max<float>(outlineWidth - platformFocusRingWidth(), 0); }
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
     static Color tapHighlightColor();
     virtual Color platformTapHighlightColor() const;
 #endif

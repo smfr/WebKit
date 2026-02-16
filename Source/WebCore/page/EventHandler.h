@@ -286,6 +286,9 @@ public:
 
 #if PLATFORM(IOS_FAMILY)
     void defaultTouchEventHandler(Node&, TouchEvent&);
+#endif
+
+#if ENABLE(TWO_PHASE_CLICKS)
     WEBCORE_EXPORT void dispatchSyntheticMouseOut(const PlatformMouseEvent&);
     WEBCORE_EXPORT void dispatchSyntheticMouseMove(const PlatformMouseEvent&);
 #endif

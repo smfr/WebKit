@@ -2087,7 +2087,7 @@ Color RenderTheme::platformDefaultButtonTextColor(OptionSet<StyleColorOptions> o
     return systemColor(CSSValueActivebuttontext, options);
 }
 
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
 
 Color RenderTheme::tapHighlightColor()
 {
@@ -2237,7 +2237,7 @@ void RenderTheme::paintSystemPreviewBadge(Image& image, const PaintInfo& paintIn
 }
 #endif
 
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
 
 Color RenderTheme::platformTapHighlightColor() const
 {

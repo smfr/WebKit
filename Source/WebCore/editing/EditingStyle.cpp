@@ -94,7 +94,7 @@ static constexpr std::array editingProperties {
     CSSPropertyWhiteSpaceCollapse,
     CSSPropertyWidows,
     CSSPropertyWordSpacing,
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
     CSSPropertyWebkitTapHighlightColor,
 #endif
     CSSPropertyWebkitTextDecorationsInEffect,
