@@ -913,12 +913,15 @@ class YarrGenerator final : public YarrJITInfo {
 
             // We can move BMP only character classes after fixed character terms.
             // When not decoding surrogate pairs (Char8 mode), only swap if the character class
-            // has no non-BMP characters. Otherwise the swapped pattern could be passed to
-            // byteCodeCompilePattern (on JIT allocation failure) and then executed against a
-            // Char16 string where the changed term order would cause misreads of surrogate pairs.
+            // has no non-BMP characters and is not inverted. Otherwise the swapped pattern could
+            // be passed to byteCodeCompilePattern (on JIT allocation failure) and then executed
+            // against a Char16 string where the changed term order would cause misreads of
+            // surrogate pairs. An inverted class like [^a] has BMP-only class data but can match
+            // non-BMP characters (variable width in UTF-16), so it must not be swapped either.
             if ((term.type == PatternTerm::Type::CharacterClass)
                 && (term.quantityType == QuantifierType::FixedCount)
-                && ((!m_decodeSurrogatePairs && !term.characterClass->hasNonBMPCharacters()) || (term.characterClass->hasOneCharacterSize() && !term.m_invert))
+                && !term.m_invert
+                && ((!m_decodeSurrogatePairs && !term.characterClass->hasNonBMPCharacters()) || term.characterClass->hasOneCharacterSize())
                 && (nextTerm.type == PatternTerm::Type::PatternCharacter)
                 && (nextTerm.quantityType == QuantifierType::FixedCount)) {
                 PatternTerm termCopy = term;
