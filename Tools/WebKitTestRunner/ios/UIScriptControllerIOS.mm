@@ -264,6 +264,11 @@ void UIScriptControllerIOS::doAfterNextVisibleContentRectAndStablePresentationUp
     }).get()];
 }
 
+void UIScriptControllerIOS::immediateZoomToScale(double scale)
+{
+    [webView() zoomToScale:scale animated:NO completionHandler:nil];
+}
+
 void UIScriptControllerIOS::zoomToScale(double scale, JSValueRef callback)
 {
     unsigned callbackID = m_context->prepareForAsyncTask(callback, CallbackTypeNonPersistent);
@@ -839,11 +844,6 @@ void UIScriptControllerIOS::immediateScrollElementAtContentPointToOffset(long x,
     UIView *hitView = [contentView hitTest:CGPointMake(x, y) withEvent:nil];
     UIScrollView *enclosingScrollView = enclosingScrollViewIncludingSelf(hitView);
     [enclosingScrollView setContentOffset:CGPointMake(xScrollOffset, yScrollOffset)];
-}
-
-void UIScriptControllerIOS::immediateZoomToScale(double scale)
-{
-    [webView().scrollView setZoomScale:scale animated:NO];
 }
 
 void UIScriptControllerIOS::keyboardAccessoryBarNext()
