@@ -8334,3 +8334,5 @@ webkit.org/b/307602 imported/w3c/web-platform-tests/svg/text/reftests/textpath-p
 webkit.org/b/307602 imported/w3c/web-platform-tests/svg/text/reftests/textpath-path-attr.svg [ ImageOnlyFailure ]
 
 imported/w3c/web-platform-tests/html/semantics/scripting-1/the-script-element/module/dynamic-import/microtasks/worklet.https.html [ ImageOnlyFailure ]
+
+webkit.org/b/307972 imported/w3c/web-platform-tests/css/css-tables/crashtests/atomic-item-crash.html [ Skip ]
