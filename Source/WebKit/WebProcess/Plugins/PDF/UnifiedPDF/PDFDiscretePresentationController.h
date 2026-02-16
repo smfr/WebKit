@@ -202,7 +202,7 @@ private:
 
         bool isPageBackgroundLayer(const GraphicsLayer*) const;
 
-        RefPtr<WebCore::GraphicsLayer> leftPageBackgroundLayer() const;
+        Ref<WebCore::GraphicsLayer> leftPageBackgroundLayer() const;
         RefPtr<WebCore::GraphicsLayer> rightPageBackgroundLayer() const;
 
         RefPtr<WebCore::GraphicsLayer> backgroundLayerForPageIndex(PDFDocumentLayout::PageIndex) const;

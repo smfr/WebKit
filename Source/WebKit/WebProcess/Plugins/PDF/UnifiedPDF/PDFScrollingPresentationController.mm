@@ -218,14 +218,13 @@ void PDFScrollingPresentationController::updatePageBackgroundLayers()
             if (pageIndex < pageContainerLayers.size())
                 return pageContainerLayers[pageIndex];
 
-            RefPtr pageContainerLayer = makePageContainerLayer(pageIndex);
+            Ref pageContainerLayer = makePageContainerLayer(pageIndex);
 
             // Sure would be nice if we could just stuff data onto a GraphicsLayer.
-            RefPtr pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(*pageContainerLayer);
-            m_pageBackgroundLayers.add(pageBackgroundLayer, pageIndex);
+            Ref pageBackgroundLayer = pageBackgroundLayerForPageContainerLayer(pageContainerLayer);
+            m_pageBackgroundLayers.add(WTF::move(pageBackgroundLayer), pageIndex);
 
-            auto containerLayer = pageContainerLayer.releaseNonNull();
-            pageContainerLayers.append(WTF::move(containerLayer));
+            pageContainerLayers.append(WTF::move(pageContainerLayer));
 
             return pageContainerLayers[pageIndex];
         }(i);
@@ -356,11 +355,7 @@ void PDFScrollingPresentationController::paintBackgroundLayerForPage(const Graph
 
 std::optional<PDFDocumentLayout::PageIndex> PDFScrollingPresentationController::pageIndexForPageBackgroundLayer(const GraphicsLayer& layer) const
 {
-    auto it = m_pageBackgroundLayers.find(&layer);
-    if (it == m_pageBackgroundLayers.end())
-        return { };
-
-    return it->value;
+    return m_pageBackgroundLayers.getOptional(layer);
 }
 
 #pragma mark -

@@ -75,7 +75,7 @@ void UserMediaPermissionRequestManager::startUserMediaRequest(UserMediaRequest& 
         return;
     }
 
-    auto& pendingRequests = m_pendingUserMediaRequests.add(document, Vector<Ref<UserMediaRequest>>()).iterator->value;
+    auto& pendingRequests = m_pendingUserMediaRequests.add(*document, Vector<Ref<UserMediaRequest>>()).iterator->value;
     if (pendingRequests.isEmpty())
         document->addMediaCanStartListener(*this);
     pendingRequests.append(request);
@@ -107,7 +107,7 @@ void UserMediaPermissionRequestManager::cancelUserMediaRequest(UserMediaRequest&
     if (!document)
         return;
     
-    auto iterator = m_pendingUserMediaRequests.find(document);
+    auto iterator = m_pendingUserMediaRequests.find(*document);
     if (iterator == m_pendingUserMediaRequests.end())
         return;
 
@@ -127,7 +127,7 @@ void UserMediaPermissionRequestManager::mediaCanStart(Document& document)
 {
     ASSERT(document.page()->canStartMedia());
 
-    auto pendingRequests = m_pendingUserMediaRequests.take(&document);
+    auto pendingRequests = m_pendingUserMediaRequests.take(document);
     for (auto& pendingRequest : pendingRequests)
         sendUserMediaRequest(pendingRequest);
 }

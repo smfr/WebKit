@@ -113,7 +113,7 @@ private:
     RefPtr<WebCore::GraphicsLayer> m_selectionLayer;
 #endif
 
-    HashMap<RefPtr<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_pageBackgroundLayers;
+    HashMap<Ref<WebCore::GraphicsLayer>, PDFDocumentLayout::PageIndex> m_pageBackgroundLayers;
 };
 
 

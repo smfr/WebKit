@@ -114,11 +114,11 @@ private:
     }
 
     // NetscapePluginStreamLoaderClient
-    void willSendRequest(NetscapePlugInStreamLoader*, ResourceRequest&&, const ResourceResponse& redirectResponse, CompletionHandler<void(ResourceRequest&&)>&&) override;
-    void didReceiveResponse(NetscapePlugInStreamLoader*, const ResourceResponse&) override;
-    void didReceiveData(NetscapePlugInStreamLoader*, const SharedBuffer&) override;
-    void didFail(NetscapePlugInStreamLoader*, const ResourceError&) override;
-    void didFinishLoading(NetscapePlugInStreamLoader*) override;
+    void willSendRequest(NetscapePlugInStreamLoader&, ResourceRequest&&, const ResourceResponse& redirectResponse, CompletionHandler<void(ResourceRequest&&)>&&) override;
+    void didReceiveResponse(NetscapePlugInStreamLoader&, const ResourceResponse&) override;
+    void didReceiveData(NetscapePlugInStreamLoader&, const SharedBuffer&) override;
+    void didFail(NetscapePlugInStreamLoader&, const ResourceError&) override;
+    void didFinishLoading(NetscapePlugInStreamLoader&) override;
 
     SingleThreadWeakPtr<PluginView> m_pluginView;
     ResourceRequest m_request;
@@ -166,23 +166,23 @@ void PluginView::Stream::continueLoad()
     m_loadCallback(ResourceRequest(m_request));
 }
 
-void PluginView::Stream::willSendRequest(NetscapePlugInStreamLoader*, ResourceRequest&& request, const ResourceResponse&, CompletionHandler<void(ResourceRequest&&)>&& decisionHandler)
+void PluginView::Stream::willSendRequest(NetscapePlugInStreamLoader&, ResourceRequest&& request, const ResourceResponse&, CompletionHandler<void(ResourceRequest&&)>&& decisionHandler)
 {
     m_loadCallback = WTF::move(decisionHandler);
     m_request = WTF::move(request);
 }
 
-void PluginView::Stream::didReceiveResponse(NetscapePlugInStreamLoader*, const ResourceResponse& response)
+void PluginView::Stream::didReceiveResponse(NetscapePlugInStreamLoader&, const ResourceResponse& response)
 {
     m_pluginView->m_plugin->streamDidReceiveResponse(response);
 }
 
-void PluginView::Stream::didReceiveData(NetscapePlugInStreamLoader*, const SharedBuffer& buffer)
+void PluginView::Stream::didReceiveData(NetscapePlugInStreamLoader&, const SharedBuffer& buffer)
 {
     m_pluginView->m_plugin->streamDidReceiveData(buffer);
 }
 
-void PluginView::Stream::didFail(NetscapePlugInStreamLoader*, const ResourceError&)
+void PluginView::Stream::didFail(NetscapePlugInStreamLoader&, const ResourceError&)
 {
     // Calling streamDidFail could cause us to be deleted, so we hold on to a reference here.
     Ref protectedThis { *this };
@@ -196,7 +196,7 @@ void PluginView::Stream::didFail(NetscapePlugInStreamLoader*, const ResourceErro
     m_pluginView = nullptr;
 }
 
-void PluginView::Stream::didFinishLoading(NetscapePlugInStreamLoader*)
+void PluginView::Stream::didFinishLoading(NetscapePlugInStreamLoader&)
 {
     // Calling streamDidFinishLoading could cause us to be deleted, so we hold on to a reference here.
     Ref protectedThis { *this };

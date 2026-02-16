@@ -116,9 +116,9 @@ private:
     {
     }
     static Lock syncMessageStateMapLock;
-    static HashMap<RefPtr<SerialFunctionDispatcher>, ThreadSafeWeakPtr<SyncMessageState>>& syncMessageStateMap() WTF_REQUIRES_LOCK(syncMessageStateMapLock)
+    static HashMap<Ref<SerialFunctionDispatcher>, ThreadSafeWeakPtr<SyncMessageState>>& syncMessageStateMap() WTF_REQUIRES_LOCK(syncMessageStateMapLock)
     {
-        static NeverDestroyed<HashMap<RefPtr<SerialFunctionDispatcher>, ThreadSafeWeakPtr<SyncMessageState>>> map;
+        static NeverDestroyed<HashMap<Ref<SerialFunctionDispatcher>, ThreadSafeWeakPtr<SyncMessageState>>> map;
         return map;
     }
 
@@ -152,7 +152,7 @@ Lock Connection::SyncMessageState::syncMessageStateMapLock;
 Ref<Connection::SyncMessageState> Connection::SyncMessageState::getOrCreate(SerialFunctionDispatcher& dispatcher)
 {
     Locker locker { syncMessageStateMapLock };
-    auto addResult = syncMessageStateMap().add(&dispatcher, nullptr);
+    auto addResult = syncMessageStateMap().add(dispatcher, nullptr);
     if (!addResult.isNewEntry)
         return addResult.iterator->value.get().releaseNonNull();
     Ref newState = adoptRef(*new SyncMessageState(dispatcher));
@@ -165,7 +165,7 @@ Connection::SyncMessageState::~SyncMessageState()
     Ref dispatcher = this->dispatcher();
 
     Locker locker { syncMessageStateMapLock };
-    syncMessageStateMap().remove(dispatcher.ptr());
+    syncMessageStateMap().remove(dispatcher);
 }
 
 void Connection::SyncMessageState::enqueueMatchingMessages(Connection& connection, MessageReceiveQueue& receiveQueue, const ReceiverMatcher& receiverMatcher)
