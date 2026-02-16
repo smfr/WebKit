@@ -30,6 +30,7 @@
 
 #include <WebCore/KeyboardScroll.h>
 #include <WebCore/RectEdges.h>
+#include <WebCore/RubberbandingState.h>
 #include <WebCore/ScrollAnimation.h>
 #include <WebCore/ScrollSnapAnimatorState.h>
 #include <WebCore/ScrollSnapOffsetsInfo.h>
@@ -199,6 +200,10 @@ public:
     void startRubberBandSnapBack();
     bool isRubberBandInProgress() const;
     RectEdges<bool> rubberBandingEdges() const { return m_rubberBandingEdges; }
+
+    std::optional<RubberbandingState> captureRubberbandingState() const;
+    bool restoreRubberbandingState(const RubberbandingState&);
+    bool shouldAttemptRubberbandingRestoration(const RubberbandingState&);
     FloatSize deltaWithAdditionalAdjustments(const FloatSize& adjustedDelta, bool);
 #endif
 
@@ -225,6 +230,7 @@ private:
     void startRubberBandAnimationIfNecessary();
 
     bool startRubberBandAnimation(const FloatSize& initialVelocity, const FloatSize& initialOverscroll);
+    bool startRubberBandAnimationWithElapsedTime(const FloatSize& initialVelocity, const FloatSize& initialOverscroll, Seconds alreadyElapsed);
     void stopRubberBandAnimation();
 
     void willStartRubberBandAnimation();

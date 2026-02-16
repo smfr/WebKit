@@ -61,6 +61,10 @@ public:
     bool isRubberBandInProgress() const;
     void startRubberBandSnapBack();
 
+#if HAVE(RUBBER_BANDING)
+    std::optional<RubberbandingState> captureRubberbandingState() const final;
+#endif
+
     void updateScrollbarPainters();
     void updateScrollbarLayers() final;
     
@@ -94,6 +98,10 @@ private:
     const Ref<ScrollerPairMac> m_scrollerPair;
 
     bool m_inMomentumPhase { false };
+
+#if HAVE(RUBBER_BANDING)
+    std::optional<RubberbandingState> m_pendingRubberbandingState;
+#endif
 };
 
 } // namespace WebCore

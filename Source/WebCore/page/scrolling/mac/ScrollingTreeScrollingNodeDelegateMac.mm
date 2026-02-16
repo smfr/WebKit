@@ -29,6 +29,7 @@
 #if PLATFORM(MAC)
 
 #import "Logging.h"
+#import "RubberbandingState.h"
 #import "ScrollExtents.h"
 #import "ScrollingStateScrollingNode.h"
 #import "ScrollingTree.h"
@@ -47,6 +48,10 @@ ScrollingTreeScrollingNodeDelegateMac::ScrollingTreeScrollingNodeDelegateMac(Scr
     : ThreadedScrollingTreeScrollingNodeDelegate(scrollingNode)
     , m_scrollerPair(ScrollerPairMac::create(scrollingNode))
 {
+#if HAVE(RUBBER_BANDING)
+    if (scrollingNode.nodeType() == ScrollingNodeType::MainFrame)
+        m_pendingRubberbandingState = scrollingTree()->takePendingMainFrameRubberbandingState();
+#endif
 }
 
 ScrollingTreeScrollingNodeDelegateMac::~ScrollingTreeScrollingNodeDelegateMac()
@@ -123,6 +128,17 @@ void ScrollingTreeScrollingNodeDelegateMac::updateFromStateNode(const ScrollingS
     m_scrollerPair->updateValues();
 
     ThreadedScrollingTreeScrollingNodeDelegate::updateFromStateNode(scrollingStateNode);
+
+#if HAVE(RUBBER_BANDING)
+    if (m_pendingRubberbandingState) {
+        LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingTreeScrollingNodeDelegateMac::updateFromStateNode - restoring rubberbanding state: initialOverscroll=" << m_pendingRubberbandingState->initialOverscroll);
+        bool restored = m_scrollController.restoreRubberbandingState(WTF::move(*m_pendingRubberbandingState));
+        m_pendingRubberbandingState = std::nullopt;
+        if (restored)
+            scrollingNode()->setRestoredRubberbandingInProgress(true);
+        LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingTreeScrollingNodeDelegateMac::updateFromStateNode - restoreRubberbandingState returned " << restored);
+    }
+#endif
 }
 
 bool ScrollingTreeScrollingNodeDelegateMac::handleWheelEvent(const PlatformWheelEvent& wheelEvent)
@@ -207,6 +223,13 @@ void ScrollingTreeScrollingNodeDelegateMac::startRubberBandSnapBack()
 {
     m_scrollController.startRubberBandSnapBack();
 }
+
+#if HAVE(RUBBER_BANDING)
+std::optional<RubberbandingState> ScrollingTreeScrollingNodeDelegateMac::captureRubberbandingState() const
+{
+    return m_scrollController.captureRubberbandingState();
+}
+#endif
 
 bool ScrollingTreeScrollingNodeDelegateMac::allowsHorizontalStretching(const PlatformWheelEvent& wheelEvent) const
 {
@@ -324,6 +347,10 @@ void ScrollingTreeScrollingNodeDelegateMac::didStopRubberBandAnimation()
 void ScrollingTreeScrollingNodeDelegateMac::rubberBandingStateChanged(bool inRubberBand)
 {
     scrollingTree()->setRubberBandingInProgressForNode(scrollingNode()->scrollingNodeID(), inRubberBand);
+#if HAVE(RUBBER_BANDING)
+    if (!inRubberBand)
+        scrollingNode()->setRestoredRubberbandingInProgress(false);
+#endif
 }
 
 FloatSize ScrollingTreeScrollingNodeDelegateMac::rubberBandTargetOffset() const

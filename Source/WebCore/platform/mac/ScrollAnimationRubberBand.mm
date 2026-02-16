@@ -72,6 +72,16 @@ bool ScrollAnimationRubberBand::startRubberBandAnimation(const FloatSize& initia
     return true;
 }
 
+bool ScrollAnimationRubberBand::startRubberBandAnimationWithElapsedTime(const FloatSize& initialVelocity, const FloatSize& initialOverscroll, Seconds alreadyElapsed, const FloatSize& targetOverscroll)
+{
+    m_initialVelocity = initialVelocity;
+    m_initialOverscroll = initialOverscroll;
+    m_targetOverscroll = targetOverscroll;
+
+    didStart(MonotonicTime::now() - alreadyElapsed);
+    return true;
+}
+
 bool ScrollAnimationRubberBand::retargetActiveAnimation(const FloatPoint&)
 {
     return false;

@@ -2419,6 +2419,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     platform/ReferrerPolicy.h
     platform/RegistrableDomain.h
     platform/RemoteCommandListener.h
+    platform/RubberbandingState.h
     platform/RunLoopObserver.h
     platform/ScreenOrientationManager.h
     platform/ScreenProperties.h

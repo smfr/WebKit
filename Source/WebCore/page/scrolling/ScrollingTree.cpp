@@ -32,6 +32,7 @@
 #include "EventNames.h"
 #include "Logging.h"
 #include "PlatformWheelEvent.h"
+#include "RubberbandingState.h"
 #include "ScrollingEffectsController.h"
 #include "ScrollingStateFrameScrollingNode.h"
 #include "ScrollingStateTree.h"
@@ -344,6 +345,16 @@ void ScrollingTree::removeFrameHostingNode(LayerHostingContextIdentifier hosting
 bool ScrollingTree::commitTreeStateInternal(std::unique_ptr<ScrollingStateTree>&& scrollingStateTree, std::optional<LayerHostingContextIdentifier> hostingContextIdentifier)
 {
     bool rootStateNodeChanged = scrollingStateTree->hasNewRootStateNode();
+
+#if HAVE(RUBBER_BANDING)
+    if (RefPtr rootNode = m_rootNode; rootNode && rootStateNodeChanged) {
+        if (auto state = rootNode->captureRubberbandingState()) {
+            LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingTree::commitTreeStateInternal - captured rubberbanding state: initialOverscroll");
+            setPendingMainFrameRubberbandingState(WTF::move(state));
+        } else
+            setPendingMainFrameRubberbandingState(std::nullopt);
+    }
+#endif
 
     LOG(ScrollingTree, "\nScrollingTree %p commitTreeState", this);
 
@@ -788,6 +799,18 @@ void ScrollingTree::setRubberBandingInProgressForNode(ScrollingNodeID nodeID, bo
     else
         m_treeState.nodesWithActiveRubberBanding.remove(nodeID);
 }
+
+#if HAVE(RUBBER_BANDING)
+void ScrollingTree::setPendingMainFrameRubberbandingState(std::optional<RubberbandingState>&& state)
+{
+    m_pendingMainFrameRubberbandingState = WTF::move(state);
+}
+
+std::optional<RubberbandingState> ScrollingTree::takePendingMainFrameRubberbandingState()
+{
+    return std::exchange(m_pendingMainFrameRubberbandingState, std::nullopt);
+}
+#endif
 
 // Can be called from the main thread.
 bool ScrollingTree::isUserScrollInProgressForNode(std::optional<ScrollingNodeID> nodeID)

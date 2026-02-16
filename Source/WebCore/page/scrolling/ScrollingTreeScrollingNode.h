@@ -29,6 +29,7 @@
 #if ENABLE(ASYNC_SCROLLING)
 
 #include <WebCore/IntRect.h>
+#include <WebCore/RubberbandingState.h>
 #include <WebCore/ScrollSnapOffsetsInfo.h>
 #include <WebCore/ScrollableArea.h>
 #include <WebCore/ScrollingTree.h>
@@ -85,6 +86,12 @@ public:
 
     bool isScrollSnapInProgress() const;
     void setScrollSnapInProgress(bool);
+
+#if HAVE(RUBBER_BANDING)
+    std::optional<RubberbandingState> captureRubberbandingState() const;
+    void setRestoredRubberbandingInProgress(bool inProgress) { m_restoredRubberbandingInProgress = inProgress; }
+    bool restoredRubberbandingInProgress() const { return m_restoredRubberbandingInProgress; }
+#endif
 
     virtual bool startAnimatedScrollToPosition(FloatPoint);
     virtual void stopAnimatedScroll();
@@ -223,6 +230,9 @@ private:
 #endif
     bool m_isFirstCommit { true };
     bool m_scrolledSinceLastCommit { false };
+#if HAVE(RUBBER_BANDING)
+    bool m_restoredRubberbandingInProgress { false };
+#endif
     ScrollbarRevealBehavior m_scrollbarRevealBehaviorForNextScrollbarUpdate { ScrollbarRevealBehavior::Default };
 
     LayerRepresentation m_scrollContainerLayer;
