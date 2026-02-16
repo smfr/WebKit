@@ -317,6 +317,9 @@ class SaferCPPStaticAnalyzerFactory(Factory):
         Factory.__init__(self, platform, configuration, architectures, False, additionalArguments, device_model, **kwargs)
         self.addStep(InstallCMake())
         self.addStep(InstallNinja())
+        self.addStep(GetLLVMVersion())
+        self.addStep(PrintClangVersion())
+        self.addStep(CheckOutLLVMProject())
         if platform.startswith('ios'):
             self.addStep(GetSwiftTagName())
             self.addStep(PrintSwiftVersion())
@@ -325,9 +328,6 @@ class SaferCPPStaticAnalyzerFactory(Factory):
             self.addStep(BuildSwift())
             self.addStep(InstallMetalToolchain())
         else:
-            self.addStep(GetLLVMVersion())
-            self.addStep(PrintClangVersion())
-            self.addStep(CheckOutLLVMProject())
             self.addStep(UpdateClang())
         self.addStep(ScanBuild())
 

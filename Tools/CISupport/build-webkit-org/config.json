@@ -850,7 +850,7 @@
                     "builderNames": ["Apple-Sequoia-Intel-Release-JSC-Tests"]
                   },
                   { "type": "PlatformSpecificScheduler", "platform": "ios-26", "branch": "main", "treeStableTimer": 45.0,
-                    "builderNames": ["Apple-iOS-26-Release-Build"]
+                    "builderNames": ["Apple-iOS-26-Release-Build", "Apple-iOS-26-Safer-CPP-Checks"]
                   },
                   { "type": "PlatformSpecificScheduler", "platform": "ios-simulator-26", "branch": "main", "treeStableTimer": 45.0,
                     "builderNames": ["Apple-iOS-26-Simulator-Release-Build", "Apple-iOS-26-Simulator-Debug-Build"]

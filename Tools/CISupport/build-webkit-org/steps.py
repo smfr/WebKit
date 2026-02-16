@@ -2376,7 +2376,7 @@ class BuildSwift(steps.ShellSequence, ShellMixin):
         ]
 
         if rc != SUCCESS:
-            if self.getProperty('current_swift_tag', ''):
+            if self.getProperty('current_swift_tag', '') and self.getProperty('has_swift_toolchain', False):
                 return WARNINGS
             self.build.buildFinished(['Failed to set up swift, retrying update'], RETRY)
         else:
@@ -2397,6 +2397,4 @@ class BuildSwift(steps.ShellSequence, ShellMixin):
         return {'step': 'Successfully built Swift'}
 
     def doStepIf(self, step):
-        if not self.getProperty('has_swift_toolchain'):
-            return True
         return self.getProperty('canonical_swift_tag') and self.getProperty('current_swift_tag', '') != self.getProperty('canonical_swift_tag')

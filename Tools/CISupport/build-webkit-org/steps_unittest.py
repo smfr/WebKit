@@ -2732,6 +2732,7 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
         self.setup_step(BuildSwift())
         self.setProperty('architecture', 'arm64')
         self.setProperty('builddir', 'webkit')
+        self.setProperty('canonical_swift_tag', 'swift-6.0.3-RELEASE')
 
     def expectedShellCommand(self):
         builddir = 'webkit'
@@ -2789,7 +2790,6 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
     def test_skipped_toolchain_exists_same_tag(self):
         self.configureStep()
         self.setProperty('has_swift_toolchain', True)
-        self.setProperty('canonical_swift_tag', 'swift-6.0.3-RELEASE')
         self.setProperty('current_swift_tag', 'swift-6.0.3-RELEASE')
         self.expect_outcome(result=SKIPPED, state_string='Swift toolchain already exists')
         return self.run_step()
@@ -2797,7 +2797,6 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
     def test_build_when_tag_changed(self):
         self.configureStep()
         self.setProperty('has_swift_toolchain', True)
-        self.setProperty('canonical_swift_tag', 'swift-6.0.3-RELEASE')
         self.setProperty('current_swift_tag', 'swift-6.0.2-RELEASE')
         self.expectRemoteCommands(
             ExpectShell(workdir=SWIFT_DIR,
@@ -2826,7 +2825,7 @@ class TestBuildSwift(BuildStepMixinAdditions, unittest.TestCase):
 
     def test_failure_with_previous_checkout(self):
         self.configureStep()
-        self.setProperty('has_swift_toolchain', False)
+        self.setProperty('has_swift_toolchain', True)
         self.setProperty('current_swift_tag', 'swift-6.0.2-RELEASE')
         self.expectRemoteCommands(
             ExpectShell(workdir=SWIFT_DIR,
