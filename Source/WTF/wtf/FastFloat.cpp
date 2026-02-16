@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "FastFloat.h"
+#include <wtf/FastFloat.h>
 
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
 #include "fast_float/fast_float.h"

@@ -28,14 +28,14 @@
  */
 
 #include "config.h"
-#include "URLHelpers.h"
+#include <wtf/URLHelpers.h>
 
-#include "URLParser.h"
 #include <mutex>
 #include <ranges>
 #include <unicode/uidna.h>
 #include <unicode/uscript.h>
 #include <wtf/StdLibExtras.h>
+#include <wtf/URLParser.h>
 #include <wtf/text/ParsingUtilities.h>
 #include <wtf/text/WTFString.h>
 

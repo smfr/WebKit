@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "Logger.h"
+#include <wtf/Logger.h>
 
 #include <mutex>
 #include <wtf/HexNumber.h>

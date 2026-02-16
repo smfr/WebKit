@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "LibraryPathDiagnostics.h"
+#include <wtf/darwin/LibraryPathDiagnostics.h>
 
 #include <dlfcn.h>
 #include <notify.h>

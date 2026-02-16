@@ -27,7 +27,6 @@
 #include "config.h"
 #include <wtf/URL.h>
 
-#include "URLParser.h"
 #include <ranges>
 #include <stdio.h>
 #include <unicode/uidna.h>
@@ -38,6 +37,7 @@
 #include <wtf/NeverDestroyed.h>
 #include <wtf/PrintStream.h>
 #include <wtf/StdLibExtras.h>
+#include <wtf/URLParser.h>
 #include <wtf/UUID.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/MakeString.h>

@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "RuntimeApplicationChecks.h"
+#include <wtf/RuntimeApplicationChecks.h>
 
 #include <wtf/NeverDestroyed.h>
 #include <wtf/ProcessID.h>

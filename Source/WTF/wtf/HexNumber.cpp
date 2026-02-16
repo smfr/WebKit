@@ -18,7 +18,7 @@
  */
 
 #include "config.h"
-#include "HexNumber.h"
+#include <wtf/HexNumber.h>
 
 #include <wtf/ASCIICType.h>
 #include <wtf/CheckedArithmetic.h>

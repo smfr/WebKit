@@ -24,9 +24,9 @@
  */
 
 #include "config.h"
-#include "StackPointer.h"
+#include <wtf/StackPointer.h>
 
-#include "InlineASM.h"
+#include <wtf/InlineASM.h>
 
 namespace WTF {
 
