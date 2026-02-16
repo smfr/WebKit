@@ -236,6 +236,7 @@
 #include <WebCore/FragmentDirectiveUtilities.h>
 #include <WebCore/FrameDestructionObserverInlines.h>
 #include <WebCore/FrameInlines.h>
+#include <WebCore/FrameInspectorController.h>
 #include <WebCore/FrameLoadRequest.h>
 #include <WebCore/FrameLoaderTypes.h>
 #include <WebCore/GeometryUtilities.h>
@@ -960,6 +961,10 @@ WebPage::WebPage(PageIdentifier pageID, WebPageCreationParameters&& parameters)
     WebStorageNamespaceProvider::incrementUseCount(sessionStorageNamespaceIdentifier());
 
     updatePreferences(parameters.store);
+    if (page->settings().siteIsolationEnabled()) {
+        if (RefPtr frame = page->localMainFrame())
+            frame->inspectorController().siteIsolationFirstEnabled();
+    }
 
 #if PLATFORM(IOS_FAMILY) || ENABLE(ROUTING_ARBITRATION)
     DeprecatedGlobalSettings::setShouldManageAudioSessionCategory(true);
