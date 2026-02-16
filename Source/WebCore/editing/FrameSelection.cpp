@@ -2796,7 +2796,7 @@ void FrameSelection::expandSelectionToElementContainingCaretSelection()
 
 std::optional<SimpleRange> FrameSelection::elementRangeContainingCaretSelection() const
 {
-    auto element = deprecatedEnclosingBlockFlowElement(m_selection.visibleStart().deepEquivalent().deprecatedNode());
+    RefPtr element = deprecatedEnclosingBlockFlowElement(m_selection.visibleStart().deepEquivalent().deprecatedNode());
     if (!element)
         return std::nullopt;
 

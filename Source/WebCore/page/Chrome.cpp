@@ -600,7 +600,7 @@ void Chrome::didReceiveDocType(LocalFrame& frame)
     if (!frame.isMainFrame())
         return;
 
-    auto* doctype = frame.document()->doctype();
+    RefPtr doctype = protect(frame.document())->doctype();
     m_client->didReceiveMobileDocType(doctype && doctype->publicId().containsIgnoringASCIICase("xhtml mobile"_s));
 #endif
 }

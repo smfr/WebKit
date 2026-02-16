@@ -325,24 +325,24 @@ bool ScrollingEffectsController::processWheelEventForKineticScrolling(const Plat
     if (!m_currentAnimation)
         m_currentAnimation = makeUnique<ScrollAnimationKinetic>(*this);
 
-    auto& kineticAnimation = downcast<ScrollAnimationKinetic>(*m_currentAnimation);
+    CheckedRef kineticAnimation = downcast<ScrollAnimationKinetic>(*m_currentAnimation);
     while (!m_scrollHistory.isEmpty())
-        kineticAnimation.appendToScrollHistory(m_scrollHistory.takeFirst());
+        kineticAnimation->appendToScrollHistory(m_scrollHistory.takeFirst());
 
     FloatSize previousVelocity;
     if (!m_previousKineticAnimationInfo.initialVelocity.isZero()) {
-        previousVelocity = kineticAnimation.accumulateVelocityFromPreviousGesture(m_previousKineticAnimationInfo.startTime,
+        previousVelocity = kineticAnimation->accumulateVelocityFromPreviousGesture(m_previousKineticAnimationInfo.startTime,
             m_previousKineticAnimationInfo.initialOffset, m_previousKineticAnimationInfo.initialVelocity);
         m_previousKineticAnimationInfo.initialVelocity = FloatSize();
     }
 
     if (event.isEndOfNonMomentumScroll()) {
-        kineticAnimation.startAnimatedScrollWithInitialVelocity(m_client.scrollOffset(), kineticAnimation.computeVelocity(), previousVelocity, m_client.allowsHorizontalScrolling(), m_client.allowsVerticalScrolling());
+        kineticAnimation->startAnimatedScrollWithInitialVelocity(m_client.scrollOffset(), kineticAnimation->computeVelocity(), previousVelocity, m_client.allowsHorizontalScrolling(), m_client.allowsVerticalScrolling());
         return true;
     }
     if (event.isTransitioningToMomentumScroll()) {
-        kineticAnimation.clearScrollHistory();
-        kineticAnimation.startAnimatedScrollWithInitialVelocity(m_client.scrollOffset(), event.swipeVelocity(), previousVelocity, m_client.allowsHorizontalScrolling(), m_client.allowsVerticalScrolling());
+        kineticAnimation->clearScrollHistory();
+        kineticAnimation->startAnimatedScrollWithInitialVelocity(m_client.scrollOffset(), event.swipeVelocity(), previousVelocity, m_client.allowsHorizontalScrolling(), m_client.allowsVerticalScrolling());
         return true;
     }
 
