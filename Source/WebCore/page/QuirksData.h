@@ -69,7 +69,7 @@ struct QuirksData {
         IsTouchBarUpdateSuppressedForHiddenContentEditableQuirk,
 #endif
         MaybeBypassBackForwardCache,
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
         MayNeedToIgnoreContentObservation,
 #endif
         NeedsBodyScrollbarWidthNoneDisabledQuirk,
@@ -117,8 +117,10 @@ struct QuirksData {
         NeedsVP9FullRangeFlagQuirk,
         NeedsVideoShouldMaintainAspectRatioQuirk,
         NeedsWebKitMediaTextTrackDisplayQuirk,
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
         NeedsYouTubeMouseOutQuirk,
+#endif
+#if PLATFORM(IOS_FAMILY)
         NeedsYouTubeOverflowScrollQuirk,
 #endif
         NeedsZeroMaxTouchPointsQuirk,

@@ -264,8 +264,11 @@ public:
     bool needsZeroMaxTouchPointsQuirk() const;
     bool needsChromeMediaControlsPseudoElement() const;
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
     WEBCORE_EXPORT bool shouldIgnoreContentObservationForClick(const Node&) const;
+#endif
+
+#if PLATFORM(IOS_FAMILY)
     WEBCORE_EXPORT bool shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Element&) const;
     WEBCORE_EXPORT bool needsPointerTouchCompatibility(const Element&) const;
     WEBCORE_EXPORT bool shouldHideSoftTopScrollEdgeEffectDuringFocus(const Element&) const;

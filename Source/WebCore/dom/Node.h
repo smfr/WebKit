@@ -575,7 +575,7 @@ public:
 
     void dispatchWebKitSubmitEvent(Event& underlyingSubmitEvent);
 
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(TWO_PHASE_CLICKS)
     virtual bool allowsDoubleTapGesture() const { return true; }
 #endif
 

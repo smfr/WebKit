@@ -2660,7 +2660,7 @@ void Element::setIsLink(bool flag)
     setStateFlag(StateFlag::IsLink, flag);
 }
 
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(TWO_PHASE_CLICKS)
 
 bool Element::allowsDoubleTapGesture() const
 {

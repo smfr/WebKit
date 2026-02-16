@@ -812,7 +812,7 @@ public:
 
     WEBCORE_EXPORT URL absoluteLinkURL() const;
 
-#if ENABLE(TOUCH_EVENTS)
+#if ENABLE(TWO_PHASE_CLICKS)
     bool allowsDoubleTapGesture() const override;
 #endif
 

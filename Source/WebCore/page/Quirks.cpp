@@ -27,6 +27,7 @@
 #include "Quirks.h"
 
 #include "AccessibilityObject.h"
+#include "AccessibilityRole.h"
 #include "Attr.h"
 #include "ContainerNodeInlines.h"
 #include "DatasetDOMStringMap.h"
@@ -324,7 +325,7 @@ bool Quirks::shouldDispatchSyntheticMouseEventsWhenModifyingSelection() const
 // www.youtube.com rdar://52361019
 bool Quirks::needsYouTubeMouseOutQuirk() const
 {
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
     if (m_document->settings().shouldDispatchSyntheticMouseOutAfterSyntheticClick())
         return true;
 
@@ -1971,43 +1972,7 @@ bool Quirks::needsChromeMediaControlsPseudoElement() const
     return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::NeedsChromeMediaControlsPseudoElementQuirk);
 }
 
-#if PLATFORM(IOS_FAMILY)
-
-bool Quirks::shouldHideSoftTopScrollEdgeEffectDuringFocus(const Element& focusedElement) const
-{
-    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
-
-    if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldHideSoftTopScrollEdgeEffectDuringFocusQuirk))
-        return false;
-
-    return focusedElement.getIdAttribute().contains("crossword"_s);
-}
-
-// cbssports.com <rdar://139478801>.
-// docs.google.com <rdar://59402637>.
-bool Quirks::shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Element& target) const
-{
-    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
-
-    if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldSynthesizeTouchEventsAfterNonSyntheticClickQuirk))
-        return false;
-
-    if (m_quirksData.isCBSSports)
-        return target.nodeName() == "AVIA-BUTTON"_s;
-
-    if (m_quirksData.isGoogleDocs) {
-        unsigned numberOfAncestorsToCheck = 3;
-        for (Ref ancestor : lineageOfType<HTMLElement>(target)) {
-            if (ancestor->hasClassName("docs-ml-promotion-action-container"_s))
-                return true;
-
-            if (!--numberOfAncestorsToCheck)
-                break;
-        }
-    }
-
-    return false;
-}
+#if ENABLE(TWO_PHASE_CLICKS)
 
 static AccessibilityRole accessibilityRole(const Element& element)
 {
@@ -2047,6 +2012,46 @@ bool Quirks::shouldIgnoreContentObservationForClick(const Node& targetNode) cons
     }
 
     return true;
+}
+
+#endif
+
+#if PLATFORM(IOS_FAMILY)
+
+bool Quirks::shouldHideSoftTopScrollEdgeEffectDuringFocus(const Element& focusedElement) const
+{
+    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
+
+    if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldHideSoftTopScrollEdgeEffectDuringFocusQuirk))
+        return false;
+
+    return focusedElement.getIdAttribute().contains("crossword"_s);
+}
+
+// cbssports.com <rdar://139478801>.
+// docs.google.com <rdar://59402637>.
+bool Quirks::shouldSynthesizeTouchEventsAfterNonSyntheticClick(const Element& target) const
+{
+    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
+
+    if (!m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldSynthesizeTouchEventsAfterNonSyntheticClickQuirk))
+        return false;
+
+    if (m_quirksData.isCBSSports)
+        return target.nodeName() == "AVIA-BUTTON"_s;
+
+    if (m_quirksData.isGoogleDocs) {
+        unsigned numberOfAncestorsToCheck = 3;
+        for (Ref ancestor : lineageOfType<HTMLElement>(target)) {
+            if (ancestor->hasClassName("docs-ml-promotion-action-container"_s))
+                return true;
+
+            if (!--numberOfAncestorsToCheck)
+                break;
+        }
+    }
+
+    return false;
 }
 
 bool Quirks::needsChromeOSNavigatorUserAgentQuirk(const Document& document) const
@@ -2539,15 +2544,6 @@ static void handleSlackQuirks(QuirksData& quirksData, const URL&, const String& 
 #endif
 }
 
-static void handleWalmartQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL&  /* documentURL */)
-{
-    QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("walmart.com"_s);
-
-    // walmart.com: rdar://123734840
-    quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::MayNeedToIgnoreContentObservation);
-    quirksData.isWalmart = true;
-}
-
 static void handleScriptToEvaluateBeforeRunningScriptFromURLQuirk(QuirksData& quirksData, const URL& /* quirksURL */, const String& topDomain, const URL& /* documentURL */)
 {
     if (topDomain == "thesaurus.com"_s) {
@@ -2561,6 +2557,17 @@ static void handleScriptToEvaluateBeforeRunningScriptFromURLQuirk(QuirksData& qu
         quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::NeedsScriptToEvaluateBeforeRunningScriptFromURLQuirk);
     }
 #endif
+}
+#endif
+
+#if ENABLE(TWO_PHASE_CLICKS)
+static void handleWalmartQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL&  /* documentURL */)
+{
+    QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("walmart.com"_s);
+
+    // walmart.com: rdar://123734840
+    quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::MayNeedToIgnoreContentObservation);
+    quirksData.isWalmart = true;
 }
 #endif
 
@@ -2907,9 +2914,11 @@ static void handleGoogleQuirks(QuirksData& quirksData, const URL& quirksURL, con
     if (startsWithLettersIgnoringASCIICase(topDocumentPath, "/maps/"_s)) {
         quirksData.isGoogleMaps = true;
         quirksData.enableQuirks({
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
             // maps.google.com rdar://152194074
             QuirksData::SiteSpecificQuirk::MayNeedToIgnoreContentObservation,
+#endif
+#if PLATFORM(IOS_FAMILY)
             // maps.google.com rdar://67358928
             QuirksData::SiteSpecificQuirk::NeedsGoogleMapsScrollingQuirk,
 #endif
@@ -3026,9 +3035,11 @@ static void handleLiveQuirks(QuirksData& quirksData, const URL& quirksURL, const
     quirksData.isOutlook = topDocumentHost == "outlook.live.com"_s;
     // outlook.live.com: rdar://136624720
     quirksData.setQuirkState(QuirksData::SiteSpecificQuirk::NeedsMozillaFileTypeForDataTransferQuirk, quirksData.isOutlook);
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
     // outlook.live.com: rdar://152277211
     quirksData.setQuirkState(QuirksData::SiteSpecificQuirk::MayNeedToIgnoreContentObservation, quirksData.isOutlook);
+#endif
+#if PLATFORM(IOS_FAMILY)
     // live.com: rdar://167489768
     quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::NeedsChromeOSNavigatorUserAgentQuirk);
 #endif
@@ -3335,22 +3346,31 @@ static void handleYouTubeQuirks(QuirksData& quirksData, const URL& quirksURL, co
         QuirksData::SiteSpecificQuirk::ShouldSilenceResizeObservers,
 #endif
     });
+
+    [[maybe_unused]] auto topDocumentHost = quirksURL.host();
+
 #if PLATFORM(IOS_FAMILY)
     // YouTube.com does not provide AirPlay controls in fullscreen
     // (Ref: rdar://121471373)
     quirksData.shouldDisableElementFullscreen = PAL::currentUserInterfaceIdiomIsSmallScreen();
-    auto topDocumentHost = quirksURL.host();
     if (topDocumentHost == "www.youtube.com"_s) {
         quirksData.enableQuirks({
-            // www.youtube.com rdar://52361019
-            QuirksData::SiteSpecificQuirk::NeedsYouTubeMouseOutQuirk,
             // youtube.com rdar://49582231
             QuirksData::SiteSpecificQuirk::NeedsYouTubeOverflowScrollQuirk
         });
     }
-#else
-    UNUSED_PARAM(quirksURL);
 #endif
+
+#if ENABLE(TWO_PHASE_CLICKS)
+    if (topDocumentHost == "www.youtube.com"_s) {
+        quirksData.enableQuirks({
+            // www.youtube.com rdar://52361019
+            QuirksData::SiteSpecificQuirk::NeedsYouTubeMouseOutQuirk
+        });
+    }
+#endif
+
+    UNUSED_PARAM(quirksURL);
 }
 
 static void handleZillowQuirks(QuirksData& quirksData, const URL& quirksURL, const String& quirksDomainString, const URL& /* documentURL */)
@@ -3549,7 +3569,7 @@ void Quirks::determineRelevantQuirks()
         { "tympanus"_s, &handleTympanusQuirks },
         { "victoriassecret"_s, &handleVictoriasSecretQuirks },
         { "vimeo"_s, &handleVimeoQuirks },
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
         { "walmart"_s, &handleWalmartQuirks },
 #endif
         { "wikipedia"_s, &handleWikipediaQuirks },
