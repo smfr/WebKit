@@ -80,6 +80,7 @@ public:
     using InlineLevelBoxList = Vector<InlineLevelBox>;
     const InlineLevelBoxList& nonRootInlineLevelBoxes() const { return m_nonRootInlineLevelBoxList; }
 
+    InlineLayoutUnit alignmentBaseline() const { return logicalRectForRootInlineBox().top() + rootInlineBox().ascent(); }
     FontBaseline baselineType() const { return m_baselineType; }
 
     const InlineRect& logicalRect() const { return m_logicalRect; }

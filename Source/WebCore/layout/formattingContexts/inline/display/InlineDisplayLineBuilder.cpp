@@ -154,7 +154,7 @@ InlineDisplay::Line InlineDisplayLineBuilder::build(const LineLayoutResult& line
         , mapLineRectLogicalToVisual(lineBoxLogicalRect, constraints.formattingRootBorderBoxSize(), writingMode)
         , mapLineRectLogicalToVisual(enclosingLineGeometry.contentOverflowRect, constraints.formattingRootBorderBoxSize(), writingMode)
         , enclosingLineGeometry.enclosingTopAndBottom
-        , rootInlineBox.logicalTop() + rootInlineBox.ascent()
+        , lineBox.alignmentBaseline()
         , lineBox.baselineType()
         , rootInlineBoxRect.left()
         , contentLineLeftEdge

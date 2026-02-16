@@ -113,6 +113,33 @@ InlineDisplay::Boxes InlineDisplayContentBuilder::build(const LineLayoutResult& 
     return boxes;
 }
 
+InlineDisplay::Boxes InlineDisplayContentBuilder::buildTextOnlyContent(const LineLayoutResult& lineLayoutResult)
+{
+    auto boxes = InlineDisplay::Boxes { };
+    if (lineLayoutResult.runs.size() > 1)
+        boxes.reserveInitialCapacity(lineLayoutResult.runs.size() + 1);
+
+    auto rootInlineBoxRect = lineBox().logicalRectForRootInlineBox();
+    rootInlineBoxRect.moveBy(m_displayLine.topLeft());
+
+    appendRootInlineBoxDisplayBox(rootInlineBoxRect, true, boxes);
+
+    for (auto& lineRun : lineLayoutResult.runs) {
+        auto runRect = InlineRect { rootInlineBoxRect.top(), rootInlineBoxRect.left() + lineRun.logicalLeft(), lineRun.logicalWidth(), rootInlineBoxRect.height() };
+        if (lineRun.isText()) {
+            appendTextDisplayBox(lineRun, runRect, boxes);
+            continue;
+        }
+        if (lineRun.isSoftLineBreak()) {
+            appendSoftLineBreakDisplayBox(lineRun, runRect, boxes);
+            continue;
+        }
+        ASSERT_NOT_REACHED();
+    }
+    collectInkOverflowForTextDecorations(boxes);
+    return boxes;
+}
+
 static inline bool computeInkOverflowForInlineLevelBox(const RenderStyle& style, FloatRect& inkOverflow)
 {
     auto hasInkOverflow = false;
@@ -264,7 +291,7 @@ void InlineDisplayContentBuilder::appendTextDisplayBox(const Line::Run& lineRun,
     });
 }
 
-void InlineDisplayContentBuilder::appendSoftLineBreakDisplayBox(const Line::Run& lineRun, const InlineRect& softLineBreakRunRect, InlineDisplay::Boxes& boxes)
+void InlineDisplayContentBuilder::appendSoftLineBreakDisplayBox(const Line::Run& lineRun, const InlineRect& softLineBreakRunRect, InlineDisplay::Boxes& boxes) const
 {
     ASSERT(lineRun.textContent().length && is<InlineTextBox>(lineRun.layoutBox()));
 
@@ -286,7 +313,7 @@ void InlineDisplayContentBuilder::appendSoftLineBreakDisplayBox(const Line::Run&
     });
 }
 
-void InlineDisplayContentBuilder::appendHardLineBreakDisplayBox(const Line::Run& lineRun, const InlineRect& lineBreakBoxRect, InlineDisplay::Boxes& boxes)
+void InlineDisplayContentBuilder::appendHardLineBreakDisplayBox(const Line::Run& lineRun, const InlineRect& lineBreakBoxRect, InlineDisplay::Boxes& boxes) const
 {
     auto isContentful = true;
     boxes.append({ lineIndex()
@@ -352,7 +379,7 @@ void InlineDisplayContentBuilder::appendBlockLevelDisplayBox(const Line::Run& li
     });
 }
 
-void InlineDisplayContentBuilder::appendRootInlineBoxDisplayBox(const InlineRect& rootInlineBoxVisualRect, bool lineHasContent, InlineDisplay::Boxes& boxes)
+void InlineDisplayContentBuilder::appendRootInlineBoxDisplayBox(const InlineRect& rootInlineBoxVisualRect, bool lineHasContent, InlineDisplay::Boxes& boxes) const
 {
     boxes.append({ lineIndex()
         , InlineDisplay::Box::Type::RootInlineBox

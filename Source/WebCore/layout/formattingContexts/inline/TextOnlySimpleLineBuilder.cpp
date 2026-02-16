@@ -528,6 +528,26 @@ bool TextOnlySimpleLineBuilder::isEligibleForSimplifiedInlineLayoutByStyle(const
     return isEligibleByStyle(style.get()) && (style.ptr() == firstLineStyle.ptr() || isEligibleByStyle(firstLineStyle.get()));
 }
 
+bool TextOnlySimpleLineBuilder::isEligibleForSimplifiedDisplayBuild(const ElementBox& rootBlockContainer)
+{
+    auto isSingleTextBox = is<InlineTextBox>(rootBlockContainer.firstChild()) && rootBlockContainer.firstChild() == rootBlockContainer.lastChild();
+    if (!isSingleTextBox)
+        return false;
+    if (!downcast<InlineTextBox>(*rootBlockContainer.firstChild()).canUseSimplifiedContentMeasuring())
+        return false;
+
+    auto& rootStyle = rootBlockContainer.style();
+    if (rootStyle.textOverflow() != Style::ComputedStyle::initialTextOverflow())
+        return false;
+    if (!rootStyle.writingMode().isHorizontal())
+        return false;
+    if (rootStyle.textEmphasisStyle() != Style::ComputedStyle::initialTextEmphasisStyle())
+        return false;
+    if (rootStyle.lineBoxContain() != Style::ComputedStyle::initialLineBoxContain())
+        return false;
+    return true;
+}
+
 }
 }
 

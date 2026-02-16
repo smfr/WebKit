@@ -181,7 +181,7 @@ static bool hasTrailingSoftWrapOpportunity(size_t softWrapOpportunityIndex, size
             if (!inlineItemList[index].isOpaque())
                 return hasTrailingSoftWrapOpportunity(index + 1, layoutRangeEnd, inlineItemList);
         }
-        ASSERT(inlineItemList[softWrapOpportunityIndex].isFloat());
+        ASSERT(inlineItemList[softWrapOpportunityIndex].isFloat() || inlineItemList[softWrapOpportunityIndex].isBlock());
         return false;
     }
     if (trailingInlineItem.isBlock())

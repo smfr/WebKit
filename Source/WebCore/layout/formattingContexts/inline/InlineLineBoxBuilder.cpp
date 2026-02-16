@@ -92,6 +92,20 @@ LineBox LineBoxBuilder::build(size_t lineIndex)
     return lineBox;
 }
 
+LineBox LineBoxBuilder::buildForRootInlineBoxOnly(size_t lineIndex)
+{
+    auto& lineLayoutResult = this->lineLayoutResult();
+    ASSERT(lineLayoutResult.hasContentfulInlineContent());
+
+    auto lineBox = LineBox { rootBox(), lineLayoutResult.contentGeometry.logicalLeft, lineLayoutResult.contentGeometry.logicalWidth - lineLayoutResult.hangingContent.logicalWidth, lineIndex, isFirstFormattedLine(), lineLayoutResult.nonSpanningInlineLevelBoxCount };
+    auto& rootInlineBox = lineBox.rootInlineBox();
+    setVerticalPropertiesForInlineLevelBox(lineBox, rootInlineBox);
+    rootInlineBox.setLogicalTop(rootInlineBox.layoutBounds().ascent - rootInlineBox.ascent());
+    auto lineBoxLogicalHeight = applyTextBoxTrimOnLineBoxIfNeeded(rootInlineBox.layoutBounds().height(), lineBox);
+    lineBox.setLogicalRect({ lineLayoutResult.lineGeometry.logicalTopLeft, lineLayoutResult.lineGeometry.logicalWidth, lineBoxLogicalHeight });
+    return lineBox;
+}
+
 TextUtil::FallbackFontList LineBoxBuilder::collectFallbackFonts(const InlineLevelBox& parentInlineBox, const Line::Run& run, const RenderStyle& style)
 {
     ASSERT(parentInlineBox.isInlineBox());

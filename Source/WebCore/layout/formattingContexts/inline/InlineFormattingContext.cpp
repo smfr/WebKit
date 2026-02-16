@@ -178,7 +178,12 @@ std::unique_ptr<InlineLayoutResult> InlineFormattingContext::layout(const Constr
 
     if (TextOnlySimpleLineBuilder::isEligibleForSimplifiedTextOnlyInlineLayoutByContent(inlineItems, inlineLayoutState.placedFloats()) && TextOnlySimpleLineBuilder::isEligibleForSimplifiedInlineLayoutByStyle(root())) {
         auto simplifiedLineBuilder = makeUniqueRef<TextOnlySimpleLineBuilder>(*this, root(), constraints.horizontal(), inlineItemList);
-        return lineLayout(simplifiedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints, lineDamage).moveToUniquePtr();
+        auto shouldUseSimplifiedDisplayContentBuild = [&] {
+            if (lineDamage || !m_globalLayoutState.inStandardsMode() || inlineLayoutState.parentBlockLayoutState().lineClamp())
+                return false;
+            return TextOnlySimpleLineBuilder::isEligibleForSimplifiedDisplayBuild(root());
+        };
+        return lineLayout(simplifiedLineBuilder, inlineItemList, needsLayoutRange, previousLine, constraints, lineDamage, shouldUseSimplifiedDisplayContentBuild()).moveToUniquePtr();
     }
     if (RangeBasedLineBuilder::isEligibleForRangeInlineLayout(*this, needsLayoutRange, inlineItems, inlineLayoutState.placedFloats())) {
         auto rangeBasedLineBuilder = makeUniqueRef<RangeBasedLineBuilder>(*this, constraints.horizontal(), inlineItems);
@@ -294,7 +299,7 @@ static inline void handleAfterSideMargin(BlockLayoutState::MarginState& marginSt
         marginState.canCollapseMarginAfterWithChildren = false;
 }
 
-UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBuilder& lineBuilder, const InlineItemList& inlineItemList, InlineItemRange needsLayoutRange, std::optional<PreviousLine> previousLine, const ConstraintsForInlineContent& constraints, const InlineDamage* lineDamage)
+UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBuilder& lineBuilder, const InlineItemList& inlineItemList, InlineItemRange needsLayoutRange, std::optional<PreviousLine> previousLine, const ConstraintsForInlineContent& constraints, const InlineDamage* lineDamage, bool mayUseSimplifiedDisplayContentBuild)
 {
     ASSERT(!needsLayoutRange.isEmpty());
     auto layoutResult = makeUniqueRef<InlineLayoutResult>();
@@ -304,7 +309,7 @@ UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBu
     auto isPartialLayout = InlineInvalidation::mayOnlyNeedPartialLayout(lineDamage);
     ASSERT(isPartialLayout || !previousLine);
 
-    if (!isPartialLayout && (createDisplayContentForLineFromCachedContent(constraints, layoutResult.get()) || createDisplayContentForEmptyInlineContent(constraints, inlineItemList, layoutResult.get()))) {
+    if (!isPartialLayout && (createDisplayContentForLineFromCachedContent(constraints, layoutResult.get(), mayUseSimplifiedDisplayContentBuild) || createDisplayContentForEmptyInlineContent(constraints, inlineItemList, layoutResult.get()))) {
         layoutResult->range = InlineLayoutResult::Range::Full;
         handleAfterSideMargin(marginState, layoutResult->displayContent);
         return layoutResult;
@@ -318,6 +323,7 @@ UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBu
     auto previousLineEnd = std::optional<InlineItemPosition> { };
     auto leadingInlineItemPosition = needsLayoutRange.start;
     auto isFirstFormattedLineCandidate = !previousLine;
+
     while (true) {
 
         auto lineInitialRect = InlineRect { lineLogicalTop, constraints.horizontal().logicalLeft, constraints.horizontal().logicalWidth, formattingUtils().initialLineHeight(!previousLine.has_value()) };
@@ -325,14 +331,19 @@ UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBu
         auto lineIndex = previousLine ? (previousLine->lineIndex + 1lu) : 0lu;
 
         auto lineLayoutResult = lineBuilder.layoutInlineContent(lineInput, previousLine, isFirstFormattedLineCandidate);
-        auto lineBox = LineBoxBuilder { *this, lineLayoutResult }.build(lineIndex);
-        if (lineLayoutResult.hasContentfulInFlowContent()) {
-            inlineLayoutState.incrementLineCount();
-            isFirstFormattedLineCandidate = false;
+        auto hasContentfulInFlowContent = lineLayoutResult.hasContentfulInFlowContent();
+
+        auto canUseSimplifiedDisplayContentBuild = mayUseSimplifiedDisplayContentBuild && hasContentfulInFlowContent;
+        auto lineBox = canUseSimplifiedDisplayContentBuild ? LineBoxBuilder { *this, lineLayoutResult }.buildForRootInlineBoxOnly(lineIndex) : LineBoxBuilder { *this, lineLayoutResult }.build(lineIndex);
+        auto lineLogicalRect = createDisplayContentForInlineContent(lineBox, lineLayoutResult, constraints, layoutResult->displayContent, canUseSimplifiedDisplayContentBuild);
+        if (!canUseSimplifiedDisplayContentBuild) {
+            updateBoxGeometryForPlacedFloats(lineLayoutResult.floatContent.placedFloats);
+            updateLayoutStateWithLineLayoutResult(lineLayoutResult, lineLogicalRect, floatingContext);
         }
-        auto lineLogicalRect = createDisplayContentForInlineContent(lineBox, lineLayoutResult, constraints, layoutResult->displayContent);
-        updateBoxGeometryForPlacedFloats(lineLayoutResult.floatContent.placedFloats);
-        updateLayoutStateWithLineLayoutResult(lineLayoutResult, lineLogicalRect, floatingContext);
+        if (hasContentfulInFlowContent) {
+            isFirstFormattedLineCandidate = false;
+            inlineLayoutState.incrementLineCount();
+        }
 
         auto lineContentEnd = lineLayoutResult.inlineItemRange.end;
         leadingInlineItemPosition = InlineFormattingUtils::leadingInlineItemPositionForNextLine(lineContentEnd, previousLineEnd, !lineLayoutResult.floatContent.hasIntrusiveFloat.isEmpty() || !lineLayoutResult.floatContent.placedFloats.isEmpty(), needsLayoutRange.end);
@@ -429,8 +440,21 @@ void InlineFormattingContext::updateBoxGeometryForPlacedFloats(const LineLayoutR
     }
 }
 
-InlineRect InlineFormattingContext::createDisplayContentForInlineContent(const LineBox& lineBox, const LineLayoutResult& lineLayoutResult, const ConstraintsForInlineContent& constraints, InlineDisplay::Content& displayContent)
+InlineRect InlineFormattingContext::createDisplayContentForInlineContent(const LineBox& lineBox, const LineLayoutResult& lineLayoutResult, const ConstraintsForInlineContent& constraints, InlineDisplay::Content& displayContent, bool canUseSimplifiedDisplayContentBuild)
 {
+    if (canUseSimplifiedDisplayContentBuild) {
+        auto lineBoxRect = lineBox.logicalRect();
+        auto rootInlineBoxRect = lineBox.logicalRectForRootInlineBox();
+        auto displayLine = InlineDisplay::Line { lineBoxRect, { lineBoxRect.top() + rootInlineBoxRect.top(), lineBoxRect.top() + rootInlineBoxRect.bottom() }, lineBox.alignmentBaseline(), rootInlineBoxRect.left(), rootInlineBoxRect.width() };
+
+        auto numberOfDisplayBoxesFromPreviousLines = displayContent.boxes.size();
+        displayContent.boxes.appendVector(InlineDisplayContentBuilder { *this, constraints, lineBox, displayLine }.buildTextOnlyContent(lineLayoutResult));
+        ASSERT(displayContent.boxes.size() > numberOfDisplayBoxesFromPreviousLines);
+        displayLine.setBoxCount(displayContent.boxes.size() - numberOfDisplayBoxesFromPreviousLines);
+        displayContent.lines.append(displayLine);
+        return lineBoxRect;
+    }
+
     auto& inlineLayoutState = layoutState();
     auto lineClamp = inlineLayoutState.parentBlockLayoutState().lineClamp();
     // Eligible lines from nested block containers are already included (see layoutWithFormattingContextForBlockInInline).
@@ -482,7 +506,7 @@ void InlineFormattingContext::resetBoxGeometriesForDiscardedContent(const Inline
         geometryForBox(*floatBox).reset();
 }
 
-bool InlineFormattingContext::createDisplayContentForLineFromCachedContent(const ConstraintsForInlineContent& constraints, InlineLayoutResult& layoutResult)
+bool InlineFormattingContext::createDisplayContentForLineFromCachedContent(const ConstraintsForInlineContent& constraints, InlineLayoutResult& layoutResult, bool mayUseSimplifiedDisplayContentBuild)
 {
     auto& inlineContentCache = this->inlineContentCache();
 
@@ -525,8 +549,10 @@ bool InlineFormattingContext::createDisplayContentForLineFromCachedContent(const
     lineContent.lineGeometry.logicalTopLeft = { constraints.horizontal().logicalLeft, constraints.logicalTop() };
     lineContent.lineGeometry.logicalWidth = constraints.horizontal().logicalWidth;
     lineContent.contentGeometry.logicalLeft = InlineFormattingUtils::horizontalAlignmentOffset(root().style(), lineContent.contentGeometry.logicalWidth, lineContent.lineGeometry.logicalWidth, lineContent.hangingContent.logicalWidth, true);
-    auto lineBox = LineBoxBuilder { *this, lineContent }.build({ });
-    createDisplayContentForInlineContent(lineBox, lineContent, constraints, layoutResult.displayContent);
+
+    auto canUseSimplifiedDisplayContentBuild = mayUseSimplifiedDisplayContentBuild && lineContent.hasContentfulInFlowContent();
+    auto lineBox = canUseSimplifiedDisplayContentBuild ? LineBoxBuilder { *this, lineContent }.buildForRootInlineBoxOnly({ }) : LineBoxBuilder { *this, lineContent }.build({ });
+    createDisplayContentForInlineContent(lineBox, lineContent, constraints, layoutResult.displayContent, canUseSimplifiedDisplayContentBuild);
     return true;
 }
 
