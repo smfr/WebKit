@@ -62,7 +62,7 @@
     _nodeIdentifierInclusion = onlyVisibleText ? _WKTextExtractionNodeIdentifierInclusionNone : _WKTextExtractionNodeIdentifierInclusionInteractive;
     _eventListenerCategories = onlyVisibleText ? _WKTextExtractionEventListenerCategoryNone : _WKTextExtractionEventListenerCategoryAll;
     _includeAccessibilityAttributes = !onlyVisibleText;
-    _includeTextInAutoFilledControls = !onlyVisibleText;
+    _includeTextInAutoFilledControls = NO;
     _onlyIncludeVisibleText = onlyVisibleText;
     _targetRect = CGRectNull;
     _maxWordsPerParagraph = NSUIntegerMax;

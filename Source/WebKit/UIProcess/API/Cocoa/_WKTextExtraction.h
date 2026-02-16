@@ -145,7 +145,7 @@ WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
 
 /*!
  Include text content underneath form controls that have been modified via AutoFill.
- The default value is `YES`.
+ The default value is `NO`.
  */
 @property (nonatomic) BOOL includeTextInAutoFilledControls;
 
