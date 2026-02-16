@@ -918,6 +918,13 @@ window.UIHelper = class UIHelper {
         });
     }
 
+    static isShowingContextMenu()
+    {
+        return new Promise(resolve => {
+            testRunner.runUIScript(`uiController.isShowingContextMenu`, result => resolve(result === "true"));
+        });
+    }
+
     static dismissMenu()
     {
         if (!this.isWebKit2())

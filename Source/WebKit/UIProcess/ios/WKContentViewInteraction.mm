@@ -8306,6 +8306,10 @@ static RetainPtr<NSObject <WKFormPeripheral>> createInputPeripheralWithView(WebK
 #else
     switch (type) {
     case WebKit::InputType::Select:
+        // Don't create native iOS picker for appearance: base selects
+        if (view.focusedElementInformation.usesBaseAppearancePicker)
+            return nil;
+
         return adoptNS([[WKFormSelectControl alloc] initWithView:view]);
     case WebKit::InputType::Color:
 #if PLATFORM(APPLETV)

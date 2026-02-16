@@ -184,7 +184,7 @@ public:
     void registerSelectedContentElement();
     void unregisterSelectedContentElement();
 
-    bool usesBaseAppearancePicker() const;
+    WEBCORE_EXPORT bool usesBaseAppearancePicker() const;
     SelectPopoverElement* pickerPopoverElement() const;
     void hidePickerPopoverElement();
 

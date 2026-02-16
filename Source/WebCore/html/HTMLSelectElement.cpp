@@ -1490,10 +1490,12 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
 
     if (RefPtr mouseEvent = dynamicDowncast<MouseEvent>(event); event.type() == eventNames.mousedownEvent && mouseEvent && mouseEvent->button() == MouseButton::Left) {
         focus();
-#if !PLATFORM(IOS_FAMILY)
         protect(document())->updateStyleIfNeeded();
-
+#if !PLATFORM(IOS_FAMILY)
         if (renderer() && usesMenuList()) {
+#else
+        if (usesBaseAppearancePicker()) {
+#endif
             ASSERT(usesBaseAppearancePicker() || !m_popupIsVisible);
             // Save the selection so it can be compared to the new
             // selection when we call onChange during selectOption,
@@ -1503,7 +1505,6 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
             saveLastSelection();
             showPickerInternal(); // showPickerInternal() may run JS and cause the renderer to get destroyed.
         }
-#endif
         event.setDefaultHandled();
     }
 
