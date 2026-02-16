@@ -158,6 +158,8 @@ std::unique_ptr<InlineLayoutResult> InlineFormattingContext::layout(const Constr
             ASSERT_NOT_REACHED();
             return { };
         }
+        if (!lineDamage->layoutStartPosition()->lineIndex)
+            return { };
         auto lastLineIndex = lineDamage->layoutStartPosition()->lineIndex - 1;
         // FIXME: We should be able to extract the last line information and provide it to layout as "previous line" (ends in line break and inline direction).
         return PreviousLine { lastLineIndex, { }, { }, { }, { } };
