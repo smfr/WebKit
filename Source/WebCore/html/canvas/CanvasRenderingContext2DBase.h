@@ -399,7 +399,7 @@ protected:
 
     RefPtr<ImageBuffer> allocateImageBuffer() const;
     bool hasCreatedImageBuffer() const { return m_hasCreatedImageBuffer; }
-    RefPtr<ImageBuffer> buffer() const;
+    ImageBuffer* buffer() const;
     RefPtr<ImageBuffer> makeRenderingResultsAvailable(ShouldApplyPostProcessingToDirtyRect = ShouldApplyPostProcessingToDirtyRect::Yes);
     RefPtr<ImageBuffer> createImageForNoiseInjection() const;
     void didUpdateCanvasSizeProperties(bool) override;
