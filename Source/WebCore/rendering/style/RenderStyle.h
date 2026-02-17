@@ -296,6 +296,8 @@ public:
     inline Style::BackgroundLayers& ensureBackgroundLayers();
     inline Style::MaskLayers& ensureMaskLayers();
     inline Style::Transitions& ensureTransitions();
+    inline Style::ScrollTimelines& ensureScrollTimelines();
+    inline Style::ViewTimelines& ensureViewTimelines();
 
     inline const BorderData& border() const;
     inline const BorderValue& borderBottom() const;
@@ -459,10 +461,8 @@ public:
     inline bool hasOutline() const;
     inline bool hasOutlineInVisualOverflow() const;
     inline bool hasPositionedMask() const;
-    inline bool hasScrollTimelines() const;
     inline bool hasUsedAppearance() const;
     inline bool hasUsedContentNone() const;
-    inline bool hasViewTimelines() const;
     inline bool hasExplicitlySetBorderRadius() const;
     inline bool hasPositiveStrokeWidth() const;
 

@@ -866,92 +866,76 @@ void Styleable::updateCSSTransitions(const RenderStyle& currentStyle, const Rend
 
 void Styleable::updateCSSScrollTimelines(const RenderStyle* currentStyle, const RenderStyle& afterChangeStyle) const
 {
-    auto updateAnonymousScrollTimelines = [&]() {
-        if (currentStyle && currentStyle->scrollTimelines() == afterChangeStyle.scrollTimelines())
-            return;
+    if (currentStyle && currentStyle->scrollTimelines() == afterChangeStyle.scrollTimelines())
+        return;
 
-        auto& currentTimelines = afterChangeStyle.scrollTimelines();
-        for (auto& currentTimeline : currentTimelines)
-            currentTimeline->setSource(&element);
+    CheckedRef styleOriginatedTimelinesController = protect(element.document())->ensureStyleOriginatedTimelinesController();
 
-        if (!currentStyle)
-            return;
+    HashSet<AtomString> registeredScrollTimelineNames;
 
-        for (auto& previousTimeline : currentStyle->scrollTimelines()) {
-            if (!currentTimelines.contains(previousTimeline) && previousTimeline->source() == &element)
-                previousTimeline->setSource(nullptr);
-        }
-    };
+    for (auto& scrollTimeline : afterChangeStyle.scrollTimelines().usedValues()) {
+        WTF::switchOn(scrollTimeline.name(),
+            [](CSS::Keyword::None) {
+                // Nothing to register.
+            },
+            [&](const CustomIdentifier& identifier) {
+                styleOriginatedTimelinesController->registerNamedScrollTimeline(identifier.value, *this, scrollTimeline.axis());
+                registeredScrollTimelineNames.add(identifier.value);
+            }
+        );
+    }
 
-    auto updateNamedScrollTimelines = [&]() {
-        if (currentStyle && currentStyle->scrollTimelineNames() == afterChangeStyle.scrollTimelineNames() && currentStyle->scrollTimelineAxes() == afterChangeStyle.scrollTimelineAxes())
-            return;
+    if (!currentStyle)
+        return;
 
-        CheckedRef styleOriginatedTimelinesController = protect(element.document())->ensureStyleOriginatedTimelinesController();
-
-        auto& currentTimelineNames = afterChangeStyle.scrollTimelineNames();
-        auto& currentTimelineAxes = afterChangeStyle.scrollTimelineAxes();
-        auto numberOfAxes = currentTimelineAxes.size();
-        for (auto [i, name] : indexedRange(currentTimelineNames))
-            styleOriginatedTimelinesController->registerNamedScrollTimeline(name.value.value, *this, currentTimelineAxes[i % numberOfAxes]);
-
-        if (!currentStyle)
-            return;
-
-        for (auto& previousTimelineName : currentStyle->scrollTimelineNames()) {
-            if (!currentTimelineNames.contains(previousTimelineName))
-                styleOriginatedTimelinesController->unregisterNamedTimeline(previousTimelineName.value.value, *this);
-        }
-    };
-
-    updateAnonymousScrollTimelines();
-    updateNamedScrollTimelines();
+    for (auto& previousScrollTimeline : currentStyle->scrollTimelines().usedValues()) {
+        WTF::switchOn(previousScrollTimeline.name(),
+            [](CSS::Keyword::None) {
+                // Nothing to unregister.
+            },
+            [&](const CustomIdentifier& identifier) {
+                if (!registeredScrollTimelineNames.contains(identifier.value))
+                    styleOriginatedTimelinesController->unregisterNamedTimeline(identifier.value, *this);
+            }
+        );
+    }
 };
 
 void Styleable::updateCSSViewTimelines(const RenderStyle* currentStyle, const RenderStyle& afterChangeStyle) const
 {
-    auto updateAnonymousViewTimelines = [&]() {
-        if (currentStyle && currentStyle->viewTimelines() == afterChangeStyle.viewTimelines())
-            return;
+    if (currentStyle && currentStyle->viewTimelines() == afterChangeStyle.viewTimelines())
+        return;
 
-        auto& currentTimelines = afterChangeStyle.viewTimelines();
-        for (auto& currentTimeline : currentTimelines)
-            currentTimeline->setSubject(&element);
+    CheckedRef styleOriginatedTimelinesController = protect(element.document())->ensureStyleOriginatedTimelinesController();
 
-        if (!currentStyle)
-            return;
+    HashSet<AtomString> registeredViewTimelineNames;
 
-        for (auto& previousTimeline : currentStyle->viewTimelines()) {
-            if (!currentTimelines.contains(previousTimeline) && previousTimeline->subject() == &element)
-                previousTimeline->setSubject(nullptr);
-        }
-    };
+    for (auto& viewTimeline : afterChangeStyle.viewTimelines().usedValues()) {
+        WTF::switchOn(viewTimeline.name(),
+            [](CSS::Keyword::None) {
+                // Nothing to register.
+            },
+            [&](const CustomIdentifier& identifier) {
+                styleOriginatedTimelinesController->registerNamedViewTimeline(identifier.value, *this, viewTimeline.axis(), viewTimeline.inset());
+                registeredViewTimelineNames.add(identifier.value);
+            }
+        );
+    }
 
-    auto updateNamedViewTimelines = [&]() {
-        if ((currentStyle && currentStyle->viewTimelineNames() == afterChangeStyle.viewTimelineNames()) && (currentStyle && currentStyle->viewTimelineAxes() == afterChangeStyle.viewTimelineAxes()) && (currentStyle && currentStyle->viewTimelineInsets() == afterChangeStyle.viewTimelineInsets()))
-            return;
+    if (!currentStyle)
+        return;
 
-        CheckedRef styleOriginatedTimelinesController = protect(element.document())->ensureStyleOriginatedTimelinesController();
-
-        auto& currentTimelineNames = afterChangeStyle.viewTimelineNames();
-        auto& currentTimelineAxes = afterChangeStyle.viewTimelineAxes();
-        auto& currentTimelineInsets = afterChangeStyle.viewTimelineInsets();
-        auto numberOfAxes = currentTimelineAxes.size();
-        auto numberOfInsets = currentTimelineInsets.size();
-        for (auto [i, name] : indexedRange(currentTimelineNames))
-            styleOriginatedTimelinesController->registerNamedViewTimeline(name.value.value, *this, currentTimelineAxes[i % numberOfAxes], currentTimelineInsets[i % numberOfInsets]);
-
-        if (!currentStyle)
-            return;
-
-        for (auto& previousTimelineName : currentStyle->viewTimelineNames()) {
-            if (!currentTimelineNames.contains(previousTimelineName))
-                styleOriginatedTimelinesController->unregisterNamedTimeline(previousTimelineName.value.value, *this);
-        }
-    };
-
-    updateAnonymousViewTimelines();
-    updateNamedViewTimelines();
+    for (auto& previousViewTimeline : currentStyle->viewTimelines().usedValues()) {
+        WTF::switchOn(previousViewTimeline.name(),
+            [](CSS::Keyword::None) {
+                // Nothing to unregister.
+            },
+            [&](const CustomIdentifier& identifier) {
+                if (!registeredViewTimelineNames.contains(identifier.value))
+                    styleOriginatedTimelinesController->unregisterNamedTimeline(identifier.value, *this);
+            }
+        );
+    }
 };
 
 void Styleable::queryContainerDidChange() const

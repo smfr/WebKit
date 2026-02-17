@@ -12784,10 +12784,11 @@
                 "y"
             ],
             "codegen-properties": {
-                "computed-style-name-for-methods": "ScrollTimelineAxes",
-                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
-                "computed-style-storage-kind": "reference",
-                "computed-style-type": "Style::ProgressTimelineAxes",
+                "coordinated-value-list-property": true,
+                "coordinated-value-list-property-name-for-methods": "Axis",
+                "coordinated-value-list-property-item-type": "Style::ProgressTimelineAxis",
+                "computed-style-storage-container": "opaque",
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData", "scrollTimelines"],
                 "parser-exported": true,
                 "parser-grammar": "<axis>#"
             },
@@ -12803,10 +12804,11 @@
                 "none"
             ],
             "codegen-properties": {
-                "computed-style-name-for-methods": "ScrollTimelineNames",
-                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
-                "computed-style-storage-kind": "reference",
-                "computed-style-type": "Style::ProgressTimelineNames",
+                "coordinated-value-list-property": true,
+                "coordinated-value-list-property-name-for-methods": "Name",
+                "coordinated-value-list-property-item-type": "Style::ProgressTimelineName",
+                "computed-style-storage-container": "opaque",
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData", "scrollTimelines"],
                 "parser-exported": true,
                 "parser-grammar": "<single-scroll-timeline-name>#"
             },
@@ -12979,10 +12981,11 @@
                 "y"
             ],
             "codegen-properties": {
-                "computed-style-name-for-methods": "ViewTimelineAxes",
-                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
-                "computed-style-storage-kind": "reference",
-                "computed-style-type": "Style::ProgressTimelineAxes",
+                "coordinated-value-list-property": true,
+                "coordinated-value-list-property-name-for-methods": "Axis",
+                "coordinated-value-list-property-item-type": "Style::ProgressTimelineAxis",
+                "computed-style-storage-container": "opaque",
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData", "viewTimelines"],
                 "parser-exported": true,
                 "parser-grammar": "<axis>#"
             },
@@ -12999,10 +13002,11 @@
                 "auto"
             ],
             "codegen-properties": {
-                "computed-style-name-for-methods": "ViewTimelineInsets",
-                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
-                "computed-style-storage-kind": "reference",
-                "computed-style-type": "Style::ViewTimelineInsets",
+                "coordinated-value-list-property": true,
+                "coordinated-value-list-property-name-for-methods": "Inset",
+                "coordinated-value-list-property-item-type": "Style::ViewTimelineInsetItem",
+                "computed-style-storage-container": "opaque",
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData", "viewTimelines"],
                 "parser-grammar": "<single-view-timeline-inset-item>#@(no-single-item-opt)"
             },
             "specification": {
@@ -13017,10 +13021,11 @@
                 "none"
             ],
             "codegen-properties": {
-                "computed-style-name-for-methods": "ViewTimelineNames",
-                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
-                "computed-style-storage-kind": "reference",
-                "computed-style-type": "Style::ProgressTimelineNames",
+                "coordinated-value-list-property": true,
+                "coordinated-value-list-property-name-for-methods": "Name",
+                "coordinated-value-list-property-item-type": "Style::ProgressTimelineName",
+                "computed-style-storage-container": "opaque",
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData", "viewTimelines"],
                 "parser-exported": true,
                 "parser-grammar": "<single-scroll-timeline-name>#"
             },

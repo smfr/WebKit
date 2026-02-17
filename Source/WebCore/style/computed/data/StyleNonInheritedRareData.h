@@ -56,8 +56,6 @@
 #include <WebCore/StylePositionTryFallbacks.h>
 #include <WebCore/StylePositionVisibility.h>
 #include <WebCore/StylePrimitiveNumericTypes.h>
-#include <WebCore/StyleProgressTimelineAxes.h>
-#include <WebCore/StyleProgressTimelineName.h>
 #include <WebCore/StyleRotate.h>
 #include <WebCore/StyleScale.h>
 #include <WebCore/StyleScrollBehavior.h>
@@ -74,7 +72,6 @@
 #include <WebCore/StyleTextDecorationThickness.h>
 #include <WebCore/StyleTouchAction.h>
 #include <WebCore/StyleTranslate.h>
-#include <WebCore/StyleViewTimelineInsets.h>
 #include <WebCore/StyleViewTimelines.h>
 #include <WebCore/StyleViewTransitionClass.h>
 #include <WebCore/StyleViewTransitionName.h>
@@ -185,13 +182,7 @@ public:
     TextDecorationThickness textDecorationThickness;
 
     ScrollTimelines scrollTimelines;
-    ProgressTimelineAxes scrollTimelineAxes;
-    ProgressTimelineNames scrollTimelineNames;
-
     ViewTimelines viewTimelines;
-    ViewTimelineInsets viewTimelineInsets;
-    ProgressTimelineAxes viewTimelineAxes;
-    ProgressTimelineNames viewTimelineNames;
 
     NameScope timelineScope;
 

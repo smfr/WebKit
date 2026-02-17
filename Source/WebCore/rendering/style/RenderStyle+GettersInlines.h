@@ -1058,11 +1058,6 @@ inline bool RenderStyle::hasPositionedMask() const
     return Style::hasImageInAnyLayer(maskLayers());
 }
 
-inline bool RenderStyle::hasScrollTimelines() const
-{
-    return !scrollTimelines().isEmpty() || !scrollTimelineNames().isNone();
-}
-
 inline bool RenderStyle::hasStaticBlockPosition(bool horizontal) const
 {
     return horizontal
@@ -1101,11 +1096,6 @@ inline bool RenderStyle::hasUsedContentNone() const
 inline bool RenderStyle::hasViewportConstrainedPosition() const
 {
     return position() == PositionType::Fixed || position() == PositionType::Sticky;
-}
-
-inline bool RenderStyle::hasViewTimelines() const
-{
-    return !viewTimelines().isEmpty() || !viewTimelineNames().isNone();
 }
 
 inline bool RenderStyle::hasPositiveStrokeWidth() const

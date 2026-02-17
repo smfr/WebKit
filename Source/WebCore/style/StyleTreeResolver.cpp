@@ -809,10 +809,10 @@ ElementUpdate TreeResolver::createAnimatedElementUpdate(ResolvedStyle&& resolved
         if (oldStyle && (!oldStyle->transitions().isInitial() || !resolvedStyle.style->transitions().isInitial()))
             styleable.updateCSSTransitions(*oldStyle, *resolvedStyle.style, newStyleOriginatedAnimations);
 
-        if ((oldStyle && oldStyle->hasScrollTimelines()) || resolvedStyle.style->hasScrollTimelines())
+        if ((oldStyle && !oldStyle->scrollTimelines().isInitial()) || !resolvedStyle.style->scrollTimelines().isInitial())
             styleable.updateCSSScrollTimelines(oldStyle, *resolvedStyle.style);
 
-        if ((oldStyle && oldStyle->hasViewTimelines()) || resolvedStyle.style->hasViewTimelines())
+        if ((oldStyle && !oldStyle->viewTimelines().isInitial()) || !resolvedStyle.style->viewTimelines().isInitial())
             styleable.updateCSSViewTimelines(oldStyle, *resolvedStyle.style);
 
         if ((oldStyle && oldStyle->timelineScope().type != NameScope::Type::None) || resolvedStyle.style->timelineScope().type != NameScope::Type::None) {

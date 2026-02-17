@@ -29,7 +29,7 @@
 #include <WebCore/CSSPrimitiveValue.h>
 #include <WebCore/ScrollTimeline.h>
 #include <WebCore/StyleViewFunction.h>
-#include <WebCore/StyleViewTimelineInsets.h>
+#include <WebCore/StyleViewTimelineInsetItem.h>
 #include <WebCore/Styleable.h>
 #include <WebCore/ViewTimelineOptions.h>
 #include <wtf/Ref.h>

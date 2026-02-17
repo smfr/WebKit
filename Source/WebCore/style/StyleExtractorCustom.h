@@ -3033,39 +3033,53 @@ inline void ExtractorCustom::extractPositionTryShorthandSerialization(ExtractorS
 
 inline RefPtr<CSSValue> ExtractorCustom::extractScrollTimelineShorthand(ExtractorState& state)
 {
-    auto& timelines = state.style.scrollTimelines();
-    if (timelines.isEmpty())
+    auto& scrollTimelines = state.style.scrollTimelines();
+    if (scrollTimelines.isInitial())
         return createCSSValue(state.pool, state.style, CSS::Keyword::None { });
 
+    // FIXME: This should probably be using `scrollTimelines.computedValues()`, but a WPT test, scroll-animations/css/scroll-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
+    // See https://github.com/w3c/csswg-drafts/issues/13500
+
     CSSValueListBuilder list;
-    for (auto& timeline : timelines) {
-        auto& name = timeline->name();
-        auto axis = timeline->axis();
+    for (auto& scrollTimeline : scrollTimelines.usedValues()) {
+        auto& name = scrollTimeline.name();
+        auto axis = scrollTimeline.axis();
 
-        ASSERT(!name.isNull());
-        auto nameCSSValue = createCSSValue(state.pool, state.style, CustomIdentifier { name });
+        auto hasDefaultAxis = axis == ProgressTimelineAxis::Block;
 
-        if (axis == ScrollAxis::Block)
-            list.append(WTF::move(nameCSSValue));
-        else
-            list.append(CSSValuePair::createNoncoalescing(nameCSSValue, createCSSValue(state.pool, state.style, axis)));
+        if (hasDefaultAxis)
+            list.append(createCSSValue(state.pool, state.style, name));
+        else {
+            list.append(CSSValuePair::createNoncoalescing(
+                createCSSValue(state.pool, state.style, name),
+                createCSSValue(state.pool, state.style, axis)
+            ));
+        }
     }
     return CSSValueList::createCommaSeparated(WTF::move(list));
 }
 
 inline void ExtractorCustom::extractScrollTimelineShorthandSerialization(ExtractorState& state, StringBuilder& builder, const CSS::SerializationContext& context)
 {
-    auto& timelines = state.style.scrollTimelines();
-    if (timelines.isEmpty()) {
+    auto& scrollTimelines = state.style.scrollTimelines();
+    if (scrollTimelines.isInitial()) {
         serializationForCSS(builder, context, state.style, CSS::Keyword::None { });
         return;
     }
 
-    builder.append(interleave(timelines, [&](auto& builder, auto& timeline) {
-        ASSERT(!timeline->name().isNull());
+    // FIXME: This should probably be using `scrollTimelines.computedValues()`, but a WPT test, scroll-animations/css/scroll-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
+    // See https://github.com/w3c/csswg-drafts/issues/13500
 
-        serializationForCSS(builder, context, state.style, CustomIdentifier { timeline->name() });
-        if (auto axis = timeline->axis(); axis != ScrollAxis::Block) {
+    builder.append(interleave(scrollTimelines.usedValues(), [&](auto& builder, auto& scrollTimeline) {
+        auto& name = scrollTimeline.name();
+        auto axis = scrollTimeline.axis();
+
+        auto hasDefaultAxis = axis == ProgressTimelineAxis::Block;
+
+        if (hasDefaultAxis)
+            serializationForCSS(builder, context, state.style, name);
+        else {
+            serializationForCSS(builder, context, state.style, name);
             builder.append(' ');
             serializationForCSS(builder, context, state.style, axis);
         }
@@ -3195,33 +3209,39 @@ inline void ExtractorCustom::extractTransitionShorthandSerialization(ExtractorSt
 
 inline RefPtr<CSSValue> ExtractorCustom::extractViewTimelineShorthand(ExtractorState& state)
 {
-    auto& timelines = state.style.viewTimelines();
-    if (timelines.isEmpty())
+    auto& viewTimelines = state.style.viewTimelines();
+    if (viewTimelines.isInitial())
         return createCSSValue(state.pool, state.style, CSS::Keyword::None { });
 
+    // FIXME: This should probably be using `viewTimelines.computedValues()`, but a WPT test, scroll-animations/css/view-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
+    // See https://github.com/w3c/csswg-drafts/issues/13500
+
     CSSValueListBuilder list;
-    for (auto& timeline : timelines) {
-        auto& name = timeline->name();
-        auto axis = timeline->axis();
-        auto& insets = timeline->insets();
+    for (auto& viewTimeline : viewTimelines.usedValues()) {
+        auto& name = viewTimeline.name();
+        auto axis = viewTimeline.axis();
+        auto& inset = viewTimeline.inset();
 
-        auto hasDefaultAxis = axis == ScrollAxis::Block;
-        auto hasDefaultInsets = insets.start().isAuto() && insets.end().isAuto();
+        auto hasDefaultAxis = axis == ProgressTimelineAxis::Block;
+        auto hasDefaultInset = inset.start().isAuto() && inset.end().isAuto();
 
-        ASSERT(!name.isNull());
-        auto nameCSSValue = createCSSValue(state.pool, state.style, CustomIdentifier { name });
-
-        if (hasDefaultAxis && hasDefaultInsets)
-            list.append(WTF::move(nameCSSValue));
-        else if (hasDefaultAxis)
-            list.append(CSSValuePair::createNoncoalescing(nameCSSValue, createCSSValue(state.pool, state.style, insets)));
-        else if (hasDefaultInsets)
-            list.append(CSSValuePair::createNoncoalescing(nameCSSValue, createCSSValue(state.pool, state.style, axis)));
-        else {
+        if (hasDefaultAxis && hasDefaultInset)
+            list.append(createCSSValue(state.pool, state.style, name));
+        else if (hasDefaultAxis) {
+            list.append(CSSValuePair::createNoncoalescing(
+                createCSSValue(state.pool, state.style, name),
+                createCSSValue(state.pool, state.style, inset)
+            ));
+        } else if (hasDefaultInset) {
+            list.append(CSSValuePair::createNoncoalescing(
+                createCSSValue(state.pool, state.style, name),
+                createCSSValue(state.pool, state.style, axis)
+            ));
+        } else {
             list.append(CSSValueList::createSpaceSeparated(
-                WTF::move(nameCSSValue),
+                createCSSValue(state.pool, state.style, name),
                 createCSSValue(state.pool, state.style, axis),
-                createCSSValue(state.pool, state.style, insets)
+                createCSSValue(state.pool, state.style, inset)
             ));
         }
     }
@@ -3230,8 +3250,41 @@ inline RefPtr<CSSValue> ExtractorCustom::extractViewTimelineShorthand(ExtractorS
 
 inline void ExtractorCustom::extractViewTimelineShorthandSerialization(ExtractorState& state, StringBuilder& builder, const CSS::SerializationContext& context)
 {
-    // FIXME: Do this more efficiently without creating and destroying a CSSValue object.
-    builder.append(extractViewTimelineShorthand(state)->cssText(context));
+    auto& viewTimelines = state.style.viewTimelines();
+    if (viewTimelines.isInitial()) {
+        serializationForCSS(builder, context, state.style, CSS::Keyword::None { });
+        return;
+    }
+
+    // FIXME: This should probably be using `viewTimelines.computedValues()`, but a WPT test, scroll-animations/css/view-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
+    // See https://github.com/w3c/csswg-drafts/issues/13500
+
+    builder.append(interleave(viewTimelines.usedValues(), [&](auto& builder, auto& viewTimeline) {
+        auto& name = viewTimeline.name();
+        auto axis = viewTimeline.axis();
+        auto& inset = viewTimeline.inset();
+
+        auto hasDefaultAxis = axis == ProgressTimelineAxis::Block;
+        auto hasDefaultInset = inset.start().isAuto() && inset.end().isAuto();
+
+        if (hasDefaultAxis && hasDefaultInset)
+            serializationForCSS(builder, context, state.style, name);
+        else if (hasDefaultAxis) {
+            serializationForCSS(builder, context, state.style, name);
+            builder.append(' ');
+            serializationForCSS(builder, context, state.style, inset);
+        } else if (hasDefaultInset) {
+            serializationForCSS(builder, context, state.style, name);
+            builder.append(' ');
+            serializationForCSS(builder, context, state.style, axis);
+        } else {
+            serializationForCSS(builder, context, state.style, name);
+            builder.append(' ');
+            serializationForCSS(builder, context, state.style, axis);
+            builder.append(' ');
+            serializationForCSS(builder, context, state.style, inset);
+        }
+    }, ", "_s));
 }
 
 inline RefPtr<CSSValue> ExtractorCustom::extractWhiteSpaceShorthand(ExtractorState& state)

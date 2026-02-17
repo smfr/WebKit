@@ -3348,10 +3348,11 @@ style/values/primitives/StyleRatio.cpp
 style/values/primitives/StyleURL.cpp
 style/values/primitives/StyleUnevaluatedCalculation.cpp
 style/values/rhythm/StyleBlockStepSize.cpp
-style/values/scroll-animations/StyleProgressTimelineName.cpp
 style/values/scroll-animations/StyleScrollFunction.cpp
+style/values/scroll-animations/StyleScrollTimeline.cpp
 style/values/scroll-animations/StyleViewFunction.cpp
-style/values/scroll-animations/StyleViewTimelineInsets.cpp
+style/values/scroll-animations/StyleViewTimelineInsetItem.cpp
+style/values/scroll-animations/StyleViewTimeline.cpp
 style/values/scroll-snap/StyleScrollMargin.cpp
 style/values/scroll-snap/StyleScrollPadding.cpp
 style/values/scroll-snap/StyleScrollSnapAlign.cpp

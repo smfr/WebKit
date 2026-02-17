@@ -283,6 +283,16 @@ inline MaskLayers& ComputedStyleBase::ensureMaskLayers()
     return m_nonInheritedData.access().miscData.access().mask.access();
 }
 
+inline ScrollTimelines& ComputedStyleBase::ensureScrollTimelines()
+{
+    return m_nonInheritedData.access().rareData.access().scrollTimelines.access();
+}
+
+inline ViewTimelines& ComputedStyleBase::ensureViewTimelines()
+{
+    return m_nonInheritedData.access().rareData.access().viewTimelines.access();
+}
+
 inline void ComputedStyleBase::setBackgroundLayers(BackgroundLayers&& layers)
 {
     SET_NESTED(m_nonInheritedData, backgroundData, background, WTF::move(layers));

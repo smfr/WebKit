@@ -1326,37 +1326,19 @@ void Adjuster::adjustMaskLayers(RenderStyle& style)
 
 void Adjuster::adjustScrollTimelines(RenderStyle& style)
 {
-    auto& names = style.scrollTimelineNames();
-    if (names.isNone() && style.scrollTimelines().isEmpty())
+    if (style.scrollTimelines().isInitial())
         return;
 
-    auto& axes = style.scrollTimelineAxes();
-    auto numberOfAxes = axes.size();
-    ASSERT(numberOfAxes > 0);
-
-    style.computedStyle().m_nonInheritedData.access().rareData.access().scrollTimelines = { FixedVector<Ref<ScrollTimeline>>::createWithSizeFromGenerator(names.size(), [&](auto i) {
-        return ScrollTimeline::create(names[i].value.value, axes[i % numberOfAxes]);
-    }) };
+    style.ensureScrollTimelines().prepareForUse();
 }
 
 void Adjuster::adjustViewTimelines(RenderStyle& style)
 {
-    auto& names = style.viewTimelineNames();
-    if (names.isNone() && style.viewTimelines().isEmpty())
+    if (style.viewTimelines().isInitial())
         return;
 
-    auto& axes = style.viewTimelineAxes();
-    auto numberOfAxes = axes.size();
-    ASSERT(numberOfAxes > 0);
-
-    auto& insets = style.viewTimelineInsets();
-    auto numberOfInsets = insets.size();
-    ASSERT(numberOfInsets > 0);
-
-    style.computedStyle().m_nonInheritedData.access().rareData.access().viewTimelines = { FixedVector<Ref<ViewTimeline>>::createWithSizeFromGenerator(names.size(), [&](auto i) {
-        return ViewTimeline::create(names[i].value.value, axes[i % numberOfAxes], insets[i % numberOfInsets]);
-    }) };
+    style.ensureViewTimelines().prepareForUse();
 }
 
-}
-}
+} // namespace Style
+} // namespace WebCore

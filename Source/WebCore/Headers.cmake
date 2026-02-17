@@ -3554,12 +3554,14 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
 
     style/values/rhythm/StyleBlockStepSize.h
 
-    style/values/scroll-animations/StyleProgressTimelineAxes.h
+    style/values/scroll-animations/StyleProgressTimelineAxis.h
     style/values/scroll-animations/StyleProgressTimelineName.h
     style/values/scroll-animations/StyleScrollFunction.h
+    style/values/scroll-animations/StyleScrollTimeline.h
     style/values/scroll-animations/StyleScrollTimelines.h
     style/values/scroll-animations/StyleViewFunction.h
-    style/values/scroll-animations/StyleViewTimelineInsets.h
+    style/values/scroll-animations/StyleViewTimeline.h
+    style/values/scroll-animations/StyleViewTimelineInsetItem.h
     style/values/scroll-animations/StyleViewTimelines.h
 
     style/values/scroll-snap/StyleScrollMargin.h

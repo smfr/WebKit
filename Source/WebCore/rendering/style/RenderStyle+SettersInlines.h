@@ -336,6 +336,16 @@ inline Style::MaskLayers& RenderStyle::ensureMaskLayers()
     return m_computedStyle.ensureMaskLayers();
 }
 
+inline Style::ScrollTimelines& RenderStyle::ensureScrollTimelines()
+{
+    return m_computedStyle.ensureScrollTimelines();
+}
+
+inline Style::ViewTimelines& RenderStyle::ensureViewTimelines()
+{
+    return m_computedStyle.ensureViewTimelines();
+}
+
 inline void RenderStyle::setBackgroundLayers(Style::BackgroundLayers&& layers)
 {
     m_computedStyle.setBackgroundLayers(WTF::move(layers));

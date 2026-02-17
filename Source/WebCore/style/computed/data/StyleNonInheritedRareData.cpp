@@ -80,13 +80,8 @@ NonInheritedRareData::NonInheritedRareData()
     , offsetRotate(ComputedStyle::initialOffsetRotate())
     , textDecorationColor(ComputedStyle::initialTextDecorationColor())
     , textDecorationThickness(ComputedStyle::initialTextDecorationThickness())
-    // scrollTimelines
-    , scrollTimelineAxes(ComputedStyle::initialScrollTimelineAxes())
-    , scrollTimelineNames(ComputedStyle::initialScrollTimelineNames())
-    // viewTimelines
-    , viewTimelineInsets(ComputedStyle::initialViewTimelineInsets())
-    , viewTimelineAxes(ComputedStyle::initialViewTimelineAxes())
-    , viewTimelineNames(ComputedStyle::initialViewTimelineNames())
+    , scrollTimelines { CSS::Keyword::None { } }
+    , viewTimelines { CSS::Keyword::None { } }
     , timelineScope(ComputedStyle::initialTimelineScope())
     , scrollbarGutter(ComputedStyle::initialScrollbarGutter())
     , scrollSnapType(ComputedStyle::initialScrollSnapType())
@@ -191,12 +186,7 @@ inline NonInheritedRareData::NonInheritedRareData(const NonInheritedRareData& o)
     , textDecorationColor(o.textDecorationColor)
     , textDecorationThickness(o.textDecorationThickness)
     , scrollTimelines(o.scrollTimelines)
-    , scrollTimelineAxes(o.scrollTimelineAxes)
-    , scrollTimelineNames(o.scrollTimelineNames)
     , viewTimelines(o.viewTimelines)
-    , viewTimelineInsets(o.viewTimelineInsets)
-    , viewTimelineAxes(o.viewTimelineAxes)
-    , viewTimelineNames(o.viewTimelineNames)
     , timelineScope(o.timelineScope)
     , scrollbarGutter(o.scrollbarGutter)
     , scrollSnapType(o.scrollSnapType)
@@ -306,12 +296,7 @@ bool NonInheritedRareData::operator==(const NonInheritedRareData& o) const
         && offsetRotate == o.offsetRotate
         && textDecorationThickness == o.textDecorationThickness
         && scrollTimelines == o.scrollTimelines
-        && scrollTimelineAxes == o.scrollTimelineAxes
-        && scrollTimelineNames == o.scrollTimelineNames
         && viewTimelines == o.viewTimelines
-        && viewTimelineInsets == o.viewTimelineInsets
-        && viewTimelineAxes == o.viewTimelineAxes
-        && viewTimelineNames == o.viewTimelineNames
         && timelineScope == o.timelineScope
         && scrollbarGutter == o.scrollbarGutter
         && scrollSnapType == o.scrollSnapType
@@ -458,13 +443,7 @@ void NonInheritedRareData::dumpDifferences(TextStream& ts, const NonInheritedRar
     LOG_IF_DIFFERENT(textDecorationThickness);
 
     LOG_IF_DIFFERENT(scrollTimelines);
-    LOG_IF_DIFFERENT(scrollTimelineAxes);
-    LOG_IF_DIFFERENT(scrollTimelineNames);
-
     LOG_IF_DIFFERENT(viewTimelines);
-    LOG_IF_DIFFERENT(viewTimelineInsets);
-    LOG_IF_DIFFERENT(viewTimelineAxes);
-    LOG_IF_DIFFERENT(viewTimelineNames);
 
     LOG_IF_DIFFERENT(timelineScope);
 
