@@ -33,11 +33,10 @@
 
 namespace WebCore {
 class GraphicsContext;
-class RunLoopObserver;
 }
 
 namespace WebKit {
-class NonCompositedFrameRenderer;
+class FrameRenderer;
 struct RenderProcessInfo;
 
 class DrawingAreaCoordinatedGraphics final : public DrawingArea {
@@ -108,12 +107,6 @@ private:
     void suspendPainting();
     void resumePainting();
 
-    void scheduleUpdate();
-    void scheduleRenderingUpdateRunLoopObserver();
-    void invalidateRenderingUpdateRunLoopObserver();
-    void renderingUpdateRunLoopObserverFired();
-    void updateRendering();
-
     // Whether we're currently processing an UpdateGeometry message.
     bool m_inUpdateGeometry { false };
 
@@ -128,15 +121,9 @@ private:
     // won't paint until painting has resumed again.
     bool m_isPaintingSuspended { false };
 
-    // The layer tree host that handles accelerated compositing.
-    std::unique_ptr<LayerTreeHost> m_layerTreeHost;
-
-    // Frame renderer used in non-composited mode.
-    std::unique_ptr<NonCompositedFrameRenderer> m_nonCompositedFrameRenderer;
+    std::unique_ptr<FrameRenderer> m_renderer;
 
     bool m_supportsAsyncScrolling { true };
-
-    std::unique_ptr<WebCore::RunLoopObserver> m_renderingUpdateRunLoopObserver;
 
 #if PLATFORM(GTK)
     bool m_transientZoom { false };

@@ -52,7 +52,6 @@
 #include <WebCore/Settings.h>
 #include <WebCore/SkiaPaintingEngine.h>
 #include <WebCore/ThreadedScrollingTree.h>
-#include <WebCore/WindowEventLoop.h>
 #include <wtf/SetForScope.h>
 #include <wtf/SystemTracing.h>
 #include <wtf/TZoneMallocInlines.h>
@@ -82,10 +81,6 @@ LayerTreeHost::LayerTreeHost(WebPage& webPage)
         rootLayer.setSize(m_webPage.size());
     }
 
-    m_renderingUpdateRunLoopObserver = makeUnique<RunLoopObserver>(RunLoopObserver::WellKnownOrder::RenderingUpdate, [this] {
-        this->renderingUpdateRunLoopObserverFired();
-    });
-
     m_compositor = ThreadedCompositor::create(*this);
 #if ENABLE(DAMAGE_TRACKING)
     std::optional<OptionSet<ThreadedCompositor::DamagePropagationFlags>> damagePropagationFlags;
@@ -99,16 +94,10 @@ LayerTreeHost::LayerTreeHost(WebPage& webPage)
     }
     m_compositor->setDamagePropagationFlags(damagePropagationFlags);
 #endif
-    m_layerTreeContext.contextID = m_compositor->surfaceID();
 }
 
 LayerTreeHost::~LayerTreeHost()
 {
-    if (m_forceRepaintAsync.callback)
-        m_forceRepaintAsync.callback();
-
-    invalidateRenderingUpdateRunLoopObserver();
-
     m_sceneState->invalidate();
 
     m_skiaPaintingEngine = nullptr;
@@ -116,27 +105,16 @@ LayerTreeHost::~LayerTreeHost()
     m_compositor->invalidate();
 }
 
-void LayerTreeHost::setLayerTreeStateIsFrozen(bool isFrozen)
+uint64_t LayerTreeHost::surfaceID() const
 {
-    if (m_layerTreeStateIsFrozen == isFrozen)
-        return;
-
-    m_layerTreeStateIsFrozen = isFrozen;
-
-    if (m_layerTreeStateIsFrozen)
-        invalidateRenderingUpdateRunLoopObserver();
-    else
-        scheduleRenderingUpdate();
+    return m_compositor->surfaceID();
 }
 
 void LayerTreeHost::scheduleRenderingUpdate()
 {
     WTFEmitSignpost(this, LayerTreeHostScheduleRenderingUpdate, "isWaitingForRenderer %s", m_isWaitingForRenderer ? "yes" : "no");
 
-    if (m_layerTreeStateIsFrozen)
-        return;
-
-    if (m_webPage.size().isEmpty())
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage.size().isEmpty())
         return;
 
     if (m_isWaitingForRenderer) {
@@ -147,28 +125,9 @@ void LayerTreeHost::scheduleRenderingUpdate()
     scheduleRenderingUpdateRunLoopObserver();
 }
 
-void LayerTreeHost::scheduleRenderingUpdateRunLoopObserver()
+bool LayerTreeHost::canUpdateRendering() const
 {
-    if (m_renderingUpdateRunLoopObserver->isScheduled())
-        return;
-
-    if (m_isUpdatingRendering)
-        return;
-
-    tracePoint(RenderingUpdateRunLoopObserverStart);
-    m_renderingUpdateRunLoopObserver->schedule();
-
-    // Avoid running any more tasks before the runloop observer fires.
-    WebCore::WindowEventLoop::breakToAllowRenderingUpdate();
-}
-
-void LayerTreeHost::invalidateRenderingUpdateRunLoopObserver()
-{
-    if (!m_renderingUpdateRunLoopObserver->isScheduled())
-        return;
-
-    tracePoint(RenderingUpdateRunLoopObserverEnd);
-    m_renderingUpdateRunLoopObserver->invalidate();
+    return !m_isWaitingForRenderer;
 }
 
 void LayerTreeHost::updateRendering()
@@ -238,19 +197,6 @@ void LayerTreeHost::updateRendering()
     }
 }
 
-void LayerTreeHost::renderingUpdateRunLoopObserverFired()
-{
-    WTFEmitSignpost(this, RenderingUpdateRunLoopObserverFired, "isWaitingForRenderer %s", m_isWaitingForRenderer ? "yes" : "no");
-
-    if (m_isSuspended)
-        return;
-
-    if (m_isWaitingForRenderer)
-        return;
-
-    updateRendering();
-}
-
 void LayerTreeHost::updateRootLayer()
 {
     Vector<Ref<CoordinatedPlatformLayer>> children;
@@ -284,7 +230,7 @@ void LayerTreeHost::setViewOverlayRootLayer(GraphicsLayer* graphicsLayer)
 void LayerTreeHost::updateRenderingWithForcedRepaint()
 {
     if (m_isWaitingForRenderer) {
-        if (m_forceRepaintAsync.callback)
+        if (m_forcedRepaintAsyncCallback)
             m_pendingForceRepaint = true;
         return;
     }
@@ -307,17 +253,14 @@ void LayerTreeHost::updateRenderingWithForcedRepaint()
     updateRendering();
 }
 
-void LayerTreeHost::updateRenderingWithForcedRepaintAsync(CompletionHandler<void()>&& callback)
+bool LayerTreeHost::ensureDrawing()
 {
-    ASSERT(!m_forceRepaintAsync.callback);
-    m_forceRepaintAsync.callback = WTF::move(callback);
-    updateRenderingWithForcedRepaint();
-}
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage.size().isEmpty())
+        return false;
 
-void LayerTreeHost::ensureDrawing()
-{
     m_forceFrameSync = true;
     scheduleRenderingUpdate();
+    return true;
 }
 
 void LayerTreeHost::sizeDidChange()
@@ -329,17 +272,16 @@ void LayerTreeHost::sizeDidChange()
         updateRendering();
 }
 
-void LayerTreeHost::pauseRendering()
+void LayerTreeHost::suspend()
 {
-    m_isSuspended = true;
+    FrameRenderer::suspend();
     m_compositor->suspend();
 }
 
-void LayerTreeHost::resumeRendering()
+void LayerTreeHost::resume()
 {
-    m_isSuspended = false;
     m_compositor->resume();
-    scheduleRenderingUpdate();
+    FrameRenderer::resume();
 }
 
 GraphicsLayerFactory* LayerTreeHost::graphicsLayerFactory()
@@ -460,16 +402,16 @@ void LayerTreeHost::requestCompositionForRenderingUpdate()
     m_compositor->requestCompositionForRenderingUpdate([this] {
         WTFBeginSignpost(this, DidComposite);
 
-        if (!m_pendingForceRepaint && m_forceRepaintAsync.callback)
-            m_forceRepaintAsync.callback();
+        if (!m_pendingForceRepaint && m_forcedRepaintAsyncCallback)
+            m_forcedRepaintAsyncCallback();
 
         m_isWaitingForRenderer = false;
         bool scheduledWhileWaitingForRenderer = std::exchange(m_scheduledWhileWaitingForRenderer, false);
         if (m_pendingForceRepaint) {
             if (!m_layerTreeStateIsFrozen)
                 updateRenderingWithForcedRepaint();
-            else if (m_forceRepaintAsync.callback)
-                m_forceRepaintAsync.callback();
+            else if (m_forcedRepaintAsyncCallback)
+                m_forcedRepaintAsyncCallback();
         } else if (!m_isSuspended && !m_layerTreeStateIsFrozen && scheduledWhileWaitingForRenderer)
             scheduleRenderingUpdateRunLoopObserver();
 
@@ -537,7 +479,7 @@ void LayerTreeHost::applyTransientZoomToLayers(double scale, FloatPoint origin)
     zoomLayer->setPosition(FloatPoint());
 }
 
-void LayerTreeHost::adjustTransientZoom(double scale, FloatPoint origin)
+void LayerTreeHost::adjustTransientZoom(double scale, FloatPoint origin, FloatPoint)
 {
     m_transientZoom = true;
     m_transientZoomScale = scale;
@@ -546,7 +488,7 @@ void LayerTreeHost::adjustTransientZoom(double scale, FloatPoint origin)
     applyTransientZoomToLayers(m_transientZoomScale, m_transientZoomOrigin);
 }
 
-void LayerTreeHost::commitTransientZoom(double scale, FloatPoint origin)
+void LayerTreeHost::commitTransientZoom(double scale, FloatPoint origin, FloatPoint unscrolledOrigin)
 {
     if (m_transientZoomScale == scale) {
         // If the page scale is already the target scale, setPageScaleFactor() will short-circuit
@@ -560,6 +502,8 @@ void LayerTreeHost::commitTransientZoom(double scale, FloatPoint origin)
     m_transientZoom = false;
     m_transientZoomScale = 1;
     m_transientZoomOrigin = FloatPoint();
+
+    m_webPage.scalePage(scale / m_webPage.viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
 }
 #endif
 
@@ -586,7 +530,7 @@ void LayerTreeHost::resetDamageHistoryForTesting()
     m_compositor->enableFrameDamageNotificationForTesting();
 }
 
-void LayerTreeHost::foreachRegionInDamageHistoryForTesting(Function<void(const Region&)>&& callback)
+void LayerTreeHost::foreachRegionInDamageHistoryForTesting(Function<void(const Region&)>&& callback) const
 {
     Locker locker { m_frameDamageHistoryForTestingLock };
     for (const auto& region : m_frameDamageHistoryForTesting)

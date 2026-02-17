@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Igalia S.L.
+ * Copyright (C) 2025, 2026 Igalia S.L.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,7 +27,15 @@
 #include "NonCompositedFrameRenderer.h"
 
 #if USE(COORDINATED_GRAPHICS)
+#include "DrawingArea.h"
+#include "WebPage.h"
+#include "WebPageInlines.h"
+#include <WebCore/GLContext.h>
 #include <WebCore/GraphicsContextSkia.h>
+#include <WebCore/Page.h>
+#include <WebCore/PlatformDisplay.h>
+#include <WebCore/Settings.h>
+#include <wtf/SetForScope.h>
 #include <wtf/SystemTracing.h>
 
 namespace WebKit {
@@ -44,12 +52,7 @@ std::unique_ptr<NonCompositedFrameRenderer> NonCompositedFrameRenderer::create(W
 NonCompositedFrameRenderer::NonCompositedFrameRenderer(WebPage& webPage)
     : m_webPage(webPage)
     , m_surface(AcceleratedSurface::create(m_webPage, [this] {
-        WTFEmitSignpost(this, FrameComplete);
-        m_canRenderNextFrame = true;
-        if (m_shouldRenderFollowupFrame) {
-            m_shouldRenderFollowupFrame = false;
-            display();
-        }
+        frameComplete();
     }, AcceleratedSurface::RenderingPurpose::NonComposited))
 {
 #if ENABLE(DAMAGE_TRACKING)
@@ -81,12 +84,12 @@ NonCompositedFrameRenderer::~NonCompositedFrameRenderer()
     m_surface->willDestroyCompositingRunLoop();
 }
 
-void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
+void NonCompositedFrameRenderer::addDirtyRect(const IntRect& rect)
 {
 #if ENABLE(DAMAGE_TRACKING)
     if (m_frameDamage) {
-        IntRect scaledRect = rect;
-        scaledRect.scale(protect(m_webPage)->deviceScaleFactor());
+        auto scaledRect = rect;
+        scaledRect.scale(m_webPage->deviceScaleFactor());
         m_frameDamage->add(scaledRect);
     }
 #else
@@ -94,11 +97,34 @@ void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
 #endif
 }
 
+void NonCompositedFrameRenderer::setNeedsDisplay()
+{
+    Ref webPage = m_webPage.get();
+    auto dirtyRect = webPage->bounds();
+    if (dirtyRect.isEmpty())
+        return;
+
+    addDirtyRect(dirtyRect);
+    scheduleRenderingUpdate();
+}
+
+void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
+{
+    Ref webPage = m_webPage.get();
+    auto dirtyRect = rect;
+    dirtyRect.intersect(webPage->bounds());
+    if (dirtyRect.isEmpty())
+        return;
+
+    addDirtyRect(dirtyRect);
+    scheduleRenderingUpdate();
+}
+
 #if ENABLE(DAMAGE_TRACKING)
 void NonCompositedFrameRenderer::resetFrameDamage()
 {
     Ref webPage = m_webPage.get();
-    IntRect scaledRect = webPage->bounds();
+    auto scaledRect = webPage->bounds();
     scaledRect.scale(webPage->deviceScaleFactor());
     if (!m_context) {
         // For CPU rendering use the damage unconditionally to reduce the amount of pixels to upload to the GPU for the UI process.
@@ -115,12 +141,46 @@ void NonCompositedFrameRenderer::resetFrameDamage()
 }
 #endif
 
-void NonCompositedFrameRenderer::display()
+void NonCompositedFrameRenderer::sizeDidChange()
 {
+#if ENABLE(DAMAGE_TRACKING)
+    resetFrameDamage();
+    addDirtyRect(m_webPage->bounds());
+#endif
+    if (m_canRenderNextFrame)
+        updateRendering();
+    else
+        scheduleRenderingUpdate();
+}
+
+void NonCompositedFrameRenderer::scheduleRenderingUpdate()
+{
+    WTFEmitSignpost(this, NonCompositedScheduleRenderingUpdate, "canRenderNextFrame %s", m_canRenderNextFrame ? "yes" : "no");
+
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage->size().isEmpty())
+        return;
+
     if (!m_canRenderNextFrame) {
         m_shouldRenderFollowupFrame = true;
         return;
     }
+
+    scheduleRenderingUpdateRunLoopObserver();
+}
+
+bool NonCompositedFrameRenderer::canUpdateRendering() const
+{
+    return m_canRenderNextFrame;
+}
+
+void NonCompositedFrameRenderer::updateRendering()
+{
+    invalidateRenderingUpdateRunLoopObserver();
+
+    if (m_layerTreeStateIsFrozen || m_isSuspended)
+        return;
+
+    SetForScope<bool> reentrancyProtector(m_isUpdatingRendering, true);
 
     WTFBeginSignpost(this, NonCompositedRenderingUpdate);
 
@@ -140,57 +200,56 @@ void NonCompositedFrameRenderer::display()
         m_context->makeContextCurrent();
     m_surface->willRenderFrame(scaledSize);
 
-    auto* canvas = m_surface->canvas();
-    RELEASE_ASSERT(canvas);
+    if (auto* canvas = m_surface->canvas()) {
+        if (m_context)
+            PlatformDisplay::sharedDisplay().skiaGLContext()->makeContextCurrent();
 
-    if (m_context)
-        PlatformDisplay::sharedDisplay().skiaGLContext()->makeContextCurrent();
+        canvas->save();
+        GraphicsContextSkia graphicsContext(*canvas, m_context ? RenderingMode::Accelerated : RenderingMode::Unaccelerated, RenderingPurpose::DOM);
+        graphicsContext.applyDeviceScaleFactor(webPage->deviceScaleFactor());
 
-    canvas->save();
-    GraphicsContextSkia graphicsContext(*canvas, m_context ? RenderingMode::Accelerated : RenderingMode::Unaccelerated, RenderingPurpose::DOM);
-    graphicsContext.applyDeviceScaleFactor(webPage->deviceScaleFactor());
-
-    if (m_surface->shouldPaintMirrored()) {
-        SkMatrix matrix;
-        matrix.setScaleTranslate(1, -1, 0, webPage->size().height());
-        canvas->concat(matrix);
-    }
-
-#if ENABLE(DAMAGE_TRACKING)
-    if (m_frameDamage) {
-        if (m_frameDamageHistoryForTesting)
-            m_frameDamageHistoryForTesting->append(m_frameDamage->regionForTesting());
-        m_surface->setFrameDamage(WTF::move(*m_frameDamage));
-        resetFrameDamage();
-    }
-#endif
-
-    auto drawRect = [&](const IntRect& rect) {
-        WTFBeginSignpost(canvas, DrawRect, "Skia/%s, dirty region %ix%i+%i+%i", m_context ? "GPU" : "CPU", rect.x(), rect.y(), rect.width(), rect.height());
-        webPage->drawRect(graphicsContext, rect);
-        WTFEndSignpost(canvas, DrawRect);
-    };
-
-#if ENABLE(DAMAGE_TRACKING)
-    if (auto& renderTargetDamage = m_surface->renderTargetDamage()) {
-        for (const auto& rect : *renderTargetDamage) {
-            IntRect scaledRect = rect;
-            scaledRect.scale(1 / webPage->deviceScaleFactor());
-            drawRect(scaledRect);
+        if (m_surface->shouldPaintMirrored()) {
+            SkMatrix matrix;
+            matrix.setScaleTranslate(1, -1, 0, webPage->size().height());
+            canvas->concat(matrix);
         }
-    } else
-        drawRect(webPage->bounds());
-#else
-    drawRect(webPage->bounds());
+
+#if ENABLE(DAMAGE_TRACKING)
+        if (m_frameDamage) {
+            if (m_frameDamageHistoryForTesting)
+                m_frameDamageHistoryForTesting->append(m_frameDamage->regionForTesting());
+            m_surface->setFrameDamage(WTF::move(*m_frameDamage));
+            resetFrameDamage();
+        }
 #endif
 
-    canvas->restore();
+        auto drawRect = [&](const IntRect& rect) {
+            WTFBeginSignpost(canvas, DrawRect, "Skia/%s, dirty region %ix%i+%i+%i", m_context ? "GPU" : "CPU", rect.x(), rect.y(), rect.width(), rect.height());
+            webPage->drawRect(graphicsContext, rect);
+            WTFEndSignpost(canvas, DrawRect);
+        };
 
-    if (m_context) {
-        if (auto* surface = canvas->getSurface())
-            PlatformDisplay::sharedDisplay().skiaGrContext()->flushAndSubmit(surface, GrSyncCpu::kNo);
+#if ENABLE(DAMAGE_TRACKING)
+        if (auto& renderTargetDamage = m_surface->renderTargetDamage()) {
+            for (const auto& rect : *renderTargetDamage) {
+                auto scaledRect = rect;
+                scaledRect.scale(1 / webPage->deviceScaleFactor());
+                drawRect(scaledRect);
+            }
+        } else
+            drawRect(webPage->bounds());
+#else
+        drawRect(webPage->bounds());
+#endif
 
-        m_context->makeContextCurrent();
+        canvas->restore();
+
+        if (m_context) {
+            if (auto* surface = canvas->getSurface())
+                PlatformDisplay::sharedDisplay().skiaGrContext()->flushAndSubmit(surface, GrSyncCpu::kNo);
+
+            m_context->makeContextCurrent();
+        }
     }
 
     m_canRenderNextFrame = false;
@@ -206,23 +265,33 @@ void NonCompositedFrameRenderer::display()
 
     WTFEndSignpost(this, NonCompositedRenderingUpdate);
 
-    if (m_forcedRepaintAsyncCallback) {
+    if (m_forcedRepaintAsyncCallback)
         m_forcedRepaintAsyncCallback();
-        m_forcedRepaintAsyncCallback = nullptr;
-    }
+}
+
+void NonCompositedFrameRenderer::frameComplete()
+{
+    WTFEmitSignpost(this, FrameComplete);
+
+    m_canRenderNextFrame = true;
+    bool shouldRenderFollowupFrame = std::exchange(m_shouldRenderFollowupFrame, false);
+    if (!m_isSuspended && !m_layerTreeStateIsFrozen && shouldRenderFollowupFrame)
+        scheduleRenderingUpdateRunLoopObserver();
 }
 
 void NonCompositedFrameRenderer::updateRenderingWithForcedRepaint()
 {
-    setNeedsDisplayInRect(m_webPage.get().bounds());
-    display();
+    addDirtyRect(m_webPage->bounds());
+    updateRendering();
 }
 
-void NonCompositedFrameRenderer::updateRenderingWithForcedRepaintAsync(CompletionHandler<void()>&& callback)
+bool NonCompositedFrameRenderer::ensureDrawing()
 {
-    ASSERT(!m_forcedRepaintAsyncCallback);
-    m_forcedRepaintAsyncCallback = WTF::move(callback);
-    updateRenderingWithForcedRepaint();
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage->size().isEmpty())
+        return false;
+
+    setNeedsDisplay();
+    return true;
 }
 
 #if PLATFORM(WPE) && ENABLE(WPE_PLATFORM) && (USE(GBM) || OS(ANDROID))
@@ -239,7 +308,7 @@ void NonCompositedFrameRenderer::resetDamageHistoryForTesting()
     m_frameDamageHistoryForTesting = std::make_optional<Vector<WebCore::Region>>();
 }
 
-void NonCompositedFrameRenderer::foreachRegionInDamageHistoryForTesting(Function<void(const Region&)>&& callback)
+void NonCompositedFrameRenderer::foreachRegionInDamageHistoryForTesting(Function<void(const Region&)>&& callback) const
 {
     if (m_frameDamageHistoryForTesting) {
         for (const auto& region : *m_frameDamageHistoryForTesting)
@@ -247,6 +316,26 @@ void NonCompositedFrameRenderer::foreachRegionInDamageHistoryForTesting(Function
     }
 }
 #endif
+
+#if PLATFORM(GTK)
+void NonCompositedFrameRenderer::adjustTransientZoom(double scale, FloatPoint, FloatPoint unscrolledOrigin)
+{
+    Ref webPage = m_webPage.get();
+    webPage->scalePage(scale / webPage->viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
+}
+
+void NonCompositedFrameRenderer::commitTransientZoom(double scale, FloatPoint, FloatPoint unscrolledOrigin)
+{
+    Ref webPage = m_webPage.get();
+    webPage->scalePage(scale / webPage->viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
+}
+#endif
+
+void NonCompositedFrameRenderer::fillGLInformation(RenderProcessInfo&& info, CompletionHandler<void(RenderProcessInfo&&)>&& completionHandler)
+{
+    // FIXME: implement.
+    completionHandler(WTF::move(info));
+}
 
 } // namespace WebKit
 
