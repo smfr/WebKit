@@ -29,7 +29,6 @@ bindings/js/JSDOMAbstractOperations.h
 bindings/js/JSDOMBindingSecurity.cpp
 bindings/js/JSDOMGlobalObject.cpp
 bindings/js/JSDOMWindowBase.cpp
-bindings/js/JSDOMWindowCustom.cpp
 bindings/js/JSDOMWindowProperties.cpp
 bindings/js/JSErrorHandler.cpp
 bindings/js/JSHTMLAllCollectionCustom.cpp

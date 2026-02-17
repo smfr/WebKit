@@ -102,7 +102,6 @@ bindings/js/JSDOMPromiseDeferred.cpp
 bindings/js/JSDOMPromiseDeferred.h
 bindings/js/JSDOMSetLike.h
 bindings/js/JSDOMWindowBase.cpp
-bindings/js/JSDOMWindowCustom.cpp
 bindings/js/JSDOMWindowProperties.cpp
 bindings/js/JSDocumentCustom.cpp
 bindings/js/JSElementCustom.cpp
