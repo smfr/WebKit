@@ -119,7 +119,7 @@ void CanvasBase::addObserver(CanvasObserver& observer)
 {
     m_observers.add(observer);
 
-    if (is<StyleCanvasImage>(observer))
+    if (is<Style::CanvasImage>(observer))
         InspectorInstrumentation::didChangeCSSCanvasClientNodes(*this);
 }
 
@@ -127,7 +127,7 @@ void CanvasBase::removeObserver(CanvasObserver& observer)
 {
     m_observers.remove(observer);
 
-    if (is<StyleCanvasImage>(observer))
+    if (is<Style::CanvasImage>(observer))
         InspectorInstrumentation::didChangeCSSCanvasClientNodes(*this);
 }
 
@@ -197,7 +197,7 @@ HashSet<Element*> CanvasBase::cssCanvasClients() const
 {
     HashSet<Element*> cssCanvasClients;
     for (CheckedRef observer : m_observers) {
-        RefPtr image = dynamicDowncast<StyleCanvasImage>(observer.get());
+        RefPtr image = dynamicDowncast<Style::CanvasImage>(observer.get());
         if (!image)
             continue;
 

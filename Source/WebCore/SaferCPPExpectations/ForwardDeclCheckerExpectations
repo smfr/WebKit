@@ -68,8 +68,8 @@ rendering/MarkedText.h
 rendering/RenderLayerBacking.cpp
 rendering/RenderLayerCompositor.cpp
 rendering/RenderTextLineBoxes.h
-rendering/style/StyleCachedImage.cpp
 rendering/svg/SVGRenderingContext.h
 style/StyleExtractorState.h
 style/StyleScope.h
+style/values/images/kinds/StyleCachedImage.cpp
 testing/Internals.cpp

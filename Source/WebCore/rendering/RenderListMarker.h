@@ -104,7 +104,7 @@ private:
 
 private:
     ListMarkerTextContent m_textContent;
-    RefPtr<StyleImage> m_image;
+    RefPtr<Style::Image> m_image;
 
     SingleThreadWeakPtr<RenderListItem> m_listItem;
     LayoutUnit m_lineOffsetForListItem;

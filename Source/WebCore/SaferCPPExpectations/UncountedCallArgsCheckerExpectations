@@ -676,13 +676,6 @@ rendering/mathml/RenderMathMLUnderOver.cpp
 rendering/shapes/ShapeOutsideInfo.cpp
 rendering/shapes/ShapeOutsideInfo.h
 rendering/style/BorderData.cpp
-rendering/style/StyleCachedImage.cpp
-rendering/style/StyleCanvasImage.cpp
-rendering/style/StyleCrossfadeImage.cpp
-rendering/style/StyleCursorImage.cpp
-rendering/style/StyleGeneratedImage.cpp
-rendering/style/StyleMultiImage.cpp
-rendering/style/StylePaintImage.cpp
 rendering/svg/RenderSVGImage.cpp
 rendering/svg/RenderSVGInline.cpp
 rendering/svg/RenderSVGInlineText.cpp
@@ -761,6 +754,13 @@ style/UserAgentStyle.cpp
 style/computed/StyleComputedStyle.cpp
 style/computed/StyleComputedStyleBase.cpp
 style/values/filter-effects/StyleFilterReference.cpp
+style/values/images/kinds/StyleCachedImage.cpp
+style/values/images/kinds/StyleCanvasImage.cpp
+style/values/images/kinds/StyleCrossfadeImage.cpp
+style/values/images/kinds/StyleCursorImage.cpp
+style/values/images/kinds/StyleGeneratedImage.cpp
+style/values/images/kinds/StyleMultiImage.cpp
+style/values/images/kinds/StylePaintImage.cpp
 style/values/primitives/StyleLengthWrapperData.cpp
 style/values/transforms/StyleRotate.cpp
 style/values/transforms/StyleScale.cpp

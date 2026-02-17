@@ -66,6 +66,7 @@
 #include "RenderView.h"
 #include "ScrollingConstraints.h"
 #include "Settings.h"
+#include "StyleImage.h"
 #include "Styleable.h"
 #include "TextBoxPainter.h"
 #include "TransformState.h"
@@ -789,7 +790,7 @@ static inline LayoutSize resolveAgainstIntrinsicRatio(const LayoutSize& size, co
     return LayoutSize(size.width(), solutionHeight);
 }
 
-LayoutSize RenderBoxModelObject::calculateImageIntrinsicDimensions(StyleImage* image, const LayoutSize& positioningAreaSize, ScaleByUsedZoom scaleByUsedZoom) const
+LayoutSize RenderBoxModelObject::calculateImageIntrinsicDimensions(Style::Image* image, const LayoutSize& positioningAreaSize, ScaleByUsedZoom scaleByUsedZoom) const
 {
     // A generated image without a fixed size, will always return the container size as intrinsic size.
     if (!image->imageHasNaturalDimensions())

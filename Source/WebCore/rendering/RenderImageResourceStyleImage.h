@@ -37,7 +37,7 @@ class RenderImageResourceStyleImage final : public RenderImageResource {
     WTF_MAKE_TZONE_ALLOCATED(RenderImageResourceStyleImage);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderImageResourceStyleImage);
 public:
-    explicit RenderImageResourceStyleImage(StyleImage&);
+    explicit RenderImageResourceStyleImage(Style::Image&);
 
 private:
     void initialize(RenderElement&) final;
@@ -54,7 +54,7 @@ private:
     WrappedImagePtr imagePtr() const final { return m_styleImage->data(); }
     LayoutSize imageSize(float multiplier, CachedImage::SizeType) const final { return LayoutSize(m_styleImage->imageSize(renderer(), multiplier)); }
 
-    const Ref<StyleImage> m_styleImage;
+    const Ref<Style::Image> m_styleImage;
 };
 
 } // namespace WebCore

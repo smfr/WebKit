@@ -42,6 +42,7 @@
 #include "SVGResourceElementClient.h"
 #include "Settings.h"
 #include "StyleFilterReference.h"
+#include "StyleImage.h"
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -257,7 +258,7 @@ RefPtr<SVGMarkerElement> ReferencedSVGResources::referencedMarkerElement(TreeSco
     return downcast<SVGMarkerElement>(elementForResourceID(treeScope, resourceID, SVGNames::markerTag));
 }
 
-RefPtr<SVGMaskElement> ReferencedSVGResources::referencedMaskElement(TreeScope& treeScope, const StyleImage& maskImage)
+RefPtr<SVGMaskElement> ReferencedSVGResources::referencedMaskElement(TreeScope& treeScope, const Style::Image& maskImage)
 {
     auto resourceID = SVGURIReference::fragmentIdentifierFromIRIString(maskImage.url(), protect(treeScope.documentScope()));
     if (resourceID.isEmpty())

@@ -42,7 +42,6 @@ namespace WebCore {
 
 class FontCascadeDescription;
 class FontSelectionValue;
-class StyleImage;
 class StyleResolver;
 
 namespace CSSCalc {
@@ -52,6 +51,7 @@ struct RandomCachingKey;
 namespace Style {
 
 class BuilderState;
+class Image;
 struct Color;
 struct FontFamilies;
 struct FontFeatureSettings;
@@ -145,7 +145,7 @@ public:
 
     ScopeOrdinal styleScopeOrdinal() const { return m_currentProperty->styleScopeOrdinal; }
 
-    RefPtr<StyleImage> createStyleImage(const CSSValue&) const;
+    RefPtr<Image> createStyleImage(const CSSValue&) const;
 
     const Vector<AtomString>& registeredContentAttributes() const { return m_registeredContentAttributes; }
     void registerContentAttribute(const AtomString& attributeLocalName);

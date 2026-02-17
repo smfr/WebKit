@@ -3237,10 +3237,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     rendering/style/RenderStyle.h
     rendering/style/RenderStyle+GettersInlines.h
     rendering/style/RenderStyleConstants.h
-    rendering/style/StyleCachedImage.h
     rendering/style/StyleContentAlignmentData.h
-    rendering/style/StyleGeneratedImage.h
-    rendering/style/StyleImage.h
     rendering/style/StyleSelfAlignmentData.h
 
     rendering/svg/RenderSVGInlineText.h
@@ -3469,6 +3466,9 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     style/values/images/StyleImageOrientation.h
     style/values/images/StyleImageWrapper.h
     style/values/images/StyleObjectPosition.h
+
+    style/values/images/kinds/StyleCachedImage.h
+    style/values/images/kinds/StyleImage.h
 
     style/values/inline/StyleLineFitEdge.h
     style/values/inline/StyleLineHeight.h

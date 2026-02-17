@@ -40,7 +40,6 @@ class ReferencedSVGResources;
 class RenderBlock;
 class RenderStyle;
 class RenderTreeBuilder;
-class StyleImage;
 struct ImageOrientation;
 
 struct MarginRect {
@@ -53,6 +52,7 @@ class ElementBox;
 }
 
 namespace Style {
+class Image;
 struct Content;
 }
 
@@ -418,7 +418,7 @@ private:
     bool shouldRepaintForStyleDifference(Style::Difference) const;
 
     template<typename FillLayerType> void updateFillImages(const FillLayerType*, const FillLayerType*);
-    void updateImage(StyleImage*, StyleImage*);
+    void updateImage(Style::Image*, Style::Image*);
     void updateShapeImage(const Style::ShapeOutside*, const Style::ShapeOutside*);
 
     Style::Difference adjustStyleDifference(Style::Difference) const;

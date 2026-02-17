@@ -35,10 +35,10 @@ class CachedResourceLoader;
 class DeprecatedCSSOMValue;
 class CSSStyleDeclaration;
 class RenderElement;
-class StyleImage;
 
 namespace Style {
 class BuilderState;
+class Image;
 }
 
 class CSSImageValue final : public CSSValue {
@@ -68,7 +68,7 @@ public:
 
     bool knownToBeOpaque(const RenderElement&) const;
 
-    RefPtr<StyleImage> createStyleImage(const Style::BuilderState&) const;
+    RefPtr<Style::Image> createStyleImage(const Style::BuilderState&) const;
 
     bool isLoadedFromOpaqueSource() const;
 

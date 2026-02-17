@@ -42,8 +42,8 @@ class RenderImage : public RenderReplaced {
     WTF_MAKE_TZONE_ALLOCATED(RenderImage);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderImage);
 public:
-    RenderImage(Type, Element&, RenderStyle&&, StyleImage* = nullptr, const float imageDevicePixelRatio = 1.0f);
-    RenderImage(Type, Document&, RenderStyle&&, StyleImage* = nullptr);
+    RenderImage(Type, Element&, RenderStyle&&, Style::Image* = nullptr, const float imageDevicePixelRatio = 1.0f);
+    RenderImage(Type, Document&, RenderStyle&&, Style::Image* = nullptr);
     virtual ~RenderImage();
 
     RenderImageResource& imageResource() { return *m_imageResource; }
@@ -86,7 +86,7 @@ public:
 #endif
 
 protected:
-    RenderImage(Type, Element&, RenderStyle&&, OptionSet<ReplacedFlag>, StyleImage* = nullptr, const float imageDevicePixelRatio = 1.0f);
+    RenderImage(Type, Element&, RenderStyle&&, OptionSet<ReplacedFlag>, Style::Image* = nullptr, const float imageDevicePixelRatio = 1.0f);
     void willBeDestroyed() override;
 
     bool shouldInvalidatePreferredWidths() const final;

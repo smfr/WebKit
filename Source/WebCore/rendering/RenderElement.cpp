@@ -183,7 +183,7 @@ const Layout::ElementBox* RenderElement::layoutBox() const
     return downcast<Layout::ElementBox>(RenderObject::layoutBox());
 }
 
-static RefPtr<StyleImage> minimallySupportedContentDataImage(const Style::Content& content)
+static RefPtr<Style::Image> minimallySupportedContentDataImage(const Style::Content& content)
 {
     // Minimal support for content properties replacing an entire element.
     // Works only if we have exactly one piece of content and it's a URL.
@@ -450,7 +450,7 @@ template<typename FillLayers> void RenderElement::updateFillImages(const FillLay
     }
 }
 
-void RenderElement::updateImage(StyleImage* oldImage, StyleImage* newImage)
+void RenderElement::updateImage(Style::Image* oldImage, Style::Image* newImage)
 {
     if (oldImage == newImage)
         return;

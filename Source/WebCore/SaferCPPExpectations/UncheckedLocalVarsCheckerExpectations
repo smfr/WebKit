@@ -113,7 +113,6 @@ rendering/mathml/RenderMathMLRow.cpp
 rendering/mathml/RenderMathMLScripts.cpp
 rendering/mathml/RenderMathMLUnderOver.cpp
 rendering/shapes/ShapeOutsideInfo.cpp
-rendering/style/StyleCanvasImage.cpp
 rendering/svg/RenderSVGInline.cpp
 rendering/svg/RenderSVGInlineText.cpp
 rendering/svg/RenderSVGPath.cpp
@@ -172,6 +171,7 @@ style/StyleTreeResolver.cpp
 style/Styleable.cpp
 style/computed/StyleComputedStyleBase.cpp
 style/values/grid/StyleGridPositionsResolver.cpp
+style/values/images/kinds/StyleCanvasImage.cpp
 style/values/primitives/StyleLengthResolution.cpp
 svg/SVGFilterPrimitiveStandardAttributes.cpp
 svg/SVGGeometryElement.cpp

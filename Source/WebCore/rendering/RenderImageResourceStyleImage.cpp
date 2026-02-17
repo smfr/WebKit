@@ -39,7 +39,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(RenderImageResourceStyleImage);
 
-RenderImageResourceStyleImage::RenderImageResourceStyleImage(StyleImage& styleImage)
+RenderImageResourceStyleImage::RenderImageResourceStyleImage(Style::Image& styleImage)
     : m_styleImage(styleImage)
 {
 }

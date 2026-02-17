@@ -73,7 +73,7 @@ struct MaskLayer {
     MaskLayer();
     MaskLayer(CSS::Keyword::None);
     MaskLayer(ImageOrNone&&);
-    MaskLayer(RefPtr<StyleImage>&&);
+    MaskLayer(RefPtr<Image>&&);
 
     const ImageOrNone& image() const { return m_image; }
     const PositionX& positionX() const { return m_positionX; }
