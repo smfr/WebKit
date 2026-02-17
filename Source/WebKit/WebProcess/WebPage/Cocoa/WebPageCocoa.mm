@@ -2853,7 +2853,7 @@ Awaitable<std::optional<WebCore::RemoteUserInputEventData>> WebPage::potentialTa
 
     sendTapHighlightForNodeIfNecessary(requestID, m_potentialTapNode.get(), position);
 #if ENABLE(TWO_PHASE_CLICKS)
-    if (m_potentialTapNode && !m_potentialTapNode->allowsDoubleTapGesture())
+    if (RefPtr potentialTapNode = m_potentialTapNode; potentialTapNode && !potentialTapNode->allowsDoubleTapGesture())
         send(Messages::WebPageProxy::DisableDoubleTapGesturesDuringTapIfNecessary(requestID));
 #endif
 #endif // PLATFORM(IOS_FAMILY)
@@ -2971,7 +2971,7 @@ void WebPage::sendTapHighlightForNodeIfNecessary(WebKit::TapIdentifier requestID
     if (!localMainFrame)
         return;
 
-    if (m_page->isEditable() && node == localMainFrame->document()->body())
+    if (m_page->isEditable() && node == protect(localMainFrame->document())->body())
         return;
 
     if (RefPtr element = dynamicDowncast<Element>(*node)) {
@@ -2987,7 +2987,7 @@ void WebPage::sendTapHighlightForNodeIfNecessary(WebKit::TapIdentifier requestID
     }
 
 #if ENABLE(PDF_PLUGIN)
-    if (RefPtr pluginView = pluginViewForFrame(updatedNode->document().frame())) {
+    if (RefPtr pluginView = pluginViewForFrame(protect(updatedNode->document().frame()))) {
         if (auto rect = pluginView->highlightRectForTapAtPoint(point)) {
 #if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
             auto highlightColor = RenderTheme::singleton().platformTapHighlightColor();
@@ -3002,7 +3002,7 @@ void WebPage::sendTapHighlightForNodeIfNecessary(WebKit::TapIdentifier requestID
 #endif // ENABLE(PDF_PLUGIN)
 
     Vector<FloatQuad> quads;
-    if (RenderObject *renderer = updatedNode->renderer()) {
+    if (CheckedPtr renderer = updatedNode->renderer()) {
         renderer->absoluteQuads(quads);
 #if ENABLE(CSS_TAP_HIGHLIGHT_COLOR)
         auto highlightColor = renderer->style().tapHighlightColorResolvingCurrentColor();
