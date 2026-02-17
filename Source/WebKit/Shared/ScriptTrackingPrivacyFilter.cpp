@@ -119,6 +119,9 @@ bool ScriptTrackingPrivacyFilter::shouldBlockRequest(const URL& url, const WebCo
 #endif
 
     auto categoryFlag = WebCore::scriptCategoryAsFlag(ScriptTrackingPrivacyCategory::NetworkRequests);
+    if (!m_categoriesWithAllowedHosts.contains(categoryFlag))
+        return true;
+
     auto result = lookup(url, topOrigin);
     return result.foundMatch && !result.allowedCategories.contains(categoryFlag);
 }
