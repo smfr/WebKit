@@ -588,6 +588,9 @@ void PeerConnectionBackend::setRemoteDescriptionFailed(Exception&& exception)
 void PeerConnectionBackend::iceGatheringStateChanged(RTCIceGatheringState state)
 {
     ActiveDOMObject::queueTaskKeepingObjectAlive(protectedPeerConnection().get(), TaskSource::Networking, [this, protectedThis = Ref { *this }, state](auto& peerConnection) {
+        if (peerConnection.isClosed())
+            return;
+
         if (state == RTCIceGatheringState::Complete) {
             doneGatheringCandidates();
             return;
