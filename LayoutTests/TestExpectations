@@ -1501,6 +1501,8 @@ webkit.org/b/139903 editing/spelling/grammar-paste.html [ Timeout Pass ]
 webkit.org/b/112521 [ Release ] webaudio/audioprocessingevent.html [ Pass Failure ]
 webkit.org/b/112521 [ Debug ] webaudio/audioprocessingevent.html [ Skip ]
 
+webkit.org/b/308024 webaudio/automatic-pull-node.html [ Pass Failure ]
+
 # The test frequently times out, and is just unsuccessful at detecting incorrect behavior when it passes.
 webkit.org/b/72698 media/audio-garbage-collect.html [ Skip ]
 
@@ -7090,7 +7092,7 @@ imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-ro
 imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-stacking-context-001.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-mask.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-plus-lighter-svg.html [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-plus-lighter.html [ ImageOnlyFailure ]
+imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-plus-lighter.html [ ImageOnlyFailure Pass ]
 imported/w3c/web-platform-tests/css/compositing/root-element-background-transparency.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/compositing/root-element-opacity.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/compositing/svg/mix-blend-mode-in-svg-image.html [ ImageOnlyFailure ]

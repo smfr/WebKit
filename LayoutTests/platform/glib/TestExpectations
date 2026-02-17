@@ -1667,6 +1667,8 @@ webkit.org/b/234352 media/track/track-webvtt-snap-to-lines-left-right.html [ Tim
 
 media/track/webvtt-ruby.html [ Timeout Pass ]
 
+webkit.org/b/308023 media/video-played-reset.html [ Failure Pass ]
+
 # Race conditions from missing this patch:
 # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3471 (still flaky with GStreamer 1.24)
 webkit.org/b/254514 media/media-source/media-source-current-time.html [ Failure Pass ]
@@ -1676,6 +1678,8 @@ webkit.org/b/254514 media/media-source/media-source-seek-unbuffered.html [ Failu
 webkit.org/b/167108 imported/w3c/web-platform-tests/media-source/URL-createObjectURL-revoke.html [ Failure ]
 
 webkit.org/b/224767 imported/w3c/web-platform-tests/media-source/mediasource-changetype-play-implicit.html [ Crash Pass ]
+
+webkit.org/b/285752 imported/w3c/web-platform-tests/mediacapture-record/MediaRecorder-mimetype.html [ Pass Crash ]
 
 # See also bug #175578.
 webkit.org/b/167108 imported/w3c/web-platform-tests/media-source/mediasource-avtracks.html [ Failure ]
@@ -1932,6 +1936,8 @@ webkit.org/b/243614 imported/w3c/web-platform-tests/IndexedDB/interleaved-cursor
 webkit.org/b/243614 imported/w3c/web-platform-tests/IndexedDB/interleaved-cursors-small.html [ Failure ]
 webkit.org/b/243614 imported/w3c/web-platform-tests/IndexedDB/nested-cloning-large-multiple.html [ Failure ]
 webkit.org/b/243614 imported/w3c/web-platform-tests/IndexedDB/nested-cloning-large.html [ Failure ]
+
+webkit.org/b/216298 imported/w3c/web-platform-tests/IndexedDB/blob-valid-after-deletion.any.html [ Pass Failure ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of IndexedDB-related bugs
@@ -2525,6 +2531,8 @@ http/tests/webgl/1.0.x/conformance/textures/misc/origin-clean-conformance-offscr
 webgl/webgl-draft-extensions-flag-default.html [ Skip ]
 webgl/webgl-draft-extensions-flag-on.html [ Skip ]
 
+webgl/1.0.x/conformance/textures/misc/texture-corner-case-videos.html [ Failure Pass ]
+
 # WEBGL2 failures
 webkit.org/b/251106 webgl/1.0.x/conformance/offscreencanvas/context-lost-restored-worker.html [ Failure  ]
 webkit.org/b/251106 webgl/1.0.x/conformance/offscreencanvas/context-lost-worker.html [ Failure ]
@@ -2625,6 +2633,8 @@ webkit.org/b/292951 webgl/2.0.y/conformance/textures/video/tex-2d-rgb-rgb-unsign
 webkit.org/b/292951 webkit.org/b/251107 webgl/2.0.y/conformance/textures/video/tex-2d-rgba-rgba-unsigned_byte.html [ Timeout Failure ]
 webkit.org/b/292951 webgl/2.0.y/conformance/textures/video/tex-2d-rgba-rgba-unsigned_short_4_4_4_4.html [ Timeout ]
 webkit.org/b/292951 webgl/2.0.y/conformance/textures/video/tex-2d-rgba-rgba-unsigned_short_5_5_5_1.html [ Timeout ]
+
+webkit.org/b/308025 webgl/2.0.y/conformance2/query/occlusion-query-scissor.html [ Failure ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of WebGL-related bugs
@@ -4506,7 +4516,7 @@ imported/w3c/web-platform-tests/css/css-view-transitions/content-with-child-with
 imported/w3c/web-platform-tests/css/css-view-transitions/snapshot-containing-block-includes-scrollbar-gutter.html [ ImageOnlyFailure Pass ]
 imported/w3c/web-platform-tests/css/css-view-transitions/web-animations-api.html [ ImageOnlyFailure Pass ]
 
-imported/w3c/web-platform-tests/css/css-view-transitions/fragmented-at-start-ignored.html [ ImageOnlyFailure ]
+imported/w3c/web-platform-tests/css/css-view-transitions/fragmented-at-start-ignored.html [ ImageOnlyFailure Pass ]
 imported/w3c/web-platform-tests/css/css-view-transitions/fractional-translation-from-transform.html [ Pass ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/massive-element-left-of-viewport-partially-onscreen-new.html [ Pass ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/massive-element-left-of-viewport-partially-onscreen-old.html [ Pass ImageOnlyFailure ]
@@ -5041,11 +5051,6 @@ fullscreen/fullscreen-grid-item-container-type-crash.html [ Skip ]
 
 webkit.org/b/303539 imported/w3c/web-platform-tests/service-workers/service-worker/multipart-image.https.html [ Crash Failure ]
 webkit.org/b/303547 fullscreen/full-screen-keyboard-lock-option-enabled.html [ Pass Timeout ]
-
-# Flaky soup_session_get_feature crash
-webkit.org/b/303677 imported/w3c/web-platform-tests/workers/constructors/SharedWorker/empty-name.html [ Pass Crash ]
-webkit.org/b/303677 imported/w3c/web-platform-tests/fetch/data-urls/base64.any.html [ Pass Crash ]
-webkit.org/b/303677 imported/w3c/web-platform-tests/close-watcher/user-activation/n-activate-preventDefault.html?CloseWatcher [ Pass Crash ]
 
 webkit.org/b/303855 fast/css/view-transitions-scrolling-position-fixed.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303856 fast/scrolling/rtl-scrollbars-positioning.html [ Pass ImageOnlyFailure ]

@@ -1344,8 +1344,6 @@ webgl/2.0.y/conformance/state/state-uneffected-after-compositing.html [ Skip ]
 webgl/2.0.y/conformance2/offscreencanvas/offscreencanvas-transfer-image-bitmap.html [ Skip ]
 webgl/2.0.y/conformance/context/context-no-alpha-fbo-with-alpha.html [ Skip ]
 
-webgl/1.0.x/conformance/textures/misc/texture-corner-case-videos.html [ Failure Pass ]
-
 # Flaky tests on Aug-2023
 webkit.org/b/261024 http/wpt/mediarecorder/MediaRecorder-video-bitrate.html [ Crash Failure Pass ]
 webkit.org/b/261024 imported/w3c/web-platform-tests/css/css-transforms/animation/transform-interpolation-rotate-slerp.html [ ImageOnlyFailure Pass ]

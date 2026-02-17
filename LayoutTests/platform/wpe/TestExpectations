@@ -481,8 +481,6 @@ css3/scroll-snap/resnap-after-layout.html [ Skip ] # Timeout.
 # 4. TESTS CRASHING
 #////////////////////////////////////////////////////////////////////////////////////////
 
-webkit.org/b/305722 [ Debug ] platform/wpe/media/video-punch-hole.html [ Crash Pass ]
-
 webkit.org/b/177633 editing/async-clipboard/clipboard-change-data-while-writing.html [ Failure Pass ]
 webkit.org/b/177633 editing/async-clipboard/clipboard-read-text-from-platform.html [ Failure ]
 
@@ -586,7 +584,7 @@ webkit.org/b/252878 fast/hidpi/image-set-units.html [ Timeout Pass ]
 webkit.org/b/252878 [ Release ] fast/scrolling/keyboard-scrolling-distance-pageDown.html [ Pass ]
 webkit.org/b/252878 gamepad/gamepad-event-handlers.html [ Pass Timeout ]
 webkit.org/b/252878 http/tests/media/video-play-waiting.html [ Failure Pass ]
-webkit.org/b/281053 http/tests/media/user-gesture-preserved-across-xmlhttprequest.html [ Crash Failure ]
+webkit.org/b/281053 http/tests/media/user-gesture-preserved-across-xmlhttprequest.html [ Failure ]
 webkit.org/b/252878 http/wpt/cross-origin-opener-policy/header-parsing-with-report-to.https.html [ Failure Pass Timeout ]
 webkit.org/b/252878 http/wpt/service-workers/controlled-sharedworker.https.html [ Failure Pass ]
 webkit.org/b/252878 imported/blink/fast/hidpi/border-background-align.html [ Pass ]
@@ -610,8 +608,6 @@ webkit.org/b/257624 imported/w3c/web-platform-tests/media-source/mediasource-red
 
 # Sometimes times out, it's easier to reproduce with WPE Platform API.
 fullscreen/full-screen-enter-while-exiting-multiple-elements.html [ Pass Timeout ]
-
-webkit.org/b/285752 imported/w3c/web-platform-tests/mediacapture-record/MediaRecorder-mimetype.html [ Pass Crash ]
 
 # These touch events test behave differently with WPE Platform API.
 # FIXME: split the expectations once we have a separate baseline.
@@ -867,7 +863,6 @@ webkit.org/b/251107 webgl/2.0.y/conformance2/reading/read-pixels-from-fbo-test.h
 webkit.org/b/251107 webgl/2.0.y/conformance2/rendering/blitframebuffer-filter-outofbounds.html [ Failure ]
 webkit.org/b/251107 webgl/2.0.y/conformance/context/premultiplyalpha-test.html [ Failure ]
 webkit.org/b/251107 webgl/2.0.y/conformance2/extensions/ext-texture-norm16.html [ Failure ]
-webgl/1.0.x/conformance/textures/misc/texture-corner-case-videos.html [ Crash Pass ]
 
 # WEBGL2 flakies
 webkit.org/b/251107 webgl/2.0.y/conformance2/rendering/blitframebuffer-test.html [ Pass Failure ]
@@ -925,8 +920,6 @@ webkit.org/b/244476 fast/canvas/webgl/webgl-compressed-texture-size-limit.html [
 
 webkit.org/b/244489 fast/canvas/webgl/bufferData-offset-length.html [ Failure ]
 webkit.org/b/244491 fast/canvas/webgl/webgl2-texture-upload-enums.html [ Failure ]
-
-fast/canvas/webgl/texImage2D-video-flipY-false.html [ Failure Crash Timeout Pass ]
 
 fast/canvas/toDataURL-alpha-permutation.html [ ImageOnlyFailure ]
 
@@ -993,7 +986,7 @@ perf/htmlcollection-backwards-iteration.html [ Pass Failure ]
 webkit.org/b/261024 fast/events/remove-child-onscroll.html [ Pass Timeout ]
 webkit.org/b/261024 fast/multicol/pagination/RightToLeft-rl-hittest.html [ Failure Pass ]
 webkit.org/b/261024 http/tests/frame-throttling/raf-throttle-in-cross-origin-subframe.html [ Failure ]
-webkit.org/b/261024 imported/w3c/web-platform-tests/encrypted-media/clearkey-mp4-playback-temporary-encrypted-clear-sources.https.html [ Crash Failure Pass ]
+webkit.org/b/261024 imported/w3c/web-platform-tests/encrypted-media/clearkey-mp4-playback-temporary-encrypted-clear-sources.https.html [ Failure Pass ]
 webkit.org/b/261024 js/cached-window-properties.html [ Pass Timeout ]
 
 webrtc/vp8-then-h264.html [ Pass ]
@@ -1055,7 +1048,7 @@ imported/w3c/web-platform-tests/css/compositing/mix-blend-mode/mix-blend-mode-pa
 # This is expected to fail in all platforms but it rarely passes in WPE
 imported/w3c/web-platform-tests/css/compositing/background-blending/background-blend-mode-plus-lighter.html [ ImageOnlyFailure Pass ]
 
-media/media-source/media-detachablemse-append.html [ Timeout Crash Pass ]
+media/media-source/media-detachablemse-append.html [ Timeout Pass ]
 
 http/tests/login-status/login-status-api-getter-setter-functions.html [ Failure ]
 
@@ -1233,7 +1226,7 @@ webkit.org/b/287572 svg/W3C-SVG-1.2-Tiny/struct-use-recursion-01-t.svg [ ImageOn
 
 imported/w3c/web-platform-tests/css/css-position/hypothetical-box-scroll-parent.html [ ImageOnlyFailure ]
 
-webkit.org/b/254518 imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/autoplay-allowed-by-feature-policy.https.sub.html [ Crash Failure Pass ]
+webkit.org/b/254518 imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/autoplay-allowed-by-feature-policy.https.sub.html [ Failure Pass ]
 
 # The Digital Credentials API is not supported on WPE port.
 http/tests/digital-credentials/ [ Skip ]
@@ -1266,10 +1259,7 @@ webkit.org/b/303861 imported/w3c/web-platform-tests/svg/path/property/mpath.svg 
 webkit.org/b/303866 imported/w3c/web-platform-tests/css/css-anchor-position/scroll-to-anchored-fixed-003.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303866 imported/w3c/web-platform-tests/css/css-anchor-position/scroll-to-anchored-fixed-004.html [ Pass ImageOnlyFailure ]
 
-# Flaky soup_session_get_feature crash
-webkit.org/b/303677 imported/w3c/web-platform-tests/fetch/cross-origin-resource-policy/fetch-in-iframe.html [ Pass Crash ]
-
-webkit.org/b/304272 [ Debug ] imported/w3c/web-platform-tests/html/anonymous-iframe/local-storage.tentative.https.window.html [ Failure Pass ]
+webkit.org/b/304272 imported/w3c/web-platform-tests/html/anonymous-iframe/local-storage.tentative.https.window.html [ Failure Pass ]
 
 # webkit.org/b/304535 ui-serif, ui-sans-serif, ui-monospace, ui-rounded generic families not implemented on WPE
 imported/w3c/web-platform-tests/css/css-fonts/generic-family-lang-attr-cascade.html [ ImageOnlyFailure ]
@@ -1279,7 +1269,8 @@ webkit.org/b/244538 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-t
 webkit.org/b/245034 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-target-align-003.html [ Pass ImageOnlyFailure ]
 webkit.org/b/227085 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-target-snap-003.html [ Pass ImageOnlyFailure ]
 
-webkit.org/b/305201 fast/forms/datalist/data-list-search-input-with-appearance-none.html [ Crash ]
+# UIScriptController::isShowingDataListSuggestions is not implemented yet
+webkit.org/b/305201 fast/forms/datalist/data-list-search-input-with-appearance-none.html [ Skip ]
 
 webkit.org/b/305511 imported/w3c/web-platform-tests/event-timing/crossiframe.html [ Failure Pass ]
 webkit.org/b/305512 imported/w3c/web-platform-tests/focus/focus-large-element-in-overflow-hidden-container.html [ ImageOnlyFailure Pass ]
