@@ -56,7 +56,7 @@ SequesteredAutomaticThread::~SequesteredAutomaticThread()
 
 StackAllocationSpecification SequesteredAutomaticThread::stackSpecification()
 {
-    return StackAllocationSpecification::CustomStack(m_stack.span());
+    return StackAllocationSpecification::DeferredStack(m_stack.span(), 1 * MB);
 }
 
 #endif // USE(PROTECTED_JIT_STACKS)

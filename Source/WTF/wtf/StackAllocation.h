@@ -39,6 +39,7 @@ public:
         Default = 0, // OS provided stack, OS default size
         SizeOnly, // OS provided stack, specified size
         SizeAndLocation, // Preallocated stack with known size
+        DeferredStack, // OS provided stack initially, then hop to user-preallocated stack
     };
 
     StackAllocationSpecification() = default;
@@ -57,23 +58,54 @@ public:
         return s;
     }
 
-    Kind kind() const { return m_kind; }
-    bool isKind(Kind kind) const { return this->kind() == kind; }
-
-    std::size_t sizeBytes() const
+    static StackAllocationSpecification DeferredStack(std::span<std::byte> deferredStack, std::size_t osStackSizeBytes)
     {
-        RELEASE_ASSERT(m_kind == Kind::SizeOnly || m_kind == Kind::SizeAndLocation);
+        StackAllocationSpecification s(Kind::DeferredStack);
+        s.storage.deferredStack.stack = deferredStack;
+        s.storage.deferredStack.osStackSize = osStackSizeBytes;
+        return s;
+    }
+
+    constexpr Kind kind() const { return m_kind; }
+    constexpr bool isKind(Kind kind) const { return this->kind() == kind; }
+
+    constexpr std::size_t osStackSize() const
+    {
+        if (m_kind == Kind::SizeOnly)
+            return storage.sizeBytes;
+        if (m_kind == Kind::DeferredStack)
+            return storage.deferredStack.osStackSize;
+        RELEASE_ASSERT_NOT_REACHED();
+    }
+
+    constexpr std::size_t effectiveSize() const
+    {
         if (m_kind == Kind::SizeOnly)
             return storage.sizeBytes;
         if (m_kind == Kind::SizeAndLocation)
             return storage.stack.size_bytes();
+        if (m_kind == Kind::DeferredStack)
+            return storage.deferredStack.stack.size_bytes();
         RELEASE_ASSERT_NOT_REACHED();
     }
 
-    std::span<std::byte> stackSpan() const
+    constexpr std::span<std::byte> stackSpan() const
     {
-        RELEASE_ASSERT(m_kind == Kind::SizeAndLocation);
-        return storage.stack;
+        if (m_kind == Kind::SizeAndLocation)
+            return storage.stack;
+        if (m_kind == Kind::DeferredStack)
+            return storage.deferredStack.stack;
+        RELEASE_ASSERT_NOT_REACHED();
+    }
+
+    void* stackOrigin() const
+    {
+        RELEASE_ASSERT(kind() == Kind::SizeAndLocation || kind() == Kind::DeferredStack);
+        void* bound = stackSpan().data();
+        WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN;
+        void* origin = reinterpret_cast<char*>(bound) + stackSpan().size_bytes();
+        WTF_ALLOW_UNSAFE_BUFFER_USAGE_END;
+        return origin;
     }
 
 private:
@@ -86,6 +118,10 @@ private:
         constexpr Storage() : sizeBytes(0) { }
         std::size_t sizeBytes;
         std::span<std::byte> stack;
+        struct {
+            std::span<std::byte> stack;
+            std::size_t osStackSize;
+        } deferredStack;
     } storage { };
 };
 

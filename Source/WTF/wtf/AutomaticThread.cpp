@@ -174,9 +174,15 @@ void AutomaticThread::start(const AbstractLocker&)
         break;
     case StackAllocationSpecification::Kind::SizeAndLocation:
         RELEASE_ASSERT(!(reinterpret_cast<uintptr_t>(stackSpec.stackSpan().data()) % pageSize()));
-        [[fallthrough]];
+        RELEASE_ASSERT(!(stackSpec.effectiveSize() % pageSize()));
+        break;
     case StackAllocationSpecification::Kind::SizeOnly:
-        RELEASE_ASSERT(!(stackSpec.sizeBytes() % pageSize()));
+        RELEASE_ASSERT(!(stackSpec.osStackSize() % pageSize()));
+        break;
+    case StackAllocationSpecification::Kind::DeferredStack:
+        RELEASE_ASSERT(!(stackSpec.osStackSize() % pageSize()));
+        RELEASE_ASSERT(!(reinterpret_cast<uintptr_t>(stackSpec.stackSpan().data()) % pageSize()));
+        RELEASE_ASSERT(!(stackSpec.effectiveSize() % pageSize()));
         break;
     }
 

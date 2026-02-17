@@ -319,7 +319,10 @@ bool Thread::establishHandle(NewThreadContext& context, StackAllocationSpecifica
     case StackAllocationSpecification::Kind::Default:
         break;
     case StackAllocationSpecification::Kind::SizeOnly:
-        pthread_attr_setstacksize(&attr, stackSpec.sizeBytes());
+        pthread_attr_setstacksize(&attr, stackSpec.osStackSize());
+        break;
+    case StackAllocationSpecification::Kind::DeferredStack:
+        pthread_attr_setstacksize(&attr, stackSpec.osStackSize());
         break;
     case StackAllocationSpecification::Kind::SizeAndLocation: {
         auto bounds = stackSpec.stackSpan();

@@ -310,6 +310,7 @@ public:
 
     struct NewThreadContext;
     static void entryPoint(NewThreadContext*);
+    static void entryPointFinishSetup(void*);
     ThreadLikeAssertion threadLikeAssertion() const { return createThreadLikeAssertion(m_uid); }
 
     // Returns nullptr if thread-specific storage was not initialized.
