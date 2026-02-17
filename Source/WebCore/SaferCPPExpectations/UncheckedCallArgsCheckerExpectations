@@ -315,7 +315,6 @@ mathml/MathMLOperatorElement.cpp
 mathml/MathMLPresentationElement.cpp
 mathml/MathMLSelectElement.cpp
 page/AutoscrollController.cpp
-[ iOS ] page/Chrome.cpp
 [ Mac ] page/ContextMenuController.cpp
 [ iOS ] page/DOMTimer.cpp
 page/DragController.cpp

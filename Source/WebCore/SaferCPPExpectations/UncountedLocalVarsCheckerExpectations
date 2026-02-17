@@ -60,8 +60,6 @@ dom/Node.cpp
 dom/Position.cpp
 dom/SpaceSplitString.cpp
 dom/TreeScope.cpp
-[ iOS ] editing/FrameSelection.cpp
-[ iOS ] editing/cocoa/DataDetection.mm
 [ iOS ] editing/ios/DictationCommandIOS.cpp
 [ iOS ] editing/ios/EditorIOS.mm
 [ iOS ] html/HTMLAnchorElement.cpp
@@ -79,7 +77,6 @@ inspector/agents/InspectorPageAgent.cpp
 inspector/agents/page/PageCanvasAgent.cpp
 inspector/agents/page/PageNetworkAgent.cpp
 [ iOS ] loader/cache/CachedRawResource.cpp
-[ iOS ] page/Chrome.cpp
 page/EventHandler.cpp
 page/FocusController.cpp
 [ iOS ] page/LocalDOMWindow.cpp
