@@ -368,6 +368,14 @@ FloatSize ScrollingTreeScrollingNodeDelegateMac::rubberBandTargetOffset() const
 
 #if ENABLE(BANNER_VIEW_OVERLAYS)
 
+float ScrollingTreeScrollingNodeDelegateMac::bannerViewMaximumHeight() const
+{
+    if (scrollingNode()->nodeType() != ScrollingNodeType::MainFrame)
+        return 0;
+
+    return scrollingTree()->bannerViewMaximumHeight();
+}
+
 bool ScrollingTreeScrollingNodeDelegateMac::hasBannerViewOverlay() const
 {
     return scrollingNode()->nodeType() == ScrollingNodeType::MainFrame && scrollingTree()->hasBannerViewOverlay();

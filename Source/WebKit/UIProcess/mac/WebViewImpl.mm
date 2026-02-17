@@ -1498,9 +1498,10 @@ void WebViewImpl::didRelaunchProcess()
 void WebViewImpl::scrollingCoordinatorWasCreated()
 {
 #if ENABLE(BANNER_VIEW_OVERLAYS)
-    // Sync banner view state that may have been set before the scrolling coordinator existed.
-    if (CheckedPtr scrollingCoordinator = m_page->scrollingCoordinatorProxy())
+    if (CheckedPtr scrollingCoordinator = m_page->scrollingCoordinatorProxy()) {
         scrollingCoordinator->setHasBannerViewOverlay(!!m_bannerView);
+        scrollingCoordinator->setBannerViewMaximumHeight(bannerViewMaximumHeight());
+    }
 #endif
 }
 

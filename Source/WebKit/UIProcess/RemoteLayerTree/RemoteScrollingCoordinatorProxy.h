@@ -182,6 +182,7 @@ public:
     WebCore::FloatBoxExtent obscuredContentInsets() const;
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     void setBannerViewHeight(float);
+    void setBannerViewMaximumHeight(float);
     void setHasBannerViewOverlay(bool);
 #endif
     WebCore::FloatPoint currentMainFrameScrollPosition() const;

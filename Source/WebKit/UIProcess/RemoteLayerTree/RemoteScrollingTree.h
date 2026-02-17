@@ -99,6 +99,8 @@ public:
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     float bannerViewHeight() const override { return m_bannerViewHeight; }
     void setBannerViewHeight(float height) { m_bannerViewHeight = height; }
+    float bannerViewMaximumHeight() const override { return m_bannerViewMaximumHeight; }
+    void setBannerViewMaximumHeight(float height) { m_bannerViewMaximumHeight = height; }
     void triggerMainFrameRubberBandSnapBack() override { }
 
     bool hasBannerViewOverlay() const override { return m_hasBannerViewOverlay; }
@@ -126,6 +128,7 @@ protected:
     bool m_hasNodesWithSynchronousScrollingReasons WTF_GUARDED_BY_LOCK(m_treeLock) { false };
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     float m_bannerViewHeight { 0 };
+    float m_bannerViewMaximumHeight { 0 };
     bool m_hasBannerViewOverlay { false };
 #endif
 

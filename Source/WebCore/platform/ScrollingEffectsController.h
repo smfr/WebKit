@@ -112,6 +112,7 @@ public:
 
     virtual FloatSize rubberBandTargetOffset() const { return { }; }
     virtual bool hasBannerViewOverlay() const { return false; }
+    virtual float bannerViewMaximumHeight() const { return 0; }
 #endif
 
     virtual void deferWheelEventTestCompletionForReason(ScrollingNodeID, WheelEventTestMonitor::DeferReason) const { /* Do nothing */ }

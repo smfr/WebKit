@@ -300,6 +300,11 @@ void RemoteScrollingCoordinatorProxy::setBannerViewHeight(float offset)
         m_scrollingTree->triggerMainFrameRubberBandSnapBack();
 }
 
+void RemoteScrollingCoordinatorProxy::setBannerViewMaximumHeight(float offset)
+{
+    m_scrollingTree->setBannerViewMaximumHeight(offset);
+}
+
 void RemoteScrollingCoordinatorProxy::setHasBannerViewOverlay(bool hasBannerView)
 {
     m_scrollingTree->setHasBannerViewOverlay(hasBannerView);

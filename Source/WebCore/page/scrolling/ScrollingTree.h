@@ -246,6 +246,7 @@ public:
 
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     virtual float bannerViewHeight() const { return 0; }
+    virtual float bannerViewMaximumHeight() const { return 0; }
     virtual bool hasBannerViewOverlay() const { return false; }
 #endif
 

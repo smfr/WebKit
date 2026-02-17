@@ -92,6 +92,7 @@ private:
     FloatSize rubberBandTargetOffset() const final;
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     bool hasBannerViewOverlay() const final;
+    float bannerViewMaximumHeight() const final;
 #endif
     bool scrollPositionIsNotRubberbandingEdge(const FloatPoint&) const;
 

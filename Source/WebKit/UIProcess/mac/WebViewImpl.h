@@ -849,6 +849,7 @@ public:
 
     void applyBannerViewOverlayHeight(CGFloat, bool);
     CGFloat bannerViewHeight() const;
+    CGFloat bannerViewMaximumHeight() const;
     void updateBannerViewForWheelEvent(NSEvent *);
     void updateBannerViewForPanGesture(NSGestureRecognizerState);
     void updateBannerViewFrame();
