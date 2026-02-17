@@ -7970,9 +7970,6 @@ imported/w3c/web-platform-tests/css/CSS2/stacking-context/composite-change-after
 
 webkit.org/b/288518 fast/text/emoji-num-glyphs.html [ Failure ]
 
-# rdar://148254605 (REGRESSION (iOS 18.4): media/sources-fallback-codecs.html is constantly failing.)
-media/sources-fallback-codecs.html [ Failure ]
-
 webkit.org/b/294142 fast/canvas/webgl/gl-teximage.html [ Failure ]
 
 webkit.org/b/294152 http/tests/misc/timer-vs-loading.html [ Timeout ]
