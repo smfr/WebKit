@@ -144,8 +144,8 @@ public:
     bool isTrackingPreventionEnabled() const;
     static WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&);
     static WebCore::IsKnownCrossSiteTracker isResourceFromKnownCrossSiteTracker(const URL& firstParty, const URL& resource);
-    static bool isRequestBlockable(const WebCore::ResourceRequest&);
-    bool shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest&, WebPageProxyIdentifier, bool mayBlockScriptLoad);
+    static bool isRequestBlockable(const WebCore::ResourceRequest&, bool needsAdvancedPrivacyProtections);
+    bool shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest&, WebPageProxyIdentifier, bool mayBlockScriptLoad, bool needsAdvancedPrivacyProtections);
     void deleteAndRestrictWebsiteDataForRegistrableDomains(OptionSet<WebsiteDataType>, RegistrableDomainsToDeleteOrRestrictWebsiteDataFor&&, CompletionHandler<void(HashSet<WebCore::RegistrableDomain>&&)>&&);
     void registrableDomainsWithWebsiteData(OptionSet<WebsiteDataType>, CompletionHandler<void(HashSet<WebCore::RegistrableDomain>&&)>&&);
     bool enableResourceLoadStatisticsLogTestingEvent() const { return m_enableResourceLoadStatisticsLogTestingEvent; }

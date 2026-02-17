@@ -317,10 +317,10 @@ bool NetworkSession::isTrackingPreventionEnabled() const
     return !!m_resourceLoadStatistics;
 }
 
-bool NetworkSession::isRequestBlockable(const WebCore::ResourceRequest& request)
+bool NetworkSession::isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvancedPrivacyProtections)
 {
 #if ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
-    return WebKit::isRequestBlockable(request);
+    return WebKit::isRequestBlockable(request, needsAdvancedPrivacyProtections);
 #else
     return false;
 #endif
@@ -342,9 +342,9 @@ IsKnownCrossSiteTracker NetworkSession::isResourceFromKnownCrossSiteTracker(cons
     return isRequestToKnownCrossSiteTracker(request);
 }
 
-bool NetworkSession::shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest& request, WebPageProxyIdentifier webPageID, bool mayBlockScriptLoad)
+bool NetworkSession::shouldBlockRequestForTrackingPolicyAndUpdatePolicy(const WebCore::ResourceRequest& request, WebPageProxyIdentifier webPageID, bool mayBlockScriptLoad, bool needsAdvancedPrivacyProtections)
 {
-    if (!mayBlockScriptLoad && !isRequestBlockable(request))
+    if (!mayBlockScriptLoad && !isRequestBlockable(request, needsAdvancedPrivacyProtections))
         return false;
     auto it = m_trackerBlockingPolicyByPageIdentifier.find(webPageID);
     if (it == m_trackerBlockingPolicyByPageIdentifier.end())

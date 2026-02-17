@@ -764,7 +764,7 @@ WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore:
     return request.isThirdParty() && isKnownTrackerAddressOrDomain(request.url().host()) ? WebCore::IsKnownCrossSiteTracker::Yes : WebCore::IsKnownCrossSiteTracker::No;
 }
 
-bool isRequestBlockable(const WebCore::ResourceRequest& request)
+bool isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvancedPrivacyProtections)
 {
     TrackerAddressLookupInfo::populateIfNeeded();
     TrackerDomainLookupInfo::populateIfNeeded();
@@ -774,7 +774,9 @@ bool isRequestBlockable(const WebCore::ResourceRequest& request)
         return true;
 
     if (auto info = TrackerDomainLookupInfo::find(domain.string()); info.owner().length()) {
-        return info.canBlock() == TrackerDomainLookupInfo::CanBlock::WithDefaultProtections;
+        if (info.canBlock() == TrackerDomainLookupInfo::CanBlock::No)
+            return false;
+        return needsAdvancedPrivacyProtections || info.canBlock() == TrackerDomainLookupInfo::CanBlock::WithDefaultProtections;
     }
     return false;
 }
@@ -788,7 +790,7 @@ bool isTaintedScriptURLBlockable(const URL& url)
 void configureForAdvancedPrivacyProtections(NSURLSession *) { }
 bool isKnownTrackerAddressOrDomain(StringView) { return false; }
 WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&) { return WebCore::IsKnownCrossSiteTracker::No; }
-bool isRequestBlockable(const WebCore::ResourceRequest&) { return false; }
+bool isRequestBlockable(const WebCore::ResourceRequest&, bool) { return false; }
 bool isTaintedScriptURLBlockable(const URL&) { return false; }
 
 #endif
