@@ -26,6 +26,7 @@
 #include "ShorthandSerializer.h"
 
 #include "CSSBorderImageWidthValue.h"
+#include "CSSFunctionValue.h"
 #include "CSSGridLineNamesValue.h"
 #include "CSSGridTemplateAreasValue.h"
 #include "CSSParserIdioms.h"
@@ -264,6 +265,10 @@ bool ShorthandSerializer::commonSerializationChecks(const StyleProperties& prope
 
         // Don't serialize if any longhand was set to a variable.
         if (is<CSSVariableReferenceValue>(value))
+            return true;
+
+        // Don't serialize if any longhand was set to -internal-auto-base().
+        if (RefPtr functionValue = dynamicDowncast<CSSFunctionValue>(value); functionValue && functionValue->name() == CSSValueInternalAutoBase)
             return true;
 
         // Don't serialize if any longhand was set by a different shorthand.
