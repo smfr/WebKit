@@ -394,10 +394,8 @@ void BorderPainter::paintSides(const BorderShape& borderShape, const Sides& side
             auto outerBorderRect = borderShape.borderRect();
             Path path;
             for (auto side : allBoxSides) {
-                if (sides.edges.at(side).shouldRender()) {
-                    auto sideRect = calculateSideRect(outerBorderRect, sides.edges, side);
-                    path.addRect(sideRect); // FIXME: Need pixel snapping here.
-                }
+                if (sides.edges.at(side).shouldRender())
+                    path.addRect(snapRectToDevicePixels(calculateSideRect(outerBorderRect, sides.edges, side), deviceScaleFactor));
             }
 
             graphicsContext.setFillRule(WindRule::NonZero);
