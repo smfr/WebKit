@@ -1344,13 +1344,13 @@ unsigned Page::countFindMatches(const String& target, FindOptions options, unsig
 }
 
 struct FindReplacementRange {
-    RefPtr<ContainerNode> root;
+    Ref<ContainerNode> root;
     CharacterRange range;
 };
 
 static void replaceRanges(Page& page, const Vector<FindReplacementRange>& ranges, const String& replacementText)
 {
-    HashMap<RefPtr<ContainerNode>, Vector<FindReplacementRange>> rangesByContainerNode;
+    HashMap<Ref<ContainerNode>, Vector<FindReplacementRange>> rangesByContainerNode;
     for (auto& range : ranges) {
         auto& rangeList = rangesByContainerNode.ensure(range.root, [] {
             return Vector<FindReplacementRange> { };
@@ -1368,18 +1368,18 @@ static void replaceRanges(Page& page, const Vector<FindReplacementRange>& ranges
         rangeList.insert(insertionIndex, range);
     }
 
-    HashMap<RefPtr<LocalFrame>, unsigned> frameToTraversalIndexMap;
+    HashMap<Ref<LocalFrame>, unsigned> frameToTraversalIndexMap;
     unsigned currentFrameTraversalIndex = 0;
     for (RefPtr frame = page.mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame))
-            frameToTraversalIndexMap.set(WTF::move(localFrame), currentFrameTraversalIndex++);
+            frameToTraversalIndexMap.set(localFrame.releaseNonNull(), currentFrameTraversalIndex++);
     }
 
     // Likewise, iterate backwards (in document and frame order) through editing containers that contain text matches,
     // so that we're consistent with our backwards iteration behavior per editing container when replacing text.
     auto containerNodesInOrderOfReplacement = copyToVector(rangesByContainerNode.keys());
     std::ranges::sort(containerNodesInOrderOfReplacement, [frameToTraversalIndexMap](auto& firstNode, auto& secondNode) {
-        if (firstNode == secondNode)
+        if (firstNode.ptr() == secondNode.ptr())
             return false;
 
         RefPtr firstFrame = firstNode->document().frame();
@@ -1392,10 +1392,10 @@ static void replaceRanges(Page& page, const Vector<FindReplacementRange>& ranges
 
         if (firstFrame == secondFrame) {
             // Must not use Node::compareDocumentPosition here because some editing roots are inside shadow roots.
-            return is_gt(treeOrder<ComposedTree>(*firstNode, *secondNode));
+            return is_gt(treeOrder<ComposedTree>(firstNode, secondNode));
         }
 
-        return frameToTraversalIndexMap.get(firstFrame) > frameToTraversalIndexMap.get(secondFrame);
+        return frameToTraversalIndexMap.get(*firstFrame) > frameToTraversalIndexMap.get(*secondFrame);
     });
 
     for (auto& container : containerNodesInOrderOfReplacement) {
@@ -1406,7 +1406,7 @@ static void replaceRanges(Page& page, const Vector<FindReplacementRange>& ranges
         // Iterate backwards through ranges when replacing text, such that earlier text replacements don't clobber replacement ranges later on.
         auto& ranges = rangesByContainerNode.find(container)->value;
         for (auto iterator = ranges.rbegin(); iterator != ranges.rend(); ++iterator) {
-            auto range = resolveCharacterRange(makeRangeSelectingNodeContents(*container), iterator->range);
+            auto range = resolveCharacterRange(makeRangeSelectingNodeContents(container), iterator->range);
             if (range.collapsed())
                 continue;
 
@@ -1425,7 +1425,7 @@ uint32_t Page::replaceRangesWithText(const Vector<SimpleRange>& rangesToReplace,
         if (!highestRoot || highestRoot != highestEditableRoot(makeDeprecatedLegacyPosition(range.end)) || !highestRoot->document().frame())
             return std::nullopt;
         auto scope = makeRangeSelectingNodeContents(*highestRoot);
-        return FindReplacementRange { WTF::move(highestRoot), characterRange(scope, range) };
+        return FindReplacementRange { highestRoot.releaseNonNull(), characterRange(scope, range) };
     });
 
     replaceRanges(*this, replacementRanges, replacementText);
