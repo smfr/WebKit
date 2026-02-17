@@ -661,16 +661,20 @@ void AXObjectCache::setIsolatedTreeFocusedObject(AccessibilityObject* focus)
 IntPoint AXObjectCache::mapScreenPointToPagePoint(const IntPoint& screenRelativePoint) const
 {
     RefPtr page = this->page();
-    if (!page) {
-        // We can't do the conversion if we don't have a page.
+    if (!page)
         return screenRelativePoint;
-    }
 
-    // FIXME: WebPage::screenToRootView does sync IPC. Can we find a way to convert this point
-    // without sync IPC?
-    auto convertedPoint = page->chrome().client().screenToRootView(WebCore::IntPoint(screenRelativePoint));
     RefPtr frame = m_document ? m_document->frame() : nullptr;
-    if (RefPtr frameView = frame ? frame->view() : nullptr)
+    RefPtr frameView = frame ? frame->view() : nullptr;
+
+    // Try to use cached accessibility position to avoid sync IPC (macOS only).
+    IntPoint convertedPoint;
+    if (auto localResult = page->chrome().client().screenToRootViewUsingCachedPosition(screenRelativePoint, frameView ? frameView->size() : IntSize()))
+        convertedPoint = *localResult;
+    else
+        convertedPoint = page->chrome().client().screenToRootView(screenRelativePoint);
+
+    if (frameView)
         convertedPoint.moveBy(frameView->scrollPosition());
 
     auto obscuredContentInsets = page->obscuredContentInsets();

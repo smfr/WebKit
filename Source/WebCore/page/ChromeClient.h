@@ -284,6 +284,9 @@ public:
     virtual IntPoint screenToRootView(const IntPoint&) const = 0;
     virtual IntPoint rootViewToScreen(const IntPoint&) const = 0;
     virtual IntRect rootViewToScreen(const IntRect&) const = 0;
+    // Returns the screen-to-rootView conversion using cached accessibility position if available.
+    // Returns std::nullopt if cached data is not available, in which case caller should use screenToRootView().
+    virtual std::optional<IntPoint> screenToRootViewUsingCachedPosition(const IntPoint&, const IntSize&) const { return std::nullopt; }
     virtual IntPoint accessibilityScreenToRootView(const IntPoint&) const = 0;
     virtual IntRect rootViewToAccessibilityScreen(const IntRect&) const = 0;
 #if PLATFORM(IOS_FAMILY)
