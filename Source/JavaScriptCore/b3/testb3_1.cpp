@@ -878,6 +878,19 @@ void run(const TestConfig* config)
     RUN(testConstDoubleMove());
     RUN(testConstFloatMove());
 
+    RUN(testConstDoubleZero());
+    RUN(testConstDoubleNegativeZero());
+    RUN(testConstFloatZero());
+    RUN(testConstFloatNegativeZero());
+    RUN(testConstDoubleAddZero());
+    RUN(testConstFloatAddZero());
+    RUN(testConstDoubleCompareZero());
+    RUN(testConstFloatCompareZero());
+    RUN(testConstDoubleSelectZero());
+    RUN(testConstFloatSelectZero());
+    RUN(testConstDoubleMultipleZeroUses());
+    RUN(testConstFloatMultipleZeroUses());
+
     RUN(testLoadImmutable());
 
     // ARM64 conditional compare (ccmp) tests

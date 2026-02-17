@@ -866,19 +866,19 @@ private:
             break;
         case Air::MoveFloat:
             if (source.isZeroReg()) {
-                append(Air::MoveZeroToFloat, dest);
+                append(Air::MoveFloat, Arg::fpImm32(0), dest);
                 return;
             }
             break;
         case Air::MoveDouble:
             if (source.isZeroReg()) {
-                append(Air::MoveZeroToDouble, dest);
+                append(Air::MoveDouble, Arg::fpImm64(0), dest);
                 return;
             }
             break;
         case Air::MoveVector:
             if (source.isZeroReg()) {
-                append(Air::MoveZeroToVector, dest);
+                append(Air::MoveVector, Arg::fpImm128(v128_t { }), dest);
                 return;
             }
             break;
@@ -5193,23 +5193,15 @@ private:
         }
 
         case ConstDouble: {
-            if (isIdentical(m_value->asDouble(), 0.0)) {
-                append(MoveZeroToDouble, tmp(m_value));
-                return;
-            }
-            append(Move64ToDouble, Arg::fpImm64(std::bit_cast<uint64_t>(m_value->asDouble())), tmp(m_value));
+            append(MoveDouble, Arg::fpImm64(std::bit_cast<uint64_t>(m_value->asDouble())), tmp(m_value));
             return;
         }
 
         case ConstFloat: {
             uint32_t imm = std::bit_cast<uint32_t>(m_value->asFloat());
-            if (!imm) {
-                append(MoveZeroToDouble, tmp(m_value));
-                return;
-            }
 
             if (Arg::isValidFPImm32Form(imm)) {
-                append(Move32ToFloat, Arg::fpImm32(imm), tmp(m_value));
+                append(MoveFloat, Arg::fpImm32(imm), tmp(m_value));
                 return;
             }
 
@@ -5225,11 +5217,7 @@ private:
         case Const128: {
             // We expect that the moveConstants() phase has run, and any constant vector referenced from stackmaps get fused.
             auto v128 = m_value->asV128();
-            if (bitEquals(v128, vectorAllZeros())) {
-                append(MoveZeroToVector, tmp(m_value));
-                return;
-            }
-            append(Move128ToVector, Arg::fpImm128(v128), tmp(m_value));
+            append(MoveVector, Arg::fpImm128(v128), tmp(m_value));
             return;
         }
 
@@ -5238,7 +5226,6 @@ private:
                 switch (type.kind()) {
                 case Void:
                 case Tuple:
-                case V128:
                     RELEASE_ASSERT_NOT_REACHED();
                     break;
                 case Int32:
@@ -5247,8 +5234,13 @@ private:
                     append(Move, imm(static_cast<int64_t>(0)), tmp.tmp());
                     break;
                 case Float:
+                    append(MoveFloat, Arg::fpImm32(0), tmp.tmp());
+                    break;
                 case Double:
-                    append(MoveZeroToDouble, tmp.tmp());
+                    append(MoveDouble, Arg::fpImm64(0), tmp.tmp());
+                    break;
+                case V128:
+                    append(MoveVector, Arg::fpImm128(v128_t { }), tmp.tmp());
                     break;
                 }
             });

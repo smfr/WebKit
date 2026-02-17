@@ -1403,6 +1403,19 @@ void testVectorMulLow();
 void testConstDoubleMove();
 void testConstFloatMove();
 
+void testConstDoubleZero();
+void testConstDoubleNegativeZero();
+void testConstFloatZero();
+void testConstFloatNegativeZero();
+void testConstDoubleAddZero();
+void testConstFloatAddZero();
+void testConstDoubleCompareZero();
+void testConstFloatCompareZero();
+void testConstDoubleSelectZero();
+void testConstFloatSelectZero();
+void testConstDoubleMultipleZeroUses();
+void testConstFloatMultipleZeroUses();
+
 void testSShrCompare32(int32_t);
 void testSShrCompare64(int64_t);
 

@@ -1501,7 +1501,7 @@ private:
             ASSERT(tmpData.useDefCost == 0.0f);
             auto index = AbsoluteTmpMapper<bank>::absoluteIndex(tmp);
             float useDefCost = m_useCounts.numWarmUsesAndDefs<bank>(index);
-            if (bank == GP && m_useCounts.isConstDef<GP>(index))
+            if (m_useCounts.isConstDef<bank>(index))
                 useDefCost /= 2; // Can rematerialize rather than spill in many cases.
             tmpData.useDefCost = useDefCost;
 
@@ -2050,7 +2050,7 @@ private:
             return false;
 
         unsigned tmpIndex = AbsoluteTmpMapper<bank>::absoluteIndex(tmp);
-        if (bank == GP && m_useCounts.isConstDef<bank>(tmpIndex))
+        if (m_useCounts.isConstDef<bank>(tmpIndex))
             return false; // Constant will be rematerialized instead
 
         // Don't split an already intra-block tmp. Otherwise, we might recursively try to
@@ -2303,22 +2303,25 @@ private:
                         unsigned tmpIndex = AbsoluteTmpMapper<bank>::absoluteIndex(arg.tmp());
                         ASSERT_IMPLIES(Arg::isColdUse(role), m_map.get<bank>(arg.tmp()).hasColdUse);
                         if (!Arg::isColdUse(role) && m_useCounts.isConstDef<bank>(tmpIndex)) {
-                            int64_t value = m_useCounts.constant<bank>(tmpIndex);
-                            Arg oldArg = arg;
-                            Arg imm;
-                            if (Arg::isValidImmForm(value))
-                                imm = Arg::imm(value);
-                            else
-                                imm = Arg::bigImm(value);
-                            ASSERT(inst.isValidForm());
-                            arg = imm;
-                            if (inst.isValidForm()) {
-                                m_stats[bank].numRematerializeConst++;
-                                dataLogLnIf(verbose(), "Rematerialized (direct imm), BB", *block, " arg=", oldArg, ", inst=", inst);
-                                return;
+                            // We do not handle FP here as there is almost zero instructions which can take FPImm except for Move.
+                            if constexpr (bank == GP) {
+                                int64_t value = m_useCounts.constant<bank>(tmpIndex);
+                                Arg oldArg = arg;
+                                Arg imm;
+                                if (Arg::isValidImmForm(value))
+                                    imm = Arg::imm(value);
+                                else
+                                    imm = Arg::bigImm(value);
+                                ASSERT(inst.isValidForm());
+                                arg = imm;
+                                if (inst.isValidForm()) {
+                                    m_stats[bank].numRematerializeConst++;
+                                    dataLogLnIf(verbose(), "Rematerialized (direct imm), BB", *block, " arg=", oldArg, ", inst=", inst);
+                                    return;
+                                }
+                                // Couldn't insert the immediate into the instruction directly, so undo.
+                                arg = oldArg;
                             }
-                            // Couldn't insert the immediate into the instruction directly, so undo.
-                            arg = oldArg;
                             // We can still rematerialize it into a register. In order for that optimization to kick in,
                             // we need to avoid placing the Tmp's stack address into the instruction.
                             return;
@@ -2394,7 +2397,7 @@ private:
                     auto originalTmp = tmp;
                     auto tmpIndex = AbsoluteTmpMapper<bank>::absoluteIndex(tmp);
 
-                    bool canRematerializeConstant = bank == GP && m_useCounts.isConstDef<bank>(tmpIndex);
+                    bool canRematerializeConstant = m_useCounts.isConstDef<bank>(tmpIndex);
                     ASSERT_IMPLIES(canRematerializeConstant, !(Arg::isAnyUse(role) && Arg::isAnyDef(role)));
                     ASSERT_IMPLIES(canRematerializeConstant, role != Arg::Scratch);
 
@@ -2408,26 +2411,69 @@ private:
 
                     Arg arg = Arg::stack(spilled);
                     if (Arg::isAnyUse(role)) {
-                        if (canRematerializeConstant) {
-                            int64_t value = m_useCounts.constant<bank>(tmpIndex);
-                            if (Arg::isValidImmForm(value) && isValidForm(Move, Arg::Imm, Arg::Tmp)) {
-                                m_insertionSets[block].insert(instIndex, spillLoad, Move, inst.origin, Arg::imm(value), tmp);
-                                m_stats[bank].numRematerializeConst++;
-                                dataLogLnIf(verbose(), "Rematerialized (imm) BB", *block, " ", originalTmp, ": ", tmp, " <- ", WTF::RawHex(value));
-                            } else {
+                        auto tryRematerialize = [&]() {
+                            if (!canRematerializeConstant)
+                                return false;
+
+                            if constexpr (bank == GP) {
+                                int64_t value = m_useCounts.constant<bank>(tmpIndex);
+                                if (Arg::isValidImmForm(value) && isValidForm(Move, Arg::Imm, Arg::Tmp)) {
+                                    m_insertionSets[block].insert(instIndex, spillLoad, Move, inst.origin, Arg::imm(value), tmp);
+                                    m_stats[bank].numRematerializeConst++;
+                                    dataLogLnIf(verbose(), "Rematerialized (imm) BB", *block, " ", originalTmp, ": ", tmp, " <- ", WTF::RawHex(value));
+                                    return true;
+                                }
                                 RELEASE_ASSERT(isValidForm(Move, Arg::BigImm, Arg::Tmp));
                                 m_insertionSets[block].insert(instIndex, spillLoad, Move, inst.origin, Arg::bigImm(value), tmp);
                                 m_stats[bank].numRematerializeConst++;
                                 dataLogLnIf(verbose(), "Rematerialized (bigImm) BB", *block, " ", originalTmp, ": ", tmp, " <- ", WTF::RawHex(value));
+                                return true;
+                            } else {
+                                v128_t constant = m_useCounts.constant<bank>(tmpIndex);
+                                Width constWidth = m_useCounts.constantWidth<bank>(tmpIndex);
+                                Arg imm;
+                                Opcode constMove = Oops;
+                                switch (constWidth) {
+                                case Width32:
+                                    if (Arg::isValidFPImm32Form(constant.u64x2[0]))
+                                        imm = Arg::fpImm32(constant.u64x2[0]);
+                                    constMove = MoveFloat;
+                                    break;
+                                case Width64:
+                                    if (Arg::isValidFPImm64Form(constant.u64x2[0]))
+                                        imm = Arg::fpImm64(constant.u64x2[0]);
+                                    constMove = MoveDouble;
+                                    break;
+                                case Width128:
+                                    if (Arg::isValidFPImm128Form(constant))
+                                        imm = Arg::fpImm128(constant);
+                                    constMove = MoveVector;
+                                    break;
+                                default:
+                                    RELEASE_ASSERT_NOT_REACHED();
+                                }
+
+                                if (imm && isValidForm(constMove, imm.kind(), Arg::Tmp)) {
+                                    m_insertionSets[block].insert(instIndex, spillLoad, constMove, inst.origin, imm, tmp);
+                                    m_stats[bank].numRematerializeConst++;
+                                    dataLogLnIf(verbose(), "Rematerialized (FP) BB", *block, " ", originalTmp, ": ", tmp);
+                                    return true;
+                                }
+
+                                return false;
                             }
-                        } else {
+                        };
+
+                        if (!tryRematerialize()) {
                             m_insertionSets[block].insert(instIndex, spillLoad, move, inst.origin, arg, tmp);
                             m_stats[bank].numLoadSpill++;
                         }
                     }
                     if (Arg::isAnyDef(role)) {
                         if (canKillDef) {
-                            ASSERT(inst.kind.opcode == Move || inst.kind.opcode == Move32);
+                            ASSERT(inst.kind.opcode == Move || inst.kind.opcode == Move32
+                                || inst.kind.opcode == MoveFloat || inst.kind.opcode == MoveDouble
+                                || inst.kind.opcode == MoveVector);
                             ASSERT(inst.args[0].isSomeImm() && inst.args[1] == originalTmp);
                             doKillInst = true;
                             dataLogLnIf(verbose(), "Rematerialized BB", *block, " removing def inst: ", inst);
