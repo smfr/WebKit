@@ -1495,6 +1495,7 @@ static std::optional<SimpleRange> searchForText(Node& node, const String& search
     auto foundRange = findPlainText(searchRange, searchText, {
         FindOption::DoNotRevealSelection,
         FindOption::DoNotSetSelection,
+        FindOption::CaseInsensitive,
     });
 
     if (foundRange.collapsed())
@@ -1736,6 +1737,24 @@ static void scrollBy(LocalFrame& frame, std::optional<NodeIdentifier>&& identifi
     completion(true, { });
 }
 
+static void scrollToReveal(LocalFrame& frame, std::optional<NodeIdentifier>&& identifier, String&& searchText, CompletionHandler<void(bool, String&&)>&& completion)
+{
+    RefPtr searchScope = resolveNodeWithBodyAsFallback(frame, identifier);
+    if (!searchScope)
+        return completion(false, invalidNodeIdentifierDescription(WTF::move(identifier)));
+
+    auto foundRange = searchForText(*searchScope, searchText);
+    if (!foundRange)
+        return completion(false, searchTextNotFoundDescription(searchText));
+
+    RefPtr elementToReveal = lineageOfType<Element>(foundRange->startContainer()).first();
+    if (!elementToReveal)
+        return completion(false, searchTextNotFoundDescription(searchText));
+
+    elementToReveal->scrollIntoView();
+    completion(true, { });
+}
+
 static bool simulateKeyPress(LocalFrame& frame, const String& key)
 {
     auto keyDown = PlatformKeyboardEvent::syntheticEventFromText(PlatformEvent::Type::KeyDown, key);
@@ -1892,7 +1911,10 @@ void handleInteraction(Interaction&& interaction, LocalFrame& frame, CompletionH
 
         return highlightText(frame, WTF::move(interaction.nodeIdentifier), WTF::move(interaction.text), interaction.scrollToVisible, WTF::move(completion));
     }
-    case Action::ScrollBy:
+    case Action::Scroll:
+        if (!interaction.text.isEmpty())
+            return scrollToReveal(frame, WTF::move(interaction.nodeIdentifier), WTF::move(interaction.text), WTF::move(completion));
+
         if (interaction.scrollDelta.isZero())
             return completion(false, "Scroll delta is zero"_s);
 
@@ -2102,7 +2124,7 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
             return "Enter text"_s;
         case Action::HighlightText:
             return "Highlight text"_s;
-        case Action::ScrollBy:
+        case Action::Scroll:
             return "Scroll"_s;
         }
         ASSERT_NOT_REACHED();
@@ -2114,11 +2136,11 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
         case Action::SelectText:
         case Action::Click:
         case Action::HighlightText:
+        case Action::Scroll:
             return true;
         case Action::SelectMenuItem:
         case Action::TextInput:
         case Action::KeyPress:
-        case Action::ScrollBy:
             return false;
         }
         ASSERT_NOT_REACHED();
@@ -2133,7 +2155,7 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
         }
     }
 
-    if (action == Action::ScrollBy) {
+    if (action == Action::Scroll && interaction.text.isEmpty()) {
         auto delta = roundedIntSize(interaction.scrollDelta);
         description.append(makeString(" by ("_s, delta.width(), ", "_s, delta.height(), ')'));
     }
@@ -2143,8 +2165,8 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
         if (elementString.isEmpty())
             return;
 
-        auto elementPrefix = [action] -> String {
-            switch (action) {
+        auto elementPrefix = [&interaction] -> String {
+            switch (interaction.action) {
             case Action::Click:
                 return " on "_s;
             case Action::SelectText:
@@ -2152,8 +2174,9 @@ InteractionDescription interactionDescription(const Interaction& interaction, Lo
             case Action::SelectMenuItem:
             case Action::KeyPress:
             case Action::HighlightText:
-            case Action::ScrollBy:
                 return " in "_s;
+            case Action::Scroll:
+                return interaction.text.isEmpty() ? " in "_s : " to reveal "_s;
             case Action::TextInput:
                 return " into "_s;
             }

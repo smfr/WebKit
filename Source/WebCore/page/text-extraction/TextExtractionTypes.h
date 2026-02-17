@@ -55,7 +55,7 @@ enum class Action : uint8_t {
     TextInput,
     KeyPress,
     HighlightText,
-    ScrollBy,
+    Scroll,
 };
 
 struct Interaction {

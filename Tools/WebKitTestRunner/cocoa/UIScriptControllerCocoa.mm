@@ -518,8 +518,8 @@ void UIScriptControllerCocoa::performTextExtractionInteraction(JSStringRef jsAct
         action = _WKTextExtractionActionKeyPress;
     if (equalLettersIgnoringASCIICase(actionName, "highlighttext"))
         action = _WKTextExtractionActionHighlightText;
-    if (equalLettersIgnoringASCIICase(actionName, "scrollby"))
-        action = _WKTextExtractionActionScrollBy;
+    if (equalLettersIgnoringASCIICase(actionName, "scroll"))
+        action = _WKTextExtractionActionScroll;
 
     if (!action) {
         ASSERT_NOT_REACHED();

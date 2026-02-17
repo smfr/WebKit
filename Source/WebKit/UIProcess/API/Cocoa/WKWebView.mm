@@ -7096,8 +7096,8 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
             return WebCore::TextExtraction::Action::KeyPress;
         case _WKTextExtractionActionHighlightText:
             return WebCore::TextExtraction::Action::HighlightText;
-        case _WKTextExtractionActionScrollBy:
-            return WebCore::TextExtraction::Action::ScrollBy;
+        case _WKTextExtractionActionScroll:
+            return WebCore::TextExtraction::Action::Scroll;
         default:
             ASSERT_NOT_REACHED();
             return WebCore::TextExtraction::Action::Click;

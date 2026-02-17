@@ -6865,7 +6865,7 @@ header: <WebCore/TextExtractionTypes.h>
     TextInput,
     KeyPress,
     HighlightText,
-    ScrollBy
+    Scroll
 };
 
 header: <WebCore/TextExtractionTypes.h>

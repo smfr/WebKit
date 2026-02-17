@@ -41,8 +41,10 @@
     <h1 class="click-count">0</h1>
     <div class="scroller" aria-label="Child scroller">
         <div class="tall">Foo bar</div>
+        <p>Hidden in scroller</p>
     </div>
     <div class="tall"></div>
+    <p>Hidden in page</p>
     <script>
     jsTestIsAsync = true;
 
@@ -86,7 +88,7 @@
             text: "Subject"
         });
 
-        scrollChildContainerError = await UIHelper.performTextExtractionInteraction("scrollby", {
+        scrollChildContainerError = await UIHelper.performTextExtractionInteraction("scroll", {
             nodeIdentifier: UIHelper.nodeIdentifierFromDebugText(debugText, "Child scroller"),
             scrollDelta: {
                 x: 0,
@@ -94,11 +96,43 @@
             }
         });
 
-        scrollPageError = await UIHelper.performTextExtractionInteraction("scrollby", {
+        scrollPageError = await UIHelper.performTextExtractionInteraction("scroll", {
             scrollDelta: {
                 x: 0,
                 y: 100
             }
+        });
+
+        await UIHelper.ensureVisibleContentRectUpdate();
+        await UIHelper.ensurePresentationUpdate();
+
+        childScrollerScrollTopAfterScrollBy = childScroller.scrollTop;
+        pageScrollTopAfterScrollBy = document.scrollingElement.scrollTop;
+
+        childScroller.scrollTop = 0;
+        document.scrollingElement.scrollTop = 0;
+
+        scrollToRevealInScrollerError = await UIHelper.performTextExtractionInteraction("scroll", {
+            nodeIdentifier: UIHelper.nodeIdentifierFromDebugText(debugText, "Child scroller"),
+            text: "Hidden in scroller"
+        });
+
+        await UIHelper.ensureVisibleContentRectUpdate();
+        await UIHelper.ensurePresentationUpdate();
+
+        childScrollerScrollTopAfterScrollToReveal = childScroller.scrollTop;
+
+        scrollToRevealInPageError = await UIHelper.performTextExtractionInteraction("scroll", {
+            text: "Hidden in page"
+        });
+
+        await UIHelper.ensureVisibleContentRectUpdate();
+        await UIHelper.ensurePresentationUpdate();
+
+        pageScrollTopAfterScrollToReveal = document.scrollingElement.scrollTop;
+
+        scrollToRevealNotFoundError = await UIHelper.performTextExtractionInteraction("scroll", {
+            text: "Nonexistent text"
         });
 
         invalidActionError = await UIHelper.performTextExtractionInteraction("click", {
@@ -129,9 +163,14 @@
         shouldBeEqualToString("selectTextError", "");
         shouldBeEqualToString("getSelection().toString()", "Subject");
         shouldBeEqualToString("scrollChildContainerError", "");
-        shouldBe("childScroller.scrollTop", "100");
+        shouldBe("childScrollerScrollTopAfterScrollBy", "100");
         shouldBeEqualToString("scrollPageError", "");
-        shouldBe("document.scrollingElement.scrollTop", "100");
+        shouldBe("pageScrollTopAfterScrollBy", "100");
+        shouldBeEqualToString("scrollToRevealInScrollerError", "");
+        shouldBeGreaterThan("childScrollerScrollTopAfterScrollToReveal", "0");
+        shouldBeEqualToString("scrollToRevealInPageError", "");
+        shouldBeGreaterThan("pageScrollTopAfterScrollToReveal", "100");
+        shouldBeEqualToString("scrollToRevealNotFoundError", "'Nonexistent text' not found inside the target node");
         shouldBeEqualToString("invalidActionError", "Failed to resolve nodeIdentifier 4294967293");
         shouldBeEqualToString("clickDisabledError", "Click target is disabled");
         shouldBeEqualToString("textInputReadonlyError", "Target is readonly");
