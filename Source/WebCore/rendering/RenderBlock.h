@@ -84,13 +84,13 @@ public:
     }
     void addPercentHeightDescendant(RenderBox&);
     static void removePercentHeightDescendant(RenderBox&);
-    TrackedRendererListHashSet* percentHeightDescendants() const;
+    TrackedRendererListHashSet* NODELETE percentHeightDescendants() const;
     bool hasPercentHeightDescendants() const
     {
         auto* renderers = percentHeightDescendants();
         return renderers && !renderers->isEmptyIgnoringNullReferences();
     }
-    static bool hasPercentHeightContainerMap();
+    static bool NODELETE hasPercentHeightContainerMap();
     static void clearPercentHeightDescendantsFrom(RenderBox&);
 
     virtual bool willStretchItem(const RenderBox& item, LogicalBoxAxis containingAxis, StretchingMode = StretchingMode::Normal) const;
@@ -104,8 +104,8 @@ public:
     bool hasMarginAfterQuirk() const { return renderBlockHasMarginAfterQuirk(); }
     bool hasBorderOrPaddingLogicalWidthChanged() const { return renderBlockShouldForceRelayoutChildren(); }
 
-    bool hasMarginBeforeQuirk(const RenderBox& child) const;
-    bool hasMarginAfterQuirk(const RenderBox& child) const;
+    bool NODELETE hasMarginBeforeQuirk(const RenderBox& child) const;
+    bool NODELETE hasMarginAfterQuirk(const RenderBox& child) const;
 
     void markOutOfFlowBoxesForLayout();
     void markForPaginationRelayoutIfNeeded() override;
@@ -154,18 +154,18 @@ public:
     static TextRun constructTextRun(std::span<const char16_t> characters, const RenderStyle&,
         ExpansionBehavior = ExpansionBehavior::defaultBehavior());
 
-    LayoutUnit paginationStrut() const;
+    LayoutUnit NODELETE paginationStrut() const;
     void setPaginationStrut(LayoutUnit);
 
     // The page logical offset is the object's offset from the top of the page in the page progression
     // direction (so an x-offset in vertical text and a y-offset for horizontal text).
-    LayoutUnit pageLogicalOffset() const;
+    LayoutUnit NODELETE pageLogicalOffset() const;
     void setPageLogicalOffset(LayoutUnit);
 
     // Fieldset legends that are taller than the fieldset border add in intrinsic border
     // in order to ensure that content gets properly pushed down across all layout systems
     // (flexbox, block, etc.)
-    LayoutUnit intrinsicBorderForFieldset() const;
+    LayoutUnit NODELETE intrinsicBorderForFieldset() const;
     void setIntrinsicBorderForFieldset(LayoutUnit);
 
     RectEdges<LayoutUnit> borderWidths() const override;
@@ -221,7 +221,7 @@ public:
     bool canHaveChildren() const override { return true; }
     virtual bool canDropAnonymousBlockChild() const { return true; }
 
-    RenderFragmentedFlow* cachedEnclosingFragmentedFlow() const;
+    RenderFragmentedFlow* NODELETE cachedEnclosingFragmentedFlow() const;
     void setCachedEnclosingFragmentedFlowNeedsUpdate();
     virtual bool cachedEnclosingFragmentedFlowNeedsUpdate() const;
     void resetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(RenderFragmentedFlow* = nullptr) final;

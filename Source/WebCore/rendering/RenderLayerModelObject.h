@@ -53,9 +53,9 @@ public:
 
     void destroyLayer();
 
-    bool hasSelfPaintingLayer() const;
+    bool NODELETE hasSelfPaintingLayer() const;
     RenderLayer* layer() const { return m_layer.get(); }
-    CheckedPtr<RenderLayer> checkedLayer() const;
+    CheckedPtr<RenderLayer> NODELETE checkedLayer() const;
 
     void styleWillChange(Style::Difference, const RenderStyle& newStyle) override;
     void styleDidChange(Style::Difference, const RenderStyle* oldStyle) override;
@@ -72,7 +72,7 @@ public:
 
     virtual bool isScrollableOrRubberbandableBox() const { return false; }
 
-    bool shouldPlaceVerticalScrollbarOnLeft() const;
+    bool NODELETE shouldPlaceVerticalScrollbarOnLeft() const;
 
     std::optional<LayoutRect> cachedLayerClippedOverflowRect() const;
 
