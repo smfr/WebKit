@@ -2186,7 +2186,6 @@ webkit.org/b/296209 http/tests/workers/service/basic-timeout.https.html [ Pass F
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/decl/var.html [ Failure ]
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/expression/binary/short_circuiting_and_or.html [ Failure ]
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/expression/call/builtin/value_constructor.html [ Failure ]
-[ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/functions/restrictions.html [ Failure ]
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/parse/identifiers.html [ Failure ]
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/shader_io/interpolate.html [ Failure ]
 [ Sequoia Release arm64 ] http/tests/webgpu/webgpu/shader/validation/statement/continuing.html [ Failure ]
@@ -2491,3 +2490,5 @@ webkit.org/b/307850 media/modern-media-controls/tracks-support/audio-single-trac
 webkit.org/b/307886 [ Release arm64 ] js/dom/promise-stack-overflow.html [ Pass Failure ]
 
 webkit.org/b/307889 http/tests/multipart/multipart-async-image.html [ Pass Failure ]
+
+ webkit.org/b/308026 [ Release arm64 ] http/tests/webgpu/webgpu/shader/validation/functions/restrictions.html [ Pass Failure ]
