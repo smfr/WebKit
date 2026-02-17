@@ -1235,7 +1235,6 @@ imported/w3c/web-platform-tests/digital-credentials/ [ Skip ]
 
 media/adopt-node-after-showing-picker-crash.html [ Skip ]
 
-webkit.org/b/306017 imported/w3c/web-platform-tests/css/css-view-transitions/content-smaller-than-box-size.html [ ImageOnlyFailure Pass ]
 imported/w3c/web-platform-tests/css/css-view-transitions/start-skip-start.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/start-view-transtion-skips-active.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/table-caption.html [ ImageOnlyFailure ]

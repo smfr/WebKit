@@ -471,7 +471,7 @@ webkit.org/b/197473 http/wpt/resource-timing/rt-cors.worker.html [ Pass Failure 
 # No support for font-variant-* properties in @font-face declarations
 webkit.org/b/161586 css3/font-feature-settings-font-face-rendering.html [ ImageOnlyFailure ]
 
-webkit.org/b/161962 fast/forms/implicit-submission.html [ Failure ]
+webkit.org/b/161962 fast/forms/implicit-submission.html [ Failure Pass ]
 
 webkit.org/b/169531 fast/text/font-selection-font-face-parse.html [ Skip ]
 webkit.org/b/305558 fast/text/non-integral-initial-letter-simple.html [ ImageOnlyFailure ]
@@ -823,6 +823,8 @@ webkit.org/b/257624 imported/w3c/web-platform-tests/xhr/xmlhttprequest-timeout-w
 webkit.org/b/257624 imported/w3c/web-platform-tests/xhr/xmlhttprequest-timeout-worker-overridesexpires.html [ Failure Pass ]
 webkit.org/b/257624 media/video-audio-session-mode.html [ Timeout ]
 webkit.org/b/257624 webanimations/accelerated-animations-and-motion-path.html [ Failure Pass ]
+
+webkit.org/b/308032 fast/events/popup-allowed-from-gesture-initiated-event.html [ Failure Pass ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of Flaky tests
@@ -1388,7 +1390,7 @@ webkit.org/b/264680 imported/w3c/web-platform-tests/media-source/mediasource-see
 webkit.org/b/264680 inspector/heap/getPreview.html [ Failure Pass ]
 webkit.org/b/264680 media/no-fullscreen-when-hidden.html [ Timeout Pass ]
 webkit.org/b/264680 media/video-background-tab-playback.html [ Timeout Pass ]
-webkit.org/b/264680 media/video-muted-holds-sleep-assertion.html [ Timeout Pass ]
+webkit.org/b/264680 media/video-muted-holds-sleep-assertion.html [ Timeout Pass Failure ]
 webkit.org/b/264680 scrollbars/scrollbar-selectors.html [ Pass Timeout ]
 
 fast/dom/no-scroll-when-command-click-fragment-URL.html [ Skip ]

@@ -1347,6 +1347,8 @@ webkit.org/b/279421 imported/w3c/web-platform-tests/css/css-multicol/crashtests/
 
 imported/w3c/web-platform-tests/css/css-view-transitions/inline-with-offset-from-containing-block.html [ ImageOnlyFailure Pass ]
 
+webkit.org/b/306017 imported/w3c/web-platform-tests/css/css-view-transitions/content-smaller-than-box-size.html [ ImageOnlyFailure Pass ]
+
 webkit.org/b/305742 imported/w3c/web-platform-tests/css/css-viewport/zoom/iframe-zoom-nested.html [ ImageOnlyFailure Pass ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
@@ -1601,6 +1603,9 @@ webkit.org/b/182103 fast/forms/focus-selection-textarea.html [ Failure ]
 #////////////////////////////////////////////////////////////////////////////////////////
 # GStreamer-related bugs
 #////////////////////////////////////////////////////////////////////////////////////////
+
+webkit.org/b/308037 imported/w3c/web-platform-tests/webrtc/simulcast/vp8.https.html [ Failure Pass ]
+webkit.org/b/308037 imported/w3c/web-platform-tests/webrtc/simulcast/vp9.https.html [ Failure Pass ]
 
 webkit.org/b/307144 media/video-restricted-invisible-autoplay-not-allowed.html [ Timeout Pass ]
 
