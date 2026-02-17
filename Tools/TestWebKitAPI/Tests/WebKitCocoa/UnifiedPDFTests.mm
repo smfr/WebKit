@@ -631,7 +631,12 @@ UNIFIED_PDF_TEST(PDFHUDLoadPDFTypeWithPluginsBlocked)
 
 #endif // ENABLE(PDF_HUD)
 
+// FIXME when rdar://170186477 is resolved.
+#if PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+UNIFIED_PDF_TEST(DISABLED_SnapshotsPaintPageContent)
+#else
 UNIFIED_PDF_TEST(SnapshotsPaintPageContent)
+#endif
 {
     auto webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 600, 600) configuration:configurationForWebViewTestingUnifiedPDF().get() addToWindow:YES]);
 
