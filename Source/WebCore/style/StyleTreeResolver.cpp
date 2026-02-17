@@ -405,7 +405,7 @@ auto TreeResolver::resolveElement(Element& element, const RenderStyle* existingS
         update.style->addCachedPseudoStyle(WTF::move(pseudoElementUpdate->style));
         return pseudoElementUpdate->changes;
     };
-    
+
     if (resolveAndAddPseudoElementStyle({ PseudoElementType::FirstLine }))
         descendantsToResolve = DescendantsToResolve::All;
     if (resolveAndAddPseudoElementStyle({ PseudoElementType::FirstLetter }))
@@ -413,17 +413,13 @@ auto TreeResolver::resolveElement(Element& element, const RenderStyle* existingS
     if (resolveAndAddPseudoElementStyle({ PseudoElementType::WebKitScrollbar }))
         descendantsToResolve = DescendantsToResolve::All;
 
+    // Early-returns are usually added `resolvePseudoElement()` to avoid unnecessarily resolving style in irrelevant cases.
     resolveAndAddPseudoElementStyle({ PseudoElementType::Marker });
     resolveAndAddPseudoElementStyle({ PseudoElementType::Before });
     resolveAndAddPseudoElementStyle({ PseudoElementType::After });
     resolveAndAddPseudoElementStyle({ PseudoElementType::Backdrop });
-
-    if (update.style->usedAppearance() == StyleAppearance::Base) {
-        if (RefPtr input = dynamicDowncast<HTMLInputElement>(element); input && input->isCheckable())
-            resolveAndAddPseudoElementStyle({ PseudoElementType::Checkmark });
-        if (RefPtr select = dynamicDowncast<HTMLSelectElement>(element); select && select->usesMenuList())
-            resolveAndAddPseudoElementStyle({ PseudoElementType::PickerIcon });
-    }
+    resolveAndAddPseudoElementStyle({ PseudoElementType::Checkmark });
+    resolveAndAddPseudoElementStyle({ PseudoElementType::PickerIcon });
 
     if (isDocumentElement && m_document->hasViewTransitionPseudoElementTree()) {
         resolveAndAddPseudoElementStyle({ PseudoElementType::ViewTransition });
@@ -460,6 +456,19 @@ std::optional<ElementUpdate> TreeResolver::resolvePseudoElement(Element& element
         return { };
     if (pseudoElementIdentifier.type == PseudoElementType::Marker && elementUpdate.style->display() != DisplayType::BlockFlowListItem)
         return { };
+
+    if (pseudoElementIdentifier.type == PseudoElementType::Checkmark) {
+        if (elementUpdate.style->usedAppearance() != StyleAppearance::Base)
+            return { };
+        if (RefPtr input = dynamicDowncast<HTMLInputElement>(element); !input || !input->isCheckable())
+            return { };
+    }
+    if (pseudoElementIdentifier.type == PseudoElementType::PickerIcon) {
+        if (elementUpdate.style->usedAppearance() != StyleAppearance::Base)
+            return { };
+        if (RefPtr select = dynamicDowncast<HTMLSelectElement>(element); !select || !select->usesMenuList())
+            return { };
+    }
 
     auto userAgentShadowTreeEnclosingResolver = [&] -> Resolver* {
         if (element.isInUserAgentShadowTree())
