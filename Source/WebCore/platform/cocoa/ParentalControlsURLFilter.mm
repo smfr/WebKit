@@ -238,6 +238,12 @@ void ParentalControlsURLFilter::allowURL(const ParentalControlsURLFilterParamete
     filter->allowURL(parameters.urlToAllow, WTF::move(completionHandler));
 }
 
+void ParentalControlsURLFilter::requestPermissionForURL(const URL&, const URL&, CompletionHandler<void(bool)>&&)
+{
+    // Check canRequestPermissionForURL() before invoking.
+    RELEASE_ASSERT_NOT_REACHED();
+}
+
 WCRBrowserEngineClient* ParentalControlsURLFilter::effectiveWCRBrowserEngineClient()
 {
     if (!isEnabled())

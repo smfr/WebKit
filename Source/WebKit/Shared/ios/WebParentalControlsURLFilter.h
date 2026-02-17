@@ -46,6 +46,8 @@ private:
     bool isEnabledImpl() const final;
     void isURLAllowedImpl(const URL& mainDocumentURL, const URL&, CompletionHandler<void(bool, NSData *)>&&) final;
     void allowURL(const URL&, CompletionHandler<void(bool)>&&) final;
+    void requestPermissionForURL(const URL&, const URL& referrerURL, CompletionHandler<void(bool)>&&) final;
+    bool canRequestPermissionForURL() final { return true; }
 
     BEWebContentFilter* ensureWebContentFilter();
 

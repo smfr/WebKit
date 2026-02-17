@@ -453,14 +453,20 @@ bool WebFrameProxy::didHandleContentFilterUnblockNavigation(const ResourceReques
     }
 #endif
 
+    std::optional<URL> unblockRequestURL = std::nullopt;
 #if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER) && !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+    if (page->preferences().webContentRestrictionsAskToEnabled())
+        unblockRequestURL = request.url();
+#endif
+
     WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary();
 #endif
 
     m_contentFilterUnblockHandler.requestUnblockAsync([page](bool unblocked) {
         if (unblocked)
             page->reload({ });
-    });
+    }, unblockRequestURL);
     return true;
 }
 #endif

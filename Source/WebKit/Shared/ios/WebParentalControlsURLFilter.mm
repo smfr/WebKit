@@ -122,6 +122,25 @@ void WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary
 #endif
 }
 
+void WebParentalControlsURLFilter::requestPermissionForURL(const URL& url, const URL& referrerURL, CompletionHandler<void(bool)>&& completionHandler)
+{
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+    workQueueSingleton().dispatchSync([this, protectedThis = Ref { *this }, currentIsEnabled = isEnabled(), url = crossThreadCopy(url), referrerURL = crossThreadCopy(referrerURL), completionHandler = WTF::move(completionHandler)]() mutable {
+        if (!currentIsEnabled) {
+            callOnMainRunLoop([completionHandler = WTF::move(completionHandler)] mutable {
+                completionHandler(true);
+            });
+            return;
+        }
+        auto filter = ensureWebContentFilter();
+#if __has_include(<WebKitAdditions/BEKAdditions.h>)
+        RELEASE_LOG(Loading, "WebParentalControlsURLFilter::requestPermissionForURL starts execution");
+        MAYBE_REQUEST_PERMISSION_ASK_TO
+#endif
+    });
+#endif
+}
+
 } // namespace WebKit
 
 #endif

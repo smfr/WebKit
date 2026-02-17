@@ -9349,6 +9349,22 @@ WebCodecsVideoEnabled:
   richJavaScript: true
   mediaPlaybackRelated: true
 
+WebContentRestrictionsAskToEnabled:
+  type: bool
+  status: unstable
+  defaultsOverridable: true
+  humanReadableName: "Web Content Restrictions Ask To"
+  humanReadableDescription: "Enable Ask To for WebContentRestrictions"
+  condition: HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+  sharedPreferenceForWebProcess: true
+
 WebContentRestrictionsTransitiveTrustEnabled:
   type: bool
   status: stable

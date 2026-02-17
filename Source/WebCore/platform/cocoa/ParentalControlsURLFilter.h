@@ -58,6 +58,8 @@ public:
     void isURLAllowed(const URL& mainDocumentURL, const URL&, ParentalControlsContentFilter&);
     WEBCORE_EXPORT void isURLAllowed(const URL& mainDocumentURL, const URL&, CompletionHandler<void(bool, NSData *)>&&);
     virtual void allowURL(const URL&, CompletionHandler<void(bool)>&&);
+    virtual void requestPermissionForURL(const URL&, const URL&, CompletionHandler<void(bool)>&&);
+    virtual bool canRequestPermissionForURL() { return false; }
 
 protected:
 #if HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
