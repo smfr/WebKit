@@ -119,7 +119,7 @@ static String normalizeText(const String& string, unsigned maxDescriptionLength 
     result = makeStringByReplacingAll(result, '"', "'"_s);
     result = makeStringByReplacingAll(result, '\r', ""_s);
     result = makeStringByReplacingAll(result, '\n', " "_s);
-    result = result.trim(isASCIIWhitespace<char16_t>);
+    result = result.simplifyWhiteSpace(isASCIIWhitespace);
     if (result.length() <= maxDescriptionLength)
         return result;
 
@@ -1989,6 +1989,46 @@ static String textDescription(const Element& element, Vector<String>& stringsToV
         description.append(makeString(" with placeholder "_s, wrapWithDoubleQuotes(WTF::move(text))));
         stringsToValidate.append(WTF::move(text));
         needsParentContext = false;
+    }
+
+    static constexpr auto maximumNumberOfClasses = 3;
+    static constexpr auto minimumClassOrIdLength = 6;
+    static constexpr auto maximumClassOrIdLength = 20;
+
+    auto isCandidateClassOrId = [](StringView text) {
+        if (text.length() < minimumClassOrIdLength)
+            return false;
+
+        if (text.length() > maximumClassOrIdLength)
+            return false;
+
+        if (!StringEntropyHelpers::isProbablyHumanReadable(text))
+            return false;
+
+        return true;
+    };
+
+    if (auto text = element.attributeWithoutSynchronization(HTMLNames::idAttr); isCandidateClassOrId(text)) {
+        description.append(makeString(" with id "_s, wrapWithDoubleQuotes(text)));
+        needsParentContext = false;
+    }
+
+    if (auto classValue = element.attributeWithoutSynchronization(HTMLNames::classAttr); !classValue.isEmpty()) {
+        Vector<String, maximumNumberOfClasses> humanReadableClassNames;
+        for (auto className : StringView { classValue }.split(' ')) {
+            if (!isCandidateClassOrId(className))
+                continue;
+
+            humanReadableClassNames.append(className.toString());
+            if (humanReadableClassNames.size() >= maximumNumberOfClasses)
+                break;
+        }
+
+        if (!humanReadableClassNames.isEmpty()) {
+            auto classOrClasses = humanReadableClassNames.size() > 1 ? " with classes "_s : " with class "_s;
+            description.append(makeString(classOrClasses, wrapWithDoubleQuotes(makeStringByJoining(humanReadableClassNames, " "_s))));
+            needsParentContext = false;
+        }
     }
 
     auto elementDescription = description.toString();
