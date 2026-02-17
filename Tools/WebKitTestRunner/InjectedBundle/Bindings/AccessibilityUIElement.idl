@@ -121,6 +121,7 @@ interface AccessibilityUIElement {
     readonly attribute DOMString classList;
     readonly attribute DOMString embeddedImageDescription;
     readonly attribute object imageOverlayElements;
+    readonly attribute boolean hasImageData;
     readonly attribute boolean isInsertion;
     readonly attribute boolean isDeletion;
     readonly attribute boolean isFirstItemInSuggestion;

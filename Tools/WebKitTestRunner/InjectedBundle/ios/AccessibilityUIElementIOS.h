@@ -165,6 +165,7 @@ public:
 
     JSRetainPtr<JSStringRef> embeddedImageDescription() const override;
     JSValueRef imageOverlayElements(JSContextRef) override;
+    bool hasImageData() const override;
 
     bool hasDocumentRoleAncestor() const;
     bool hasWebApplicationAncestor() const;

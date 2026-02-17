@@ -184,6 +184,7 @@ public:
     JSRetainPtr<JSStringRef> classList() const override;
     JSRetainPtr<JSStringRef> embeddedImageDescription() const override;
     JSValueRef imageOverlayElements(JSContextRef) override;
+    bool hasImageData() const override;
 
     JSRetainPtr<JSStringRef> speakAs() override;
 

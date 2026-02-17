@@ -1955,6 +1955,16 @@ static void appendStringToResult(NSMutableString *result, NSString *string)
     return self.axBackingObject->embeddedImageDescription().createNSString().autorelease();
 }
 
+- (NSData *)browserAccessibilityImageData
+{
+    if (![self _prepareAccessibilityCall])
+        return nil;
+
+    if (auto imageData = self.axBackingObject->imageData())
+        return imageData->makeContiguous()->createNSData().autorelease();
+    return nil;
+}
+
 - (NSArray *)accessibilityImageOverlayElements
 {
     if (![self _prepareAccessibilityCall])

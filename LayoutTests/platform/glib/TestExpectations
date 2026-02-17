@@ -870,6 +870,9 @@ accessibility/aria-actions.html [ Skip ]
 # Failing since introduced, Atspi::State::Visited may not be set / updated properly?
 accessibility/link-becomes-visited.html [ Failure ]
 
+# These verify what is currently a Cocoa-only API.
+accessibility/image-data.html [ Skip ]
+
 accessibility/search-misspellings.html [ Skip ]
 accessibility/shadow-dom-hit-test.html [ Skip ]
 

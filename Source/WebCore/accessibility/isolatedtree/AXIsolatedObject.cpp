@@ -1391,6 +1391,15 @@ String AXIsolatedObject::identifierAttribute() const
 #endif
 }
 
+RefPtr<FragmentedSharedBuffer> AXIsolatedObject::imageData() const
+{
+    return Accessibility::retrieveValueFromMainThreadWithTimeoutAndDefault([context = mainThreadContext()] () -> RefPtr<FragmentedSharedBuffer> {
+        if (RefPtr object = context.axObjectOnMainThread())
+            return object->imageData();
+        return nullptr;
+    }, Accessibility::ImageDataTimeout, nullptr);
+}
+
 CharacterRange AXIsolatedObject::doAXRangeForLine(unsigned lineIndex) const
 {
     AX_ASSERT(!isMainThread());

@@ -137,6 +137,7 @@ typedef void (*AXPostedNotificationCallback)(id element, NSString* notification,
 - (BOOL)accessibilityIsFirstItemInSuggestion;
 - (BOOL)accessibilityIsLastItemInSuggestion;
 - (BOOL)accessibilityIsMarkAnnotation;
+- (NSData *)browserAccessibilityImageData;
 
 // TextMarker related
 - (NSArray *)textMarkerRange;
@@ -1264,6 +1265,12 @@ JSRetainPtr<JSStringRef> AccessibilityUIElementIOS::embeddedImageDescription() c
 JSValueRef AccessibilityUIElementIOS::imageOverlayElements(JSContextRef context)
 {
     return makeJSArray(context, makeVector<RefPtr<AccessibilityUIElement>>([m_element accessibilityImageOverlayElements]));
+}
+
+bool AccessibilityUIElementIOS::hasImageData() const
+{
+    NSData *imageData = [m_element browserAccessibilityImageData];
+    return imageData && [imageData length] > 0;
 }
 
 bool AccessibilityUIElementIOS::isCollapsed() const

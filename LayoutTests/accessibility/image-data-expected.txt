@@ -1,0 +1,8 @@
+This tests that images expose image data through the accessibility API.
+
+PASS: accessibilityController.accessibleElementById('image').hasImageData === true
+
+PASS successfullyParsed is true
+
+TEST COMPLETE
+

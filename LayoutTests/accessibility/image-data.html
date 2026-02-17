@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<script src="../resources/accessibility-helper.js"></script>
+<script src="../resources/js-test.js"></script>
+</head>
+<body>
+
+<img id="image" alt="Delicious cake" src="resources/cake.png">
+
+<script>
+var output = "This tests that images expose image data through the accessibility API.\n\n";
+
+window.jsTestIsAsync = true;
+
+window.onload = function() {
+    if (window.accessibilityController) {
+        output += expect("accessibilityController.accessibleElementById('image').hasImageData", "true");
+
+        debug(output);
+        finishJSTest();
+    }
+};
+</script>
+</body>
+</html>
+

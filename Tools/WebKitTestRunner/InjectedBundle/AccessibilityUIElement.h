@@ -212,6 +212,7 @@ public:
     virtual JSRetainPtr<JSStringRef> classList() const;
     virtual JSRetainPtr<JSStringRef> embeddedImageDescription() const;
     virtual JSValueRef imageOverlayElements(JSContextRef);
+    virtual bool hasImageData() const;
 
     // CSS3-speech properties.
     virtual JSRetainPtr<JSStringRef> speakAs();
