@@ -365,7 +365,6 @@ typedef NS_ENUM(NSInteger, _WKPrintRenderingCallbackType) {
     if (!processID)
         return;
     auto coreIdentifier = process.coreProcessIdentifier();
-    ASSERT(!_visibilityPropagationViewsForWebProcesses.contains(coreIdentifier));
     if (_visibilityPropagationViewsForWebProcesses.contains(coreIdentifier))
         return;
 #if HAVE(NON_HOSTING_VISIBILITY_PROPAGATION_VIEW)
