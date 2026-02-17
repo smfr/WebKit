@@ -497,7 +497,8 @@ void FindController::didFindString()
 
     CheckedRef selection = selectedFrame->selection();
     selection->revealSelection();
-    revealClosedDetailsAndHiddenUntilFoundAncestors(*protect(selection->selection().start().anchorNode()));
+    if (RefPtr anchorNode = selection->selection().start().anchorNode())
+        revealClosedDetailsAndHiddenUntilFoundAncestors(*anchorNode);
 }
 
 void FindController::didHideFindIndicator()
