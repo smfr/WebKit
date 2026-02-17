@@ -131,7 +131,7 @@ void RenderTreeUpdater::commit(std::unique_ptr<Style::Update> styleUpdate)
     for (auto& root : m_styleUpdate->roots()) {
         if (&root->document() != m_document.ptr())
             continue;
-        RefPtr renderingRoot = findRenderingRoot(*root);
+        RefPtr renderingRoot = findRenderingRoot(root.get());
         if (!renderingRoot)
             continue;
         updateRenderTree(*renderingRoot);
@@ -219,7 +219,7 @@ void RenderTreeUpdater::updateRebuildRoots()
         if (rebuildRoots.isEmpty())
             break;
         for (auto& rebuildRoot : rebuildRoots) {
-            if (RefPtr newRebuildRoot = findNewRebuildRoot(*rebuildRoot))
+            if (RefPtr newRebuildRoot = findNewRebuildRoot(rebuildRoot.get()))
                 addSubtreeForRebuild(*newRebuildRoot);
         }
     }
