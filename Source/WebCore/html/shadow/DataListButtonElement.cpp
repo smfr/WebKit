@@ -29,6 +29,7 @@
 #include "Event.h"
 #include "EventNames.h"
 #include "MouseEvent.h"
+#include "ResolvedStyle.h"
 #include "StyleAppearance.h"
 #include <wtf/TZoneMallocInlines.h>
 
@@ -42,7 +43,7 @@ Ref<DataListButtonElement> DataListButtonElement::create(Document& document, Dat
 }
 
 DataListButtonElement::DataListButtonElement(Document& document, DataListButtonOwner& owner)
-    : HTMLDivElement(document)
+    : HTMLDivElement(document, TypeFlag::HasCustomStyleResolveCallbacks)
     , m_owner(owner)
 {
 }
@@ -67,18 +68,26 @@ void DataListButtonElement::defaultEventHandler(Event& event)
         HTMLDivElement::defaultEventHandler(event);
 }
 
-bool DataListButtonElement::canAdjustStyleForAppearance() const
-{
-    RefPtr host = shadowHost();
-    if (host && host->existingComputedStyle())
-        return host->existingComputedStyle()->usedAppearance() != StyleAppearance::None;
-    return true;
-}
-
 bool DataListButtonElement::isDisabledFormControl() const
 {
     RefPtr host = shadowHost();
     return host && host->isDisabledFormControl();
+}
+
+std::optional<Style::UnadjustedStyle> DataListButtonElement::resolveCustomStyle(const Style::ResolutionContext& resolutionContext, const RenderStyle* shadowHostStyle)
+{
+    m_canAdjustStyleForAppearance = true;
+
+    if (!shadowHostStyle)
+        return std::nullopt;
+
+    auto usedAppearance = shadowHostStyle->usedAppearance();
+    if (usedAppearance == StyleAppearance::None) {
+        m_canAdjustStyleForAppearance = false;
+        return resolveStyle(resolutionContext);
+    }
+
+    return std::nullopt;
 }
 
 } // namespace WebCore
