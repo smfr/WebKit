@@ -49,4 +49,29 @@ double parseDouble(std::span<const char16_t> string, size_t& parsedLength)
     return doubleValue;
 }
 
+std::optional<double> parseJSONDouble(std::span<const Latin1Character> string, size_t& parsedLength)
+{
+    double doubleValue = 0;
+    auto stringData = byteCast<char>(string);
+    auto result = fast_float::from_chars(std::to_address(stringData.begin()), std::to_address(stringData.end()), doubleValue, fast_float::chars_format::json);
+    if (!result) [[unlikely]] {
+        if (result.ec != std::errc::result_out_of_range)
+            return std::nullopt;
+    }
+    parsedLength = result.ptr - stringData.data();
+    return doubleValue;
+}
+
+std::optional<double> parseJSONDouble(std::span<const char16_t> string, size_t& parsedLength)
+{
+    double doubleValue = 0;
+    auto result = fast_float::from_chars(std::to_address(string.begin()), std::to_address(string.end()), doubleValue, fast_float::chars_format::json);
+    if (!result) [[unlikely]] {
+        if (result.ec != std::errc::result_out_of_range)
+            return std::nullopt;
+    }
+    parsedLength = result.ptr - string.data();
+    return doubleValue;
+}
+
 } // namespace WTF
