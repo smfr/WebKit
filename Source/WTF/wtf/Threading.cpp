@@ -28,14 +28,11 @@
 
 #include <bmalloc/BPlatform.h>
 #include <cstring>
-#include <wtf/Assertions.h>
 #include <wtf/DateMath.h>
 #include <wtf/Gigacage.h>
 #include <wtf/NeverDestroyed.h>
 #include <wtf/PrintStream.h>
 #include <wtf/RunLoop.h>
-#include <wtf/StackAllocation.h>
-#include <wtf/StackSwitch.h>
 #include <wtf/ThreadGroup.h>
 #include <wtf/ThreadingPrimitives.h>
 #include <wtf/WTFConfig.h>
@@ -152,11 +149,10 @@ uint32_t ThreadLike::currentSequence()
 
 struct Thread::NewThreadContext : public ThreadSafeRefCounted<NewThreadContext> {
 public:
-    NewThreadContext(ASCIILiteral name, Function<void()>&& entryPoint, Ref<Thread>&& thread, StackAllocationSpecification spec)
+    NewThreadContext(ASCIILiteral name, Function<void()>&& entryPoint, Ref<Thread>&& thread)
         : name(name)
         , entryPoint(WTF::move(entryPoint))
         , thread(WTF::move(thread))
-        , stackSpec(spec)
     {
     }
 
@@ -166,7 +162,6 @@ public:
     Function<void()> entryPoint;
     Ref<Thread> thread;
     Mutex mutex;
-    StackAllocationSpecification stackSpec;
 
 #if !HAVE(STACK_BOUNDS_FOR_NEW_THREAD)
     ThreadCondition condition;
@@ -233,32 +228,10 @@ void Thread::initializeInThread()
 
 void Thread::entryPoint(NewThreadContext* newThreadContext)
 {
-    SUPPRESS_UNCOUNTED_LOCAL std::optional<void*> stackSwitchTarget { };
-    {
-        MutexLocker locker(newThreadContext->mutex);
-        if (newThreadContext->stackSpec.kind() == StackAllocationSpecification::Kind::DeferredStack) {
-            // The OS-provided stack we start on is not our 'target work stack';
-            // we need to hop over to it ourselves during initialization.
-            stackSwitchTarget = newThreadContext->stackSpec.stackOrigin();
-            RELEASE_ASSERT(*stackSwitchTarget);
-        }
-        // It's OK for us to let go of the lock between here and the next function
-        // call, as our choice of actions here should be transparent to
-        // entryPointFinishSetup either way
-    }
-
-    if (stackSwitchTarget)
-        callThreadEntryPointFinishSetupWithNewStack(newThreadContext, *stackSwitchTarget);
-    else
-        entryPointFinishSetup(newThreadContext);
-}
-
-void Thread::entryPointFinishSetup(void* newThreadContext)
-{
     Function<void()> function;
     {
         // Ref is already incremented by Thread::create.
-        Ref context = adoptRef(*static_cast<NewThreadContext*>(newThreadContext));
+        Ref context = adoptRef(*newThreadContext);
         // Block until our creating thread has completed any extra setup work, including establishing ThreadIdentifier.
         MutexLocker locker(context->mutex);
 
@@ -291,7 +264,7 @@ Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, Thr
 
     Ref thread = adoptRef(*new Thread(schedulingPolicy));
 
-    Ref context = adoptRef(*new NewThreadContext { name, WTF::move(entryPoint), thread.get(), stackSpec });
+    Ref context = adoptRef(*new NewThreadContext { name, WTF::move(entryPoint), thread.get() });
     {
         MutexLocker locker(context->mutex);
         context->ref(); // Adopted by Thread::entryPoint
@@ -303,31 +276,20 @@ Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, Thr
         bool success = thread->establishHandle(context.get(), stackSpec, qos, schedulingPolicy);
         RELEASE_ASSERT(success);
 
-        // If the thread is using a deferred stack, then the OS stack
-        // that newThreadStackBounds will give us is not the stack that the
-        // thread will actually spend most of its time executing on.
-        // In this case, we provide the bounds manually, with the knowledge that
-        // they will become correct once the thread transitions through the
-        // stack-switching trampoline.
-        if (stackSpec.kind() == StackAllocationSpecification::Kind::DeferredStack) {
-            thread->m_stack = StackBounds::fromCustomStack(stackSpec);
-            thread->m_savedLastStackTop = thread->stack().origin();
-        } else {
 #if HAVE(STACK_BOUNDS_FOR_NEW_THREAD)
-            thread->m_stack = StackBounds::newThreadStackBounds(thread->m_handle);
-            thread->m_savedLastStackTop = thread->stack().origin();
-            allThreads().add(thread.get()); // Must have stack bounds before adding to allThreads()
+        thread->m_stack = StackBounds::newThreadStackBounds(thread->m_handle);
+        thread->m_savedLastStackTop = thread->stack().origin();
+        allThreads().add(thread.get()); // Must have stack bounds before adding to allThreads()
 #else
-            // In platforms which do not support StackBounds::newThreadStackBounds(), we do not have a way to get stack
-            // bounds outside the target thread itself. Thus, we need to initialize thread information in the target thread
-            // and wait for completion of initialization in the caller side.
-            context->stage = NewThreadContext::Stage::EstablishedHandle;
-            while (context->stage != NewThreadContext::Stage::Initialized)
-                context->condition.wait(context->mutex);
+        // In platforms which do not support StackBounds::newThreadStackBounds(), we do not have a way to get stack
+        // bounds outside the target thread itself. Thus, we need to initialize thread information in the target thread
+        // and wait for completion of initialization in the caller side.
+        context->stage = NewThreadContext::Stage::EstablishedHandle;
+        while (context->stage != NewThreadContext::Stage::Initialized)
+            context->condition.wait(context->mutex);
 
-            // Thread::entryPointFinishSetup initializes thread->m_stack and thread->m_savedLastStackTop and adds to allThreads().
+        // Thread::entryPoint initializes thread->m_stack and thread->m_savedLastStackTop and adds to allThreads().
 #endif
-        }
     }
 
     return thread;

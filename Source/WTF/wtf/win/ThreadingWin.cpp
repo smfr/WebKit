@@ -150,11 +150,10 @@ static unsigned __stdcall wtfThreadEntryPoint(void* data)
 bool Thread::establishHandle(NewThreadContext& data, StackAllocationSpecification stackSpec, QOS, SchedulingPolicy)
 {
     RELEASE_ASSERT(stackSpec.kind() != StackAllocationSpecification::Kind::SizeAndLocation && "Custom stacks not supported on windows");
-    RELEASE_ASSERT(stackSpec.kind() != StackAllocationSpecification::Kind::DeferredStack && "Deferred stacks not supported on windows");
     unsigned threadIdentifier = 0;
     size_t stackSize = 0;
     if (stackSpec.kind() == StackAllocationSpecification::Kind::SizeOnly)
-        stackSize = stackSpec.osStackSize();
+        stackSize = stackSpec.sizeBytes();
     unsigned initFlag = stackSize ? STACK_SIZE_PARAM_IS_A_RESERVATION : 0;
     HANDLE threadHandle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, stackSize, wtfThreadEntryPoint, &data, initFlag, &threadIdentifier));
     if (!threadHandle) {

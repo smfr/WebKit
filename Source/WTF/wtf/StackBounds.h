@@ -27,7 +27,6 @@
 #pragma once
 
 #include <algorithm>
-#include <wtf/StackAllocation.h>
 #include <wtf/StackPointer.h>
 #include <wtf/ThreadingPrimitives.h>
 
@@ -55,15 +54,6 @@ public:
 #endif
 
     static constexpr StackBounds emptyBounds() { return StackBounds(); }
-
-    static StackBounds fromCustomStack(const StackAllocationSpecification& spec)
-    {
-        using SpecKind = StackAllocationSpecification::Kind;
-        RELEASE_ASSERT(spec.kind() == SpecKind::DeferredStack || spec.kind() == SpecKind::SizeAndLocation);
-        void* bound = spec.stackSpan().data();
-        void* origin = spec.stackOrigin();
-        return { origin, bound };
-    }
 
 #if HAVE(STACK_BOUNDS_FOR_NEW_THREAD)
     // This function is only effective for newly created threads. In some platform, it returns a bogus value for the main thread.

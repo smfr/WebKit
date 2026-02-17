@@ -326,7 +326,6 @@ set(WTF_PUBLIC_HEADERS
     StackShot.h
     StackShotProfiler.h
     StackStats.h
-    StackSwitch.h
     StackTrace.h
     StatisticsManager.h
     StdFilesystem.h
@@ -612,7 +611,6 @@ set(WTF_SOURCES
     StackCheck.cpp
     StackPointer.cpp
     StackStats.cpp
-    StackSwitch.cpp
     StackTrace.cpp
     StatisticsManager.cpp
     StringPrintStream.cpp

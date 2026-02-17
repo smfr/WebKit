@@ -22,7 +22,6 @@
 		0F3492D722AF431C004F85FC /* TextStreamCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F3492D622AF42F1004F85FC /* TextStreamCocoa.mm */; };
 		0F43D8F11DB5ADDC00108FB6 /* AutomaticThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F43D8EF1DB5ADDC00108FB6 /* AutomaticThread.cpp */; };
 		0F43D8F11DB5ADDC00108FC6 /* SequesteredAutomaticThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F43D8EF1DB5ADDC00108FC6 /* SequesteredAutomaticThread.cpp */; };
-		0F43D8F11DB5ADDC00108FD6 /* StackSwitch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F43D8EF1DB5ADDC00108FD6 /* StackSwitch.cpp */; };
 		0F5BF1761F23D49A0029D91D /* Gigacage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F5BF1741F23D49A0029D91D /* Gigacage.cpp */; settings = {COMPILER_FLAGS = "-O3"; }; };
 		0F60F32F1DFCBD1B00416D6C /* LockedPrintStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F60F32D1DFCBD1B00416D6C /* LockedPrintStream.cpp */; };
 		0F66B28A1DC97BAB004A1D3F /* ClockType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F66B2801DC97BAB004A1D3F /* ClockType.cpp */; };
@@ -568,7 +567,6 @@
 		DD3DC97E27A4BF8E007E5B61 /* AutomaticThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F43D8F01DB5ADDC00108FB6 /* AutomaticThread.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DD3DC97E27A4BF8E007E5BC1 /* SequesteredAutomaticThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F43D8F01DB5ADDC00108FC6 /* SequesteredAutomaticThread.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DD3DC97F27A4BF8E007E5BC1 /* StackAllocation.h in Headers */ = {isa = PBXBuildFile; fileRef = A8A4730F151A825B004123CF /* StackAllocation.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		DD3DC97E27A4BF8E007E5BD1 /* StackSwitch.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F43D8F01DB5ADDC00108FD6 /* StackSwitch.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DD3DC97F27A4BF8E007E5B61 /* StackBounds.h in Headers */ = {isa = PBXBuildFile; fileRef = A8A4730F151A825B004123FF /* StackBounds.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DD3DC98027A4BF8E007E5B61 /* Stopwatch.h in Headers */ = {isa = PBXBuildFile; fileRef = C4F8A93619C65EB400B2B15D /* Stopwatch.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DD3DC98127A4BF8E007E5B61 /* StdLibExtras.h in Headers */ = {isa = PBXBuildFile; fileRef = A8A47311151A825B004123FF /* StdLibExtras.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -1130,8 +1128,6 @@
 		0F43D8F01DB5ADDC00108FB6 /* AutomaticThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutomaticThread.h; sourceTree = "<group>"; };
 		0F43D8EF1DB5ADDC00108FC6 /* SequesteredAutomaticThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SequesteredAutomaticThread.cpp; sourceTree = "<group>"; };
 		0F43D8F01DB5ADDC00108FC6 /* SequesteredAutomaticThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequesteredAutomaticThread.h; sourceTree = "<group>"; };
-		0F43D8EF1DB5ADDC00108FD6 /* StackSwitch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StackSwitch.cpp; sourceTree = "<group>"; };
-		0F43D8F01DB5ADDC00108FD6 /* StackSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StackSwitch.h; sourceTree = "<group>"; };
 		0F4570421BE5B58F0062A629 /* Dominators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dominators.h; sourceTree = "<group>"; };
 		0F4570441BE834410062A629 /* BubbleSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BubbleSort.h; sourceTree = "<group>"; };
 		0F4D8C711FC1E7CE001D32AC /* SinglyLinkedListWithTail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SinglyLinkedListWithTail.h; sourceTree = "<group>"; };
@@ -2732,8 +2728,6 @@
 				0F9DAA051FD1C37B0079C5B2 /* StackShotProfiler.h */,
 				FEDACD3B1630F83F00C69634 /* StackStats.cpp */,
 				FEDACD3C1630F83F00C69634 /* StackStats.h */,
-				0F43D8EF1DB5ADDC00108FD6 /* StackSwitch.cpp */,
-				0F43D8F01DB5ADDC00108FD6 /* StackSwitch.h */,
 				313EDEC9778E49C9BEA91CFC /* StackTrace.cpp */,
 				EF7D6CD59D8642A8A0DA86AD /* StackTrace.h */,
 				FF3997402DB044E600A58E88 /* StatisticsManager.cpp */,
@@ -3880,7 +3874,6 @@
 				DD3DC8FE27A4BF8E007E5B61 /* StackShot.h in Headers */,
 				DD3DC8A127A4BF8E007E5B61 /* StackShotProfiler.h in Headers */,
 				DD3DC97A27A4BF8E007E5B61 /* StackStats.h in Headers */,
-				DD3DC97E27A4BF8E007E5BD1 /* StackSwitch.h in Headers */,
 				DD3DC99C27A4BF8E007E5B61 /* StackTrace.h in Headers */,
 				FF3997422DB044E600A58E88 /* StatisticsManager.h in Headers */,
 				DD3DC94827A4BF8E007E5B61 /* StdFilesystem.h in Headers */,
@@ -4583,7 +4576,6 @@
 				FE35D09227DC5ECC009DFA5B /* StackCheck.cpp in Sources */,
 				FEEA4DF9216D7BE400AC0602 /* StackPointer.cpp in Sources */,
 				FEDACD3D1630F83F00C69634 /* StackStats.cpp in Sources */,
-				0F43D8F11DB5ADDC00108FD6 /* StackSwitch.cpp in Sources */,
 				3337DB9CE743410FAF076E17 /* StackTrace.cpp in Sources */,
 				FF3997412DB044E600A58E88 /* StatisticsManager.cpp in Sources */,
 				0F95B63720CB5EFD00479635 /* StringBuffer.cpp in Sources */,
