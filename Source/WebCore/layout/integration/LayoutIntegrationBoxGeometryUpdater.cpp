@@ -365,13 +365,26 @@ static std::optional<LayoutUnit> lastInflowBoxBaseline(const RenderBlock& blockC
 {
     auto* lastInFlowChild = blockContainer.lastInFlowChildBox();
     for (auto* inflowBox = lastInFlowChild; inflowBox; inflowBox = inflowBox->previousInFlowSiblingBox()) {
-        if (inflowBox->isWritingModeRoot())
-            continue;
 
-        if (inflowBox->shouldApplyLayoutContainment())
-            continue;
+        auto isBaselineCanididate = [&](auto& inflowChildBox) {
+            if (inflowChildBox.isWritingModeRoot() || inflowChildBox.shouldApplyLayoutContainment() || is<RenderTable>(inflowChildBox))
+                return false;
 
-        if (shouldUseMarginBoxAsBaseline(*inflowBox)) {
+            if (CheckedPtr scrollableArea = inflowChildBox.layer() ? inflowChildBox.layer()->scrollableArea() : nullptr) {
+                if (scrollableArea->marquee())
+                    return false;
+
+                auto isScrollable = blockContainer.writingMode().isHorizontal() ? (scrollableArea->verticalScrollbar() || scrollableArea->scrollOffset().y()) : (scrollableArea->horizontalScrollbar() || scrollableArea->scrollOffset().x());
+                return !isScrollable;
+            }
+            if (CheckedPtr blockFlow = dynamicDowncast<RenderBlockFlow>(inflowChildBox)) {
+                auto hasValidBaseline = !blockFlow->childrenInline() || blockFlow->hasContentfulInlineOrBlockLine() || blockFlow->hasLineIfEmpty();
+                return hasValidBaseline;
+            }
+            return true;
+        };
+
+        if (!isBaselineCanididate(*inflowBox)) {
             // We need to find a better candidate for baseline.
             continue;
         }
