@@ -53,6 +53,8 @@ class GraphicsContext;
 class IntRect;
 class MixedFontGlyphPage;
 
+struct TextShapingResult;
+
 struct GlyphOverflow {
     // FIXME: May need clearer&safer storage and names. See webkit.org/b/307002
     LayoutUnit left;
@@ -62,17 +64,16 @@ struct GlyphOverflow {
     bool computeBounds { false };
 };
 
-struct CachedShapedText {
-    float width { 0.f };
-    std::unique_ptr<GlyphBuffer> glyphBuffer;
+namespace ShapedTextCacheDefaults {
+// This is tuned for Canvas text operations (fillText, strokeText)
+static constexpr int initialInterval = -3; // Cache immediately, no countdown
+static constexpr int minInterval = -3; // After a hit, cache the next 3 attempts
+static constexpr int maxInterval = -3; // Never ramp up sampling, stay aggressive
+static constexpr unsigned maxSize = 500000; // Same as default cache size
+static constexpr unsigned maxTextLength = 128; // Larger than default to cache longer canvas text
+}
 
-    // This is tuned for Canvas text operations (fillText, strokeText)
-    static constexpr int s_shapedTextCacheInitialInterval = -3; // Cache immediately, no countdown
-    static constexpr int s_shapedTextCacheMinInterval = -3; // After a hit, cache the next 3 attempts
-    static constexpr int s_shapedTextCacheMaxInterval = -3; // Never ramp up sampling, stay aggressive
-    static constexpr unsigned s_shapedTextCacheMaxSize = 500000; // Same as default cache size
-    static constexpr unsigned s_shapedTextCacheMaxTextLength = 128; // Matches SmallStringKey::capacity()
-};
+using CachedTextShapingResult = std::unique_ptr<TextShapingResult>;
 
 } // namespace WebCore
 
@@ -127,17 +128,17 @@ public:
     const GlyphGeometryCache& glyphGeometryCache() const { return m_glyphGeometryCache; }
 
     using ShapedTextCache = TextMeasurementCache<
-        CachedShapedText,
-        CachedShapedText::s_shapedTextCacheInitialInterval,
-        CachedShapedText::s_shapedTextCacheMinInterval,
-        CachedShapedText::s_shapedTextCacheMaxInterval,
-        CachedShapedText::s_shapedTextCacheMaxSize,
-        CachedShapedText::s_shapedTextCacheMaxTextLength
+        CachedTextShapingResult,
+        ShapedTextCacheDefaults::initialInterval,
+        ShapedTextCacheDefaults::minInterval,
+        ShapedTextCacheDefaults::maxInterval,
+        ShapedTextCacheDefaults::maxSize,
+        ShapedTextCacheDefaults::maxTextLength
     >;
     ShapedTextCache& shapedTextCache() { return m_shapedTextCache; }
     const ShapedTextCache& shapedTextCache() const { return m_shapedTextCache; }
 
-    const CachedShapedText* getOrCreateCachedShapedText(const TextRun&, const FontCascade&);
+    const TextShapingResult* getOrCreateCachedShapedText(const TextRun&, const FontCascade&);
 
     const Font& primaryFont(const FontCascadeDescription&, FontSelector*);
     WEBCORE_EXPORT const FontRanges& realizeFallbackRangesAt(const FontCascadeDescription&, FontSelector*, unsigned fallbackIndex);

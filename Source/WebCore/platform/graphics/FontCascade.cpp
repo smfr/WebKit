@@ -172,18 +172,18 @@ void FontCascade::update(RefPtr<FontSelector>&& fontSelector) const
     FontCache::forCurrentThread()->updateFontCascade(*this);
 }
 
-GlyphBuffer FontCascade::layoutText(CodePath codePathToUse, const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
+TextShapingResult FontCascade::layoutText(CodePath codePathToUse, const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis) const
 {
     if (shouldUseComplexTextController(codePathToUse))
-        return layoutComplexText(run, from, to, forTextEmphasis, outWidth);
+        return layoutComplexText(run, from, to, forTextEmphasis);
 
-    return layoutSimpleText(run, from, to, forTextEmphasis, outWidth);
+    return layoutSimpleText(run, from, to, forTextEmphasis);
 }
 
 FloatSize FontCascade::drawText(GraphicsContext& context, const TextRun& run, const FloatPoint& point, unsigned from, std::optional<unsigned> to, CustomFontNotReadyAction customFontNotReadyAction) const
 {
     unsigned destination = to.value_or(run.length());
-    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination);
+    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination).glyphBuffer;
     glyphBuffer.flatten();
 
     if (glyphBuffer.isEmpty())
@@ -201,7 +201,7 @@ void FontCascade::drawEmphasisMarks(GraphicsContext& context, const TextRun& run
 
     unsigned destination = to.value_or(run.length());
 
-    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination, ForTextEmphasis::Yes);
+    auto glyphBuffer = layoutText(codePath(run, from, to), run, from, destination, ForTextEmphasis::Yes).glyphBuffer;
     glyphBuffer.flatten();
 
     if (glyphBuffer.isEmpty())
@@ -221,7 +221,7 @@ RefPtr<const DisplayList::DisplayList> FontCascade::displayListForTextRun(Graphi
     if (codePathToUse != CodePath::Complex && !canHandleRunAsSimpleText(run, from, destination))
         codePathToUse = CodePath::Complex;
 
-    auto glyphBuffer = layoutText(codePathToUse, run, from, destination);
+    auto glyphBuffer = layoutText(codePathToUse, run, from, destination).glyphBuffer;
     glyphBuffer.flatten();
 
     if (glyphBuffer.isEmpty())
@@ -1471,9 +1471,9 @@ float FontCascade::floatEmphasisMarkHeight(const AtomString& mark) const
     return { };
 }
 
-GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
+TextShapingResult FontCascade::layoutSimpleText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis) const
 {
-    GlyphBuffer glyphBuffer;
+    TextShapingResult result;
 
     WidthIterator it(*this, run, 0, false, forTextEmphasis == ForTextEmphasis::Yes);
     // FIXME: Using separate glyph buffers for the prefix and the suffix is incorrect when kerning or
@@ -1481,15 +1481,13 @@ GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, uns
     GlyphBuffer localGlyphBuffer;
     it.advance(from, localGlyphBuffer);
     float beforeWidth = it.runWidthSoFar();
-    it.advance(to, glyphBuffer);
+    it.advance(to, result.glyphBuffer);
 
-    if (glyphBuffer.isEmpty())
-        return glyphBuffer;
+    if (result.glyphBuffer.isEmpty())
+        return result;
 
     float afterWidth = it.runWidthSoFar();
-
-    if (outWidth)
-        *outWidth = afterWidth - beforeWidth;
+    result.width = afterWidth - beforeWidth;
 
     float initialAdvance = 0;
     if (run.rtl()) {
@@ -1500,31 +1498,30 @@ GlyphBuffer FontCascade::layoutSimpleText(const TextRun& run, unsigned from, uns
         it.finalize(localGlyphBuffer);
         initialAdvance = beforeWidth;
     }
-    glyphBuffer.expandInitialAdvance(initialAdvance);
+    result.glyphBuffer.expandInitialAdvance(initialAdvance);
 
     // The glyph buffer is currently in logical order,
     // but we need to return the results in visual order.
     if (run.rtl())
-        glyphBuffer.reverse(0, glyphBuffer.size());
+        result.glyphBuffer.reverse(0, result.glyphBuffer.size());
 
-    return glyphBuffer;
+    return result;
 }
 
-GlyphBuffer FontCascade::layoutComplexText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis, float* outWidth) const
+TextShapingResult FontCascade::layoutComplexText(const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis) const
 {
-    GlyphBuffer glyphBuffer;
+    TextShapingResult result;
 
     ComplexTextController controller(*this, run, false, 0, forTextEmphasis == ForTextEmphasis::Yes);
     GlyphBuffer glyphBufferForStartingIndex;
     controller.advance(from, &glyphBufferForStartingIndex);
     float widthBeforeSegment = controller.totalAdvance().width();
-    controller.advance(to, &glyphBuffer);
+    controller.advance(to, &result.glyphBuffer);
 
-    if (glyphBuffer.isEmpty())
-        return glyphBuffer;
+    if (result.glyphBuffer.isEmpty())
+        return result;
 
-    if (outWidth)
-        *outWidth = controller.totalAdvance().width() - widthBeforeSegment;
+    result.width = controller.totalAdvance().width() - widthBeforeSegment;
 
     if (run.rtl()) {
         // Exploit the fact that the sum of the paint advances is equal to
@@ -1532,20 +1529,20 @@ GlyphBuffer FontCascade::layoutComplexText(const TextRun& run, unsigned from, un
         FloatSize initialAdvance = controller.totalAdvance();
         for (unsigned i = 0; i < glyphBufferForStartingIndex.size(); ++i)
             initialAdvance -= WebCore::size(glyphBufferForStartingIndex.advanceAt(i));
-        for (unsigned i = 0; i < glyphBuffer.size(); ++i)
-            initialAdvance -= WebCore::size(glyphBuffer.advanceAt(i));
+        for (unsigned i = 0; i < result.glyphBuffer.size(); ++i)
+            initialAdvance -= WebCore::size(result.glyphBuffer.advanceAt(i));
         // FIXME: Shouldn't we subtract the other initial advance?
-        glyphBuffer.reverse(0, glyphBuffer.size());
-        glyphBuffer.setInitialAdvance(makeGlyphBufferAdvance(initialAdvance));
+        result.glyphBuffer.reverse(0, result.glyphBuffer.size());
+        result.glyphBuffer.setInitialAdvance(makeGlyphBufferAdvance(initialAdvance));
     } else {
         FloatSize initialAdvance = WebCore::size(glyphBufferForStartingIndex.initialAdvance());
         for (unsigned i = 0; i < glyphBufferForStartingIndex.size(); ++i)
             initialAdvance += WebCore::size(glyphBufferForStartingIndex.advanceAt(i));
         // FIXME: Shouldn't we add the other initial advance?
-        glyphBuffer.setInitialAdvance(makeGlyphBufferAdvance(initialAdvance));
+        result.glyphBuffer.setInitialAdvance(makeGlyphBufferAdvance(initialAdvance));
     }
 
-    return glyphBuffer;
+    return result;
 }
 
 inline bool shouldDrawIfLoading(const Font& font, FontCascade::CustomFontNotReadyAction customFontNotReadyAction)
@@ -1892,7 +1889,7 @@ Vector<FloatSegment> FontCascade::lineSegmentsForIntersectionsWithRect(const Tex
     if (isLoadingCustomFonts())
         return result;
 
-    auto glyphBuffer = layoutText(codePath(run), run, 0, run.length());
+    auto glyphBuffer = layoutText(codePath(run), run, 0, run.length()).glyphBuffer;
     if (!glyphBuffer.size())
         return result;
 

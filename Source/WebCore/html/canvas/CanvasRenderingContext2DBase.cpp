@@ -2877,14 +2877,14 @@ void CanvasRenderingContext2DBase::drawTextUnchecked(const TextRun& textRun, dou
     auto& fontCascade = this->fontProxy()->fontCascade();
     auto& fontMetrics = fontProxy()->metricsOfPrimaryFont();
 
-    const CachedShapedText* cachedShapedText = nullptr;
+    const TextShapingResult* cachedShapedText = nullptr;
     if (canUseCachedShapedText(textRun)) {
         RefPtr fonts = fontCascade.fonts();
         ASSERT(fonts);
         cachedShapedText = fonts->getOrCreateCachedShapedText(textRun, fontCascade);
     }
 
-    float fontWidth = (cachedShapedText && cachedShapedText->glyphBuffer) ? cachedShapedText->width : fontCascade.width(textRun);
+    float fontWidth = cachedShapedText ? cachedShapedText->width : fontCascade.width(textRun);
 
     bool useMaxWidth = maxWidth && maxWidth.value() < fontWidth;
     float width = useMaxWidth ? maxWidth.value() : fontWidth;
@@ -2905,8 +2905,8 @@ void CanvasRenderingContext2DBase::drawTextUnchecked(const TextRun& textRun, dou
     auto& fontProxy = *this->fontProxy();
 
     auto drawText = [&](GraphicsContext& context, const FloatPoint& point) {
-        if (cachedShapedText && cachedShapedText->glyphBuffer) {
-            const auto& glyphBuffer = *cachedShapedText->glyphBuffer;
+        if (cachedShapedText) {
+            const auto& glyphBuffer = cachedShapedText->glyphBuffer;
             if (!glyphBuffer.isEmpty()) {
                 FloatPoint startPoint = point + WebCore::size(glyphBuffer.initialAdvance());
                 fontCascade.drawGlyphBuffer(context, glyphBuffer, startPoint, FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady);
