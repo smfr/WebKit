@@ -25,7 +25,7 @@
 
 @_weakLinked internal import USDKit
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
-@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) import RealityKit
 
 nonisolated func makeParameters(
     for function: _Proto_LowLevelMaterialResource_v1.Function,

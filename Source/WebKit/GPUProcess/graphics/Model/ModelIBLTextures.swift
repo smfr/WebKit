@@ -26,8 +26,8 @@
 internal import Metal
 @_weakLinked internal import USDKit
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
-@_weakLinked @_spi(RealityCoreRendererAPI) internal import RealityKit
-@_weakLinked @_spi(RealityCoreTextureProcessingAPI) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) import RealityKit
+@_weakLinked @_spi(RealityCoreTextureProcessingAPI) import RealityKit
 
 class IBLTextures {
     static func loadIBLTextures(

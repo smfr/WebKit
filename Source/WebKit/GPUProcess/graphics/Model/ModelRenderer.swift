@@ -26,7 +26,7 @@
 internal import QuartzCore
 @_weakLinked internal import USDKit
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
-@_weakLinked @_spi(RealityCoreRendererAPI) @_spi(Private) internal import RealityKit
+@_weakLinked @_spi(RealityCoreRendererAPI) @_spi(Private) import RealityKit
 import simd
 
 extension RealityCoreRenderer._Proto_LowLevelGlobalConstantsEncoder_v1 {
