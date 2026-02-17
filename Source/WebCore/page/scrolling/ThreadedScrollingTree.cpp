@@ -255,7 +255,13 @@ void ThreadedScrollingTree::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNod
         layoutViewportOrigin = scrollingNode->layoutViewport().location();
 
     auto scrollPosition = node.currentScrollPosition();
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), scrollPosition, layoutViewportOrigin, ScrollUpdateType::PositionUpdate, scrollingLayerPositionAction };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = scrollPosition,
+        .layoutViewportOrigin = layoutViewportOrigin,
+        .updateType = ScrollUpdateType::PositionUpdate,
+        .updateLayerPositionAction = scrollingLayerPositionAction,
+    };
 
     if (RunLoop::isMain()) {
         scrollingCoordinator->applyScrollUpdate(WTF::move(scrollUpdate));
@@ -281,7 +287,13 @@ void ThreadedScrollingTree::scrollingTreeNodeScrollUpdated(ScrollingTreeScrollin
 
     LOG_WITH_STREAM(Scrolling, stream << "ThreadedScrollingTree::scrollingTreeNodeScrollUpdated " << node.scrollingNodeID() << " update type " << scrollUpdateType);
 
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), { }, { }, scrollUpdateType };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = { },
+        .layoutViewportOrigin = { },
+        .updateType = scrollUpdateType,
+        .updateLayerPositionAction = ScrollingLayerPositionAction::Sync
+    };
 
     if (RunLoop::isMain()) {
         scrollingCoordinator->applyScrollUpdate(WTF::move(scrollUpdate));

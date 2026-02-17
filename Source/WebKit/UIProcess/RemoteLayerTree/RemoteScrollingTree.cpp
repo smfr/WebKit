@@ -83,7 +83,12 @@ void RemoteScrollingTree::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNode&
     if (auto* scrollingNode = dynamicDowncast<ScrollingTreeFrameScrollingNode>(node))
         layoutViewportOrigin = scrollingNode->layoutViewport().location();
 
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), node.currentScrollPosition(), layoutViewportOrigin, ScrollUpdateType::PositionUpdate, scrollingLayerPositionAction };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = node.currentScrollPosition(),
+        .layoutViewportOrigin = layoutViewportOrigin,
+        .updateLayerPositionAction = scrollingLayerPositionAction,
+    };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 
     scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
@@ -97,7 +102,12 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopAnimatedScroll(ScrollingTreeSc
     if (!scrollingCoordinatorProxy)
         return;
 
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), { }, { }, ScrollUpdateType::AnimatedScrollDidEnd };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = { },
+        .layoutViewportOrigin = { },
+        .updateType = ScrollUpdateType::AnimatedScrollDidEnd,
+    };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 
     scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
@@ -111,7 +121,12 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopWheelEventScroll(WebCore::Scro
     if (!scrollingCoordinatorProxy)
         return;
 
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), { }, { }, ScrollUpdateType::WheelEventScrollDidEnd };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = { },
+        .layoutViewportOrigin = { },
+        .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
+    };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 
     scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
@@ -147,7 +162,12 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopProgrammaticScroll(WebCore::Sc
     if (!scrollingCoordinatorProxy)
         return;
 
-    auto scrollUpdate = ScrollUpdate { node.scrollingNodeID(), { }, { }, ScrollUpdateType::ProgrammaticScrollDidEnd };
+    auto scrollUpdate = ScrollUpdate {
+        .nodeID = node.scrollingNodeID(),
+        .scrollPosition = { },
+        .layoutViewportOrigin = { },
+        .updateType = ScrollUpdateType::ProgrammaticScrollDidEnd,
+    };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 
     scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
