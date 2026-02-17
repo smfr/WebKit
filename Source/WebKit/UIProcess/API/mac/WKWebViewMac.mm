@@ -557,12 +557,12 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
 
 - (void)mouseDown:(NSEvent *)event
 {
-    _impl->mouseDown(event, WebKit::WebMouseEventInputSource::Hardware);
+    _impl->mouseDown(event, WebKit::WebMouseEventInputSource::UserDriven);
 }
 
 - (void)mouseUp:(NSEvent *)event
 {
-    _impl->mouseUp(event, WebKit::WebMouseEventInputSource::Hardware);
+    _impl->mouseUp(event, WebKit::WebMouseEventInputSource::UserDriven);
 }
 
 - (void)mouseDragged:(NSEvent *)event

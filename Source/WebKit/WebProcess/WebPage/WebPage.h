@@ -3058,7 +3058,7 @@ private:
     RefPtr<WebCore::Node> m_potentialTapNode;
     WebCore::FloatPoint m_potentialTapLocation;
     RefPtr<WebCore::SecurityOrigin> m_potentialTapSecurityOrigin;
-    WebCore::MouseEventInputSource m_potentialTapInputSource { WebCore::MouseEventInputSource::Hardware };
+    WebCore::MouseEventInputSource m_potentialTapInputSource { WebCore::MouseEventInputSource::UserDriven };
 
     bool m_completingSyntheticClick { false };
     bool m_hasHandledSyntheticClick { false };

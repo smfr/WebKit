@@ -81,8 +81,8 @@ WebMouseEventButton kit(WebCore::MouseButton button)
 WebCore::MouseEventInputSource platform(WebMouseEventInputSource source)
 {
     switch (source) {
-    case WebMouseEventInputSource::Hardware:
-        return WebCore::MouseEventInputSource::Hardware;
+    case WebMouseEventInputSource::UserDriven:
+        return WebCore::MouseEventInputSource::UserDriven;
     case WebMouseEventInputSource::Automation:
         return WebCore::MouseEventInputSource::Automation;
     default:

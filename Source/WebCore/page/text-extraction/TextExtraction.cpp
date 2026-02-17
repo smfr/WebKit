@@ -1523,15 +1523,15 @@ static constexpr auto interactedWithSelectElementDescription = "Successfully upd
 static void dispatchSimulatedClick(LocalFrame& frame, IntPoint location, CompletionHandler<void(bool, String&&)>&& completion)
 {
     frame.eventHandler().handleMouseMoveEvent({
-        location, location, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::Hardware
+        location, location, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven
     });
 
     frame.eventHandler().handleMousePressEvent({
-        location, location, MouseButton::Left, PlatformEvent::Type::MousePressed, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::Hardware
+        location, location, MouseButton::Left, PlatformEvent::Type::MousePressed, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven
     });
 
     frame.eventHandler().handleMouseReleaseEvent({
-        location, location, MouseButton::Left, PlatformEvent::Type::MouseReleased, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::Hardware
+        location, location, MouseButton::Left, PlatformEvent::Type::MouseReleased, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven
     });
 
     completion(true, { });

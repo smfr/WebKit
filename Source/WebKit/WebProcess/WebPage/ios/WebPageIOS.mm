@@ -922,10 +922,10 @@ void WebPage::handleDoubleTapForDoubleClickAtPoint(const IntPoint& point, Option
 
     auto platformModifiers = platform(modifiers);
     auto roundedAdjustedPoint = roundedIntPoint(adjustedPoint);
-    frameRespondingToDoubleClick->eventHandler().handleMousePressEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, MouseButton::Left, PlatformEvent::Type::MousePressed, 2, platformModifiers, MonotonicTime::now(), 0, WebCore::SyntheticClickType::OneFingerTap, WebCore::MouseEventInputSource::Hardware));
+    frameRespondingToDoubleClick->eventHandler().handleMousePressEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, MouseButton::Left, PlatformEvent::Type::MousePressed, 2, platformModifiers, MonotonicTime::now(), 0, WebCore::SyntheticClickType::OneFingerTap, WebCore::MouseEventInputSource::UserDriven));
     if (m_isClosed)
         return;
-    frameRespondingToDoubleClick->eventHandler().handleMouseReleaseEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseReleased, 2, platformModifiers, MonotonicTime::now(), 0, WebCore::SyntheticClickType::OneFingerTap, WebCore::MouseEventInputSource::Hardware));
+    frameRespondingToDoubleClick->eventHandler().handleMouseReleaseEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseReleased, 2, platformModifiers, MonotonicTime::now(), 0, WebCore::SyntheticClickType::OneFingerTap, WebCore::MouseEventInputSource::UserDriven));
 }
 
 void WebPage::requestFocusedElementInformation(CompletionHandler<void(const std::optional<FocusedElementInformation>&)>&& completionHandler)
@@ -978,7 +978,7 @@ Awaitable<DragInitiationResult> WebPage::requestAdditionalItemsForDragSession(st
     // To augment the platform drag session with additional items, end the current drag session and begin a new drag session with the new drag item.
     // This process is opaque to the UI process, which still maintains the old drag item in its drag session. Similarly, this persistent drag session
     // is opaque to the web process, which only sees that the current drag has ended, and that a new one is beginning.
-    PlatformMouseEvent event(clientPosition, globalPosition, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), 0, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware);
+    PlatformMouseEvent event(clientPosition, globalPosition, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), 0, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::UserDriven);
     m_page->dragController().dragEnded();
     RefPtr localMainFrame = protect(*m_page)->localMainFrame();
     if (!localMainFrame)
@@ -1146,7 +1146,7 @@ void WebPage::inspectorNodeSearchMovedToPosition(const FloatPoint& position)
         return;
     IntPoint adjustedPoint = roundedIntPoint(position);
 
-    localMainFrame->eventHandler().mouseMoved(PlatformMouseEvent(adjustedPoint, adjustedPoint, MouseButton::None, PlatformEvent::Type::MouseMoved, 0, { }, { }, 0, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware));
+    localMainFrame->eventHandler().mouseMoved(PlatformMouseEvent(adjustedPoint, adjustedPoint, MouseButton::None, PlatformEvent::Type::MouseMoved, 0, { }, { }, 0, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::UserDriven));
     protect(localMainFrame->document())->updateStyleIfNeeded();
 }
 
@@ -1488,16 +1488,16 @@ void WebPage::dispatchSyntheticMouseEventsForSelectionGesture(SelectionTouch tou
     auto& eventHandler = localMainFrame->eventHandler();
     switch (touch) {
     case SelectionTouch::Started:
-        eventHandler.handleMousePressEvent({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MousePressed, 1, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware });
+        eventHandler.handleMousePressEvent({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MousePressed, 1, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::UserDriven });
         break;
     case SelectionTouch::Moved:
-        eventHandler.dispatchSyntheticMouseMove({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware });
+        eventHandler.dispatchSyntheticMouseMove({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::UserDriven });
         break;
     case SelectionTouch::Ended:
     case SelectionTouch::EndedMovingForward:
     case SelectionTouch::EndedMovingBackward:
     case SelectionTouch::EndedNotMoving:
-        eventHandler.handleMouseReleaseEvent({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseReleased, 1, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::Hardware });
+        eventHandler.handleMouseReleaseEvent({ adjustedPoint, adjustedPoint, MouseButton::Left, PlatformEvent::Type::MouseReleased, 1, { }, MonotonicTime::now(), WebCore::ForceAtClick, WebCore::SyntheticClickType::NoTap, WebCore::MouseEventInputSource::UserDriven });
         break;
     }
 }

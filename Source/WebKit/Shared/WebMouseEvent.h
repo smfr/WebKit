@@ -60,7 +60,7 @@ enum class WebMouseEventSyntheticClickType : uint8_t {
 };
 WebMouseEventSyntheticClickType syntheticClickType(const WebCore::NavigationAction&);
 
-enum class WebMouseEventInputSource : uint8_t { Hardware, Automation };
+enum class WebMouseEventInputSource : uint8_t { UserDriven, Automation };
 
 class WebMouseEvent : public WebEvent {
 public:
@@ -121,7 +121,7 @@ private:
     WebCore::PlatformMouseEvent::IsTouch m_isTouchEvent { WebCore::PlatformMouseEvent::IsTouch::No };
 #endif
     double m_force { 0 };
-    WebMouseEventInputSource m_inputSource { WebMouseEventInputSource::Hardware };
+    WebMouseEventInputSource m_inputSource { WebMouseEventInputSource::UserDriven };
     WebMouseEventSyntheticClickType m_syntheticClickType { WebMouseEventSyntheticClickType::NoTap };
     WebCore::PointerID m_pointerId { WebCore::mousePointerID };
     String m_pointerType { WebCore::mousePointerEventType() };

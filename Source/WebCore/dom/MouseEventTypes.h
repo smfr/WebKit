@@ -37,7 +37,7 @@ static constexpr double ForceAtForceClick = 2;
 
 enum class SyntheticClickType : uint8_t { NoTap, OneFingerTap, TwoFingerTap };
 
-enum class MouseEventInputSource : uint8_t { Hardware, Automation };
+enum class MouseEventInputSource : uint8_t { UserDriven, Automation };
 
 // These button numbers match the ones used in the DOM API, 0 through 2, except for None and Other which aren't specified.
 // We reserve -2 for the former and -1 to represent pointer events that indicate that the pressed mouse button hasn't

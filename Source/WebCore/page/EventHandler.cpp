@@ -3193,7 +3193,7 @@ void EventHandler::updateMouseEventTargetAfterLayoutIfNeeded()
         // boundary event processing.
         auto modifiers = PlatformKeyboardEvent::currentStateOfModifierKeys();
         PlatformMouseEvent syntheticEvent(valueOrDefault(m_lastKnownMousePosition), m_lastKnownMouseGlobalPosition,
-            MouseButton::None, PlatformEvent::Type::NoType, 0, modifiers, MonotonicTime::now(), 0, SyntheticClickType::NoTap, MouseEventInputSource::Hardware);
+            MouseButton::None, PlatformEvent::Type::NoType, 0, modifiers, MonotonicTime::now(), 0, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven);
 
         // EventHandler updates scrollable areas when the element under the mouse changes as a result of the
         // mouse moving. In this case, the mouse did not move, but the element under the mouse still changed,
@@ -3845,7 +3845,7 @@ bool EventHandler::sendContextMenuEvent(const PlatformMouseEvent& event)
     if (mouseEvent.scrollbar() || view->scrollbarAtPoint(flooredEventPosition))
         return false;
 
-    auto shouldSelectOnContextualMenuClick = frame->editor().behavior().shouldSelectOnContextualMenuClick() && event.inputSource() == MouseEventInputSource::Hardware;
+    auto shouldSelectOnContextualMenuClick = frame->editor().behavior().shouldSelectOnContextualMenuClick() && event.inputSource() == MouseEventInputSource::UserDriven;
 
     if (shouldSelectOnContextualMenuClick && !frame->selection().contains(viewportPos)) {
         m_mouseDownMayStartSelect = true; // context menu events are always allowed to perform a selection
@@ -3934,7 +3934,7 @@ bool EventHandler::sendContextMenuEventForKey()
 #else
     PlatformEvent::Type eventType = PlatformEvent::Type::MousePressed;
 #endif
-    PlatformMouseEvent platformMouseEvent(position, globalPosition, MouseButton::Right, eventType, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::Hardware);
+    PlatformMouseEvent platformMouseEvent(position, globalPosition, MouseButton::Right, eventType, 1, { }, MonotonicTime::now(), ForceAtClick, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven);
 
     return sendContextMenuEvent(platformMouseEvent);
 }
@@ -4020,7 +4020,7 @@ void EventHandler::fakeMouseMoveEventTimerFired()
         return;
 
     auto modifiers = PlatformKeyboardEvent::currentStateOfModifierKeys();
-    PlatformMouseEvent fakeMouseMoveEvent(valueOrDefault(m_lastKnownMousePosition), m_lastKnownMouseGlobalPosition, MouseButton::None, PlatformEvent::Type::MouseMoved, 0, modifiers, MonotonicTime::now(), 0, SyntheticClickType::NoTap, MouseEventInputSource::Hardware);
+    PlatformMouseEvent fakeMouseMoveEvent(valueOrDefault(m_lastKnownMousePosition), m_lastKnownMouseGlobalPosition, MouseButton::None, PlatformEvent::Type::MouseMoved, 0, modifiers, MonotonicTime::now(), 0, SyntheticClickType::NoTap, MouseEventInputSource::UserDriven);
     mouseMoved(fakeMouseMoveEvent);
 }
 #endif // !ENABLE(IOS_TOUCH_EVENTS)
