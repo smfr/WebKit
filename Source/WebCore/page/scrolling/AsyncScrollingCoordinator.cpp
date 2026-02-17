@@ -426,10 +426,25 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
 
     tracePoint(ProgrammaticScroll, scrollPosition.y(), frameView->frame().isMainFrame());
 
-    if (options.originalScrollDelta)
-        stateNode->setRequestedScrollData({ ScrollRequestType::DeltaUpdate, *options.originalScrollDelta, options.type, options.clamping, options.animated, scrollableArea.scrollbarRevealBehavior() });
-    else
-        stateNode->setRequestedScrollData({ ScrollRequestType::PositionUpdate, scrollPosition, options.type, options.clamping, options.animated, scrollableArea.scrollbarRevealBehavior() });
+    if (options.originalScrollDelta) {
+        stateNode->setRequestedScrollData({
+            .requestType = ScrollRequestType::DeltaUpdate,
+            .scrollPositionOrDelta = *options.originalScrollDelta,
+            .scrollType = options.type,
+            .clamping = options.clamping,
+            .animated = options.animated,
+            .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
+        });
+    } else {
+        stateNode->setRequestedScrollData({
+            .requestType = ScrollRequestType::PositionUpdate,
+            .scrollPositionOrDelta = scrollPosition,
+            .scrollType = options.type,
+            .clamping = options.clamping,
+            .animated = options.animated,
+            .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
+        });
+    }
 
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::requestScrollToPosition " << scrollPosition << " for nodeID " << scrollingNodeID << " requestedScrollData " << stateNode->requestedScrollData());
 
@@ -455,7 +470,9 @@ void AsyncScrollingCoordinator::stopAnimatedScroll(ScrollableArea& scrollableAre
         return;
 
     // Animated scrolls are always programmatic.
-    stateNode->setRequestedScrollData({ ScrollRequestType::CancelAnimatedScroll, { } });
+    stateNode->setRequestedScrollData({
+        .requestType = ScrollRequestType::CancelAnimatedScroll
+    });
     // FIXME: This should schedule a rendering update
     commitTreeStateIfNeeded();
 }

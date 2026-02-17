@@ -108,7 +108,7 @@ enum class ScrollRequestType : uint8_t {
 
 struct RequestedScrollData {
     ScrollRequestType requestType { ScrollRequestType::PositionUpdate };
-    Variant<FloatPoint, FloatSize> scrollPositionOrDelta;
+    Variant<FloatPoint, FloatSize> scrollPositionOrDelta { };
     ScrollType scrollType { ScrollType::User };
     ScrollClamping clamping { ScrollClamping::Clamped };
     ScrollIsAnimated animated { ScrollIsAnimated::No };
