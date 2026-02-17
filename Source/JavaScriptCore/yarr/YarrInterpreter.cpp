@@ -709,10 +709,10 @@ public:
 
         auto boundaryCharacterClass = term.ignoreCase() ? pattern->ignoreCaseWordcharCharacterClass : pattern->wordcharCharacterClass;
 
-        bool prevIsWordchar = !input.atStart(inputOffset) && testCharacterClass(boundaryCharacterClass, input.readChecked(inputOffset + 1));
+        bool prevIsWordchar = !input.atStart(inputOffset) && testCharacterClass(boundaryCharacterClass, input.readCheckedDontAdvance(inputOffset + 1));
         bool readIsWordchar;
         if (inputOffset)
-            readIsWordchar = !input.atEnd(inputOffset) && testCharacterClass(boundaryCharacterClass, input.readChecked(inputOffset));
+            readIsWordchar = !input.atEnd(inputOffset) && testCharacterClass(boundaryCharacterClass, input.readCheckedDontAdvance(inputOffset));
         else
             readIsWordchar = !input.atEnd() && testCharacterClass(boundaryCharacterClass, input.read());
 
