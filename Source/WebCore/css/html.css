@@ -1214,6 +1214,14 @@ select optgroup option {
     font-weight: normal;
 }
 
+select option::checkmark {
+    content: "\2713" / "";
+}
+
+select option:not(:checked)::checkmark {
+    visibility: hidden;
+}
+
 output {
     display: inline;
 }

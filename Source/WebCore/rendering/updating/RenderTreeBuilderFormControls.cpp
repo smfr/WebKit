@@ -26,7 +26,9 @@
 #include "config.h"
 #include "RenderTreeBuilderFormControls.h"
 
+#include "ContainerNodeInlines.h"
 #include "HTMLInputElement.h"
+#include "HTMLOptionElement.h"
 #include "HTMLSelectElement.h"
 #include "InputType.h"
 #include "RenderBlockFlow.h"
@@ -36,6 +38,7 @@
 #include "RenderMenuList.h"
 #include "RenderTreeBuilderBlock.h"
 #include "RenderTreeUpdaterGeneratedContent.h"
+#include "SelectPopoverElement.h"
 #include "Settings.h"
 #include <wtf/TZoneMallocInlines.h>
 
@@ -81,17 +84,32 @@ void RenderTreeBuilder::FormControls::updateAfterDescendants(RenderElement& rend
 {
     if (RefPtr inputElement = dynamicDowncast<HTMLInputElement>(renderer.element())) {
         if (inputElement->isCheckable())
-            updatePseudoElement(PseudoElementType::Checkmark, renderer);
+            updatePseudoElement(PseudoElementType::Checkmark, renderer, renderer.style().usedAppearance());
+        return;
+    }
+
+    if (RefPtr optionElement = dynamicDowncast<HTMLOptionElement>(renderer.element())) {
+        RefPtr selectElement = optionElement->ownerSelectElement();
+        if (!selectElement)
+            return;
+
+        RefPtr pickerElement = selectElement->pickerPopoverElement();
+        if (!pickerElement)
+            return;
+
+        if (CheckedPtr pickerElementRenderer = pickerElement->renderer())
+            updatePseudoElement(PseudoElementType::Checkmark, renderer, pickerElementRenderer->style().usedAppearance(), renderer.firstChild());
+
         return;
     }
 
     if (RefPtr select = dynamicDowncast<HTMLSelectElement>(renderer.element()); select && select->usesMenuList()) {
-        updatePseudoElement(PseudoElementType::PickerIcon, renderer);
+        updatePseudoElement(PseudoElementType::PickerIcon, renderer, renderer.style().usedAppearance());
         return;
     }
 }
 
-void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type, RenderElement& renderer)
+void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type, RenderElement& renderer, StyleAppearance usedAppearance, RenderObject* beforeChild)
 {
     auto existingPseudoElement = [&] -> CheckedPtr<RenderElement> {
         for (CheckedRef child : childrenOfType<RenderElement>(renderer)) {
@@ -101,7 +119,7 @@ void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type
         return nullptr;
     }();
 
-    if (renderer.style().usedAppearance() != StyleAppearance::Base && !existingPseudoElement)
+    if (usedAppearance != StyleAppearance::Base && !existingPseudoElement)
         return;
 
     auto pseudoStyle = renderer.getCachedPseudoStyle({ type });
@@ -109,7 +127,7 @@ void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type
         return;
 
     auto shouldHavePseudoElementRenderer = [&] -> bool {
-        return renderer.style().usedAppearance() == StyleAppearance::Base && pseudoStyle->display() != Style::DisplayType::None;
+        return usedAppearance == StyleAppearance::Base && pseudoStyle->display() != Style::DisplayType::None;
     };
 
     if (!shouldHavePseudoElementRenderer()) {
@@ -139,7 +157,7 @@ void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type
     if (pseudoElement->style().content().isData())
         RenderTreeUpdater::GeneratedContent::createContentRenderers(m_builder, *pseudoElement, pseudoElement->style(), type);
 
-    m_builder.attach(renderer, WTF::move(pseudoElement));
+    m_builder.attach(renderer, WTF::move(pseudoElement), beforeChild);
 }
 
 } // namespace WebCore

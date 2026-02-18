@@ -60,6 +60,7 @@
 #include "RenderStyle+SettersInlines.h"
 #include "RenderView.h"
 #include "ResolvedStyle.h"
+#include "SelectPopoverElement.h"
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "StyleAdjuster.h"
@@ -458,11 +459,24 @@ std::optional<ElementUpdate> TreeResolver::resolvePseudoElement(Element& element
         return { };
 
     if (pseudoElementIdentifier.type == PseudoElementType::Checkmark) {
-        if (elementUpdate.style->usedAppearance() != StyleAppearance::Base)
+        // Option elements need to check against the picker for their appearance value.
+        if (RefPtr option = dynamicDowncast<HTMLOptionElement>(element)) {
+            RefPtr select = option->ownerSelectElement();
+            if (!select)
+                return { };
+            RefPtr pickerElement = select->pickerPopoverElement();
+            if (!pickerElement)
+                return { };
+            CheckedPtr pickerStyle = m_update->elementStyle(*pickerElement);
+            if (!pickerStyle || pickerStyle->usedAppearance() != StyleAppearance::Base)
+                return { };
+        } else if (elementUpdate.style->usedAppearance() != StyleAppearance::Base)
             return { };
+
         if (RefPtr input = dynamicDowncast<HTMLInputElement>(element); !input || !input->isCheckable())
             return { };
     }
+
     if (pseudoElementIdentifier.type == PseudoElementType::PickerIcon) {
         if (elementUpdate.style->usedAppearance() != StyleAppearance::Base)
             return { };
