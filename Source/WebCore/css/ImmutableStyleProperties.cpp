@@ -119,7 +119,7 @@ int ImmutableStyleProperties::findPropertyIndex(CSSPropertyID propertyID) const
 {
     // Convert here propertyID into an uint16_t to compare it with the metadata's m_propertyID to avoid
     // the compiler converting it to an int multiple times in the loop.
-    uint16_t id = enumToUnderlyingType(propertyID);
+    uint16_t id = std::to_underlying(propertyID);
     auto metadataSpan = this->metadataSpan();
     for (int n = metadataSpan.size() - 1 ; n >= 0; --n) {
         if (metadataSpan[n].m_propertyID == id)

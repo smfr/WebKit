@@ -2470,7 +2470,7 @@ auto UnifiedPDFPlugin::toContextMenuItemTag(int tagValue) -> ContextMenuItemTag
         ContextMenuItemTag::ActualSize,
     };
     const auto isKnownContextMenuItemTag = std::ranges::any_of(regularContextMenuItemTags, [tagValue](ContextMenuItemTag tag) {
-        return tagValue == enumToUnderlyingType(tag);
+        return tagValue == std::to_underlying(tag);
     });
     return isKnownContextMenuItemTag ? static_cast<ContextMenuItemTag>(tagValue) : ContextMenuItemTag::Unknown;
 }
@@ -2510,7 +2510,7 @@ std::optional<PDFContextMenu> UnifiedPDFPlugin::createContextMenu(const WebMouse
     bool shouldPresentOpenWithDefaultViewerOption = !isInRecoveryOS();
     if (shouldPresentOpenWithDefaultViewerOption) {
         menuItems.append(contextMenuItem(ContextMenuItemTag::OpenWithDefaultViewer));
-        openInDefaultViewerTag = enumToUnderlyingType(ContextMenuItemTag::OpenWithDefaultViewer);
+        openInDefaultViewerTag = std::to_underlying(ContextMenuItemTag::OpenWithDefaultViewer);
     }
 
     addSeparator();
@@ -2599,14 +2599,14 @@ PDFContextMenuItem UnifiedPDFPlugin::contextMenuItem(ContextMenuItemTag tag, boo
         auto itemEnabled = disableItemDueToLockedDocument ? ContextMenuItemEnablement::Disabled : ContextMenuItemEnablement::Enabled;
         auto itemHasAction = hasAction && !disableItemDueToLockedDocument ? ContextMenuItemHasAction::Yes : ContextMenuItemHasAction::No;
 
-        return { titleForContextMenuItemTag(tag), state, enumToUnderlyingType(tag), contextMenuActionFromTag(tag), itemEnabled, itemHasAction, ContextMenuItemIsSeparator::No };
+        return { titleForContextMenuItemTag(tag), state, std::to_underlying(tag), contextMenuActionFromTag(tag), itemEnabled, itemHasAction, ContextMenuItemIsSeparator::No };
     }
     }
 }
 
 PDFContextMenuItem UnifiedPDFPlugin::separatorContextMenuItem() const
 {
-    return { { }, 0, enumToUnderlyingType(ContextMenuItemTag::Invalid), ContextMenuItemTagNoAction, ContextMenuItemEnablement::Disabled, ContextMenuItemHasAction::No, ContextMenuItemIsSeparator::Yes };
+    return { { }, 0, std::to_underlying(ContextMenuItemTag::Invalid), ContextMenuItemTagNoAction, ContextMenuItemEnablement::Disabled, ContextMenuItemHasAction::No, ContextMenuItemIsSeparator::Yes };
 }
 
 Vector<PDFContextMenuItem> UnifiedPDFPlugin::selectionContextMenuItems(const IntPoint& contextMenuEventRootViewPoint, bool shouldPresentLookupAndSearchOptions) const

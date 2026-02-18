@@ -5169,7 +5169,7 @@ Ref<ClipRects> RenderLayer::updateClipRects(const ClipRectsContext& clipRectsCon
 #if ASSERT_ENABLED
     m_clipRectsCache->m_clipRectsRoot[clipRectsType] = clipRectsContext.rootLayer;
 #endif
-    ASSERT(enumToUnderlyingType(clipRectsContext.overlayScrollbarSizeRelevancy()) == (clipRectsContext.clipRectsType == RootRelativeClipRects));
+    ASSERT(std::to_underlying(clipRectsContext.overlayScrollbarSizeRelevancy()) == (clipRectsContext.clipRectsType == RootRelativeClipRects));
 
     RefPtr<ClipRects> parentClipRects = this->parentClipRects(clipRectsContext);
 

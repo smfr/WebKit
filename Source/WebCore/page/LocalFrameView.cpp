@@ -5568,7 +5568,7 @@ bool LocalFrameView::wasScrolledByUser() const
 
 void LocalFrameView::setLastUserScrollType(std::optional<UserScrollType> userScrollType)
 {
-    LOG(Scrolling, "LocalFrameView::setLastUserScrollType at %d", userScrollType ? enumToUnderlyingType(*userScrollType) : -1);
+    LOG(Scrolling, "LocalFrameView::setLastUserScrollType at %d", userScrollType ? std::to_underlying(*userScrollType) : -1);
 
     cancelScheduledScrolls();
     if (currentScrollType() == ScrollType::Programmatic)

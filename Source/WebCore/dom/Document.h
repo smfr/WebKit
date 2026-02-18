@@ -698,7 +698,7 @@ public:
 #endif
 
     static constexpr ptrdiff_t documentClassesMemoryOffset() { return OBJECT_OFFSETOF(Document, m_documentClasses); }
-    static auto isHTMLDocumentClassFlag() { return enumToUnderlyingType(DocumentClass::HTML); }
+    static auto isHTMLDocumentClassFlag() { return std::to_underlying(DocumentClass::HTML); }
 
     bool isSrcdocDocument() const { return m_isSrcdocDocument; }
 

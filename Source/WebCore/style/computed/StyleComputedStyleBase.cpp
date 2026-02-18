@@ -63,7 +63,7 @@ static_assert(PublicPseudoIDBits == allPublicPseudoElementTypes.size());
 static_assert(!(static_cast<unsigned>(maxTextTransformValue) >> TextTransformBits));
 
 // Value zero is used to indicate no pseudo-element.
-static_assert(!((enumToUnderlyingType(PseudoElementType::HighestEnumValue) + 1) >> PseudoElementTypeBits));
+static_assert(!((std::to_underlying(PseudoElementType::HighestEnumValue) + 1) >> PseudoElementTypeBits));
 
 DEFINE_ALLOCATOR_WITH_HEAP_IDENTIFIER(ComputedStyleBase);
 

@@ -212,7 +212,7 @@ SQLiteStatementAutoResetScope SWRegistrationDatabase::cachedStatement(StatementT
     ASSERT(m_database);
     ASSERT(type < StatementType::Invalid);
 
-    auto index = enumToUnderlyingType(type);
+    auto index = std::to_underlying(type);
     if (!m_cachedStatements[index]) {
         if (auto statement = CheckedRef { *m_database }->prepareStatement(statementString(type)))
             m_cachedStatements[index] = WTF::move(statement);
