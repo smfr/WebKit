@@ -162,6 +162,19 @@ RetainPtr<NSArray> supportedAttributes(id element)
     return attributes;
 }
 
+RetainPtr<NSArray> supportedParameterizedAttributes(id element)
+{
+    RetainPtr<NSArray> attributes;
+
+    BEGIN_AX_OBJC_EXCEPTIONS
+    AccessibilityUIElementMac::s_controller->executeOnAXThreadAndWait([&attributes, &element] {
+        attributes = [element accessibilityParameterizedAttributeNames];
+    });
+    END_AX_OBJC_EXCEPTIONS
+
+    return attributes;
+}
+
 static id attributeValue(id element, NSString *attribute)
 {
     // The given `element` may not respond to `accessibilityAttributeValue`, so first check to see if it responds to the attribute-specific selector.
@@ -966,7 +979,9 @@ bool AccessibilityUIElementMac::isAttributeSettableNS(NSString *attribute) const
 bool AccessibilityUIElementMac::isAttributeSupported(JSStringRef attribute)
 {
     BEGIN_AX_OBJC_EXCEPTIONS
-    return [supportedAttributes(m_element.getAutoreleased()) containsObject:[NSString stringWithJSStringRef:attribute]];
+    NSString *attributeName = [NSString stringWithJSStringRef:attribute];
+    id element = m_element.getAutoreleased();
+    return [supportedAttributes(element) containsObject:attributeName] || [supportedParameterizedAttributes(element) containsObject:attributeName];
     END_AX_OBJC_EXCEPTIONS
 
     return false;

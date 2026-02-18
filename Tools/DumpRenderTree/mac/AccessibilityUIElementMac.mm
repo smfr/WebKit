@@ -655,7 +655,8 @@ bool AccessibilityUIElement::isAttributeSettable(JSStringRef attribute)
 bool AccessibilityUIElement::isAttributeSupported(JSStringRef attribute)
 {
     BEGIN_AX_OBJC_EXCEPTIONS
-    return [[m_element accessibilityAttributeNames] containsObject:[NSString stringWithJSStringRef:attribute]];
+    NSString *attributeName = [NSString stringWithJSStringRef:attribute];
+    return [[m_element accessibilityAttributeNames] containsObject:attributeName] || [[m_element accessibilityParameterizedAttributeNames] containsObject:attributeName];
     END_AX_OBJC_EXCEPTIONS
 
     return false;
