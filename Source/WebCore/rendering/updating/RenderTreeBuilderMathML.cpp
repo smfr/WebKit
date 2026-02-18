@@ -54,10 +54,10 @@ RenderPtr<RenderMathMLFencedOperator> RenderTreeBuilder::MathML::createMathMLOpe
 
 void RenderTreeBuilder::MathML::makeFences(RenderMathMLFenced& parent)
 {
-    auto openFence = createMathMLOperator(parent, parent.openingBrace(), MathMLOperatorDictionary::Prefix, MathMLOperatorDictionary::Fence);
+    auto openFence = createMathMLOperator(parent, parent.openingBrace(), MathMLOperatorDictionary::Form::Prefix, MathMLOperatorDictionary::Fence);
     m_builder.blockBuilder().attach(parent, WTF::move(openFence), parent.firstChild());
 
-    auto closeFence = createMathMLOperator(parent, parent.closingBrace(), MathMLOperatorDictionary::Postfix, MathMLOperatorDictionary::Fence);
+    auto closeFence = createMathMLOperator(parent, parent.closingBrace(), MathMLOperatorDictionary::Form::Postfix, MathMLOperatorDictionary::Fence);
     parent.setCloseFenceRenderer(*closeFence);
     m_builder.blockBuilder().attach(parent, WTF::move(closeFence), nullptr);
 }
@@ -97,7 +97,7 @@ void RenderTreeBuilder::MathML::attach(RenderMathMLFenced& parent, RenderPtr<Ren
 
             StringBuilder stringBuilder;
             stringBuilder.append(separator);
-            separatorRenderer = createMathMLOperator(parent, stringBuilder.toString(), MathMLOperatorDictionary::Infix, MathMLOperatorDictionary::Separator);
+            separatorRenderer = createMathMLOperator(parent, stringBuilder.toString(), MathMLOperatorDictionary::Form::Infix, MathMLOperatorDictionary::Separator);
         }
     }
 

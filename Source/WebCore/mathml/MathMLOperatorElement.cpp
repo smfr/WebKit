@@ -85,20 +85,20 @@ Property MathMLOperatorElement::computeDictionaryProperty()
     const auto& value = attributeWithoutSynchronization(formAttr);
     bool explicitForm = true;
     if (value == "prefix"_s)
-        dictionaryProperty.form = Prefix;
+        dictionaryProperty.form = Form::Prefix;
     else if (value == "infix"_s)
-        dictionaryProperty.form = Infix;
+        dictionaryProperty.form = Form::Infix;
     else if (value == "postfix"_s)
-        dictionaryProperty.form = Postfix;
+        dictionaryProperty.form = Form::Postfix;
     else {
         // FIXME: We should use more advanced heuristics indicated in the specification to determine the operator form (https://bugs.webkit.org/show_bug.cgi?id=124829).
         explicitForm = false;
         if (!previousSibling() && nextSibling())
-            dictionaryProperty.form = Prefix;
+            dictionaryProperty.form = Form::Prefix;
         else if (previousSibling() && !nextSibling())
-            dictionaryProperty.form = Postfix;
+            dictionaryProperty.form = Form::Postfix;
         else
-            dictionaryProperty.form = Infix;
+            dictionaryProperty.form = Form::Infix;
     }
 
     // We then try and find an entry in the operator dictionary to override the default values.
