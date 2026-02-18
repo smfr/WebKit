@@ -40,7 +40,7 @@ public:
     String buttonValue();
     String fileTextValue() const;
 
-    HTMLInputElement& inputElement() const;
+    HTMLInputElement& NODELETE inputElement() const;
     
 private:
     void element() const = delete;

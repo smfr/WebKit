@@ -109,7 +109,7 @@ public:
     RenderTableSection* NODELETE firstBody() const;
 
     // This function returns 0 if the table has no section.
-    RenderTableSection* topSection() const;
+    RenderTableSection* NODELETE topSection() const;
     RenderTableSection* bottomSection() const;
 
     // This function returns 0 if the table has no non-empty sections.

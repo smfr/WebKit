@@ -40,7 +40,7 @@ public:
     bool isDeterminate() const;
     void updateFromElement() override;
 
-    HTMLProgressElement* progressElement() const;
+    HTMLProgressElement* NODELETE progressElement() const;
 
 private:
     ASCIILiteral renderName() const override { return "RenderProgress"_s; }

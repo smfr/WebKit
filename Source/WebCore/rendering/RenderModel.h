@@ -40,7 +40,7 @@ public:
     RenderModel(HTMLModelElement&, RenderStyle&&);
     virtual ~RenderModel();
 
-    HTMLModelElement& modelElement() const;
+    HTMLModelElement& NODELETE modelElement() const;
 
 private:
     void element() const = delete;

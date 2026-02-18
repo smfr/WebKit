@@ -40,7 +40,7 @@ public:
     RenderButton(HTMLFormControlElement&, RenderStyle&&);
     virtual ~RenderButton();
 
-    HTMLFormControlElement& formControlElement() const;
+    HTMLFormControlElement& NODELETE formControlElement() const;
 
     bool canBeSelectionLeaf() const override;
 

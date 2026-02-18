@@ -60,7 +60,7 @@ public:
     RenderFrameSet(HTMLFrameSetElement&, RenderStyle&&);
     virtual ~RenderFrameSet();
 
-    HTMLFrameSetElement& frameSetElement() const;
+    HTMLFrameSetElement& NODELETE frameSetElement() const;
 
     FrameEdgeInfo edgeInfo() const;
 

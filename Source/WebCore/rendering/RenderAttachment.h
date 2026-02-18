@@ -39,7 +39,7 @@ public:
     RenderAttachment(HTMLAttachmentElement&, RenderStyle&&);
     virtual ~RenderAttachment();
 
-    HTMLAttachmentElement& attachmentElement() const;
+    HTMLAttachmentElement& NODELETE attachmentElement() const;
 
     void setShouldDrawBorder(bool drawBorder) { m_shouldDrawBorder = drawBorder; }
     bool shouldDrawBorder() const;

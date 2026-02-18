@@ -38,7 +38,7 @@ public:
     RenderIFrame(HTMLIFrameElement&, RenderStyle&&);
     virtual ~RenderIFrame();
 
-    HTMLIFrameElement& iframeElement() const;
+    HTMLIFrameElement& NODELETE iframeElement() const;
 
 private:
     void frameOwnerElement() const = delete;
