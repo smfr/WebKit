@@ -1401,23 +1401,6 @@ TEST(WKUserContentController, BeforeBlurEvent)
     EXPECT_WK_STREQ([webView _test_waitForAlert], "blur-pass");
 }
 
-TEST(WKUserContentController, ShadowRootAttachedEvent)
-{
-    RetainPtr webView = adoptNS([TestWKWebView new]);
-    RetainPtr configuration = adoptNS([WKContentWorldConfiguration new]);
-    configuration.get().openClosedShadowRootsEnabled = YES;
-    RetainPtr shadowRootWorld = [WKContentWorld worldWithConfiguration:configuration.get()];
-    NSString *pageWorldJS = @"window.addEventListener('webkitshadowrootattached', () => alert('fail') ); onload = () => { setTimeout(() => alert('fail'), 100); }";
-    NSString *shadowRootWorldJS = @"window.addEventListener('webkitshadowrootattached', (e) => { setTimeout(() => alert('pass ' + e.target.localName), 50)})";
-    RetainPtr pageWorldScript = adoptNS([[WKUserScript alloc] initWithSource:pageWorldJS injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES]);
-    RetainPtr shadowRootScript = adoptNS([[WKUserScript alloc] initWithSource:shadowRootWorldJS injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES inContentWorld:shadowRootWorld.get()]);
-    RetainPtr<WKUserContentController> userContentController = [webView configuration].userContentController;
-    [userContentController addUserScript:pageWorldScript.get()];
-    [userContentController addUserScript:shadowRootScript.get()];
-    [webView loadRequest:[NSURLRequest requestWithURL:[NSBundle.test_resourcesBundle URLForResource:@"closed-shadow-tree-test" withExtension:@"html"]]];
-    EXPECT_WK_STREQ([webView _test_waitForAlert], "pass shadow-host");
-}
-
 #if WK_HAVE_C_SPI
 
 TEST(WKUserContentController, DisableAutofillSpellcheck)

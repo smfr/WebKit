@@ -677,12 +677,11 @@ protected:
 #if ENABLE(FULLSCREEN_API)
         IsFullscreen = 1 << 19,
 #endif
-        IsShadowRootAttachedEventPending = 1 << 20,
-        InLargestContentfulPaintTextContentSet = 1 << 21,
-        DidMutateSubtreeAfterSetInnerHTML = 1 << 22,
-        WasParsedWithFastPath = 1 << 23,
-        HasShadowRoot = 1 << 24
-        // 7 bits free.
+        InLargestContentfulPaintTextContentSet = 1 << 20,
+        DidMutateSubtreeAfterSetInnerHTML = 1 << 21,
+        WasParsedWithFastPath = 1 << 22,
+        HasShadowRoot = 1 << 23,
+        // 8 bits free.
     };
 
     enum class TabIndexState : uint8_t {
