@@ -298,7 +298,6 @@ loader/CrossOriginPreflightChecker.cpp
 loader/FrameLoadRequest.cpp
 loader/FrameLoader.cpp
 loader/ImageLoader.cpp
-loader/MediaResourceLoader.cpp
 loader/NavigationScheduler.cpp
 loader/PolicyChecker.cpp
 loader/ResourceLoader.cpp
