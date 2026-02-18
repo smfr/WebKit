@@ -2125,19 +2125,6 @@ JSValueRef AccessibilityUIElementMac::imageOverlayElements(JSContextRef context)
     return nullptr;
 }
 
-bool AccessibilityUIElementMac::hasImageData() const
-{
-    BEGIN_AX_OBJC_EXCEPTIONS
-    RetainPtr value = attributeValue(@"AXImageData");
-    if ([value isKindOfClass:[NSArray class]]) {
-        NSArray *array = value.get();
-        if ([array count] > 0 && [[array firstObject] isKindOfClass:[NSData class]])
-            return [[array firstObject] length] > 0;
-    }
-    END_AX_OBJC_EXCEPTIONS
-    return false;
-}
-
 bool AccessibilityUIElementMac::isIgnored() const
 {
     BOOL result = NO;

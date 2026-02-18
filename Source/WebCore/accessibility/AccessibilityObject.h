@@ -453,7 +453,6 @@ public:
     String brailleLabel() const override { return getAttribute(HTMLNames::aria_braillelabelAttr); }
     String brailleRoleDescription() const override { return getAttribute(HTMLNames::aria_brailleroledescriptionAttr); }
     String embeddedImageDescription() const final;
-    RefPtr<FragmentedSharedBuffer> imageData() const final;
     std::optional<AccessibilityChildrenVector> imageOverlayElements() override { return std::nullopt; }
     String extendedDescription() const final;
 

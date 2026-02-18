@@ -586,11 +586,6 @@ JSValueRef AccessibilityUIElement::imageOverlayElements(OpaqueJSContext const*)
     return nullptr;
 }
 
-bool AccessibilityUIElement::hasImageData() const
-{
-    return false;
-}
-
 void AccessibilityUIElement::increaseTextSelection()
 {
 }

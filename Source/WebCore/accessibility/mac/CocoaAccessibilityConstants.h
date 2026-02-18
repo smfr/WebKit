@@ -185,9 +185,6 @@
 #define NSAccessibilityGrabbedAttribute @"AXGrabbed"
 #define NSAccessibilityHasPopupAttribute @"AXHasPopup"
 #define NSAccessibilityHighestEditableAncestorAttribute @"AXHighestEditableAncestor"
-#ifndef NSAccessibilityImageDataAttribute
-#define NSAccessibilityImageDataAttribute @"AXImageData"
-#endif
 #define NSAccessibilityImageOverlayElementsAttribute @"AXImageOverlayElements"
 #define NSAccessibilityInfoStringForTestingAttribute @"AXInfoStringForTesting"
 #define NSAccessibilityInlineTextAttribute @"AXInlineText"

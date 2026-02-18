@@ -45,7 +45,6 @@
 #include "AccessibilityObjectInlines.h"
 #include "AccessibilityRenderObject.h"
 #include "AccessibilityScrollView.h"
-#include "CachedImage.h"
 #include "Chrome.h"
 #include "ChromeClient.h"
 #include "ContainerNodeInlines.h"
@@ -78,8 +77,6 @@
 #include "HTMLTableSectionElement.h"
 #include "HTMLTextAreaElement.h"
 #include "HitTestResult.h"
-#include "Image.h"
-#include "ImageBuffer.h"
 #include "LocalFrame.h"
 #include "LocalizedStrings.h"
 #include "Logging.h"
@@ -107,7 +104,6 @@
 #include "RenderedPosition.h"
 #include "SVGNames.h"
 #include "Settings.h"
-#include "SharedBuffer.h"
 #include "TextCheckerClient.h"
 #include "TextCheckingHelper.h"
 #include "TextIterator.h"
@@ -2974,58 +2970,6 @@ String AccessibilityObject::embeddedImageDescription() const
         return { };
 
     return renderImage->accessibilityDescription();
-}
-
-// Maximum pixel area for accessibility image data. Images larger than this will be
-// scaled down to fit within this area while preserving aspect ratio.
-//
-// We do this because large images (e.g., 500MB photos) would be impractical for accessibility
-// clients to process. We target a maximum of ~4 million pixels (equivalent to 2048x2048),
-// which produces:
-//   - ~16MB uncompressed RGBA buffer during processing
-//   - ~1-10MB PNG output (depending on image content)
-//
-// This balances image fidelity with practical memory and transfer constraints for
-// accessibility use cases.
-static constexpr float maximumAccessibilityImageArea = 4 * 1024 * 1024;
-
-RefPtr<FragmentedSharedBuffer> AccessibilityObject::imageData() const
-{
-    CheckedPtr renderImage = dynamicDowncast<RenderImage>(renderer());
-    WeakPtr cachedImage = renderImage ? renderImage->cachedImage() : nullptr;
-    RefPtr image = cachedImage ? cachedImage->image() : nullptr;
-    if (!image || image == &Image::nullImage())
-        return nullptr;
-
-    auto imageSize = image->size();
-    if (imageSize.isEmpty())
-        return nullptr;
-
-    bool needsScaling = imageSize.area() > maximumAccessibilityImageArea;
-    bool isPNG = equalLettersIgnoringASCIICase(cachedImage->mimeType(), "image/png"_s);
-
-    // If image is PNG and within size limits, return the original encoded data.
-    if (isPNG && !needsScaling)
-        return cachedImage->resourceBuffer();
-
-    // Either the image needs scaling, or it's not PNG and needs conversion.
-    // Create an ImageBuffer at the appropriate size and encode as PNG.
-    FloatSize targetSize = imageSize;
-    float scale = 1.0f;
-    if (needsScaling) {
-        targetSize = sizeWithAreaAndAspectRatio(maximumAccessibilityImageArea, imageSize.aspectRatio());
-        scale = targetSize.width() / imageSize.width();
-    }
-
-    RefPtr buffer = ImageBuffer::create(targetSize, RenderingMode::Unaccelerated, RenderingPurpose::Unspecified, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8);
-    if (!buffer)
-        return cachedImage->resourceBuffer();
-
-    buffer->context().scale({ scale, scale });
-    buffer->context().drawImage(*image, FloatPoint());
-
-    // Encode as PNG for lossless quality.
-    return SharedBuffer::create(buffer->toData("image/png"_s));
 }
 
 bool AccessibilityObject::isLoaded() const
