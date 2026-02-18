@@ -26,6 +26,7 @@
 #include <WebCore/InspectorInstrumentationPublic.h>
 #include <WebCore/LayoutRect.h>
 #include <WebCore/Node.h>
+#include <WebCore/NodeDocument.h>
 #include <WebCore/PseudoElement.h>
 #include <WebCore/RenderBox.h>
 #include <WebCore/ShadowRoot.h>
@@ -56,6 +57,12 @@ inline WebCoreOpaqueRoot Node::opaqueRoot() const
     }
     // FIXME: Possible race?
     return traverseToOpaqueRoot();
+}
+
+inline Document* Node::ownerDocument() const
+{
+    auto* document = &this->document();
+    return document == this ? nullptr : document;
 }
 
 inline RenderBox* Node::renderBox() const

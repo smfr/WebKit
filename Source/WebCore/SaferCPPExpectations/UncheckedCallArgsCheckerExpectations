@@ -178,7 +178,6 @@ html/HTMLInputElement.cpp
 html/HTMLLinkElement.cpp
 [ iOS ] html/HTMLMediaElement.cpp
 html/HTMLMetaElement.cpp
-html/HTMLNameCollectionInlines.h
 html/HTMLOptionsCollection.cpp
 html/HTMLPlugInElement.cpp
 html/HTMLTextFormControlElement.cpp
@@ -539,7 +538,6 @@ rendering/svg/RenderSVGResourceMarker.cpp
 rendering/svg/RenderSVGRoot.cpp
 rendering/svg/RenderSVGShape.cpp
 rendering/svg/RenderSVGText.cpp
-rendering/svg/RenderSVGTextPath.cpp
 rendering/svg/RenderSVGViewportContainer.cpp
 rendering/svg/SVGBoundingBoxComputation.cpp
 rendering/svg/SVGContainerLayout.cpp

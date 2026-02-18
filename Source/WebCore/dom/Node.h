@@ -319,23 +319,23 @@ public:
     void clearUsesScopedCustomElementRegistryMap() { clearStateFlag(StateFlag::UsesScopedCustomElementRegistryMap); }
 
     // Returns null, a child of ShadowRoot, or a legacy shadow root.
-    Node* nonBoundaryShadowTreeRootNode();
+    Node* NODELETE nonBoundaryShadowTreeRootNode();
 
     // Node's parent or shadow tree host.
     inline ContainerNode* parentOrShadowHostNode() const; // Defined in NodeInlines.h
     ContainerNode* parentInComposedTree() const;
     WEBCORE_EXPORT Element* parentElementInComposedTree() const;
-    Element* parentOrShadowHostElement() const;
+    Element* NODELETE parentOrShadowHostElement() const;
     inline void setParentNode(ContainerNode*);
     inline Node& NODELETE rootNode() const;
     WEBCORE_EXPORT Node& NODELETE traverseToRootNode() const;
-    Node& shadowIncludingRoot() const;
+    Node& NODELETE shadowIncludingRoot() const;
 
     struct GetRootNodeOptions {
         bool composed;
     };
-    Node& getRootNode(const GetRootNodeOptions&) const;
-    
+    Node& NODELETE getRootNode(const GetRootNodeOptions&) const;
+
     inline WebCoreOpaqueRoot opaqueRoot() const;
     WebCoreOpaqueRoot NODELETE traverseToOpaqueRoot() const;
 
@@ -433,7 +433,7 @@ public:
 
     // Returns the DOM ownerDocument attribute. This method never returns null, except in the case
     // of a Document node.
-    WEBCORE_EXPORT Document* NODELETE ownerDocument() const;
+    inline Document* ownerDocument() const;
 
     // Returns the document associated with this node. A document node returns itself.
     inline Document& document() const; // Defined in NodeDocument.h
@@ -446,7 +446,7 @@ public:
     inline void setTreeScopeRecursively(TreeScope&);
     static constexpr ptrdiff_t treeScopeMemoryOffset() { return OBJECT_OFFSETOF(Node, m_treeScope); }
 
-    TreeScope& treeScopeForSVGReferences() const;
+    TreeScope& NODELETE treeScopeForSVGReferences() const;
 
     // Returns true if this node is associated with a document and is in its associated document's
     // node tree, false otherwise (https://dom.spec.whatwg.org/#connected).
@@ -468,7 +468,7 @@ public:
     ExceptionOr<void> checkSetPrefix(const AtomString& prefix);
 
     // https://dom.spec.whatwg.org/#concept-tree-descendant
-    WEBCORE_EXPORT bool isDescendantOf(const Node&) const;
+    WEBCORE_EXPORT bool NODELETE isDescendantOf(const Node&) const;
     bool isDescendantOf(const Node* other) const { return other && isDescendantOf(*other); }
 
     // https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant
@@ -480,7 +480,7 @@ public:
     ALWAYS_INLINE bool contains(const Node* other) const { return other && contains(*other); }
 
     // https://dom.spec.whatwg.org/#concept-shadow-including-descendant
-    WEBCORE_EXPORT bool isShadowIncludingDescendantOf(const Node&) const;
+    WEBCORE_EXPORT bool NODELETE isShadowIncludingDescendantOf(const Node&) const;
     ALWAYS_INLINE bool isShadowIncludingDescendantOf(const Node* other) const { return other && isShadowIncludingDescendantOf(*other); }
 
     // https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-ancestor
@@ -546,7 +546,7 @@ public:
 
     void invalidateNodeListAndCollectionCachesInAncestors();
     void invalidateNodeListCollectionAndInnerHTMLPrefixCachesInAncestorsForAttribute(const QualifiedName&, const IsMutationBySetInnerHTML = IsMutationBySetInnerHTML::No);
-    NodeListsNodeData* nodeLists();
+    NodeListsNodeData* NODELETE nodeLists();
     void clearNodeLists();
 
     virtual bool willRespondToMouseMoveEvents() const;

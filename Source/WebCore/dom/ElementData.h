@@ -174,7 +174,7 @@ public:
     void removeAttributeAt(unsigned index);
 
     Attribute& attributeAt(unsigned index);
-    Attribute* findAttributeByName(const QualifiedName&);
+    Attribute* NODELETE findAttributeByName(const QualifiedName&);
 
     std::span<const Attribute> attributes() const LIFETIME_BOUND { return m_attributeVector.span(); }
 

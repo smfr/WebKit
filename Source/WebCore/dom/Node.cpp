@@ -1534,12 +1534,6 @@ Element* Node::rootEditableElement() const
 
 // FIXME: End of obviously misplaced HTML editing functions.  Try to move these out of Node.
 
-Document* Node::ownerDocument() const
-{
-    Document* document = &this->document();
-    return document == this ? nullptr : document;
-}
-
 const URL& Node::baseURI() const
 {
     auto& url = document().baseURL();
