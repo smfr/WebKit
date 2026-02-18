@@ -855,7 +855,7 @@ void VideoPresentationInterfaceMac::videoDimensionsChanged(const FloatSize& vide
         [m_webVideoPresentationInterfaceObjC setVideoDimensions:videoDimensions];
 }
 
-bool VideoPresentationInterfaceMac::isPlayingVideoInEnhancedFullscreen() const
+bool VideoPresentationInterfaceMac::isPlayingVideoInPictureInPicture() const
 {
     return hasMode(WebCore::HTMLMediaElementEnums::VideoFullscreenModePictureInPicture) && [m_webVideoPresentationInterfaceObjC isPlaying];
 }

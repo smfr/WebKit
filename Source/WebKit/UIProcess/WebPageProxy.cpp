@@ -14995,11 +14995,11 @@ void WebPageProxy::handleControlledElementIDResponse(const String& identifier) c
 #endif
 }
 
-bool WebPageProxy::isPlayingVideoInEnhancedFullscreen() const
+bool WebPageProxy::isPlayingVideoInPictureInPicture() const
 {
 #if ENABLE(VIDEO_PRESENTATION_MODE)
     RefPtr videoPresentationManager = m_videoPresentationManager;
-    return videoPresentationManager && videoPresentationManager->isPlayingVideoInEnhancedFullscreen();
+    return videoPresentationManager && videoPresentationManager->isPlayingVideoInPictureInPicture();
 #else
     return false;
 #endif

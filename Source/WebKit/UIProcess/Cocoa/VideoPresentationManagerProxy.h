@@ -178,7 +178,7 @@ public:
 
     void requestRouteSharingPolicyAndContextUID(PlaybackSessionContextIdentifier, CompletionHandler<void(WebCore::RouteSharingPolicy, String)>&&);
 
-    bool isPlayingVideoInEnhancedFullscreen() const;
+    bool isPlayingVideoInPictureInPicture() const;
 
     RefPtr<WebCore::PlatformVideoPresentationInterface> controlsManagerInterface();
     using VideoInPictureInPictureDidChangeObserver = WTF::Observer<void(bool)>;

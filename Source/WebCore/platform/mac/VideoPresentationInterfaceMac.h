@@ -105,7 +105,7 @@ public:
     WEBCORE_EXPORT void setMode(HTMLMediaElementEnums::VideoFullscreenMode, VideoPresentationModel::ShouldNotifyMediaElement);
     WEBCORE_EXPORT void clearMode(HTMLMediaElementEnums::VideoFullscreenMode, VideoPresentationModel::ShouldNotifyMediaElement);
 
-    WEBCORE_EXPORT bool isPlayingVideoInEnhancedFullscreen() const;
+    WEBCORE_EXPORT bool isPlayingVideoInPictureInPicture() const;
 
     bool mayAutomaticallyShowVideoPictureInPicture() const { return false; }
     void applicationDidBecomeActive() { }

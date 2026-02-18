@@ -677,10 +677,10 @@ bool VideoPresentationManagerProxy::mayAutomaticallyShowVideoPictureInPicture() 
 }
 
 #if ENABLE(VIDEO_PRESENTATION_MODE)
-bool VideoPresentationManagerProxy::isPlayingVideoInEnhancedFullscreen() const
+bool VideoPresentationManagerProxy::isPlayingVideoInPictureInPicture() const
 {
     for (auto& [model, interface] : m_contextMap.values()) {
-        if (interface->isPlayingVideoInEnhancedFullscreen())
+        if (interface->isPlayingVideoInPictureInPicture())
             return true;
     }
 

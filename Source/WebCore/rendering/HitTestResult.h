@@ -145,9 +145,9 @@ public:
     WEBCORE_EXPORT bool mediaIsVideo() const;
     bool mediaMuted() const;
     void toggleMediaMuteState() const;
-    bool mediaSupportsEnhancedFullscreen() const;
-    bool mediaIsInEnhancedFullscreen() const;
-    void toggleEnhancedFullscreenForVideo() const;
+    bool mediaSupportsPictureInPicture() const;
+    bool mediaIsInPictureInPicture() const;
+    void togglePictureInPictureForVideo() const;
 
 #if ENABLE(ACCESSIBILITY_ANIMATION_CONTROL)
     void pauseAnimation() const;
