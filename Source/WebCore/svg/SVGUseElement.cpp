@@ -345,7 +345,7 @@ static bool isDirectReference(const SVGElement& element)
 SVGGraphicsElement* SVGUseElement::visibleTargetGraphicsElement() const
 {
     RefPtr clone = this->targetClone();
-    SUPPRESS_UNCOUNTED_LOCAL auto* targetElement = dynamicDowncast<SVGGraphicsElement>(clone.get());
+    auto* targetElement = dynamicDowncast<SVGGraphicsElement>(clone.get());
     if (!targetElement)
         return nullptr;
 

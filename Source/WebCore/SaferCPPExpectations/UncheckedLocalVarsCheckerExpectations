@@ -161,10 +161,13 @@ style/ElementRuleCollector.cpp
 style/InlineTextBoxStyle.cpp
 style/StyleAdjuster.cpp
 style/StyleBuilder.cpp
+style/StyleBuilderCustom.h
 style/StyleBuilderStateInlines.h
 style/StyleDifference.cpp
 style/StyleExtractor.cpp
 style/StyleExtractorCustom.h
+style/StyleInvalidationFunctions.h
+style/StyleRelations.cpp
 style/StyleResolver.cpp
 style/StyleScope.cpp
 style/StyleTreeResolver.cpp
@@ -173,6 +176,7 @@ style/computed/StyleComputedStyleBase.cpp
 style/values/grid/StyleGridPositionsResolver.cpp
 style/values/images/kinds/StyleCanvasImage.cpp
 style/values/primitives/StyleLengthResolution.cpp
+svg/SVGClipPathElement.cpp
 svg/SVGFilterPrimitiveStandardAttributes.cpp
 svg/SVGGeometryElement.cpp
 svg/SVGLengthContext.cpp
