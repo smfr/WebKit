@@ -171,9 +171,11 @@ void PlatformMediaSession::setState(State state)
     if (state == m_state)
         return;
 
-    ALWAYS_LOG(LOGIDENTIFIER, state);
+    bool canProduceAudio = this->canProduceAudio();
+    ALWAYS_LOG(LOGIDENTIFIER, state, ", canProduceAudio=", canProduceAudio);
+
     m_state = state;
-    if (m_state == State::Playing && canProduceAudio())
+    if (m_state == State::Playing && canProduceAudio)
         setHasPlayedAudiblySinceLastInterruption(true);
 
     if (RefPtr manager = sessionManager())
@@ -382,6 +384,9 @@ bool PlatformMediaSession::activeAudioSessionRequired() const
 
 void PlatformMediaSession::canProduceAudioChanged()
 {
+    if (m_state == State::Playing && canProduceAudio())
+        setHasPlayedAudiblySinceLastInterruption(true);
+
     if (RefPtr manager = sessionManager())
         manager->sessionCanProduceAudioChanged();
 }
