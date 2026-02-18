@@ -95,8 +95,6 @@ dom/Document.cpp
 dom/DocumentFullscreen.cpp
 dom/Element.cpp
 dom/ElementInternals.cpp
-dom/ElementIteratorInlines.h
-dom/ElementTraversal.h
 dom/EventLoop.cpp
 dom/ExtensionStyleSheets.cpp
 dom/FragmentDirectiveRangeFinder.cpp
@@ -149,7 +147,6 @@ editing/ModifySelectionListLevel.cpp
 editing/RemoveFormatCommand.cpp
 editing/RenderedPosition.cpp
 editing/ReplaceSelectionCommand.cpp
-editing/ReplaceSelectionCommand.h
 editing/SimplifyMarkupCommand.cpp
 editing/SpellChecker.cpp
 editing/TextInsertionBaseCommand.cpp

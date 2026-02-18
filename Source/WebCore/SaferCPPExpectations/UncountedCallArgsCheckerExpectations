@@ -257,8 +257,6 @@ dom/Element.cpp
 dom/ElementData.cpp
 dom/ElementInlines.h
 dom/ElementInternals.cpp
-dom/ElementIteratorInlines.h
-dom/ElementTraversal.h
 dom/EventPath.cpp
 dom/ExtensionStyleSheets.cpp
 dom/FragmentDirectiveRangeFinder.cpp
@@ -312,7 +310,6 @@ editing/InsertTextCommand.cpp
 editing/ModifySelectionListLevel.cpp
 editing/RemoveFormatCommand.cpp
 editing/ReplaceSelectionCommand.cpp
-editing/ReplaceSelectionCommand.h
 editing/SpellChecker.cpp
 editing/TextIterator.cpp
 editing/TextManipulationController.cpp
