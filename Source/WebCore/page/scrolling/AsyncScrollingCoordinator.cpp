@@ -426,25 +426,23 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
 
     tracePoint(ProgrammaticScroll, scrollPosition.y(), frameView->frame().isMainFrame());
 
+    auto requestedScrollData = RequestedScrollData {
+        .requestType = ScrollRequestType::PositionUpdate,
+        .scrollPositionOrDelta = scrollPosition,
+        .identifier = { },
+        .scrollType = options.type,
+        .clamping = options.clamping,
+        .animated = options.animated,
+        .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
+    };
+
     if (options.originalScrollDelta) {
-        stateNode->setRequestedScrollData({
-            .requestType = ScrollRequestType::DeltaUpdate,
-            .scrollPositionOrDelta = *options.originalScrollDelta,
-            .scrollType = options.type,
-            .clamping = options.clamping,
-            .animated = options.animated,
-            .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
-        });
-    } else {
-        stateNode->setRequestedScrollData({
-            .requestType = ScrollRequestType::PositionUpdate,
-            .scrollPositionOrDelta = scrollPosition,
-            .scrollType = options.type,
-            .clamping = options.clamping,
-            .animated = options.animated,
-            .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
-        });
+        requestedScrollData.requestType = ScrollRequestType::DeltaUpdate;
+        requestedScrollData.scrollPositionOrDelta = *options.originalScrollDelta;
     }
+
+    willSendScrollPositionRequest(*scrollingNodeID, requestedScrollData);
+    stateNode->setRequestedScrollData(WTF::move(requestedScrollData));
 
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::requestScrollToPosition " << scrollPosition << " for nodeID " << scrollingNodeID << " requestedScrollData " << stateNode->requestedScrollData());
 
@@ -700,6 +698,14 @@ void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update,
 {
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::applyScrollPositionUpdate " << update);
     switch (update.updateType) {
+
+    case ScrollUpdateType::PositionUpdate:
+        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
+        return;
+
+    case ScrollUpdateType::ScrollRequestResponse:
+        return;
+
     case ScrollUpdateType::AnimatedScrollWillStart:
         animatedScrollWillStartForNode(update.nodeID);
         return;
@@ -714,10 +720,6 @@ void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update,
 
     case ScrollUpdateType::WheelEventScrollDidEnd:
         wheelEventScrollDidEndForNode(update.nodeID);
-        return;
-
-    case ScrollUpdateType::PositionUpdate:
-        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
         return;
 
     case ScrollUpdateType::ProgrammaticScrollDidEnd:

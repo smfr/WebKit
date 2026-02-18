@@ -510,6 +510,7 @@ Vector<ASCIILiteral> serializedIdentifiers()
         "WebCore::SWServerConnectionIdentifier"_s,
         "WebCore::SamplesRendererTrackIdentifier"_s,
         "WebCore::ScrollingNodeIdentifier"_s,
+        "WebCore::ScrollRequestIdentifier"_s,
         "WebCore::ServiceWorkerIdentifier"_s,
         "WebCore::ServiceWorkerJobIdentifier"_s,
         "WebCore::ServiceWorkerRegistrationIdentifier"_s,

@@ -151,6 +151,9 @@ public:
 
     ScrollbarRevealBehavior takeScrollbarRevealBehaviorForNextScrollbarUpdate();
 
+    std::optional<ScrollRequestIdentifier> currentScrollRequest() const { return m_currentScrollRequest; }
+    void setCurrentScrollRequest(std::optional<ScrollRequestIdentifier> ident) { m_currentScrollRequest = ident; }
+
 protected:
     ScrollingTreeScrollingNode(ScrollingTree&, ScrollingNodeType, ScrollingNodeID);
 
@@ -228,6 +231,7 @@ private:
 #if ENABLE(SCROLLING_THREAD)
     OptionSet<SynchronousScrollingReason> m_synchronousScrollingReasons;
 #endif
+    Markable<ScrollRequestIdentifier> m_currentScrollRequest;
     bool m_isFirstCommit { true };
     bool m_scrolledSinceLastCommit { false };
 #if HAVE(RUBBER_BANDING)

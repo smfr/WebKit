@@ -78,6 +78,7 @@ private:
     // ScrollingCoordinator
     bool coordinatesScrollingForFrameView(const WebCore::LocalFrameView&) const override;
     void scheduleTreeStateCommit() override;
+    void willSendScrollPositionRequest(WebCore::ScrollingNodeID, WebCore::RequestedScrollData&) override;
 
     bool isRubberBandInProgress(std::optional<WebCore::ScrollingNodeID>) const final;
     bool isUserScrollInProgress(std::optional<WebCore::ScrollingNodeID>) const final;
@@ -109,6 +110,8 @@ private:
     HashSet<WebCore::ScrollingNodeID> m_nodesWithActiveRubberBanding;
     HashSet<WebCore::ScrollingNodeID> m_nodesWithActiveScrollSnap;
     HashSet<WebCore::ScrollingNodeID> m_nodesWithActiveUserScrolls;
+
+    HashMap<WebCore::ScrollingNodeID, WebCore::ScrollRequestIdentifier> m_scrollRequestsPendingResponse;
 
     NodeAndGestureState m_currentWheelGestureInfo;
 

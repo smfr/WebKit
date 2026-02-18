@@ -135,6 +135,7 @@ template: struct WebCore::PlatformLayerIdentifierType
 template: struct WebCore::PlaybackTargetClientContextIdentifierType
 template: struct WebCore::PushSubscriptionIdentifierType
 template: struct WebCore::ProcessIdentifierType
+template: struct WebCore::ScrollRequestIdentifierType
 template: struct WebCore::ScrollingNodeIDType
 template: struct WebCore::SharedWorkerObjectIdentifierType
 template: struct WebCore::SleepDisablerIdentifierType

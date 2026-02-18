@@ -2821,6 +2821,7 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
     std::optional<WebCore::FloatPoint> layoutViewportOrigin;
     WebCore::ScrollUpdateType updateType;
     WebCore::ScrollingLayerPositionAction updateLayerPositionAction;
+    Markable<WebCore::ScrollRequestIdentifier> responseIdentifier;
 };
 
 header: <WebCore/ScrollingCoordinatorTypes.h>
@@ -4310,6 +4311,7 @@ enum class WebCore::ScrollType : bool;
 [CustomHeader] struct WebCore::RequestedScrollData {
     WebCore::ScrollRequestType requestType;
     Variant<WebCore::FloatPoint, WebCore::FloatSize> scrollPositionOrDelta;
+    Markable<WebCore::ScrollRequestIdentifier> identifier;
     WebCore::ScrollType scrollType;
     WebCore::ScrollClamping clamping;
     WebCore::ScrollIsAnimated animated;
