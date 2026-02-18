@@ -1697,6 +1697,7 @@ struct TimeoutSafeSemaphore : RefCounted<TimeoutSafeSemaphore<T>> {
     bool wait(Seconds timeout) { return semaphore.waitFor(timeout); }
 };
 
+constexpr Seconds HitTestCacheExpiration = 500_ms;
 // Timeout constants for retrieveValueFromMainThreadWithTimeoutAndDefault.
 // These are grouped by operation type to make it easier to tune timeouts.
 constexpr Seconds HitTestTimeout = 15_ms;

@@ -340,6 +340,7 @@ public:
 
     // Returns the root object for a specific frame.
     WEBCORE_EXPORT AXCoreObject* rootObjectForFrame(LocalFrame&);
+    AccessibilityObject* rootWebArea();
 #if ENABLE(ACCESSIBILITY_LOCAL_FRAME)
     WEBCORE_EXPORT void setFrameInheritedState(LocalFrame&, const InheritedFrameState&);
 #endif
@@ -835,8 +836,6 @@ protected:
     LayoutRect localCaretRectForCharacterOffset(RenderObject*&, const CharacterOffset&);
     bool shouldSkipBoundary(const CharacterOffset&, const CharacterOffset&);
 private:
-    AccessibilityObject* rootWebArea();
-
     // Returns the object or nearest render-tree ancestor object that is already created (i.e.
     // retrievable by |get|, not |getOrCreate|).
     AccessibilityObject* getIncludingAncestors(RenderObject&) const;
