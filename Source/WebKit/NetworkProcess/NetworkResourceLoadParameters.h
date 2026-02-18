@@ -75,7 +75,7 @@ struct NetworkResourceLoadParameters {
     bool hadMainFrameMainResourcePrivateRelayed { false };
     bool allowPrivacyProxy { true };
     OptionSet<WebCore::AdvancedPrivacyProtections> advancedPrivacyProtections { };
-    bool mayBlockNetworkRequest { false };
+    std::optional<bool> mayBlockNetworkRequest { false };
 
     uint64_t requiredCookiesVersion { 0 };
 

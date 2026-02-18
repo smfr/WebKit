@@ -347,23 +347,27 @@ bool NetworkLoadChecker::shouldBlockForTrackingPolicy(const ResourceRequest& req
     if (!m_webPageProxyID)
         return false;
 
-    bool needsAdvancedPrivacyProtections = false;
-    bool mayBlock = false;
-    if (RefPtr networkResourceLoader = m_networkResourceLoader.get()) {
-        mayBlock = networkResourceLoader->parameters().mayBlockNetworkRequest;
-        if (mayBlock && networkResourceLoader->parameters().options.destination != FetchOptionsDestination::Script) {
-            LOAD_CHECKER_RELEASE_LOG("shouldBlockForTrackingPolicy - Blocked non-script load by tracking protections");
-            return true;
-        }
+    RefPtr networkResourceLoader = m_networkResourceLoader.get();
+    if (!networkResourceLoader)
+        return false;
 
-        needsAdvancedPrivacyProtections = networkResourceLoader->parameters().advancedPrivacyProtections.contains(WebCore::AdvancedPrivacyProtections::BaselineProtections);
+    auto mayBlock = networkResourceLoader->parameters().mayBlockNetworkRequest;
+    bool needsAdvancedPrivacyProtections = networkResourceLoader->parameters().advancedPrivacyProtections.contains(WebCore::AdvancedPrivacyProtections::BaselineProtections);
+    if (!mayBlock)
+        return false;
+
+    if (*mayBlock && networkResourceLoader->parameters().options.destination != FetchOptionsDestination::Script) {
+        LOAD_CHECKER_RELEASE_LOG("shouldBlockForTrackingPolicy - Blocked non-script load by tracking protections");
+        return true;
     }
+
     if (CheckedPtr networkSession = m_networkProcess->networkSession(m_sessionID)) {
-        if (networkSession->shouldBlockRequestForTrackingPolicyAndUpdatePolicy(request, *m_webPageProxyID, mayBlock, needsAdvancedPrivacyProtections)) {
+        if (networkSession->shouldBlockRequestForTrackingPolicyAndUpdatePolicy(request, *m_webPageProxyID, *mayBlock, needsAdvancedPrivacyProtections)) {
             LOAD_CHECKER_RELEASE_LOG("shouldBlockForTrackingPolicy - Blocked by tracking protections");
             return true;
         }
     }
+
     return false;
 }
 
