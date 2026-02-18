@@ -451,7 +451,7 @@ public:
     // Returns true if this node is associated with a document and is in its associated document's
     // node tree, false otherwise (https://dom.spec.whatwg.org/#connected).
     bool isConnected() const { return hasEventTargetFlag(EventTargetFlag::IsConnected); }
-    bool isInUserAgentShadowTree() const;
+    inline bool isInUserAgentShadowTree() const { return checkIsInUserAgentShadowTree(isInShadowTree() && hasBeenInUserAgentShadowTree()); }
     bool isInShadowTree() const { return hasEventTargetFlag(EventTargetFlag::IsInShadowTree); }
     bool isInTreeScope() const { return isConnected() || isInShadowTree(); }
     bool hasBeenInUserAgentShadowTree() const { return hasEventTargetFlag(EventTargetFlag::HasBeenInUserAgentShadowTree); }
@@ -799,6 +799,12 @@ private:
 
     void refEventTarget() final;
     void derefEventTarget() final;
+
+#if ASSERT_ENABLED
+    bool checkIsInUserAgentShadowTree(bool) const;
+#else
+    bool checkIsInUserAgentShadowTree(bool value) const { return value; }
+#endif
 
     void trackForDebugging();
     void materializeRareData();

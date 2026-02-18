@@ -1414,11 +1414,15 @@ TreeScope& Node::treeScopeForSVGReferences() const
     return treeScope();
 }
 
-bool Node::isInUserAgentShadowTree() const
+#if ASSERT_ENABLED
+bool Node::checkIsInUserAgentShadowTree(bool isInUserAgentShadowTree) const
 {
     auto* shadowRoot = containingShadowRoot();
-    return shadowRoot && shadowRoot->mode() == ShadowRootMode::UserAgent;
+    auto actualValue = shadowRoot && shadowRoot->mode() == ShadowRootMode::UserAgent;
+    ASSERT(actualValue == isInUserAgentShadowTree);
+    return isInUserAgentShadowTree;
 }
+#endif
 
 Node* Node::nonBoundaryShadowTreeRootNode()
 {
