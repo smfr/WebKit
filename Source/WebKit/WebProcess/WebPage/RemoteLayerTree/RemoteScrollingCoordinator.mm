@@ -129,11 +129,65 @@ void RemoteScrollingCoordinator::willSendScrollPositionRequest(ScrollingNodeID n
 }
 
 // Notification from the UI process that we scrolled.
+//
+// This logic deals with overlapping scrolling IPC between the UI process and the web process.
+// It's possible to have user scrolls coming from the UI process, while programmatic scrolls
+// go in the other direction; the IPC messages in the two directions can overlap. This code
+// attempts to maintain a coherent scroll position in the web process under these conditions.
+//
+// When sending a programmatic scroll to the UI process, we've already updated the web process
+// position synchronously (see AsyncScrollingCoordinator::requestScrollToPosition()). We need
+// to avoid applying a user scroll that overlaps until we're received the programmatic scroll
+// response (otherwise we'll apply a stale position), but we do need to apply its scroll position
+// because it may have been a delta scroll, where the response's scrollPosition reflects the UI
+// process state.
+// If we have multiple programmatic scrolls in flight, we avoid applying replies to older ones,
+// because they will be stale.
+//
 void RemoteScrollingCoordinator::scrollUpdateForNode(ScrollUpdate&& update, CompletionHandler<void()>&& completionHandler)
 {
     LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinator::scrollUpdateForNode: " << update);
 
-    applyScrollUpdate(WTF::move(update), ScrollType::User, ViewportRectStability::Stable);
+    auto latestPendingRequestIdent = m_scrollRequestsPendingResponse.getOptional(update.nodeID);
+
+    if (update.updateType == ScrollUpdateType::ScrollRequestResponse) {
+        ASSERT(update.responseIdentifier);
+        if (update.responseIdentifier) {
+            auto requestIdentifier = *update.responseIdentifier;
+
+            if (latestPendingRequestIdent) {
+                ASSERT(requestIdentifier <= *latestPendingRequestIdent);
+
+                if (*latestPendingRequestIdent == requestIdentifier) {
+                    LOG_WITH_STREAM(Scrolling, stream << " identifier " << requestIdentifier << " is the last sent; updating scroll position");
+                    m_scrollRequestsPendingResponse.remove(update.nodeID);
+
+                    auto scrollUpdate = ScrollUpdate {
+                        .nodeID = update.nodeID,
+                        .scrollPosition = update.scrollPosition,
+                        .layoutViewportOrigin = { },
+                        .updateType = ScrollUpdateType::PositionUpdate,
+                        .updateLayerPositionAction = ScrollingLayerPositionAction::Set
+                    };
+                    applyScrollUpdate(WTF::move(scrollUpdate), ScrollType::User, ViewportRectStability::Stable);
+                } else
+                    LOG_WITH_STREAM(Scrolling, stream << " identifier " << requestIdentifier << " is not the most recent; ignoring");
+
+            } else {
+                // We should at least be waiting for the identifier we've just received back.
+                ASSERT_NOT_REACHED();
+            }
+        }
+
+        completionHandler();
+        return;
+    }
+
+    if (!latestPendingRequestIdent)
+        applyScrollUpdate(WTF::move(update), ScrollType::User, ViewportRectStability::Stable);
+    else
+        LOG_WITH_STREAM(Scrolling, stream << " waiting for scroll request id " << *latestPendingRequestIdent << "; ignoring scroll update");
+
     completionHandler();
 }
 

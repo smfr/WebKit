@@ -467,10 +467,13 @@ void AsyncScrollingCoordinator::stopAnimatedScroll(ScrollableArea& scrollableAre
     if (!stateNode)
         return;
 
-    // Animated scrolls are always programmatic.
-    stateNode->setRequestedScrollData({
+    auto requestedScrollData = RequestedScrollData {
         .requestType = ScrollRequestType::CancelAnimatedScroll
-    });
+    };
+
+    willSendScrollPositionRequest(*scrollingNodeID, requestedScrollData);
+    stateNode->setRequestedScrollData(WTF::move(requestedScrollData));
+
     // FIXME: This should schedule a rendering update
     commitTreeStateIfNeeded();
 }

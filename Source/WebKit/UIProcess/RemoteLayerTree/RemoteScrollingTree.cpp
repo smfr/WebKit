@@ -157,9 +157,9 @@ bool RemoteScrollingTree::scrollingTreeNodeRequestsKeyboardScroll(ScrollingNodeI
 void RemoteScrollingTree::didHandleScrollRequestForNode(ScrollingNodeID nodeID, FloatPoint scrollPosition, ScrollRequestIdentifier requestIdentifier)
 {
     auto scrollUpdate = ScrollUpdate {
-        .nodeID = node.scrollingNodeID(),
+        .nodeID = nodeID,
         .scrollPosition = scrollPosition,
-        .layoutViewportOrigin = { }
+        .layoutViewportOrigin = { },
         .updateType = ScrollUpdateType::ScrollRequestResponse,
         .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
         .responseIdentifier = requestIdentifier

@@ -2800,6 +2800,7 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
 header: <WebCore/ScrollingCoordinatorTypes.h>
 [CustomHeader] enum class WebCore::ScrollUpdateType : uint8_t {
     PositionUpdate,
+    ScrollRequestResponse,
     AnimatedScrollWillStart,
     AnimatedScrollDidEnd,
     WheelEventScrollWillStart,
