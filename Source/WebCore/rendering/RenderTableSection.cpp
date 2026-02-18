@@ -1272,26 +1272,25 @@ static BoxSide physicalBorderForDirection(const WritingMode writingMode, Collaps
 {
     // FIXME: Replace this with types/methods from BoxSides.h
     switch (side) {
-    case CBSStart:
+    case CollapsedBorderSide::Start:
         if (writingMode.isHorizontal())
             return writingMode.isInlineLeftToRight() ? BoxSide::Left : BoxSide::Right;
         return writingMode.isInlineTopToBottom() ? BoxSide::Top : BoxSide::Bottom;
-    case CBSEnd:
+    case CollapsedBorderSide::End:
         if (writingMode.isHorizontal())
             return writingMode.isInlineLeftToRight() ? BoxSide::Right : BoxSide::Left;
         return writingMode.isInlineTopToBottom() ? BoxSide::Bottom : BoxSide::Top;
-    case CBSBefore:
+    case CollapsedBorderSide::Before:
         if (writingMode.isHorizontal())
             return writingMode.isBlockTopToBottom() ? BoxSide::Top : BoxSide::Bottom;
         return writingMode.isBlockLeftToRight() ? BoxSide::Left : BoxSide::Right;
-    case CBSAfter:
+    case CollapsedBorderSide::After:
         if (writingMode.isHorizontal())
             return writingMode.isBlockTopToBottom() ? BoxSide::Bottom : BoxSide::Top;
         return writingMode.isBlockLeftToRight() ? BoxSide::Right : BoxSide::Left;
-    default:
-        ASSERT_NOT_REACHED();
-        return BoxSide::Left;
     }
+    ASSERT_NOT_REACHED();
+    return BoxSide::Left;
 }
 
 void RenderTableSection::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
@@ -1352,9 +1351,9 @@ void RenderTableSection::paintObject(PaintInfo& paintInfo, const LayoutPoint& pa
                 RenderTableCell* cell = current.primaryCell();
                 if (!cell) {
                     if (!c)
-                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CBSStart));
+                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CollapsedBorderSide::Start));
                     else if (c == table()->numEffCols())
-                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CBSEnd));
+                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CollapsedBorderSide::End));
 
                     shouldPaintRowGroupBorder = true;
                     continue;
@@ -1367,9 +1366,9 @@ void RenderTableSection::paintObject(PaintInfo& paintInfo, const LayoutPoint& pa
                 // this will only happen once within a row as the null cells will always be clustered together on one end of the row.
                 if (shouldPaintRowGroupBorder) {
                     if (r == m_grid.size())
-                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CBSAfter), cell);
+                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CollapsedBorderSide::After), cell);
                     else if (!row && !table()->sectionAbove(this))
-                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CBSBefore), cell);
+                        paintRowGroupBorderIfRequired(paintInfo, paintOffset, row, col, physicalBorderForDirection(table()->writingMode(), CollapsedBorderSide::Before), cell);
 
                     shouldPaintRowGroupBorder = false;
                 }
@@ -1650,7 +1649,7 @@ void RenderTableSection::removeCachedCollapsedBorders(const RenderTableCell& cel
     if (!table()->collapseBorders())
         return;
     
-    for (int side = CBSBefore; side <= CBSEnd; ++side)
+    for (auto side = std::to_underlying(CollapsedBorderSide::Before); side <= std::to_underlying(CollapsedBorderSide::End); ++side)
         m_cellsCollapsedBorders.remove(std::make_pair(&cell, side));
 }
 
@@ -1658,13 +1657,13 @@ void RenderTableSection::setCachedCollapsedBorder(const RenderTableCell& cell, C
 {
     ASSERT(table()->collapseBorders());
     ASSERT(border.width());
-    m_cellsCollapsedBorders.set(std::make_pair(&cell, side), border);
+    m_cellsCollapsedBorders.set(std::make_pair(&cell, std::to_underlying(side)), border);
 }
 
 CollapsedBorderValue RenderTableSection::cachedCollapsedBorder(const RenderTableCell& cell, CollapsedBorderSide side)
 {
     ASSERT(table()->collapseBorders() && table()->collapsedBordersAreValid());
-    auto it = m_cellsCollapsedBorders.find(std::make_pair(&cell, side));
+    auto it = m_cellsCollapsedBorders.find(std::make_pair(&cell, std::to_underlying(side)));
     // Only non-empty collapsed borders are in the hashmap.
     if (it == m_cellsCollapsedBorders.end())
         return CollapsedBorderValue(BorderValue(), Color(), BorderPrecedence::Cell, cell.style().usedZoomForLength());

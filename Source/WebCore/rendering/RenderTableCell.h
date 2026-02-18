@@ -312,22 +312,18 @@ inline RenderTableCell* RenderTableRow::lastCell() const
 inline void RenderTableCell::setHasEmptyCollapsedBorder(CollapsedBorderSide side, bool empty) const
 {
     switch (side) {
-    case CBSAfter: {
+    case CollapsedBorderSide::After:
         m_hasEmptyCollapsedAfterBorder = empty;
         break;
-    }
-    case CBSBefore: {
+    case CollapsedBorderSide::Before:
         m_hasEmptyCollapsedBeforeBorder = empty;
         break;
-    }
-    case CBSStart: {
+    case CollapsedBorderSide::Start:
         m_hasEmptyCollapsedStartBorder = empty;
         break;
-    }
-    case CBSEnd: {
+    case CollapsedBorderSide::End:
         m_hasEmptyCollapsedEndBorder = empty;
         break;
-    }
     }
     if (empty)
         table()->collapsedEmptyBorderIsPresent();

@@ -34,11 +34,11 @@ namespace WebCore {
 class RenderTableCell;
 class RenderTableRow;
 
-enum CollapsedBorderSide {
-    CBSBefore,
-    CBSAfter,
-    CBSStart,
-    CBSEnd
+enum class CollapsedBorderSide : uint8_t {
+    Before,
+    After,
+    Start,
+    End
 };
 
 // Helper class for paintObject.
@@ -243,7 +243,7 @@ private:
 
     // This map holds the collapsed border values for cells with collapsed borders.
     // It is held at RenderTableSection level to spare memory consumption by table cells.
-    HashMap<std::pair<const RenderTableCell*, int>, CollapsedBorderValue > m_cellsCollapsedBorders;
+    HashMap<std::pair<const RenderTableCell*, int>, CollapsedBorderValue> m_cellsCollapsedBorders;
 
     bool m_forceSlowPaintPathWithOverflowingCell { false };
     bool m_hasMultipleCellLevels { false };

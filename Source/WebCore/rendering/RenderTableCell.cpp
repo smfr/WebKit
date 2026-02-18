@@ -772,12 +772,12 @@ CollapsedBorderValue RenderTableCell::collapsedStartBorder(IncludeBorderColorOrN
         return emptyBorder();
 
     if (table()->collapsedBordersAreValid())
-        return section()->cachedCollapsedBorder(*this, CBSStart);
+        return section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Start);
 
     CollapsedBorderValue result = computeCollapsedStartBorder(includeColor);
-    setHasEmptyCollapsedBorder(CBSStart, !result.width());
+    setHasEmptyCollapsedBorder(CollapsedBorderSide::Start, !result.width());
     if (includeColor && !m_hasEmptyCollapsedStartBorder)
-        section()->setCachedCollapsedBorder(*this, CBSStart, result);
+        section()->setCachedCollapsedBorder(*this, CollapsedBorderSide::Start, result);
     return result;
 }
 
@@ -900,12 +900,12 @@ CollapsedBorderValue RenderTableCell::collapsedEndBorder(IncludeBorderColorOrNot
         return emptyBorder();
 
     if (table()->collapsedBordersAreValid())
-        return section()->cachedCollapsedBorder(*this, CBSEnd);
+        return section()->cachedCollapsedBorder(*this, CollapsedBorderSide::End);
 
     CollapsedBorderValue result = computeCollapsedEndBorder(includeColor);
-    setHasEmptyCollapsedBorder(CBSEnd, !result.width());
+    setHasEmptyCollapsedBorder(CollapsedBorderSide::End, !result.width());
     if (includeColor && !m_hasEmptyCollapsedEndBorder)
-        section()->setCachedCollapsedBorder(*this, CBSEnd, result);
+        section()->setCachedCollapsedBorder(*this, CollapsedBorderSide::End, result);
     return result;
 }
 
@@ -1014,12 +1014,12 @@ CollapsedBorderValue RenderTableCell::collapsedBeforeBorder(IncludeBorderColorOr
         return emptyBorder();
 
     if (table()->collapsedBordersAreValid())
-        return section()->cachedCollapsedBorder(*this, CBSBefore);
+        return section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Before);
 
     CollapsedBorderValue result = computeCollapsedBeforeBorder(includeColor);
-    setHasEmptyCollapsedBorder(CBSBefore, !result.width());
+    setHasEmptyCollapsedBorder(CollapsedBorderSide::Before, !result.width());
     if (includeColor && !m_hasEmptyCollapsedBeforeBorder)
-        section()->setCachedCollapsedBorder(*this, CBSBefore, result);
+        section()->setCachedCollapsedBorder(*this, CollapsedBorderSide::Before, result);
     return result;
 }
 
@@ -1111,12 +1111,12 @@ CollapsedBorderValue RenderTableCell::collapsedAfterBorder(IncludeBorderColorOrN
         return emptyBorder();
 
     if (table()->collapsedBordersAreValid())
-        return section()->cachedCollapsedBorder(*this, CBSAfter);
+        return section()->cachedCollapsedBorder(*this, CollapsedBorderSide::After);
 
     CollapsedBorderValue result = computeCollapsedAfterBorder(includeColor);
-    setHasEmptyCollapsedBorder(CBSAfter, !result.width());
+    setHasEmptyCollapsedBorder(CollapsedBorderSide::After, !result.width());
     if (includeColor && !m_hasEmptyCollapsedAfterBorder)
-        section()->setCachedCollapsedBorder(*this, CBSAfter, result);
+        section()->setCachedCollapsedBorder(*this, CollapsedBorderSide::After, result);
     return result;
 }
 
@@ -1198,29 +1198,29 @@ CollapsedBorderValue RenderTableCell::computeCollapsedAfterBorder(IncludeBorderC
 inline CollapsedBorderValue RenderTableCell::cachedCollapsedLeftBorder(const WritingMode writingMode) const
 {
     if (writingMode.isHorizontal())
-        return writingMode.isInlineLeftToRight() ? section()->cachedCollapsedBorder(*this, CBSStart) : section()->cachedCollapsedBorder(*this, CBSEnd);
-    return writingMode.isBlockLeftToRight() ? section()->cachedCollapsedBorder(*this, CBSBefore) : section()->cachedCollapsedBorder(*this, CBSAfter);
+        return writingMode.isInlineLeftToRight() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Start) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::End);
+    return writingMode.isBlockLeftToRight() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Before) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::After);
 }
 
 inline CollapsedBorderValue RenderTableCell::cachedCollapsedRightBorder(const WritingMode writingMode) const
 {
     if (writingMode.isHorizontal())
-        return writingMode.isInlineLeftToRight() ? section()->cachedCollapsedBorder(*this, CBSEnd) : section()->cachedCollapsedBorder(*this, CBSStart);
-    return writingMode.isBlockLeftToRight() ? section()->cachedCollapsedBorder(*this, CBSAfter) : section()->cachedCollapsedBorder(*this, CBSBefore);
+        return writingMode.isInlineLeftToRight() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::End) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Start);
+    return writingMode.isBlockLeftToRight() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::After) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Before);
 }
 
 inline CollapsedBorderValue RenderTableCell::cachedCollapsedTopBorder(const WritingMode writingMode) const
 {
     if (writingMode.isHorizontal())
-        return writingMode.isBlockTopToBottom() ? section()->cachedCollapsedBorder(*this, CBSBefore) : section()->cachedCollapsedBorder(*this, CBSAfter);
-    return writingMode.isInlineTopToBottom() ? section()->cachedCollapsedBorder(*this, CBSStart) : section()->cachedCollapsedBorder(*this, CBSEnd);
+        return writingMode.isBlockTopToBottom() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Before) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::After);
+    return writingMode.isInlineTopToBottom() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Start) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::End);
 }
 
 inline CollapsedBorderValue RenderTableCell::cachedCollapsedBottomBorder(const WritingMode writingMode) const
 {
     if (writingMode.isHorizontal())
-        return writingMode.isBlockTopToBottom() ? section()->cachedCollapsedBorder(*this, CBSAfter) : section()->cachedCollapsedBorder(*this, CBSBefore);
-    return writingMode.isInlineTopToBottom() ? section()->cachedCollapsedBorder(*this, CBSEnd) : section()->cachedCollapsedBorder(*this, CBSStart);
+        return writingMode.isBlockTopToBottom() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::After) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Before);
+    return writingMode.isInlineTopToBottom() ? section()->cachedCollapsedBorder(*this, CollapsedBorderSide::End) : section()->cachedCollapsedBorder(*this, CollapsedBorderSide::Start);
 }
 
 RectEdges<LayoutUnit> RenderTableCell::borderWidths() const
