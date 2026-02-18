@@ -3468,6 +3468,21 @@ HTMLEnhancedSelectParsingEnabled:
      WebCore:
        default: true
 
+HTMLEnhancedSelectParsingQuirkEnabled:
+  type: bool
+  status: internal
+  category: dom
+  humanReadableName: "Enhanced HTML select element parsing quirk"
+  humanReadableDescription: "Enable enhanced HTML select element parsing quirk for specific applications"
+  defaultValue:
+    WebKitLegacy:
+      PLATFORM(MAC): WebKit::defaultHTMLEnhancedSelectParsingQuirkEnabled()
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 HTTPEquivEnabled:
   type: bool
   status: mature

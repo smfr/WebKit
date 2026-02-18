@@ -506,6 +506,12 @@ bool MacApplication::isMimeoPhotoProject()
     return isMimeoPhotoProject;
 }
 
+bool MacApplication::isGridLegends()
+{
+    static bool isGridLegends = applicationBundleIsEqualTo("com.feralinteractive.gridlegends"_s);
+    return isGridLegends;
+}
+
 #endif // PLATFORM(MAC)
 
 #if PLATFORM(IOS_FAMILY)

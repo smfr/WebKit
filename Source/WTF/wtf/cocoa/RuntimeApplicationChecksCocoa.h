@@ -134,6 +134,7 @@ enum class SDKAlignedBehavior {
     GetBoundingClientRectZoomed,
     CrashWhenMutatingProcessAssertionsFromBackgroundThread,
     NoFontFaceSetConstructor,
+    NoHTMLEnhancedSelectParsingQuirk,
 
     NumberOfBehaviors
 };
@@ -186,6 +187,7 @@ WTF_EXPORT_PRIVATE bool isHRBlock();
 WTF_EXPORT_PRIVATE bool isTurboTax();
 WTF_EXPORT_PRIVATE bool isEpsonSoftwareUpdater();
 WTF_EXPORT_PRIVATE bool isMimeoPhotoProject();
+WTF_EXPORT_PRIVATE bool isGridLegends();
 
 } // MacApplication
 

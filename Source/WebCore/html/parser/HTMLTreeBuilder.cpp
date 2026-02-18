@@ -641,6 +641,11 @@ void HTMLTreeBuilder::processStartTagForInBody(AtomHTMLToken&& token)
     case TagName::noframes:
     case TagName::script:
     case TagName::style:
+        if (m_options.enhancedSelectQuirk && m_tree.openElements().inScope(HTML::select)) {
+            parseError(token);
+            return;
+        }
+        [[fallthrough]];
     case TagName::title: {
         bool didProcess = processStartTagForInHead(WTF::move(token));
         ASSERT_UNUSED(didProcess, didProcess);
