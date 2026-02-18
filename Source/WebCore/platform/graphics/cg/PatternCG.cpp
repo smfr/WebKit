@@ -69,10 +69,13 @@ RetainPtr<CGPatternRef> Pattern::createPlatformPattern(const AffineTransform& us
     patternTransform.scaleNonUniform(1, -1);
     patternTransform.translate(0, -tileRect.height());
 
+    // FIXME: rdar://170607038 ('CGPatternCreateWithImage2' is deprecated: Don't use CGPatternCreateWithImage2; use CGDataProviderGetSizeOfData instead.)
+ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     // If we're repeating in both directions, we can use image-backed patterns
     // instead of custom patterns, and avoid tiling-edge pixel cracks.
     if (repeatX() && repeatY())
         return adoptCF(CGPatternCreateWithImage2(platformImage.get(), patternTransform, kCGPatternTilingConstantSpacing));
+ALLOW_DEPRECATED_DECLARATIONS_END
 
     // If FLT_MAX should also be used for xStep or yStep, nothing is rendered. Using fractions of FLT_MAX also
     // result in nothing being rendered.
