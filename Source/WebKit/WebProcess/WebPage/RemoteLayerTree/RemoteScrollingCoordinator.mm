@@ -121,11 +121,11 @@ RemoteScrollingCoordinatorTransaction RemoteScrollingCoordinator::buildTransacti
 }
 
 // Notification from the UI process that we scrolled.
-void RemoteScrollingCoordinator::scrollUpdateForNode(ScrollUpdate update, CompletionHandler<void()>&& completionHandler)
+void RemoteScrollingCoordinator::scrollUpdateForNode(ScrollUpdate&& update, CompletionHandler<void()>&& completionHandler)
 {
     LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinator::scrollUpdateForNode: " << update);
 
-    applyScrollUpdate(WTF::move(update));
+    applyScrollUpdate(WTF::move(update), ScrollType::User, ViewportRectStability::Stable);
     completionHandler();
 }
 

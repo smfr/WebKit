@@ -612,7 +612,13 @@ void AsyncScrollingCoordinator::synchronizeStateFromScrollingTree()
     m_scrollingTree->traverseScrollingTree([&](ScrollingNodeID nodeID, ScrollingNodeType, std::optional<FloatPoint> scrollPosition, std::optional<FloatPoint> layoutViewportOrigin, bool scrolledSinceLastCommit) {
         if (scrollPosition && scrolledSinceLastCommit) {
             LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::synchronizeStateFromScrollingTree - node " << nodeID << " scroll position " << scrollPosition);
-            updateScrollPositionAfterAsyncScroll(nodeID, scrollPosition.value(), layoutViewportOrigin, ScrollingLayerPositionAction::Set, ScrollType::User);
+            auto scrollUpdate = ScrollUpdate {
+                .nodeID = nodeID,
+                .scrollPosition = *scrollPosition,
+                .layoutViewportOrigin = layoutViewportOrigin,
+                .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
+            };
+            updateScrollPositionAfterAsyncScroll(WTF::move(scrollUpdate), ScrollType::User, ViewportRectStability::Stable);
         }
     });
 }
@@ -625,7 +631,7 @@ void AsyncScrollingCoordinator::applyPendingScrollUpdates()
     auto scrollUpdates = m_scrollingTree->takePendingScrollUpdates();
     for (auto& update : scrollUpdates) {
         LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::applyPendingScrollUpdates - node " << update.nodeID << " scroll position " << update.scrollPosition);
-        applyScrollPositionUpdate(WTF::move(update), ScrollType::User);
+        applyScrollPositionUpdate(WTF::move(update), ScrollType::User, ViewportRectStability::Stable);
     }
 }
 
@@ -684,13 +690,13 @@ LocalFrameView* AsyncScrollingCoordinator::frameViewForScrollingNode(std::option
     return nullptr;
 }
 
-void AsyncScrollingCoordinator::applyScrollUpdate(ScrollUpdate&& update, ScrollType scrollType)
+void AsyncScrollingCoordinator::applyScrollUpdate(ScrollUpdate&& update, ScrollType scrollType, ViewportRectStability viewportStability)
 {
     applyPendingScrollUpdates();
-    applyScrollPositionUpdate(WTF::move(update), scrollType);
+    applyScrollPositionUpdate(WTF::move(update), scrollType, viewportStability);
 }
 
-void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update, ScrollType scrollType)
+void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update, ScrollType scrollType, ViewportRectStability viewportStability)
 {
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::applyScrollPositionUpdate " << update);
     switch (update.updateType) {
@@ -711,7 +717,7 @@ void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update,
         return;
 
     case ScrollUpdateType::PositionUpdate:
-        updateScrollPositionAfterAsyncScroll(update.nodeID, update.scrollPosition, update.layoutViewportOrigin, update.updateLayerPositionAction, scrollType);
+        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
         return;
 
     case ScrollUpdateType::ProgrammaticScrollDidEnd:
@@ -810,7 +816,7 @@ void AsyncScrollingCoordinator::notifyScrollableAreasForScrollEnd(ScrollingNodeI
         scrollableArea->scrollDidEnd();
 }
 
-void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollingNodeID scrollingNodeID, const FloatPoint& scrollPosition, std::optional<FloatPoint> layoutViewportOrigin, ScrollingLayerPositionAction scrollingLayerPositionAction, ScrollType scrollType)
+void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollUpdate&& update, ScrollType scrollType, ViewportRectStability viewportStability)
 {
     ASSERT(isMainThread());
 
@@ -818,30 +824,30 @@ void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollingNo
     if (!page)
         return;
 
-    RefPtr frameView = frameViewForScrollingNode(scrollingNodeID);
+    RefPtr frameView = frameViewForScrollingNode(update.nodeID);
     if (!frameView)
         return;
 
-    LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll node " << scrollingNodeID << " " << scrollType << " scrollPosition " << scrollPosition << " action " << scrollingLayerPositionAction);
+    LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll node " << update.nodeID << " " << scrollType << " scrollPosition " << update.scrollPosition << " action " << update.updateLayerPositionAction);
 
     if (!frameView->frame().isMainFrame()) {
-        if (scrollingLayerPositionAction == ScrollingLayerPositionAction::Set)
+        if (update.updateLayerPositionAction == ScrollingLayerPositionAction::Set)
             page->editorClient().subFrameScrollPositionChanged();
     }
 
-    if (scrollingNodeID == frameView->scrollingNodeID()) {
-        reconcileScrollingState(*frameView, scrollPosition, layoutViewportOrigin, scrollType, ViewportRectStability::Stable, scrollingLayerPositionAction);
+    if (update.nodeID == frameView->scrollingNodeID()) {
+        reconcileScrollingState(*frameView, update.scrollPosition, update.layoutViewportOrigin, scrollType, viewportStability, update.updateLayerPositionAction);
         return;
     }
 
     // Overflow-scroll area.
-    if (CheckedPtr scrollableArea = frameView->scrollableAreaForScrollingNodeID(scrollingNodeID)) {
+    if (CheckedPtr scrollableArea = frameView->scrollableAreaForScrollingNodeID(update.nodeID)) {
         auto previousScrollType = scrollableArea->currentScrollType();
         scrollableArea->setCurrentScrollType(scrollType);
-        scrollableArea->notifyScrollPositionChanged(roundedIntPoint(scrollPosition));
+        scrollableArea->notifyScrollPositionChanged(roundedIntPoint(update.scrollPosition));
         scrollableArea->setCurrentScrollType(previousScrollType);
 
-        if (scrollingLayerPositionAction == ScrollingLayerPositionAction::Set)
+        if (update.updateLayerPositionAction == ScrollingLayerPositionAction::Set)
             page->editorClient().overflowScrollPositionChanged();
     }
 }
