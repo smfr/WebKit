@@ -986,7 +986,7 @@ bool ScriptExecutionContext::requiresScriptTrackingPrivacyProtection(ScriptTrack
         return false;
 
     bool shouldApplyConsistently = (category == ScriptTrackingPrivacyCategory::QueryParameters && document->quirks().needsConsistentQueryParameterFilteringQuirk(taintedURL))
-        || document->quirks().mayBenefitFromFingerprintingProtectionQuirk(taintedURL);
+        || (category != ScriptTrackingPrivacyCategory::NetworkRequests && document->quirks().mayBenefitFromFingerprintingProtectionQuirk(taintedURL));
     if (!shouldEnableScriptTrackingPrivacy(category, advancedPrivacyProtections(), shouldApplyConsistently))
         return false;
 
