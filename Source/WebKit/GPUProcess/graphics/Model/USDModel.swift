@@ -34,7 +34,7 @@ import simd
 @_weakLinked @_spi(SwiftAPI) internal import DirectResource
 @_weakLinked internal import USDKit
 @_weakLinked internal import _USDKit_RealityKit
-@_weakLinked import RealityKit
+import RealityKit
 @_weakLinked @_spi(SGPrivate) internal import ShaderGraph
 @_weakLinked internal import RealityCoreDeformation
 
