@@ -1432,10 +1432,8 @@ class YarrGenerator final : public YarrJITInfo {
 
     MacroAssembler::Address duplicateNamedGroupAddress(unsigned duplicateNamedGroupId)
     {
-        if (m_needsInternalSubpatternOutput) {
-            unsigned offset = (m_pattern.m_numSubpatterns + 1) * 2 + duplicateNamedGroupId;
-            return internalSubpatternOutputAddress(offset * sizeof(int));
-        }
+        if (m_needsInternalSubpatternOutput)
+            return internalSubpatternOutputAddress(offsetForDuplicateNamedGroupId(duplicateNamedGroupId) * sizeof(int));
         return MacroAssembler::Address(m_regs.output, offsetForDuplicateNamedGroupId(duplicateNamedGroupId) * sizeof(int));
     }
 
@@ -1545,7 +1543,7 @@ class YarrGenerator final : public YarrJITInfo {
     void setMatchStart(MacroAssembler::RegisterID reg)
     {
         ASSERT(!m_pattern.m_body->m_hasFixedSize);
-        if (m_compileMode == JITCompileMode::IncludeSubpatterns || m_needsInternalSubpatternOutput)
+        if (shouldRecordSubpatterns())
             m_jit.store32(reg, subpatternStartAddress(0));
         else
             m_jit.move(reg, m_regs.output);
@@ -2146,10 +2144,10 @@ class YarrGenerator final : public YarrJITInfo {
 
             // An empty match is successful without consuming characters
             if (term->quantityType != QuantifierType::FixedCount || term->quantityMaxCount != 1) {
-                matches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternIndex));
+                matches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternTemp));
                 matches.append(m_jit.branch32(MacroAssembler::Equal, patternIndex, patternTemp));
             } else {
-                zeroLengthMatches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternIndex));
+                zeroLengthMatches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternTemp));
                 MacroAssembler::Jump tryNonZeroMatch = m_jit.branch32(MacroAssembler::NotEqual, patternIndex, patternTemp);
                 zeroLengthMatches.link(&m_jit);
                 storeToFrame(MacroAssembler::TrustedImm32(1), parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex());
@@ -2250,7 +2248,7 @@ class YarrGenerator final : public YarrJITInfo {
                 loadSubPattern(subpatternId, patternIndex, patternTemp);
 
             // An empty match is successful without consuming characters
-            zeroLengthMatches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternIndex));
+            zeroLengthMatches.append(m_jit.branch32(MacroAssembler::Equal, MacroAssembler::TrustedImm32(-1), patternTemp));
             MacroAssembler::Jump tryNonZeroMatch = m_jit.branch32(MacroAssembler::NotEqual, patternIndex, patternTemp);
             zeroLengthMatches.link(&m_jit);
             storeToFrame(MacroAssembler::TrustedImm32(1), parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex());
@@ -3603,12 +3601,12 @@ class YarrGenerator final : public YarrJITInfo {
                         m_jit.sub32(m_regs.index, MacroAssembler::Imm32(priorAlternative->m_minimumSize), m_regs.returnRegister);
                     else
                         m_jit.move(m_regs.index, m_regs.returnRegister);
-                    if (m_compileMode == JITCompileMode::IncludeSubpatterns)
-                        m_jit.storePair32(m_regs.returnRegister, m_regs.index, m_regs.output, MacroAssembler::TrustedImm32(0));
+                    if (shouldRecordSubpatterns())
+                        m_jit.storePair32(m_regs.returnRegister, m_regs.index, subpatternStartAddress(0));
                 } else {
                     getMatchStart(m_regs.returnRegister);
-                    if (m_compileMode == JITCompileMode::IncludeSubpatterns)
-                        m_jit.store32(m_regs.index, MacroAssembler::Address(m_regs.output, 4));
+                    if (shouldRecordSubpatterns())
+                        m_jit.store32(m_regs.index, subpatternEndAddress(0));
                 }
                 m_jit.move(m_regs.index, m_regs.returnRegister2);
                 generateReturn();
@@ -3622,10 +3620,9 @@ class YarrGenerator final : public YarrJITInfo {
                     // PRIOR alteranative, and we will only check input availability if we
                     // need to progress it forwards.
                     defineReentryLabel(op);
-                    if (shouldRecordSubpatterns()
-                        && priorAlternative->needToCleanupCaptures()) {
-                            for (unsigned subpattern = priorAlternative->firstCleanupSubpatternId(); subpattern <= priorAlternative->m_lastSubpatternId; subpattern++)
-                                clearSubpattern(subpattern);
+                    if (shouldRecordSubpatterns() && priorAlternative->needToCleanupCaptures()) {
+                        for (unsigned subpattern = priorAlternative->firstCleanupSubpatternId(); subpattern <= priorAlternative->m_lastSubpatternId; subpattern++)
+                            clearSubpattern(subpattern);
                     }
                     if (alternative->m_minimumSize > priorAlternative->m_minimumSize) {
                         m_jit.add32(MacroAssembler::Imm32(alternative->m_minimumSize - priorAlternative->m_minimumSize), m_regs.index);
@@ -6674,26 +6671,13 @@ public:
         // Initialize subpatterns' starts. And initialize matchStart if `!m_pattern.m_body->m_hasFixedSize`.
         // If shouldRecordSubpatterns(), then matchStart is subpatterns[0]'s start.
         if (shouldRecordSubpatterns()) {
-            unsigned subpatternId = 0;
-            // First subpatternId's start is configured to `index` if !m_pattern.m_body->m_hasFixedSize.
-            if (!m_pattern.m_body->m_hasFixedSize) {
-                setMatchStart(m_regs.index);
-                ++subpatternId;
-            }
-            for (; subpatternId < m_pattern.m_numSubpatterns + 1; ++subpatternId)
+            for (unsigned subpatternId = 0; subpatternId < m_pattern.m_numSubpatterns + 1; ++subpatternId)
                 clearSubpattern(subpatternId);
-            // Initialize named captures / duplicate named group tracking
-            if (m_compileMode == JITCompileMode::IncludeSubpatterns) {
-                for (unsigned i = m_pattern.offsetVectorBaseForNamedCaptures(); i < m_pattern.offsetsSize(); ++i)
-                    m_jit.store32(MacroAssembler::TrustedImm32(0), MacroAssembler::Address(m_regs.output, i * sizeof(int)));
-            } else {
-                for (unsigned i = 1; i <= m_pattern.m_numDuplicateNamedCaptureGroups; ++i)
-                    m_jit.store32(MacroAssembler::TrustedImm32(0), duplicateNamedGroupAddress(i));
-            }
-        } else {
-            if (!m_pattern.m_body->m_hasFixedSize)
-                setMatchStart(m_regs.index);
+            for (unsigned i = 1; i <= m_pattern.m_numDuplicateNamedCaptureGroups; ++i)
+                m_jit.store32(MacroAssembler::TrustedImm32(0), duplicateNamedGroupAddress(i));
         }
+        if (!m_pattern.m_body->m_hasFixedSize)
+            setMatchStart(m_regs.index);
 
         if (m_pattern.m_saveInitialStartValue)
             m_jit.move(m_regs.index, m_regs.initialStart);
@@ -6834,13 +6818,12 @@ public:
             m_jit.getEffectiveAddress(MacroAssembler::BaseIndex(m_regs.input, m_regs.length, MacroAssembler::TimesTwo), m_regs.endOfStringAddress);
 #endif
 
-        if (m_compileMode == JITCompileMode::IncludeSubpatterns) {
-            for (unsigned i = 0; i < m_pattern.m_numSubpatterns + 1; ++i)
-                clearSubpattern(i);
-            for (unsigned i = m_pattern.offsetVectorBaseForNamedCaptures(); i < m_pattern.offsetsSize(); ++i)
-                m_jit.store32(MacroAssembler::TrustedImm32(0), MacroAssembler::Address(m_regs.output, (i) * sizeof(int)));
+        if (shouldRecordSubpatterns()) {
+            for (unsigned subpatternId = 0; subpatternId < m_pattern.m_numSubpatterns + 1; ++subpatternId)
+                clearSubpattern(subpatternId);
+            for (unsigned i = 1; i <= m_pattern.m_numDuplicateNamedCaptureGroups; ++i)
+                m_jit.store32(MacroAssembler::TrustedImm32(0), duplicateNamedGroupAddress(i));
         }
-
         if (!m_pattern.m_body->m_hasFixedSize)
             setMatchStart(m_regs.index);
 
@@ -7125,8 +7108,9 @@ public:
     template<typename... Args>
     void appendOp(Args&&... args)
     {
+        unsigned index = m_ops.size();
         m_ops.constructAndAppend(std::forward<Args>(args)...);
-        m_ops.last().m_index = m_ops.size();
+        m_ops.last().m_index = index;
     }
 
 private:
