@@ -611,29 +611,29 @@ String ShorthandSerializer::serializeCoordinatingListPropertyGroup() const
     // https://drafts.csswg.org/css-values-4/#linked-properties
 
     // First, figure out the number of items in the coordinating list base property,
-    // which we'll need to match for all coordinated longhands, thus possibly trimming
-    // or expanding.
+    // which we'll need to match for all coordinated longhands.
     unsigned numberOfItemsForCoordinatingListBaseProperty = 1;
     if (RefPtr valueList = dynamicDowncast<CSSValueList>(longhandValue(0)))
         numberOfItemsForCoordinatingListBaseProperty = std::max(valueList->length(), numberOfItemsForCoordinatingListBaseProperty);
 
-    // Now go through all longhands and ensure we repeat items earlier in the list
-    // should there not be a specified value.
+    // If any longhand has a different number of items than the coordinating list base
+    // property, there is no serialization that will round-trip, so the serialization fails
+    for (unsigned longhandIndex = 1; longhandIndex < length(); ++longhandIndex) {
+        Ref value = longhandValue(longhandIndex);
+        if (RefPtr valueList = dynamicDowncast<CSSValueList>(value)) {
+            if (valueList->length() != numberOfItemsForCoordinatingListBaseProperty)
+                return String();
+        }
+    }
+
     StringBuilder result;
     for (unsigned listItemIndex = 0; listItemIndex < numberOfItemsForCoordinatingListBaseProperty; ++listItemIndex) {
         LayerValues layerValues { m_shorthand };
         for (unsigned longhandIndex = 0; longhandIndex < length(); ++longhandIndex) {
             Ref value = longhandValue(longhandIndex);
-            if (auto* valueList = dynamicDowncast<CSSValueList>(value.ptr())) {
-                auto* valueInList = [&]() -> const CSSValue* {
-                    if (auto* specifiedValue = valueList->item(listItemIndex))
-                        return specifiedValue;
-                    if (auto numberOfItemsInList = valueList->size())
-                        return valueList->item(listItemIndex % numberOfItemsInList);
-                    return nullptr;
-                }();
-                layerValues.set(longhandIndex, valueInList);
-            } else
+            if (auto* valueList = dynamicDowncast<CSSValueList>(value.ptr()))
+                layerValues.set(longhandIndex, valueList->item(listItemIndex));
+            else
                 layerValues.set(longhandIndex, value.ptr());
         }
         // The coordinating list base property must never be skipped.

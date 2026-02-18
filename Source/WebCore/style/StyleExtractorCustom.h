@@ -3037,11 +3037,18 @@ inline RefPtr<CSSValue> ExtractorCustom::extractScrollTimelineShorthand(Extracto
     if (scrollTimelines.isInitial())
         return createCSSValue(state.pool, state.style, CSS::Keyword::None { });
 
-    // FIXME: This should probably be using `scrollTimelines.computedValues()`, but a WPT test, scroll-animations/css/scroll-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
-    // See https://github.com/w3c/csswg-drafts/issues/13500
+    // If there is more than one scroll timeline and any scroll timeline has any
+    // property not set, there is no serialization that will round-trip, so the
+    // extraction fails.
+    if (scrollTimelines.computedLength() > 1) {
+        for (auto& scrollTimeline : scrollTimelines.computedValues()) {
+            if (!allPropertiesAreSet(scrollTimeline))
+                return nullptr;
+        }
+    }
 
     CSSValueListBuilder list;
-    for (auto& scrollTimeline : scrollTimelines.usedValues()) {
+    for (auto& scrollTimeline : scrollTimelines.computedValues()) {
         auto& name = scrollTimeline.name();
         auto axis = scrollTimeline.axis();
 
@@ -3067,10 +3074,17 @@ inline void ExtractorCustom::extractScrollTimelineShorthandSerialization(Extract
         return;
     }
 
-    // FIXME: This should probably be using `scrollTimelines.computedValues()`, but a WPT test, scroll-animations/css/scroll-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
-    // See https://github.com/w3c/csswg-drafts/issues/13500
+    // If there is more than one scroll timeline and any scroll timeline has any
+    // property not set, there is no serialization that will round-trip, so the
+    // extraction fails.
+    if (scrollTimelines.computedLength() > 1) {
+        for (auto& scrollTimeline : scrollTimelines.computedValues()) {
+            if (!allPropertiesAreSet(scrollTimeline))
+                return;
+        }
+    }
 
-    builder.append(interleave(scrollTimelines.usedValues(), [&](auto& builder, auto& scrollTimeline) {
+    builder.append(interleave(scrollTimelines.computedValues(), [&](auto& builder, auto& scrollTimeline) {
         auto& name = scrollTimeline.name();
         auto axis = scrollTimeline.axis();
 
@@ -3213,11 +3227,18 @@ inline RefPtr<CSSValue> ExtractorCustom::extractViewTimelineShorthand(ExtractorS
     if (viewTimelines.isInitial())
         return createCSSValue(state.pool, state.style, CSS::Keyword::None { });
 
-    // FIXME: This should probably be using `viewTimelines.computedValues()`, but a WPT test, scroll-animations/css/view-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
-    // See https://github.com/w3c/csswg-drafts/issues/13500
+    // If there is more than one view timeline and any view timeline has any
+    // property not set, there is no serialization that will round-trip, so the
+    // extraction fails.
+    if (viewTimelines.computedLength() > 1) {
+        for (auto& viewTimeline : viewTimelines.computedValues()) {
+            if (!allPropertiesAreSet(viewTimeline))
+                return nullptr;
+        }
+    }
 
     CSSValueListBuilder list;
-    for (auto& viewTimeline : viewTimelines.usedValues()) {
+    for (auto& viewTimeline : viewTimelines.computedValues()) {
         auto& name = viewTimeline.name();
         auto axis = viewTimeline.axis();
         auto& inset = viewTimeline.inset();
@@ -3256,10 +3277,17 @@ inline void ExtractorCustom::extractViewTimelineShorthandSerialization(Extractor
         return;
     }
 
-    // FIXME: This should probably be using `viewTimelines.computedValues()`, but a WPT test, scroll-animations/css/view-timeline-shorthand.html, currently relies on the shorthand serializing the used value list.
-    // See https://github.com/w3c/csswg-drafts/issues/13500
+    // If there is more than one view timeline and any view timeline has any
+    // property not set, there is no serialization that will round-trip, so the
+    // extraction fails.
+    if (viewTimelines.computedLength() > 1) {
+        for (auto& viewTimeline : viewTimelines.computedValues()) {
+            if (!allPropertiesAreSet(viewTimeline))
+                return;
+        }
+    }
 
-    builder.append(interleave(viewTimelines.usedValues(), [&](auto& builder, auto& viewTimeline) {
+    builder.append(interleave(viewTimelines.computedValues(), [&](auto& builder, auto& viewTimeline) {
         auto& name = viewTimeline.name();
         auto axis = viewTimeline.axis();
         auto& inset = viewTimeline.inset();
