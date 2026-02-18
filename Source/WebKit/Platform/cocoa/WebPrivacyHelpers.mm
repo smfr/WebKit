@@ -783,7 +783,8 @@ bool isRequestBlockable(const WebCore::ResourceRequest& request, bool needsAdvan
 
 bool isTaintedScriptURLBlockable(const URL& url)
 {
-    return IS_REQUEST_UNCONDITIONALLY_BLOCKABLE(WebCore::RegistrableDomain { url });
+    WebCore::RegistrableDomain domain { url };
+    return domain == "tainted.example" || IS_REQUEST_UNCONDITIONALLY_BLOCKABLE(domain);
 }
 #else
 
@@ -948,4 +949,8 @@ void ConsistentPrivacyQuirkController::didUpdateCachedListData()
 
 } // namespace WebKit
 
+#else
+namespace WebKit {
+bool isTaintedScriptURLBlockable(const URL&) { return false; }
+}
 #endif // ENABLE(ADVANCED_PRIVACY_PROTECTIONS)
