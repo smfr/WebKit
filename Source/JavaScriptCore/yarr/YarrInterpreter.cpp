@@ -322,11 +322,10 @@ public:
             unsigned p = pos - negativePositionOffest;
             ASSERT(p < length);
             auto result = input[p];
-            if (U16_IS_LEAD(result) && decodeSurrogatePairs && p + 1 < length && U16_IS_TRAIL(input[p + 1])) {
-                if (atEnd())
-                    return errorCodePoint;
+            if (U16_IS_LEAD(result) && decodeSurrogatePairs && p + 1 < length && U16_IS_TRAIL(input[p + 1]))
                 return U16_GET_SUPPLEMENTARY(result, input[p + 1]);
-            }
+            if (U16_IS_TRAIL(result) && decodeSurrogatePairs && p > 0 && U16_IS_LEAD(input[p - 1]))
+                return errorCodePoint;
             return result;
         }
 
@@ -659,7 +658,7 @@ public:
                 ch = input.readSurrogatePairChecked(negativeInputOffset);
                 ++i;
             } else
-                ch = term.matchDirection() == Forward ? input.readChecked(negativeInputOffset) : input.tryReadBackward(negativeInputOffset);
+                ch = term.matchDirection() == Forward ? input.readCheckedDontAdvance(negativeInputOffset) : input.tryReadBackward(negativeInputOffset);
 
             if (oldCh == errorCodePoint || ch == errorCodePoint)
                 return false;
