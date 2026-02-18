@@ -137,7 +137,7 @@ void NonCompositedFrameRenderer::resetFrameDamage()
         return;
     }
 
-    m_frameDamage = std::make_optional<Damage>(webPage->bounds(), webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4);
+    m_frameDamage = std::make_optional<Damage>(scaledRect, webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4);
 }
 #endif
 
