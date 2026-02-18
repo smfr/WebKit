@@ -486,7 +486,7 @@ http/tests/media/video-no-content-length-stall.html [ Pass ]
 http/tests/media/video-query-url.html [ Pass ]
 http/tests/security/canvas-remote-read-remote-video-blocked-no-crossorigin.html [ Pass ]
 http/tests/security/canvas-remote-read-remote-video-redirect.html [ Pass ]
-http/tests/security/contentSecurityPolicy/audio-redirect-allowed.html [ Pass ]
+http/tests/security/contentSecurityPolicy/audio-redirect-allowed.html [ Pass Timeout ]
 http/tests/security/contentSecurityPolicy/video-redirect-allowed.html [ Pass ]
 media/media-can-play-webm.html [ Pass ]
 media/media-controller-time-constant.html [ Pass ]
@@ -4313,7 +4313,7 @@ webkit.org/b/229761 http/tests/media/media-stream/audio-capture-and-category.htt
 
 # Flaky tests detected both on GTK and WPE from 29Jan2023 to 23Feb2023
 webkit.org/b/252878 http/tests/media/modern-media-controls/skip-back-support/skip-back-support-live-broadcast.html [ Timeout ]
-webkit.org/b/252878 http/tests/workers/service/shownotification-allowed.html [ Pass Timeout ]
+webkit.org/b/252878 http/tests/workers/service/shownotification-allowed.html [ Pass Failure Timeout ]
 # Uncomment when webkit.org/b/268068 is fixed
 #webkit.org/b/252878 imported/w3c/web-platform-tests/html/cross-origin-opener-policy/reporting/navigation-reporting/reporting-coop-navigated-opener.https.html [ Failure Pass ]
 webkit.org/b/252878 imported/w3c/web-platform-tests/service-workers/service-worker/navigation-timing.https.html [ Failure Pass ]
@@ -5232,6 +5232,8 @@ webkit.org/b/307291 imported/w3c/web-platform-tests/editing/other/typing-around-
 webkit.org/b/307291 imported/w3c/web-platform-tests/editing/other/typing-around-link-element-at-non-collapsed-selection.tentative.html?target=DesignMode&child=b [ Pass Failure ]
 webkit.org/b/307291 imported/w3c/web-platform-tests/editing/other/typing-around-link-element-at-non-collapsed-selection.tentative.html?target=DesignMode&parent=b&child=i [ Pass Failure ]
 
+webkit.org/b/308142 imported/w3c/web-platform-tests/editing/other/insertparagraph-in-child-of-head.tentative.html?designMode=on&white-space=pre-line [ Pass Failure ]
+
 webkit.org/b/307292 imported/w3c/web-platform-tests/resource-timing/buffered-flag.any.html [ Pass Failure ]
 webkit.org/b/307292 imported/w3c/web-platform-tests/resource-timing/buffered-flag.any.worker.html [ Pass Failure ]
 
@@ -5255,6 +5257,15 @@ webkit.org/b/307657 imported/w3c/web-platform-tests/resource-timing/status-codes
 webkit.org/b/307666 media/modern-media-controls/status-support/status-support-playing.html [ Pass Timeout ]
 
 webkit.org/b/307989 imported/w3c/web-platform-tests/cookies/path/default.html [ Pass Failure ]
+
+webkit.org/b/308139 imported/w3c/web-platform-tests/css/css-sizing/intrinsic-percent-replaced-019.html [ Pass ImageOnlyFailure ]
+
+webkit.org/b/308141 fast/text/international/bidi-LDB-2-CSS.html [ ImageOnlyFailure Failure ]
+webkit.org/b/308141 fast/text/international/bidi-LDB-2-HTML.html [ ImageOnlyFailure Failure ]
+
+webkit.org/b/308144 imported/w3c/web-platform-tests/css/selectors/user-invalid-form-submission-invalidation.html [ Pass ImageOnlyFailure ]
+
+webkit.org/b/308146 media/video-size.html [ Pass Failure Timeout ]
 
 # End: Common failures between GTK and WPE.
 

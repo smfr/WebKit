@@ -1305,3 +1305,9 @@ webkit.org/b/307098 imported/w3c/web-platform-tests/html/canvas/offscreen/text/c
 webkit.org/b/307098 imported/w3c/web-platform-tests/html/canvas/offscreen/text/canvas.2d.fontStretch.semi-expanded.html [ ImageOnlyFailure Pass ]
 webkit.org/b/307098 imported/w3c/web-platform-tests/html/canvas/offscreen/text/canvas.2d.fontStretch.ultra-condensed.html [ ImageOnlyFailure Pass ]
 webkit.org/b/307098 imported/w3c/web-platform-tests/html/canvas/offscreen/text/canvas.2d.fontStretch.ultra-expanded.html [ ImageOnlyFailure Pass ]
+
+webkit.org/b/308140 fast/dom/webtiming.html [ Pass Failure ]
+
+webkit.org/b/308145 imported/w3c/web-platform-tests/css/css-position/sticky/position-sticky-writing-modes.html [ Pass ImageOnlyFailure ]
+
+webkit.org/b/308148 imported/w3c/web-platform-tests/css/css-conditional/container-queries/crashtests/chrome-bug-439886903-crash.html [ Pass Timeout ]
