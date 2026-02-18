@@ -2353,6 +2353,8 @@ webkit.org/b/188218 fast/repaint/canvas-object-fit.html [ Failure ]
 
 webkit.org/b/170337 fast/repaint/obscured-background-no-repaint.html [ Pass Failure ]
 
+webkit.org/b/308103 fast/repaint/svg-image-object-fit-animation-repaint.html [ ImageOnlyFailure Pass ]
+
 # Makes subsequent tests randomly fail
 webkit.org/b/296727 fast/repaint/fixed-in-page-scale.html [ Skip ]
 webkit.org/b/296727 fast/repaint/fixed-right-bottom-in-page-scale.html [ Skip ]
@@ -2366,6 +2368,8 @@ webkit.org/b/296730 fast/repaint/no-animation-outside-viewport-subframe.html [ F
 webkit.org/b/298636 fast/repaint/fixed-move-after-keyboard-scroll.html [ Skip ] # Timeout
 
 webkit.org/b/304402 fast/repaint/translate-animation-repaint.html [ Failure ]
+
+webkit.org/b/308098 fast/repaint/hdpi-box-border-on-transition-paint.html [ ImageOnlyFailure Pass ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of Repaint-related bugs
@@ -5068,6 +5072,8 @@ webkit.org/b/303856 fast/scrolling/rtl-scrollbars-positioning.html [ Pass ImageO
 webkit.org/b/303856 fast/scrolling/rtl-scrollbars-sticky-document.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303857 imported/w3c/web-platform-tests/mathml/relations/css-styling/non-mathml-namespace-001.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303863 imported/w3c/web-platform-tests/css/css-view-transitions/transformed-element-scroll-transform.html [ Pass ImageOnlyFailure ]
+webkit.org/b/303865 imported/w3c/web-platform-tests/css/css-overflow/scrollbar-gutter-fixedpos-001.html [ Pass ImageOnlyFailure ]
+webkit.org/b/303865 imported/w3c/web-platform-tests/css/css-overflow/scrollbar-gutter-fixedpos-002.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303865 imported/w3c/web-platform-tests/css/css-overflow/scrollbar-gutter-fixedpos-003.html [ Pass ImageOnlyFailure ]
 webkit.org/b/303873 imported/w3c/web-platform-tests/trusted-types/navigate-to-javascript-url-csp-headers.html [ Pass Failure ]
 
