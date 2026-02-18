@@ -54,11 +54,13 @@ class Git(mocks.Subprocess):
         remote=None, tags=None,
         detached=None, default_branch='main',
         git_svn=False, remotes=None, editor=None,
+        is_worktree=False,
     ):
         self.path = path
         self.default_branch = default_branch
         self.remote = remote or 'git@example.org:mock/{}'.format(os.path.basename(path))
         self.detached = detached or False
+        self.is_worktree = is_worktree
 
         self.tags = tags or {}
 
@@ -244,7 +246,14 @@ nothing to commit, working tree clean
             ), mocks.Subprocess.Route(
                 self.executable, 'rev-parse', '--git-common-dir',
                 cwd=self.path,
-                completion=mocks.ProcessCompletion(
+                generator=lambda *args, **kwargs: mocks.ProcessCompletion(
+                    returncode=0,
+                    stdout='{}\n'.format('/main-repo/.git' if self.is_worktree else '.git'),
+                ),
+            ), mocks.Subprocess.Route(
+                self.executable, 'rev-parse', '--git-dir',
+                cwd=self.path,
+                generator=lambda *args, **kwargs: mocks.ProcessCompletion(
                     returncode=0,
                     stdout='.git\n',
                 ),
@@ -631,7 +640,7 @@ nothing to commit, working tree clean
             ), mocks.Subprocess.Route(
                 self.executable, 'fetch', 'origin', re.compile(r'.+:.+'),
                 cwd=self.path,
-                generator=lambda *args, **kwargs: mocks.ProcessCompletion(returncode=0),
+                generator=lambda *args, **kwargs: self._fetch_with_refspec(args[3]),
             ), mocks.Subprocess.Route(
                 self.executable, 'rebase', '--onto', re.compile(r'.+'), re.compile(r'.+'), re.compile(r'.+'),
                 cwd=self.path,
@@ -1306,6 +1315,20 @@ nothing to commit, working tree clean
             self.remotes[remote_branch] = self.commits[branch][:]
         elif remote_branch in self.remotes:
             del self.remotes[remote_branch]
+        return mocks.ProcessCompletion(returncode=0)
+
+    def _fetch_with_refspec(self, refspec):
+        """Handle fetch with refspec like 'main:main'.
+
+        Simulates git's behavior of refusing to fetch into a branch
+        that is checked out in any worktree.
+        """
+        branch = refspec.split(':')[0]
+        if self.is_worktree:
+            return mocks.ProcessCompletion(
+                returncode=1,
+                stderr="fatal: refusing to fetch into branch 'refs/heads/{}' checked out at '/other/worktree'\n".format(branch),
+            )
         return mocks.ProcessCompletion(returncode=0)
 
     def dcommit(self, remote='origin', branch=None):

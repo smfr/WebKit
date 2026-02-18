@@ -457,6 +457,23 @@ class Git(Scm):
 
     @property
     @decorators.Memoize()
+    def git_directory(self):
+        result = run([self.executable(), 'rev-parse', '--git-dir'], cwd=self.root_path, capture_output=True, encoding='utf-8')
+        if result.returncode:
+            return os.path.join(self.root_path, '.git')
+        return os.path.abspath(os.path.join(self.root_path, result.stdout.rstrip()))
+
+    @property
+    @decorators.Memoize()
+    def is_worktree(self):
+        """Return True if this repository is a git worktree.
+
+        A worktree's git_directory differs from its common_directory.
+        """
+        return self.git_directory != self.common_directory
+
+    @property
+    @decorators.Memoize()
     def default_branch(self):
         for name in ['HEAD', 'main', 'master']:
             result = run([self.executable(), 'rev-parse', '--symbolic-full-name', 'refs/remotes/{}/{}'.format(self.default_remote, name)],
@@ -675,7 +692,7 @@ class Git(Scm):
         # The way the buildbot workers update the git repository does not always update the remote/origin/main reference.
         # Workaround that by checking if remote/origin/main is an ancestor of FETCH_HEAD and then updating it here of needed.
         # See https://webkit.org/b/299395 for more details.
-        fh_path = os.path.join(self.common_directory, 'FETCH_HEAD')
+        fh_path = os.path.join(self.git_directory, 'FETCH_HEAD')
         if not os.path.isfile(fh_path):
             return
         repo_url = self.url().removesuffix('.git')
@@ -1359,8 +1376,11 @@ class Git(Scm):
 
         need_commit_signature = self.commit_signing_enabled()
 
+        # Note: We skip the fetch when in a worktree because 'git fetch origin
+        # main:main' fails when main is checked out in another worktree. The
+        # 'git pull' below will still update the remote tracking ref.
         code = 0
-        if branch and self.branch != branch:
+        if branch and self.branch != branch and not self.is_worktree:
             code = self.fetch(branch=branch, remote=remote, prune=prune)
         if not code:
             command = [self.executable()]
@@ -1391,6 +1411,7 @@ class Git(Scm):
                     command + ['HEAD...{}'.format('{}/{}'.format(remote, branch))],
                     cwd=self.root_path,
                     env={'FILTER_BRANCH_SQUELCH_WARNING': '1'},
+                    capture_output=True,
                 ).returncode
 
         if not code and self.is_svn and commit.revision:
