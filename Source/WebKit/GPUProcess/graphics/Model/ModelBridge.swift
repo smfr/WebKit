@@ -24,9 +24,9 @@
 internal import Metal
 import WebKit
 
-#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit) && !os(visionOS)
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
-@_weakLinked @_spi(RealityCoreRendererAPI) import RealityKit
+@_spi(RealityCoreRendererAPI) import RealityKit
 @_weakLinked internal import USDKit
 @_weakLinked @_spi(SwiftAPI) internal import DirectResource
 @_weakLinked internal import _USDKit_RealityKit
@@ -805,7 +805,7 @@ extension WKBridgeLiteral {
     }
 }
 
-#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit) && !os(visionOS)
 
 internal func toData<T>(_ input: [T]) -> Data {
 #if compiler(>=6.2)
