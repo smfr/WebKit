@@ -1200,7 +1200,7 @@ bool Node::isComposedTreeDescendantOf(const Node& node) const
 Node* Node::pseudoAwarePreviousSibling() const
 {
     auto* pseudoElement = dynamicDowncast<PseudoElement>(*this);
-    RefPtr parentOrHost = pseudoElement ? pseudoElement->hostElement() : parentElement();
+    auto* parentOrHost = pseudoElement ? pseudoElement->hostElement() : parentElement();
     if (parentOrHost && !previousSibling()) {
         if (isAfterPseudoElement() && parentOrHost->lastChild())
             return parentOrHost->lastChild();
@@ -1213,7 +1213,7 @@ Node* Node::pseudoAwarePreviousSibling() const
 Node* Node::pseudoAwareNextSibling() const
 {
     auto* pseudoElement = dynamicDowncast<PseudoElement>(*this);
-    RefPtr parentOrHost = pseudoElement ? pseudoElement->hostElement() : parentElement();
+    auto* parentOrHost = pseudoElement ? pseudoElement->hostElement() : parentElement();
     if (parentOrHost && !nextSibling()) {
         if (isBeforePseudoElement() && parentOrHost->firstChild())
             return parentOrHost->firstChild();
@@ -1226,7 +1226,7 @@ Node* Node::pseudoAwareNextSibling() const
 Node* Node::pseudoAwareFirstChild() const
 {
     if (auto* currentElement = dynamicDowncast<Element>(*this)) {
-        SUPPRESS_UNCHECKED_LOCAL Node* first = currentElement->beforePseudoElement();
+        Node* first = currentElement->beforePseudoElement();
         if (first)
             return first;
         first = currentElement->firstChild();
@@ -1240,7 +1240,7 @@ Node* Node::pseudoAwareFirstChild() const
 Node* Node::pseudoAwareLastChild() const
 {
     if (auto* currentElement = dynamicDowncast<Element>(*this)) {
-        SUPPRESS_UNCHECKED_LOCAL Node* last = currentElement->afterPseudoElement();
+        Node* last = currentElement->afterPseudoElement();
         if (last)
             return last;
         last = currentElement->lastChild();

@@ -179,10 +179,10 @@ public:
     inline Node* lastChild() const;
     inline bool hasAttributes() const;
     inline NamedNodeMap* attributesMap() const;
-    Node* pseudoAwareNextSibling() const;
-    Node* pseudoAwarePreviousSibling() const;
-    Node* pseudoAwareFirstChild() const;
-    Node* pseudoAwareLastChild() const;
+    Node* NODELETE pseudoAwareNextSibling() const;
+    Node* NODELETE pseudoAwarePreviousSibling() const;
+    Node* NODELETE pseudoAwareFirstChild() const;
+    Node* NODELETE pseudoAwareLastChild() const;
 
     WEBCORE_EXPORT const URL& baseURI() const;
     
