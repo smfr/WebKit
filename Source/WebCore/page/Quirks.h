@@ -322,6 +322,8 @@ public:
     bool shouldReportVisibleDueToActivePictureInPictureContent() const;
 #endif
 
+    bool shouldComparareUsedValuesForBorderWidthForTriggeringTransitions() const;
+
     void determineRelevantQuirks();
 
 private:

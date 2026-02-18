@@ -2400,6 +2400,13 @@ bool Quirks::shouldDisableDOMAudioSessionQuirk() const
     return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldDisableDOMAudioSession);
 }
 
+bool Quirks::shouldComparareUsedValuesForBorderWidthForTriggeringTransitions() const
+{
+    QUIRKS_EARLY_RETURN_IF_DISABLED_WITH_VALUE(false);
+
+    return m_quirksData.quirkIsEnabled(QuirksData::SiteSpecificQuirk::ShouldComparareUsedValuesForBorderWidthForTriggeringTransitions);
+}
+
 #if ENABLE(PICTURE_IN_PICTURE_API)
 bool Quirks::shouldReportVisibleDueToActivePictureInPictureContent() const
 {
@@ -3278,6 +3285,15 @@ static void handleWeeblyQuirks(QuirksData& quirksData, const URL& /* quirksURL *
     quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::ShouldDispatchSyntheticMouseEventsWhenModifyingSelectionQuirk);
 }
 
+static void handleWorkspacesQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL&  /* documentURL */)
+{
+    QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("workspaces.xyz"_s);
+
+    // workspaces.xyz rdar://170412045
+    // https://bugs.webkit.org/show_bug.cgi?id=307933
+    quirksData.enableQuirk(QuirksData::SiteSpecificQuirk::ShouldComparareUsedValuesForBorderWidthForTriggeringTransitions);
+}
+
 static void handleWikipediaQuirks(QuirksData& quirksData, const URL& /* quirksURL */, const String& quirksDomainString, const URL&  /* documentURL */)
 {
     QUIRKS_EARLY_RETURN_IF_NOT_DOMAIN("wikipedia.org"_s);
@@ -3580,6 +3596,7 @@ void Quirks::determineRelevantQuirks()
         { "webex"_s, &handleScriptToEvaluateBeforeRunningScriptFromURLQuirk },
 #endif
         { "weebly"_s, &handleWeeblyQuirks },
+        { "workspaces"_s, &handleWorkspacesQuirks },
 #if PLATFORM(MAC)
         { "wpdevelopment"_s, &handleWPDevelopmentQuirks },
 #endif
