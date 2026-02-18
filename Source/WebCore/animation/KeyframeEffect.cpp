@@ -1947,6 +1947,11 @@ const TimingFunction* KeyframeEffect::timingFunctionForKeyframeAtIndex(size_t in
 
 bool KeyframeEffect::canBeAccelerated() const
 {
+    return canBeAccelerated(AccountForTimelineAccelerationAbility::Yes);
+}
+
+bool KeyframeEffect::canBeAccelerated(AccountForTimelineAccelerationAbility accountForTimelineAccelerationAbility) const
+{
     if (!animation() || !animation()->timeline() || animation()->isSkippedContentAnimation())
         return false;
 
@@ -1975,7 +1980,9 @@ bool KeyframeEffect::canBeAccelerated() const
 
 #if ENABLE(THREADED_ANIMATIONS)
     if (canHaveAcceleratedRepresentation())
-        return !animation()->pending() && animation()->timeline()->canBeAccelerated();
+        return !animation()->pending() && (accountForTimelineAccelerationAbility == AccountForTimelineAccelerationAbility::No || animation()->timeline()->canBeAccelerated());
+#else
+    UNUSED_PARAM(accountForTimelineAccelerationAbility);
 #endif
 
     if (m_isAssociatedWithProgressBasedTimeline)
@@ -3186,7 +3193,8 @@ void KeyframeEffect::scheduleAssociatedAcceleratedEffectStackUpdate(const std::o
 
 void KeyframeEffect::timelineAccelerationAbilityDidChange()
 {
-    scheduleAssociatedAcceleratedEffectStackUpdate();
+    if (canBeAccelerated(AccountForTimelineAccelerationAbility::No))
+        scheduleAssociatedAcceleratedEffectStackUpdate();
 }
 
 Ref<AcceleratedEffect> KeyframeEffect::acceleratedRepresentation(const IntRect& borderBoxRect, const AcceleratedEffectValues& baseValues, OptionSet<AcceleratedEffectProperty>& disallowedProperties)

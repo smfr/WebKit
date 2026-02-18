@@ -43,6 +43,9 @@ AnimationTimeline::AnimationTimeline(std::optional<WebAnimationTime> duration)
 #endif
 {
     m_duration = duration;
+#if ENABLE(THREADED_ANIMATIONS)
+    m_canBeAccelerated = computeCanBeAccelerated();
+#endif
 }
 
 AnimationTimeline::~AnimationTimeline() = default;
