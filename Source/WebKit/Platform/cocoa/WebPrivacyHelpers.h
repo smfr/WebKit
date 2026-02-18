@@ -65,7 +65,7 @@ enum class RestrictedOpenerType : uint8_t;
 void configureForAdvancedPrivacyProtections(NSURLSession *);
 bool isKnownTrackerAddressOrDomain(StringView host);
 WebCore::IsKnownCrossSiteTracker isRequestToKnownCrossSiteTracker(const WebCore::ResourceRequest&);
-bool isRequestBlockable(const WebCore::ResourceRequest&, bool);
+bool isRequestBlockable(const WebCore::ResourceRequest&);
 void requestLinkDecorationFilteringData(CompletionHandler<void(Vector<WebCore::LinkDecorationFilteringData>&&)>&&);
 
 class ListDataObserver : public RefCountedAndCanMakeWeakPtr<ListDataObserver> {

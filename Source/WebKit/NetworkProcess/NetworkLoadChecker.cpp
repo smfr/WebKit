@@ -352,7 +352,6 @@ bool NetworkLoadChecker::shouldBlockForTrackingPolicy(const ResourceRequest& req
         return false;
 
     auto mayBlock = networkResourceLoader->parameters().mayBlockNetworkRequest;
-    bool needsAdvancedPrivacyProtections = networkResourceLoader->parameters().advancedPrivacyProtections.contains(WebCore::AdvancedPrivacyProtections::BaselineProtections);
     if (!mayBlock)
         return false;
 
@@ -362,7 +361,7 @@ bool NetworkLoadChecker::shouldBlockForTrackingPolicy(const ResourceRequest& req
     }
 
     if (CheckedPtr networkSession = m_networkProcess->networkSession(m_sessionID)) {
-        if (networkSession->shouldBlockRequestForTrackingPolicyAndUpdatePolicy(request, *m_webPageProxyID, *mayBlock, needsAdvancedPrivacyProtections)) {
+        if (networkSession->shouldBlockRequestForTrackingPolicyAndUpdatePolicy(request, *m_webPageProxyID, *mayBlock)) {
             LOAD_CHECKER_RELEASE_LOG("shouldBlockForTrackingPolicy - Blocked by tracking protections");
             return true;
         }
