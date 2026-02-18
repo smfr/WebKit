@@ -523,6 +523,9 @@ enum ContentsFormat {
     // Animated image pausing testing.
     boolean hasPausedImageAnimations(Element element);
 
+    // lang attribute testing.
+    boolean effectiveLangKnownToMatchDocumentElement(Element element);
+
     undefined markFrontBufferVolatile(Element element);
     boolean isFullyActive(Document document);
     // Must be called on an element whose enclosingLayer() is self-painting.

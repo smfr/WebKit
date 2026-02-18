@@ -230,6 +230,7 @@ public:
 
     ExceptionOr<String> elementRenderTreeAsText(Element&);
     bool hasPausedImageAnimations(Element&);
+    bool effectiveLangKnownToMatchDocumentElement(Element&);
     void markFrontBufferVolatile(Element&);
 
     bool isFullyActive(Document&);

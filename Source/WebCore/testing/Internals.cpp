@@ -1534,6 +1534,11 @@ bool Internals::hasPausedImageAnimations(Element& element)
     return element.renderer() && element.renderer()->hasPausedImageAnimations();
 }
 
+bool Internals::effectiveLangKnownToMatchDocumentElement(Element& element)
+{
+    return element.effectiveLangKnownToMatchDocumentElement();
+}
+
 bool Internals::isFullyActive(Document& document)
 {
     return document.isFullyActive();
