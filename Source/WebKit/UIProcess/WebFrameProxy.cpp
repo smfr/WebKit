@@ -435,17 +435,26 @@ bool WebFrameProxy::didHandleContentFilterUnblockNavigation(const ResourceReques
     m_contentFilterUnblockHandler.setConfigurationPath(protect(page->websiteDataStore())->configuration().webContentRestrictionsConfigurationFile());
 #endif
 
+    std::optional<URL> unblockRequestURL = std::nullopt;
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+    if (page->preferences().webContentRestrictionsAskToEnabled())
+        unblockRequestURL = request.url();
+#endif
+
 #if HAVE(WEBCONTENTRESTRICTIONS)
     if (m_contentFilterUnblockHandler.needsNetworkProcess()) {
         if (auto evaluatedURL = m_contentFilterUnblockHandler.evaluatedURL()) {
             WebCore::ParentalControlsURLFilterParameters parameters {
                 *evaluatedURL,
 #if HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
-                m_contentFilterUnblockHandler.configurationPath()
+                m_contentFilterUnblockHandler.configurationPath(),
+#endif
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+                unblockRequestURL,
 #endif
             };
             protect(protect(page->websiteDataStore())->networkProcess())->allowEvaluatedURL(parameters, [page](bool unblocked) {
-                if (unblocked)
+            if (unblocked)
                     page->reload({ });
             });
             return true;
@@ -453,13 +462,7 @@ bool WebFrameProxy::didHandleContentFilterUnblockNavigation(const ResourceReques
     }
 #endif
 
-    std::optional<URL> unblockRequestURL = std::nullopt;
 #if HAVE(BROWSERENGINEKIT_WEBCONTENTFILTER) && !HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
-#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
-    if (page->preferences().webContentRestrictionsAskToEnabled())
-        unblockRequestURL = request.url();
-#endif
-
     WebParentalControlsURLFilter::setSharedParentalControlsURLFilterIfNecessary();
 #endif
 

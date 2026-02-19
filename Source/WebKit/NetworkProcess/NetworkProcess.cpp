@@ -3383,7 +3383,20 @@ void NetworkProcess::setDefaultRequestTimeoutInterval(double timeoutInterval)
 #if HAVE(WEBCONTENTRESTRICTIONS)
 void NetworkProcess::allowEvaluatedURL(const WebCore::ParentalControlsURLFilterParameters& parameters, CompletionHandler<void(bool)>&& completionHandler)
 {
-    WebCore::ParentalControlsURLFilter::allowURL(parameters, WTF::move(completionHandler));
+#if HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
+    Ref filter = WebCore::ParentalControlsURLFilter::filterWithConfigurationPath(parameters.configurationPath);
+#else
+    Ref filter = WebCore::ParentalControlsURLFilter::singleton();
+#endif
+
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+    if (parameters.referrerURL) {
+        filter->requestPermissionForURL(parameters.urlToAllow, *parameters.referrerURL, WTF::move(completionHandler));
+        return;
+    }
+#else
+    filter->allowURL(parameters.urlToAllow, WTF::move(completionHandler));
+#endif
 }
 #endif
 

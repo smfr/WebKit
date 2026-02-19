@@ -32,6 +32,10 @@
 #import "DeprecatedGlobalSettings.h"
 #endif
 
+#if USE(APPLE_INTERNAL_SDK)
+#import <WebKitAdditions/WebContentRestrictionsInternalSPI.h>
+#endif
+
 #import "Logging.h"
 #import "ParentalControlsContentFilter.h"
 #import "ParentalControlsURLFilterParameters.h"
@@ -238,11 +242,23 @@ void ParentalControlsURLFilter::allowURL(const ParentalControlsURLFilterParamete
     filter->allowURL(parameters.urlToAllow, WTF::move(completionHandler));
 }
 
-void ParentalControlsURLFilter::requestPermissionForURL(const URL&, const URL&, CompletionHandler<void(bool)>&&)
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+void ParentalControlsURLFilter::requestPermissionForURL(const URL& url, const URL& referrerURL, CompletionHandler<void(bool)>&& completionHandler)
 {
-    // Check canRequestPermissionForURL() before invoking.
-    RELEASE_ASSERT_NOT_REACHED();
+    ASSERT(isMainThread());
+
+    RetainPtr wcrBrowserEngineClient = effectiveWCRBrowserEngineClient();
+    if (!wcrBrowserEngineClient)
+        return completionHandler(true);
+
+#if __has_include(<WebKitAdditions/WebContentRestrictionsInternalSPI.h>)
+    MAYBE_REQUEST_PERMISSION_WCR_ASK_TO
+#endif
+
+    RELEASE_LOG(ContentFiltering, "ParentalControlsURLFilter::requestPermissionForURL falls back to allow.");
+    return completionHandler(true);
 }
+#endif
 
 WCRBrowserEngineClient* ParentalControlsURLFilter::effectiveWCRBrowserEngineClient()
 {

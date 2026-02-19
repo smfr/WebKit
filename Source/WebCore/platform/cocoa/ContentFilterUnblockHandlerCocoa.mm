@@ -169,7 +169,7 @@ void ContentFilterUnblockHandler::requestUnblockAsync(DecisionHandlerFunction&& 
         Ref filter = WebCore::ParentalControlsURLFilter::singleton();
 #endif
 #if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
-        if (requestURL && filter->canRequestPermissionForURL()) {
+        if (requestURL) {
             filter->requestPermissionForURL(*m_evaluatedURL, *requestURL, [decisionHandler = WTF::move(decisionHandler)](bool didAllow) mutable {
                 callOnMainThread([decisionHandler = WTF::move(decisionHandler), didAllow]() {
                     decisionHandler(didAllow);

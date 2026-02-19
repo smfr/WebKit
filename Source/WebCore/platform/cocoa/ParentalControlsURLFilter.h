@@ -27,6 +27,7 @@
 
 #if HAVE(WEBCONTENTRESTRICTIONS)
 
+#include "ParentalControlsURLFilterParameters.h"
 #include <wtf/ThreadSafeRefCounted.h>
 
 OBJC_CLASS WCRBrowserEngineClient;
@@ -37,7 +38,7 @@ class WorkQueue;
 
 namespace WebCore {
 
-struct ParentalControlsURLFilterParameters;
+// struct ParentalControlsURLFilterParameters;
 class ParentalControlsContentFilter;
 
 class ParentalControlsURLFilter : public ThreadSafeRefCounted<ParentalControlsURLFilter, WTF::DestructionThread::Main> {
@@ -58,8 +59,9 @@ public:
     void isURLAllowed(const URL& mainDocumentURL, const URL&, ParentalControlsContentFilter&);
     WEBCORE_EXPORT void isURLAllowed(const URL& mainDocumentURL, const URL&, CompletionHandler<void(bool, NSData *)>&&);
     virtual void allowURL(const URL&, CompletionHandler<void(bool)>&&);
-    virtual void requestPermissionForURL(const URL&, const URL&, CompletionHandler<void(bool)>&&);
-    virtual bool canRequestPermissionForURL() { return false; }
+#if HAVE(WEBCONTENTRESTRICTIONS_ASK_TO)
+    virtual void requestPermissionForURL(const URL&, const URL& referrerURL, CompletionHandler<void(bool)>&&);
+#endif
 
 protected:
 #if HAVE(WEBCONTENTRESTRICTIONS_PATH_SPI)
