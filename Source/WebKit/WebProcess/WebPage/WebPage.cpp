@@ -9146,13 +9146,14 @@ void WebPage::requestTextRecognition(Element& element, TextRecognitionOptions&& 
         std::nullopt,
         AllowAnimatedImages::No,
         options.allowSnapshots == TextRecognitionOptions::AllowSnapshots::Yes ? UseSnapshotForTransparentImages::Yes : UseSnapshotForTransparentImages::No
-    })->whenSettled(RunLoop::mainSingleton(), [webPage = WeakPtr { *this }, weakElement = WeakPtr { *htmlElement }, options = WTF::move(options)](auto&& result) mutable {
-        RefPtr protectedPage { webPage.get() };
-        if (!protectedPage)
-            return;
+    })->whenSettled(RunLoop::mainSingleton(), [weakThis = WeakPtr { *this }, weakElement = WeakPtr { *htmlElement }, options = WTF::move(options)](auto&& result) mutable {
 
-        auto resolveAndRemoveHandlerFollowingError = [&](WeakPtr<WebCore::HTMLElement, WebCore::WeakPtrImplWithEventTargetData>& originalElement) {
-            protectedPage->m_elementsPendingTextRecognition.removeAllMatching([&] (auto& elementAndCompletionHandlers) {
+        auto resolveAndRemoveHandlerFollowingError = [weakPage = weakThis](WeakPtr<WebCore::HTMLElement, WebCore::WeakPtrImplWithEventTargetData>& originalElement) {
+            RefPtr page = weakPage.get();
+            if (!page)
+                return;
+
+            page->m_elementsPendingTextRecognition.removeAllMatching([&] (auto& elementAndCompletionHandlers) {
                 auto& [element, completionHandlers] = elementAndCompletionHandlers;
                 if (element.get() && originalElement != element)
                     return false;
@@ -9165,7 +9166,7 @@ void WebPage::requestTextRecognition(Element& element, TextRecognitionOptions&& 
             });
         };
 
-        if (!result || !weakElement) {
+        if (!weakThis || !result || !weakElement) {
             resolveAndRemoveHandlerFollowingError(weakElement);
             return;
         }
@@ -9182,11 +9183,15 @@ void WebPage::requestTextRecognition(Element& element, TextRecognitionOptions&& 
             return;
         }
 
+        RefPtr protectedThis = weakThis.get();
+        if (!protectedThis)
+            return;
+
         auto cachedImage = renderImage->cachedImage();
         auto imageURL = cachedImage ? protect(weakElement->document())->completeURL(cachedImage->url().string()) : URL { };
-        protectedPage->sendWithAsyncReply(Messages::WebPageProxy::RequestTextRecognition(WTF::move(imageURL), WTF::move(*bitmapHandle), options.sourceLanguageIdentifier, options.targetLanguageIdentifier), [webPage, weakElement, resolveAndRemoveHandlerFollowingError = WTF::move(resolveAndRemoveHandlerFollowingError)] (auto&& result) mutable {
-            RefPtr protectedPage { webPage.get() };
-            if (!protectedPage)
+        protectedThis->sendWithAsyncReply(Messages::WebPageProxy::RequestTextRecognition(WTF::move(imageURL), WTF::move(*bitmapHandle), options.sourceLanguageIdentifier, options.targetLanguageIdentifier), [weakThis, weakElement, resolveAndRemoveHandlerFollowingError = WTF::move(resolveAndRemoveHandlerFollowingError)] (auto&& result) mutable {
+            RefPtr protectedThis = weakThis.get();
+            if (!protectedThis)
                 return;
 
             RefPtr htmlElement = weakElement.get();
@@ -9197,7 +9202,7 @@ void WebPage::requestTextRecognition(Element& element, TextRecognitionOptions&& 
 
             ImageOverlay::updateWithTextRecognitionResult(*htmlElement, result);
 
-            auto matchIndex = protectedPage->m_elementsPendingTextRecognition.findIf([&] (auto& elementAndCompletionHandlers) {
+            auto matchIndex = protectedThis->m_elementsPendingTextRecognition.findIf([&] (auto& elementAndCompletionHandlers) {
                 return elementAndCompletionHandlers.first == htmlElement.get();
             });
 
@@ -9205,10 +9210,10 @@ void WebPage::requestTextRecognition(Element& element, TextRecognitionOptions&& 
                 return;
 
             RefPtr imageOverlayHost = ImageOverlay::hasOverlay(*htmlElement) ? htmlElement.get() : nullptr;
-            for (auto& completionHandler : protectedPage->m_elementsPendingTextRecognition[matchIndex].second)
+            for (auto& completionHandler : protectedThis->m_elementsPendingTextRecognition[matchIndex].second)
                 completionHandler(imageOverlayHost.copyRef());
 
-            protectedPage->m_elementsPendingTextRecognition.removeAt(matchIndex);
+            protectedThis->m_elementsPendingTextRecognition.removeAt(matchIndex);
         });
     });
 }
