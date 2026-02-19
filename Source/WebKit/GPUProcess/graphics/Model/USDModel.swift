@@ -1279,18 +1279,11 @@ extension WKBridgeReceiver {
             let originalTransforms = meshTransforms[identifier]
             // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
             // swift-format-ignore: NeverForceUnwrap
-            let angle: Float = 0.707
-            let rotationY90 = simd_float4x4(
-                simd_float4(angle, 0, angle, 0), // column 0
-                simd_float4(0, 1, 0, 0), // column 1
-                simd_float4(-angle, 0, angle, 0), // column 2
-                simd_float4(0, 0, 0, 1) // column 3
-            )
 
             for (index, meshInstance) in meshes.enumerated() {
                 // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
                 // swift-format-ignore: NeverForceUnwrap
-                let computedTransform = modelTransform * rotationY90 * originalTransforms![index]
+                let computedTransform = modelTransform * originalTransforms![index]
                 meshInstance.setTransform(.single(computedTransform))
             }
         }

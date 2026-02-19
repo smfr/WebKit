@@ -497,18 +497,20 @@ void WebModelPlayer::simulate(float elapsedTime)
     m_yawAcceleration *= 0.95f;
     m_pitchAcceleration *= 0.95f;
 
+    const float simulationEpsilon = 0.01f;
     m_yawAcceleration = std::clamp(m_yawAcceleration, -5.f, 5.f);
     m_pitchAcceleration = std::clamp(m_pitchAcceleration, -5.f, 5.f);
-    if (fabs(m_yawAcceleration) < 0.01f)
+    if (fabs(m_yawAcceleration) < simulationEpsilon)
         m_yawAcceleration = 0.f;
-    if (fabs(m_pitchAcceleration) < 0.01f)
+    if (fabs(m_pitchAcceleration) < simulationEpsilon)
         m_pitchAcceleration = 0.f;
 
     m_yaw += m_yawAcceleration * elapsedTime;
     m_pitch += m_pitchAcceleration * elapsedTime;
     m_pitch *= (1.f - elapsedTime);
 
-    model->setRotation(m_yaw, m_pitch);
+    if (m_yawAcceleration || m_pitchAcceleration)
+        model->setRotation(m_yaw, m_pitch);
 }
 
 void WebModelPlayer::setPlaybackRate(double newRate, CompletionHandler<void(double effectivePlaybackRate)>&& completion)
@@ -602,9 +604,6 @@ std::optional<WebCore::TransformationMatrix> WebModelPlayer::entityTransform() c
 void WebModelPlayer::setStageMode(WebCore::StageModeOperation stageMode)
 {
     m_stageMode = stageMode;
-    if (m_stageMode == WebCore::StageModeOperation::None)
-        return;
-
     if (RefPtr model = m_currentModel) {
         model->setStageMode(m_stageMode);
         notifyEntityTransformUpdated();
