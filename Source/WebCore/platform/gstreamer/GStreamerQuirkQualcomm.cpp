@@ -62,6 +62,11 @@ bool GStreamerQuirkQualcomm::isPlatformSupported() const
     return true;
 }
 
+bool GStreamerQuirkQualcomm::isVideoCapsGLCompatible(const GRefPtr<GstCaps>& caps) const
+{
+    return !gst_caps_features_contains(gst_caps_get_features(caps.get(), 0), "memory:GBM");
+}
+
 #undef GST_CAT_DEFAULT
 
 } // namespace WebCore
