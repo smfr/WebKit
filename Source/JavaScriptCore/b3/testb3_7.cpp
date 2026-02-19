@@ -440,6 +440,338 @@ void testReduceStrengthTruncDoubleConstant(double filler, float value)
     testReduceStrengthTruncConstant<ConstDoubleValue>(filler, value);
 }
 
+void testReduceStrengthMulDoubleByTwo()
+{
+    // Mul(arg, 2.0) → Add(arg, arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* two = root->appendNew<ConstDoubleValue>(proc, Origin(), 2.0);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, two);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    CHECK_EQ(root->last()->child(0)->opcode(), Add);
+    CHECK(root->last()->child(0)->child(0) == arg);
+    CHECK(root->last()->child(0)->child(1) == arg);
+}
+
+void testReduceStrengthMulFloatByTwo()
+{
+    // Mul(arg, 2.0f) → Add(arg, arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* two = root->appendNew<ConstFloatValue>(proc, Origin(), 2.0f);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, two);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    // Find the Return value - it may be through BitwiseCast or directly
+    Value* returnValue = root->last();
+    CHECK_EQ(returnValue->opcode(), Return);
+    // The result should contain an Add(arg, arg) somewhere
+    Value* result = returnValue->child(0);
+    CHECK_EQ(result->opcode(), Add);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1) == arg);
+}
+
+void testReduceStrengthMulDoubleByNegOne()
+{
+    // Mul(arg, -1.0) → Sub(ConstDouble(-0.0), arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* negOne = root->appendNew<ConstDoubleValue>(proc, Origin(), -1.0);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, negOne);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    CHECK_EQ(root->last()->child(0)->opcode(), Sub);
+    CHECK(root->last()->child(0)->child(0)->hasDouble());
+    CHECK(isIdentical(root->last()->child(0)->child(0)->asDouble(), -0.0));
+    CHECK(root->last()->child(0)->child(1) == arg);
+}
+
+void testReduceStrengthMulFloatByNegOne()
+{
+    // Mul(arg, -1.0f) → Sub(ConstFloat(-0.0f), arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* negOne = root->appendNew<ConstFloatValue>(proc, Origin(), -1.0f);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, negOne);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Sub);
+    CHECK(result->child(0)->hasFloat());
+    CHECK(isIdentical(result->child(0)->asFloat(), -0.0f));
+    CHECK(result->child(1) == arg);
+}
+
+void testReduceStrengthMulDoubleByNegTwo()
+{
+    // Mul(arg, -2.0) → Sub(ConstDouble(-0.0), Add(arg, arg))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* negTwo = root->appendNew<ConstDoubleValue>(proc, Origin(), -2.0);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, negTwo);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Sub);
+    CHECK(result->child(0)->hasDouble());
+    CHECK(isIdentical(result->child(0)->asDouble(), -0.0));
+    CHECK_EQ(result->child(1)->opcode(), Add);
+    CHECK(result->child(1)->child(0) == arg);
+    CHECK(result->child(1)->child(1) == arg);
+}
+
+void testReduceStrengthMulFloatByNegTwo()
+{
+    // Mul(arg, -2.0f) → Sub(ConstFloat(-0.0f), Add(arg, arg))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* negTwo = root->appendNew<ConstFloatValue>(proc, Origin(), -2.0f);
+    Value* mul = root->appendNew<Value>(proc, Mul, Origin(), arg, negTwo);
+    root->appendNew<Value>(proc, Return, Origin(), mul);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Sub);
+    CHECK(result->child(0)->hasFloat());
+    CHECK(isIdentical(result->child(0)->asFloat(), -0.0f));
+    CHECK_EQ(result->child(1)->opcode(), Add);
+    CHECK(result->child(1)->child(0) == arg);
+    CHECK(result->child(1)->child(1) == arg);
+}
+
+void testReduceStrengthDivDoubleByNegOne()
+{
+    // Div(arg, -1.0) → Sub(ConstDouble(-0.0), arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* negOne = root->appendNew<ConstDoubleValue>(proc, Origin(), -1.0);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, negOne);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Sub);
+    CHECK(result->child(0)->hasDouble());
+    CHECK(isIdentical(result->child(0)->asDouble(), -0.0));
+    CHECK(result->child(1) == arg);
+}
+
+void testReduceStrengthDivFloatByNegOne()
+{
+    // Div(arg, -1.0f) → Sub(ConstFloat(-0.0f), arg)
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* negOne = root->appendNew<ConstFloatValue>(proc, Origin(), -1.0f);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, negOne);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Sub);
+    CHECK(result->child(0)->hasFloat());
+    CHECK(isIdentical(result->child(0)->asFloat(), -0.0f));
+    CHECK(result->child(1) == arg);
+}
+
+void testReduceStrengthDivDoubleByTwo()
+{
+    // Div(arg, 2.0) → Mul(arg, ConstDouble(0.5))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* two = root->appendNew<ConstDoubleValue>(proc, Origin(), 2.0);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, two);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasDouble());
+    CHECK(isIdentical(result->child(1)->asDouble(), 0.5));
+}
+
+void testReduceStrengthDivFloatByTwo()
+{
+    // Div(arg, 2.0f) → Mul(arg, ConstFloat(0.5f))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* two = root->appendNew<ConstFloatValue>(proc, Origin(), 2.0f);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, two);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasFloat());
+    CHECK(isIdentical(result->child(1)->asFloat(), 0.5f));
+}
+
+void testReduceStrengthDivDoubleByFour()
+{
+    // Div(arg, 4.0) → Mul(arg, ConstDouble(0.25))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* four = root->appendNew<ConstDoubleValue>(proc, Origin(), 4.0);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, four);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasDouble());
+    CHECK(isIdentical(result->child(1)->asDouble(), 0.25));
+}
+
+void testReduceStrengthDivDoubleByNegTwo()
+{
+    // Div(arg, -2.0) → Mul(arg, ConstDouble(-0.5))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<double>(proc, root);
+    Value* arg = arguments[0];
+
+    Value* negTwo = root->appendNew<ConstDoubleValue>(proc, Origin(), -2.0);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, negTwo);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasDouble());
+    CHECK(isIdentical(result->child(1)->asDouble(), -0.5));
+}
+
+void testReduceStrengthDivFloatByFour()
+{
+    // Div(arg, 4.0f) → Mul(arg, ConstFloat(0.25f))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* four = root->appendNew<ConstFloatValue>(proc, Origin(), 4.0f);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, four);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasFloat());
+    CHECK(isIdentical(result->child(1)->asFloat(), 0.25f));
+}
+
+void testReduceStrengthDivFloatByNegTwo()
+{
+    // Div(arg, -2.0f) → Mul(arg, ConstFloat(-0.5f))
+    Procedure proc;
+    BasicBlock* root = proc.addBlock();
+    auto arguments = cCallArgumentValues<int32_t>(proc, root);
+    Value* argInt = arguments[0];
+    Value* arg = root->appendNew<Value>(proc, BitwiseCast, Origin(), argInt);
+
+    Value* negTwo = root->appendNew<ConstFloatValue>(proc, Origin(), -2.0f);
+    Value* div = root->appendNew<Value>(proc, Div, Origin(), arg, negTwo);
+    root->appendNew<Value>(proc, Return, Origin(), div);
+
+    proc.resetReachability();
+    reduceStrength(proc);
+
+    CHECK_EQ(root->last()->opcode(), Return);
+    Value* result = root->last()->child(0);
+    CHECK_EQ(result->opcode(), Mul);
+    CHECK(result->child(0) == arg);
+    CHECK(result->child(1)->hasFloat());
+    CHECK(isIdentical(result->child(1)->asFloat(), -0.5f));
+}
+
 void testLoadBaseIndexShift2()
 {
     Procedure proc;

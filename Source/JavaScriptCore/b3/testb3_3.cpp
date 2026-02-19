@@ -4180,7 +4180,18 @@ void addArgTests(const TestConfig* config, Deque<RefPtr<SharedTask<void()>>>& ta
     RUN_UNARY(testMulArgFloatWithUselessDoubleConversion, floatingPointOperands<float>());
     RUN_BINARY(testMulArgsFloatWithUselessDoubleConversion, floatingPointOperands<float>(), floatingPointOperands<float>());
     RUN_BINARY(testMulArgsFloatWithEffectfulDoubleConversion, floatingPointOperands<float>(), floatingPointOperands<float>());
-    
+
+    RUN_UNARY(testMulDoubleByTwo, floatingPointOperands<double>());
+    RUN_UNARY(testMulFloatByTwo, floatingPointOperands<float>());
+    RUN_UNARY(testMulDoubleByNegOne, floatingPointOperands<double>());
+    RUN_UNARY(testMulFloatByNegOne, floatingPointOperands<float>());
+    RUN_UNARY(testMulDoubleByNegTwo, floatingPointOperands<double>());
+    RUN_UNARY(testMulFloatByNegTwo, floatingPointOperands<float>());
+    RUN_UNARY(testDivDoubleByNegOne, floatingPointOperands<double>());
+    RUN_UNARY(testDivFloatByNegOne, floatingPointOperands<float>());
+    RUN_UNARY(testDivDoubleByPowerOfTwo, floatingPointOperands<double>());
+    RUN_UNARY(testDivFloatByPowerOfTwo, floatingPointOperands<float>());
+
     RUN(testDivArgDouble(std::numbers::pi));
     RUN(testDivArgsDouble(std::numbers::pi, 1));
     RUN(testDivArgsDouble(std::numbers::pi, -std::numbers::pi));
