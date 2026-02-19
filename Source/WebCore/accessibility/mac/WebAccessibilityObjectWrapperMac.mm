@@ -2056,6 +2056,30 @@ id attributeValueForTesting(const RefPtr<AXCoreObject>& backingObject, NSString 
         return [NSValue valueWithRect:rect];
     }
 
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerDescriptionAttribute])
+        return AXTextMarker { markerRef }.description().createNSString().autorelease();
+
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerDebugDescriptionAttribute])
+        return AXTextMarker { markerRef }.debugDescription().createNSString().autorelease();
+
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDescriptionAttribute])
+        return AXTextMarkerRange { markerRangeRef }.description().createNSString().autorelease();
+
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDebugDescriptionAttribute])
+        return AXTextMarkerRange { markerRangeRef }.debugDescription().createNSString().autorelease();
+
+#if ENABLE(TREE_DEBUGGING)
+    if ([attribute isEqualToString:AXTextMarkerNodeDebugDescriptionAttribute]) {
+        [self showNodeForTextMarker:markerRef];
+        return nil;
+    }
+
+    if ([attribute isEqualToString:AXTextMarkerNodeTreeDebugDescriptionAttribute]) {
+        [self showNodeTreeForTextMarker:markerRef];
+        return nil;
+    }
+#endif // ENABLE(TREE_DEBUGGING)
+
     return nil;
 }
 
@@ -3541,30 +3565,6 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
         RefPtr parent = backingObject->parentObject();
         return parent ? [NSValue valueWithRect:parent->convertFrameToSpace(FloatRect(rect), AccessibilityConversionSpace::Page)] : nil;
     }
-
-    if ([attribute isEqualToString:NSAccessibilityTextMarkerDebugDescriptionAttribute])
-        return AXTextMarker { textMarker }.debugDescription().createNSString().autorelease();
-
-    if ([attribute isEqualToString:NSAccessibilityTextMarkerDescriptionAttribute])
-        return AXTextMarker { textMarker }.description().createNSString().autorelease();
-
-    if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDebugDescriptionAttribute])
-        return AXTextMarkerRange { textMarkerRange }.debugDescription().createNSString().autorelease();
-
-    if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDescriptionAttribute])
-        return AXTextMarkerRange { textMarkerRange }.description().createNSString().autorelease();
-
-#if ENABLE(TREE_DEBUGGING)
-    if ([attribute isEqualToString:AXTextMarkerNodeDebugDescriptionAttribute]) {
-        [self showNodeForTextMarker:textMarker];
-        return nil;
-    }
-
-    if ([attribute isEqualToString:AXTextMarkerNodeTreeDebugDescriptionAttribute]) {
-        [self showNodeTreeForTextMarker:textMarker];
-        return nil;
-    }
-#endif // ENABLE(TREE_DEBUGGING)
 
     if (AXObjectCache::clientIsInTestMode()) {
         if (RetainPtr<id> value = [self parameterizedAttributeValueForTesting:attribute parameter:parameter backingObject:backingObject])
