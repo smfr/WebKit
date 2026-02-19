@@ -111,6 +111,23 @@ std::optional<RequestedScrollData> RemoteScrollingCoordinatorProxy::commitScroll
     return std::exchange(m_requestedScroll, { });
 }
 
+void RemoteScrollingCoordinatorProxy::adjustMainFrameDelegatedScrollPosition(RequestedScrollData&& requestedScroll)
+{
+    auto currentScrollPosition = currentMainFrameScrollPosition();
+    if (auto previousData = std::exchange(requestedScroll.requestedDataBeforeAnimatedScroll, std::nullopt)) {
+        auto& [requestType, positionOrDeltaBeforeAnimatedScroll, scrollType, clamping] = *previousData;
+        if (requestType != ScrollRequestType::CancelAnimatedScroll)
+            currentScrollPosition = RequestedScrollData::computeDestinationPosition(currentScrollPosition, requestType, positionOrDeltaBeforeAnimatedScroll);
+    }
+
+    // FIXME: Maybe we should avoid interrupting animations in more cases?
+    auto interruptScrollAnimation = requestedScroll.requestType == ScrollRequestType::DeltaUpdate ? InterruptScrollAnimation::No : InterruptScrollAnimation::Yes;
+    auto targetScrollPosition = requestedScroll.destinationPosition(currentScrollPosition);
+    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::adjustViewScrollPosition requesting scroll to " << targetScrollPosition);
+
+    protect(webPageProxy())->requestScroll(targetScrollPosition, scrollOrigin(), requestedScroll.animated, interruptScrollAnimation);
+}
+
 void RemoteScrollingCoordinatorProxy::stickyScrollingTreeNodeBeganSticking(ScrollingNodeID)
 {
     protect(webPageProxy())->stickyScrollingTreeNodeBeganSticking();
