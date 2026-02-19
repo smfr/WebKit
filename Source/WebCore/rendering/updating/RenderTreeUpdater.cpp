@@ -729,13 +729,30 @@ void RenderTreeUpdater::tearDownRenderers(Element& root)
 void RenderTreeUpdater::tearDownRenderersForShadowRootInsertion(Element& host)
 {
     ASSERT(!host.shadowRoot());
-    tearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
+    tearDownRenderers(host, TeardownType::FullAfterShadowRootInsertion);
 }
 
 void RenderTreeUpdater::tearDownRenderersAfterSlotChange(Element& host)
 {
     ASSERT(host.shadowRoot());
-    tearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
+    auto* view = host.document().renderView();
+    if (!view)
+        return;
+
+    if (!host.renderer() && !host.hasDisplayContents())
+        return;
+
+    RenderTreeBuilder builder(*view);
+
+    tearDownDescendantRenderers(host, TeardownType::RendererUpdate, builder);
+
+    // Remove any remaining child renderers (pseudo-elements like ::picker-icon,
+    // ::before, ::after, anonymous blocks, etc.) so they get recreated at the
+    // correct position when the tree is rebuilt.
+    if (auto* hostRenderer = host.renderer()) {
+        while (auto* child = hostRenderer->firstChild())
+            builder.destroy(*child);
+    }
 }
 
 void RenderTreeUpdater::tearDownRenderer(Text& text)
@@ -837,19 +854,32 @@ static std::optional<DidRepaintAndMarkContainingBlock> repaintAndMarkContainingB
     return destroyRootRenderer ? DidRepaintAndMarkContainingBlock::Yes : DidRepaintAndMarkContainingBlock::No;
 }
 
-void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownType, RenderTreeBuilder& builder)
+template<RenderTreeUpdater::TeardownScope scope>
+void RenderTreeUpdater::tearDownRenderersInternal(Element& root, TeardownType teardownType, RenderTreeBuilder& builder)
 {
     Vector<Element*, 30> teardownStack;
 
-    auto push = [&] (Element& element) {
+    auto push = [&](Element& element) {
+        if constexpr (scope == TeardownScope::DescendantsOnly) {
+            if (&element == &root) {
+                teardownStack.append(&element);
+                return;
+            }
+        }
         if (element.hasCustomStyleResolveCallbacks())
             element.willDetachRenderers();
         teardownStack.append(&element);
     };
 
-    auto pop = [&] (unsigned depth, NeedsRepaintAndLayout needsRepaintAndLayout) {
+    auto pop = [&](unsigned depth, NeedsRepaintAndLayout needsRepaintAndLayout) {
         while (teardownStack.size() > depth) {
             Ref element = *teardownStack.takeLast();
+
+            if constexpr (scope == TeardownScope::DescendantsOnly) {
+                if (element.ptr() == &root)
+                    continue;
+            }
+
             auto styleable = Styleable::fromElement(element.get());
 
             // Make sure we don't leave any renderers behind in nodes outside the composed tree.
@@ -858,7 +888,7 @@ void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownTy
                 tearDownLeftoverChildrenOfComposedTree(element.get(), builder);
 
             switch (teardownType) {
-            case TeardownType::FullAfterSlotOrShadowRootChange:
+            case TeardownType::FullAfterShadowRootInsertion:
                 if (element.ptr() == &root) {
                     // Keep animations going on the host.
                     styleable.willChangeRenderer();
@@ -928,7 +958,18 @@ void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownTy
 
     pop(0, needsDescendantRepaintAndLayout);
 
-    tearDownLeftoverPaginationRenderersIfNeeded(root, builder);
+    if constexpr (scope == TeardownScope::IncludingRoot)
+        tearDownLeftoverPaginationRenderersIfNeeded(root, builder);
+}
+
+void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownType, RenderTreeBuilder& builder)
+{
+    tearDownRenderersInternal<TeardownScope::IncludingRoot>(root, teardownType, builder);
+}
+
+void RenderTreeUpdater::tearDownDescendantRenderers(Element& root, TeardownType teardownType, RenderTreeBuilder& builder)
+{
+    tearDownRenderersInternal<TeardownScope::DescendantsOnly>(root, teardownType, builder);
 }
 
 void RenderTreeUpdater::tearDownTextRenderer(Text& text, const ContainerNode* root, RenderTreeBuilder& builder, NeedsRepaintAndLayout needsRepaintAndLayout)

@@ -97,9 +97,12 @@ private:
     void popParentsToDepth(unsigned depth);
 
     // FIXME: Use OptionSet.
-    enum class TeardownType { Full, FullAfterSlotOrShadowRootChange, RendererUpdate, RendererUpdateCancelingAnimations };
+    enum class TeardownType { Full, FullAfterShadowRootInsertion, RendererUpdate, RendererUpdateCancelingAnimations };
     static void tearDownRenderers(Element&, TeardownType);
     static void tearDownRenderers(Element&, TeardownType, RenderTreeBuilder&);
+    static void tearDownDescendantRenderers(Element&, TeardownType, RenderTreeBuilder&);
+    enum class TeardownScope { IncludingRoot, DescendantsOnly };
+    template<TeardownScope> static void tearDownRenderersInternal(Element&, TeardownType, RenderTreeBuilder&);
     enum class NeedsRepaintAndLayout : bool { No, Yes };
     static void tearDownTextRenderer(Text&, const ContainerNode* root, RenderTreeBuilder&, NeedsRepaintAndLayout = NeedsRepaintAndLayout::Yes);
     static void tearDownLeftoverChildrenOfComposedTree(Element&, RenderTreeBuilder&);
