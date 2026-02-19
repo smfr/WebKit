@@ -5156,7 +5156,8 @@ std::optional<LayoutUnit> RenderBox::explicitIntrinsicInnerWidth() const
 {
     ASSERT(isHorizontalWritingMode() ? shouldApplySizeOrInlineSizeContainment() : shouldApplySizeContainment());
 
-    auto& containIntrinsicWidth = style().containIntrinsicWidth();
+    auto& style = this->style();
+    auto& containIntrinsicWidth = style.containIntrinsicWidth();
     if (containIntrinsicWidth.isNone())
         return { };
 
@@ -5169,7 +5170,7 @@ std::optional<LayoutUnit> RenderBox::explicitIntrinsicInnerWidth() const
     }
 
     if (auto length = containIntrinsicWidth.tryLength())
-        return LayoutUnit { length->resolveZoom(Style::ZoomNeeded { }) };
+        return LayoutUnit { length->resolveZoom(style.usedZoomForLength()) };
 
     ASSERT(containIntrinsicWidth.isAutoAndNone());
     return { };
@@ -5179,7 +5180,8 @@ std::optional<LayoutUnit> RenderBox::explicitIntrinsicInnerHeight() const
 {
     ASSERT(isHorizontalWritingMode() ? shouldApplySizeContainment() : shouldApplySizeOrInlineSizeContainment());
 
-    auto& containIntrinsicHeight = style().containIntrinsicHeight();
+    auto& style = this->style();
+    auto& containIntrinsicHeight = style.containIntrinsicHeight();
     if (containIntrinsicHeight.isNone())
         return { };
 
@@ -5192,7 +5194,7 @@ std::optional<LayoutUnit> RenderBox::explicitIntrinsicInnerHeight() const
     }
 
     if (auto length = containIntrinsicHeight.tryLength())
-        return LayoutUnit { length->resolveZoom(Style::ZoomNeeded { }) };
+        return LayoutUnit { length->resolveZoom(style.usedZoomForLength()) };
 
     ASSERT(containIntrinsicHeight.isAutoAndNone());
     return { };
