@@ -160,7 +160,7 @@ bool HTMLOptionElement::rendererIsNeeded(const RenderStyle&)
     if (!select)
         return false;
 
-    return select->document().settings().htmlEnhancedSelectEnabled() && select->usesBaseAppearancePicker();
+    return document().settings().htmlEnhancedSelectEnabled() && select->usesBaseAppearancePicker();
 }
 
 String HTMLOptionElement::text() const

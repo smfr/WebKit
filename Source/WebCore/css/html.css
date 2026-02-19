@@ -1206,6 +1206,14 @@ select option:disabled {
     color: color-mix(in lab, currentColor 50%, transparent);
 }
 
+select option::checkmark {
+    content: "\2713" / "";
+}
+
+select option:not(:checked)::checkmark {
+    visibility: hidden;
+}
+
 select optgroup {
     font-weight: bolder;
 }
@@ -1214,12 +1222,9 @@ select optgroup option {
     font-weight: normal;
 }
 
-select option::checkmark {
-    content: "\2713" / "";
-}
-
-select option:not(:checked)::checkmark {
-    visibility: hidden;
+select optgroup legend {
+    padding-inline: 0.5em;
+    min-block-size: 1lh;
 }
 
 output {
@@ -1485,7 +1490,7 @@ iframe {
     border: 2px inset;
 }
 
-hr, bdi, output {
+hr, bdi, legend, output {
     unicode-bidi: isolate;
 }
 
