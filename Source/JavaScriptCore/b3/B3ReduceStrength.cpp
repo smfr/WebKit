@@ -3604,6 +3604,8 @@ private:
                 SUPPRESS_UNCOUNTED_LOCAL const Wasm::RTT* targetRTT = cast->targetRTT();
                 if (!Wasm::typeIndexIsType(static_cast<Wasm::TypeIndex>(toHeapType))) {
                     if (rtt->isSubRTT(*targetRTT)) {
+                        // shouldNegate can only be set on WasmRefTest.
+                        ASSERT(!cast->shouldNegate());
                         replaceWithIdentity(structNew);
                         break;
                     }
@@ -3669,7 +3671,8 @@ private:
                 int32_t toHeapType = cast->targetHeapType();
                 SUPPRESS_UNCOUNTED_LOCAL const Wasm::RTT* targetRTT = cast->targetRTT();
                 if (!Wasm::typeIndexIsType(static_cast<Wasm::TypeIndex>(toHeapType))) {
-                    replaceWithNewValue(m_proc.addIntConstant(m_value, !!rtt->isSubRTT(*targetRTT)));
+                    const bool isSubtype = rtt->isSubRTT(*targetRTT);
+                    replaceWithNewValue(m_proc.addIntConstant(m_value, cast->shouldNegate() ? !isSubtype : isSubtype));
                     break;
                 }
             }
