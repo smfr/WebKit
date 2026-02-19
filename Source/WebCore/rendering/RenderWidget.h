@@ -75,7 +75,7 @@ public:
 
     virtual bool requiresAcceleratedCompositing() const;
 
-    RemoteFrame* remoteFrame() const;
+    RemoteFrame* NODELETE remoteFrame() const;
 
 protected:
     RenderWidget(Type, HTMLFrameOwnerElement&, RenderStyle&&);

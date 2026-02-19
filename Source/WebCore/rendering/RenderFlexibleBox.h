@@ -64,8 +64,8 @@ public:
 
     bool willStretchItem(const RenderBox& item, LogicalBoxAxis containingAxis, StretchingMode = StretchingMode::Normal) const override;
 
-    bool isHorizontalFlow() const;
-    Direction crossAxisDirection() const;
+    bool NODELETE isHorizontalFlow() const;
+    Direction NODELETE crossAxisDirection() const;
 
     const OrderIterator& orderIterator() const { return m_orderIterator; }
 
@@ -105,8 +105,8 @@ public:
 
     bool shouldResetFlexItemLogicalHeightBeforeLayout() const { return m_shouldResetFlexItemLogicalHeightBeforeLayout; }
 
-    bool isColumnOrRowReverse() const;
-    bool isWrapReverse() const;
+    bool NODELETE isColumnOrRowReverse() const;
+    bool NODELETE isWrapReverse() const;
 
 protected:
     void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override;
