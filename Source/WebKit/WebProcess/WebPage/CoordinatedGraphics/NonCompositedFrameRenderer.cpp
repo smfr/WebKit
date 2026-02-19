@@ -102,8 +102,7 @@ void NonCompositedFrameRenderer::addDirtyRect(const IntRect& rect)
 
 void NonCompositedFrameRenderer::setNeedsDisplay()
 {
-    Ref webPage = m_webPage.get();
-    auto dirtyRect = webPage->bounds();
+    auto dirtyRect = m_webPage->bounds();
     if (dirtyRect.isEmpty())
         return;
 
@@ -113,9 +112,8 @@ void NonCompositedFrameRenderer::setNeedsDisplay()
 
 void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
 {
-    Ref webPage = m_webPage.get();
     auto dirtyRect = rect;
-    dirtyRect.intersect(webPage->bounds());
+    dirtyRect.intersect(m_webPage->bounds());
     if (dirtyRect.isEmpty())
         return;
 
@@ -126,21 +124,20 @@ void NonCompositedFrameRenderer::setNeedsDisplayInRect(const IntRect& rect)
 #if ENABLE(DAMAGE_TRACKING)
 void NonCompositedFrameRenderer::resetFrameDamage()
 {
-    Ref webPage = m_webPage.get();
-    auto scaledRect = webPage->bounds();
-    scaledRect.scale(webPage->deviceScaleFactor());
+    auto scaledRect = m_webPage->bounds();
+    scaledRect.scale(m_webPage->deviceScaleFactor());
     if (!m_context) {
         // For CPU rendering use the damage unconditionally to reduce the amount of pixels to upload to the GPU for the UI process.
         m_frameDamage = std::make_optional<Damage>(scaledRect, Damage::Mode::Rectangles, 4);
         return;
     }
 
-    if (!webPage->corePage()->settings().propagateDamagingInformation()) {
+    if (!m_webPage->corePage()->settings().propagateDamagingInformation()) {
         m_frameDamage = std::nullopt;
         return;
     }
 
-    m_frameDamage = std::make_optional<Damage>(scaledRect, webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4);
+    m_frameDamage = std::make_optional<Damage>(scaledRect, m_webPage->corePage()->settings().unifyDamagedRegions() ? Damage::Mode::BoundingBox : Damage::Mode::Rectangles, 4);
 }
 #endif
 
@@ -187,7 +184,7 @@ void NonCompositedFrameRenderer::updateRendering()
 
     WTFBeginSignpost(this, NonCompositedRenderingUpdate);
 
-    Ref webPage = m_webPage.get();
+    Ref webPage = m_webPage;
     webPage->updateRendering();
     webPage->finalizeRenderingUpdate({ });
     webPage->flushPendingEditorStateUpdate();
@@ -323,13 +320,13 @@ void NonCompositedFrameRenderer::foreachRegionInDamageHistoryForTesting(Function
 #if PLATFORM(GTK)
 void NonCompositedFrameRenderer::adjustTransientZoom(double scale, FloatPoint, FloatPoint unscrolledOrigin)
 {
-    Ref webPage = m_webPage.get();
+    Ref webPage = m_webPage;
     webPage->scalePage(scale / webPage->viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
 }
 
 void NonCompositedFrameRenderer::commitTransientZoom(double scale, FloatPoint, FloatPoint unscrolledOrigin)
 {
-    Ref webPage = m_webPage.get();
+    Ref webPage = m_webPage;
     webPage->scalePage(scale / webPage->viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
 }
 #endif

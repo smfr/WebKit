@@ -41,7 +41,7 @@ class NonCompositedFrameRenderer final : public FrameRenderer {
 public:
     static std::unique_ptr<NonCompositedFrameRenderer> create(WebPage&);
 
-    NonCompositedFrameRenderer(WebPage&);
+    explicit NonCompositedFrameRenderer(WebPage&);
     ~NonCompositedFrameRenderer();
 
 private:
@@ -77,7 +77,7 @@ private:
     void commitTransientZoom(double, WebCore::FloatPoint, WebCore::FloatPoint) override;
 #endif
 
-    WeakRef<WebPage> m_webPage;
+    const WeakRef<WebPage> m_webPage;
     Ref<AcceleratedSurface> m_surface;
     std::unique_ptr<WebCore::GLContext> m_context;
     bool m_canRenderNextFrame { true };

@@ -62,6 +62,11 @@ using namespace WebCore;
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(LayerTreeHost);
 
+std::unique_ptr<LayerTreeHost> LayerTreeHost::create(WebPage& webPage)
+{
+    return makeUnique<LayerTreeHost>(webPage);
+}
+
 LayerTreeHost::LayerTreeHost(WebPage& webPage)
     : m_webPage(webPage)
     , m_sceneState(CoordinatedSceneState::create())
@@ -72,16 +77,16 @@ LayerTreeHost::LayerTreeHost(WebPage& webPage)
 #if ENABLE(DAMAGE_TRACKING)
         rootLayer.setDamagePropagationEnabled(webPage.corePage()->settings().propagateDamagingInformation());
         if (webPage.corePage()->settings().propagateDamagingInformation()) {
-            m_damageInGlobalCoordinateSpace = std::make_shared<Damage>(m_webPage.size());
+            m_damageInGlobalCoordinateSpace = std::make_shared<Damage>(m_webPage->size());
             rootLayer.setDamageInGlobalCoordinateSpace(m_damageInGlobalCoordinateSpace);
         }
 #endif
         Locker locker { rootLayer.lock() };
         rootLayer.setAnchorPoint(FloatPoint3D(0, 0, 0));
-        rootLayer.setSize(m_webPage.size());
+        rootLayer.setSize(m_webPage->size());
     }
 
-    m_compositor = ThreadedCompositor::create(*this);
+    m_compositor = ThreadedCompositor::create(webPage, *this, m_sceneState.get());
 #if ENABLE(DAMAGE_TRACKING)
     std::optional<OptionSet<ThreadedCompositor::DamagePropagationFlags>> damagePropagationFlags;
     const auto& settings = webPage.corePage()->settings();
@@ -114,7 +119,7 @@ void LayerTreeHost::scheduleRenderingUpdate()
 {
     WTFEmitSignpost(this, LayerTreeHostScheduleRenderingUpdate, "isWaitingForRenderer %s", m_isWaitingForRenderer ? "yes" : "no");
 
-    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage.size().isEmpty())
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage->size().isEmpty())
         return;
 
     if (m_isWaitingForRenderer) {
@@ -142,7 +147,7 @@ void LayerTreeHost::updateRendering()
 
     TraceScope traceScope(LayerTreeHostRenderingUpdateStart, LayerTreeHostRenderingUpdateEnd);
 
-    Ref page { m_webPage };
+    Ref page = m_webPage;
     page->updateRendering();
     page->flushPendingEditorStateUpdate();
     page->flushPendingThemeColorChange();
@@ -173,7 +178,7 @@ void LayerTreeHost::updateRendering()
         applyTransientZoomToLayers(m_transientZoomScale, m_transientZoomOrigin);
 #endif
 
-    if (RefPtr drawingArea = m_webPage.drawingArea())
+    if (RefPtr drawingArea = page->drawingArea())
         drawingArea->dispatchPendingCallbacksAfterEnsuringDrawing();
 
     bool didChangeSceneState = m_sceneState->flush();
@@ -236,7 +241,7 @@ void LayerTreeHost::updateRenderingWithForcedRepaint()
     }
 
     m_pendingForceRepaint = false;
-    m_webPage.corePage()->forceRepaintAllFrames();
+    protect(m_webPage)->corePage()->forceRepaintAllFrames();
     m_forceFrameSync = true;
 
     // Make sure `m_sceneState->waitUntilPaintingComplete()` is invoked at the
@@ -255,7 +260,7 @@ void LayerTreeHost::updateRenderingWithForcedRepaint()
 
 bool LayerTreeHost::ensureDrawing()
 {
-    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage.size().isEmpty())
+    if (m_layerTreeStateIsFrozen || m_isSuspended || m_webPage->size().isEmpty())
         return false;
 
     m_forceFrameSync = true;
@@ -291,9 +296,10 @@ GraphicsLayerFactory* LayerTreeHost::graphicsLayerFactory()
 
 FloatRect LayerTreeHost::visibleContentsRect() const
 {
-    if (auto* localMainFrameView = m_webPage.localMainFrameView())
+    Ref webPage = m_webPage;
+    if (auto* localMainFrameView = webPage->localMainFrameView())
         return FloatRect({ }, localMainFrameView->sizeForVisibleContent(ScrollableArea::VisibleContentRectIncludesScrollbars::Yes));
-    return m_webPage.bounds();
+    return webPage->bounds();
 }
 
 void LayerTreeHost::backgroundColorDidChange()
@@ -304,7 +310,7 @@ void LayerTreeHost::backgroundColorDidChange()
 void LayerTreeHost::attachLayer(CoordinatedPlatformLayer& layer)
 {
 #if ENABLE(DAMAGE_TRACKING)
-    layer.setDamagePropagationEnabled(webPage().corePage()->settings().propagateDamagingInformation());
+    layer.setDamagePropagationEnabled(m_webPage->corePage()->settings().propagateDamagingInformation());
     if (m_damageInGlobalCoordinateSpace)
         layer.setDamageInGlobalCoordinateSpace(m_damageInGlobalCoordinateSpace);
 #endif
@@ -382,16 +388,17 @@ Ref<GraphicsLayer> LayerTreeHost::createGraphicsLayer(GraphicsLayer::Type layerT
 
 void LayerTreeHost::willRenderFrame()
 {
-    if (RefPtr drawingArea = m_webPage.drawingArea())
+    if (RefPtr drawingArea = protect(m_webPage)->drawingArea())
         drawingArea->willStartRenderingUpdateDisplay();
 }
 
 void LayerTreeHost::didRenderFrame()
 {
-    if (RefPtr drawingArea = m_webPage.drawingArea())
+    Ref webPage = m_webPage;
+    if (RefPtr drawingArea = webPage->drawingArea())
         drawingArea->didCompleteRenderingUpdateDisplay();
     if (auto fps = m_compositor->fps()) {
-        if (RefPtr document = m_webPage.corePage()->localTopDocument())
+        if (RefPtr document = webPage->corePage()->localTopDocument())
             document->addConsoleMessage(MessageSource::Rendering, MessageLevel::Info, makeString("FPS: "_s, *fps));
     }
 }
@@ -423,7 +430,8 @@ void LayerTreeHost::requestCompositionForRenderingUpdate()
 #if PLATFORM(GTK)
 FloatPoint LayerTreeHost::constrainTransientZoomOrigin(double scale, FloatPoint origin) const
 {
-    auto* frameView = m_webPage.localMainFrameView();
+    Ref webPage = m_webPage;
+    auto* frameView = webPage->localMainFrameView();
     if (!frameView)
         return origin;
 
@@ -433,7 +441,7 @@ FloatPoint LayerTreeHost::constrainTransientZoomOrigin(double scale, FloatPoint 
     constrainedOrigin.moveBy(-origin);
 
     IntSize scaledTotalContentsSize = frameView->totalContentsSize();
-    scaledTotalContentsSize.scale(scale * m_webPage.viewScaleFactor() / m_webPage.totalScaleFactor());
+    scaledTotalContentsSize.scale(scale * webPage->viewScaleFactor() / webPage->totalScaleFactor());
 
     // Scaling may have exposed the overhang area, so we need to constrain the final
     // layer position exactly like scrolling will once it's committed, to ensure that
@@ -449,7 +457,7 @@ FloatPoint LayerTreeHost::constrainTransientZoomOrigin(double scale, FloatPoint 
 
 CoordinatedPlatformLayer* LayerTreeHost::layerForTransientZoom() const
 {
-    auto* frameView = m_webPage.localMainFrameView();
+    auto* frameView = protect(m_webPage)->localMainFrameView();
     if (!frameView)
         return nullptr;
 
@@ -503,7 +511,8 @@ void LayerTreeHost::commitTransientZoom(double scale, FloatPoint origin, FloatPo
     m_transientZoomScale = 1;
     m_transientZoomOrigin = FloatPoint();
 
-    m_webPage.scalePage(scale / m_webPage.viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
+    Ref webPage = m_webPage;
+    webPage->scalePage(scale / webPage->viewScaleFactor(), roundedIntPoint(-unscrolledOrigin));
 }
 #endif
 

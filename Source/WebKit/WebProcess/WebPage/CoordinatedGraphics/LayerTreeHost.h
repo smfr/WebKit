@@ -43,6 +43,7 @@
 #include <wtf/OptionSet.h>
 #include <wtf/RunLoop.h>
 #include <wtf/TZoneMalloc.h>
+#include <wtf/WeakRef.h>
 
 #if ENABLE(DAMAGE_TRACKING)
 #include <WebCore/Region.h>
@@ -56,11 +57,6 @@ class GraphicsLayer;
 class GraphicsLayerFactory;
 class NativeImage;
 class SkiaPaintingEngine;
-#if USE(CAIRO)
-namespace Cairo {
-class PaintingEngine;
-}
-#endif
 }
 
 namespace WebKit {
@@ -72,11 +68,10 @@ class LayerTreeHost final : public FrameRenderer, public CanMakeCheckedPtr<Layer
     WTF_MAKE_TZONE_ALLOCATED(LayerTreeHost);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(LayerTreeHost);
 public:
+    static std::unique_ptr<LayerTreeHost> create(WebPage&);
+
     explicit LayerTreeHost(WebPage&);
     ~LayerTreeHost();
-
-    WebPage& webPage() const { return m_webPage; }
-    CoordinatedSceneState& sceneState() const { return m_sceneState.get(); }
 
     void willRenderFrame();
     void didRenderFrame();
@@ -92,11 +87,7 @@ private:
     void requestCompositionForRenderingUpdate();
 
     // CoordinatedPlatformLayer::Client
-#if USE(CAIRO)
-    WebCore::Cairo::PaintingEngine& paintingEngine() override;
-#elif USE(SKIA)
     WebCore::SkiaPaintingEngine& paintingEngine() const override { return *m_skiaPaintingEngine.get(); }
-#endif
     Ref<WebCore::CoordinatedImageBackingStore> imageBackingStore(Ref<WebCore::NativeImage>&&) override;
 
     void attachLayer(WebCore::CoordinatedPlatformLayer&) override;
@@ -143,7 +134,7 @@ private:
     void applyTransientZoomToLayers(double, WebCore::FloatPoint);
 #endif
 
-    WebPage& m_webPage;
+    const WeakRef<WebPage> m_webPage;
     const Ref<CoordinatedSceneState> m_sceneState;
     WebCore::GraphicsLayer* m_rootCompositingLayer { nullptr };
     WebCore::GraphicsLayer* m_overlayCompositingLayer { nullptr };
@@ -158,11 +149,7 @@ private:
     bool m_compositionRequiredInScrollingThread { false };
 #endif
     RefPtr<ThreadedCompositor> m_compositor;
-#if USE(CAIRO)
-    std::unique_ptr<WebCore::Cairo::PaintingEngine> m_paintingEngine;
-#elif USE(SKIA)
     std::unique_ptr<WebCore::SkiaPaintingEngine> m_skiaPaintingEngine;
-#endif
     HashMap<uint64_t, Ref<WebCore::CoordinatedImageBackingStore>> m_imageBackingStores;
 
 #if PLATFORM(GTK)

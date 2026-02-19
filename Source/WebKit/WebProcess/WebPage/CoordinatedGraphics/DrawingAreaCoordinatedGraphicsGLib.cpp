@@ -112,7 +112,8 @@ void DrawingAreaCoordinatedGraphics::setLayerTreeStateIsFrozen(bool isFrozen)
 
 void DrawingAreaCoordinatedGraphics::updatePreferences(const WebPreferencesStore& store)
 {
-    Settings& settings = m_webPage->corePage()->settings();
+    Ref page = *m_webPage->corePage();
+    Settings& settings = page->settings();
 #if PLATFORM(GTK)
     if (settings.hardwareAccelerationEnabled())
         WebProcess::singleton().initializePlatformDisplayIfNeeded();
@@ -141,10 +142,11 @@ void DrawingAreaCoordinatedGraphics::updatePreferences(const WebPreferencesStore
 
 bool DrawingAreaCoordinatedGraphics::enterAcceleratedCompositingModeIfNeeded()
 {
-    if (m_webPage->corePage()->settings().acceleratedCompositingEnabled())
-        m_renderer = makeUnique<LayerTreeHost>(m_webPage);
+    Ref webPage = m_webPage;
+    if (webPage->corePage()->settings().acceleratedCompositingEnabled())
+        m_renderer = LayerTreeHost::create(webPage.get());
     else
-        m_renderer = NonCompositedFrameRenderer::create(m_webPage);
+        m_renderer = NonCompositedFrameRenderer::create(webPage.get());
 
     if (m_renderer) {
         if (m_layerTreeStateIsFrozen)
@@ -166,7 +168,7 @@ void DrawingAreaCoordinatedGraphics::backgroundColorDidChange()
 
 void DrawingAreaCoordinatedGraphics::setDeviceScaleFactor(float deviceScaleFactor, CompletionHandler<void()>&& completionHandler)
 {
-    Ref webPage = m_webPage.get();
+    Ref webPage = m_webPage;
     webPage->setDeviceScaleFactor(deviceScaleFactor);
     if (m_renderer && !webPage->size().isEmpty())
         m_renderer->sizeDidChange();
@@ -245,7 +247,7 @@ void DrawingAreaCoordinatedGraphics::activityStateDidChange(OptionSet<ActivitySt
 void DrawingAreaCoordinatedGraphics::updateGeometry(const IntSize& size, CompletionHandler<void()>&& completionHandler)
 {
     SetForScope inUpdateGeometry(m_inUpdateGeometry, true);
-    Ref webPage = m_webPage.get();
+    Ref webPage = m_webPage;
     webPage->setSize(size);
     webPage->layoutIfNeeded();
 
@@ -278,7 +280,7 @@ void DrawingAreaCoordinatedGraphics::dispatchPendingCallbacksAfterEnsuringDrawin
 void DrawingAreaCoordinatedGraphics::adjustTransientZoom(double scale, FloatPoint origin)
 {
     if (!m_transientZoom) {
-        RefPtr frameView = m_webPage->localMainFrameView();
+        RefPtr frameView = protect(m_webPage)->localMainFrameView();
         if (!frameView)
             return;
 
