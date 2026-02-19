@@ -29,6 +29,7 @@
 #if HAVE(AVEXPERIENCECONTROLLER)
 
 #import <WebCore/PlaybackSessionModel.h>
+#import <wtf/RetainPtr.h>
 
 #import <pal/cf/CoreMediaSoftLink.h>
 
@@ -37,6 +38,11 @@ SOFT_LINK_CLASS_OPTIONAL(AVKit, AVInterfaceMetadata)
 SOFT_LINK_CLASS_OPTIONAL(AVKit, AVInterfaceTimelineSegment)
 
 NS_ASSUME_NONNULL_BEGIN
+
+@interface AVInterfaceMetadata (Staging_169033633)
+- (instancetype)initWithAudioOnly:(BOOL)audioOnly title:(nullable NSString *)title subtitle:(nullable NSString *)subtitle albumArtworkRepresentations:(NSArray<AVInterfaceAlbumArtwork *> *)albumArtworkRepresentations;
+- (instancetype)initWithAudioOnly:(BOOL)audioOnly title:(nullable NSString *)title subtitle:(nullable NSString *)subtitle albumArtworks:(nullable NSArray<AVInterfaceAlbumArtwork *> *)albumArtworks;
+@end
 
 @implementation WKAVContentSource {
     WeakPtr<WebCore::PlaybackSessionModel> _model;
@@ -92,7 +98,7 @@ static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
     _currentLegibleOptionIndex = NSNotFound;
     _audioOptions = [NSArray array];
     _legibleOptions = [NSArray array];
-    _metadata = adoptNS([allocAVInterfaceMetadataInstance() initWithAudioOnly:NO title:nil subtitle:nil albumArtworks:nil]).get();
+    _metadata = createPlatformMetadata(nil, nil);
     _videoSize = CGSizeZero;
 
     return self;
@@ -211,6 +217,7 @@ static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
     return _timeRange;
 }
 
+ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
 - (CMTime)currentValue
 {
     return [self currentPlaybackPosition];
@@ -220,6 +227,7 @@ static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
 {
     [self setCurrentPlaybackPosition:currentValue];
 }
+ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
 - (CMTime)currentPlaybackPosition
 {
@@ -441,6 +449,18 @@ static RetainPtr<AVInterfaceTimelineSegment> emptyTimelineSegment()
 }
 
 @end
+
+RetainPtr<AVInterfaceMetadata> createPlatformMetadata(NSString * _Nullable title, NSString * _Nullable subtitle)
+{
+    using namespace PAL;
+
+    if ([getAVInterfaceMetadataClassSingleton() respondsToSelector:@selector(initWithAudioOnly:title:subtitle:albumArtworkRepresentations:)])
+        return adoptNS([allocAVInterfaceMetadataInstance() initWithAudioOnly:NO title:title subtitle:subtitle albumArtworkRepresentations:[NSArray array]]).get();
+
+ALLOW_DEPRECATED_DECLARATIONS_BEGIN
+    return adoptNS([allocAVInterfaceMetadataInstance() initWithAudioOnly:NO title:title subtitle:subtitle albumArtworks:nil]).get();
+ALLOW_DEPRECATED_DECLARATIONS_END
+}
 
 NS_ASSUME_NONNULL_END
 

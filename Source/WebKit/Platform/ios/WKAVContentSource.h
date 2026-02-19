@@ -28,6 +28,7 @@
 #import <AVKit/AVInterfaceControllable_Private.h>
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
+#import <wtf/Forward.h>
 
 namespace WebCore {
 class PlaybackSessionModel;
@@ -60,6 +61,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) CALayer *videoLayer;
 @property (nonatomic) CGSize videoSize;
 @end
+
+RetainPtr<AVInterfaceMetadata> createPlatformMetadata(NSString * _Nullable title, NSString * _Nullable subtitle);
 
 NS_ASSUME_NONNULL_END
 

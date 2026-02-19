@@ -165,8 +165,7 @@ void PlaybackSessionInterfaceAVKit::stopObservingNowPlayingMetadata()
 
 void PlaybackSessionInterfaceAVKit::nowPlayingMetadataChanged(const WebCore::NowPlayingMetadata& metadata)
 {
-    RetainPtr platformMetadata = adoptNS([allocAVInterfaceMetadataInstance() initWithAudioOnly:NO title:metadata.title.createNSString().get() subtitle:metadata.artist.createNSString().get() albumArtworks:nil]);
-    [m_contentSource setMetadata:platformMetadata.get()];
+    [m_contentSource setMetadata:createPlatformMetadata(metadata.title.createNSString().get(), metadata.artist.createNSString().get())];
 }
 
 #if !RELEASE_LOG_DISABLED
