@@ -24,12 +24,12 @@
  */
 
 #include "config.h"
-#include "WebPageInspectorTargetProxy.h"
+#include "PageInspectorTargetProxy.h"
 
 #include "InspectorTargetProxy.h"
 #include "MessageSenderInlines.h"
+#include "PageInspectorTarget.h"
 #include "ProvisionalPageProxy.h"
-#include "WebPageInspectorTarget.h"
 #include "WebPageMessages.h"
 #include "WebPageProxy.h"
 #include "WebProcessProxy.h"
@@ -41,31 +41,31 @@ namespace WebKit {
 
 using namespace Inspector;
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(WebPageInspectorTargetProxy);
+WTF_MAKE_TZONE_ALLOCATED_IMPL(PageInspectorTargetProxy);
 
-std::unique_ptr<WebPageInspectorTargetProxy> WebPageInspectorTargetProxy::create(WebPageProxy& page, const String& targetId, Inspector::InspectorTargetType type)
+std::unique_ptr<PageInspectorTargetProxy> PageInspectorTargetProxy::create(WebPageProxy& page, const String& targetId, Inspector::InspectorTargetType type)
 {
-    return makeUnique<WebPageInspectorTargetProxy>(page, targetId, type);
+    return makeUnique<PageInspectorTargetProxy>(page, targetId, type);
 }
 
-std::unique_ptr<WebPageInspectorTargetProxy> WebPageInspectorTargetProxy::create(ProvisionalPageProxy& provisionalPage, const String& targetId, Inspector::InspectorTargetType type)
+std::unique_ptr<PageInspectorTargetProxy> PageInspectorTargetProxy::create(ProvisionalPageProxy& provisionalPage, const String& targetId, Inspector::InspectorTargetType type)
 {
     RefPtr page = provisionalPage.page();
     if (!page)
         return nullptr;
 
-    std::unique_ptr target = WebPageInspectorTargetProxy::create(*page, targetId, type);
+    std::unique_ptr target = PageInspectorTargetProxy::create(*page, targetId, type);
     target->m_provisionalPage = provisionalPage;
     return target;
 }
 
-WebPageInspectorTargetProxy::WebPageInspectorTargetProxy(WebPageProxy& page, const String& targetId, Inspector::InspectorTargetType type)
+PageInspectorTargetProxy::PageInspectorTargetProxy(WebPageProxy& page, const String& targetId, Inspector::InspectorTargetType type)
     : InspectorTargetProxy(targetId, type)
     , m_page(page)
 {
 }
 
-void WebPageInspectorTargetProxy::connect(Inspector::FrontendChannel::ConnectionType connectionType)
+void PageInspectorTargetProxy::connect(Inspector::FrontendChannel::ConnectionType connectionType)
 {
     if (RefPtr provisionalPage = m_provisionalPage.get()) {
         provisionalPage->send(Messages::WebPage::ConnectInspector(connectionType));
@@ -77,7 +77,7 @@ void WebPageInspectorTargetProxy::connect(Inspector::FrontendChannel::Connection
         protect(page->legacyMainFrameProcess())->send(Messages::WebPage::ConnectInspector(connectionType), page->webPageIDInMainFrameProcess());
 }
 
-void WebPageInspectorTargetProxy::disconnect()
+void PageInspectorTargetProxy::disconnect()
 {
     if (isPaused())
         resume();
@@ -92,7 +92,7 @@ void WebPageInspectorTargetProxy::disconnect()
         protect(page->legacyMainFrameProcess())->send(Messages::WebPage::DisconnectInspector(), page->webPageIDInMainFrameProcess());
 }
 
-void WebPageInspectorTargetProxy::sendMessageToTargetBackend(const String& message)
+void PageInspectorTargetProxy::sendMessageToTargetBackend(const String& message)
 {
     if (RefPtr provisionalPage = m_provisionalPage.get()) {
         provisionalPage->send(Messages::WebPage::SendMessageToTargetBackend(message));
@@ -104,12 +104,12 @@ void WebPageInspectorTargetProxy::sendMessageToTargetBackend(const String& messa
         protect(page->legacyMainFrameProcess())->send(Messages::WebPage::SendMessageToTargetBackend(message), page->webPageIDInMainFrameProcess());
 }
 
-void WebPageInspectorTargetProxy::didCommitProvisionalTarget()
+void PageInspectorTargetProxy::didCommitProvisionalTarget()
 {
     m_provisionalPage = nullptr;
 }
 
-bool WebPageInspectorTargetProxy::isProvisional() const
+bool PageInspectorTargetProxy::isProvisional() const
 {
     return !!m_provisionalPage;
 }

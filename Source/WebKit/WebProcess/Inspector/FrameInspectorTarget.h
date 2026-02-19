@@ -25,46 +25,39 @@
 
 #pragma once
 
-#include "InspectorTargetProxy.h"
 #include <JavaScriptCore/InspectorTarget.h>
+#include <WebCore/FrameIdentifier.h>
 #include <memory>
 #include <wtf/Noncopyable.h>
 #include <wtf/TZoneMalloc.h>
-#include <wtf/TypeCasts.h>
-#include <wtf/WeakPtr.h>
+#include <wtf/WeakRef.h>
 
 namespace WebKit {
 
-class ProvisionalFrameProxy;
-class WebFrameProxy;
+class UIProcessForwardingFrontendChannel;
+class WebFrame;
 
-class WebFrameInspectorTargetProxy final : public InspectorTargetProxy {
-    WTF_MAKE_TZONE_ALLOCATED(WebFrameInspectorTargetProxy);
-    WTF_MAKE_NONCOPYABLE(WebFrameInspectorTargetProxy);
-    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(WebFrameInspectorTargetProxy);
+class FrameInspectorTarget final : public Inspector::InspectorTarget {
+    WTF_MAKE_TZONE_ALLOCATED(FrameInspectorTarget);
+    WTF_MAKE_NONCOPYABLE(FrameInspectorTarget);
+    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(FrameInspectorTarget);
 public:
-    static std::unique_ptr<WebFrameInspectorTargetProxy> create(WebFrameProxy&, const String& targetId);
-    static std::unique_ptr<WebFrameInspectorTargetProxy> create(ProvisionalFrameProxy&, const String& targetId);
-    WebFrameInspectorTargetProxy(WebFrameProxy&, const String& targetId);
-    ~WebFrameInspectorTargetProxy();
+    explicit FrameInspectorTarget(WebFrame&);
+    ~FrameInspectorTarget();
 
-    void didCommitProvisionalTarget() override;
-    bool isProvisional() const override;
+    Inspector::InspectorTargetType type() const final { return Inspector::InspectorTargetType::Frame; }
+
+    String identifier() const final;
 
     void connect(Inspector::FrontendChannel::ConnectionType) override;
     void disconnect() override;
     void sendMessageToTargetBackend(const String&) override;
 
+    static String toTargetID(WebCore::FrameIdentifier);
+
 private:
-    WeakRef<WebFrameProxy> m_frame;
-    WeakPtr<ProvisionalFrameProxy> m_provisionalFrame;
+    WeakRef<WebFrame> m_frame;
+    std::unique_ptr<UIProcessForwardingFrontendChannel> m_channel;
 };
 
 } // namespace WebKit
-
-SPECIALIZE_TYPE_TRAITS_BEGIN(WebKit::WebFrameInspectorTargetProxy)
-static bool isType(const WebKit::WebFrameInspectorTargetProxy& target)
-{
-    return target.type() == Inspector::InspectorTargetType::Frame;
-}
-SPECIALIZE_TYPE_TRAITS_END()

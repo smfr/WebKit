@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "WebPageInspectorTargetFrontendChannel.h"
+#include "UIProcessForwardingFrontendChannel.h"
 
 #include "MessageSenderInlines.h"
 #include "WebPage.h"
@@ -33,16 +33,16 @@
 
 namespace WebKit {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(WebPageInspectorTargetFrontendChannel);
+WTF_MAKE_TZONE_ALLOCATED_IMPL(UIProcessForwardingFrontendChannel);
 
-WebPageInspectorTargetFrontendChannel::WebPageInspectorTargetFrontendChannel(WebPage& page, const String& targetId, Inspector::FrontendChannel::ConnectionType connectionType)
+UIProcessForwardingFrontendChannel::UIProcessForwardingFrontendChannel(WebPage& page, const String& targetId, Inspector::FrontendChannel::ConnectionType connectionType)
     : m_page(page)
     , m_targetId(targetId)
     , m_connectionType(connectionType)
 {
 }
 
-void WebPageInspectorTargetFrontendChannel::sendMessageToFrontend(const String& message)
+void UIProcessForwardingFrontendChannel::sendMessageToFrontend(const String& message)
 {
     Ref { m_page.get() }->send(Messages::WebPageProxy::SendMessageToInspectorFrontend(m_targetId, message));
 }

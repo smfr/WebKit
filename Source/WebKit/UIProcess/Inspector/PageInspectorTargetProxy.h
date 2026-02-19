@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,38 +25,44 @@
 
 #pragma once
 
+#include "InspectorTargetProxy.h"
 #include <JavaScriptCore/InspectorTarget.h>
-#include <WebCore/PageIdentifier.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/TZoneMalloc.h>
-#include <wtf/WeakRef.h>
+#include <wtf/TypeCasts.h>
+#include <wtf/WeakPtr.h>
 
 namespace WebKit {
 
-class WebPage;
-class WebPageInspectorTargetFrontendChannel;
+class ProvisionalPageProxy;
+class WebPageProxy;
 
-class WebPageInspectorTarget final : public Inspector::InspectorTarget {
-    WTF_MAKE_TZONE_ALLOCATED(WebPageInspectorTarget);
-    WTF_MAKE_NONCOPYABLE(WebPageInspectorTarget);
-    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(WebPageInspectorTarget);
+class PageInspectorTargetProxy final : public InspectorTargetProxy {
+    WTF_MAKE_TZONE_ALLOCATED(PageInspectorTargetProxy);
+    WTF_MAKE_NONCOPYABLE(PageInspectorTargetProxy);
+    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(PageInspectorTargetProxy);
 public:
-    explicit WebPageInspectorTarget(WebPage&);
-    virtual ~WebPageInspectorTarget();
+    static std::unique_ptr<PageInspectorTargetProxy> create(WebPageProxy&, const String& targetId, Inspector::InspectorTargetType);
+    static std::unique_ptr<PageInspectorTargetProxy> create(ProvisionalPageProxy&, const String& targetId, Inspector::InspectorTargetType);
+    PageInspectorTargetProxy(WebPageProxy&, const String& targetId, Inspector::InspectorTargetType);
 
-    Inspector::InspectorTargetType type() const final { return Inspector::InspectorTargetType::Page; }
-
-    String identifier() const final;
+    void didCommitProvisionalTarget() override;
+    bool isProvisional() const override;
 
     void connect(Inspector::FrontendChannel::ConnectionType) override;
     void disconnect() override;
     void sendMessageToTargetBackend(const String&) override;
 
-    static String toTargetID(WebCore::PageIdentifier);
-
 private:
-    WeakRef<WebPage> m_page;
-    std::unique_ptr<WebPageInspectorTargetFrontendChannel> m_channel;
+    WeakRef<WebPageProxy> m_page;
+    WeakPtr<ProvisionalPageProxy> m_provisionalPage;
 };
 
 } // namespace WebKit
+
+SPECIALIZE_TYPE_TRAITS_BEGIN(WebKit::PageInspectorTargetProxy)
+static bool isType(const WebKit::PageInspectorTargetProxy& target)
+{
+    return target.type() == Inspector::InspectorTargetType::Page;
+}
+SPECIALIZE_TYPE_TRAITS_END()

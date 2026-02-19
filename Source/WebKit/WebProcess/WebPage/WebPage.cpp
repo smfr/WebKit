@@ -68,6 +68,7 @@
 #include "NodeHitTestResult.h"
 #include "NotificationPermissionRequestManager.h"
 #include "PageBanner.h"
+#include "PageInspectorTarget.h"
 #include "PluginView.h"
 #include "PolicyDecision.h"
 #include "PrintInfo.h"
@@ -142,7 +143,6 @@
 #include "WebPageCreationParameters.h"
 #include "WebPageGroupProxy.h"
 #include "WebPageInlines.h"
-#include "WebPageInspectorTarget.h"
 #include "WebPageInternals.h"
 #include "WebPageMessages.h"
 #include "WebPageOverlay.h"
@@ -4173,10 +4173,10 @@ void WebPage::setControlledByAutomation(bool controlled)
     m_page->setControlledByAutomation(controlled);
 }
 
-CheckedRef<WebPageInspectorTarget> WebPage::ensureInspectorTarget()
+CheckedRef<PageInspectorTarget> WebPage::ensureInspectorTarget()
 {
     if (!m_inspectorTarget)
-        m_inspectorTarget = makeUnique<WebPageInspectorTarget>(*this);
+        m_inspectorTarget = makeUnique<PageInspectorTarget>(*this);
     return *m_inspectorTarget;
 }
 

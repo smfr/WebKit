@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,26 +26,25 @@
 #pragma once
 
 #include <JavaScriptCore/InspectorTarget.h>
-#include <WebCore/FrameIdentifier.h>
-#include <memory>
+#include <WebCore/PageIdentifier.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/WeakRef.h>
 
 namespace WebKit {
 
-class WebFrame;
-class WebFrameInspectorTargetFrontendChannel;
+class UIProcessForwardingFrontendChannel;
+class WebPage;
 
-class WebFrameInspectorTarget final : public Inspector::InspectorTarget {
-    WTF_MAKE_TZONE_ALLOCATED(WebFrameInspectorTarget);
-    WTF_MAKE_NONCOPYABLE(WebFrameInspectorTarget);
-    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(WebFrameInspectorTarget);
+class PageInspectorTarget final : public Inspector::InspectorTarget {
+    WTF_MAKE_TZONE_ALLOCATED(PageInspectorTarget);
+    WTF_MAKE_NONCOPYABLE(PageInspectorTarget);
+    WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(PageInspectorTarget);
 public:
-    explicit WebFrameInspectorTarget(WebFrame&);
-    ~WebFrameInspectorTarget();
+    explicit PageInspectorTarget(WebPage&);
+    virtual ~PageInspectorTarget();
 
-    Inspector::InspectorTargetType type() const final { return Inspector::InspectorTargetType::Frame; }
+    Inspector::InspectorTargetType type() const final { return Inspector::InspectorTargetType::Page; }
 
     String identifier() const final;
 
@@ -53,11 +52,11 @@ public:
     void disconnect() override;
     void sendMessageToTargetBackend(const String&) override;
 
-    static String toTargetID(WebCore::FrameIdentifier);
+    static String toTargetID(WebCore::PageIdentifier);
 
 private:
-    WeakRef<WebFrame> m_frame;
-    std::unique_ptr<WebFrameInspectorTargetFrontendChannel> m_channel;
+    WeakRef<WebPage> m_page;
+    std::unique_ptr<UIProcessForwardingFrontendChannel> m_channel;
 };
 
 } // namespace WebKit

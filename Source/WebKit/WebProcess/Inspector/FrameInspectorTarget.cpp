@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,12 +24,13 @@
  */
 
 #include "config.h"
-#include "WebPageInspectorTarget.h"
+#include "FrameInspectorTarget.h"
 
+#include "UIProcessForwardingFrontendChannel.h"
+#include "WebFrame.h"
 #include "WebPage.h"
-#include "WebPageInspectorTargetFrontendChannel.h"
-#include <WebCore/Page.h>
-#include <WebCore/PageInspectorController.h>
+#include <WebCore/FrameInspectorController.h>
+#include <WebCore/LocalFrame.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/MakeString.h>
 
@@ -37,49 +38,54 @@ namespace WebKit {
 
 using namespace Inspector;
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(WebPageInspectorTarget);
+WTF_MAKE_TZONE_ALLOCATED_IMPL(FrameInspectorTarget);
 
-WebPageInspectorTarget::WebPageInspectorTarget(WebPage& page)
-    : m_page(page)
+FrameInspectorTarget::FrameInspectorTarget(WebFrame& frame)
+    : m_frame(frame)
 {
 }
 
-WebPageInspectorTarget::~WebPageInspectorTarget() = default;
+FrameInspectorTarget::~FrameInspectorTarget() = default;
 
-String WebPageInspectorTarget::identifier() const
+String FrameInspectorTarget::identifier() const
 {
-    return toTargetID(m_page->identifier());
+    return toTargetID(m_frame->frameID());
 }
 
-void WebPageInspectorTarget::connect(Inspector::FrontendChannel::ConnectionType connectionType)
+void FrameInspectorTarget::connect(Inspector::FrontendChannel::ConnectionType connectionType)
 {
     if (m_channel)
         return;
-    Ref page = m_page.get();
-    m_channel = makeUnique<WebPageInspectorTargetFrontendChannel>(page, identifier(), connectionType);
-    if (RefPtr corePage = page->corePage())
-        corePage->protectedInspectorController()->connectFrontend(*m_channel);
+
+    Ref frame = m_frame.get();
+    RefPtr page = frame->page();
+    ASSERT(page);
+    m_channel = makeUnique<UIProcessForwardingFrontendChannel>(*page, identifier(), connectionType);
+
+    if (RefPtr coreFrame = frame->coreLocalFrame())
+        protect(coreFrame->inspectorController())->connectFrontend(*m_channel);
 }
 
-void WebPageInspectorTarget::disconnect()
+void FrameInspectorTarget::disconnect()
 {
     if (!m_channel)
         return;
-    if (RefPtr corePage = m_page->corePage())
-        corePage->protectedInspectorController()->disconnectFrontend(*m_channel);
+
+    if (RefPtr coreFrame = protect(m_frame)->coreLocalFrame())
+        protect(coreFrame->inspectorController())->disconnectFrontend(*m_channel);
+
     m_channel.reset();
 }
 
-void WebPageInspectorTarget::sendMessageToTargetBackend(const String& message)
+void FrameInspectorTarget::sendMessageToTargetBackend(const String& message)
 {
-    if (RefPtr corePage = m_page->corePage())
-        corePage->protectedInspectorController()->dispatchMessageFromFrontend(message);
+    if (RefPtr coreFrame = protect(m_frame)->coreLocalFrame())
+        protect(coreFrame->inspectorController())->dispatchMessageFromFrontend(message);
 }
 
-String WebPageInspectorTarget::toTargetID(WebCore::PageIdentifier pageID)
+String FrameInspectorTarget::toTargetID(WebCore::FrameIdentifier frameID)
 {
-    return makeString("page-"_s, pageID.toUInt64());
+    return makeString("frame-"_s, frameID.toUInt64());
 }
-
 
 } // namespace WebKit

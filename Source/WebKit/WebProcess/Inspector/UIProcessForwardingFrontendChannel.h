@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,30 +23,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "WebFrameInspectorTargetFrontendChannel.h"
+#pragma once
 
-#include "MessageSenderInlines.h"
-#include "WebFrame.h"
-#include "WebPage.h"
-#include "WebPageProxyMessages.h"
-#include <wtf/TZoneMallocInlines.h>
+#include <JavaScriptCore/InspectorFrontendChannel.h>
+#include <wtf/RefCounted.h>
+#include <wtf/TZoneMalloc.h>
+#include <wtf/WeakRef.h>
+#include <wtf/text/WTFString.h>
 
 namespace WebKit {
 
-WTF_MAKE_TZONE_ALLOCATED_IMPL(WebFrameInspectorTargetFrontendChannel);
+class WebPage;
 
-WebFrameInspectorTargetFrontendChannel::WebFrameInspectorTargetFrontendChannel(WebFrame& frame, const String& targetId, Inspector::FrontendChannel::ConnectionType connectionType)
-    : m_frame(frame)
-    , m_targetId(targetId)
-    , m_connectionType(connectionType)
-{
-}
+class UIProcessForwardingFrontendChannel final : public Inspector::FrontendChannel {
+    WTF_MAKE_TZONE_ALLOCATED(UIProcessForwardingFrontendChannel);
+    WTF_MAKE_NONCOPYABLE(UIProcessForwardingFrontendChannel);
+public:
+    UIProcessForwardingFrontendChannel(WebPage&, const String& targetId, Inspector::FrontendChannel::ConnectionType);
+    virtual ~UIProcessForwardingFrontendChannel() = default;
 
-void WebFrameInspectorTargetFrontendChannel::sendMessageToFrontend(const String& message)
-{
-    if (RefPtr page = protect(m_frame)->page())
-        page->send(Messages::WebPageProxy::SendMessageToInspectorFrontend(m_targetId, message));
-}
+private:
+    ConnectionType connectionType() const override { return m_connectionType; }
+    void sendMessageToFrontend(const String& message) override;
+
+    WeakRef<WebPage> m_page;
+    String m_targetId;
+    Inspector::FrontendChannel::ConnectionType m_connectionType { Inspector::FrontendChannel::ConnectionType::Remote };
+};
 
 } // namespace WebKit

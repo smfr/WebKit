@@ -96,7 +96,7 @@ class InjectedBundleHitTestResult;
 class InjectedBundleNodeHandle;
 class InjectedBundleRangeHandle;
 class InjectedBundleScriptWorld;
-class WebFrameInspectorTarget;
+class FrameInspectorTarget;
 class WebKeyboardEvent;
 class WebImage;
 class WebMouseEvent;
@@ -311,7 +311,7 @@ private:
 
     void findFocusableElementDescendingIntoRemoteFrame(WebCore::FocusDirection, const WebCore::FocusEventData&, WebCore::ShouldFocusElement, CompletionHandler<void(WebCore::FoundElementInRemoteFrame)>&&);
 
-    CheckedRef<WebFrameInspectorTarget> ensureInspectorTarget();
+    CheckedRef<FrameInspectorTarget> ensureInspectorTarget();
 
     WeakPtr<WebCore::Frame> m_coreFrame;
     WeakPtr<WebPage> m_page;
@@ -336,7 +336,7 @@ private:
     Markable<WebCore::LayerHostingContextIdentifier> m_layerHostingContextIdentifier;
     Markable<WebCore::FrameIdentifier> m_frameIDBeforeProvisionalNavigation;
 
-    std::unique_ptr<WebFrameInspectorTarget> m_inspectorTarget;
+    std::unique_ptr<FrameInspectorTarget> m_inspectorTarget;
 };
 
 } // namespace WebKit

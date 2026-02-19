@@ -31,6 +31,7 @@
 #include "DownloadManager.h"
 #include "DrawingArea.h"
 #include "FrameInfoData.h"
+#include "FrameInspectorTarget.h"
 #include "FrameTreeNodeData.h"
 #include "InjectedBundleCSSStyleDeclarationHandle.h"
 #include "InjectedBundleHitTestResult.h"
@@ -50,7 +51,6 @@
 #include "WebContextMenu.h"
 #include "WebEventConversion.h"
 #include "WebEventFactory.h"
-#include "WebFrameInspectorTarget.h"
 #include "WebFrameProxyMessages.h"
 #include "WebImage.h"
 #include "WebKeyboardEvent.h"
@@ -1617,10 +1617,10 @@ void WebFrame::takeSnapshotOfNode(JSHandleIdentifier identifier, CompletionHandl
     completion(bitmap->createHandle(SharedMemory::Protection::ReadOnly));
 }
 
-CheckedRef<WebFrameInspectorTarget> WebFrame::ensureInspectorTarget()
+CheckedRef<FrameInspectorTarget> WebFrame::ensureInspectorTarget()
 {
     if (!m_inspectorTarget)
-        m_inspectorTarget = makeUnique<WebFrameInspectorTarget>(*this);
+        m_inspectorTarget = makeUnique<FrameInspectorTarget>(*this);
     return *m_inspectorTarget;
 }
 

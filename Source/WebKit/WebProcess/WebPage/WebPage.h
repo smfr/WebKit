@@ -467,7 +467,7 @@ class WebMouseEvent;
 class WebNotificationClient;
 class WebOpenPanelResultListener;
 class WebPageGroupProxy;
-class WebPageInspectorTarget;
+class PageInspectorTarget;
 class WebPageOverlay;
 class WebPageTesting;
 class WebPaymentCoordinator;
@@ -2740,7 +2740,7 @@ private:
 
     void frameNameWasChangedInAnotherProcess(WebCore::FrameIdentifier, const String& frameName);
 
-    CheckedRef<WebPageInspectorTarget> ensureInspectorTarget();
+    CheckedRef<PageInspectorTarget> ensureInspectorTarget();
 
     struct Internals;
     const UniqueRef<Internals> m_internals;
@@ -2878,7 +2878,7 @@ private:
     RefPtr<WebInspectorBackend> m_inspector;
     RefPtr<WebInspectorUI> m_inspectorUI;
     RefPtr<RemoteWebInspectorUI> m_remoteInspectorUI;
-    std::unique_ptr<WebPageInspectorTarget> m_inspectorTarget;
+    std::unique_ptr<PageInspectorTarget> m_inspectorTarget;
 
 #if ENABLE(VIDEO_PRESENTATION_MODE)
     RefPtr<PlaybackSessionManager> m_playbackSessionManager;
