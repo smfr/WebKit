@@ -54,7 +54,7 @@
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
 
 // We don't have a NO_RETURN_DUE_TO_EXIT, nor should we. That's ridiculous.
-static bool hiddenTruthBecauseNoReturnIsStupid() { return true; }
+static bool NODELETE hiddenTruthBecauseNoReturnIsStupid() { return true; }
 
 static void usage()
 {
@@ -1359,7 +1359,7 @@ void testShuffleShiftMemoryAllRegs64()
     CHECK(memory[1] == 35000000000000ll);
 }
 
-int64_t combineHiLo(int64_t high, int64_t low)
+int64_t NODELETE combineHiLo(int64_t high, int64_t low)
 {
     union {
         int64_t value;

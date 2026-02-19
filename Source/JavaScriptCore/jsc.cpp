@@ -244,8 +244,8 @@ public:
     Message(Content&&, int32_t);
     ~Message();
     
-    Content&& releaseContents() { return WTF::move(m_contents); }
-    int32_t index() const { return m_index; }
+    Content&& NODELETE releaseContents() { return WTF::move(m_contents); }
+    int32_t NODELETE index() const { return m_index; }
 
 private:
     Content m_contents;
@@ -259,7 +259,7 @@ public:
     
     void enqueue(const AbstractLocker&, RefPtr<Message>);
     RefPtr<Message> dequeue();
-    bool isMain() const { return m_isMain; }
+    bool NODELETE isMain() const { return m_isMain; }
 
     static Worker& current();
 
@@ -527,7 +527,7 @@ void StopWatch::stop()
     m_stopTime = MonotonicTime::now();
 }
 
-long StopWatch::getElapsedMS()
+long NODELETE StopWatch::getElapsedMS()
 {
     return (m_stopTime - m_startTime).millisecondsAs<long>();
 }
@@ -570,7 +570,7 @@ public:
         return Structure::create(vm, nullptr, prototype, TypeInfo(GlobalObjectType, StructureFlags), info());
     }
 
-    static RuntimeFlags javaScriptRuntimeFlags(const JSGlobalObject*) { return RuntimeFlags::createAllEnabled(); }
+    static RuntimeFlags NODELETE javaScriptRuntimeFlags(const JSGlobalObject*) { return RuntimeFlags::createAllEnabled(); }
 
     static void getOwnPropertyNames(JSObject* object, JSGlobalObject* globalObject, PropertyNameArrayBuilder& propertyNames, DontEnumPropertiesMode mode)
     {
@@ -601,7 +601,7 @@ private:
         }
 
         bool contains(UniquedStringImpl* name) const { return m_names.contains(name); }
-        const UncheckedKeyHashSet<UniquedStringImpl*>& names() const { return m_names; }
+        const UncheckedKeyHashSet<UniquedStringImpl*>& NODELETE names() const { return m_names; }
 
     private:
         Vector<AtomString> m_strings; // To keep the UniqueStringImpls alive.
@@ -950,7 +950,7 @@ private:
 STATIC_ASSERT_ISO_SUBSPACE_SHARABLE(GlobalObject, JSGlobalObject);
 
 static bool supportsRichSourceInfo = true;
-static bool shellSupportsRichSourceInfo(const JSGlobalObject*)
+static bool NODELETE shellSupportsRichSourceInfo(const JSGlobalObject*)
 {
     return supportsRichSourceInfo;
 }
@@ -1005,7 +1005,7 @@ JSC_DEFINE_CUSTOM_SETTER(testCustomValueSetter, (JSGlobalObject* lexicalGlobalOb
     return GlobalObject::testCustomSetterImpl(lexicalGlobalObject, thisObject, encodedValue, "_testCustomValueSetter"_s);
 }
 
-static char16_t pathSeparator()
+static char16_t NODELETE pathSeparator()
 {
 #if OS(WINDOWS)
     return '\\';
@@ -1401,7 +1401,7 @@ private:
     {
     }
 
-    bool cacheEnabled() const { return m_cacheEnabled; }
+    bool NODELETE cacheEnabled() const { return m_cacheEnabled; }
 
     mutable RefPtr<CachedBytecode> m_cachedBytecode;
     const bool m_cacheEnabled;
@@ -1810,7 +1810,7 @@ class JSCMemoryFootprint : public JSDestructibleObject {
     using Base = JSDestructibleObject;
 public:
     template<typename CellType, SubspaceAccess>
-    static CompleteSubspace* subspaceFor(VM& vm)
+    static CompleteSubspace* NODELETE subspaceFor(VM& vm)
     {
         return &vm.destructibleObjectSpace();
     }
@@ -2198,7 +2198,7 @@ class JSFileDescriptor : public JSDestructibleObject {
     using Base = JSDestructibleObject;
 public:
     template<typename CellType, SubspaceAccess>
-    static CompleteSubspace* subspaceFor(VM& vm)
+    static CompleteSubspace* NODELETE subspaceFor(VM& vm)
     {
         return &vm.destructibleObjectSpace();
     }
@@ -2229,7 +2229,7 @@ public:
         static_cast<JSFileDescriptor*>(thisObject)->~JSFileDescriptor();
     }
 
-    FILE* descriptor() const { return m_descriptor; }
+    FILE* NODELETE descriptor() const { return m_descriptor; }
 
     DECLARE_INFO;
 
@@ -3541,7 +3541,7 @@ static void startTimeoutTimer(Seconds duration)
 // jsc shell test timeouts (i.e. crashDueToJSCShellTimeout is present in crash stack
 // traces) from other crashes.
 NO_RETURN_DUE_TO_CRASH NEVER_INLINE void crashDueToJSCShellTimeout();
-void crashDueToJSCShellTimeout()
+void NODELETE crashDueToJSCShellTimeout()
 {
     CRASH();
 }

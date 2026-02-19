@@ -1383,7 +1383,7 @@ bool SpeculativeJIT::genericJSValueStrictEq(Node* node, bool invert)
     return false;
 }
 
-static const char* dataFormatString(DataFormat format)
+static const char* NODELETE dataFormatString(DataFormat format)
 {
     // These values correspond to the DataFormat enum.
     const char* strings[] = {

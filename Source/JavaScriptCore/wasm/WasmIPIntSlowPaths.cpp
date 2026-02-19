@@ -341,7 +341,7 @@ WASM_IPINT_EXTERN_CPP_DECL(epilogue_osr, CallFrame* callFrame)
 }
 #endif
 
-static void copyExceptionStackToPayload(const Wasm::FunctionSignature& tagType, const IPIntStackEntry* stackPointer, FixedVector<uint64_t>& payload)
+static void NODELETE copyExceptionStackToPayload(const Wasm::FunctionSignature& tagType, const IPIntStackEntry* stackPointer, FixedVector<uint64_t>& payload)
 {
     unsigned payloadIndex = payload.size();
     for (unsigned i = 0; i < tagType.argumentCount(); ++i) {
@@ -355,7 +355,7 @@ static void copyExceptionStackToPayload(const Wasm::FunctionSignature& tagType, 
     ASSERT(!payloadIndex);
 }
 
-static void copyExceptionPayloadToStack(const Wasm::FunctionSignature& tagType, const FixedVector<uint64_t>& payload, IPIntStackEntry* stackPointer)
+static void NODELETE copyExceptionPayloadToStack(const Wasm::FunctionSignature& tagType, const FixedVector<uint64_t>& payload, IPIntStackEntry* stackPointer)
 {
     unsigned payloadIndex = payload.size();
     for (unsigned i = 0; i < tagType.argumentCount(); ++i) {
