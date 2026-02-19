@@ -92,6 +92,11 @@ void WebProcessCache::deref() const
 
 bool WebProcessCache::canCacheProcess(WebProcessProxy& process) const
 {
+    if (!process.isEligibleForWebProcessCache()) {
+        WEBPROCESSCACHE_RELEASE_LOG("canCacheProcess: Not caching process because WebProcessProxy does not allow it", process.processID());
+        return false;
+    }
+
     if (!capacity()) {
         WEBPROCESSCACHE_RELEASE_LOG("canCacheProcess: Not caching process because the cache has no capacity", process.processID());
         return false;

@@ -609,6 +609,9 @@ public:
     void takeInvalidMessageStringForTesting(CompletionHandler<void(String&&)>&&);
 #endif
 
+    void setIneligbleForWebProcessCache() { m_isEligibleForWebProcessCache = false; }
+    bool isEligibleForWebProcessCache() const { return m_isEligibleForWebProcessCache; }
+
 private:
     Type type() const final { return Type::WebContent; }
 
@@ -930,6 +933,8 @@ private:
     RefPtr<WasmDebuggerDebuggable> m_wasmDebuggerDebuggable;
     bool m_createWasmDebuggerDebuggable { false };
 #endif
+
+    bool m_isEligibleForWebProcessCache { true };
 
     HashMap<String, SandboxExtension::Handle> m_fileSandboxExtensions;
 

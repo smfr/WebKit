@@ -715,22 +715,19 @@ void WebProcessPool::establishRemoteWorkerContextConnectionToNetworkProcess(Remo
     auto useProcessForRemoteWorkers = [&](WebProcessProxy& process) {
         remoteWorkerProcessProxy = process;
         process.enableRemoteWorkers(workerType, processPool->userContentControllerForRemoteWorkers());
-        if (process.isInProcessCache()) {
-            processPool->webProcessCache().removeProcess(process, WebProcessCache::ShouldShutDownProcess::No);
-            ASSERT(!process.isInProcessCache());
-        }
+        RELEASE_ASSERT(!process.isInProcessCache());
     };
 
     if (serviceWorkerPageIdentifier) {
         ASSERT(workerType == RemoteWorkerType::ServiceWorker);
         // This is a service worker for a service worker page so we need to make sure we use use the page's WebProcess for the service worker.
-        if (RefPtr process = WebProcessProxy::processForIdentifier(serviceWorkerPageIdentifier->processIdentifier()))
+        if (RefPtr process = WebProcessProxy::processForIdentifier(serviceWorkerPageIdentifier->processIdentifier()); process && !process->isInProcessCache())
             useProcessForRemoteWorkers(*process);
     }
 
     // Prioritize the requesting WebProcess for running the service worker.
     if (!remoteWorkerProcessProxy && !s_useSeparateServiceWorkerProcess && requestingProcess && requestingProcess->state() != WebProcessProxy::State::Terminated) {
-        if (requestingProcess->websiteDataStore() == websiteDataStore && requestingProcess->site() == site)
+        if (requestingProcess->websiteDataStore() == websiteDataStore && requestingProcess->site() == site && !requestingProcess->isInProcessCache())
             useProcessForRemoteWorkers(*requestingProcess);
     }
 
@@ -743,6 +740,8 @@ void WebProcessPool::establishRemoteWorkerContextConnectionToNetworkProcess(Remo
             if (process->site() != site)
                 continue;
             if (process->lockdownMode() != lockdownMode)
+                continue;
+            if (process->isInProcessCache())
                 continue;
 
             useProcessForRemoteWorkers(process);
@@ -1305,6 +1304,8 @@ Ref<WebProcessProxy> WebProcessPool::processForSite(WebsiteDataStore& websiteDat
             tryPrewarmWithDomainInformation(*process, site->domain());
         ASSERT(m_processes.containsIf([&](auto& item) { return item.ptr() == process; }));
         process->setIsolatedProcessType(isolatedProcessType);
+        if (processSwapDisposition == ProcessSwapDisposition::COOP)
+            process->setIneligbleForWebProcessCache();
         return process.releaseNonNull();
     }
 
@@ -1328,6 +1329,8 @@ Ref<WebProcessProxy> WebProcessPool::processForSite(WebsiteDataStore& websiteDat
     auto enableWebAssemblyDebugger = protect(pageConfiguration.preferences())->webAssemblyDebuggerEnabled() ? WebProcessProxy::EnableWebAssemblyDebugger::Yes : WebProcessProxy::EnableWebAssemblyDebugger::No;
     Ref process = createNewWebProcess(&websiteDataStore, lockdownMode, enhancedSecurity, enableWebAssemblyDebugger);
     process->setIsolatedProcessType(isolatedProcessType);
+    if (processSwapDisposition == ProcessSwapDisposition::COOP)
+        process->setIneligbleForWebProcessCache();
     return process;
 }
 
