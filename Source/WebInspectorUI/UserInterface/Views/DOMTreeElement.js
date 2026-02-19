@@ -868,21 +868,11 @@ WI.DOMTreeElement = class DOMTreeElement extends WI.TreeElement
 
         if (!this.representedObject.destroyed && !this.representedObject.isPseudoElement()) {
             subMenus.copy.appendItem(WI.UIString("HTML"), () => {
-                this.representedObject.getOuterHTML()
-                .then((outerHTML) => {
-                    InspectorFrontendHost.copyText(outerHTML);
-                });
+                this._copyHTMLOfSelectedDOMNodes();
             });
 
             subMenus.copy.appendItem(WI.UIString("HTML (Formatted)"), () => {
-                this.representedObject.getOuterHTML()
-                .then((outerHTML) => {
-                    let workerProxy = WI.FormatterWorkerProxy.singleton();
-                    const includeSourceMapData = false;
-                    workerProxy.formatHTML(outerHTML, WI.indentString(), includeSourceMapData, ({formattedText}) => {
-                        InspectorFrontendHost.copyText(formattedText);
-                    });
-                });
+                this._copyHTMLOfSelectedDOMNodes({formatted: true});
             });
         }
 
@@ -932,6 +922,27 @@ WI.DOMTreeElement = class DOMTreeElement extends WI.TreeElement
                 });
             }
         }
+    }
+
+    _copyHTMLOfSelectedDOMNodes({formatted} = {})
+    {
+        Promise.all(this.treeOutline.selectedTreeElements.map(async function(treeElement) {
+            let outerHTML = await treeElement.representedObject.getOuterHTML();
+            if (formatted) {
+                let workerProxy = WI.FormatterWorkerProxy.singleton();
+                const includeSourceMapData = false;
+                let {formattedText} = await workerProxy.formatHTML(outerHTML, WI.indentString(), includeSourceMapData);
+                outerHTML = formattedText || "";
+            }
+
+            return outerHTML;
+        }))
+        .then(function(outerHTMLs) {
+            InspectorFrontendHost.copyText(outerHTMLs.join("\n"));
+        })
+        .catch(function(error) {
+            WI.reportInternalError(error);
+        });
     }
 
     _startEditing()
