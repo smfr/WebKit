@@ -303,6 +303,8 @@ interface AccessibilityUIElement {
     AccessibilityTextMarkerRange textMarkerRangeMatchesTextNearMarkers(DOMString text, AccessibilityTextMarker startMarker, AccessibilityTextMarker endMarker);
     DOMString textMarkerDebugDescription(AccessibilityTextMarker marker);
     DOMString textMarkerRangeDebugDescription(AccessibilityTextMarkerRange range);
+    DOMString textMarkerDescription(AccessibilityTextMarker marker);
+    DOMString textMarkerRangeDescription(AccessibilityTextMarkerRange range);
 
     // Returns an ordered list of supported actions for an element.
     readonly attribute DOMString supportedActions;

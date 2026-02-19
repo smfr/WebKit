@@ -313,6 +313,8 @@ public:
     RefPtr<AccessibilityTextMarker> previousSentenceStartTextMarkerForTextMarker(AccessibilityTextMarker*) override;
     JSRetainPtr<JSStringRef> textMarkerDebugDescription(AccessibilityTextMarker*) override;
     JSRetainPtr<JSStringRef> textMarkerRangeDebugDescription(AccessibilityTextMarkerRange*) override;
+    JSRetainPtr<JSStringRef> textMarkerDescription(AccessibilityTextMarker*) override;
+    JSRetainPtr<JSStringRef> textMarkerRangeDescription(AccessibilityTextMarkerRange*) override;
 
     JSRetainPtr<JSStringRef> supportedActions() const override;
     JSRetainPtr<JSStringRef> mathPostscriptsDescription() const override;

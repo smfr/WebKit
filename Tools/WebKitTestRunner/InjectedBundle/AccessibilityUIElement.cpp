@@ -1384,6 +1384,16 @@ JSRetainPtr<JSStringRef> AccessibilityUIElement::textMarkerRangeDebugDescription
     return nullptr;
 }
 
+JSRetainPtr<JSStringRef> AccessibilityUIElement::textMarkerDescription(WTR::AccessibilityTextMarker*)
+{
+    return nullptr;
+}
+
+JSRetainPtr<JSStringRef> AccessibilityUIElement::textMarkerRangeDescription(WTR::AccessibilityTextMarkerRange*)
+{
+    return nullptr;
+}
+
 RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElement::textMarkerRangeForElement(WTR::AccessibilityUIElement*)
 {
     return nullptr;

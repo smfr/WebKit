@@ -272,6 +272,7 @@ public:
     bool isDownstream() const { return affinity() == Affinity::Downstream; }
     void setAffinity(Affinity affinity) { m_data.affinity = affinity; }
 
+    String description() const;
     String debugDescription() const;
     TextMarkerOrigin origin() const { return m_data.origin; }
 
@@ -429,6 +430,7 @@ public:
 #endif // PLATFORM(COCOA)
 #endif // ENABLE(ACCESSIBILITY_ISOLATED_TREE)
 
+    String description() const;
     String debugDescription() const;
 private:
     AXTextMarker m_start;

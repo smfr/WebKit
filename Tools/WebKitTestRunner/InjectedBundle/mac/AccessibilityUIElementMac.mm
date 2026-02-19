@@ -2972,7 +2972,7 @@ JSRetainPtr<JSStringRef> AccessibilityUIElementMac::textMarkerDebugDescription(A
         return nullptr;
 
     BEGIN_AX_OBJC_EXCEPTIONS
-    RetainPtr description = attributeValueForParameter(@"AXTextMarkerDebugDescription", marker->platformTextMarker());
+    RetainPtr description = attributeValueForParameter(@"_AXTextMarkerDebugDescription", marker->platformTextMarker());
     return [description createJSStringRef];
     END_AX_OBJC_EXCEPTIONS
 
@@ -2985,7 +2985,33 @@ JSRetainPtr<JSStringRef> AccessibilityUIElementMac::textMarkerRangeDebugDescript
         return nullptr;
 
     BEGIN_AX_OBJC_EXCEPTIONS
-    RetainPtr description = attributeValueForParameter(@"AXTextMarkerRangeDebugDescription", range->platformTextMarkerRange());
+    RetainPtr description = attributeValueForParameter(@"_AXTextMarkerRangeDebugDescription", range->platformTextMarkerRange());
+    return [description createJSStringRef];
+    END_AX_OBJC_EXCEPTIONS
+
+    return nullptr;
+}
+
+JSRetainPtr<JSStringRef> AccessibilityUIElementMac::textMarkerDescription(AccessibilityTextMarker* marker)
+{
+    if (!marker)
+        return nullptr;
+
+    BEGIN_AX_OBJC_EXCEPTIONS
+    RetainPtr description = attributeValueForParameter(@"_AXTextMarkerDescription", marker->platformTextMarker());
+    return [description createJSStringRef];
+    END_AX_OBJC_EXCEPTIONS
+
+    return nullptr;
+}
+
+JSRetainPtr<JSStringRef> AccessibilityUIElementMac::textMarkerRangeDescription(AccessibilityTextMarkerRange* range)
+{
+    if (!range)
+        return nullptr;
+
+    BEGIN_AX_OBJC_EXCEPTIONS
+    RetainPtr description = attributeValueForParameter(@"_AXTextMarkerRangeDescription", range->platformTextMarkerRange());
     return [description createJSStringRef];
     END_AX_OBJC_EXCEPTIONS
 

@@ -3545,8 +3545,14 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
     if ([attribute isEqualToString:NSAccessibilityTextMarkerDebugDescriptionAttribute])
         return AXTextMarker { textMarker }.debugDescription().createNSString().autorelease();
 
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerDescriptionAttribute])
+        return AXTextMarker { textMarker }.description().createNSString().autorelease();
+
     if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDebugDescriptionAttribute])
         return AXTextMarkerRange { textMarkerRange }.debugDescription().createNSString().autorelease();
+
+    if ([attribute isEqualToString:NSAccessibilityTextMarkerRangeDescriptionAttribute])
+        return AXTextMarkerRange { textMarkerRange }.description().createNSString().autorelease();
 
 #if ENABLE(TREE_DEBUGGING)
     if ([attribute isEqualToString:AXTextMarkerNodeDebugDescriptionAttribute]) {
