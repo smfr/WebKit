@@ -33,6 +33,7 @@
 
 #if !__has_feature(modules) || (defined(WK_SUPPORTS_SWIFT_OBJCXX_INTEROP) && WK_SUPPORTS_SWIFT_OBJCXX_INTEROP)
 
+#import "IdentifierTypes.h"
 #import "PDFPluginIdentifier.h"
 #import "VisibleContentRectUpdateInfo.h"
 #import <WebCore/CocoaView.h>
@@ -121,6 +122,10 @@ class Attachment;
 }
 
 namespace WebCore {
+class FloatQuad;
+class FloatRect;
+class IntPoint;
+class IntSize;
 struct AppHighlight;
 struct ExceptionData;
 struct ExceptionDetails;
@@ -746,6 +751,21 @@ RetainPtr<NSError> nsErrorFromExceptionDetails(const std::optional<WebCore::Exce
 #endif
 
 WebCore::CocoaColor *sampledFixedPositionContentColor(const WebCore::FixedContainerEdges&, WebCore::BoxSide);
+
+#if ENABLE(TWO_PHASE_CLICKS)
+
+@interface WKWebView (TwoPhaseClicks)
+- (void)_didNotHandleTapAsClick:(const WebCore::IntPoint&)point;
+- (void)_didHandleTapAsHover;
+- (void)_didCompleteSyntheticClick;
+- (void)_commitPotentialTapFailed;
+- (void)_didGetTapHighlightGeometries:(WebKit::TapIdentifier)requestID color:(const WebCore::Color&)color quads:(const Vector<WebCore::FloatQuad>&)highlightedQuads topLeftRadius:(const WebCore::IntSize&)topLeftRadius topRightRadius:(const WebCore::IntSize&)topRightRadius bottomLeftRadius:(const WebCore::IntSize&)bottomLeftRadius bottomRightRadius:(const WebCore::IntSize&)bottomRightRadius nodeHasBuiltInClickHandling:(BOOL)nodeHasBuiltInClickHandling;
+- (BOOL)_isPotentialTapInProgress;
+- (void)_disableDoubleTapGesturesDuringTapIfNecessary:(WebKit::TapIdentifier)requestID;
+- (void)_handleSmartMagnificationInformationForPotentialTap:(WebKit::TapIdentifier)requestID renderRect:(const WebCore::FloatRect&)renderRect fitEntireRect:(BOOL)fitEntireRect viewportMinimumScale:(double)viewportMinimumScale viewportMaximumScale:(double)viewportMaximumScale nodeIsRootLevel:(BOOL)nodeIsRootLevel nodeIsPluginElement:(BOOL)nodeIsPluginElement;
+@end
+
+#endif
 
 #endif // !__has_feature(modules) || WK_SUPPORTS_SWIFT_OBJCXX_INTEROP
 

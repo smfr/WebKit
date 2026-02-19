@@ -353,21 +353,6 @@ void PageClientImpl::toolTipChanged(const String&, const String& newToolTip)
 #endif
 }
 
-void PageClientImpl::didNotHandleTapAsClick(const WebCore::IntPoint& point)
-{
-    [contentView() _didNotHandleTapAsClick:point];
-}
-
-void PageClientImpl::didHandleTapAsHover()
-{
-    [contentView() _didHandleTapAsHover];
-}
-
-void PageClientImpl::didCompleteSyntheticClick()
-{
-    [contentView() _didCompleteSyntheticClick];
-}
-
 void PageClientImpl::decidePolicyForGeolocationPermissionRequest(WebFrameProxy& frame, const FrameInfoData& frameInfo, Function<void(bool)>& completionHandler)
 {
     if (auto webView = this->webView()) {
@@ -409,16 +394,6 @@ void PageClientImpl::didCommitLoadForMainFrame(const String& mimeType, bool useC
 void PageClientImpl::didChangeContentSize(const WebCore::IntSize&)
 {
     notImplemented();
-}
-
-void PageClientImpl::disableDoubleTapGesturesDuringTapIfNecessary(WebKit::TapIdentifier requestID)
-{
-    [contentView() _disableDoubleTapGesturesDuringTapIfNecessary:requestID];
-}
-
-void PageClientImpl::handleSmartMagnificationInformationForPotentialTap(WebKit::TapIdentifier requestID, const WebCore::FloatRect& renderRect, bool fitEntireRect, double viewportMinimumScale, double viewportMaximumScale, bool nodeIsRootLevel, bool nodeIsPluginElement)
-{
-    [contentView() _handleSmartMagnificationInformationForPotentialTap:requestID renderRect:renderRect fitEntireRect:fitEntireRect viewportMinimumScale:viewportMinimumScale viewportMaximumScale:viewportMaximumScale nodeIsRootLevel:nodeIsRootLevel nodeIsPluginElement:nodeIsPluginElement];
 }
 
 double PageClientImpl::minimumZoomScale() const
@@ -755,16 +730,6 @@ RefPtr<ViewSnapshot> PageClientImpl::takeViewSnapshot(std::optional<WebCore::Int
 void PageClientImpl::wheelEventWasNotHandledByWebCore(const NativeWebWheelEvent& event)
 {
     notImplemented();
-}
-
-void PageClientImpl::commitPotentialTapFailed()
-{
-    [contentView() _commitPotentialTapFailed];
-}
-
-void PageClientImpl::didGetTapHighlightGeometries(WebKit::TapIdentifier requestID, const WebCore::Color& color, const Vector<WebCore::FloatQuad>& highlightedQuads, const WebCore::IntSize& topLeftRadius, const WebCore::IntSize& topRightRadius, const WebCore::IntSize& bottomLeftRadius, const WebCore::IntSize& bottomRightRadius, bool nodeHasBuiltInClickHandling)
-{
-    [contentView() _didGetTapHighlightForRequest:requestID color:color quads:highlightedQuads topLeftRadius:topLeftRadius topRightRadius:topRightRadius bottomLeftRadius:bottomLeftRadius bottomRightRadius:bottomRightRadius nodeHasBuiltInClickHandling:nodeHasBuiltInClickHandling];
 }
 
 void PageClientImpl::didCommitLayerTree(const RemoteLayerTreeTransaction& layerTreeTransaction, const std::optional<MainFrameData>& mainFrameData, const PageData& pageData, const TransactionID& transactionID)
@@ -1435,11 +1400,6 @@ String PageClientImpl::spatialTrackingLabel() const
 void PageClientImpl::scheduleVisibleContentRectUpdate()
 {
     [webView() _scheduleVisibleContentRectUpdate];
-}
-
-bool PageClientImpl::isPotentialTapInProgress() const
-{
-    return [protect(m_contentView) isPotentialTapInProgress];
 }
 
 bool PageClientImpl::canStartNavigationSwipeAtLastInteractionLocation() const

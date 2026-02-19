@@ -5108,6 +5108,54 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
 @end
 
+#if ENABLE(TWO_PHASE_CLICKS)
+
+@implementation WKWebView (TwoPhaseClicks)
+
+- (void)_didNotHandleTapAsClick:(const WebCore::IntPoint&)point
+{
+    [_contentView _didNotHandleTapAsClick:point];
+}
+
+- (void)_didHandleTapAsHover
+{
+    [_contentView _didHandleTapAsHover];
+}
+
+- (void)_didCompleteSyntheticClick
+{
+    [_contentView _didCompleteSyntheticClick];
+}
+
+- (void)_commitPotentialTapFailed
+{
+    [_contentView _commitPotentialTapFailed];
+}
+
+- (void)_didGetTapHighlightGeometries:(WebKit::TapIdentifier)requestID color:(const WebCore::Color&)color quads:(const Vector<WebCore::FloatQuad>&)highlightedQuads topLeftRadius:(const WebCore::IntSize&)topLeftRadius topRightRadius:(const WebCore::IntSize&)topRightRadius bottomLeftRadius:(const WebCore::IntSize&)bottomLeftRadius bottomRightRadius:(const WebCore::IntSize&)bottomRightRadius nodeHasBuiltInClickHandling:(BOOL)nodeHasBuiltInClickHandling
+{
+    [_contentView _didGetTapHighlightForRequest:requestID color:color quads:highlightedQuads topLeftRadius:topLeftRadius topRightRadius:topRightRadius bottomLeftRadius:bottomLeftRadius bottomRightRadius:bottomRightRadius nodeHasBuiltInClickHandling:nodeHasBuiltInClickHandling];
+}
+
+- (BOOL)_isPotentialTapInProgress
+{
+    return [_contentView isPotentialTapInProgress];
+}
+
+- (void)_disableDoubleTapGesturesDuringTapIfNecessary:(WebKit::TapIdentifier)requestID
+{
+    [_contentView _disableDoubleTapGesturesDuringTapIfNecessary:requestID];
+}
+
+- (void)_handleSmartMagnificationInformationForPotentialTap:(WebKit::TapIdentifier)requestID renderRect:(const WebCore::FloatRect&)renderRect fitEntireRect:(BOOL)fitEntireRect viewportMinimumScale:(double)viewportMinimumScale viewportMaximumScale:(double)viewportMaximumScale nodeIsRootLevel:(BOOL)nodeIsRootLevel nodeIsPluginElement:(BOOL)nodeIsPluginElement
+{
+    [_contentView _handleSmartMagnificationInformationForPotentialTap:requestID renderRect:renderRect fitEntireRect:fitEntireRect viewportMinimumScale:viewportMinimumScale viewportMaximumScale:viewportMaximumScale nodeIsRootLevel:nodeIsRootLevel nodeIsPluginElement:nodeIsPluginElement];
+}
+
+@end
+
+#endif // ENABLE(TWO_PHASE_CLICKS)
+
 #undef WKWEBVIEW_RELEASE_LOG
 
 _WKTapHandlingResult wkTapHandlingResult(WebKit::TapHandlingResult result)

@@ -488,39 +488,44 @@ void PageClientImplCocoa::didCommitMainFrameData(const MainFrameData& mainFrameD
 
 #if ENABLE(TWO_PHASE_CLICKS)
 
-// FIXME: Coalesce platform-agnostic logic with PageClientImplIOS
-
-void PageClientImplCocoa::didNotHandleTapAsClick(const WebCore::IntPoint&)
+void PageClientImplCocoa::didNotHandleTapAsClick(const WebCore::IntPoint& point)
 {
+    [m_webView _didNotHandleTapAsClick:point];
 }
 
 void PageClientImplCocoa::didHandleTapAsHover()
 {
+    [m_webView _didHandleTapAsHover];
 }
 
 void PageClientImplCocoa::didCompleteSyntheticClick()
 {
+    [m_webView _didCompleteSyntheticClick];
 }
 
 void PageClientImplCocoa::commitPotentialTapFailed()
 {
+    [m_webView _commitPotentialTapFailed];
 }
 
-void PageClientImplCocoa::didGetTapHighlightGeometries(WebKit::TapIdentifier, const WebCore::Color&, const Vector<WebCore::FloatQuad>&, const WebCore::IntSize&, const WebCore::IntSize&, const WebCore::IntSize&, const WebCore::IntSize&, bool)
+void PageClientImplCocoa::didGetTapHighlightGeometries(WebKit::TapIdentifier requestID, const WebCore::Color& color, const Vector<WebCore::FloatQuad>& highlightedQuads, const WebCore::IntSize& topLeftRadius, const WebCore::IntSize& topRightRadius, const WebCore::IntSize& bottomLeftRadius, const WebCore::IntSize& bottomRightRadius, bool nodeHasBuiltInClickHandling)
 {
+    [m_webView _didGetTapHighlightGeometries:requestID color:color quads:highlightedQuads topLeftRadius:topLeftRadius topRightRadius:topRightRadius bottomLeftRadius:bottomLeftRadius bottomRightRadius:bottomRightRadius nodeHasBuiltInClickHandling:nodeHasBuiltInClickHandling];
 }
 
 bool PageClientImplCocoa::isPotentialTapInProgress() const
 {
-    return false;
+    return [m_webView _isPotentialTapInProgress];
 }
 
-void PageClientImplCocoa::disableDoubleTapGesturesDuringTapIfNecessary(WebKit::TapIdentifier)
+void PageClientImplCocoa::disableDoubleTapGesturesDuringTapIfNecessary(WebKit::TapIdentifier requestID)
 {
+    [m_webView _disableDoubleTapGesturesDuringTapIfNecessary:requestID];
 }
 
-void PageClientImplCocoa::handleSmartMagnificationInformationForPotentialTap(WebKit::TapIdentifier, const WebCore::FloatRect&, bool, double, double, bool, bool)
+void PageClientImplCocoa::handleSmartMagnificationInformationForPotentialTap(WebKit::TapIdentifier requestID, const WebCore::FloatRect& renderRect, bool fitEntireRect, double viewportMinimumScale, double viewportMaximumScale, bool nodeIsRootLevel, bool nodeIsPluginElement)
 {
+    [m_webView _handleSmartMagnificationInformationForPotentialTap:requestID renderRect:renderRect fitEntireRect:fitEntireRect viewportMinimumScale:viewportMinimumScale viewportMaximumScale:viewportMaximumScale nodeIsRootLevel:nodeIsRootLevel nodeIsPluginElement:nodeIsPluginElement];
 }
 
 #endif // ENABLE(TWO_PHASE_CLICKS)
