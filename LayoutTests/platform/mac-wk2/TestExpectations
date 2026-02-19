@@ -2494,6 +2494,4 @@ webkit.org/b/307889 http/tests/multipart/multipart-async-image.html [ Pass Failu
 webkit.org/b/308079 [ Tahoe Release arm64 ] http/tests/site-isolation/inspector/console/message-from-iframe.html [ Failure ]
 webkit.org/b/308079 [ Tahoe Release arm64 ] http/tests/site-isolation/inspector/console/message-from-worker.html [ Failure ]
 
-webkit.org/b/308086 [ Tahoe Release arm64 ] compositing/visible-rect/animated-from-none.html [ Pass Failure ]
-
 webkit.org/b/308165 [ Debug ] scrollingcoordinator/mac/latching/simple-page-rubberbands.html [ Pass Failure ]
