@@ -646,7 +646,6 @@ imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customiz
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-fallback-top-left.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-fallback-top-right-scroller.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-fallback-top-right.html [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-font-inheriting.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-optgroup-legend-and-label.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-optgroup-legend.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-optgroup-rendering.html [ ImageOnlyFailure ]
