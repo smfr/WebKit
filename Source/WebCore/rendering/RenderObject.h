@@ -748,7 +748,7 @@ public:
     inline TreeScope& treeScopeForSVGReferences() const; // Defined in RenderObjectInlines.h
     inline LocalFrame& frame() const; // Defined in RenderObjectInlines.h
     inline Page& page() const; // Defined in RenderObjectInlines.h
-    inline Settings& settings() const; // Defined in RenderObjectInlines.h
+    inline const Settings& settings() const; // Defined in RenderObjectDocument.h
 
     // Returns the object containing this one. Can be different from parent for positioned elements.
     // If repaintContainer and repaintContainerSkipped are not null, on return *repaintContainerSkipped
