@@ -620,6 +620,9 @@ public:
     ViewGestureController* gestureController() const { return m_gestureController.get(); }
     ViewGestureController& ensureGestureController();
     Ref<ViewGestureController> ensureProtectedGestureController();
+#if HAVE(APPKIT_GESTURES_SUPPORT)
+    WKAppKitGestureController *appKitGestureController() const { return m_appKitGestureController.get(); }
+#endif
     void setAllowsBackForwardNavigationGestures(bool);
     bool allowsBackForwardNavigationGestures() const { return m_allowsBackForwardNavigationGestures; }
     void setAllowsMagnification(bool);

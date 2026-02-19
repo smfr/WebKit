@@ -53,6 +53,7 @@ DECLARE_SYSTEM_HEADER
 
 #import <AppKit/NSGestureRecognizer_Private.h>
 #import <AppKit/NSPanGestureRecognizer_Private.h>
+#import <AppKit/NSPressGestureRecognizer_Private.h>
 
 #if HAVE(NSVIEW_CORNER_CONFIGURATION)
 #import <AppKit/NSViewCornerConfiguration_Private.h>
@@ -163,6 +164,10 @@ typedef NS_ENUM(NSInteger, NSScrollPocketEdge) {
 @interface NSViewCornerConfiguration : NSObject
 + (NSViewCornerConfiguration *)configurationWithRadius:(_NSCornerRadius *)radius;
 + (instancetype)configurationWithTopLeftRadius:(nullable _NSCornerRadius *)topLeftRadius topRightRadius:(nullable _NSCornerRadius *)topRightRadius bottomLeftRadius:(nullable _NSCornerRadius *)bottomLeftRadius bottomRightRadius:(nullable _NSCornerRadius *)bottomRightRadius;
+@end
+
+@interface NSPressGestureRecognizer (SPI)
+@property BOOL cancelPastAllowableMovement;
 @end
 
 @interface NSView (NSViewCornerConfiguration)

@@ -29,33 +29,37 @@
 #if HAVE(APPKIT_GESTURES_SUPPORT)
 
 #import "AppKitSPI.h"
+#import "IdentifierTypes.h"
 #import "NativeWebWheelEvent.h"
+#import "RemoteLayerTreeDrawingAreaProxy.h"
 #import "ScrollingAccelerationCurve.h"
 #import "ViewGestureController.h"
 #import "WKWebView.h"
 #import "WebEventModifier.h"
 #import "WebEventType.h"
+#import "WebMouseEvent.h"
 #import "WebPageProxy.h"
 #import "WebPreferences.h"
 #import "WebViewImpl.h"
 #import "WebWheelEvent.h"
 #import <Carbon/Carbon.h>
+#import <WebCore/Color.h>
 #import <WebCore/FloatPoint.h>
+#import <WebCore/FloatQuad.h>
 #import <WebCore/FloatSize.h>
 #import <WebCore/IntPoint.h>
+#import <WebCore/IntSize.h>
 #import <WebCore/PlatformEventFactoryMac.h>
+#import <WebCore/PointerID.h>
 #import <WebCore/Scrollbar.h>
 #import <source_location>
 #import <wtf/CheckedPtr.h>
+#import <wtf/Markable.h>
 #import <wtf/MonotonicTime.h>
 #import <wtf/RefPtr.h>
 #import <wtf/RetainPtr.h>
 #import <wtf/UUID.h>
 #import <wtf/WeakPtr.h>
-
-#if __has_include(<WebKitAdditions/WKAppKitGestureControllerAdditionsBefore.mm>)
-#import <WebKitAdditions/WKAppKitGestureControllerAdditionsBefore.mm>
-#endif
 
 #define WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(pageID, fmt, ...) RELEASE_LOG(ViewGestures, "[pageProxyID=%llu] %s: " fmt, pageID, std::source_location::current().function_name(), ##__VA_ARGS__)
 
@@ -108,11 +112,21 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
     WeakPtr<WebKit::WebViewImpl> _viewImpl;
 
     RetainPtr<NSPanGestureRecognizer> _panGestureRecognizer;
-    RetainPtr<NSClickGestureRecognizer> _singleClickGestureRecognizer;
+    RetainPtr<NSPressGestureRecognizer> _singleClickGestureRecognizer;
     RetainPtr<NSClickGestureRecognizer> _doubleClickGestureRecognizer;
     RetainPtr<NSPressGestureRecognizer> _secondaryClickGestureRecognizer;
 
     bool _isMomentumActive;
+
+    bool _potentialClickInProgress;
+    bool _isClickHighlightIDValid;
+    bool _hasHighlightForPotentialClick;
+    bool _isExpectingFastClickCommit;
+
+    std::optional<WebKit::TransactionID> _layerTreeTransactionIdAtLastInteractionStart;
+    Markable<WebKit::ClickIdentifier> _latestClickID;
+    WebCore::PointerID _commitPotentialClickPointerId;
+    WebCore::FloatPoint _lastInteractionLocation;
 }
 
 #if __has_include(<WebKitAdditions/WKAppKitGestureControllerAdditionsImpl.mm>)
@@ -149,7 +163,7 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
 
 - (void)setUpSingleClickGestureRecognizer
 {
-    _singleClickGestureRecognizer = adoptNS([[NSClickGestureRecognizer alloc] initWithTarget:self action:@selector(singleClickGestureRecognized:)]);
+    _singleClickGestureRecognizer = adoptNS([[NSPressGestureRecognizer alloc] initWithTarget:self action:@selector(singleClickGestureRecognized:)]);
     [self configureForSingleClick:_singleClickGestureRecognizer.get()];
     [_singleClickGestureRecognizer setDelegate:self];
     [_singleClickGestureRecognizer setName:@"WKSingleClickGesture"];
@@ -264,17 +278,20 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
     if (_singleClickGestureRecognizer != gesture)
         return;
 
-    auto timestamp = GetCurrentEventTime();
-ALLOW_NEW_API_WITHOUT_GUARDS_BEGIN
-    auto modifierFlags = [gesture modifierFlags];
-ALLOW_NEW_API_WITHOUT_GUARDS_END
-    auto location = [gesture locationInView:nil];
-    auto windowNumber = viewImpl->windowNumber();
-    RetainPtr mouseDown = [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:location modifierFlags:modifierFlags timestamp:timestamp windowNumber:windowNumber context:NULL eventNumber:0 clickCount:1 pressure:1.0];
-    RetainPtr mouseUp = [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp location:location modifierFlags:modifierFlags timestamp:timestamp windowNumber:windowNumber context:NULL eventNumber:0 clickCount:1 pressure:0.0];
-
-    viewImpl->mouseDown(mouseDown.get(), WebKit::WebMouseEventInputSource::Automation);
-    viewImpl->mouseUp(mouseUp.get(), WebKit::WebMouseEventInputSource::Automation);
+    switch (gesture.state) {
+    case NSGestureRecognizerStateBegan:
+        [self _handleClickBegan:gesture];
+        break;
+    case NSGestureRecognizerStateEnded:
+        [self _handleClickEnded:gesture];
+        break;
+    case NSGestureRecognizerStateCancelled:
+    case NSGestureRecognizerStateFailed:
+        [self _handleClickCancelled];
+        break;
+    default:
+        break;
+    }
 }
 
 - (void)doubleClickGestureRecognized:(NSGestureRecognizer *)gesture
@@ -334,6 +351,161 @@ ALLOW_NEW_API_WITHOUT_GUARDS_END
     RetainPtr mouseUp = [NSEvent mouseEventWithType:NSEventTypeRightMouseUp location:location modifierFlags:modifierFlags timestamp:GetCurrentEventTime() windowNumber:windowNumber context:NULL eventNumber:0 clickCount:1 pressure:0.0];
     viewImpl->mouseUp(mouseUp.get(), WebKit::WebMouseEventInputSource::UserDriven);
 }
+
+#pragma mark - Click Handling
+
+- (void)_handleClickBegan:(NSGestureRecognizer *)gesture
+{
+    CheckedPtr viewImpl = _viewImpl.get();
+    if (!viewImpl)
+        return;
+
+    RetainPtr webView = viewImpl->view();
+    if (!webView)
+        return;
+
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    WebCore::FloatPoint position = [gesture locationInView:webView.get()];
+    _lastInteractionLocation = position;
+
+    if (RefPtr drawingArea = page->drawingArea()) {
+        if (RefPtr remoteDrawingArea = dynamicDowncast<WebKit::RemoteLayerTreeDrawingAreaProxy>(*drawingArea))
+            _layerTreeTransactionIdAtLastInteractionStart = remoteDrawingArea->lastCommittedMainFrameLayerTreeTransactionID();
+    }
+
+    _latestClickID = WebKit::ClickIdentifier::generate();
+    _potentialClickInProgress = true;
+    _isClickHighlightIDValid = true;
+    _isExpectingFastClickCommit = ![_doubleClickGestureRecognizer isEnabled];
+
+    page->potentialClickAtPosition(std::nullopt, WebCore::FloatPoint(position), false, *_latestClickID, WebKit::WebMouseEventInputSource::UserDriven);
+}
+
+- (void)_handleClickEnded:(NSGestureRecognizer *)gesture
+{
+    if (!_potentialClickInProgress)
+        return;
+
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    [self _endPotentialClickAndEnableDoubleClickGesturesIfNecessary];
+
+    _commitPotentialClickPointerId = WebCore::mousePointerID;
+
+    if (!_layerTreeTransactionIdAtLastInteractionStart) {
+        [self _handleClickCancelled];
+        return;
+    }
+
+    page->commitPotentialClick(std::nullopt, { }, *_layerTreeTransactionIdAtLastInteractionStart, _commitPotentialClickPointerId);
+}
+
+- (void)_handleClickCancelled
+{
+    if (!_potentialClickInProgress)
+        return;
+
+    _potentialClickInProgress = false;
+    _isClickHighlightIDValid = false;
+
+    if (RefPtr page = _page.get())
+        page->cancelPotentialClick();
+}
+
+- (void)_endPotentialClickAndEnableDoubleClickGesturesIfNecessary
+{
+    _potentialClickInProgress = false;
+    [self _setDoubleClickGesturesEnabled:YES];
+}
+
+- (void)_setDoubleClickGesturesEnabled:(BOOL)enabled
+{
+    [_doubleClickGestureRecognizer setEnabled:enabled];
+}
+
+#if ENABLE(TWO_PHASE_CLICKS)
+
+#pragma mark - Two-Phase Click Response Handlers
+
+- (BOOL)isPotentialClickInProgress
+{
+    return _potentialClickInProgress;
+}
+
+- (void)didGetClickHighlightForRequest:(WebKit::ClickIdentifier)requestID color:(const WebCore::Color&)color quads:(const Vector<WebCore::FloatQuad>&)highlightedQuads topLeftRadius:(const WebCore::IntSize&)topLeftRadius topRightRadius:(const WebCore::IntSize&)topRightRadius bottomLeftRadius:(const WebCore::IntSize&)bottomLeftRadius bottomRightRadius:(const WebCore::IntSize&)bottomRightRadius nodeHasBuiltInClickHandling:(BOOL)nodeHasBuiltInClickHandling
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    if (!_isClickHighlightIDValid || _latestClickID != requestID)
+        return;
+
+    _isClickHighlightIDValid = false;
+    _hasHighlightForPotentialClick = _potentialClickInProgress;
+
+    // FIXME: Bring up support for click highlighting here.
+
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "Received click highlight for request %llu, nodeHasBuiltInClickHandling=%d", requestID.toUInt64(), nodeHasBuiltInClickHandling);
+}
+
+- (void)disableDoubleClickGesturesDuringClickIfNecessary:(WebKit::ClickIdentifier)requestID
+{
+    if (_latestClickID != requestID)
+        return;
+
+    [self _setDoubleClickGesturesEnabled:NO];
+}
+
+- (void)commitPotentialClickFailed
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    _commitPotentialClickPointerId = 0;
+    [self _handleClickCancelled];
+
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "Commit potential click failed");
+}
+
+- (void)didCompleteSyntheticClick
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    _commitPotentialClickPointerId = 0;
+
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "Synthetic click completed");
+}
+
+- (void)didHandleClickAsHover
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "Click was handled as hover");
+}
+
+- (void)didNotHandleClickAsClick:(const WebCore::IntPoint&)point
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "Click at (%d, %d) was not handled as click", point.x(), point.y());
+
+    // FIXME: Consider smart magnification here if a double-click is pending and the point hasn't moved significantly.
+}
+
+#endif
 
 #pragma mark - Wheel Event Handling
 
@@ -538,6 +710,9 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
         if (gestureRecognizer == _secondaryClickGestureRecognizer && otherGestureRecognizer == gestureForFailureRequirements)
             return YES;
     }
+
+    if (gestureRecognizer == _singleClickGestureRecognizer && otherGestureRecognizer == _doubleClickGestureRecognizer)
+        return YES;
 
     return NO;
 }

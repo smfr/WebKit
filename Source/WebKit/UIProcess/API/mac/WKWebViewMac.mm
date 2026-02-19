@@ -1239,11 +1239,11 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
     _impl->effectiveAppearanceDidChange();
 }
 
+@end
+
 #if USE(APPLE_INTERNAL_SDK) && __has_include(<WebKitAdditions/WKWebViewMacAdditionsAfter.mm>)
 #import <WebKitAdditions/WKWebViewMacAdditionsAfter.mm>
 #endif
-
-@end
 
 #pragma mark -
 
