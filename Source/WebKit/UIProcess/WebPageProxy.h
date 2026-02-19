@@ -3818,6 +3818,8 @@ private:
 
     bool m_isEditable { false };
 
+    bool m_accessibilityEnabled { false };
+
     double m_textZoomFactor { 1 };
     double m_pageZoomFactor { 1 };
     double m_pageScaleFactor { 1 };

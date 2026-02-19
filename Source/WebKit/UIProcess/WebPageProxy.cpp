@@ -6091,6 +6091,7 @@ void WebPageProxy::accessibilitySettingsDidChange()
 
 void WebPageProxy::enableAccessibilityForAllProcesses()
 {
+    m_accessibilityEnabled = true;
     forEachWebContentProcess([&](auto& webProcess, auto pageID) {
         webProcess.send(Messages::WebPage::EnableAccessibility(), pageID);
     });
@@ -12776,6 +12777,8 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
 #endif
 
     parameters.textManipulationParameters = m_internals->textManipulationParameters;
+
+    parameters.accessibilityEnabled = m_accessibilityEnabled;
 
     return parameters;
 }

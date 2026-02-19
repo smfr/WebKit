@@ -1084,6 +1084,9 @@ WebPage::WebPage(PageIdentifier pageID, WebPageCreationParameters&& parameters)
     if (parameters.isEditable)
         setEditable(true);
 
+    if (parameters.accessibilityEnabled)
+        enableAccessibility();
+
 #if PLATFORM(MAC)
     setUseFormSemanticContext(parameters.useFormSemanticContext);
     setHeaderBannerHeight(parameters.headerBannerHeight);

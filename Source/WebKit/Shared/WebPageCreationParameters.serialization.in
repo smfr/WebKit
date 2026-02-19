@@ -297,6 +297,8 @@ enum class WebCore::UserInterfaceLayoutDirection : bool;
     std::optional<WebKit::TextManipulationParameters> textManipulationParameters;
 
     bool isPopup;
+
+    bool accessibilityEnabled;
 }
 
 [Nested] struct WebKit::RemotePageParameters {

@@ -381,6 +381,8 @@ struct WebPageCreationParameters {
     std::optional<TextManipulationParameters> textManipulationParameters { std::nullopt };
 
     bool isPopup { false };
+
+    bool accessibilityEnabled { false };
 };
 
 } // namespace WebKit
