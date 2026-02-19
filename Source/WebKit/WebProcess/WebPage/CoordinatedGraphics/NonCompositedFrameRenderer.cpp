@@ -28,6 +28,7 @@
 
 #if USE(COORDINATED_GRAPHICS)
 #include "DrawingArea.h"
+#include "RenderProcessInfo.h"
 #include "WebPage.h"
 #include "WebPageInlines.h"
 #include <WebCore/GLContext.h>
@@ -35,6 +36,8 @@
 #include <WebCore/Page.h>
 #include <WebCore/PlatformDisplay.h>
 #include <WebCore/Settings.h>
+#include <epoxy/egl.h>
+#include <epoxy/gl.h>
 #include <wtf/SetForScope.h>
 #include <wtf/SystemTracing.h>
 
@@ -333,7 +336,25 @@ void NonCompositedFrameRenderer::commitTransientZoom(double scale, FloatPoint, F
 
 void NonCompositedFrameRenderer::fillGLInformation(RenderProcessInfo&& info, CompletionHandler<void(RenderProcessInfo&&)>&& completionHandler)
 {
-    // FIXME: implement.
+    if (!m_context) {
+        completionHandler(WTF::move(info));
+        return;
+    }
+
+    {
+        GLContext::ScopedGLContextCurrent currentContext(*m_context);
+        info.glRenderer = String::fromUTF8(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+        info.glVendor = String::fromUTF8(reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+        info.glVersion = String::fromUTF8(reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+        info.glShadingVersion = String::fromUTF8(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+        info.glExtensions = String::fromUTF8(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+
+        auto eglDisplay = eglGetCurrentDisplay();
+        info.eglVersion = String::fromUTF8(eglQueryString(eglDisplay, EGL_VERSION));
+        info.eglVendor = String::fromUTF8(eglQueryString(eglDisplay, EGL_VENDOR));
+        info.eglExtensions = makeString(unsafeSpan(eglQueryString(nullptr, EGL_EXTENSIONS)), ' ', unsafeSpan(eglQueryString(eglDisplay, EGL_EXTENSIONS)));
+    }
+
     completionHandler(WTF::move(info));
 }
 
