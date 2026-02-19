@@ -202,7 +202,7 @@ static String stringOnlyIfHumanReadable(const String& string)
     return { };
 }
 
-static void addBoxShadowIfNeeded(Node& node, String&& styleValue)
+static void addBoxShadowIfNeeded(Node& node, const String& colorAsString)
 {
     Ref document = node.document();
     if (!document->settings().textExtractionDebugUIEnabled())
@@ -215,7 +215,19 @@ static void addBoxShadowIfNeeded(Node& node, String&& styleValue)
     if (element == document->body())
         return;
 
-    element->setInlineStyleProperty(CSSPropertyBoxShadow, WTF::move(styleValue), IsImportant::Yes);
+    auto styleValue = makeString("0 0 20px "_s, colorAsString, ", inset 0 0 8px "_s, colorAsString);
+    element->setInlineStyleProperty(CSSPropertyBoxShadow, styleValue, IsImportant::Yes);
+
+    auto relatedElementAttributes = std::array {
+        HTMLNames::aria_labeledbyAttr.get(),
+        HTMLNames::aria_labelledbyAttr.get(),
+        HTMLNames::aria_describedbyAttr.get()
+    };
+
+    for (auto& attributeName : relatedElementAttributes) {
+        if (RefPtr otherElement = dynamicDowncast<HTMLElement>(element->elementForAttributeInternal(attributeName).get()))
+            otherElement->setInlineStyleProperty(CSSPropertyBoxShadow, styleValue, IsImportant::Yes);
+    }
 }
 
 using ClientNodeAttributesMap = WeakHashMap<Node, HashMap<String, String>, WeakPtrImplWithEventTargetData>;
@@ -1160,7 +1172,7 @@ Result extractItem(Request&& request, LocalFrame& frame)
 #endif
 
     if (extractionRootNode)
-        addBoxShadowIfNeeded(*extractionRootNode, "0 0 10px #0088FF"_s);
+        addBoxShadowIfNeeded(*extractionRootNode, "#0088FF"_s);
 
     if (!extractionRootNode)
         return { root, 0 };
@@ -1215,7 +1227,7 @@ Result extractItem(Request&& request, LocalFrame& frame)
             for (Ref passwordField : passwordFields) {
                 static constexpr FloatSize minimumSize { 280, 200 };
                 if (RefPtr container = findLargeContainerAboveNode(passwordField, minimumSize)) {
-                    addBoxShadowIfNeeded(*container, "0 0 10px #cb30e0"_s);
+                    addBoxShadowIfNeeded(*container, "#cb30e0"_s);
                     additionalContainersToCollect.add(container.releaseNonNull());
                 }
             }
@@ -1575,7 +1587,7 @@ static void dispatchSimulatedClick(Node& targetNode, const String& searchText, C
     if (!frame)
         return completion(false, nullFrameDescription);
 
-    addBoxShadowIfNeeded(targetNode, "0 0 16px #34c759"_s);
+    addBoxShadowIfNeeded(targetNode, "#34c759"_s);
 
     std::optional<FloatRect> targetRectInRootView;
     if (!searchText.isEmpty()) {
@@ -1640,7 +1652,7 @@ static SelectOptionResult selectOptionByValue(NodeIdentifier identifier, const S
         if (optionText.isEmpty())
             return { };
 
-        addBoxShadowIfNeeded(*select, "0 0 16px #34c759"_s);
+        addBoxShadowIfNeeded(*select, "#34c759"_s);
         select->setValue(optionText);
         return { select->selectedIndex() != -1, { } };
     }
@@ -1681,7 +1693,7 @@ static void selectText(LocalFrame& frame, std::optional<NodeIdentifier>&& identi
     if (RefPtr control = dynamicDowncast<HTMLTextFormControlElement>(*foundNode)) {
         // FIXME: This should probably honor `searchText`.
         control->select();
-        addBoxShadowIfNeeded(*control, "0 0 16px #34c759"_s);
+        addBoxShadowIfNeeded(*control, "#34c759"_s);
         return completion(true, { });
     }
 
@@ -1732,7 +1744,7 @@ static void scrollBy(LocalFrame& frame, std::optional<NodeIdentifier>&& identifi
     if (!scroller)
         return completion(false, "No scrollable area found"_s);
 
-    addBoxShadowIfNeeded(*foundNode, "0 0 16px #34c759"_s);
+    addBoxShadowIfNeeded(*foundNode, "#34c759"_s);
     scroller->scrollToOffsetWithoutAnimation(FloatPoint { scroller->scrollOffset() } + scrollDelta);
     completion(true, { });
 }
@@ -2054,7 +2066,7 @@ static String textDescription(Node* node, Vector<String>& stringsToValidate)
     if (!node)
         return { };
 
-    addBoxShadowIfNeeded(*node, "0 0 16px #ff383c"_s);
+    addBoxShadowIfNeeded(*node, "#ff383c"_s);
 
     auto addRenderedTextOrLabeledChild = [&](const String& description) {
         StringBuilder extendedDescription;
