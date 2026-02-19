@@ -227,7 +227,7 @@ inline void ComputedStyleBase::setHasPseudoStyles(EnumSet<PseudoElementType> set
 inline void ComputedStyleBase::setPseudoElementIdentifier(std::optional<PseudoElementIdentifier>&& identifier)
 {
     if (identifier) {
-        m_nonInheritedFlags.pseudoElementType = std::to_underlying(identifier->type) + 1;
+        m_nonInheritedFlags.pseudoElementType = enumToUnderlyingType(identifier->type) + 1;
         SET_NESTED(m_nonInheritedData, rareData, pseudoElementNameArgument, WTF::move(identifier->nameArgument));
     } else {
         m_nonInheritedFlags.pseudoElementType = 0;

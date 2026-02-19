@@ -91,14 +91,14 @@ void PropertyCascade::buildCascade()
             break;
         bool hasImportant = addNormalMatches(origin);
         if (hasImportant)
-            originsWithImportant[std::to_underlying(origin)] = true;
+            originsWithImportant[enumToUnderlyingType(origin)] = true;
     }
 
     if (m_positionTryFallbackProperties)
         addPositionTryFallbackProperties();
 
     for (auto origin : { Origin::Author, Origin::User, Origin::UserAgent }) {
-        if (!originsWithImportant[std::to_underlying(origin)])
+        if (!originsWithImportant[enumToUnderlyingType(origin)])
             continue;
         addImportantMatches(origin);
     }

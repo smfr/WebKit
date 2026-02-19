@@ -93,7 +93,7 @@ template<Numeric N, PrimitiveKeyword... Ks> struct PrimitiveDataIndex {
 
     static constexpr Storage indexStorageForUnit(UnitType unit)
     {
-        return indexStorageForFirstRaw + std::to_underlying(unit);
+        return indexStorageForFirstRaw + enumToUnderlyingType(unit);
     }
 
     static consteval Storage indexStorageForKeyword(ValidKeywordForList<Keywords> auto keyword)

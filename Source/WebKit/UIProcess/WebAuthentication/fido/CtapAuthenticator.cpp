@@ -175,7 +175,7 @@ void CtapAuthenticator::makeCredential()
 void CtapAuthenticator::continueSilentlyCheckCredentials(Vector<uint8_t>&& data, CompletionHandler<void(bool)>&& completionHandler)
 {
     auto error = getResponseCode(data);
-    CTAP_RELEASE_LOG("continueSilentlyCheckCredentials: Got error code: %hhu from authenticator.", std::to_underlying(error));
+    CTAP_RELEASE_LOG("continueSilentlyCheckCredentials: Got error code: %hhu from authenticator.", enumToUnderlyingType(error));
 
     if (error == CtapDeviceResponseCode::kSuccess)
         return completionHandler(true);
@@ -292,7 +292,7 @@ void CtapAuthenticator::continueMakeCredentialAfterCheckExcludedCredentials(bool
 void CtapAuthenticator::continueMakeCredentialAfterResponseReceived(Vector<uint8_t>&& data)
 {
     auto error = getResponseCode(data);
-    CTAP_RELEASE_LOG("continueMakeCredentialAfterResponseReceived: Got error code: %hhu from authenticator.", std::to_underlying(error));
+    CTAP_RELEASE_LOG("continueMakeCredentialAfterResponseReceived: Got error code: %hhu from authenticator.", enumToUnderlyingType(error));
     auto response = readCTAPMakeCredentialResponse(data, AuthenticatorAttachment::CrossPlatform, transports(), std::get<PublicKeyCredentialCreationOptions>(requestData().options).attestation, m_hmacSecretRequest);
     if (!response) {
         CTAP_RELEASE_LOG("makeCredential: Failed to parse response %s", base64EncodeToString(data).utf8().data());
@@ -462,7 +462,7 @@ void CtapAuthenticator::continueGetAssertionAfterResponseReceived(Vector<uint8_t
 {
     auto response = readCTAPGetAssertionResponse(data, AuthenticatorAttachment::CrossPlatform, m_hmacSecretRequest);
     auto error = getResponseCode(data);
-    CTAP_RELEASE_LOG("continueGetAssertionAfterResponseReceived: errorcode: %hhu", std::to_underlying(error));
+    CTAP_RELEASE_LOG("continueGetAssertionAfterResponseReceived: errorcode: %hhu", enumToUnderlyingType(error));
     if (!response) {
         CTAP_RELEASE_LOG("continueGetAssertionAfterResponseReceived: Failed to parse response %s", base64EncodeToString(data).utf8().data());
         if (error == CtapDeviceResponseCode::kCtap2ErrActionTimeout) {
@@ -524,7 +524,7 @@ void CtapAuthenticator::continueGetAssertionAfterResponseReceived(Vector<uint8_t
 void CtapAuthenticator::continueGetNextAssertionAfterResponseReceived(Vector<uint8_t>&& data)
 {
     auto error = getResponseCode(data);
-    CTAP_RELEASE_LOG("continueGetNextAssertionAfterResponseReceived: errorcode: %hhu", std::to_underlying(error));
+    CTAP_RELEASE_LOG("continueGetNextAssertionAfterResponseReceived: errorcode: %hhu", enumToUnderlyingType(error));
     auto response = readCTAPGetAssertionResponse(data, AuthenticatorAttachment::CrossPlatform, m_hmacSecretRequest);
     if (!response) {
         CTAP_RELEASE_LOG("continueGetNextAssertionAfterResponseReceived: Unable to parse response: %s", base64EncodeToString(data).utf8().data());
@@ -583,7 +583,7 @@ void CtapAuthenticator::continueGetKeyAgreementAfterGetRetries(Vector<uint8_t>&&
     auto retries = pin::RetriesResponse::parse(data);
     if (!retries) {
         auto error = getResponseCode(data);
-        CTAP_RELEASE_LOG("continueGetKeyAgreementAfterGetRetries: Error code: %hhu", std::to_underlying(error));
+        CTAP_RELEASE_LOG("continueGetKeyAgreementAfterGetRetries: Error code: %hhu", enumToUnderlyingType(error));
         receiveRespond(ExceptionData { ExceptionCode::UnknownError, makeString("Unknown internal error. Error code: "_s, static_cast<uint8_t>(error)) });
         return;
     }
@@ -692,7 +692,7 @@ void CtapAuthenticator::continueRequestAfterGetPinToken(Vector<uint8_t>&& data, 
 
 bool CtapAuthenticator::tryRestartPin(const CtapDeviceResponseCode& error)
 {
-    CTAP_RELEASE_LOG("tryRestartPin: Error code: %hhu", std::to_underlying(error));
+    CTAP_RELEASE_LOG("tryRestartPin: Error code: %hhu", enumToUnderlyingType(error));
     switch (error) {
     case CtapDeviceResponseCode::kCtap2ErrPinNotSet:
     case CtapDeviceResponseCode::kCtap2ErrPinAuthInvalid:

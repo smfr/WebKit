@@ -84,9 +84,9 @@ namespace WTF {
 template<> bool isValidEnum<TestEnum>(std::underlying_type_t<TestEnum> value)
 {
     switch (value) {
-    case std::to_underlying(TestEnum::A):
-    case std::to_underlying(TestEnum::B):
-    case std::to_underlying(TestEnum::C):
+    case enumToUnderlyingType(TestEnum::A):
+    case enumToUnderlyingType(TestEnum::B):
+    case enumToUnderlyingType(TestEnum::C):
         return true;
     default:
         return false;

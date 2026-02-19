@@ -47,7 +47,7 @@ unsigned short CSSRule::typeForCSSOM() const
     if (styleRuleType() >= firstUnexposedStyleRuleType)
         return 0;
 
-    return std::to_underlying(styleRuleType());
+    return enumToUnderlyingType(styleRuleType());
 }
 
 ExceptionOr<void> CSSRule::setCssText(const String&)

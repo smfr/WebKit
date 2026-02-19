@@ -1561,7 +1561,7 @@ void HTMLInputElement::setAutofillButtonType(AutoFillButtonType autoFillButtonTy
         return;
 
     m_lastAutoFillButtonType = m_autoFillButtonType;
-    m_autoFillButtonType = std::to_underlying(autoFillButtonType);
+    m_autoFillButtonType = enumToUnderlyingType(autoFillButtonType);
     m_inputType->updateAutoFillButton();
     updateInnerTextElementEditability();
     invalidateStyleForSubtree();

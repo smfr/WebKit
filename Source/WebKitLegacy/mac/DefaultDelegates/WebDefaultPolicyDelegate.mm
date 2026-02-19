@@ -86,7 +86,7 @@ static WebDefaultPolicyDelegate *sharedDelegate = nil;
 
     if ([WebView _canHandleRequest:request forMainFrame:frame == [wv mainFrame]]) {
         [listener use];
-    } else if (std::to_underlying(navType) == std::to_underlying(WebNavigationTypePlugInRequest)) {
+    } else if (enumToUnderlyingType(navType) == enumToUnderlyingType(WebNavigationTypePlugInRequest)) {
         [listener use];
     } else {
         // A file URL shouldn't fall through to here, but if it did,

@@ -486,8 +486,8 @@ private:
     bool m_isAutoFilled : 1 { false };
     bool m_isAutoFilledAndViewable : 1 { false };
     bool m_isAutoFilledAndObscured : 1 { false };
-    unsigned m_autoFillButtonType : 3 { std::to_underlying(AutoFillButtonType::None) }; // AutoFillButtonType
-    unsigned m_lastAutoFillButtonType : 3 { std::to_underlying(AutoFillButtonType::None) }; // AutoFillButtonType
+    unsigned m_autoFillButtonType : 3 { enumToUnderlyingType(AutoFillButtonType::None) }; // AutoFillButtonType
+    unsigned m_lastAutoFillButtonType : 3 { enumToUnderlyingType(AutoFillButtonType::None) }; // AutoFillButtonType
     bool m_isAutoFillAvailable : 1 { false };
     bool m_hasNonEmptyList : 1 { false };
     bool m_stateRestored : 1 { false };

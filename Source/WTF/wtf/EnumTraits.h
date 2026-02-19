@@ -121,6 +121,12 @@ constexpr bool isValidEnumForPersistence(bool t)
     return !t || t == 1;
 }
 
+template<typename E>
+constexpr auto enumToUnderlyingType(E e)
+{
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+
 template<typename T, typename E> struct ZeroBasedContiguousEnumChecker;
 
 template<typename T, typename E, E e, E... es>
@@ -128,7 +134,7 @@ struct ZeroBasedContiguousEnumChecker<T, EnumValues<E, e, es...>> {
     template<size_t INDEX = 0>
     static constexpr bool isZeroBasedContiguousEnum()
     {
-        return (std::to_underlying(e) == INDEX) ? ZeroBasedContiguousEnumChecker<T, EnumValues<E, es...>>::template isZeroBasedContiguousEnum<INDEX + 1>() : false;
+        return (enumToUnderlyingType(e) == INDEX) ? ZeroBasedContiguousEnumChecker<T, EnumValues<E, es...>>::template isZeroBasedContiguousEnum<INDEX + 1>() : false;
     }
 };
 
@@ -320,6 +326,7 @@ constexpr std::span<const char> enumName(E v)
 
 } // namespace WTF
 
+using WTF::enumToUnderlyingType;
 using WTF::isValidEnum;
 using WTF::isZeroBasedContiguousEnum;
 using WTF::enumTypeName;

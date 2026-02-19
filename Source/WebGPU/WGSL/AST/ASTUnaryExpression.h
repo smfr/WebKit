@@ -54,7 +54,7 @@ WGSL_AST_UNARYOP_IMPL
 #undef WGSL_AST_UNARYOP
     });
 
-    return unaryOperationNames[std::to_underlying(op)];
+    return unaryOperationNames[WTF::enumToUnderlyingType(op)];
 }
 
 void printInternal(PrintStream&, UnaryOperation);

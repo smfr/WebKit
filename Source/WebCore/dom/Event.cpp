@@ -61,11 +61,11 @@ ALWAYS_INLINE Event::Event(MonotonicTime createTime, enum EventInterfaceType eve
     , m_currentTargetIsInShadowTree { false }
     , m_isAutofillEvent { false }
     , m_eventPhase { NONE }
-    , m_eventInterface(std::to_underlying(eventInterface))
+    , m_eventInterface(enumToUnderlyingType(eventInterface))
     , m_type { type }
     , m_createTime { createTime }
 {
-    ASSERT(m_eventInterface == std::to_underlying(eventInterface));
+    ASSERT(m_eventInterface == enumToUnderlyingType(eventInterface));
 }
 
 Event::Event(enum EventInterfaceType eventInterface, IsTrusted isTrusted)

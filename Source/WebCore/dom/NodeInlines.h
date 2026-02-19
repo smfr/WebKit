@@ -130,7 +130,7 @@ std::optional<Style::PseudoElementIdentifier> Node::pseudoElementIdentifier() co
 inline void Node::setTabIndexState(TabIndexState state)
 {
     auto bitfields = rareDataBitfields();
-    bitfields.tabIndexState = std::to_underlying(state);
+    bitfields.tabIndexState = enumToUnderlyingType(state);
     setRareDataBitfields(bitfields);
 }
 
