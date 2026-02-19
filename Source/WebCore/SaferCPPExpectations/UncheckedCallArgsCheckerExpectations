@@ -150,7 +150,6 @@ editing/ReplaceSelectionCommand.cpp
 editing/SimplifyMarkupCommand.cpp
 editing/SpellChecker.cpp
 editing/TextInsertionBaseCommand.cpp
-editing/TextIterator.cpp
 editing/TextManipulationController.cpp
 editing/TypingCommand.cpp
 editing/VisiblePosition.cpp

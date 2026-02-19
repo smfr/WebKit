@@ -36,7 +36,6 @@ dom/CustomElementReactionQueue.h
 dom/Element.h
 dom/Node.h
 editing/Editor.h
-editing/TextIterator.cpp
 html/HTMLMediaElement.cpp
 html/canvas/PlaceholderRenderingContext.cpp
 html/shadow/DateTimeEditElement.h
