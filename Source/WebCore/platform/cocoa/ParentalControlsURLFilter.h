@@ -27,7 +27,7 @@
 
 #if HAVE(WEBCONTENTRESTRICTIONS)
 
-#include "ParentalControlsURLFilterParameters.h"
+#include <WebCore/ParentalControlsURLFilterParameters.h>
 #include <wtf/ThreadSafeRefCounted.h>
 
 OBJC_CLASS WCRBrowserEngineClient;
@@ -38,7 +38,6 @@ class WorkQueue;
 
 namespace WebCore {
 
-// struct ParentalControlsURLFilterParameters;
 class ParentalControlsContentFilter;
 
 class ParentalControlsURLFilter : public ThreadSafeRefCounted<ParentalControlsURLFilter, WTF::DestructionThread::Main> {
