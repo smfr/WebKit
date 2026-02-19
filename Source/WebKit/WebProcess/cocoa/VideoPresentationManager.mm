@@ -638,6 +638,11 @@ void VideoPresentationManager::requestFullscreenMode(WebCore::MediaPlayerClientI
 void VideoPresentationManager::fullscreenModeChanged(WebCore::MediaPlayerClientIdentifier contextId, WebCore::HTMLMediaElementEnums::VideoFullscreenMode videoFullscreenMode)
 {
     auto [model, interface] = ensureModelAndInterface(contextId);
+#if PLATFORM(IOS)
+    HTMLMediaElementEnums::VideoFullscreenMode oldMode = interface->fullscreenMode();
+    if (oldMode == HTMLMediaElementEnums::VideoFullscreenModeNone)
+        addClientForContext(contextId);
+#endif
     model->fullscreenModeChanged(videoFullscreenMode, VideoPresentationModel::ShouldNotifyMediaElement::Yes);
     interface->setFullscreenMode(videoFullscreenMode);
 }

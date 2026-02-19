@@ -1069,7 +1069,15 @@ void VideoPresentationManagerProxy::setupFullscreenWithID(PlaybackSessionContext
     // Do not add another refcount for this contextId if the interface is already in
     // a fullscreen mode, lest the refcounts get out of sync, as removeClientForContext
     // is only called once both PiP and video fullscreen are fully exited.
-    if (interface->mode() == HTMLMediaElementEnums::VideoFullscreenModeNone || interface->mode() == HTMLMediaElementEnums::VideoFullscreenModeInWindow)
+    bool shouldAddClient = interface->mode() == HTMLMediaElementEnums::VideoFullscreenModeNone || interface->mode() == HTMLMediaElementEnums::VideoFullscreenModeInWindow;
+
+#if PLATFORM(IOS)
+    // For swipe-to-PiP, the mode may already be updated by the time we reach here,
+    // so we also check isPlayingVideoInPictureInPicture() to catch that case.
+    shouldAddClient = shouldAddClient || interface->isPlayingVideoInPictureInPicture();
+#endif
+
+    if (shouldAddClient)
         addClientForContext(contextId);
 
     if (m_mockVideoPresentationModeEnabled) {
