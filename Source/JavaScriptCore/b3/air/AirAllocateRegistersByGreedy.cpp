@@ -2248,19 +2248,22 @@ private:
                 Inst& inst = block->at(instIndex);
                 unsigned indexOfEarly = positionOfEarly(positionOfHead, instIndex);
 
-                // The TmpWidth analysis will say that a Move only stores 32 bits into the destination,
-                // if the source only had 32 bits worth of non-zero bits. Same for the source: it will
-                // only claim to read 32 bits from the source if only 32 bits of the destination are
-                // read. Note that we only apply this logic if this turns into a load or store, since
-                // Move is the canonical way to move data between GPRs.
-                bool canUseMove32IfDidSpill = false;
+                bool useMove32IfDidSpill = false;
                 bool didSpill = false;
                 bool needScratch = false;
                 Tmp scratchForTmp;
+
                 if (bank == GP && inst.kind.opcode == Move) {
-                    if ((inst.args[0].isTmp() && m_tmpWidth.width(inst.args[0].tmp()) <= Width32)
-                        || (inst.args[1].isTmp() && m_tmpWidth.width(inst.args[1].tmp()) <= Width32))
-                        canUseMove32IfDidSpill = true;
+                    Arg& srcArg = inst.args[0];
+                    Arg& dstArg = inst.args[1];
+                    if (dstArg.isTmp() && spillSlot(dstArg.tmp())) {
+                        // Storing to spill. If storing to a 4-byte slot, use store32, otherwise storePtr.
+                        useMove32IfDidSpill = spillSlot(dstArg.tmp())->byteSize() == 4;
+                    } else if (srcArg.isTmp() && spillSlot(srcArg.tmp())) {
+                        // Loading from a spill slot (but not storing to a spill slot). If loading from a
+                        // 4-byte slot, then use load32, otherwise loadPtr.
+                        useMove32IfDidSpill = spillSlot(srcArg.tmp())->byteSize() == 4;
+                    }
                 }
 
                 bool maybeCoalescable = this->mayBeCoalescable(inst);
@@ -2326,37 +2329,29 @@ private:
                             // we need to avoid placing the Tmp's stack address into the instruction.
                             return;
                         }
-                        Width spillWidth = m_tmpWidth.requiredWidth(groupForSpill<bank>(arg.tmp()));
-                        if (Arg::isAnyDef(role) && width < spillWidth) {
-                            // Either there are users of this tmp who will use more than width,
-                            // or there are producers who will produce more than width non-zero
-                            // bits.
-                            // FIXME: It's not clear why we should have to return here. We have
-                            // a ZDef fixup in allocateStack. And if this isn't a ZDef, then it
-                            // doesn't seem like it matters what happens to the high bits. Note
-                            // that this isn't the case where we're storing more than what the
-                            // spill slot can hold - we already got that covered because we
-                            // stretch the spill slot on demand. One possibility is that it's ZDefs of
-                            // smaller width than 32-bit.
-                            // https://bugs.webkit.org/show_bug.cgi?id=169823
-                            m_stats[bank].numInPlaceSpillGiveUpSpillWidth++;
-                            return;
-                        }
-                        ASSERT(inst.kind.opcode == Move || !(Arg::isAnyUse(role) && width > spillWidth));
-                        if (spillWidth != Width32)
-                            canUseMove32IfDidSpill = false;
 
-                        spilled->ensureSize(canUseMove32IfDidSpill ? 4 : bytesForWidth(width));
+                        Arg spilledArg = Arg::stack(spilled);
+                        if (Arg::isZDef(role) && bytesForWidth(width) < spilled->byteSize()) {
+                            // ZDef32 to 64 slot would require two 32-bit accesses (second one for zero extend), so
+                            // usually it will be better to ZDef into a register and then storePtr the register.
+                            // Unless, this move can have its live range coalesced.
+                            ASSERT_IMPLIES(maybeCoalescable, &arg == &inst.args[1]);
+                            if (!maybeCoalescable || spilledArg != inst.args[0]) {
+                                m_stats[bank].numInPlaceSpillGiveUpSpillWidth++;
+                                return;
+                            }
+                        }
+                        spilled->ensureSize(useMove32IfDidSpill ? 4 : bytesForWidth(width));
                         didSpill = true;
                         if (needScratchIfSpilledInPlace) {
                             needScratch = true;
                             scratchForTmp = arg.tmp();
                         }
-                        arg = Arg::stack(spilled);
+                        arg = spilledArg;
                         m_stats[bank].numInPlaceSpill++;
                     });
 
-                if (didSpill && canUseMove32IfDidSpill)
+                if (didSpill && useMove32IfDidSpill)
                     inst.kind.opcode = Move32;
 
                 if (needScratch) {
