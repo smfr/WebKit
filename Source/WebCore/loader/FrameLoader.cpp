@@ -4213,8 +4213,10 @@ void FrameLoader::continueLoadAfterNewWindowPolicy(ResourceRequest&& request,
 
     Ref mainFrameLoader = mainFrame->loader();
 
-    if (!isBlankTargetFrameName(frameName))
+    if (!isBlankTargetFrameName(frameName)) {
         mainFrame->tree().setSpecifiedName(frameName);
+        mainFrameLoader->client().frameNameChanged(frameName);
+    }
 
     protect(mainFrame->page())->setOpenedByDOM();
     mainFrameLoader->m_client->dispatchShow();
