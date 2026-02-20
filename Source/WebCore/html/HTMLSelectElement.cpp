@@ -1477,6 +1477,7 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
             selectOption(listToOptionIndex(listIndex), { SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::DispatchChangeEvent, SelectOptionFlag::UserDriven });
 
         keyboardEvent->setDefaultHandled();
+        return;
     }
 
     // Use key press event here since sending simulated mouse events
@@ -1535,20 +1536,44 @@ void HTMLSelectElement::menuListDefaultEventHandler(Event& event)
 
         if (handled)
             keyboardEvent->setDefaultHandled();
+        return;
     }
 
     if (RefPtr mouseEvent = dynamicDowncast<MouseEvent>(event); event.type() == eventNames.mousedownEvent && mouseEvent && mouseEvent->button() == MouseButton::Left) {
         focus();
         protect(document())->updateStyleIfNeeded();
 #if !PLATFORM(IOS_FAMILY)
-        if (renderer() && usesMenuList()) {
+        if (!renderer() || !usesMenuList()) {
 #else
-        if (usesBaseAppearancePicker()) {
+        if (!usesBaseAppearancePicker()) {
 #endif
-            ASSERT(usesBaseAppearancePicker() || !m_popupIsVisible);
-            openPickerForUserInteraction();
+            event.setDefaultHandled();
+            return;
         }
+        ASSERT(usesBaseAppearancePicker() || !m_popupIsVisible);
+        if (m_popupIsVisible) {
+            bool clickedInsidePopover = [&] {
+                RefPtr popover = m_popover;
+                if (!popover)
+                    return false;
+                RefPtr targetNode = dynamicDowncast<Node>(event.target());
+                if (!targetNode)
+                    return false;
+                for (RefPtr element = dynamicDowncast<Element>(targetNode); element; element = element->parentElementInComposedTree()) {
+                    if (element == popover)
+                        return true;
+                    if (element == this)
+                        return false;
+                }
+                return false;
+            }();
+            if (!clickedInsidePopover)
+                hidePickerPopoverElement();
+        } else
+            openPickerForUserInteraction();
+
         event.setDefaultHandled();
+        return;
     }
 
 #if !PLATFORM(IOS_FAMILY)

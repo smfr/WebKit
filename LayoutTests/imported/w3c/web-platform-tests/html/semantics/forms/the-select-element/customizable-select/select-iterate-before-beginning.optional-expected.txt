@@ -1,8 +1,6 @@
 button
 
-one
-two
 
-FAIL Attempting to focus the previous option while focused on the first option should not crash. assert_false: select should be closed at the end of the test. expected false got true
-FAIL Keyboard navigating backwards over an <hr> and <optgroup> should not crash. assert_false: select should be closed at the end of the test. expected false got true
+PASS Attempting to focus the previous option while focused on the first option should not crash.
+PASS Keyboard navigating backwards over an <hr> and <optgroup> should not crash.
 
