@@ -109,7 +109,7 @@ public:
     bool inWindowFullscreen() const;
     bool supportsRewind() const;
     bool needsChromeMediaControlsPseudoElement() const;
-    bool NODELETE isMediaControlsMacInlineSizeSpecsEnabled() const;
+    bool isMediaControlsMacInlineSizeSpecsEnabled() const;
 
     void captionPreferencesChanged();
     enum class ForceUpdate : bool { No, Yes };
