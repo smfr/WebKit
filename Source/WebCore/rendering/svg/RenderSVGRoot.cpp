@@ -498,7 +498,7 @@ FloatSize RenderSVGRoot::computeViewportSize() const
 
 void RenderSVGRoot::mapLocalToContainer(const RenderLayerModelObject* repaintContainer, TransformState& transformState, OptionSet<MapCoordinatesMode> mode, bool* wasFixed) const
 {
-    ASSERT(!view().frameView().layoutContext().isPaintOffsetCacheEnabled());
+    ASSERT(!isInLayout() || !view().frameView().layoutContext().isPaintOffsetCacheEnabled());
 
     if (repaintContainer == this)
         return;
