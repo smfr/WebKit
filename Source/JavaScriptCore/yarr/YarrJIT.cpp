@@ -6298,6 +6298,26 @@ class YarrGenerator final : public YarrJITInfo {
         // Add to current index
         m_jit.add32(m_regs.regT0, m_regs.index);
 
+        // When baseOffset >= 0, totalOffset = 16 + baseOffset >= 16, and the SIMD loop bound
+        // (index <= length - totalOffset) guarantees index + p <= length - 1 - baseOffset <= length - 1.
+        // But when baseOffset < 0, the SIMD load starts at index + baseOffset (before index),
+        // so the loop bound allows index up to length - 16 - baseOffset = length - 16 + |baseOffset|.
+        // Adding the match offset p (0-15) gives index up to length - 1 + |baseOffset|, which
+        // exceeds length.
+        //
+        // Example: /<([^>]+?)>[\s\S]*?<\/\1>/g
+        //   checkedOffset=6, endIndex=1 baseOffset = -6, totalOffset = 10
+        //   SIMD loop bound: index <= length - 10 (= 185 when length = 195)
+        //   At index=183, SIMD loads input[177..192] and finds '<' at vector offset 14
+        //   index becomes 183 + 14 = 197, but length = 195 => out of bounds
+        //
+        // Falling to the scalar loop is correct here: CTZ/CLZ finds the first (lowest
+        // offset) bitmap match in the vector, so all earlier positions in this window
+        // did not match the bitmap and cannot be candidates. The scalar loop's own
+        // bounds check (index > length) will immediately fail, producing "no match."
+        if (baseOffset < 0)
+            scalarLoop.append(m_jit.branch32(MacroAssembler::Above, m_regs.index, m_regs.length));
+
         // Jump to matched! (index now points to the matching character)
         matched.append(m_jit.jump());
 
