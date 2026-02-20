@@ -2318,7 +2318,7 @@ class YarrGenerator final : public YarrJITInfo {
             failures.append(atEndOfInput());
             loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex(), matchAmount);
             if (term->quantityMaxCount != quantifyInfinite)
-                failures.append(m_jit.branch32(MacroAssembler::AboveOrEqual, MacroAssembler::Imm32(term->quantityMaxCount), matchAmount));
+                failures.append(m_jit.branch32(MacroAssembler::AboveOrEqual, matchAmount, MacroAssembler::Imm32(term->quantityMaxCount)));
 
             // If the index hasn't advanced past beginIndex and matchAmount > 0,
             // the backreference matched zero-width (undefined or empty capture).
