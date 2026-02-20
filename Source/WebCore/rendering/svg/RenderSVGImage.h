@@ -46,6 +46,8 @@ public:
 
     bool updateImageViewport();
 
+    bool isObjectBoundingBoxValid() const { return !m_objectBoundingBox.isEmpty(); }
+
 private:
     void willBeDestroyed() final;
 

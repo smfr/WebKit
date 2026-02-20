@@ -260,8 +260,6 @@ svg/custom/pointer-events-text.svg                [ ImageOnlyFailure ]
 
 # Bounding box issues
 imported/w3c/web-platform-tests/svg/interact/scripted/svg-pointer-events-bbox.html    [ Failure ]
-imported/w3c/web-platform-tests/svg/types/scripted/SVGGraphicsElement.getBBox-06.html [ Failure ]
-svg/text/text-bbox-empty.html                                                         [ Failure ]
 
 # Failing WPT reftests
 imported/w3c/web-platform-tests/svg/animations/animate-rewind-freeze-indefinite.svg                    [ ImageOnlyFailure ]

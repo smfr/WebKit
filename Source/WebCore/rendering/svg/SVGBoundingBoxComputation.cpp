@@ -145,10 +145,28 @@ FloatRect SVGBoundingBoxComputation::handleRootOrContainer(const SVGBoundingBoxC
         return transform.isIdentity() ? std::nullopt : std::make_optional(WTF::move(transform));
     };
 
-    auto uniteBoundingBoxRespectingValidity = [] (bool& boxValid, FloatRect& box, const RenderLayerModelObject& child, const FloatRect& childBoundingBox) {
-        auto* containerChild = dynamicDowncast<RenderSVGContainer>(child);
-        bool isBoundingBoxValid = !containerChild || containerChild->isObjectBoundingBoxValid();
-        if (!isBoundingBoxValid)
+    // https://svgwg.org/svg2-draft/coords.html#BoundingBoxes
+    auto hasValidBoundingBoxForContainer = [] (const RenderLayerModelObject& object) {
+        if (auto* shape = dynamicDowncast<RenderSVGShape>(object))
+            return !shape->isRenderingDisabled();
+
+        if (auto* text = dynamicDowncast<RenderSVGText>(object))
+            return text->isObjectBoundingBoxValid();
+
+        if (auto* container = dynamicDowncast<RenderSVGContainer>(object))
+            return container->isObjectBoundingBoxValid();
+
+        if (auto* foreignObject = dynamicDowncast<RenderSVGForeignObject>(object))
+            return foreignObject->isObjectBoundingBoxValid();
+
+        if (auto* image = dynamicDowncast<RenderSVGImage>(object))
+            return image->isObjectBoundingBoxValid();
+
+        return false;
+    };
+
+    auto uniteBoundingBoxRespectingValidity = [hasValidBoundingBoxForContainer] (bool& boxValid, FloatRect& box, const RenderLayerModelObject& child, const FloatRect& childBoundingBox) {
+        if (!hasValidBoundingBoxForContainer(child))
             return;
 
         if (boxValid) {
