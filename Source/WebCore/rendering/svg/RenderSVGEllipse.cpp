@@ -60,8 +60,11 @@ void RenderSVGEllipse::updateShapeFromElement()
     calculateRadiiAndCenter();
 
     // Spec: "A negative value is illegal. A value of zero disables rendering of the element."
-    if (m_radii.isEmpty())
+    if (m_radii.isEmpty()) {
+        // We set this for getBBox().
+        m_fillBoundingBox = FloatRect(m_center.x() - m_radii.width(), m_center.y() - m_radii.height(), 2 * m_radii.width(), 2 * m_radii.height());
         return;
+    }
 
     if (m_radii.width() == m_radii.height())
         m_shapeType = ShapeType::Circle;
