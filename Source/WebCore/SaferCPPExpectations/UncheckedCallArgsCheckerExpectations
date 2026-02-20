@@ -83,7 +83,6 @@ css/SelectorCheckerTestFunctions.h
 css/SelectorFilter.cpp
 css/StyleAttributeMutationScope.h
 css/parser/SizesAttributeParser.cpp
-css/typedom/ComputedStylePropertyMapReadOnly.cpp
 css/typedom/InlineStylePropertyMap.cpp
 dom/Attr.cpp
 dom/BoundaryPoint.cpp

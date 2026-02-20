@@ -229,13 +229,8 @@ css/StyleRule.cpp
 css/StyleRuleImport.cpp
 css/StyleRuleImport.h
 css/StyleSheetContents.cpp
-css/typedom/CSSOMVariableReferenceValue.cpp
-css/typedom/CSSStyleValue.cpp
-css/typedom/CSSStyleValueFactory.cpp
-css/typedom/ComputedStylePropertyMapReadOnly.cpp
 css/typedom/DeclaredStylePropertyMap.cpp
 css/typedom/InlineStylePropertyMap.cpp
-css/typedom/StylePropertyMap.cpp
 css/typedom/numeric/CSSMathInvert.cpp
 css/typedom/numeric/CSSMathMax.cpp
 css/typedom/numeric/CSSMathMin.cpp
