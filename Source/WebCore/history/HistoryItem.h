@@ -105,31 +105,31 @@ public:
     WEBCORE_EXPORT URL url() const;
     WEBCORE_EXPORT URL originalURL() const;
     WEBCORE_EXPORT const String& NODELETE referrer() const;
-    WEBCORE_EXPORT const AtomString& target() const;
+    WEBCORE_EXPORT const AtomString& NODELETE target() const;
     std::optional<FrameIdentifier> frameID() const { return m_frameID; }
     bool isTargetItem() const { return m_isTargetItem; }
     
     WEBCORE_EXPORT FormData* NODELETE formData();
-    WEBCORE_EXPORT String formContentType() const;
+    WEBCORE_EXPORT String NODELETE formContentType() const;
     
     bool lastVisitWasFailure() const { return m_lastVisitWasFailure; }
 
-    WEBCORE_EXPORT const IntPoint& scrollPosition() const;
-    WEBCORE_EXPORT void setScrollPosition(const IntPoint&);
-    void clearScrollPosition();
+    WEBCORE_EXPORT const IntPoint& NODELETE scrollPosition() const;
+    WEBCORE_EXPORT void NODELETE setScrollPosition(const IntPoint&);
+    void NODELETE clearScrollPosition();
 
-    WEBCORE_EXPORT bool shouldRestoreScrollPosition() const;
+    WEBCORE_EXPORT bool NODELETE shouldRestoreScrollPosition() const;
     WEBCORE_EXPORT void setShouldRestoreScrollPosition(bool);
     
-    WEBCORE_EXPORT float pageScaleFactor() const;
-    WEBCORE_EXPORT void setPageScaleFactor(float);
+    WEBCORE_EXPORT float NODELETE pageScaleFactor() const;
+    WEBCORE_EXPORT void NODELETE setPageScaleFactor(float);
     
-    WEBCORE_EXPORT const Vector<AtomString>& documentState() const;
+    WEBCORE_EXPORT const Vector<AtomString>& NODELETE documentState() const;
     WEBCORE_EXPORT void setDocumentState(const Vector<AtomString>&);
     void clearDocumentState();
 
-    WEBCORE_EXPORT void setShouldOpenExternalURLsPolicy(ShouldOpenExternalURLsPolicy);
-    WEBCORE_EXPORT ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy() const;
+    WEBCORE_EXPORT void NODELETE setShouldOpenExternalURLsPolicy(ShouldOpenExternalURLsPolicy);
+    WEBCORE_EXPORT ShouldOpenExternalURLsPolicy NODELETE shouldOpenExternalURLsPolicy() const;
 
     void setURL(const URL&);
     WEBCORE_EXPORT void setURLString(const String&);
@@ -144,7 +144,7 @@ public:
     WEBCORE_EXPORT void setStateObject(RefPtr<SerializedScriptValue>&&);
     SerializedScriptValue* stateObject() const { return m_stateObject.get(); }
 
-    void setNavigationAPIStateObject(RefPtr<SerializedScriptValue>&&);
+    void NODELETE setNavigationAPIStateObject(RefPtr<SerializedScriptValue>&&);
     SerializedScriptValue* navigationAPIStateObject() const { return m_navigationAPIStateObject.get(); }
 
     void setItemSequenceNumber(long long number) { m_itemSequenceNumber = number; }
@@ -154,20 +154,20 @@ public:
     long long documentSequenceNumber() const { return m_documentSequenceNumber; }
 
     void setFormInfoFromRequest(const ResourceRequest&);
-    WEBCORE_EXPORT void setFormData(RefPtr<FormData>&&);
-    WEBCORE_EXPORT void setFormContentType(const String&);
+    WEBCORE_EXPORT void NODELETE setFormData(RefPtr<FormData>&&);
+    WEBCORE_EXPORT void NODELETE setFormContentType(const String&);
 
     void setLastVisitWasFailure(bool wasFailure) { m_lastVisitWasFailure = wasFailure; }
 
     WEBCORE_EXPORT void addChildItem(Ref<HistoryItem>&&);
     void setChildItem(Ref<HistoryItem>&&);
-    WEBCORE_EXPORT HistoryItem* childItemWithTarget(const AtomString&);
-    WEBCORE_EXPORT HistoryItem* childItemWithFrameID(FrameIdentifier);
-    HistoryItem* childItemWithDocumentSequenceNumber(long long number);
-    WEBCORE_EXPORT const Vector<Ref<HistoryItem>>& children() const;
+    WEBCORE_EXPORT HistoryItem* NODELETE childItemWithTarget(const AtomString&);
+    WEBCORE_EXPORT HistoryItem* NODELETE childItemWithFrameID(FrameIdentifier);
+    HistoryItem* NODELETE childItemWithDocumentSequenceNumber(long long number);
+    WEBCORE_EXPORT const Vector<Ref<HistoryItem>>& NODELETE children() const;
     void clearChildren();
 
-    bool shouldDoSameDocumentNavigationTo(HistoryItem& otherItem) const;
+    bool NODELETE shouldDoSameDocumentNavigationTo(HistoryItem& otherItem) const;
 
     bool isCurrentDocument(Document&) const;
     

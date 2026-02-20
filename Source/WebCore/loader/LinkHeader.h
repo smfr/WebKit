@@ -70,7 +70,7 @@ public:
     };
 
 private:
-    void setValue(LinkParameterName, String&& value);
+    void NODELETE setValue(LinkParameterName, String&& value);
 
     String m_url;
     String m_rel;

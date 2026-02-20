@@ -53,7 +53,7 @@ public:
     virtual ~ImageLoader();
 
     // CachedResourceClient.
-    void ref() const final;
+    void NODELETE ref() const final;
     void deref() const final;
 
     // This function should be called when the element is attached to a document; starts
@@ -86,7 +86,7 @@ public:
 
     // FIXME: Delete this code. beforeload event no longer exists.
     bool hasPendingBeforeLoadEvent() const { return m_hasPendingBeforeLoadEvent; }
-    bool hasPendingActivity() const;
+    bool NODELETE hasPendingActivity() const;
 
     void dispatchPendingEvent(ImageEventSender*, const AtomString& eventType);
 
@@ -114,11 +114,11 @@ private:
     void dispatchPendingLoadEvent();
     void dispatchPendingErrorEvent();
 
-    RenderImageResource* renderImageResource();
+    RenderImageResource* NODELETE renderImageResource();
     void updateRenderer();
 
     void clearImageWithoutConsideringPendingLoadEvent();
-    void clearFailedLoadURL();
+    void NODELETE clearFailedLoadURL();
 
     bool hasPendingDecodePromises() const { return !m_decodingPromises.isEmpty(); }
     void resolveDecodePromises();

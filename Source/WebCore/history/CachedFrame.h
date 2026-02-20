@@ -71,7 +71,7 @@ protected:
     Vector<UniqueRef<CachedFrame>> m_childFrames;
 
 private:
-    void initializeWithLocalFrame(LocalFrame&);
+    void NODELETE initializeWithLocalFrame(LocalFrame&);
 };
 
 class CachedFrame : private CachedFrameBase {
@@ -87,15 +87,15 @@ public:
     WEBCORE_EXPORT CachedFramePlatformData* NODELETE cachedFramePlatformData();
 
     HasInsecureContent hasInsecureContent() const;
-    UsedLegacyTLS usedLegacyTLS() const;
-    WasPrivateRelayed wasPrivateRelayed() const;
+    UsedLegacyTLS NODELETE usedLegacyTLS() const;
+    WasPrivateRelayed NODELETE wasPrivateRelayed() const;
 
     using CachedFrameBase::document;
     using CachedFrameBase::view;
     using CachedFrameBase::url;
     DocumentLoader* documentLoader() const { return m_documentLoader.get(); }
 
-    size_t descendantFrameCount() const;
+    size_t NODELETE descendantFrameCount() const;
 };
 
 } // namespace WebCore

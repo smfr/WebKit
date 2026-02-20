@@ -190,7 +190,7 @@
 #else
 namespace WebCore {
 
-static void verifyUserAgent(const String&)
+static void NODELETE verifyUserAgent(const String&)
 {
 }
 
@@ -250,7 +250,7 @@ bool isReload(FrameLoadType type)
 // non-member lets us exclude it from the header file, thus keeping FrameLoader.h's
 // API simpler.
 //
-static bool isDocumentSandboxed(LocalFrame& frame, SandboxFlag flag)
+static bool NODELETE isDocumentSandboxed(LocalFrame& frame, SandboxFlag flag)
 {
     return frame.document() && frame.document()->isSandboxed(flag);
 }
@@ -939,7 +939,7 @@ bool FrameLoader::allChildrenAreComplete() const
     return true;
 }
 
-bool FrameLoader::allAncestorsAreComplete() const
+bool NODELETE FrameLoader::allAncestorsAreComplete() const
 {
     for (RefPtr<Frame> ancestor = m_frame.ptr(); ancestor; ancestor = ancestor->tree().parent()) {
         auto* localAncestor = dynamicDowncast<LocalFrame>(*ancestor);
@@ -1218,7 +1218,7 @@ void FrameLoader::setFirstPartyForCookies(const URL& url)
     }
 }
 
-static NavigationNavigationType determineNavigationType(FrameLoadType loadType, NavigationHistoryBehavior historyHandling)
+static NavigationNavigationType NODELETE determineNavigationType(FrameLoadType loadType, NavigationHistoryBehavior historyHandling)
 {
     if (historyHandling == NavigationHistoryBehavior::Push)
         return NavigationNavigationType::Push;
@@ -2794,7 +2794,7 @@ void FrameLoader::willChangeTitle(DocumentLoader* loader)
     m_client->willChangeTitle(loader);
 }
 
-FrameLoadType FrameLoader::loadType() const
+FrameLoadType NODELETE FrameLoader::loadType() const
 {
     return m_loadType;
 }
@@ -3792,7 +3792,7 @@ static bool itemAllowsScrollRestoration(HistoryItem* historyItem, FrameLoadType 
     return true;
 }
 
-static bool isSameDocumentReload(bool isNewNavigation, FrameLoadType loadType)
+static bool NODELETE isSameDocumentReload(bool isNewNavigation, FrameLoadType loadType)
 {
     return !isNewNavigation && !isBackForwardLoadType(loadType);
 }
@@ -3914,7 +3914,7 @@ void FrameLoader::dispatchUnloadEvents(UnloadEventPolicy unloadEventPolicy)
         protect(m_frame->document())->removeAllEventListeners();
 }
 
-static bool shouldAskForNavigationConfirmation(Document& document, const BeforeUnloadEvent& event)
+static bool NODELETE shouldAskForNavigationConfirmation(Document& document, const BeforeUnloadEvent& event)
 {
     // Confirmation dialog should not be displayed when the allow-modals flag is not set.
     if (document.isSandboxed(SandboxFlag::Modals))
@@ -4809,7 +4809,7 @@ void FrameLoader::clearTestingOverrides()
     m_isStrictRawResourceValidationPolicyDisabledForTesting = false;
 }
 
-bool LocalFrameLoaderClient::hasHTMLView() const
+bool NODELETE LocalFrameLoaderClient::hasHTMLView() const
 {
     return true;
 }

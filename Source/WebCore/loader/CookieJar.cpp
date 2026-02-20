@@ -47,7 +47,7 @@
 
 namespace WebCore {
 
-static ShouldRelaxThirdPartyCookieBlocking shouldRelaxThirdPartyCookieBlocking(const Document& document)
+static ShouldRelaxThirdPartyCookieBlocking NODELETE shouldRelaxThirdPartyCookieBlocking(const Document& document)
 {
     if (RefPtr page = document.page())
         return page->shouldRelaxThirdPartyCookieBlocking();

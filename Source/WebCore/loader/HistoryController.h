@@ -55,7 +55,7 @@ public:
     explicit HistoryController(LocalFrame&);
     ~HistoryController();
 
-    WEBCORE_EXPORT void ref() const;
+    WEBCORE_EXPORT void NODELETE ref() const;
     WEBCORE_EXPORT void deref() const;
 
     WEBCORE_EXPORT void saveScrollPositionAndViewStateToItem(HistoryItem*);
@@ -77,7 +77,7 @@ public:
     void updateForClientRedirect();
     void updateForCommit();
     void updateForSameDocumentNavigation();
-    void updateForFrameLoadCompleted();
+    void NODELETE updateForFrameLoadCompleted();
 
     HistoryItem* currentItem() const { return m_currentItem.get(); }
     WEBCORE_EXPORT void setCurrentItem(Ref<HistoryItem>&&);
@@ -89,7 +89,7 @@ public:
     void clearPreviousItem();
 
     HistoryItem* provisionalItem() const { return m_provisionalItem.get(); }
-    void setProvisionalItem(RefPtr<HistoryItem>&&);
+    void NODELETE setProvisionalItem(RefPtr<HistoryItem>&&);
 
     void pushState(RefPtr<SerializedScriptValue>&&, const String& url);
     void replaceState(RefPtr<SerializedScriptValue>&&, const String& url);
@@ -104,7 +104,7 @@ public:
 
 private:
     friend class Page;
-    bool shouldStopLoadingForHistoryItem(HistoryItem&) const;
+    bool NODELETE shouldStopLoadingForHistoryItem(HistoryItem&) const;
     void goToItem(HistoryItem&, FrameLoadType, ShouldTreatAsContinuingLoad);
     void goToItemForNavigationAPI(HistoryItem&, FrameLoadType, LocalFrame& triggeringFrame, NavigationAPIMethodTracker*);
     void goToItemShared(HistoryItem&, CompletionHandler<void(ShouldGoToHistoryItem)>&&, ShouldTreatAsContinuingLoad = ShouldTreatAsContinuingLoad::No);
@@ -116,8 +116,8 @@ private:
     enum class ForNavigationAPI : bool { No, Yes };
     void recursiveSetProvisionalItem(HistoryItem&, HistoryItem*, ForNavigationAPI = ForNavigationAPI::No);
     void recursiveGoToItem(HistoryItem&, HistoryItem*, FrameLoadType, ShouldTreatAsContinuingLoad);
-    bool isMultipartReplaceLoadTypeWithProvisionalItem(FrameLoadType);
-    bool isReloadTypeWithProvisionalItem(FrameLoadType);
+    bool NODELETE isMultipartReplaceLoadTypeWithProvisionalItem(FrameLoadType);
+    bool NODELETE isReloadTypeWithProvisionalItem(FrameLoadType);
     void recursiveUpdateForCommit();
     void recursiveUpdateForSameDocumentNavigation();
     static bool itemsAreClones(HistoryItem&, HistoryItem*);

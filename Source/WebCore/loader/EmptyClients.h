@@ -140,20 +140,20 @@ class EmptyChromeClient : public ChromeClient {
 
     void reachedMaxAppCacheSize(int64_t) final { }
 
-    RefPtr<ColorChooser> createColorChooser(ColorChooserClient&, const Color&) final;
+    RefPtr<ColorChooser> NODELETE createColorChooser(ColorChooserClient&, const Color&) final;
 
-    RefPtr<DataListSuggestionPicker> createDataListSuggestionPicker(DataListSuggestionsClient&) final;
+    RefPtr<DataListSuggestionPicker> NODELETE createDataListSuggestionPicker(DataListSuggestionsClient&) final;
     bool canShowDataListSuggestionLabels() const final { return false; }
 
-    RefPtr<DateTimeChooser> createDateTimeChooser(DateTimeChooserClient&) final;
+    RefPtr<DateTimeChooser> NODELETE createDateTimeChooser(DateTimeChooserClient&) final;
 
-    void setTextIndicator(RefPtr<TextIndicator>&&) const final;
-    void updateTextIndicator(RefPtr<TextIndicator>&&) const final;
+    void NODELETE setTextIndicator(RefPtr<TextIndicator>&&) const final;
+    void NODELETE updateTextIndicator(RefPtr<TextIndicator>&&) const final;
 
-    DisplayRefreshMonitorFactory* displayRefreshMonitorFactory() const final;
+    DisplayRefreshMonitorFactory* NODELETE displayRefreshMonitorFactory() const final;
 
-    void runOpenPanel(LocalFrame&, FileChooser&) final;
-    void showShareSheet(ShareDataWithParsedURL&&, CompletionHandler<void(bool)>&&) final;
+    void NODELETE runOpenPanel(LocalFrame&, FileChooser&) final;
+    void NODELETE showShareSheet(ShareDataWithParsedURL&&, CompletionHandler<void(bool)>&&) final;
     void loadIconForFiles(const Vector<String>&, FileIconLoader&) final { }
 
     void elementDidFocus(Element&, const FocusOptions&) final { }
@@ -224,7 +224,7 @@ class EmptyChromeClient : public ChromeClient {
     void didAssociateFormControls(const Vector<Ref<Element>>&, LocalFrame&) final { }
     bool shouldNotifyOnFormChanges() final { return false; }
 
-    RefPtr<Icon> createIconForFiles(const Vector<String>& /* filenames */) final;
+    RefPtr<Icon> NODELETE createIconForFiles(const Vector<String>& /* filenames */) final;
 };
 
 DiagnosticLoggingClient& emptyDiagnosticLoggingClient();

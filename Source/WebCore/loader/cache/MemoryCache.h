@@ -106,7 +106,7 @@ public:
     bool add(CachedResource&);
     void remove(CachedResource&);
 
-    static bool shouldRemoveFragmentIdentifier(const URL&);
+    static bool NODELETE shouldRemoveFragmentIdentifier(const URL&);
     WEBCORE_EXPORT static URL removeFragmentIdentifierIfNeeded(const URL&);
 
     void revalidationSucceeded(CachedResource& revalidatingResource, const ResourceResponse&);
@@ -143,7 +143,7 @@ public:
     void removeFromLRUList(CachedResource&);
 
     // Called to adjust the cache totals when a resource changes size.
-    void adjustSize(bool live, long long delta);
+    void NODELETE adjustSize(bool live, long long delta);
 
     // Track decoded resources that are in the cache and referenced by a Web page.
     void insertInLiveDecodedResourcesList(CachedResource&);
@@ -159,7 +159,7 @@ public:
     WEBCORE_EXPORT Statistics getStatistics();
     
     void resourceAccessed(CachedResource&);
-    bool inLiveDecodedResourcesList(CachedResource&) const;
+    bool NODELETE inLiveDecodedResourcesList(CachedResource&) const;
 
     using SecurityOriginSet = HashSet<Ref<SecurityOrigin>>;
     WEBCORE_EXPORT void removeResourcesWithOrigin(const SecurityOrigin&);
@@ -191,12 +191,12 @@ private:
 
     unsigned liveCapacity() const;
     unsigned deadCapacity() const;
-    bool needsPruning() const;
+    bool NODELETE needsPruning() const;
 
     CachedResource* resourceForRequestImpl(const ResourceRequest&, CachedResourceMap&);
 
     CachedResourceMap& ensureSessionResourceMap(PAL::SessionID);
-    CachedResourceMap* sessionResourceMap(PAL::SessionID) const;
+    CachedResourceMap* NODELETE sessionResourceMap(PAL::SessionID) const;
 
     bool m_disabled { false };
     bool m_inPruneResources { false };

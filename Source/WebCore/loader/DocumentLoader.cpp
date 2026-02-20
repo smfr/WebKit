@@ -148,7 +148,7 @@
 namespace WebCore {
 
 #if ENABLE(CONTENT_FILTERING)
-static bool& contentFilterInDocumentLoader()
+static bool& NODELETE contentFilterInDocumentLoader()
 {
     static bool filter = false;
     RELEASE_ASSERT(isMainThread());
@@ -168,7 +168,7 @@ static void setAllDefersLoading(const ResourceLoaderMap& loaders, bool defers)
         loader->setDefersLoading(defers);
 }
 
-static HashMap<ScriptExecutionContextIdentifier, SingleThreadWeakPtr<DocumentLoader>>& scriptExecutionContextIdentifierToLoaderMap()
+static HashMap<ScriptExecutionContextIdentifier, SingleThreadWeakPtr<DocumentLoader>>& NODELETE scriptExecutionContextIdentifierToLoaderMap()
 {
     static MainThreadNeverDestroyed<HashMap<ScriptExecutionContextIdentifier, SingleThreadWeakPtr<DocumentLoader>>> map;
     return map.get();
@@ -1249,7 +1249,7 @@ static inline bool shouldUseActiveServiceWorkerFromParent(const Document& docume
 }
 
 #if ENABLE(CONTENT_EXTENSIONS)
-static inline bool shouldEnableResourceMonitor(const Frame& frame)
+static inline bool NODELETE shouldEnableResourceMonitor(const Frame& frame)
 {
     if (frame.isMainFrame())
         return false;
@@ -1494,7 +1494,7 @@ void DocumentLoader::applyPoliciesToSettings()
         m_frame->settings().setInlineMediaPlaybackRequiresPlaysInlineAttribute(m_inlineMediaPlaybackPolicy == InlineMediaPlaybackPolicy::RequiresPlaysInlineAttribute);
 }
 
-ColorSchemePreference DocumentLoader::colorSchemePreference() const
+ColorSchemePreference NODELETE DocumentLoader::colorSchemePreference() const
 {
     return m_colorSchemePreference;
 }
