@@ -218,6 +218,40 @@ bool BorderShape::outerShapeContains(const LayoutRect& rect) const
     return m_borderRect.contains(rect);
 }
 
+bool BorderShape::allCornersClippedOut(const LayoutRect& rect) const
+{
+    if (!isRounded())
+        return true;
+
+    auto borderRect = m_borderRect.rect();
+    if (rect.contains(borderRect))
+        return false;
+
+    auto radii = m_borderRect.radii();
+
+    LayoutRect topLeftRect(borderRect.location(), radii.topLeft());
+    if (rect.intersects(topLeftRect))
+        return false;
+
+    LayoutRect topRightRect(borderRect.location(), radii.topRight());
+    topRightRect.setX(borderRect.maxX() - topRightRect.width());
+    if (rect.intersects(topRightRect))
+        return false;
+
+    LayoutRect bottomLeftRect(borderRect.location(), radii.bottomLeft());
+    bottomLeftRect.setY(borderRect.maxY() - bottomLeftRect.height());
+    if (rect.intersects(bottomLeftRect))
+        return false;
+
+    LayoutRect bottomRightRect(borderRect.location(), radii.bottomRight());
+    bottomRightRect.setX(borderRect.maxX() - bottomRightRect.width());
+    bottomRightRect.setY(borderRect.maxY() - bottomRightRect.height());
+    if (rect.intersects(bottomRightRect))
+        return false;
+
+    return true;
+}
+
 bool BorderShape::outerShapeIsRectangular() const
 {
     return !m_borderRect.isRounded();

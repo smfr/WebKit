@@ -270,13 +270,14 @@ void BorderPainter::paintBorder(const LayoutRect& rect, const RenderStyle& style
         return std::tuple<BorderShape, BorderEdges> { BorderShape({ }, { 0_lu }), { } };
     }();
 
-    bool outerEdgeIsRectangular = !shape.isRounded() || shape.outerShapeContains(m_paintInfo.rect);
+    bool haveAllSolidEdges = decorationHasAllSolidEdges(edges);
+    bool outerEdgeIsRectangular = !shape.isRounded() || (haveAllSolidEdges && shape.allCornersClippedOut(m_paintInfo.rect));
     bool innerEdgeIsRectangular = shape.innerShapeIsRectangular();
 
     paintSides(shape, {
         style.border().hasBorderRadius() ? std::optional { style.borderRadii() } : std::nullopt,
         edges,
-        decorationHasAllSolidEdges(edges),
+        haveAllSolidEdges,
         outerEdgeIsRectangular,
         innerEdgeIsRectangular,
         bleedAvoidance,
