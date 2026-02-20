@@ -344,7 +344,7 @@ FocusNavigationScope::FocusNavigationScope(Element& element)
 {
 }
 
-Variant<RefPtr<Element>, RefPtr<Frame>> NODELETE FocusNavigationScope::owner() const
+Variant<RefPtr<Element>, RefPtr<Frame>> FocusNavigationScope::owner() const
 {
     if (m_slotElement)
         return m_slotElement.get();

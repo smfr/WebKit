@@ -123,7 +123,7 @@ public:
 
     FrameConsoleClient* NODELETE console() const;
 
-    WindowProxy* NODELETE opener() const;
+    WindowProxy* opener() const;
     WEBCORE_EXPORT Document* NODELETE documentIfLocal();
 
     WindowProxy* NODELETE top() const;
