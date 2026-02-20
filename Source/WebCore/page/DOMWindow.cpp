@@ -43,6 +43,7 @@
 #include "LocalDOMWindow.h"
 #include "LocalFrame.h"
 #include "Location.h"
+#include "Logging.h"
 #include "MediaQueryList.h"
 #include "Navigation.h"
 #include "Navigator.h"
@@ -112,7 +113,10 @@ bool DOMWindow::closed() const
 
 void DOMWindow::close(Document& document)
 {
-    if (document.canNavigate(protect(frame()).get()) != CanNavigateState::Able)
+    bool canClose = document.canNavigate(protect(frame()).get()) == CanNavigateState::Able;
+    RELEASE_LOG_DEBUG(DOMAPI, "DOMWindow::close canClose=%d frameID=%" PRIu64, canClose, frame() ? protect(frame())->frameID().toUInt64() : 0);
+
+    if (!canClose)
         return;
     close();
 }
@@ -159,6 +163,9 @@ WebCoreOpaqueRoot root(DOMWindow* window)
 WindowProxy* DOMWindow::opener() const
 {
     RefPtr frame = this->frame();
+
+    RELEASE_LOG_DEBUG(DOMAPI, "DOMWindow::opener hasOpener=%d frameID=%" PRIu64, frame && frame->opener(), frame ? frame->frameID().toUInt64() : 0);
+
     if (!frame)
         return nullptr;
 
@@ -561,6 +568,7 @@ ExceptionOr<Performance&> DOMWindow::performance() const
 
 ExceptionOr<void> DOMWindow::postMessage(JSC::JSGlobalObject& globalObject, LocalDOMWindow& incumbentWindow, JSC::JSValue message, WindowPostMessageOptions&& options)
 {
+    RELEASE_LOG_DEBUG(DOMAPI, "DOMWindow::postMessage frameID=%" PRIu64, frame() ? frame()->frameID().toUInt64() : 0);
     switch (m_type) {
     case DOMWindowType::Local:
         return downcast<LocalDOMWindow>(*this).postMessage(globalObject, incumbentWindow, message, WTF::move(options));
@@ -572,6 +580,7 @@ ExceptionOr<void> DOMWindow::postMessage(JSC::JSGlobalObject& globalObject, Loca
 
 ExceptionOr<void> DOMWindow::postMessage(JSC::JSGlobalObject& globalObject, LocalDOMWindow& incumbentWindow, JSC::JSValue message, String&& targetOrigin, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
+    RELEASE_LOG_DEBUG(DOMAPI, "DOMWindow::postMessage frameID=%" PRIu64, frame() ? protect(frame())->frameID().toUInt64() : 0);
     return postMessage(globalObject, incumbentWindow, message, WindowPostMessageOptions { { WTF::move(transfer) }, WTF::move(targetOrigin) });
 }
 
