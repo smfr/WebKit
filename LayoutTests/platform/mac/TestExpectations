@@ -1642,9 +1642,6 @@ webkit.org/b/191627 imported/w3c/web-platform-tests/css/css-grid/alignment/grid-
 
 webkit.org/b/215817 [ Release ] webgl/2.0.0/conformance2/textures/canvas_sub_rectangle/tex-2d-rgb32f-rgb-float.html [ Pass Failure ]
 
-# rdar://68364365 [ Big Sur ] imported/w3c/web-platform-tests/media-source/mediasource-config-change-mp4-v-framerate.html is a flaky failure/timeout)
-imported/w3c/web-platform-tests/media-source/mediasource-config-change-mp4-v-framerate.html [ Pass Failure Timeout ]
-
 webkit.org/b/216298 imported/w3c/web-platform-tests/IndexedDB/blob-valid-after-deletion.any.html [ Pass Failure ]
 
 webkit.org/b/186045 imported/w3c/web-platform-tests/html/rendering/replaced-elements/embedded-content/cross-domain-iframe.sub.html [ Skip ]
@@ -2052,7 +2049,6 @@ webkit.org/b/157589 fast/text-autosizing/ios/text-autosizing-after-back.html [ P
 
 # webkit.org/b/261304 Batch mark expectations for flaky media tests
 [ Debug ] media/modern-media-controls/airplay-support/airplay-support-disable-event-listeners-with-hidden-controls.html [ Pass Failure ]
-[ Debug ] media/remove-from-document.html [ Pass Failure ]
 [ Debug ] media/media-event-listeners.html [ Pass Failure ]
 [ x86_64 ] media/video-object-fit.html [ Pass ImageOnlyFailure ]
 [ Debug ] media/modern-media-controls/volume-support/volume-support-click.html [ Pass Timeout ]

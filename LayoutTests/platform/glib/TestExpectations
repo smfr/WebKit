@@ -4117,9 +4117,6 @@ webkit.org/b/306019 imported/w3c/web-platform-tests/resource-timing/resource_tim
 # ch units should be ignored in these tests.
 webkit.org/b/206001 imported/w3c/web-platform-tests/css/css-values/ch-unit-017.html [ ImageOnlyFailure ]
 
-webkit.org/b/206002 imported/w3c/web-platform-tests/css/css-highlight-api/highlight-text.html [ ImageOnlyFailure ]
-webkit.org/b/206002 imported/w3c/web-platform-tests/css/css-highlight-api/highlight-text-replace.html [ ImageOnlyFailure ]
-
 # WPT fetch tests.
 webkit.org/b/206416 imported/w3c/web-platform-tests/fetch/content-encoding/bad-gzip-body.any.worker.html [ Failure ]
 webkit.org/b/206416 imported/w3c/web-platform-tests/fetch/range/sw.https.window.html [ Failure ]
@@ -5260,8 +5257,8 @@ webkit.org/b/307989 imported/w3c/web-platform-tests/cookies/path/default.html [ 
 
 webkit.org/b/308139 imported/w3c/web-platform-tests/css/css-sizing/intrinsic-percent-replaced-019.html [ Pass ImageOnlyFailure ]
 
-webkit.org/b/308141 fast/text/international/bidi-LDB-2-CSS.html [ ImageOnlyFailure Failure ]
-webkit.org/b/308141 fast/text/international/bidi-LDB-2-HTML.html [ ImageOnlyFailure Failure ]
+webkit.org/b/308141 fast/text/international/bidi-LDB-2-CSS.html [ Pass Failure ]
+webkit.org/b/308141 fast/text/international/bidi-LDB-2-HTML.html [ Pass Failure ]
 
 webkit.org/b/308144 imported/w3c/web-platform-tests/css/selectors/user-invalid-form-submission-invalidation.html [ Pass ImageOnlyFailure ]
 

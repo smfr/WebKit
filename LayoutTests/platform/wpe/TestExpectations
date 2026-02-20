@@ -1268,6 +1268,8 @@ webkit.org/b/244538 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-t
 webkit.org/b/245034 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-target-align-003.html [ Pass ImageOnlyFailure ]
 webkit.org/b/227085 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-target-snap-003.html [ Pass ImageOnlyFailure ]
 
+webkit.org/b/308294 imported/w3c/web-platform-tests/css/css-scroll-anchoring/zero-scroll-offset-002.html [ Pass Failure ]
+
 # UIScriptController::isShowingDataListSuggestions is not implemented yet
 webkit.org/b/305201 fast/forms/datalist/data-list-search-input-with-appearance-none.html [ Skip ]
 
@@ -1287,6 +1289,7 @@ webkit.org/b/306384 imported/w3c/web-platform-tests/css/css-scroll-snap/scroll-t
 webkit.org/b/306469 imported/w3c/web-platform-tests/encrypted-media/clearkey-update-non-ascii-input.https.html [ Pass Failure ]
 
 webkit.org/b/306758 media/event-attributes.html [ Pass Failure ]
+webkit.org/b/308292 http/tests/media/text-served-as-text.html [ Pass Crash ]
 
 # [WPE] Canvas font tests sometimes unexpectedly pass
 webkit.org/b/307098 imported/w3c/web-platform-tests/html/canvas/element/manual/text/canvas.2d.fontStretch.condensed.html [ ImageOnlyFailure Pass ]
