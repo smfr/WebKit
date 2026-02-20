@@ -66,9 +66,9 @@ public:
 
     bool hasRelevantQuirks() const;
 
-    bool NODELETE shouldSilenceResizeObservers() const;
-    bool NODELETE shouldSilenceWindowResizeEventsDuringApplicationSnapshotting() const;
-    bool NODELETE shouldSilenceMediaQueryListChangeEvents() const;
+    bool shouldSilenceResizeObservers() const;
+    bool shouldSilenceWindowResizeEventsDuringApplicationSnapshotting() const;
+    bool shouldSilenceMediaQueryListChangeEvents() const;
     bool shouldIgnoreInvalidSignal() const;
     bool needsFormControlToBeMouseFocusable() const;
     bool needsAutoplayPlayPauseEvents() const;
@@ -82,12 +82,12 @@ public:
     bool shouldDispatchedSimulatedMouseEventsAssumeDefaultPrevented(EventTarget*) const;
     bool shouldPreventDispatchOfTouchEvent(const AtomString&, EventTarget*) const;
 #endif
-    bool NODELETE shouldDisablePointerEventsQuirk() const;
-    bool NODELETE needsDeferKeyDownAndKeyPressTimersUntilNextEditingCommand() const;
+    bool shouldDisablePointerEventsQuirk() const;
+    bool needsDeferKeyDownAndKeyPressTimersUntilNextEditingCommand() const;
     WEBCORE_EXPORT bool NODELETE inputMethodUsesCorrectKeyEventOrder() const;
     bool shouldExposeShowModalDialog() const;
-    bool NODELETE shouldIgnoreInputModeNone() const;
-    bool NODELETE shouldNavigatorPluginsBeEmpty() const;
+    bool shouldIgnoreInputModeNone() const;
+    bool shouldNavigatorPluginsBeEmpty() const;
     bool returnNullPictureInPictureElementDuringFullscreenChange() const;
 
     bool shouldPreventOrientationMediaQueryFromEvaluatingToLandscape() const;
@@ -125,13 +125,13 @@ public:
 
     WEBCORE_EXPORT bool static NODELETE shouldDisableBlobFileAccessEnforcement();
 
-    bool NODELETE needsGMailOverflowScrollQuirk() const;
-    bool NODELETE needsYouTubeOverflowScrollQuirk() const;
-    bool NODELETE needsFullscreenDisplayNoneQuirk() const;
-    bool NODELETE needsFullscreenObjectFitQuirk() const;
+    bool needsGMailOverflowScrollQuirk() const;
+    bool needsYouTubeOverflowScrollQuirk() const;
+    bool needsFullscreenDisplayNoneQuirk() const;
+    bool needsFullscreenObjectFitQuirk() const;
     bool needsZomatoEmailLoginLabelQuirk() const;
-    bool NODELETE needsGoogleMapsScrollingQuirk() const;
-    bool NODELETE needsGoogleTranslateScrollingQuirk() const;
+    bool needsGoogleMapsScrollingQuirk() const;
+    bool needsGoogleTranslateScrollingQuirk() const;
     bool needsGeforcenowWarningDisplayNoneQuirk() const;
 
     bool needsPrimeVideoUserSelectNoneQuirk() const;
@@ -141,9 +141,9 @@ public:
     bool needsScrollbarWidthThinDisabledQuirk() const;
     bool needsBodyScrollbarWidthNoneDisabledQuirk() const;
 
-    bool NODELETE shouldOpenAsAboutBlank(const String&) const;
+    bool shouldOpenAsAboutBlank(const String&) const;
 
-    bool NODELETE needsPreloadAutoQuirk() const;
+    bool needsPreloadAutoQuirk() const;
 
     bool shouldBypassBackForwardCache() const;
     bool shouldBypassAsyncScriptDeferring() const;
@@ -235,14 +235,14 @@ public:
     bool shouldEnableCanvas2DAdvancedPrivacyProtectionQuirk() const;
     String advancedPrivacyProtectionSubstituteDataURLForScriptWithFeatures(const String& lastDrawnText, int canvasWidth, int canvasHeight) const;
 
-    bool NODELETE needsResettingTransitionCancelsRunningTransitionQuirk() const;
+    bool needsResettingTransitionCancelsRunningTransitionQuirk() const;
 
     bool shouldDisableDataURLPaddingValidation() const;
 
     bool needsDisableDOMPasteAccessQuirk() const;
 
-    bool NODELETE shouldDisableElementFullscreenQuirk() const;
-    bool NODELETE shouldIgnorePlaysInlineRequirementQuirk() const;
+    bool shouldDisableElementFullscreenQuirk() const;
+    bool shouldIgnorePlaysInlineRequirementQuirk() const;
     WEBCORE_EXPORT bool shouldUseEphemeralPartitionedStorageForDOMCookies(const URL&) const;
 
 #if PLATFORM(IOS_FAMILY)
@@ -255,9 +255,9 @@ public:
     bool mayBenefitFromFingerprintingProtectionQuirk(const URL&) const;
     static String standardUserAgentWithApplicationNameIncludingCompatOverrides(const String&, const String&, UserAgentType);
 
-    String NODELETE scriptToEvaluateBeforeRunningScriptFromURL(const URL&);
+    String scriptToEvaluateBeforeRunningScriptFromURL(const URL&);
 
-    bool NODELETE shouldHideCoarsePointerCharacteristics() const;
+    bool shouldHideCoarsePointerCharacteristics() const;
 
     bool implicitMuteWhenVolumeSetToZero() const;
 
@@ -287,7 +287,7 @@ public:
 
     bool shouldReuseLiveRangeForSelectionUpdate() const;
 
-    bool NODELETE needsFacebookStoriesCreationFormQuirk(const Element&, const RenderStyle&) const;
+    bool needsFacebookStoriesCreationFormQuirk(const Element&, const RenderStyle&) const;
 
     bool needsLimitedMatroskaSupport() const;
 
@@ -308,7 +308,7 @@ public:
     bool shouldRewriteMediaRangeRequestForURL(const URL&) const;
     bool shouldDelayReloadWhenRegisteringServiceWorker() const;
 
-    bool NODELETE ensureCaptionVisibilityInFullscreenAndPictureInPicture() const;
+    bool ensureCaptionVisibilityInFullscreenAndPictureInPicture() const;
 
     bool shouldPreventKeyframeEffectAcceleration(const KeyframeEffect&) const;
 

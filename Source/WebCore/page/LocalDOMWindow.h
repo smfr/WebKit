@@ -339,7 +339,7 @@ public:
     DeviceMotionController* deviceMotionController() const;
 #endif
 
-    void NODELETE resetAllGeolocationPermission();
+    void resetAllGeolocationPermission();
 
 #if ENABLE(IOS_TOUCH_EVENTS) || ENABLE(IOS_GESTURE_EVENTS)
     bool hasTouchOrGestureEventListeners() const { return m_touchAndGestureEventListenerCount > 0; }
@@ -397,7 +397,7 @@ private:
 #if ENABLE(DEVICE_ORIENTATION)
     bool isAllowedToUseDeviceMotionOrOrientation(String& message) const;
     bool hasPermissionToReceiveDeviceMotionOrOrientationEvents(String& message) const;
-    void NODELETE failedToRegisterDeviceMotionEventListener();
+    void failedToRegisterDeviceMotionEventListener();
 #endif
 
     EventTimingInteractionID computeInteractionID(Event&, EventType);

@@ -233,7 +233,7 @@ public:
     void setDispatchViewportDataDidChangeSuppressed(bool dispatchViewportDataDidChangeSuppressed) { m_isDispatchViewportDataDidChangeSuppressed = dispatchViewportDataDidChangeSuppressed; }
 #endif
 
-    void NODELETE didReceiveDocType(LocalFrame&);
+    void didReceiveDocType(LocalFrame&);
 
     void registerPopupOpeningObserver(PopupOpeningObserver&);
     void unregisterPopupOpeningObserver(PopupOpeningObserver&);

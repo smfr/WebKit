@@ -880,7 +880,7 @@ RefPtr<Element> DragController::draggableElement(const LocalFrame* sourceFrame, 
     return selectionDragElement;
 }
 
-static CachedImage* NODELETE getCachedImage(Element& element)
+static CachedImage* getCachedImage(Element& element)
 {
     CheckedPtr renderImage = dynamicDowncast<RenderImage>(element.renderer());
     return renderImage ? renderImage->cachedImage() : nullptr;

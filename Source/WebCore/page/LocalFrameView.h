@@ -871,7 +871,7 @@ private:
 
     void delegatedScrollingModeDidChange() final;
 
-    void NODELETE unobscuredContentSizeChanged() final;
+    void unobscuredContentSizeChanged() final;
     
     void scrollToTextFragmentRetryTimerFired();
     void textFragmentIndicatorTimerFired();

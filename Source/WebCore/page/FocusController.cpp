@@ -1005,7 +1005,7 @@ static bool relinquishesEditingFocus(Element& element)
     return frame->editor().shouldEndEditing(makeRangeSelectingNodeContents(*root));
 }
 
-static bool NODELETE shouldClearSelectionWhenChangingFocusedElement(const Page& page, RefPtr<Element> oldFocusedElement, RefPtr<Element> newFocusedElement)
+static bool shouldClearSelectionWhenChangingFocusedElement(const Page& page, RefPtr<Element> oldFocusedElement, RefPtr<Element> newFocusedElement)
 {
 #if PLATFORM(IOS_FAMILY) && ENABLE(DRAG_SUPPORT)
     if (newFocusedElement || !oldFocusedElement)
