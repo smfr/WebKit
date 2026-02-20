@@ -162,14 +162,14 @@ WebCoreOpaqueRoot root(DOMWindow* window)
 
 WindowProxy* DOMWindow::opener() const
 {
-    RefPtr frame = this->frame();
+    auto* frame = this->frame();
 
     RELEASE_LOG_DEBUG(DOMAPI, "DOMWindow::opener hasOpener=%d frameID=%" PRIu64, frame && frame->opener(), frame ? frame->frameID().toUInt64() : 0);
 
     if (!frame)
         return nullptr;
 
-    RefPtr openerFrame = frame->opener();
+    auto* openerFrame = frame->opener();
     if (!openerFrame)
         return nullptr;
 
