@@ -2496,3 +2496,5 @@ webkit.org/b/308079 [ Tahoe Release arm64 ] http/tests/site-isolation/inspector/
 webkit.org/b/308165 [ Debug ] scrollingcoordinator/mac/latching/simple-page-rubberbands.html [ Pass Failure ]
 
 webkit.org/b/308243 [ Release ] http/tests/site-isolation/mixedContent/redirect-https-to-http-iframe-in-main-frame.html [ Pass Failure ]
+
+webkit.org/b/308259 imported/w3c/web-platform-tests/fullscreen/rendering/ua-style-iframe.html [ Pass Failure ]
