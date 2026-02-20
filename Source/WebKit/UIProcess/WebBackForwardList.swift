@@ -52,6 +52,19 @@ extension WebKit.BackForwardListItemVector: CxxRefVector {
     typealias Element = WebKit.RefWebBackForwardListItem
 }
 
+extension WebKit.WebBackForwardListItem {
+    private borrowing func getUrlCopy() -> WTF.String {
+        // Safety: we immediately make a copy of the string before
+        // it could be freed or mutated. FIXME(rdar://162695942): remove
+        // this.
+        unsafe __urlUnsafe().pointee
+    }
+
+    var url: WTF.String {
+        getUrlCopy()
+    }
+}
+
 // Some of these utility functions would be better in WebBackForwardListSwiftUtilities.h
 // but can't be put there as we are unable to use swift::Array and swift::String
 // rdar://161270632
@@ -286,10 +299,8 @@ final class WebBackForwardList {
 
         // If the target item wasn't even in the list, there's nothing else to do.
         guard var targetIndex else {
-            // Safety: we immediately make a copy of the string before
-            // it could be freed or mutated.
             backForwardLog(
-                "(Back/Forward) WebBackForwardList \(ObjectIdentifier(self)) could not go to item \(item.identifier().toString()) (\(unsafe item.__urlUnsafe().pointee)) because it was not found"
+                "(Back/Forward) WebBackForwardList \(ObjectIdentifier(self)) could not go to item \(item.identifier().toString()) \(item.url) because it was not found"
             )
             return
         }
@@ -572,8 +583,7 @@ final class WebBackForwardList {
         state: WebKit.RefFrameState,
         pageIdentifier: WebKit.WebPageProxyIdentifier
     ) -> WebKit.RefWebBackForwardListItem {
-        // rdar://162310543 requires us to pass 'nil' here
-        WebKit.WebBackForwardListItem.create(consuming: state, pageIdentifier, state.ptr().frameID, nil)
+        WebKit.WebBackForwardListItem.create(consuming: state, pageIdentifier, state.ptr().frameID)
     }
 
     func restoreFromState(backForwardListState: WebKit.BackForwardListState) {
