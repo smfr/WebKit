@@ -117,6 +117,8 @@ protected:
     RefPtr<ScrollingStateNode> stateNodeForNodeID(std::optional<ScrollingNodeID>) const;
     RefPtr<ScrollingStateNode> stateNodeForScrollableArea(const ScrollableArea&) const;
 
+    virtual void willSendScrollPositionRequest(ScrollingNodeID, RequestedScrollData&) { }
+
 private:
     bool isAsyncScrollingCoordinator() const override { return true; }
 

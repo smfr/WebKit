@@ -261,6 +261,7 @@ void ThreadedScrollingTree::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNod
         .layoutViewportOrigin = layoutViewportOrigin,
         .updateType = ScrollUpdateType::PositionUpdate,
         .updateLayerPositionAction = scrollingLayerPositionAction,
+        .responseIdentifier = { }
     };
 
     if (RunLoop::isMain()) {
@@ -292,7 +293,8 @@ void ThreadedScrollingTree::scrollingTreeNodeScrollUpdated(ScrollingTreeScrollin
         .scrollPosition = { },
         .layoutViewportOrigin = { },
         .updateType = scrollUpdateType,
-        .updateLayerPositionAction = ScrollingLayerPositionAction::Sync
+        .updateLayerPositionAction = ScrollingLayerPositionAction::Sync,
+        .responseIdentifier = { }
     };
 
     if (RunLoop::isMain()) {

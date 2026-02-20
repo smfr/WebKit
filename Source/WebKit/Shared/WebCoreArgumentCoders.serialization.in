@@ -2800,6 +2800,7 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
 header: <WebCore/ScrollingCoordinatorTypes.h>
 [CustomHeader] enum class WebCore::ScrollUpdateType : uint8_t {
     PositionUpdate,
+    ScrollRequestResponse,
     AnimatedScrollWillStart,
     AnimatedScrollDidEnd,
     WheelEventScrollWillStart,
@@ -2821,6 +2822,7 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
     std::optional<WebCore::FloatPoint> layoutViewportOrigin;
     WebCore::ScrollUpdateType updateType;
     WebCore::ScrollingLayerPositionAction updateLayerPositionAction;
+    Markable<WebCore::ScrollRequestIdentifier> responseIdentifier;
 };
 
 header: <WebCore/ScrollingCoordinatorTypes.h>
@@ -4310,6 +4312,7 @@ enum class WebCore::ScrollType : bool;
 [CustomHeader] struct WebCore::RequestedScrollData {
     WebCore::ScrollRequestType requestType;
     Variant<WebCore::FloatPoint, WebCore::FloatSize> scrollPositionOrDelta;
+    Markable<WebCore::ScrollRequestIdentifier> identifier;
     WebCore::ScrollType scrollType;
     WebCore::ScrollClamping clamping;
     WebCore::ScrollIsAnimated animated;

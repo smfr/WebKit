@@ -429,6 +429,7 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
     auto requestedScrollData = RequestedScrollData {
         .requestType = ScrollRequestType::PositionUpdate,
         .scrollPositionOrDelta = scrollPosition,
+        .identifier = { },
         .scrollType = options.type,
         .clamping = options.clamping,
         .animated = options.animated,
@@ -440,6 +441,7 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
         requestedScrollData.scrollPositionOrDelta = *options.originalScrollDelta;
     }
 
+    willSendScrollPositionRequest(*scrollingNodeID, requestedScrollData);
     stateNode->setRequestedScrollData(WTF::move(requestedScrollData));
 
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::requestScrollToPosition " << scrollPosition << " for nodeID " << scrollingNodeID << " requestedScrollData " << stateNode->requestedScrollData());
@@ -465,10 +467,13 @@ void AsyncScrollingCoordinator::stopAnimatedScroll(ScrollableArea& scrollableAre
     if (!stateNode)
         return;
 
-    // Animated scrolls are always programmatic.
-    stateNode->setRequestedScrollData({
+    auto requestedScrollData = RequestedScrollData {
         .requestType = ScrollRequestType::CancelAnimatedScroll
-    });
+    };
+
+    willSendScrollPositionRequest(*scrollingNodeID, requestedScrollData);
+    stateNode->setRequestedScrollData(WTF::move(requestedScrollData));
+
     // FIXME: This should schedule a rendering update
     commitTreeStateIfNeeded();
 }
@@ -696,6 +701,15 @@ void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update,
 {
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::applyScrollPositionUpdate " << update);
     switch (update.updateType) {
+
+    case ScrollUpdateType::PositionUpdate:
+        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
+        return;
+
+    case ScrollUpdateType::ScrollRequestResponse:
+        // FIXME: Handle.
+        return;
+
     case ScrollUpdateType::AnimatedScrollWillStart:
         animatedScrollWillStartForNode(update.nodeID);
         return;
@@ -710,10 +724,6 @@ void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update,
 
     case ScrollUpdateType::WheelEventScrollDidEnd:
         wheelEventScrollDidEndForNode(update.nodeID);
-        return;
-
-    case ScrollUpdateType::PositionUpdate:
-        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
         return;
 
     case ScrollUpdateType::ProgrammaticScrollDidEnd:

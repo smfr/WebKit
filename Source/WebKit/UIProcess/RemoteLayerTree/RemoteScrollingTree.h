@@ -77,6 +77,8 @@ public:
     bool scrollingTreeNodeRequestsKeyboardScroll(WebCore::ScrollingNodeID, const WebCore::RequestedKeyboardScrollData&) override;
     void scrollingTreeNodeDidStopProgrammaticScroll(WebCore::ScrollingTreeScrollingNode&) override;
 
+    void didHandleScrollRequestForNode(WebCore::ScrollingNodeID, WebCore::FloatPoint scrollPosition, WebCore::ScrollRequestIdentifier) override;
+
     void scrollingTreeNodeWillStartScroll(WebCore::ScrollingNodeID) override;
     void scrollingTreeNodeDidEndScroll(WebCore::ScrollingNodeID) override;
     void clearNodesWithUserScrollInProgress() override;

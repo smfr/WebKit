@@ -120,6 +120,13 @@ RemoteScrollingCoordinatorTransaction RemoteScrollingCoordinator::buildTransacti
     };
 }
 
+void RemoteScrollingCoordinator::willSendScrollPositionRequest(ScrollingNodeID nodeID, RequestedScrollData& request)
+{
+    request.identifier = ScrollRequestIdentifier::generate();
+    // This may clobber an older one, but that's OK.
+    m_scrollRequestsPendingResponse.set(nodeID, *request.identifier);
+}
+
 // Notification from the UI process that we scrolled.
 void RemoteScrollingCoordinator::scrollUpdateForNode(ScrollUpdate&& update, CompletionHandler<void()>&& completionHandler)
 {

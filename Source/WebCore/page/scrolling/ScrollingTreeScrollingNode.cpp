@@ -37,6 +37,8 @@
 #include "ScrollingStateTree.h"
 #include "ScrollingTree.h"
 #include "ScrollingTreeScrollingNodeDelegate.h"
+#include <wtf/Scope.h>
+#include <wtf/SetForScope.h>
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/TextStream.h>
 
@@ -392,6 +394,11 @@ void ScrollingTreeScrollingNode::requestKeyboardScroll(const RequestedKeyboardSc
 
 void ScrollingTreeScrollingNode::handleScrollPositionRequest(const RequestedScrollData& requestedScrollData)
 {
+    auto scopeExit = WTF::makeScopeExit([&] {
+        if (requestedScrollData.identifier)
+            scrollingTree()->didHandleScrollRequestForNode(scrollingNodeID(), currentScrollPosition(), *requestedScrollData.identifier);
+    });
+
 #if HAVE(RUBBER_BANDING)
     LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingTreeScrollingNode::handleScrollPositionRequest nodeID=" << scrollingNodeID() << " requestType=" << static_cast<unsigned>(requestedScrollData.requestType) << " isRubberBanding=" << scrollingTree()->isRubberBandInProgressForNode(scrollingNodeID()) << " restoredRubberbandingInProgress=" << restoredRubberbandingInProgress());
 
@@ -442,6 +449,7 @@ void ScrollingTreeScrollingNode::handleScrollPositionRequest(const RequestedScro
 
     m_scrollbarRevealBehaviorForNextScrollbarUpdate = requestedScrollData.scrollbarRevealBehavior;
     scrollTo(destinationPosition, requestedScrollData.scrollType, requestedScrollData.clamping);
+
     didStopProgrammaticScroll();
 }
 
