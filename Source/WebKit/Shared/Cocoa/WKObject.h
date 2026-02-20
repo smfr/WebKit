@@ -66,16 +66,6 @@ template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::Wrapp
     return object ? wrapper(*object) : nil;
 }
 
-template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> protectedWrapper(ObjectClass& object)
-{
-    return wrapper(object);
-}
-
-template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> protectedWrapper(ObjectClass* object)
-{
-    return wrapper(object);
-}
-
 template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(const Ref<ObjectClass>& object)
 {
     return wrapper(object.get());
@@ -84,16 +74,6 @@ template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::Wrapp
 template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(const RefPtr<ObjectClass>& object)
 {
     return wrapper(object.get());
-}
-
-template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> protectedWrapper(const Ref<ObjectClass>& object)
-{
-    return wrapper(object);
-}
-
-template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> protectedWrapper(const RefPtr<ObjectClass>& object)
-{
-    return wrapper(object);
 }
 
 template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> wrapper(Ref<ObjectClass>&& object)
@@ -110,7 +90,6 @@ template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectCla
 
 namespace API {
 
-using WebKit::protectedWrapper;
 using WebKit::wrapper;
 
 }

@@ -156,7 +156,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; configuration = %@>", RetainPtr { NSStringFromClass(self.class) }.get(), self, protectedWrapper(_processPool->configuration()).get()];
+    return [NSString stringWithFormat:@"<%@: %p; configuration = %@>", RetainPtr { NSStringFromClass(self.class) }.get(), self, protect(wrapper(_processPool->configuration())).get()];
 }
 
 ALLOW_DEPRECATED_DECLARATIONS_BEGIN

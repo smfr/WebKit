@@ -94,7 +94,7 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 ALLOW_DEPRECATED_DECLARATIONS_BEGIN
 - (_WKUserContentWorld *)_userContentWorld
 {
-    return adoptNS([[_WKUserContentWorld alloc] _initWithContentWorld:protectedWrapper(_userScript->contentWorld()).get()]).autorelease();
+    return adoptNS([[_WKUserContentWorld alloc] _initWithContentWorld:protect(wrapper(_userScript->contentWorld())).get()]).autorelease();
 }
 ALLOW_DEPRECATED_DECLARATIONS_END
 

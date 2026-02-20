@@ -1443,7 +1443,7 @@ header: <WebCore/Report.h>
 [RefCounted] class WebCore::Report {
     String type()
     String url()
-    RefPtr<WebCore::ReportBody> protectedBody()
+    RefPtr<WebCore::ReportBody> bodyForSerialization()
 };
 
 [RefCounted] class WebCore::TestReportBody {

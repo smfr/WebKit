@@ -769,7 +769,7 @@ void PDFIncrementalLoader::transitionToMainThreadDocument()
     }
 }
 
-void PDFIncrementalLoader::threadEntry(Ref<PDFIncrementalLoader>&& protectedLoader)
+void PDFIncrementalLoader::threadEntry(Ref<PDFIncrementalLoader>&& loader)
 {
     CGDataProviderDirectAccessRangesCallbacks dataProviderCallbacks {
         0,
@@ -778,10 +778,10 @@ void PDFIncrementalLoader::threadEntry(Ref<PDFIncrementalLoader>&& protectedLoad
         dataProviderReleaseInfoCallback,
     };
 
-    auto scopeExit = makeScopeExit([protectedLoader = WTF::move(protectedLoader)] mutable {
+    auto scopeExit = makeScopeExit([loader = WTF::move(loader)] mutable {
         // Keep the PDFPlugin alive until the end of this function and the end
         // of the last main thread task submitted by this function.
-        callOnMainRunLoop([protectedLoader = WTF::move(protectedLoader)] { });
+        callOnMainRunLoop([loader = WTF::move(loader)] { });
     });
 
     RefPtr plugin = m_plugin.get();

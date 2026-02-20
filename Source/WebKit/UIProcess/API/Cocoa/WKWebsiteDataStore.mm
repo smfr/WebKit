@@ -191,7 +191,7 @@ private:
 
         RetainPtr nsURL = URL { url }.createNSURL();
         auto apiOrigin = API::SecurityOrigin::create(serviceWorkerOrigin);
-        [m_delegate.get() websiteDataStore:m_dataStore.get().get() openWindow:nsURL.get() fromServiceWorkerOrigin:protectedWrapper(apiOrigin.get()).get() completionHandler:completionHandler.get()];
+        [m_delegate.get() websiteDataStore:m_dataStore.get().get() openWindow:nsURL.get() fromServiceWorkerOrigin:protect(wrapper(apiOrigin.get())).get() completionHandler:completionHandler.get()];
     }
 
     void reportServiceWorkerConsoleMessage(const URL&, const WebCore::SecurityOriginData&, MessageSource, MessageLevel, const String& message, unsigned long)
@@ -254,7 +254,7 @@ private:
             completionHandler(WTF::move(notificationDatas));
         });
 
-        [m_delegate.get() websiteDataStore:m_dataStore.get().get() getDisplayedNotificationsForWorkerOrigin:protectedWrapper(apiOrigin.get()).get() completionHandler:delegateCompletionHandler.get()];
+        [m_delegate.get() websiteDataStore:m_dataStore.get().get() getDisplayedNotificationsForWorkerOrigin:protect(wrapper(apiOrigin.get())).get() completionHandler:delegateCompletionHandler.get()];
     }
 
     void workerUpdatedAppBadge(const WebCore::SecurityOriginData& origin, std::optional<uint64_t> badge) final
@@ -267,7 +267,7 @@ private:
         if (badge)
             nsBadge = @(*badge);
 
-        [m_delegate.get() websiteDataStore:m_dataStore.get().get() workerOrigin:protectedWrapper(apiOrigin.get()).get() updatedAppBadge:nsBadge.get()];
+        [m_delegate.get() websiteDataStore:m_dataStore.get().get() workerOrigin:protect(wrapper(apiOrigin.get())).get() updatedAppBadge:nsBadge.get()];
     }
 
     void navigationToNotificationActionURL(const URL& url) final

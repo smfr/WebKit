@@ -534,8 +534,7 @@ void WKPageSetCustomTextEncodingName(WKPageRef pageRef, WKStringRef encodingName
 void WKPageTerminate(WKPageRef pageRef)
 {
     CRASH_IF_SUSPENDED;
-    Ref<WebProcessProxy> protectedProcessProxy(toProtectedImpl(pageRef)->legacyMainFrameProcess());
-    protectedProcessProxy->requestTermination(ProcessTerminationReason::RequestedByClient);
+    protect(toProtectedImpl(pageRef)->legacyMainFrameProcess())->requestTermination(ProcessTerminationReason::RequestedByClient);
 }
 
 void WKPageResetStateBetweenTests(WKPageRef pageRef)

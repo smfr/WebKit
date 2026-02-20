@@ -32,34 +32,29 @@
 
 WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
-static Ref<API::FormInfo> protectedFormInfo(WKFormInfo *formInfo)
-{
-    return *formInfo->_formInfo;
-}
-
 - (WKFrameInfo *)targetFrame
 {
-    return wrapper(protectedFormInfo(self)->targetFrame());
+    return wrapper(protect(*_formInfo)->targetFrame());
 }
 
 - (WKFrameInfo *)sourceFrame
 {
-    return wrapper(protectedFormInfo(self)->sourceFrame());
+    return wrapper(protect(*_formInfo)->sourceFrame());
 }
 
 - (NSURL *)submissionURL
 {
-    return protectedFormInfo(self)->submissionURL().createNSURL().autorelease();
+    return protect(*_formInfo)->submissionURL().createNSURL().autorelease();
 }
 
 - (NSString *)httpMethod
 {
-    return nsStringNilIfEmpty(protectedFormInfo(self)->httpMethod()).autorelease();
+    return nsStringNilIfEmpty(protect(*_formInfo)->httpMethod()).autorelease();
 }
 
 - (NSDictionary<NSString *, NSString *> *)formValues
 {
-    auto protectedAPIFormInfo = protectedFormInfo(self);
+    Ref protectedAPIFormInfo = *_formInfo;
     auto& formValues = protectedAPIFormInfo->formValues();
     RetainPtr valueMap = adoptNS([[NSMutableDictionary alloc] initWithCapacity:formValues.size()]);
     for (const auto& pair : formValues)
