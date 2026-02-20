@@ -497,6 +497,13 @@
             }
         }
     },
+    "TestWebKitWebXR": {
+        "subtests": {
+            "/webkit/WebKitWebXR/leave-immersive-mode": {
+                "expected": {"wpe": {"status": ["TIMEOUT", "PASS"], "bug": "webkit.org/b/308258"}}
+            }
+        }
+    },
     "TestWebProcessExtensions": {
         "subtests": {
             "/webkit/WebKitWebProcessExtension/page-id": {

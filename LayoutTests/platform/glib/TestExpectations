@@ -5267,6 +5267,10 @@ webkit.org/b/308144 imported/w3c/web-platform-tests/css/selectors/user-invalid-f
 
 webkit.org/b/308146 media/video-size.html [ Pass Failure Timeout ]
 
+webkit.org/b/308262 fast/css/view-transitions-hide-under-page-background-color.html [ Pass ImageOnlyFailure ]
+
+webkit.org/b/308265 media/media-source/media-source-reopen.html [ Pass Failure ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////
