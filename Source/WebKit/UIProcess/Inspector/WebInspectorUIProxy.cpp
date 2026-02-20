@@ -824,6 +824,15 @@ void WebInspectorUIProxy::setDiagnosticLoggingAvailable(bool available)
 #endif
 }
 
+void WebInspectorUIProxy::systemAppearanceDidChange()
+{
+    RefPtr inspectorPage = m_inspectorPage.get();
+    if (!inspectorPage)
+        return;
+
+    protect(inspectorPage->legacyMainFrameProcess())->send(Messages::WebInspectorUI::SystemAppearanceDidChange(), inspectorPage->webPageIDInMainFrameProcess());
+}
+
 void WebInspectorUIProxy::save(Vector<InspectorFrontendClient::SaveData>&& saveDatas, bool forceSaveAs)
 {
     if (!protect(protect(inspectedPage())->preferences())->developerExtrasEnabled())
