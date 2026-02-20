@@ -59,7 +59,7 @@ public:
     ScriptExecutionContext* scriptExecutionContext() const final { return nullptr; }
 
     // DOM API exposed cross-origin.
-    WindowProxy* self() const;
+    WindowProxy* NODELETE self() const;
     void focus(LocalDOMWindow& incumbentWindow);
     void blur();
     unsigned length() const;

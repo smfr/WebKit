@@ -91,9 +91,9 @@ public:
     unsigned scopedChildCount() const;
 
 private:
-    Frame* deepFirstChild() const;
-    Frame* deepLastChild() const;
-    Frame* nextAncestorSibling(const Frame* stayWithin) const;
+    Frame* NODELETE deepFirstChild() const;
+    Frame* NODELETE deepLastChild() const;
+    Frame* NODELETE nextAncestorSibling(const Frame* stayWithin) const;
 
     RefPtr<Frame> scopedChild(unsigned index, TreeScope*) const;
     RefPtr<Frame> scopedChild(NOESCAPE const Function<bool(const FrameTree&)>& isMatch, TreeScope*) const;

@@ -125,7 +125,7 @@ public:
     bool allowPopUp(); // Call on first window, not target window.
     static bool allowPopUp(LocalFrame& firstFrame);
     static bool canShowModalDialog(const LocalFrame&);
-    WEBCORE_EXPORT void setCanShowModalDialogOverride(bool);
+    WEBCORE_EXPORT void NODELETE setCanShowModalDialogOverride(bool);
 
     Screen& screen();
     WEBCORE_EXPORT History& history();
@@ -140,9 +140,9 @@ public:
     WEBCORE_EXPORT Ref<Navigator> protectedNavigator();
     Navigator* optionalNavigator() const { return m_navigator.get(); }
 
-    WEBCORE_EXPORT static void overrideTransientActivationDurationForTesting(std::optional<Seconds>&&);
+    WEBCORE_EXPORT static void NODELETE overrideTransientActivationDurationForTesting(std::optional<Seconds>&&);
     void setLastActivationTimestamp(MonotonicTime lastActivationTimestamp) { m_lastActivationTimestamp = lastActivationTimestamp; }
-    void consumeLastActivationIfNecessary();
+    void NODELETE consumeLastActivationIfNecessary();
     MonotonicTime lastActivationTimestamp() const { return m_lastActivationTimestamp; }
     void notifyActivated(MonotonicTime);
     WEBCORE_EXPORT bool hasTransientActivation() const;
@@ -150,18 +150,18 @@ public:
     WEBCORE_EXPORT bool consumeTransientActivation();
     WEBCORE_EXPORT bool hasHistoryActionActivation() const;
     WEBCORE_EXPORT bool consumeHistoryActionUserActivation();
-    WEBCORE_EXPORT static Seconds transientActivationDuration();
+    WEBCORE_EXPORT static Seconds NODELETE transientActivationDuration();
 
     struct ClickEventData {
         MonotonicTime time;
         OptionSet<PlatformEventModifier> modifiers;
     };
     void updateLastUserClickEvent(OptionSet<PlatformEventModifier>);
-    WEBCORE_EXPORT std::optional<ClickEventData> consumeLastUserClickEvent();
+    WEBCORE_EXPORT std::optional<ClickEventData> NODELETE consumeLastUserClickEvent();
 
     DOMSelection* getSelection();
 
-    HTMLFrameOwnerElement* frameElement() const;
+    HTMLFrameOwnerElement* NODELETE frameElement() const;
 
     WEBCORE_EXPORT void focus(bool allowFocus = false);
     void focus(LocalDOMWindow& incumbentWindow);
@@ -182,7 +182,7 @@ public:
 
     bool find(const String&, bool caseSensitive, bool backwards, bool wrap, bool wholeWord, bool searchInFrames, bool showDialog) const;
 
-    bool offscreenBuffering() const;
+    bool NODELETE offscreenBuffering() const;
 
     int outerHeight() const;
     int outerWidth() const;
@@ -197,11 +197,11 @@ public:
 
     unsigned length() const;
 
-    AtomString name() const;
+    AtomString NODELETE name() const;
     void setName(const AtomString&);
 
     String status() const;
-    void setStatus(const String&);
+    void NODELETE setStatus(const String&);
 
     void disownOpener();
 
@@ -280,8 +280,8 @@ public:
 
     void dispatchLoadEvent();
 
-    void captureEvents();
-    void releaseEvents();
+    void NODELETE captureEvents();
+    void NODELETE releaseEvents();
 
     void finishedLoading();
 
@@ -317,7 +317,7 @@ public:
 
     WEBCORE_EXPORT ReducedResolutionSeconds nowTimestamp() const;
     void freezeNowTimestamp();
-    void unfreezeNowTimestamp();
+    void NODELETE unfreezeNowTimestamp();
     ReducedResolutionSeconds frozenNowTimestamp() const;
 
 #if PLATFORM(IOS_FAMILY)
@@ -339,7 +339,7 @@ public:
     DeviceMotionController* deviceMotionController() const;
 #endif
 
-    void resetAllGeolocationPermission();
+    void NODELETE resetAllGeolocationPermission();
 
 #if ENABLE(IOS_TOUCH_EVENTS) || ENABLE(IOS_GESTURE_EVENTS)
     bool hasTouchOrGestureEventListeners() const { return m_touchAndGestureEventListenerCount > 0; }
@@ -369,7 +369,7 @@ public:
     void setMayReuseForNavigation(bool mayReuseForNavigation) { m_mayReuseForNavigation = mayReuseForNavigation; }
     bool mayReuseForNavigation() const { return m_mayReuseForNavigation; }
 
-    Page* page() const;
+    Page* NODELETE page() const;
 
     WEBCORE_EXPORT static void forEachWindowInterestedInStorageEvents(NOESCAPE const Function<void(LocalDOMWindow&)>&);
 
@@ -384,20 +384,20 @@ public:
 private:
     explicit LocalDOMWindow(Document&);
 
-    ScriptExecutionContext* scriptExecutionContext() const final;
+    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
 
     void closePage() final;
     void eventListenersDidChange() final;
     void setLocation(LocalDOMWindow& activeWindow, const URL& completedURL, NavigationHistoryBehavior, SetLocationLocking, CanNavigateState) final;
 
-    bool allowedToChangeWindowGeometry() const;
+    bool NODELETE allowedToChangeWindowGeometry() const;
 
     static ExceptionOr<RefPtr<Frame>> createWindow(const String& urlString, const AtomString& frameName, const WindowFeatures&, LocalDOMWindow& activeWindow, LocalFrame& firstFrame, LocalFrame& openerFrame, NOESCAPE const Function<void(LocalDOMWindow&)>& prepareDialogFunction = nullptr);
 
 #if ENABLE(DEVICE_ORIENTATION)
     bool isAllowedToUseDeviceMotionOrOrientation(String& message) const;
     bool hasPermissionToReceiveDeviceMotionOrOrientationEvents(String& message) const;
-    void failedToRegisterDeviceMotionEventListener();
+    void NODELETE failedToRegisterDeviceMotionEventListener();
 #endif
 
     EventTimingInteractionID computeInteractionID(Event&, EventType);

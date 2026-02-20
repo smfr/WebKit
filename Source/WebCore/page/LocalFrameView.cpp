@@ -3391,7 +3391,7 @@ void LocalFrameView::cancelScheduledTextFragmentIndicatorTimer()
     m_delayedTextFragmentIndicatorTimer.stop();
 }
 
-static void adjustScrollRectToVisibleOptionsForHiddenOverflow(ScrollRectToVisibleOptions& options, const RenderStyle& style)
+static void NODELETE adjustScrollRectToVisibleOptionsForHiddenOverflow(ScrollRectToVisibleOptions& options, const RenderStyle& style)
 {
     if (options.allowScrollingOverflowHidden == AllowScrollingOverflowHidden::Yes)
         return;

@@ -68,16 +68,16 @@ public:
     void updateBeforeLayout();
     void adjustScrollPositionForAnchoring();
 
-    void willDispatchScrollEvent();
-    void didDispatchScrollEvent();
+    void NODELETE willDispatchScrollEvent();
+    void NODELETE didDispatchScrollEvent();
 
     void notifyChildHadSuppressingStyleChange(RenderElement&);
 
     bool hasAnchorElement() const { return !!m_anchorObject; }
 
     // These nest.
-    void startSuppressingScrollAnchoring();
-    void stopSuppressingScrollAnchoring();
+    void NODELETE startSuppressingScrollAnchoring();
+    void NODELETE stopSuppressingScrollAnchoring();
 
 private:
     static bool isViableStatus(AnchorSearchStatus status)
@@ -85,7 +85,7 @@ private:
         return status == AnchorSearchStatus::Constrain || status == AnchorSearchStatus::Choose;
     }
 
-    LocalFrameView& frameView() const;
+    LocalFrameView& NODELETE frameView() const;
 
     bool findPriorityCandidate(Document&);
 

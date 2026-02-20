@@ -94,7 +94,7 @@ public:
     PerformanceTiming& timing();
     EventCounts& eventCounts();
 
-    uint64_t interactionCount();
+    uint64_t NODELETE interactionCount();
 
     Vector<Ref<PerformanceEntry>> getEntries() const;
     Vector<Ref<PerformanceEntry>> getEntriesByType(const String& entryType) const;
@@ -105,7 +105,7 @@ public:
     void processEventEntry(const PerformanceEventTimingCandidate&);
 
     void clearResourceTimings();
-    void setResourceTimingBufferSize(unsigned);
+    void NODELETE setResourceTimingBufferSize(unsigned);
 
     ExceptionOr<Ref<PerformanceMark>> mark(JSC::JSGlobalObject&, const String& markName, std::optional<PerformanceMarkOptions>&&);
     void clearMarks(const String& markName);
@@ -126,15 +126,15 @@ public:
     void registerPerformanceObserver(PerformanceObserver&);
     void unregisterPerformanceObserver(PerformanceObserver&);
 
-    static void allowHighPrecisionTime();
-    static Seconds timeResolution();
+    static void NODELETE allowHighPrecisionTime();
+    static Seconds NODELETE timeResolution();
     static Seconds reduceTimeResolution(Seconds);
 
     Seconds relativeTimeFromTimeOriginInReducedResolutionSeconds(MonotonicTime) const;
     DOMHighResTimeStamp relativeTimeFromTimeOriginInReducedResolution(MonotonicTime) const;
-    MonotonicTime monotonicTimeFromRelativeTime(DOMHighResTimeStamp) const;
+    MonotonicTime NODELETE monotonicTimeFromRelativeTime(DOMHighResTimeStamp) const;
 
-    ScriptExecutionContext* scriptExecutionContext() const final;
+    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
 
     void scheduleTaskIfNeeded();
 
@@ -150,7 +150,7 @@ private:
     void refEventTarget() final { ref(); }
     void derefEventTarget() final { deref(); }
 
-    bool isResourceTimingBufferFull() const;
+    bool NODELETE isResourceTimingBufferFull() const;
     void resourceTimingBufferFullTimerFired();
 
     void queueEntry(PerformanceEntry&);

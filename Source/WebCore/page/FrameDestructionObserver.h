@@ -37,7 +37,7 @@ public:
     WEBCORE_EXPORT explicit FrameDestructionObserver(LocalFrame*);
 
     WEBCORE_EXPORT virtual void frameDestroyed();
-    WEBCORE_EXPORT virtual void willDetachPage();
+    WEBCORE_EXPORT virtual void NODELETE willDetachPage();
 
     bool hasFrame() const { return !!m_frame; }
 

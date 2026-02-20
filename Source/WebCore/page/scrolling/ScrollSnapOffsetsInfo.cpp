@@ -265,7 +265,7 @@ static LayoutRect computeScrollSnapAreaRect(const RenderStyle& style, const Layo
     return result;
 }
 
-static LayoutUnit computeScrollSnapAlignOffset(LayoutUnit minLocation, LayoutUnit maxLocation, ScrollSnapAxisAlignType alignment, bool axisIsFlipped)
+static LayoutUnit NODELETE computeScrollSnapAlignOffset(LayoutUnit minLocation, LayoutUnit maxLocation, ScrollSnapAxisAlignType alignment, bool axisIsFlipped)
 {
     switch (alignment) {
     case ScrollSnapAxisAlignType::Start:
@@ -439,7 +439,7 @@ static float convertOffsetUnit(LayoutUnit input, float deviceScaleFactor)
     return roundToDevicePixel(input, deviceScaleFactor, false);
 }
 
-static LayoutUnit convertOffsetUnit(float input, float /* scaleFactor */)
+static LayoutUnit NODELETE convertOffsetUnit(float input, float /* scaleFactor */)
 {
     return LayoutUnit(input);
 }

@@ -514,7 +514,7 @@ public:
     // Returns true if layer tree updates are disabled.
     virtual bool layerTreeStateIsFrozen() const { return false; }
 
-    WEBCORE_EXPORT virtual RefPtr<ScrollingCoordinator> createScrollingCoordinator(Page&) const;
+    WEBCORE_EXPORT virtual RefPtr<ScrollingCoordinator> NODELETE createScrollingCoordinator(Page&) const;
     WEBCORE_EXPORT virtual void ensureScrollbarsController(Page&, ScrollableArea&, bool update = false) const;
 
     virtual bool canEnterVideoFullscreen(HTMLVideoElement&, HTMLMediaElementEnums::VideoFullscreenMode) const { return false; }

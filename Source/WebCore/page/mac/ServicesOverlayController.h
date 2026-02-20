@@ -53,7 +53,7 @@ public:
     ~ServicesOverlayController();
 
     // DataDetectorHighlightClient.
-    void ref() const final;
+    void NODELETE ref() const final;
     void deref() const final;
 
     void selectedTelephoneNumberRangesChanged();
@@ -62,8 +62,8 @@ public:
 private:
     // PageOverlayClient
     void willMoveToPage(PageOverlay&, Page*) override;
-    void didMoveToPage(PageOverlay&, Page*) override;
-    void drawRect(PageOverlay&, GraphicsContext&, const IntRect& dirtyRect) override;
+    void NODELETE didMoveToPage(PageOverlay&, Page*) override;
+    void NODELETE drawRect(PageOverlay&, GraphicsContext&, const IntRect& dirtyRect) override;
     bool mouseEvent(PageOverlay&, const PlatformMouseEvent&) override;
     void didScrollFrame(PageOverlay&, LocalFrame&) override;
 

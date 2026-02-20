@@ -103,23 +103,23 @@ static RectsAlignment alignmentForRects(FocusDirection direction, const LayoutRe
     return RectsAlignment::None;
 }
 
-static inline bool isHorizontalMove(FocusDirection direction)
+static inline bool NODELETE isHorizontalMove(FocusDirection direction)
 {
     return direction == FocusDirection::Left || direction == FocusDirection::Right;
 }
 
-static inline LayoutUnit start(FocusDirection direction, const LayoutRect& rect)
+static inline LayoutUnit NODELETE start(FocusDirection direction, const LayoutRect& rect)
 {
     return isHorizontalMove(direction) ? rect.y() : rect.x();
 }
 
-static inline LayoutUnit middle(FocusDirection direction, const LayoutRect& rect)
+static inline LayoutUnit NODELETE middle(FocusDirection direction, const LayoutRect& rect)
 {
     LayoutPoint center(rect.center());
     return isHorizontalMove(direction) ? center.y(): center.x();
 }
 
-static inline LayoutUnit end(FocusDirection direction, const LayoutRect& rect)
+static inline LayoutUnit NODELETE end(FocusDirection direction, const LayoutRect& rect)
 {
     return isHorizontalMove(direction) ? rect.maxY() : rect.maxX();
 }

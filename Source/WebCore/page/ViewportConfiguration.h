@@ -165,11 +165,11 @@ public:
 
 private:
     void updateConfiguration();
-    double viewportArgumentsLength(double length) const;
+    double NODELETE viewportArgumentsLength(double length) const;
     double initialScaleFromSize(double width, double height, bool shouldIgnoreScalingConstraints) const;
 
-    bool shouldOverrideDeviceWidthAndShrinkToFit() const;
-    bool shouldIgnoreScalingConstraintsRegardlessOfContentSize() const;
+    bool NODELETE shouldOverrideDeviceWidthAndShrinkToFit() const;
+    bool NODELETE shouldIgnoreScalingConstraintsRegardlessOfContentSize() const;
     bool shouldIgnoreScalingConstraints() const;
     bool shouldIgnoreVerticalScalingConstraints() const;
     bool shouldIgnoreHorizontalScalingConstraints() const;

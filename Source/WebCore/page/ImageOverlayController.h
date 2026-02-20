@@ -68,7 +68,7 @@ public:
 
 #if PLATFORM(MAC)
     // DataDetectorHighlightClient.
-    void ref() const final;
+    void NODELETE ref() const final;
     void deref() const final;
 #else
     void ref() const;

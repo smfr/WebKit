@@ -46,8 +46,8 @@ public:
     PageOverlayController(Page&);
     virtual ~PageOverlayController();
 
-    bool hasDocumentOverlays() const;
-    bool hasViewOverlays() const;
+    bool NODELETE hasDocumentOverlays() const;
+    bool NODELETE hasViewOverlays() const;
 
     GraphicsLayer& layerWithDocumentOverlays();
     GraphicsLayer& layerWithViewOverlays();
@@ -97,8 +97,8 @@ private:
     // GraphicsLayerClient
     void notifyFlushRequired(const GraphicsLayer*) override;
     void paintContents(const GraphicsLayer&, GraphicsContext&, const FloatRect& clipRect, OptionSet<GraphicsLayerPaintBehavior>) override;
-    float deviceScaleFactor() const override;
-    bool shouldSkipLayerInDump(const GraphicsLayer*, OptionSet<LayerTreeAsTextOptions>) const override;
+    float NODELETE deviceScaleFactor() const override;
+    bool NODELETE shouldSkipLayerInDump(const GraphicsLayer*, OptionSet<LayerTreeAsTextOptions>) const override;
     bool shouldDumpPropertyForLayer(const GraphicsLayer*, ASCIILiteral propertyName, OptionSet<LayerTreeAsTextOptions>) const override;
     void tiledBackingUsageChanged(const GraphicsLayer*, bool) override;
 

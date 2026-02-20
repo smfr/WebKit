@@ -81,7 +81,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(FocusController);
 
 using namespace HTMLNames;
 
-static HTMLElement* invokerForOpenPopover(const Node* candidatePopover)
+static HTMLElement* NODELETE invokerForOpenPopover(const Node* candidatePopover)
 {
     RefPtr popover = dynamicDowncast<HTMLElement>(candidatePopover);
     if (popover && popover->isPopoverShowing())
@@ -344,7 +344,7 @@ FocusNavigationScope::FocusNavigationScope(Element& element)
 {
 }
 
-Element* FocusNavigationScope::owner() const
+Element* NODELETE FocusNavigationScope::owner() const
 {
     if (m_slotElement)
         return m_slotElement.get();
@@ -1005,7 +1005,7 @@ static bool relinquishesEditingFocus(Element& element)
     return frame->editor().shouldEndEditing(makeRangeSelectingNodeContents(*root));
 }
 
-static bool shouldClearSelectionWhenChangingFocusedElement(const Page& page, RefPtr<Element> oldFocusedElement, RefPtr<Element> newFocusedElement)
+static bool NODELETE shouldClearSelectionWhenChangingFocusedElement(const Page& page, RefPtr<Element> oldFocusedElement, RefPtr<Element> newFocusedElement)
 {
 #if PLATFORM(IOS_FAMILY) && ENABLE(DRAG_SUPPORT)
     if (newFocusedElement || !oldFocusedElement)

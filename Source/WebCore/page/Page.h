@@ -427,7 +427,7 @@ public:
     WEBCORE_EXPORT void setMainFrame(Ref<Frame>&&);
     WEBCORE_EXPORT const URL& NODELETE mainFrameURL() const;
     SecurityOrigin& mainFrameOrigin() const;
-    WEBCORE_EXPORT RefPtr<Frame> findFrameByPath(const Vector<uint64_t>& path) const;
+    WEBCORE_EXPORT RefPtr<Frame> NODELETE findFrameByPath(const Vector<uint64_t>& path) const;
 
     WEBCORE_EXPORT void setMainFrameURLAndOrigin(const URL&, RefPtr<SecurityOrigin>&&);
 #if ENABLE(DOM_AUDIO_SESSION)
@@ -443,7 +443,7 @@ public:
     bool NODELETE hasInjectedUserScript();
     WEBCORE_EXPORT void setHasInjectedUserScript();
 
-    WEBCORE_EXPORT void updateTopDocumentSyncData(const DocumentSyncSerializationData&);
+    WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(const DocumentSyncSerializationData&);
     WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(Ref<DocumentSyncData>&&);
 
     WEBCORE_EXPORT void NODELETE setMainFrameURLFragment(String&&);
@@ -473,7 +473,7 @@ public:
     WEBCORE_EXPORT static unsigned NODELETE nonUtilityPageCount();
     static Page* fromPageIdentifier(PageIdentifier);
 
-    unsigned subframeCount() const;
+    unsigned NODELETE subframeCount() const;
 
     void setCurrentKeyboardScrollingAnimator(KeyboardScrollingAnimator*);
     KeyboardScrollingAnimator* currentKeyboardScrollingAnimator() const; // Deinfed in PageInlines.h
@@ -753,7 +753,7 @@ public:
 
 #if ENABLE(APPLE_PAY)
     PaymentCoordinator& paymentCoordinator() const { return *m_paymentCoordinator; }
-    WEBCORE_EXPORT void setPaymentCoordinator(Ref<PaymentCoordinator>&&);
+    WEBCORE_EXPORT void NODELETE setPaymentCoordinator(Ref<PaymentCoordinator>&&);
 #endif
 
 #if ENABLE(APPLE_PAY_AMS_UI)
@@ -1119,7 +1119,7 @@ public:
     bool canUpdateThrottlingReason(ThrottlingReason reason) const { return !m_throttlingReasonsOverridenForTesting.contains(reason); }
     WEBCORE_EXPORT void setLowPowerModeEnabledOverrideForTesting(std::optional<bool>);
     WEBCORE_EXPORT void setAggressiveThermalMitigationEnabledForTesting(std::optional<bool>);
-    WEBCORE_EXPORT void setOutsideViewportThrottlingEnabledForTesting(bool);
+    WEBCORE_EXPORT void NODELETE setOutsideViewportThrottlingEnabledForTesting(bool);
 
     OptionSet<ThrottlingReason> throttlingReasons() const { return m_throttlingReasons; }
 
@@ -1379,7 +1379,7 @@ public:
 #endif
 
 #if ENABLE(VIDEO)
-    WEBCORE_EXPORT void setCaptionDisplaySettingsClientForTesting(Ref<CaptionDisplaySettingsClient>&&);
+    WEBCORE_EXPORT void NODELETE setCaptionDisplaySettingsClientForTesting(Ref<CaptionDisplaySettingsClient>&&);
     WEBCORE_EXPORT void clearCaptionDisplaySettingsClientForTesting();
     void showCaptionDisplaySettings(HTMLMediaElement&, const ResolvedCaptionDisplaySettingsOptions&, CompletionHandler<void(ExceptionOr<void>)>&&);
 #endif

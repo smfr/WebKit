@@ -322,7 +322,7 @@ public:
         ASSERT(m_scrollingStateTree);
         return *m_scrollingStateTree;
     }
-    void attachAfterDeserialization(ScrollingStateTree&);
+    void NODELETE attachAfterDeserialization(ScrollingStateTree&);
 
     ScrollingNodeID scrollingNodeID() const { return m_nodeID; }
 

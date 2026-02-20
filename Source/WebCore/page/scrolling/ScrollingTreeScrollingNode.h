@@ -65,7 +65,7 @@ public:
 
     bool commitStateBeforeChildren(const ScrollingStateNode&) override;
     bool commitStateAfterChildren(const ScrollingStateNode&) override;
-    void didCompleteCommitForNode() final;
+    void NODELETE didCompleteCommitForNode() final;
 
     virtual bool canHandleWheelEvent(const PlatformWheelEvent&, EventTargeting) const;
     virtual WheelEventHandlingResult handleWheelEvent(const PlatformWheelEvent&, EventTargeting = EventTargeting::Propagate);

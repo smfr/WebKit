@@ -144,7 +144,7 @@ public:
     RefPtr<ShapeDetection::FaceDetector> createFaceDetector(const ShapeDetection::FaceDetectorOptions&) const;
     RefPtr<ShapeDetection::TextDetector> createTextDetector() const;
 
-    PlatformDisplayID displayID() const override;
+    PlatformDisplayID NODELETE displayID() const override;
     void windowScreenDidChange(PlatformDisplayID, std::optional<FramesPerSecond>) override;
 
     FloatSize screenSize() const override;
@@ -233,7 +233,7 @@ public:
     void setDispatchViewportDataDidChangeSuppressed(bool dispatchViewportDataDidChangeSuppressed) { m_isDispatchViewportDataDidChangeSuppressed = dispatchViewportDataDidChangeSuppressed; }
 #endif
 
-    void didReceiveDocType(LocalFrame&);
+    void NODELETE didReceiveDocType(LocalFrame&);
 
     void registerPopupOpeningObserver(PopupOpeningObserver&);
     void unregisterPopupOpeningObserver(PopupOpeningObserver&);

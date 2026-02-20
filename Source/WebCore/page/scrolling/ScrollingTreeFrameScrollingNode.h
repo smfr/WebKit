@@ -46,7 +46,7 @@ public:
     
     bool visualViewportIsSmallerThanLayoutViewport() const { return m_visualViewportIsSmallerThanLayoutViewport; }
 
-    FloatSize viewToContentsOffset(const FloatPoint& scrollPosition) const;
+    FloatSize NODELETE viewToContentsOffset(const FloatPoint& scrollPosition) const;
 
     FloatRect layoutViewport() const { return m_layoutViewport; };
     void setLayoutViewport(const FloatRect& r) { m_layoutViewport = r; };
@@ -81,7 +81,7 @@ protected:
 
 private:
     void updateViewportForCurrentScrollPosition(std::optional<FloatRect>) override;
-    bool scrollPositionAndLayoutViewportMatch(const FloatPoint& position, std::optional<FloatRect> overrideLayoutViewport) override;
+    bool NODELETE scrollPositionAndLayoutViewportMatch(const FloatPoint& position, std::optional<FloatRect> overrideLayoutViewport) override;
     FloatRect layoutViewportForScrollPosition(const FloatPoint&, float scale, ScrollBehaviorForFixedElements = ScrollBehaviorForFixedElements::StickToDocumentBounds) const;
 
     void dumpProperties(WTF::TextStream&, OptionSet<ScrollingStateTreeAsTextBehavior>) const override;

@@ -333,7 +333,7 @@ AnchorSearchStatus ScrollAnchoringController::examinePriorityCandidate(RenderEle
     return examineAnchorCandidate(*ancestor);
 }
 
-static bool overflowAnchorProhibitsAnchoring(const RenderElement& object, const RenderBox& scrollingAncestor)
+static bool NODELETE overflowAnchorProhibitsAnchoring(const RenderElement& object, const RenderBox& scrollingAncestor)
 {
     for (CheckedPtr renderer = &object; renderer; renderer = renderer->parent()) {
         if (renderer->style().overflowAnchor() == OverflowAnchor::None)

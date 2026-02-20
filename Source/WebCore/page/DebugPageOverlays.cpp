@@ -68,9 +68,9 @@ public:
     virtual ~RegionOverlay();
 
     void recomputeRegion();
-    PageOverlay& overlay() { return *m_overlay; }
+    PageOverlay& NODELETE overlay() { return *m_overlay; }
 
-    void setRegionChanged() { m_regionChanged = true; }
+    void NODELETE setRegionChanged() { m_regionChanged = true; }
 
     virtual bool shouldPaintOverlayIntoLayer() const { return true; }
 
@@ -116,7 +116,7 @@ private:
     bool updateRegion() override;
 };
 
-bool MouseWheelRegionOverlay::updateRegion()
+bool NODELETE MouseWheelRegionOverlay::updateRegion()
 {
     RefPtr page = m_page;
     if (!page)
@@ -364,7 +364,7 @@ std::optional<std::pair<RenderLayer&, GraphicsLayer&>> InteractionRegionOverlay:
     return { { *layer, *graphicsLayer } };
 }
 
-std::optional<InteractionRegion> InteractionRegionOverlay::activeRegion() const
+std::optional<InteractionRegion> NODELETE InteractionRegionOverlay::activeRegion() const
 {
 #if ENABLE(INTERACTION_REGIONS_IN_EVENT_REGION)
     RefPtr page = m_page;
@@ -763,7 +763,7 @@ void RegionOverlay::willMoveToPage(PageOverlay&, Page* page)
         m_overlay = nullptr;
 }
 
-void RegionOverlay::didMoveToPage(PageOverlay&, Page* page)
+void NODELETE RegionOverlay::didMoveToPage(PageOverlay&, Page* page)
 {
     if (page)
         setRegionChanged();
@@ -789,12 +789,12 @@ void RegionOverlay::drawRegion(GraphicsContext& context, const Region& region, c
     }
 }
 
-bool RegionOverlay::mouseEvent(PageOverlay&, const PlatformMouseEvent&)
+bool NODELETE RegionOverlay::mouseEvent(PageOverlay&, const PlatformMouseEvent&)
 {
     return false;
 }
 
-void RegionOverlay::didScrollFrame(PageOverlay&, LocalFrame&)
+void NODELETE RegionOverlay::didScrollFrame(PageOverlay&, LocalFrame&)
 {
 }
 
@@ -821,7 +821,7 @@ DebugPageOverlays& DebugPageOverlays::singleton()
     return *sharedDebugOverlays;
 }
 
-static inline size_t indexOf(DebugPageOverlays::RegionType regionType)
+static inline size_t NODELETE indexOf(DebugPageOverlays::RegionType regionType)
 {
     return static_cast<size_t>(regionType);
 }

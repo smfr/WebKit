@@ -39,7 +39,7 @@ public:
 
     // EventTarget
     enum EventTargetInterfaceType eventTargetInterface() const final;
-    ScriptExecutionContext* scriptExecutionContext() const final;
+    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
     bool addEventListener(const AtomString& eventType, Ref<EventListener>&&, const AddEventListenerOptions&) final;
     using EventTarget::addEventListener;
 

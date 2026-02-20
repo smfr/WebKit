@@ -157,7 +157,7 @@ public:
 
     bool allowFrameAncestors(const LocalFrame&, const URL&, bool overrideContentSecurityPolicy = false) const;
     WEBCORE_EXPORT bool allowFrameAncestors(const Vector<Ref<SecurityOrigin>>& ancestorOrigins, const URL&, bool overrideContentSecurityPolicy = false) const;
-    WEBCORE_EXPORT bool overridesXFrameOptions() const;
+    WEBCORE_EXPORT bool NODELETE overridesXFrameOptions() const;
 
     enum class RedirectResponseReceived : bool { No, Yes };
     WEBCORE_EXPORT bool allowScriptFromSource(const URL&, RedirectResponseReceived = RedirectResponseReceived::No, const URL& preRedirectURL = URL(), const String& = nullString(), const String& nonce = nullString()) const;
@@ -182,7 +182,7 @@ public:
     bool requireTrustedTypesForSinkGroup(const String& sinkGroup, IncludeReportOnlyPolicies = IncludeReportOnlyPolicies::Yes) const;
     bool allowMissingTrustedTypesForSinkGroup(const String& stringContext, const String& sink, const String& sinkGroup, StringView source) const;
 
-    void setOverrideAllowInlineStyle(bool);
+    void NODELETE setOverrideAllowInlineStyle(bool);
 
     void gatherReportURIs(DOMStringList&) const;
 
@@ -206,7 +206,7 @@ public:
     void reportInvalidPathCharacter(const String& directiveName, const String& value, const char) const;
     void reportInvalidSourceExpression(const String& directiveName, const String& source) const;
     bool urlMatchesSelf(const URL&, bool forFrameSrc) const;
-    bool allowContentSecurityPolicySourceStarToMatchAnyProtocol() const;
+    bool NODELETE allowContentSecurityPolicySourceStarToMatchAnyProtocol() const;
 
     // Used by ContentSecurityPolicyDirectiveList
     void reportDuplicateDirective(const String&) const;

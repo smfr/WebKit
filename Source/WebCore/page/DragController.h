@@ -68,7 +68,7 @@ public:
     DragController(Page&, std::unique_ptr<DragClient>&&);
     ~DragController();
 
-    static DragOperation platformGenericDragOperation();
+    static DragOperation NODELETE platformGenericDragOperation();
 
     WEBCORE_EXPORT Variant<std::optional<DragOperation>, RemoteUserInputEventData> dragEnteredOrUpdated(LocalFrame&, DragData&&);
     WEBCORE_EXPORT void dragExited(LocalFrame&, DragData&&);
@@ -114,7 +114,7 @@ public:
     static const float DragImageAlpha;
 
 private:
-    void updateSupportedTypeIdentifiersForDragHandlingMethod(DragHandlingMethod, const DragData&) const;
+    void NODELETE updateSupportedTypeIdentifiersForDragHandlingMethod(DragHandlingMethod, const DragData&) const;
     bool dispatchTextInputEventFor(LocalFrame*, const DragData&);
     bool canProcessDrag(const DragData&);
     bool concludeEditDrag(const DragData&);

@@ -57,7 +57,7 @@ public:
     bool javaEnabled() const { return false; }
     const String& userAgent() const final;
     String platform() const final;
-    void userAgentChanged();
+    void NODELETE userAgentChanged();
     bool onLine() const final;
     bool canShare(Document&, const ShareData&);
     void share(Document&, const ShareData&, Ref<DeferredPromise>&&);
@@ -67,7 +67,7 @@ public:
     bool standalone() const;
 #endif
 
-    int maxTouchPoints() const;
+    int NODELETE maxTouchPoints() const;
 
     WEBCORE_EXPORT GPU* gpu();
 

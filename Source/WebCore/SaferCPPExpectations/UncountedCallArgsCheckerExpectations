@@ -154,7 +154,6 @@ bindings/js/ScriptCachedFrameData.cpp
 bindings/js/ScriptModuleLoader.cpp
 bindings/js/SerializedScriptValue.cpp
 bindings/js/WebAssemblyScriptBufferSourceProvider.h
-bindings/js/WebCoreJSClientData.cpp
 bindings/js/WebCoreTypedArrayController.cpp
 bindings/js/WindowProxy.cpp
 bridge/jsc/BridgeJSC.cpp
@@ -437,7 +436,6 @@ mathml/MathMLSelectElement.cpp
 page/AutoscrollController.cpp
 [ Mac ] page/ContextMenuController.cpp
 [ iOS ] page/DOMTimer.cpp
-page/DebugPageOverlays.h
 page/DragController.cpp
 page/ElementTargetingController.cpp
 page/EventHandler.cpp
@@ -456,7 +454,6 @@ page/Location.cpp
 page/NavigateEvent.cpp
 page/NavigationDestination.cpp
 page/NavigationDestination.h
-page/PageColorSampler.cpp
 page/PageSerializer.cpp
 page/PartitionedSecurityOrigin.h
 page/Performance.cpp

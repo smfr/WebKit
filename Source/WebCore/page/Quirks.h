@@ -66,9 +66,9 @@ public:
 
     bool hasRelevantQuirks() const;
 
-    bool shouldSilenceResizeObservers() const;
-    bool shouldSilenceWindowResizeEventsDuringApplicationSnapshotting() const;
-    bool shouldSilenceMediaQueryListChangeEvents() const;
+    bool NODELETE shouldSilenceResizeObservers() const;
+    bool NODELETE shouldSilenceWindowResizeEventsDuringApplicationSnapshotting() const;
+    bool NODELETE shouldSilenceMediaQueryListChangeEvents() const;
     bool shouldIgnoreInvalidSignal() const;
     bool needsFormControlToBeMouseFocusable() const;
     bool needsAutoplayPlayPauseEvents() const;
@@ -82,56 +82,56 @@ public:
     bool shouldDispatchedSimulatedMouseEventsAssumeDefaultPrevented(EventTarget*) const;
     bool shouldPreventDispatchOfTouchEvent(const AtomString&, EventTarget*) const;
 #endif
-    bool shouldDisablePointerEventsQuirk() const;
-    bool needsDeferKeyDownAndKeyPressTimersUntilNextEditingCommand() const;
-    WEBCORE_EXPORT bool inputMethodUsesCorrectKeyEventOrder() const;
+    bool NODELETE shouldDisablePointerEventsQuirk() const;
+    bool NODELETE needsDeferKeyDownAndKeyPressTimersUntilNextEditingCommand() const;
+    WEBCORE_EXPORT bool NODELETE inputMethodUsesCorrectKeyEventOrder() const;
     bool shouldExposeShowModalDialog() const;
-    bool shouldIgnoreInputModeNone() const;
-    bool shouldNavigatorPluginsBeEmpty() const;
+    bool NODELETE shouldIgnoreInputModeNone() const;
+    bool NODELETE shouldNavigatorPluginsBeEmpty() const;
     bool returnNullPictureInPictureElementDuringFullscreenChange() const;
 
     bool shouldPreventOrientationMediaQueryFromEvaluatingToLandscape() const;
-    bool shouldFlipScreenDimensions() const;
+    bool NODELETE shouldFlipScreenDimensions() const;
 
     WEBCORE_EXPORT bool shouldDispatchSyntheticMouseEventsWhenModifyingSelection() const;
-    WEBCORE_EXPORT bool shouldSuppressAutocorrectionAndAutocapitalizationInHiddenEditableAreas() const;
+    WEBCORE_EXPORT bool NODELETE shouldSuppressAutocorrectionAndAutocapitalizationInHiddenEditableAreas() const;
     WEBCORE_EXPORT bool isTouchBarUpdateSuppressedForHiddenContentEditable() const;
     WEBCORE_EXPORT bool isNeverRichlyEditableForTouchBar() const;
     WEBCORE_EXPORT bool shouldAvoidResizingWhenInputViewBoundsChange() const;
     WEBCORE_EXPORT bool shouldAvoidScrollingWhenFocusedContentIsVisible() const;
     WEBCORE_EXPORT bool shouldUseLayoutViewportForClientRects() const;
     WEBCORE_EXPORT bool shouldUseLegacySelectPopoverDismissalBehaviorInDataActivation() const;
-    WEBCORE_EXPORT bool shouldIgnoreAriaForFastPathContentObservationCheck() const;
-    WEBCORE_EXPORT bool shouldIgnoreViewportArgumentsToAvoidExcessiveZoom() const;
-    WEBCORE_EXPORT bool shouldIgnoreViewportArgumentsToAvoidEnlargedView() const;
+    WEBCORE_EXPORT bool NODELETE shouldIgnoreAriaForFastPathContentObservationCheck() const;
+    WEBCORE_EXPORT bool NODELETE shouldIgnoreViewportArgumentsToAvoidExcessiveZoom() const;
+    WEBCORE_EXPORT bool NODELETE shouldIgnoreViewportArgumentsToAvoidEnlargedView() const;
     WEBCORE_EXPORT bool shouldLayOutAtMinimumWindowWidthWhenIgnoringScalingConstraints() const;
     WEBCORE_EXPORT bool shouldAllowNotificationPermissionWithoutUserGesture() const;
     WEBCORE_EXPORT static bool shouldAllowNavigationToCustomProtocolWithoutUserGesture(StringView protocol, const SecurityOriginData& requesterOrigin);
 
-    WEBCORE_EXPORT bool needsYouTubeMouseOutQuirk() const;
+    WEBCORE_EXPORT bool NODELETE needsYouTubeMouseOutQuirk() const;
 
     WEBCORE_EXPORT bool shouldDisableWritingSuggestionsByDefault() const;
 
     WEBCORE_EXPORT static void updateStorageAccessUserAgentStringQuirks(HashMap<RegistrableDomain, String>&&);
     WEBCORE_EXPORT String storageAccessUserAgentStringQuirkForDomain(const URL&);
     WEBCORE_EXPORT static bool needsIPadMiniUserAgent(const URL&);
-    WEBCORE_EXPORT static bool needsIPhoneUserAgent(const URL&);
-    WEBCORE_EXPORT static bool needsDesktopUserAgent(const URL&);
+    WEBCORE_EXPORT static bool NODELETE needsIPhoneUserAgent(const URL&);
+    WEBCORE_EXPORT static bool NODELETE needsDesktopUserAgent(const URL&);
     WEBCORE_EXPORT static std::optional<String> needsCustomUserAgentOverride(const URL&, const String& applicationNameForUserAgent, const String& currentUserAgent);
 
     WEBCORE_EXPORT static bool needsPartitionedCookies(const ResourceRequest&);
 
-    WEBCORE_EXPORT static std::optional<Vector<HashSet<String>>> defaultVisibilityAdjustmentSelectors(const URL&);
+    WEBCORE_EXPORT static std::optional<Vector<HashSet<String>>> NODELETE defaultVisibilityAdjustmentSelectors(const URL&);
 
-    WEBCORE_EXPORT bool static shouldDisableBlobFileAccessEnforcement();
+    WEBCORE_EXPORT bool static NODELETE shouldDisableBlobFileAccessEnforcement();
 
-    bool needsGMailOverflowScrollQuirk() const;
-    bool needsYouTubeOverflowScrollQuirk() const;
-    bool needsFullscreenDisplayNoneQuirk() const;
-    bool needsFullscreenObjectFitQuirk() const;
+    bool NODELETE needsGMailOverflowScrollQuirk() const;
+    bool NODELETE needsYouTubeOverflowScrollQuirk() const;
+    bool NODELETE needsFullscreenDisplayNoneQuirk() const;
+    bool NODELETE needsFullscreenObjectFitQuirk() const;
     bool needsZomatoEmailLoginLabelQuirk() const;
-    bool needsGoogleMapsScrollingQuirk() const;
-    bool needsGoogleTranslateScrollingQuirk() const;
+    bool NODELETE needsGoogleMapsScrollingQuirk() const;
+    bool NODELETE needsGoogleTranslateScrollingQuirk() const;
     bool needsGeforcenowWarningDisplayNoneQuirk() const;
 
     bool needsPrimeVideoUserSelectNoneQuirk() const;
@@ -141,9 +141,9 @@ public:
     bool needsScrollbarWidthThinDisabledQuirk() const;
     bool needsBodyScrollbarWidthNoneDisabledQuirk() const;
 
-    bool shouldOpenAsAboutBlank(const String&) const;
+    bool NODELETE shouldOpenAsAboutBlank(const String&) const;
 
-    bool needsPreloadAutoQuirk() const;
+    bool NODELETE needsPreloadAutoQuirk() const;
 
     bool shouldBypassBackForwardCache() const;
     bool shouldBypassAsyncScriptDeferring() const;
@@ -235,14 +235,14 @@ public:
     bool shouldEnableCanvas2DAdvancedPrivacyProtectionQuirk() const;
     String advancedPrivacyProtectionSubstituteDataURLForScriptWithFeatures(const String& lastDrawnText, int canvasWidth, int canvasHeight) const;
 
-    bool needsResettingTransitionCancelsRunningTransitionQuirk() const;
+    bool NODELETE needsResettingTransitionCancelsRunningTransitionQuirk() const;
 
     bool shouldDisableDataURLPaddingValidation() const;
 
     bool needsDisableDOMPasteAccessQuirk() const;
 
-    bool shouldDisableElementFullscreenQuirk() const;
-    bool shouldIgnorePlaysInlineRequirementQuirk() const;
+    bool NODELETE shouldDisableElementFullscreenQuirk() const;
+    bool NODELETE shouldIgnorePlaysInlineRequirementQuirk() const;
     WEBCORE_EXPORT bool shouldUseEphemeralPartitionedStorageForDOMCookies(const URL&) const;
 
 #if PLATFORM(IOS_FAMILY)
@@ -255,9 +255,9 @@ public:
     bool mayBenefitFromFingerprintingProtectionQuirk(const URL&) const;
     static String standardUserAgentWithApplicationNameIncludingCompatOverrides(const String&, const String&, UserAgentType);
 
-    String scriptToEvaluateBeforeRunningScriptFromURL(const URL&);
+    String NODELETE scriptToEvaluateBeforeRunningScriptFromURL(const URL&);
 
-    bool shouldHideCoarsePointerCharacteristics() const;
+    bool NODELETE shouldHideCoarsePointerCharacteristics() const;
 
     bool implicitMuteWhenVolumeSetToZero() const;
 
@@ -287,7 +287,7 @@ public:
 
     bool shouldReuseLiveRangeForSelectionUpdate() const;
 
-    bool needsFacebookStoriesCreationFormQuirk(const Element&, const RenderStyle&) const;
+    bool NODELETE needsFacebookStoriesCreationFormQuirk(const Element&, const RenderStyle&) const;
 
     bool needsLimitedMatroskaSupport() const;
 
@@ -303,12 +303,12 @@ public:
 
     bool needsWebKitMediaTextTrackDisplayQuirk() const;
 
-    bool shouldSupportHoverMediaQueries() const;
+    bool NODELETE shouldSupportHoverMediaQueries() const;
 
     bool shouldRewriteMediaRangeRequestForURL(const URL&) const;
     bool shouldDelayReloadWhenRegisteringServiceWorker() const;
 
-    bool ensureCaptionVisibilityInFullscreenAndPictureInPicture() const;
+    bool NODELETE ensureCaptionVisibilityInFullscreenAndPictureInPicture() const;
 
     bool shouldPreventKeyframeEffectAcceleration(const KeyframeEffect&) const;
 

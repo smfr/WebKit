@@ -454,7 +454,7 @@ static IMP originalNSScrollViewScrollWheel;
 static bool _nsScrollViewScrollWheelShouldRetainSelf;
 static void selfRetainingNSScrollViewScrollWheel(NSScrollView *, SEL, NSEvent *);
 
-static bool nsScrollViewScrollWheelShouldRetainSelf()
+static bool NODELETE nsScrollViewScrollWheelShouldRetainSelf()
 {
     ASSERT(isMainThread());
 
@@ -745,12 +745,12 @@ PlatformMouseEvent EventHandler::currentPlatformMouseEvent() const
     return PlatformEventFactory::createPlatformMouseEvent(currentNSEvent(), correspondingPressureEvent(), windowView.get());
 }
 
-bool EventHandler::eventActivatedView(const PlatformMouseEvent& event) const
+bool NODELETE EventHandler::eventActivatedView(const PlatformMouseEvent& event) const
 {
     return m_activationEventNumber == event.eventNumber();
 }
 
-bool EventHandler::needsKeyboardEventDisambiguationQuirks() const
+bool NODELETE EventHandler::needsKeyboardEventDisambiguationQuirks() const
 {
     return m_frame->settings().needsKeyboardEventDisambiguationQuirks();
 }
@@ -766,7 +766,7 @@ OptionSet<PlatformEvent::Modifier> EventHandler::accessKeyModifiers()
     return { PlatformEvent::Modifier::ControlKey, PlatformEvent::Modifier::AltKey };
 }
 
-static ScrollableArea* scrollableAreaForBox(RenderBox& box)
+static ScrollableArea* NODELETE scrollableAreaForBox(RenderBox& box)
 {
     if (auto* listBox = dynamicDowncast<RenderListBox>(box))
         return listBox;

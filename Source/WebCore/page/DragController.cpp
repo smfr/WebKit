@@ -234,7 +234,7 @@ void DragController::dragExited(LocalFrame& frame, DragData&& dragData)
         fileInput->setCanReceiveDroppedFiles(false);
 }
 
-inline static bool dragIsHandledByDocument(DragHandlingMethod dragHandlingMethod)
+inline static bool NODELETE dragIsHandledByDocument(DragHandlingMethod dragHandlingMethod)
 {
     return dragHandlingMethod != DragHandlingMethod::None && dragHandlingMethod != DragHandlingMethod::PageLoad;
 }
@@ -796,7 +796,7 @@ static bool modelElementIsDraggable(const HTMLModelElement& modelElement)
 
 #if ENABLE(ATTACHMENT_ELEMENT)
 
-static RefPtr<HTMLAttachmentElement> enclosingAttachmentElement(Element& element)
+static RefPtr<HTMLAttachmentElement> NODELETE enclosingAttachmentElement(Element& element)
 {
     if (RefPtr attachment = dynamicDowncast<HTMLAttachmentElement>(element))
         return attachment;
@@ -880,7 +880,7 @@ RefPtr<Element> DragController::draggableElement(const LocalFrame* sourceFrame, 
     return selectionDragElement;
 }
 
-static CachedImage* getCachedImage(Element& element)
+static CachedImage* NODELETE getCachedImage(Element& element)
 {
     CheckedPtr renderImage = dynamicDowncast<RenderImage>(element.renderer());
     return renderImage ? renderImage->cachedImage() : nullptr;
@@ -904,7 +904,7 @@ static void selectElement(Element& element)
     }
 }
 
-static IntPoint dragLocForDHTMLDrag(const IntPoint& mouseDraggedPoint, const IntPoint& dragOrigin, const IntPoint& dragImageOffset, bool isLinkImage)
+static IntPoint NODELETE dragLocForDHTMLDrag(const IntPoint& mouseDraggedPoint, const IntPoint& dragOrigin, const IntPoint& dragImageOffset, bool isLinkImage)
 {
     // dragImageOffset is the cursor position relative to the lower-left corner of the image.
 #if PLATFORM(MAC)

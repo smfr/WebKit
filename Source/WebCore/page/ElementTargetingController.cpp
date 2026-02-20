@@ -97,33 +97,33 @@ static constexpr auto minimumAreaRatioForElementToCoverViewport = 0.95;
 static constexpr auto minimumAreaForInterpolation = 200000;
 static constexpr auto maximumAreaForInterpolation = 800000;
 
-static float linearlyInterpolatedViewportRatio(float viewportArea, float minimumValue, float maximumValue)
+static float NODELETE linearlyInterpolatedViewportRatio(float viewportArea, float minimumValue, float maximumValue)
 {
     auto areaRatio = (viewportArea - minimumAreaForInterpolation) / (maximumAreaForInterpolation - minimumAreaForInterpolation);
     return clampTo(maximumValue - areaRatio * (maximumValue - minimumValue), minimumValue, maximumValue);
 }
 
-static float maximumAreaRatioForAbsolutelyPositionedContent(float viewportArea)
+static float NODELETE maximumAreaRatioForAbsolutelyPositionedContent(float viewportArea)
 {
     return linearlyInterpolatedViewportRatio(viewportArea, 0.75, 1);
 }
 
-static float maximumAreaRatioForInFlowContent(float viewportArea)
+static float NODELETE maximumAreaRatioForInFlowContent(float viewportArea)
 {
     return linearlyInterpolatedViewportRatio(viewportArea, 0.5, 1);
 }
 
-static float maximumAreaRatioForNearbyTargets(float viewportArea)
+static float NODELETE maximumAreaRatioForNearbyTargets(float viewportArea)
 {
     return linearlyInterpolatedViewportRatio(viewportArea, 0.25, 0.5);
 }
 
-static float minimumAreaRatioForInFlowContent(float viewportArea)
+static float NODELETE minimumAreaRatioForInFlowContent(float viewportArea)
 {
     return linearlyInterpolatedViewportRatio(viewportArea, 0.005, 0.01);
 }
 
-static float maximumAreaRatioForTrackingAdjustmentAreas(float viewportArea)
+static float NODELETE maximumAreaRatioForTrackingAdjustmentAreas(float viewportArea)
 {
     return linearlyInterpolatedViewportRatio(viewportArea, 0.25, 0.3);
 }
@@ -333,7 +333,7 @@ static inline String computeTagAndClassSelector(Element& element)
 static String siblingRelativeSelectorRecursive(Element&, ElementSelectorCache&);
 static String parentRelativeSelectorRecursive(Element&, ElementSelectorCache&);
 
-static String shortestSelector(const Vector<String>& selectors)
+static String NODELETE shortestSelector(const Vector<String>& selectors)
 {
     auto minLength = std::numeric_limits<size_t>::max();
     String shortestSelector;
@@ -567,7 +567,7 @@ TargetedElementSelectors ElementTargetingController::selectorsForElement(Element
     });
 }
 
-static inline RectEdges<bool> computeOffsetEdges(const RenderStyle& style)
+static inline RectEdges<bool> NODELETE computeOffsetEdges(const RenderStyle& style)
 {
     return {
         style.top().isSpecified(),
@@ -860,7 +860,7 @@ static inline std::optional<IntRect> inflatedClientRectForAdjustmentRegionTracki
     return { inflatedClientRect };
 }
 
-static bool shouldIgnoreExistingVisibilityAdjustments(const TargetedElementRequest& request)
+static bool NODELETE shouldIgnoreExistingVisibilityAdjustments(const TargetedElementRequest& request)
 {
     return std::holds_alternative<String>(request.data) || std::holds_alternative<TargetedElementSelectors>(request.data);
 }
@@ -1429,7 +1429,7 @@ static inline Ref<Element> elementToAdjust(Element& element)
     return element;
 }
 
-static inline VisibilityAdjustment adjustmentToApply(Element& element)
+static inline VisibilityAdjustment NODELETE adjustmentToApply(Element& element)
 {
     if (element.isAfterPseudoElement())
         return VisibilityAdjustment::AfterPseudo;

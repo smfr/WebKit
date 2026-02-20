@@ -70,7 +70,7 @@ protected:
     unsigned exposedUnfilledArea() const;
 
 private:
-    ScrollingTreeScrollingNodeDelegateMac& delegate() const;
+    ScrollingTreeScrollingNodeDelegateMac& NODELETE delegate() const;
 
     void willBeDestroyed() final;
     void willDoProgrammaticScroll(const FloatPoint&) final;

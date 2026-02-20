@@ -52,7 +52,7 @@ public:
     WEBCORE_EXPORT ScrollingStateTree(ScrollingStateTree&&);
     WEBCORE_EXPORT ~ScrollingStateTree();
 
-    WEBCORE_EXPORT RefPtr<ScrollingStateFrameScrollingNode> rootStateNode() const;
+    WEBCORE_EXPORT RefPtr<ScrollingStateFrameScrollingNode> NODELETE rootStateNode() const;
     WEBCORE_EXPORT RefPtr<ScrollingStateNode> stateNodeForID(std::optional<ScrollingNodeID>) const;
 
     ScrollingNodeID createUnparentedNode(ScrollingNodeType, ScrollingNodeID);
@@ -100,7 +100,7 @@ public:
 private:
     ScrollingStateTree(bool hasNewRootStateNode, bool hasChangedProperties, RefPtr<ScrollingStateFrameScrollingNode>&&);
 
-    void setRootStateNode(Ref<ScrollingStateFrameScrollingNode>&&);
+    void NODELETE setRootStateNode(Ref<ScrollingStateFrameScrollingNode>&&);
     void addNode(ScrollingStateNode&);
 
     Ref<ScrollingStateNode> createNode(ScrollingNodeType, ScrollingNodeID);

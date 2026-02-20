@@ -134,7 +134,7 @@ using TextNodesAndText = Vector<std::pair<Ref<Text>, String>>;
 using TextAndSelectedRange = std::pair<String, std::optional<CharacterRange>>;
 using TextAndSelectedRangeMap = HashMap<Ref<Text>, TextAndSelectedRange>;
 
-static bool hasEnclosingAutoFilledInput(Node& node)
+static bool NODELETE hasEnclosingAutoFilledInput(Node& node)
 {
     RefPtr input = dynamicDowncast<HTMLInputElement>(node.shadowHost());
     if (!input)
@@ -270,7 +270,7 @@ struct TraversalContext {
         return enclosingBlockNumberMap.get(*enclosingBlocks.last());
     }
 
-    void popEnclosingBlock()
+    void NODELETE popEnclosingBlock()
     {
         enclosingBlocks.removeLast();
     }
@@ -456,7 +456,7 @@ enum class SkipExtraction : bool {
     SelfAndSubtree
 };
 
-static bool shouldTreatAsPasswordField(const Element* element)
+static bool NODELETE shouldTreatAsPasswordField(const Element* element)
 {
     RefPtr input = dynamicDowncast<HTMLInputElement>(element);
     return input && input->hasEverBeenPasswordField();
@@ -1272,7 +1272,7 @@ struct TokenAndBlockOffset {
     int offset { 0 };
 };
 
-static IntSize reducePrecision(FloatSize size)
+static IntSize NODELETE reducePrecision(FloatSize size)
 {
     static constexpr auto resolution = 10;
     return {

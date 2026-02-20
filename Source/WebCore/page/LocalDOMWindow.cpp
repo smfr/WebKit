@@ -202,7 +202,7 @@ void LocalDOMWindow::forEachWindowInterestedInStorageEvents(NOESCAPE const Funct
         apply(window);
 }
 
-static std::optional<Seconds>& transientActivationDurationOverrideForTesting()
+static std::optional<Seconds>& NODELETE transientActivationDurationOverrideForTesting()
 {
     static NeverDestroyed<std::optional<Seconds>> overrideForTesting;
     return overrideForTesting;
@@ -219,13 +219,13 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(LocalDOMWindow);
 
 typedef HashCountedSet<LocalDOMWindow*> LocalDOMWindowSet;
 
-static LocalDOMWindowSet& windowsWithUnloadEventListeners()
+static LocalDOMWindowSet& NODELETE windowsWithUnloadEventListeners()
 {
     static NeverDestroyed<LocalDOMWindowSet> windowsWithUnloadEventListeners;
     return windowsWithUnloadEventListeners;
 }
 
-static LocalDOMWindowSet& windowsWithBeforeUnloadEventListeners()
+static LocalDOMWindowSet& NODELETE windowsWithBeforeUnloadEventListeners()
 {
     static NeverDestroyed<LocalDOMWindowSet> windowsWithBeforeUnloadEventListeners;
     return windowsWithBeforeUnloadEventListeners;
@@ -267,7 +267,7 @@ static void removeAllBeforeUnloadEventListeners(LocalDOMWindow* domWindow)
         domWindow->enableSuddenTermination();
 }
 
-static bool allowsBeforeUnloadListeners(LocalDOMWindow* window)
+static bool NODELETE allowsBeforeUnloadListeners(LocalDOMWindow* window)
 {
     ASSERT_ARG(window, window);
     RefPtr frame = window->frame();

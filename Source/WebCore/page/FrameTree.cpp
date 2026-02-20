@@ -48,12 +48,12 @@ FrameTree::~FrameTree()
         child->disconnectView();
 }
 
-void FrameTree::setSpecifiedName(const AtomString& specifiedName)
+void NODELETE FrameTree::setSpecifiedName(const AtomString& specifiedName)
 {
     m_specifiedName = specifiedName;
 }
 
-void FrameTree::clearName()
+void NODELETE FrameTree::clearName()
 {
     m_specifiedName = nullAtom();
 }
@@ -224,7 +224,7 @@ unsigned FrameTree::scopedChildCount() const
     return m_scopedChildCount;
 }
 
-unsigned FrameTree::childCount() const
+unsigned NODELETE FrameTree::childCount() const
 {
     unsigned count = 0;
     for (auto* child = firstChild(); child; child = child->tree().nextSibling())
@@ -268,7 +268,7 @@ Frame* FrameTree::childBySpecifiedName(const AtomString& name) const
 
 // FrameTree::find() only returns frames in pages that are related to the active
 // page by an opener <-> openee relationship.
-static bool isFrameFamiliarWith(Frame& frameA, Frame& frameB)
+static bool NODELETE isFrameFamiliarWith(Frame& frameA, Frame& frameB)
 {
     if (frameA.page() == frameB.page())
         return true;
@@ -341,7 +341,7 @@ RefPtr<Frame> FrameTree::findBySpecifiedName(const AtomString& specifiedName, Fr
     }, activeFrame);
 }
 
-bool FrameTree::isDescendantOf(const Frame* ancestor) const
+bool NODELETE FrameTree::isDescendantOf(const Frame* ancestor) const
 {
     if (!ancestor)
         return false;

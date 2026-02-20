@@ -130,7 +130,7 @@ static inline OptionSet<AutoplayQuirk> allowedAutoplayQuirks(Document* document)
     return allowedAutoplayQuirks(*document);
 }
 
-static HashMap<RegistrableDomain, String>& updatableStorageAccessUserAgentStringQuirks()
+static HashMap<RegistrableDomain, String>& NODELETE updatableStorageAccessUserAgentStringQuirks()
 {
     // FIXME: Make this a member of Quirks.
     static MainThreadNeverDestroyed<HashMap<RegistrableDomain, String>> map;
@@ -140,13 +140,13 @@ static HashMap<RegistrableDomain, String>& updatableStorageAccessUserAgentString
 #if USE(APPLE_INTERNAL_SDK)
 #import <WebKitAdditions/QuirksAdditions.cpp>
 #else
-static inline bool needsDesktopUserAgentInternal(const URL&) { return false; }
-static inline bool shouldPreventOrientationMediaQueryFromEvaluatingToLandscapeInternal(const URL&) { return false; }
-static inline bool shouldNotAutoUpgradeToHTTPSNavigationInternal(const URL&) { return false; }
-static inline bool shouldDisableBlobFileAccessEnforcementInternal() { return false; }
-static inline bool needsConsistentQueryParameterFilteringInternal(const URL&) { return false; }
+static inline bool NODELETE needsDesktopUserAgentInternal(const URL&) { return false; }
+static inline bool NODELETE shouldPreventOrientationMediaQueryFromEvaluatingToLandscapeInternal(const URL&) { return false; }
+static inline bool NODELETE shouldNotAutoUpgradeToHTTPSNavigationInternal(const URL&) { return false; }
+static inline bool NODELETE shouldDisableBlobFileAccessEnforcementInternal() { return false; }
+static inline bool NODELETE needsConsistentQueryParameterFilteringInternal(const URL&) { return false; }
 #if PLATFORM(COCOA)
-static inline String standardUserAgentWithApplicationNameIncludingCompatOverridesInternal(const String&, const String&, UserAgentType) { return { }; }
+static inline String NODELETE standardUserAgentWithApplicationNameIncludingCompatOverridesInternal(const String&, const String&, UserAgentType) { return { }; }
 #endif
 #endif
 

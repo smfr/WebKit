@@ -56,13 +56,13 @@ public:
     };
 
     std::optional<BoxSizes> elementSizeChanged() const;
-    void updateObservationSize(const BoxSizes&);
-    void resetObservationSize();
+    void NODELETE updateObservationSize(const BoxSizes&);
+    void NODELETE resetObservationSize();
 
     FloatRect computeContentRect() const;
-    FloatSize borderBoxSize() const;
-    FloatSize contentBoxSize() const;
-    FloatSize snappedContentBoxSize() const;
+    FloatSize NODELETE borderBoxSize() const;
+    FloatSize NODELETE contentBoxSize() const;
+    FloatSize NODELETE snappedContentBoxSize() const;
 
     Element* target() const { return m_target.get(); }
     ResizeObserverBoxOptions observedBox() const { return m_observedBox; }

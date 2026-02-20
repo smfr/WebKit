@@ -98,8 +98,8 @@ public:
     WEBCORE_EXPORT virtual void setRubberBandingInProgressForNode(ScrollingNodeID, bool);
 
 #if HAVE(RUBBER_BANDING)
-    void setPendingMainFrameRubberbandingState(std::optional<RubberbandingState>&&) WTF_REQUIRES_LOCK(m_treeLock);
-    std::optional<RubberbandingState> takePendingMainFrameRubberbandingState() WTF_REQUIRES_LOCK(m_treeLock);
+    void NODELETE setPendingMainFrameRubberbandingState(std::optional<RubberbandingState>&&) WTF_REQUIRES_LOCK(m_treeLock);
+    std::optional<RubberbandingState> NODELETE takePendingMainFrameRubberbandingState() WTF_REQUIRES_LOCK(m_treeLock);
 #endif
 
     bool isUserScrollInProgressForNode(std::optional<ScrollingNodeID>);
@@ -315,11 +315,11 @@ private:
     void notifyRelatedNodesRecursive(ScrollingTreeNode&);
     void traverseScrollingTreeRecursive(ScrollingTreeNode&, NOESCAPE const VisitorFunction&) WTF_REQUIRES_LOCK(m_treeLock);
     
-    void setOverlayScrollbarsEnabled(bool);
+    void NODELETE setOverlayScrollbarsEnabled(bool);
     
     virtual void didCommitTree() { }
 
-    WEBCORE_EXPORT virtual RefPtr<ScrollingTreeNode> scrollingNodeForPoint(FloatPoint);
+    WEBCORE_EXPORT virtual RefPtr<ScrollingTreeNode> NODELETE scrollingNodeForPoint(FloatPoint);
 #if ENABLE(WHEEL_EVENT_REGIONS)
     WEBCORE_EXPORT virtual OptionSet<EventListenerRegionType> eventListenerRegionTypesForPoint(FloatPoint) const;
 #endif

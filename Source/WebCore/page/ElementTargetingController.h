@@ -62,7 +62,7 @@ public:
     void adjustVisibilityInRepeatedlyTargetedRegions(Document&);
 
     void reset();
-    void didChangeMainDocument(Document* newDocument);
+    void NODELETE didChangeMainDocument(Document* newDocument);
 
     WEBCORE_EXPORT uint64_t numberOfVisibilityAdjustmentRects();
     WEBCORE_EXPORT bool resetVisibilityAdjustments(const Vector<TargetedElementIdentifiers>&);
@@ -84,7 +84,7 @@ private:
     FindElementFromSelectorsResult findElementFromSelectors(const TargetedElementSelectors&);
     static FindElementFromSelectorsResult findElementFromSelectors(Document&, const TargetedElementSelectors&);
 
-    RefPtr<Document> mainDocument() const;
+    RefPtr<Document> NODELETE mainDocument() const;
 
     void dispatchVisibilityAdjustmentStateDidChange();
     void selectorBasedVisibilityAdjustmentTimerFired();

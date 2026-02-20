@@ -203,7 +203,7 @@ private:
     WEBCORE_EXPORT void setScrollbarEnabled(Scrollbar&) override;
     WEBCORE_EXPORT void setScrollbarWidth(ScrollableArea&, ScrollbarWidth) override;
 
-    void hysterisisTimerFired(PAL::HysteresisState);
+    void NODELETE hysterisisTimerFired(PAL::HysteresisState);
 
     SmallMap<FrameIdentifier, UniqueRef<ScrollingStateTree>> m_scrollingStateTrees;
     RefPtr<ScrollingTree> m_scrollingTree;

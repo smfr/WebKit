@@ -238,7 +238,7 @@ private:
     MonotonicTime m_start;
 };
 
-static UserGestureType userGestureTypeForPlatformEvent(const PlatformKeyboardEvent& keyEvent)
+static UserGestureType NODELETE userGestureTypeForPlatformEvent(const PlatformKeyboardEvent& keyEvent)
 {
     // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     // An activation triggering input event is any event whose isTrusted attribute is true and whose type is one of:
@@ -252,7 +252,7 @@ static UserGestureType userGestureTypeForPlatformEvent(const PlatformKeyboardEve
     return UserGestureType::Other;
 }
 
-static UserGestureType userGestureTypeForPlatformEvent(const PlatformMouseEvent& mouseEvent)
+static UserGestureType NODELETE userGestureTypeForPlatformEvent(const PlatformMouseEvent& mouseEvent)
 {
     // ...
     // * "mousedown".
@@ -342,7 +342,7 @@ public:
 };
 #endif // ENABLE(TOUCH_EVENTS) && !ENABLE(IOS_TOUCH_EVENTS)
 
-static inline ScrollGranularity wheelGranularityToScrollGranularity(unsigned deltaMode)
+static inline ScrollGranularity NODELETE wheelGranularityToScrollGranularity(unsigned deltaMode)
 {
     switch (deltaMode) {
     case WheelEvent::DOM_DELTA_PAGE:
@@ -386,7 +386,7 @@ bool EventHandler::eventLoopHandleMouseDragged(const MouseEventWithHitTestResult
 // If a mouse event handler changes the input element type to one that has a widget associated,
 // we'd like to EventHandler::handleMousePressEvent to pass the event to the widget and thus the
 // event target node can't still be the shadow node.
-static inline bool shouldRefetchEventTarget(const MouseEventWithHitTestResults& mouseEvent)
+static inline bool NODELETE shouldRefetchEventTarget(const MouseEventWithHitTestResults& mouseEvent)
 {
     RefPtr targetNode = mouseEvent.targetNode();
     ASSERT(targetNode);
@@ -1959,7 +1959,7 @@ static Scrollbar* scrollbarForMouseEvent(const MouseEventWithHitTestResults& mou
 
 }
 
-static LastKnownMousePositionSource mousePositionSource(const PlatformMouseEvent& event)
+static LastKnownMousePositionSource NODELETE mousePositionSource(const PlatformMouseEvent& event)
 {
     using enum LastKnownMousePositionSource;
     return event.syntheticClickType() == SyntheticClickType::NoTap ? Mouse : Touch;
@@ -2693,7 +2693,7 @@ bool EventHandler::canDropCurrentlyDraggedImageAsFile() const
     return !sourceOrigin || protect(protect(m_frame->document())->securityOrigin())->canReceiveDragData(*sourceOrigin);
 }
 
-static std::pair<bool, RefPtr<Frame>> contentFrameForNode(Node* target)
+static std::pair<bool, RefPtr<Frame>> NODELETE contentFrameForNode(Node* target)
 {
     RefPtr frameElement = dynamicDowncast<HTMLFrameElementBase>(target);
     if (!frameElement)
@@ -3453,7 +3453,7 @@ Widget* EventHandler::widgetForEventTarget(Element* eventTarget)
     return renderWidget->widget();
 }
 
-static RefPtr<Widget> widgetForElement(const Element& element)
+static RefPtr<Widget> NODELETE widgetForElement(const Element& element)
 {
     auto* renderWidget = dynamicDowncast<RenderWidget>(element.renderer());
     if (!renderWidget || !renderWidget->widget())

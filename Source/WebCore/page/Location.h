@@ -83,7 +83,7 @@ private:
 
     ExceptionOr<void> setLocation(LocalDOMWindow& incumbentWindow, LocalDOMWindow& firstWindow, const String&);
 
-    Frame* frame();
+    Frame* NODELETE frame();
     const Frame* frame() const;
 
     WeakPtr<DOMWindow, WeakPtrImplWithEventTargetData> m_window;
