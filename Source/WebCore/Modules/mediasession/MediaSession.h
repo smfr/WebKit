@@ -193,7 +193,7 @@ private:
     std::optional<MediaPositionState> m_positionState;
     std::optional<double> m_lastReportedPosition;
     MonotonicTime m_timeAtLastPositionUpdate;
-    HashMap<MediaSessionAction, RefPtr<MediaSessionActionHandler>, IntHash<MediaSessionAction>, WTF::StrongEnumHashTraits<MediaSessionAction>> m_actionHandlers WTF_GUARDED_BY_LOCK(m_actionHandlersLock);
+    HashMap<MediaSessionAction, Ref<MediaSessionActionHandler>, IntHash<MediaSessionAction>, WTF::StrongEnumHashTraits<MediaSessionAction>> m_actionHandlers WTF_GUARDED_BY_LOCK(m_actionHandlersLock);
     RefPtr<const Logger> m_logger;
     uint64_t m_logIdentifier { 0 };
 
@@ -225,10 +225,8 @@ void MediaSession::visitActionHandlers(Visitor& visitor) const
 {
     Locker lock { m_actionHandlersLock };
     for (auto& actionHandler : m_actionHandlers) {
-        if (actionHandler.value) {
-            // We are not ref'ing here as this function may get called from a GC thread.
-            SUPPRESS_UNCOUNTED_ARG actionHandler.value->visitJSFunction(visitor);
-        }
+        // We are not ref'ing here as this function may get called from a GC thread.
+        SUPPRESS_UNCOUNTED_ARG actionHandler.value->visitJSFunction(visitor);
     }
 }
 

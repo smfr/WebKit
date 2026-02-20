@@ -291,7 +291,7 @@ ExceptionOr<void> MediaSession::setActionHandler(MediaSessionAction action, RefP
         ALWAYS_LOG(LOGIDENTIFIER, "adding ", action);
         {
             Locker lock { m_actionHandlersLock };
-            m_actionHandlers.set(action, handler);
+            m_actionHandlers.set(action, handler.releaseNonNull());
         }
 
         if (sessionManager) {

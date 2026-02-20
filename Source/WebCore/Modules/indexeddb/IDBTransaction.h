@@ -266,7 +266,7 @@ private:
     HashMap<String, std::unique_ptr<IDBObjectStore>> m_referencedObjectStores WTF_GUARDED_BY_LOCK(m_referencedObjectStoreLock);
     HashMap<IDBObjectStoreIdentifier, std::unique_ptr<IDBObjectStore>> m_deletedObjectStores;
 
-    HashSet<RefPtr<IDBRequest>> m_openRequests;
+    HashSet<Ref<IDBRequest>> m_openRequests;
     RefPtr<IDBRequest> m_currentlyCompletingRequest;
 
     bool m_isStopped { false };
