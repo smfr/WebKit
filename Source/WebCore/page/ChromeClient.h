@@ -110,6 +110,7 @@ class Geolocation;
 class GraphicsLayer;
 class GraphicsLayerFactory;
 class HTMLAttachmentElement;
+class HTMLFrameOwnerElement;
 class HTMLImageElement;
 class HTMLInputElement;
 class HTMLMediaElement;
@@ -696,6 +697,8 @@ public:
 #if ENABLE(WEB_AUTHN)
     virtual void setMockWebAuthenticationConfiguration(const MockWebAuthenticationConfiguration&) { }
 #endif
+
+    virtual HTMLFrameOwnerElement* frameOwnerElementForFrameID(FrameIdentifier) const { return nullptr; }
 
     virtual bool requiresScriptTrackingPrivacyProtections(const URL&, const SecurityOrigin& /* topOrigin */) const { return false; }
     virtual bool shouldAllowScriptAccess(const URL&, const WebCore::SecurityOrigin&, ScriptTrackingPrivacyCategory) const { return true; }

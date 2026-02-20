@@ -88,6 +88,8 @@ public:
 
     WEBCORE_EXPORT FocusableElementSearchResult findFocusableElementStartingWithLocalFrame(FocusDirection, const FocusEventData&, LocalFrame&, ShouldFocusElement);
 
+    WEBCORE_EXPORT FocusableElementSearchResult findFocusableElementContinuingFromFrame(FocusDirection, WebCore::FrameIdentifier, const FocusEventData&, LocalFrame&, ShouldFocusElement);
+
 private:
     void setActiveInternal(bool);
     void setFocusedInternal(bool);
