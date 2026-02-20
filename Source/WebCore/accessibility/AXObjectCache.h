@@ -450,6 +450,10 @@ public:
             // If something does have a renderer, we would already get children-changed notifications
             // from the render tree.
             childrenChanged(RefPtr { get(node) }.get());
+        } else if (node.renderer()->isRenderHTMLCanvas()) {
+            // Canvas fallback content (its DOM children) is not rendered, so we won't receive
+            // children-changed notifications from the render tree when those children change.
+            childrenChanged(RefPtr { get(node) }.get());
         }
     }
     void childrenChanged(RenderObject&, RenderObject* newChild = nullptr);

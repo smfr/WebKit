@@ -4,7 +4,6 @@ accessibility/isolated-tree [ Pass ]
 #
 # Potentially caused by: https://github.com/WebKit/WebKit/commit/2517a540e6f5a2037c6843102f3a9cb753f2f9f0
 accessibility/content-editable-set-inner-text-generates-axvalue-notification.html [ Failure Pass ]
-accessibility/dynamically-ignored-canvas.html [ Failure ]
 accessibility/keyevents-for-actions-mimic-real-key-events.html [ Failure ]
 accessibility/keyevents-posted-for-increment-actions.html [ Failure ]
 accessibility/mac/focus-setting-selection-syncronizing-not-clearing.html [ Failure ]
