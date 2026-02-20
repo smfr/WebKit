@@ -39,9 +39,6 @@ accessibility/datetime/input-date-field-labels-and-value-changes.html [ Pass Fai
 accessibility/text-marker/text-marker-bidi-element-arabic.html [ Failure ]
 accessibility/text-marker/text-marker-bidi-element-hebrew.html [ Failure ]
 
-# Fails because we don't emit a tab between table cells.
-accessibility/mac/attributed-string-for-table.html [ Failure ]
-
 accessibility/mac/search-text-with-image-hang.html [ Failure ]
 
 # Failures introduced by ENABLE(AX_THREAD_TEXT_APIS).
