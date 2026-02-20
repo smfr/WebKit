@@ -75,14 +75,14 @@ private:
 
     // ActiveDOMObject.
     void stop() final;
-    void suspend(ReasonForSuspension) final;
+    void NODELETE suspend(ReasonForSuspension) final;
 
     // EventTarget
     enum EventTargetInterfaceType eventTargetInterface() const final { return EventTargetInterfaceType::WebCodecsAudioDecoder; }
 
     ExceptionOr<void> closeDecoder(Exception&&);
     ExceptionOr<void> resetDecoder(const Exception&);
-    void setInternalDecoder(Ref<AudioDecoder>&&);
+    void NODELETE setInternalDecoder(Ref<AudioDecoder>&&);
 
     const Ref<WebCodecsAudioDataOutputCallback> m_output;
     const Ref<WebCodecsErrorCallback> m_error;

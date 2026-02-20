@@ -47,7 +47,7 @@
 namespace WebCore {
 
 #if !RELEASE_LOG_DISABLED
-static WTFLogChannel& logChannel() { return LogEME; }
+static WTFLogChannel& NODELETE logChannel() { return LogEME; }
 static ASCIILiteral logClassName() { return "MediaKeys"_s; }
 #endif
 

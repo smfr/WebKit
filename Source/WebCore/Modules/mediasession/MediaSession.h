@@ -104,7 +104,7 @@ public:
     void willBeginPlayback();
     void willPausePlayback();
 
-    WEBCORE_EXPORT Document* document() const;
+    WEBCORE_EXPORT Document* NODELETE document() const;
 
 #if ENABLE(MEDIA_SESSION_COORDINATOR)
     MediaSessionReadyState readyState() const { return m_readyState; };
@@ -130,7 +130,7 @@ public:
     const Logger& logger() const { return *m_logger.get(); }
 #endif
 
-    bool hasObserver(MediaSessionObserver&) const;
+    bool NODELETE hasObserver(MediaSessionObserver&) const;
     WEBCORE_EXPORT void addObserver(MediaSessionObserver&);
     void removeObserver(MediaSessionObserver&);
 
@@ -175,9 +175,9 @@ private:
     PlatformMediaSessionMediaType presentationType() const final { return PlatformMediaSessionMediaType::DOMMediaSession; }
     void mayResumePlayback(bool shouldResume) final;
     void suspendPlayback() final;
-    bool isPlaying() const final;
+    bool NODELETE isPlaying() const final;
     bool isAudible() const final { return false; }
-    bool isEnded() const final;
+    bool NODELETE isEnded() const final;
     MediaTime mediaSessionDuration() const final;
     bool canReceiveRemoteControlCommands() const final { return false; }
     void didReceiveRemoteControlCommand(PlatformMediaSessionRemoteControlCommandType, const PlatformMediaSessionRemoteCommandArgument&) final { }

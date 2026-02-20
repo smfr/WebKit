@@ -272,7 +272,7 @@ WebSocketHandshake::Mode WebSocketHandshake::mode() const
     return m_mode;
 }
 
-String WebSocketHandshake::failureReason() const
+String NODELETE WebSocketHandshake::failureReason() const
 {
     return m_failureReason;
 }

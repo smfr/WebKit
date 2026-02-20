@@ -91,7 +91,7 @@ Vector<uint8_t> RTCRtpSFrameTransformer::computeEncryptedDataSignature(const Vec
     return result;
 }
 
-void RTCRtpSFrameTransformer::updateAuthenticationSize()
+void NODELETE RTCRtpSFrameTransformer::updateAuthenticationSize()
 {
     if (m_authenticationSize > CC_SHA256_DIGEST_LENGTH)
         m_authenticationSize = CC_SHA256_DIGEST_LENGTH;

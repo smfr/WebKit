@@ -126,10 +126,10 @@ public:
     unsigned numberOfInputs() const { return m_inputs.size(); }
     unsigned numberOfOutputs() const { return m_outputs.size(); }
 
-    AudioNodeInput* input(unsigned);
-    CheckedPtr<AudioNodeInput> checkedInput(unsigned);
-    AudioNodeOutput* output(unsigned);
-    CheckedPtr<AudioNodeOutput> checkedOutput(unsigned);
+    AudioNodeInput* NODELETE input(unsigned);
+    CheckedPtr<AudioNodeInput> NODELETE checkedInput(unsigned);
+    AudioNodeOutput* NODELETE output(unsigned);
+    CheckedPtr<AudioNodeOutput> NODELETE checkedOutput(unsigned);
 
     // Called from main thread by corresponding JavaScript methods.
     ExceptionOr<void> connect(AudioNode&, unsigned outputIndex, unsigned inputIndex);
@@ -237,10 +237,10 @@ protected:
     const Logger& logger() const final { return m_logger.get(); }
     uint64_t logIdentifier() const final { return m_logIdentifier; }
     ASCIILiteral logClassName() const final { return "AudioNode"_s; }
-    WTFLogChannel& logChannel() const final;
+    WTFLogChannel& NODELETE logChannel() const final;
 #endif
 
-    void initializeDefaultNodeOptions(unsigned count, ChannelCountMode, ChannelInterpretation);
+    void NODELETE initializeDefaultNodeOptions(unsigned count, ChannelCountMode, ChannelInterpretation);
 
     virtual void updatePullStatus() { }
 

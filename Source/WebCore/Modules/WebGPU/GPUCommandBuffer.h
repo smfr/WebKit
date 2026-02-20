@@ -44,13 +44,13 @@ public:
         return adoptRef(*new GPUCommandBuffer(WTF::move(backing), encoder));
     }
 
-    String label() const;
+    String NODELETE label() const;
     void setLabel(String&&);
-    void setOverrideLabel(String&&);
+    void NODELETE setOverrideLabel(String&&);
 
     WebGPU::CommandBuffer& backing() { return m_backing; }
     const WebGPU::CommandBuffer& backing() const { return m_backing; }
-    void setBacking(WebGPU::CommandEncoder&, WebGPU::CommandBuffer&);
+    void NODELETE setBacking(WebGPU::CommandEncoder&, WebGPU::CommandBuffer&);
 
 private:
     GPUCommandBuffer(Ref<WebGPU::CommandBuffer>&& backing, GPUCommandEncoder& encoder)

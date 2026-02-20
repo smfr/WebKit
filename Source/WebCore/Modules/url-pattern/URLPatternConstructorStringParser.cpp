@@ -112,7 +112,7 @@ String URLPatternConstructorStringParser::makeComponentString() const
     return m_input.substring(componentStartIndex, *token.index - componentStartIndex).toString();
 }
 
-static inline void setInitComponentFromState(URLPatternInit& init, URLPatternConstructorStringParserState state, String&& componentString)
+static inline void NODELETE setInitComponentFromState(URLPatternInit& init, URLPatternConstructorStringParserState state, String&& componentString)
 {
     switch (state) {
     case URLPatternConstructorStringParserState::Protocol:

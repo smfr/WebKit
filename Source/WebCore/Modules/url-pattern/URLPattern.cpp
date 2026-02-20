@@ -57,7 +57,7 @@ static String processBaseURLString(StringView input, BaseURLStringType type)
 }
 
 // https://urlpattern.spec.whatwg.org/#hostname-pattern-is-an-ipv6-address
-static bool isHostnamePatternIPv6(StringView hostname)
+static bool NODELETE isHostnamePatternIPv6(StringView hostname)
 {
     if (hostname.length() < 2)
         return false;
@@ -374,7 +374,7 @@ static inline void matchHelperAssignInputsFromURL(const URL& input, String& prot
     hash = input.fragmentIdentifier().toString();
 }
 
-static inline void matchHelperAssignInputsFromInit(const URLPatternInit& input, String& protocol, String& username, String& password, String& hostname, String& port, String& pathname, String& search, String& hash)
+static inline void NODELETE matchHelperAssignInputsFromInit(const URLPatternInit& input, String& protocol, String& username, String& password, String& hostname, String& port, String& pathname, String& search, String& hash)
 {
     protocol = input.protocol;
     username = input.username;

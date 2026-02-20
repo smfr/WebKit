@@ -122,7 +122,7 @@ public:
     WEBCORE_EXPORT void handleDelete(IDBConnectionToClient&, const IDBOpenRequestData&);
     WEBCORE_EXPORT void immediateClose();
 
-    bool hasActiveTransactions() const;
+    bool NODELETE hasActiveTransactions() const;
     WEBCORE_EXPORT void abortActiveTransactions();
     WEBCORE_EXPORT bool tryClose();
 
@@ -139,7 +139,7 @@ private:
     void performCurrentDeleteOperation();
     RefPtr<ServerOpenDBRequest> takeNextRunnableRequest();
     void addOpenDatabaseConnection(Ref<UniqueIDBDatabaseConnection>&&);
-    bool hasAnyOpenConnections() const;
+    bool NODELETE hasAnyOpenConnections() const;
     bool allConnectionsAreClosedOrClosing() const;
 
     void startVersionChangeTransaction();
@@ -163,7 +163,7 @@ private:
     enum class DidCreateIndexInBackingStore : bool { No, Yes };
     void didCreateIndexAsyncForTransaction(UniqueIDBDatabaseTransaction&, const IDBIndexInfo&, const IDBError&, DidCreateIndexInBackingStore = DidCreateIndexInBackingStore::Yes);
 
-    CheckedPtr<IDBBackingStore> checkedBackingStore() const;
+    CheckedPtr<IDBBackingStore> NODELETE checkedBackingStore() const;
 
     WeakPtr<UniqueIDBDatabaseManager> m_manager;
     IDBDatabaseIdentifier m_identifier;

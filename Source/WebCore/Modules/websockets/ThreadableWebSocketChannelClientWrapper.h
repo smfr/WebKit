@@ -50,11 +50,11 @@ public:
     static Ref<ThreadableWebSocketChannelClientWrapper> create(ScriptExecutionContext&, WebSocketChannelClient&);
 
     WorkerThreadableWebSocketChannel::Peer* NODELETE peer() const;
-    void didCreateWebSocketChannel(Ref<WorkerThreadableWebSocketChannel::Peer>&&);
+    void NODELETE didCreateWebSocketChannel(Ref<WorkerThreadableWebSocketChannel::Peer>&&);
     void clearPeer();
 
-    bool failedWebSocketChannelCreation() const;
-    void setFailedWebSocketChannelCreation();
+    bool NODELETE failedWebSocketChannelCreation() const;
+    void NODELETE setFailedWebSocketChannelCreation();
 
     // Subprotocol and extensions will be available when didConnect() callback is invoked.
     String subprotocol() const;
@@ -73,7 +73,7 @@ public:
     void didReceiveMessageError(String&& reason);
     void didUpgradeURL();
 
-    void suspend();
+    void NODELETE suspend();
     void resume();
 
 private:

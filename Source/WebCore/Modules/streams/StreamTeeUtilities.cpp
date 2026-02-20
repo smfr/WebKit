@@ -55,27 +55,27 @@ public:
     ~StreamTeeState();
 
     // AbstractRefCounted.
-    void ref() const final { RefCounted::ref(); }
+    void NODELETE ref() const final { RefCounted::ref(); }
     void deref() const final { RefCounted::deref(); }
 
-    bool isReader(const ReadableStreamDefaultReader* thisReader) const { return m_defaultReader && m_defaultReader.get() == thisReader; }
-    bool isReader(const ReadableStreamBYOBReader* thisReader) const { return m_byobReader && m_byobReader.get() == thisReader; }
+    bool NODELETE isReader(const ReadableStreamDefaultReader* thisReader) const { return m_defaultReader && m_defaultReader.get() == thisReader; }
+    bool NODELETE isReader(const ReadableStreamBYOBReader* thisReader) const { return m_byobReader && m_byobReader.get() == thisReader; }
 
-    bool reading() const { return m_reading; }
-    void setReading(bool value) { m_reading = value; }
+    bool NODELETE reading() const { return m_reading; }
+    void NODELETE setReading(bool value) { m_reading = value; }
 
-    bool readAgainForBranch1() const { return m_readAgainForBranch1; }
-    void setReadAgainForBranch1(bool value) { m_readAgainForBranch1 = value; }
+    bool NODELETE readAgainForBranch1() const { return m_readAgainForBranch1; }
+    void NODELETE setReadAgainForBranch1(bool value) { m_readAgainForBranch1 = value; }
 
-    bool readAgainForBranch2() const { return m_readAgainForBranch2; }
-    void setReadAgainForBranch2(bool value) { m_readAgainForBranch2 = value; }
+    bool NODELETE readAgainForBranch2() const { return m_readAgainForBranch2; }
+    void NODELETE setReadAgainForBranch2(bool value) { m_readAgainForBranch2 = value; }
 
-    bool canceled1() const { return m_canceled1; }
-    bool canceled2() const { return m_canceled2; }
-    void setCanceled1() { m_canceled1 = true; }
-    void setCanceled2() { m_canceled2 = true; }
-    JSC::JSValue reason1() { return m_branch1Reason.getValue(); }
-    JSC::JSValue reason2() { return m_branch2Reason.getValue(); }
+    bool NODELETE canceled1() const { return m_canceled1; }
+    bool NODELETE canceled2() const { return m_canceled2; }
+    void NODELETE setCanceled1() { m_canceled1 = true; }
+    void NODELETE setCanceled2() { m_canceled2 = true; }
+    JSC::JSValue NODELETE reason1() { return m_branch1Reason.getValue(); }
+    JSC::JSValue NODELETE reason2() { return m_branch2Reason.getValue(); }
     void setReason1(JSDOMGlobalObject& globalObject, const JSC::JSCell* owner, JSC::JSValue value)
     {
         Ref vm = globalObject.vm();
@@ -92,37 +92,37 @@ public:
         m_branch2Reason.visit(visitor);
         m_stream->visitAdditionalChildren(visitor);
     }
-    void clearReasons()
+    void NODELETE clearReasons()
     {
         m_branch1Reason.clear();
         m_branch2Reason.clear();
     }
 
-    ReadableStream& stream() const { return m_stream; }
-    ReadableStream* branch1() const { return m_branch1.get(); }
-    ReadableStream* branch2() const { return m_branch2.get(); }
+    ReadableStream& NODELETE stream() const { return m_stream; }
+    ReadableStream* NODELETE branch1() const { return m_branch1.get(); }
+    ReadableStream* NODELETE branch2() const { return m_branch2.get(); }
     void setBranch1(ReadableStream& stream) { m_branch1 = &stream; }
     void setBranch2(ReadableStream& stream) { m_branch2 = &stream; }
 
-    ReadableStreamBYOBReader* byobReader() const { return m_byobReader.get(); }
+    ReadableStreamBYOBReader* NODELETE byobReader() const { return m_byobReader.get(); }
     RefPtr<ReadableStreamBYOBReader> takeBYOBReader() { return std::exchange(m_byobReader, { }); }
-    void setReader(Ref<ReadableStreamBYOBReader>&& reader)
+    void NODELETE setReader(Ref<ReadableStreamBYOBReader>&& reader)
     {
         ASSERT(!m_defaultReader);
         ASSERT(!m_byobReader);
         m_byobReader = WTF::move(reader);
     }
 
-    ReadableStreamDefaultReader* defaultReader() const { return m_defaultReader.get(); }
+    ReadableStreamDefaultReader* NODELETE defaultReader() const { return m_defaultReader.get(); }
     RefPtr<ReadableStreamDefaultReader> takeDefaultReader() { return std::exchange(m_defaultReader, { }); }
-    void setReader(Ref<ReadableStreamDefaultReader>&& reader)
+    void NODELETE setReader(Ref<ReadableStreamDefaultReader>&& reader)
     {
         ASSERT(!m_defaultReader);
         ASSERT(!m_byobReader);
         m_defaultReader = WTF::move(reader);
     }
 
-    DOMPromise& cancelPromise() { return m_cancelPromise; }
+    DOMPromise& NODELETE cancelPromise() { return m_cancelPromise; }
 
     void resolveCancelPromise()
     {
@@ -458,17 +458,17 @@ private:
             m_state->resolveCancelPromise();
     }
 
-    void runErrorSteps(JSC::JSValue) final
+    void NODELETE runErrorSteps(JSC::JSValue) final
     {
         runErrorSteps();
     }
 
-    void runErrorSteps(Exception&&) final
+    void NODELETE runErrorSteps(Exception&&) final
     {
         runErrorSteps();
     }
 
-    void runErrorSteps()
+    void NODELETE runErrorSteps()
     {
         m_state->setReading(false);
     }
@@ -595,17 +595,17 @@ private:
             m_state->resolveCancelPromise();
     }
 
-    void runErrorSteps(JSC::JSValue) final
+    void NODELETE runErrorSteps(JSC::JSValue) final
     {
         runErrorSteps();
     }
 
-    void runErrorSteps(Exception&&) final
+    void NODELETE runErrorSteps(Exception&&) final
     {
         runErrorSteps();
     }
 
-    void runErrorSteps()
+    void NODELETE runErrorSteps()
     {
         m_state->setReading(false);
     }

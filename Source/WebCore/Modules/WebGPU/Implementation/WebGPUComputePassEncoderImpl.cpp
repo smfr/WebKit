@@ -74,7 +74,7 @@ void ComputePassEncoderImpl::setBindGroup(Index32 index, const BindGroup* bindGr
     wgpuComputePassEncoderSetBindGroup(m_backing.get(), index, bindGroup ? m_convertToBackingContext->convertToBacking(*bindGroup) : nullptr, WTF::move(offsets));
 }
 
-void ComputePassEncoderImpl::setBindGroup(Index32, const BindGroup*, std::span<const uint32_t>, Size64, Size32)
+void NODELETE ComputePassEncoderImpl::setBindGroup(Index32, const BindGroup*, std::span<const uint32_t>, Size64, Size32)
 {
     RELEASE_ASSERT_NOT_REACHED();
 }

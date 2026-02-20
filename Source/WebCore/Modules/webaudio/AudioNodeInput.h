@@ -75,7 +75,7 @@ public:
 
     // bus() contains the rendered audio after pull() has been called for each time quantum.
     // Called from context's audio thread.
-    AudioBus& bus() LIFETIME_BOUND;
+    AudioBus& NODELETE bus() LIFETIME_BOUND;
 
     // updateInternalBus() updates m_internalSummingBus appropriately for the number of channels.
     // This must be called when we own the context's graph lock in the audio thread at the very start or end of the render quantum.
@@ -95,7 +95,7 @@ private:
     HashSet<AudioNodeOutput*> m_disabledOutputs;
 
     // Called from context's audio thread.
-    AudioBus& internalSummingBus();
+    AudioBus& NODELETE internalSummingBus();
     void sumAllConnections(AudioBus& summingBus, size_t framesToProcess);
 
     Ref<AudioBus> m_internalSummingBus;

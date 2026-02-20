@@ -51,7 +51,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(ConvolverNode);
 
-static unsigned computeNumberOfOutputChannels(unsigned inputChannels, unsigned responseChannels)
+static unsigned NODELETE computeNumberOfOutputChannels(unsigned inputChannels, unsigned responseChannels)
 {
     // The number of output channels for a Convolver must be one or two. And can only be one if
     // there's a mono source and a mono response buffer.
@@ -163,7 +163,7 @@ ExceptionOr<void> ConvolverNode::setBufferForBindings(RefPtr<AudioBuffer>&& buff
     return { };
 }
 
-AudioBuffer* ConvolverNode::bufferForBindings() WTF_IGNORES_THREAD_SAFETY_ANALYSIS
+AudioBuffer* NODELETE ConvolverNode::bufferForBindings() WTF_IGNORES_THREAD_SAFETY_ANALYSIS
 {
     ASSERT(isMainThread());
     return m_buffer.get();

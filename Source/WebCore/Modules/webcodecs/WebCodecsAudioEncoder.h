@@ -73,14 +73,14 @@ private:
 
     // ActiveDOMObject.
     void stop() final;
-    void suspend(ReasonForSuspension) final;
+    void NODELETE suspend(ReasonForSuspension) final;
 
     // EventTarget.
     enum EventTargetInterfaceType eventTargetInterface() const final { return EventTargetInterfaceType::WebCodecsAudioEncoder; }
 
     ExceptionOr<void> closeEncoder(Exception&&);
     ExceptionOr<void> resetEncoder(const Exception&);
-    void setInternalEncoder(Ref<AudioEncoder>&&);
+    void NODELETE setInternalEncoder(Ref<AudioEncoder>&&);
 
     WebCodecsEncodedAudioChunkMetadata createEncodedChunkMetadata();
 

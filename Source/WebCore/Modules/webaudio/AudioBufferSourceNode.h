@@ -79,7 +79,7 @@ public:
     AudioParam& playbackRate() { return m_playbackRate.get(); }
 
     // If we are no longer playing, propogate silence ahead to downstream nodes.
-    bool propagatesSilence() const final;
+    bool NODELETE propagatesSilence() const final;
 
 private:
     AudioBufferSourceNode(BaseAudioContext&);

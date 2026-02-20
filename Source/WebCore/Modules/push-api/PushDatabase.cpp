@@ -351,7 +351,7 @@ WebCore::SQLiteStatementAutoResetScope PushDatabase::bindStatementOnQueue(ASCIIL
     return sql;
 }
 
-static std::span<const uint8_t> uuidToSpan(const std::optional<WTF::UUID>& uuid)
+static std::span<const uint8_t> NODELETE uuidToSpan(const std::optional<WTF::UUID>& uuid)
 {
     if (!uuid) {
         // We store a null UUID as a zero-length blob rather than a SQL NULL. This is because the

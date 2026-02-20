@@ -108,7 +108,7 @@ bool RTCRtpSFrameTransform::isAttached() const
     return m_isAttached || (m_readable && m_readable->isLocked()) || (m_writable && m_writable->locked());
 }
 
-static RTCRtpSFrameTransformErrorEvent::Type errorTypeFromInformation(const RTCRtpSFrameTransformer::ErrorInformation& errorInformation)
+static RTCRtpSFrameTransformErrorEvent::Type NODELETE errorTypeFromInformation(const RTCRtpSFrameTransformer::ErrorInformation& errorInformation)
 {
     switch (errorInformation.error) {
     case RTCRtpSFrameTransformer::Error::KeyID:

@@ -64,7 +64,7 @@ private:
     double processARate(int, std::span<float> destP, double virtualReadIndex, std::span<float> phaseIncrements) WTF_REQUIRES_LOCK(m_processLock);
     double processKRate(int, std::span<float> destP, double virtualReadIndex) WTF_REQUIRES_LOCK(m_processLock);
 
-    bool propagatesSilence() const final;
+    bool NODELETE propagatesSilence() const final;
 
     float noiseInjectionMultiplier() const final { return 0.01; }
 

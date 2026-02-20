@@ -49,7 +49,7 @@ namespace WebCore {
 WTF_MAKE_TZONE_ALLOCATED_IMPL(FetchResponseBodyLoader);
 
 // https://fetch.spec.whatwg.org/#null-body-status
-static inline bool isNullBodyStatus(int status)
+static inline bool NODELETE isNullBodyStatus(int status)
 {
     return status == 101 || status == 204 || status == 205 || status == 304;
 }

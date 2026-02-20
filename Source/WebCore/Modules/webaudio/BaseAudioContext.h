@@ -106,7 +106,7 @@ public:
     WEBCORE_EXPORT static bool isContextAlive(uint64_t contextID);
     uint64_t contextID() const { return m_contextID; }
 
-    Document* document() const;
+    Document* NODELETE document() const;
     bool isInitialized() const { return m_isInitialized; }
     
     virtual bool isOfflineContext() const = 0;
@@ -214,16 +214,16 @@ public:
     void removeMarkedSummingJunction(AudioSummingJunction*);
 
     // EventTarget
-    ScriptExecutionContext* scriptExecutionContext() const final;
+    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
 
     virtual void sourceNodeWillBeginPlayback(AudioNode&);
     // When a source node has no more processing to do (has finished playing), then it tells the context to dereference it.
-    void sourceNodeDidFinishPlayback(AudioNode&);
+    void NODELETE sourceNodeDidFinishPlayback(AudioNode&);
 
 #if !RELEASE_LOG_DISABLED
     const Logger& logger() const override { return m_logger.get(); }
     uint64_t logIdentifier() const override { return m_logIdentifier; }
-    WTFLogChannel& logChannel() const final;
+    WTFLogChannel& NODELETE logChannel() const final;
     uint64_t nextAudioNodeLogIdentifier() { return childLogIdentifier(m_logIdentifier, ++m_nextAudioNodeIdentifier); }
     uint64_t nextAudioParameterLogIdentifier() { return childLogIdentifier(m_logIdentifier, ++m_nextAudioParameterIdentifier); }
 #endif
@@ -235,7 +235,7 @@ public:
 
     virtual void lazyInitialize();
 
-    static bool isSupportedSampleRate(float sampleRate);
+    static bool NODELETE isSupportedSampleRate(float sampleRate);
 
     PeriodicWave& periodicWave(OscillatorType);
 
@@ -258,7 +258,7 @@ protected:
 
     void clear();
 
-    RefPtr<MediaSessionManagerInterface> mediaSessionManagerIfExists() const;
+    RefPtr<MediaSessionManagerInterface> NODELETE mediaSessionManagerIfExists() const;
     RefPtr<MediaSessionManagerInterface> mediaSessionManager() const;
 
 protected:

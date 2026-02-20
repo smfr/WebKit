@@ -57,7 +57,7 @@ public:
         return adoptRef(*new GPUCommandEncoder(WTF::move(backing), device));
     }
 
-    String label() const;
+    String NODELETE label() const;
     void setLabel(String&&);
 
     ExceptionOr<Ref<GPURenderPassEncoder>> beginRenderPass(const GPURenderPassDescriptor&);
@@ -112,7 +112,7 @@ public:
 
     WebGPU::CommandEncoder& backing() { return m_backing; }
     const WebGPU::CommandEncoder& backing() const { return m_backing; }
-    void setBacking(WebGPU::CommandEncoder&);
+    void NODELETE setBacking(WebGPU::CommandEncoder&);
 
 private:
     GPUCommandEncoder(Ref<WebGPU::CommandEncoder>&&, WebGPU::Device&);

@@ -61,7 +61,7 @@ using namespace cbor;
 // hasAtLeastFourCodepoints returns true if |pin| contains
 // four or more code points. This reflects the "4 Unicode characters"
 // requirement in CTAP2.
-static bool hasAtLeastFourCodepoints(const String& pin)
+static bool NODELETE hasAtLeastFourCodepoints(const String& pin)
 {
     return pin.length() >= 4;
 }

@@ -73,14 +73,14 @@ private:
 
     // ActiveDOMObject.
     void stop() final;
-    void suspend(ReasonForSuspension) final;
+    void NODELETE suspend(ReasonForSuspension) final;
 
     // EventTarget.
     enum EventTargetInterfaceType eventTargetInterface() const final { return EventTargetInterfaceType::WebCodecsVideoDecoder; }
 
     ExceptionOr<void> closeDecoder(Exception&&);
     ExceptionOr<void> resetDecoder(const Exception&);
-    void setInternalDecoder(Ref<VideoDecoder>&&);
+    void NODELETE setInternalDecoder(Ref<VideoDecoder>&&);
 
     const Ref<WebCodecsVideoFrameOutputCallback> m_output;
     const Ref<WebCodecsErrorCallback> m_error;

@@ -128,10 +128,10 @@ public:
     void close();
     JSC::JSValue storedError(JSDOMGlobalObject&) const;
 
-    size_t getNumReadRequests() const;
+    size_t NODELETE getNumReadRequests() const;
     void addReadRequest(Ref<ReadableStreamReadRequest>&&);
 
-    size_t getNumReadIntoRequests() const;
+    size_t NODELETE getNumReadIntoRequests() const;
     void addReadIntoRequest(Ref<ReadableStreamReadIntoRequest>&&);
 
     void error(JSDOMGlobalObject&, JSC::JSValue);
@@ -174,7 +174,7 @@ public:
         ~Iterator();
 
         Ref<DOMPromise> next(JSDOMGlobalObject&);
-        bool isFinished() const;
+        bool NODELETE isFinished() const;
         Ref<DOMPromise> returnSteps(JSDOMGlobalObject&, JSC::JSValue);
 
     private:
@@ -195,7 +195,7 @@ private:
     ExceptionOr<void> setupReadableByteStreamControllerFromUnderlyingSource(JSDOMGlobalObject&, JSC::JSValue, UnderlyingSource&&, double);
     void setupReadableByteStreamController(JSDOMGlobalObject&, ReadableByteStreamController::PullAlgorithm&&, ReadableByteStreamController::CancelAlgorithm&&, double, StartSynchronously);
 
-    bool isPulling() const;
+    bool NODELETE isPulling() const;
     void teedBranchIsDestroyed(ReadableStream&);
 
     const bool m_isSourceReachableFromOpaqueRoot { false };
@@ -214,6 +214,6 @@ private:
     WeakPtr<ReadableStream> m_sourceTeedStream;
 };
 
-WebCoreOpaqueRoot root(ReadableStream*);
+WebCoreOpaqueRoot NODELETE root(ReadableStream*);
 
 } // namespace WebCore

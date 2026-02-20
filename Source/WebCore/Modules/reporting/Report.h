@@ -41,8 +41,8 @@ public:
 
     WEBCORE_EXPORT ~Report();
 
-    WEBCORE_EXPORT const String& type() const;
-    WEBCORE_EXPORT const String& url() const;
+    WEBCORE_EXPORT const String& NODELETE type() const;
+    WEBCORE_EXPORT const String& NODELETE url() const;
     ReportBody* body() const { return m_body.get(); }
     RefPtr<ReportBody> protectedBody() const { return m_body; }
 

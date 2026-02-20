@@ -61,7 +61,7 @@ public:
     void ref() const final { ThreadSafeRefCounted::ref(); }
     void deref() const final { ThreadSafeRefCounted::deref(); }
 
-    WEBCORE_EXPORT static void setDefaultSampleRateForTesting(std::optional<float>);
+    WEBCORE_EXPORT static void NODELETE setDefaultSampleRateForTesting(std::optional<float>);
 
     void close(DOMPromiseDeferred<void>&&);
 
@@ -113,7 +113,7 @@ private:
     void willBeginPlayback(CompletionHandler<void(bool)>&&);
 
 #if !RELEASE_LOG_DISABLED
-    const Logger& logger() const final;
+    const Logger& NODELETE logger() const final;
     uint64_t logIdentifier() const final { return BaseAudioContext::logIdentifier(); }
 #endif
 
@@ -128,7 +128,7 @@ private:
     bool isOfflineContext() const final { return false; }
 
     // MediaProducer
-    MediaProducerMediaStateFlags mediaState() const final;
+    MediaProducerMediaStateFlags NODELETE mediaState() const final;
     void pageMutedStateDidChange() final;
 #if PLATFORM(IOS_FAMILY)
     void sceneIdentifierDidChange() final;
@@ -147,8 +147,8 @@ private:
     std::optional<MediaSessionGroupIdentifier> mediaSessionGroupIdentifier() const final;
     bool shouldOverrideBackgroundPlaybackRestriction(PlatformMediaSession::InterruptionType) const final;
     bool isSuspended() const final;
-    bool isPlaying() const final;
-    bool isAudible() const final;
+    bool NODELETE isPlaying() const final;
+    bool NODELETE isAudible() const final;
     bool isNowPlayingEligible() const final;
     std::optional<NowPlayingInfo> nowPlayingInfo() const final;
     WeakPtr<PlatformMediaSessionInterface> selectBestMediaSession(const Vector<WeakPtr<PlatformMediaSessionInterface>>&, PlatformMediaSession::PlaybackControlsPurpose) final;
@@ -159,7 +159,7 @@ private:
     // ActiveDOMObject
     void suspend(ReasonForSuspension) final;
     void resume() final;
-    bool virtualHasPendingActivity() const final;
+    bool NODELETE virtualHasPendingActivity() const final;
 
     const UniqueRef<DefaultAudioDestinationNode> m_destinationNode;
     const Ref<PlatformMediaSession> m_mediaSession;

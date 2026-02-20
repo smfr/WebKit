@@ -467,12 +467,12 @@ private:
         m_items.clear();
     }
 
-    ContextMenuContext::Type contextMenuContextType() override
+    ContextMenuContext::Type NODELETE contextMenuContextType() override
     {
         return ContextMenuContext::Type::MediaControls;
     }
 
-    void prepareContext(ContextMenuContext& context) override
+    void NODELETE prepareContext(ContextMenuContext& context) override
     {
         context.setMediaElementIdentifier(m_identifier);
     }

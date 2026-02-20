@@ -69,7 +69,7 @@ public:
     ~MediaControlsHost();
 
 #if ENABLE(MEDIA_SESSION)
-    WEBCORE_EXPORT void ref() const final;
+    WEBCORE_EXPORT void NODELETE ref() const final;
     WEBCORE_EXPORT void deref() const final;
 #else
     WEBCORE_EXPORT void ref() const;
@@ -98,7 +98,7 @@ public:
     void setSelectedTextTrack(TextTrack*);
     Element* textTrackContainer();
     void updateTextTrackContainer();
-    TextTrackRepresentation* textTrackRepresentation() const;
+    TextTrackRepresentation* NODELETE textTrackRepresentation() const;
     bool allowsInlineMediaPlayback() const;
     bool supportsFullscreen() const;
     bool isVideoLayerInline() const;
@@ -109,7 +109,7 @@ public:
     bool inWindowFullscreen() const;
     bool supportsRewind() const;
     bool needsChromeMediaControlsPseudoElement() const;
-    bool isMediaControlsMacInlineSizeSpecsEnabled() const;
+    bool NODELETE isMediaControlsMacInlineSizeSpecsEnabled() const;
 
     void captionPreferencesChanged();
     enum class ForceUpdate : bool { No, Yes };
@@ -194,7 +194,7 @@ private:
     std::pair<Vector<MenuItem>, MenuDataMap> mediaControlsContextMenuItems(String&& optionsJSONString);
 #endif
 
-    Ref<HTMLMediaElement> protectedMediaElement() const;
+    Ref<HTMLMediaElement> NODELETE protectedMediaElement() const;
 
     WeakRef<HTMLMediaElement> m_mediaElement;
     RefPtr<MediaControlTextTrackContainerElement> m_textTrackContainer;

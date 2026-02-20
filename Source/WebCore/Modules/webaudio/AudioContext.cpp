@@ -82,7 +82,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(AudioContext);
 static unsigned hardwareContextCount;
 #endif
 
-static std::optional<float>& defaultSampleRateForTesting()
+static std::optional<float>& NODELETE defaultSampleRateForTesting()
 {
     static std::optional<float> sampleRate;
     return sampleRate;

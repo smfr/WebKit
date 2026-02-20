@@ -100,7 +100,7 @@ static inline uint64_t estimateSize(const IDBObjectStoreInfo& info, const IndexI
     return size;
 }
 
-static inline uint64_t estimateSize(const IDBValue& value)
+static inline uint64_t NODELETE estimateSize(const IDBValue& value)
 {
     uint64_t size = 4;
     size += value.data().size();
