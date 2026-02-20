@@ -7,7 +7,7 @@ PASS defaultbutton: When the listbox is open, the enter key should commit the se
 FAIL defaultbutton: When the listbox is open, the tab key should close the listbox. assert_false: Tab should close the listbox. expected false got true
 PASS custombutton: When the listbox is closed, spacebar should open the listbox.
 FAIL custombutton: When the listbox is closed, all arrow keys should open the listbox. assert_true: Arrow left should open the listbox. expected true got false
-FAIL custombutton: When the listbox is closed, the enter key should not trigger form submission. assert_false: Enter should not submit the form when the listbox is closed. expected false got true
+PASS custombutton: When the listbox is closed, the enter key should not trigger form submission.
 PASS custombutton: When the listbox is open, the enter key should commit the selected option.
 FAIL custombutton: When the listbox is open, the tab key should close the listbox. assert_false: Tab should close the listbox. expected false got true
 
