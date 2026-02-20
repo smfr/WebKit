@@ -711,6 +711,13 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
             return YES;
     }
 
+    return NO;
+}
+
+- (BOOL)gestureRecognizer:(NSGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(NSGestureRecognizer *)otherGestureRecognizer
+{
+    WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(RefPtr { _page.get() }->logIdentifier(), "Gesture: %@, Other gesture: %@", gestureRecognizer, otherGestureRecognizer);
+
     if (gestureRecognizer == _singleClickGestureRecognizer && otherGestureRecognizer == _doubleClickGestureRecognizer)
         return YES;
 
