@@ -44,8 +44,8 @@ public:
     const CSSNumericValue& ax() const { return m_ax.get(); }
     const CSSNumericValue& ay() const { return m_ay.get(); }
     
-    ExceptionOr<void> setAx(Ref<CSSNumericValue>);
-    ExceptionOr<void> setAy(Ref<CSSNumericValue>);
+    ExceptionOr<void> NODELETE setAx(Ref<CSSNumericValue>);
+    ExceptionOr<void> NODELETE setAy(Ref<CSSNumericValue>);
 
     void serialize(StringBuilder&) const final;
     ExceptionOr<Ref<DOMMatrix>> toMatrix() final;

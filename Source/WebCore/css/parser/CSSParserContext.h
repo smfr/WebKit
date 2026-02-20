@@ -95,7 +95,7 @@ struct CSSParserContext {
     CSSParserContext(const Document&, const URL& baseURL, ASCIILiteral charset = ""_s);
     CSSParserContext(const Settings&);
 
-    void setUASheetMode();
+    void NODELETE setUASheetMode();
 
     bool operator==(const CSSParserContext&) const = default;
 };

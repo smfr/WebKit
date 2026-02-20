@@ -117,7 +117,7 @@ public:
     void addClient(CSSFontFaceClient&);
     void removeClient(CSSFontFaceClient&);
 
-    bool computeFailureState() const;
+    bool NODELETE computeFailureState() const;
 
     void opportunisticallyStartFontDataURLLoading(DownloadableBinaryFontTrustedTypes);
 
@@ -133,7 +133,7 @@ public:
 
     static void appendSources(CSSFontFace&, CSSValueList&, ScriptExecutionContext*, bool isInitiatingElementInUserAgentShadowTree);
 
-    bool rangesMatchCodePoint(char32_t) const;
+    bool NODELETE rangesMatchCodePoint(char32_t) const;
 
     // We don't guarantee that the FontFace wrapper will be the same every time you ask for it.
     Ref<FontFace> wrapper(ScriptExecutionContext*);
@@ -144,7 +144,7 @@ public:
         Seconds blockPeriod;
         Seconds swapPeriod;
     };
-    FontLoadTiming fontLoadTiming() const;
+    FontLoadTiming NODELETE fontLoadTiming() const;
     bool shouldIgnoreFontLoadCompletions() const { return m_shouldIgnoreFontLoadCompletions; }
 
     bool purgeable() const;
@@ -171,7 +171,7 @@ private:
     const StyleProperties& properties() const;
     MutableStyleProperties& mutableProperties();
 
-    RefPtr<Document> protectedDocument();
+    RefPtr<Document> NODELETE protectedDocument();
 
     const Variant<Ref<MutableStyleProperties>, Ref<StyleRuleFontFace>> m_propertiesOrCSSConnection;
     RefPtr<CSSValue> m_family;

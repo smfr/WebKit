@@ -46,14 +46,14 @@ public:
     virtual ~PropertySetCSSDescriptors();
 
     void clearParentRule() { m_parentRule = nullptr; }
-    void reattach(MutableStyleProperties&);
+    void NODELETE reattach(MutableStyleProperties&);
 
     virtual StyleRuleType ruleType() const = 0;
 
 protected:
     PropertySetCSSDescriptors(MutableStyleProperties&, CSSRule&);
 
-    CSSStyleSheet* parentStyleSheet() const final;
+    CSSStyleSheet* NODELETE parentStyleSheet() const final;
     CSSRule* NODELETE parentRule() const final;
     // FIXME: To implement.
     CSSRuleList* cssRules() const override { return nullptr; }
@@ -81,7 +81,7 @@ protected:
     virtual ExceptionOr<void> setPropertyInternal(CSSPropertyID, const String& value, IsImportant);
 
     CSSParserContext cssParserContext() const;
-    Ref<MutableStyleProperties> protectedPropertySet() const;
+    Ref<MutableStyleProperties> NODELETE protectedPropertySet() const;
 
     WeakPtr<CSSRule> m_parentRule;
     HashMap<CSSValue*, WeakPtr<DeprecatedCSSOMValue>> m_cssomValueWrappers;

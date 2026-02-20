@@ -47,7 +47,7 @@ public:
         CSS_CUSTOM = 3
     };
 
-    WEBCORE_EXPORT unsigned short cssValueType() const;
+    WEBCORE_EXPORT unsigned short NODELETE cssValueType() const;
 
     WEBCORE_EXPORT String cssText() const;
     ExceptionOr<void> setCssText(const String&) { return { }; } // Will never implement.

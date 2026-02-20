@@ -108,12 +108,12 @@ private:
 
     // EventTarget
     enum EventTargetInterfaceType eventTargetInterface() const final { return EventTargetInterfaceType::FontFaceSet; }
-    ScriptExecutionContext* scriptExecutionContext() const final;
+    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
     void refEventTarget() final { ref(); }
     void derefEventTarget() final { deref(); }
 
     // Callback for ReadyPromise.
-    FontFaceSet& readyPromiseResolve();
+    FontFaceSet& NODELETE readyPromiseResolve();
 
     const Ref<CSSFontFaceSet> m_backing;
     HashMap<Ref<FontFace>, Vector<Ref<PendingPromise>>> m_pendingPromises;

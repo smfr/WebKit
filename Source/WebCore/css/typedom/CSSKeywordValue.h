@@ -41,7 +41,7 @@ public:
     static ExceptionOr<Ref<CSSKeywordValue>> create(const String&);
     
     const String& value() const { return m_value; }
-    ExceptionOr<void> setValue(const String&);
+    ExceptionOr<void> NODELETE setValue(const String&);
     
     CSSStyleValueType styleValueType() const final { return CSSStyleValueType::CSSKeywordValue; }
     

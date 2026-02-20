@@ -172,7 +172,7 @@ ExceptionOr<Vector<Ref<CSSStyleValue>>> CSSStyleValueFactory::parseStyleValue(Do
     return results;
 }
 
-static bool mayConvertCSSValueListToSingleValue(std::optional<CSSPropertyID> propertyID)
+static bool NODELETE mayConvertCSSValueListToSingleValue(std::optional<CSSPropertyID> propertyID)
 {
     if (!propertyID)
         return true;

@@ -78,7 +78,7 @@ public:
 
     void fontCacheInvalidated() final;
 
-    bool isEmpty() const;
+    bool NODELETE isEmpty() const;
 
     void registerForInvalidationCallbacks(FontSelectorClient&) final;
     void unregisterForInvalidationCallbacks(FontSelectorClient&) final;

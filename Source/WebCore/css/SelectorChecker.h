@@ -93,8 +93,8 @@ public:
 
         const SelectorChecker::Mode resolvingMode;
 
-        void setRequestedPseudoElement(Style::PseudoElementIdentifier);
-        std::optional<Style::PseudoElementIdentifier> requestedPseudoElement() const;
+        void NODELETE setRequestedPseudoElement(Style::PseudoElementIdentifier);
+        std::optional<Style::PseudoElementIdentifier> NODELETE requestedPseudoElement() const;
 
     private:
         friend class SelectorCompiler::SelectorCodeGenerator;
@@ -140,7 +140,7 @@ private:
     bool matchSelectorList(CheckingContext&, const LocalContext&, const Element&, const CSSSelectorList&) const;
     bool matchHasPseudoClass(CheckingContext&, const Element&, const CSSSelector&) const;
 
-    bool checkScrollbarPseudoClass(const CheckingContext&, const Element&, const CSSSelector&) const;
+    bool NODELETE checkScrollbarPseudoClass(const CheckingContext&, const Element&, const CSSSelector&) const;
     bool checkViewTransitionPseudoClass(const CheckingContext&, const Element&, const CSSSelector&) const;
 
     bool m_strictParsing;

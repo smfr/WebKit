@@ -116,18 +116,18 @@ struct CSSCounterStyleDescriptors {
             && m_explicitlySetDescriptors == other.m_explicitlySetDescriptors;
     }
     void setExplicitlySetDescriptors(const StyleProperties&);
-    bool isValid() const;
-    static bool areSymbolsValidForSystem(System, const Vector<Symbol>&, const AdditiveSymbols&);
+    bool NODELETE isValid() const;
+    static bool NODELETE areSymbolsValidForSystem(System, const Vector<Symbol>&, const AdditiveSymbols&);
 
-    void setName(Name);
+    void NODELETE setName(Name);
     void setSystem(System);
-    void setSystemData(SystemData);
+    void NODELETE setSystemData(SystemData);
     void setNegative(NegativeSymbols);
     void setPrefix(Symbol);
     void setSuffix(Symbol);
     void setRanges(Ranges);
     void setPad(Pad);
-    void setFallbackName(Name);
+    void NODELETE setFallbackName(Name);
     void setSymbols(Vector<Symbol>);
     void setAdditiveSymbols(AdditiveSymbols);
 

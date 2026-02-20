@@ -70,7 +70,7 @@ public:
 
     unsigned computeSpecificity() const;
     std::array<uint8_t, 3> computeSpecificityTuple() const;
-    unsigned specificityForPage() const;
+    unsigned NODELETE specificityForPage() const;
 
     enum class VisitFunctionalPseudoClasses { No, Yes };
     enum class VisitOnlySubject { No, Yes };
@@ -126,7 +126,7 @@ public:
     enum AttributeMatchType { CaseSensitive, CaseInsensitive };
 
     // Maps from the selector pseudo-element type to the style type. Only pseudo-elements that are not element-backed have a type in style.
-    static std::optional<PseudoElementType> stylePseudoElementTypeFor(PseudoElement);
+    static std::optional<PseudoElementType> NODELETE stylePseudoElementTypeFor(PseudoElement);
     static bool isPseudoClassEnabled(PseudoClass, const CSSSelectorParserContext&);
     static bool isPseudoElementEnabled(PseudoElement, StringView, const CSSSelectorParserContext&);
     static std::optional<PseudoElement> parsePseudoElementName(StringView, const CSSSelectorParserContext&);
@@ -144,9 +144,9 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
     const CSSSelector* precedingInComplexSelector() const { return m_isFirstInComplexSelector ? nullptr : this + 1; }
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
 
-    const CSSSelector* firstInCompound() const;
-    const CSSSelector* lastInCompound() const;
-    const CSSSelector* precedingInCompound() const;
+    const CSSSelector* NODELETE firstInCompound() const;
+    const CSSSelector* NODELETE lastInCompound() const;
+    const CSSSelector* NODELETE precedingInCompound() const;
 
     const QualifiedName& tagQName() const;
     const AtomString& tagLowercaseLocalName() const;
@@ -162,9 +162,9 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
     const CSSSelectorList* selectorList() const { return m_hasRareData ? m_data.rareData->selectorList.get() : nullptr; }
     CSSSelectorList* selectorList() { return m_hasRareData ? m_data.rareData->selectorList.get() : nullptr; }
 
-    bool matchNth(int count) const;
-    int nthA() const;
-    int nthB() const;
+    bool NODELETE matchNth(int count) const;
+    int NODELETE nthA() const;
+    int NODELETE nthB() const;
 
     bool hasDescendantRelation() const { return relation() == Relation::DescendantSpace; }
     bool hasDescendantOrChildRelation() const { return relation() == Relation::Child || hasDescendantRelation(); }
@@ -176,8 +176,8 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
     bool matchesPseudoElement() const;
     bool isSiblingSelector() const;
     bool isAttributeSelector() const;
-    bool isHostPseudoClass() const;
-    bool isScopePseudoClass() const;
+    bool NODELETE isHostPseudoClass() const;
+    bool NODELETE isScopePseudoClass() const;
 
     Relation relation() const { return static_cast<Relation>(m_relation); }
     Match match() const { return static_cast<Match>(m_match); }
@@ -335,7 +335,7 @@ inline bool isLogicalCombinationPseudoClass(CSSSelector::PseudoClass pseudoClass
     }
 }
 
-bool isElementBackedPseudoElement(CSSSelector::PseudoElement);
+bool NODELETE isElementBackedPseudoElement(CSSSelector::PseudoElement);
 
 inline bool CSSSelector::isSiblingSelector() const
 {

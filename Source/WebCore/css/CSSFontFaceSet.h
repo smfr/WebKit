@@ -67,7 +67,7 @@ public:
     // Calling updateStyleIfNeeded() might delete |this|.
     void updateStyleIfNeeded();
 
-    bool hasFace(const CSSFontFace&) const;
+    bool NODELETE hasFace(const CSSFontFace&) const;
     size_t faceCount() const { return m_faces.size(); }
     void add(CSSFontFace&);
     void remove(const CSSFontFace&);

@@ -44,7 +44,7 @@ const CSSParserContext& strictCSSParserContext()
     return strictContext;
 }
 
-static void applyUASheetBehaviorsToContext(CSSParserContext& context)
+static void NODELETE applyUASheetBehaviorsToContext(CSSParserContext& context)
 {
     // FIXME: We should turn all of the features on from their WebCore Settings defaults.
     context.cssAppearanceBaseEnabled = true;

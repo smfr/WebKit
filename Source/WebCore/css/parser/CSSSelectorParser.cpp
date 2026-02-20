@@ -379,7 +379,7 @@ static OptionSet<CompoundSelectorFlag> extractCompoundFlags(const MutableCSSSele
     return CompoundSelectorFlag::HasPseudoElementForRightmostCompound;
 }
 
-static bool isDescendantCombinator(CSSSelector::Relation relation)
+static bool NODELETE isDescendantCombinator(CSSSelector::Relation relation)
 {
     return relation == CSSSelector::Relation::DescendantSpace;
 }
@@ -477,7 +477,7 @@ std::unique_ptr<MutableCSSSelector> CSSSelectorParser::consumeRelativeNestedSele
     return selector;
 }
 
-static bool isScrollbarPseudoClass(CSSSelector::PseudoClass pseudo)
+static bool NODELETE isScrollbarPseudoClass(CSSSelector::PseudoClass pseudo)
 {
     switch (pseudo) {
     case CSSSelector::PseudoClass::Enabled:
@@ -501,7 +501,7 @@ static bool isScrollbarPseudoClass(CSSSelector::PseudoClass pseudo)
     }
 }
 
-static bool isUserActionPseudoClass(CSSSelector::PseudoClass pseudo)
+static bool NODELETE isUserActionPseudoClass(CSSSelector::PseudoClass pseudo)
 {
     switch (pseudo) {
     case CSSSelector::PseudoClass::Hover:
@@ -515,7 +515,7 @@ static bool isUserActionPseudoClass(CSSSelector::PseudoClass pseudo)
     }
 }
 
-static bool isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoClass pseudoClass, CSSSelector::PseudoElement compoundPseudoElement)
+static bool NODELETE isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoClass pseudoClass, CSSSelector::PseudoElement compoundPseudoElement)
 {
     // FIXME: https://drafts.csswg.org/selectors-4/#pseudo-element-states states all pseudo-elements
     // can be followed by isUserActionPseudoClass().
@@ -551,7 +551,7 @@ static bool isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoClass pseudo
     }
 }
 
-static bool isTreeAbidingPseudoElement(CSSSelector::PseudoElement pseudoElement)
+static bool NODELETE isTreeAbidingPseudoElement(CSSSelector::PseudoElement pseudoElement)
 {
     switch (pseudoElement) {
     // FIXME: This list should also include ::placeholder and ::file-selector-button

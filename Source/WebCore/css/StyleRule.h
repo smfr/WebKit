@@ -145,8 +145,8 @@ public:
     void releaseCompiledSelectors() const { m_compiledSelectors = { }; }
 #endif
 
-    static unsigned averageSizeInBytes();
-    void setProperties(Ref<StyleProperties>&&);
+    static unsigned NODELETE averageSizeInBytes();
+    void NODELETE setProperties(Ref<StyleProperties>&&);
 
     String debugDescription() const;
 protected:
@@ -307,7 +307,7 @@ private:
 
 class StyleRuleGroup : public StyleRuleBase {
 public:
-    const Vector<Ref<StyleRuleBase>>& childRules() const;
+    const Vector<Ref<StyleRuleBase>>& NODELETE childRules() const;
 
     void wrapperInsertRule(unsigned, Ref<StyleRuleBase>&&);
     void wrapperRemoveRule(unsigned);

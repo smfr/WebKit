@@ -77,7 +77,7 @@ namespace CSSPropertyParserHelpers {
 
 using DisplayOutsideInsideMap = EnumeratedArray<DisplayOutside, EnumeratedArray<DisplayInside, CSSValueID>>;
 
-consteval DisplayOutsideInsideMap makeDisplayOutsideInsideMap()
+consteval DisplayOutsideInsideMap NODELETE makeDisplayOutsideInsideMap()
 {
     using enum DisplayOutside;
     using enum DisplayInside;

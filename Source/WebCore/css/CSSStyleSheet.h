@@ -71,10 +71,10 @@ public:
 
     virtual ~CSSStyleSheet();
 
-    CSSStyleSheet* parentStyleSheet() const final;
+    CSSStyleSheet* NODELETE parentStyleSheet() const final;
     Node* NODELETE ownerNode() const final;
     MediaList* media() const final;
-    String href() const final;
+    String NODELETE href() const final;
     String title() const final { return !m_title.isEmpty() ? m_title : String(); }
     bool disabled() const final { return m_isDisabled; }
     void setDisabled(bool) final;
@@ -102,7 +102,7 @@ public:
 
     void clearOwnerNode() final;
     WEBCORE_EXPORT CSSImportRule* NODELETE ownerRule() const final;
-    URL baseURL() const final;
+    URL NODELETE baseURL() const final;
     bool isLoading() const final;
 
     void clearOwnerRule() { m_ownerRule = nullptr; }
@@ -111,8 +111,8 @@ public:
     void addAdoptingTreeScope(ContainerNode&);
     const WeakHashSet<ContainerNode, WeakPtrImplWithEventTargetData>& adoptingTreeScopes() const { return m_adoptingTreeScopes; }
 
-    Document* ownerDocument() const;
-    CSSStyleSheet& rootStyleSheet();
+    Document* NODELETE ownerDocument() const;
+    CSSStyleSheet& NODELETE rootStyleSheet();
     const CSSStyleSheet& rootStyleSheet() const;
     Style::Scope* NODELETE styleScope();
 
@@ -149,7 +149,7 @@ public:
     void reattachChildRuleCSSOMWrappers();
 
     StyleSheetContents& contents() { return m_contents; }
-    Ref<StyleSheetContents> protectedContents();
+    Ref<StyleSheetContents> NODELETE protectedContents();
 
     bool isInline() const { return m_isInlineStylesheet; }
     TextPosition startPosition() const { return m_startPosition; }
@@ -162,7 +162,7 @@ public:
     String cssText(const CSS::SerializationContext&);
     void getChildStyleSheets(HashSet<Ref<CSSStyleSheet>>&);
 
-    bool isDetached() const;
+    bool NODELETE isDetached() const;
 
 private:
     CSSStyleSheet(Ref<StyleSheetContents>&&, CSSImportRule* ownerRule, std::optional<bool> isOriginClean);

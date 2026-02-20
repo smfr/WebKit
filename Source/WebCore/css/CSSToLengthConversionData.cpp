@@ -43,7 +43,7 @@ CSSToLengthConversionData::CSSToLengthConversionData(const CSSToLengthConversion
 CSSToLengthConversionData::CSSToLengthConversionData(CSSToLengthConversionData&&) = default;
 
 // FIXME: Only rely on the RenderView for style resolution if we have an active LocalFrameView.
-static RenderView* renderViewForDocument(const Document& document)
+static RenderView* NODELETE renderViewForDocument(const Document& document)
 {
     if (document.view()) [[likely]]
         return document.renderView();

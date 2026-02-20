@@ -89,7 +89,7 @@ struct SelectorSpecificity {
     SelectorSpecificity(SelectorSpecificityIncrement);
     SelectorSpecificity& operator+=(SelectorSpecificity);
 
-    std::array<uint8_t, 3> specificityTuple() const
+    std::array<uint8_t, 3> NODELETE specificityTuple() const
     {
         uint8_t a = specificity >> 16;
         uint8_t b = specificity >> 8;
@@ -1041,7 +1041,7 @@ bool isElementBackedPseudoElement(CSSSelector::PseudoElement pseudoElement)
     }
 }
 
-static bool shouldSkipForEqualMode(const CSSSelector& simpleSelector, ComplexSelectorsEqualMode mode)
+static bool NODELETE shouldSkipForEqualMode(const CSSSelector& simpleSelector, ComplexSelectorsEqualMode mode)
 {
     if (mode == ComplexSelectorsEqualMode::IgnoreNonElementBackedPseudoElements)
         return simpleSelector.matchesPseudoElement() && !isElementBackedPseudoElement(simpleSelector.pseudoElement());

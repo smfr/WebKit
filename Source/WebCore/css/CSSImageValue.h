@@ -51,7 +51,7 @@ public:
 
     Ref<CSSImageValue> copyForComputedStyle(const CSS::URL& resolvedURL) const;
 
-    bool isPending() const;
+    bool NODELETE isPending() const;
     CachedImage* loadImage(CachedResourceLoader&, const ResourceLoaderOptions&);
     CachedImage* cachedImage() const { return m_cachedImage ? m_cachedImage.value().get() : nullptr; }
 
@@ -71,7 +71,7 @@ public:
 
     RefPtr<Style::Image> createStyleImage(const Style::BuilderState&) const;
 
-    bool isLoadedFromOpaqueSource() const;
+    bool NODELETE isLoadedFromOpaqueSource() const;
 
     IterationStatus customVisitChildren(NOESCAPE const Function<IterationStatus(CSSValue&)>& func) const
     {
