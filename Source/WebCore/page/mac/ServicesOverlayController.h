@@ -75,7 +75,7 @@ private:
     void invalidateHighlightsOfType(DataDetectorHighlight::Type);
     void buildPotentialHighlightsIfNeeded();
 
-    void replaceHighlightsOfTypePreservingEquivalentHighlights(HashSet<RefPtr<DataDetectorHighlight>>&&, DataDetectorHighlight::Type);
+    void replaceHighlightsOfTypePreservingEquivalentHighlights(HashSet<Ref<DataDetectorHighlight>>&&, DataDetectorHighlight::Type);
     void removeAllPotentialHighlightsOfType(DataDetectorHighlight::Type);
     void buildPhoneNumberHighlights();
     void buildSelectionHighlight();
@@ -108,8 +108,8 @@ private:
 
     RefPtr<DataDetectorHighlight> m_activeHighlight;
     RefPtr<DataDetectorHighlight> m_nextActiveHighlight;
-    HashSet<RefPtr<DataDetectorHighlight>> m_potentialHighlights;
-    HashSet<RefPtr<DataDetectorHighlight>> m_animatingHighlights;
+    HashSet<Ref<DataDetectorHighlight>> m_potentialHighlights;
+    HashSet<Ref<DataDetectorHighlight>> m_animatingHighlights;
     WeakHashSet<DataDetectorHighlight> m_highlights;
 
     Vector<LayoutRect> m_currentSelectionRects;

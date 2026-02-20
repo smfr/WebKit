@@ -185,7 +185,7 @@ private:
     RefPtr<PerformanceEntry> m_largestContentfulPaint;
     std::unique_ptr<PerformanceUserTiming> m_userTiming;
 
-    ListHashSet<RefPtr<PerformanceObserver>> m_observers;
+    ListHashSet<Ref<PerformanceObserver>> m_observers;
 };
 
 } // namespace WebCore

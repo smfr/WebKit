@@ -332,7 +332,7 @@ void ScrollingTree::removeNode(ScrollingNodeID nodeID, ScrollingTreeFrameHosting
                 nodeList->value.remove(nodeID);
         }
         if (hostingNode)
-            hostingNode->removeHostedChild(node);
+            hostingNode->removeHostedChild(*node);
         node->willBeDestroyed();
     }
 }
@@ -565,7 +565,7 @@ bool ScrollingTree::updateTreeFromStateNodeRecursive(const ScrollingStateNode* s
     }
 
     if (RefPtr hostingNodeForCommit = state.frameHostingNode)
-        hostingNodeForCommit->addHostedChild(node);
+        hostingNodeForCommit->addHostedChild(node.releaseNonNull());
 
     return true;
 }
