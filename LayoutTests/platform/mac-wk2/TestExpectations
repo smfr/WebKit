@@ -1148,6 +1148,8 @@ webkit.org/b/230696 imported/w3c/web-platform-tests/webrtc/RTCDataChannel-close.
 
 webkit.org/b/214997 [ Release ] http/tests/workers/service/basic-install-event-waitUntil-reject.html [ Pass Timeout ]
 
+webkit.org/b/308313 [ Tahoe Debug arm64 ] http/tests/workers/service/page-cache-service-worker-pending-promise.https.html [ Pass Timeout ]
+
 webkit.org/b/215809 [ Debug ] media/W3C/video/events/event_order_canplay_canplaythrough.html [ Pass Timeout ]
 
 webkit.org/b/216159 imported/w3c/web-platform-tests/webrtc/RTCPeerConnection-restartIce.https.html [ Pass Failure ]
