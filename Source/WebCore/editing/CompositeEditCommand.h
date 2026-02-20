@@ -120,7 +120,6 @@ public:
     void apply();
     bool isFirstCommand(EditCommand* command) { return !m_commands.isEmpty() && m_commands.first() == command; }
     EditCommandComposition* composition() const;
-    RefPtr<EditCommandComposition> protectedComposition() const { return composition(); }
     Ref<EditCommandComposition> ensureComposition();
 
     virtual bool isTypingCommand() const;

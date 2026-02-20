@@ -182,7 +182,7 @@ void HTMLAnchorElement::defaultEventHandler(Event& event)
             // for the LiveWhenNotFocused editable link behavior
             auto& eventNames = WebCore::eventNames();
             if (auto* mouseEvent = dynamicDowncast<MouseEvent>(event); event.type() == eventNames.mousedownEvent && mouseEvent && mouseEvent->button() != MouseButton::Right && document().frame()) {
-                setRootEditableElementForSelectionOnMouseDown(document().frame()->selection().selection().protectedRootEditableElement().get());
+                setRootEditableElementForSelectionOnMouseDown(protect(document().frame()->selection().selection().rootEditableElement()).get());
                 m_wasShiftKeyDownOnMouseDown = mouseEvent->shiftKey();
             } else if (event.type() == eventNames.mouseoverEvent) {
                 // These are cleared on mouseover and not mouseout because their values are needed for drag events,

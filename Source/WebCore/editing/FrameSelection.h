@@ -354,7 +354,6 @@ private:
     void caretAnimationDidUpdate(CaretAnimator&) final;
 
     Document* NODELETE document() final;
-    inline RefPtr<Document> protectedDocument() const; // Defined in DocumentInlines.h
 
     Node* caretNode() final;
 

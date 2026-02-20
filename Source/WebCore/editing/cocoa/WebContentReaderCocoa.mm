@@ -954,7 +954,7 @@ bool WebContentReader::readDataBuffer(SharedBuffer& buffer, const String& type, 
         m_fragment = document->createDocumentFragment();
 
 #if ENABLE(ATTACHMENT_ELEMENT)
-    protectedFragment()->appendChild(attachmentForData(frame, buffer, type, name, preferredPresentationSize));
+    protect(fragment())->appendChild(attachmentForData(frame, buffer, type, name, preferredPresentationSize));
 #else
     UNUSED_PARAM(type);
     UNUSED_PARAM(name);

@@ -497,11 +497,11 @@ void DeleteSelectionCommand::insertBlockPlaceholderForTableCellIfNeeded(Element&
 void DeleteSelectionCommand::removeNodeUpdatingStates(Node& node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable)
 {
     if (&node == m_startBlock) {
-        auto prev = VisiblePosition(firstPositionInNode(protectedStartBlock().get())).previous();
+        auto prev = VisiblePosition(firstPositionInNode(protect(m_startBlock).get())).previous();
         if (!prev.isNull() && !isEndOfBlock(prev))
             m_needPlaceholder = true;
     } else if (&node == m_endBlock) {
-        auto next = VisiblePosition(lastPositionInNode(protectedEndBlock().get())).next();
+        auto next = VisiblePosition(lastPositionInNode(protect(m_endBlock).get())).next();
         if (!next.isNull() && !isStartOfBlock(next))
             m_needPlaceholder = true;
     }

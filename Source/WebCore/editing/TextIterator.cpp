@@ -522,7 +522,7 @@ void TextIterator::advance()
         if (!m_handledNode) {
             if (!isRendererAccessible(renderer.get(), m_behaviors)) {
                 m_handledNode = true;
-                m_handledChildren = !hasDisplayContents(*protectedCurrentNode()) && !renderer;
+                m_handledChildren = !hasDisplayContents(*protect(m_currentNode)) && !renderer;
             } else {
                 if (isConsideredSkippedContent(dynamicDowncast<RenderBox>(renderer.get()), m_behaviors))
                     m_handledChildren = true;
@@ -540,7 +540,7 @@ void TextIterator::advance()
         // find a new current node to handle in depth-first manner,
         // calling exitNode() as we come back thru a parent node
 
-        RefPtr next = m_handledChildren ? nullptr : firstChild(m_behaviors, *protectedCurrentNode());
+        RefPtr next = m_handledChildren ? nullptr : firstChild(m_behaviors, *protect(m_currentNode));
         m_offset = 0;
         if (!next) {
             RefPtr currentNode = m_currentNode;
@@ -602,7 +602,7 @@ static bool hasVisibleTextNode(RenderText& renderer)
 
 bool TextIterator::handleTextNode()
 {
-    Ref textNode = downcast<Text>(protectedCurrentNode().releaseNonNull());
+    Ref textNode = downcast<Text>(protect(m_currentNode).releaseNonNull());
 
     if (m_fullyClippedStack.top() && !m_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
         return false;
@@ -658,7 +658,7 @@ bool TextIterator::handleTextNode()
 
 void TextIterator::handleTextRun()
 {
-    Ref textNode = downcast<Text>(protectedCurrentNode().releaseNonNull());
+    Ref textNode = downcast<Text>(protect(m_currentNode).releaseNonNull());
 
     CheckedRef renderer = m_firstLetterText ? *m_firstLetterText : *textNode->renderer();
     if (renderer->style().visibility() != Visibility::Visible && !m_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility)) {
@@ -803,7 +803,7 @@ bool TextIterator::handleReplacedElement()
     if (CheckedPtr renderTextControl = dynamicDowncast<RenderTextControl>(*renderer); renderTextControl && m_behaviors.contains(TextIteratorBehavior::EntersTextControls)) {
         if (auto innerTextElement = protect(renderTextControl->textFormControlElement())->innerTextElement()) {
             m_currentNode = innerTextElement->containingShadowRoot();
-            pushFullyClippedState(m_fullyClippedStack, *protectedCurrentNode(), m_behaviors);
+            pushFullyClippedState(m_fullyClippedStack, *protect(m_currentNode), m_behaviors);
             m_offset = 0;
             return false;
         }
@@ -813,7 +813,7 @@ bool TextIterator::handleReplacedElement()
     if (m_behaviors.contains(TextIteratorBehavior::EntersImageOverlays) && currentElement && ImageOverlay::hasOverlay(*currentElement)) {
         if (RefPtr shadowRoot = m_currentNode->shadowRoot()) {
             m_currentNode = WTF::move(shadowRoot);
-            pushFullyClippedState(m_fullyClippedStack, *protectedCurrentNode(), m_behaviors);
+            pushFullyClippedState(m_fullyClippedStack, *protect(m_currentNode), m_behaviors);
             m_offset = 0;
             return false;
         }
@@ -838,7 +838,7 @@ bool TextIterator::handleReplacedElement()
     }();
 
     if (shouldEmitObjectReplacementCharacter) {
-        emitCharacter(objectReplacementCharacter, protect(m_currentNode->parentNode()), protectedCurrentNode(), 0, 1);
+        emitCharacter(objectReplacementCharacter, protect(m_currentNode->parentNode()), protect(m_currentNode), 0, 1);
         // Don't process subtrees for embedded objects. If the text there is required,
         // it must be explicitly asked by specifying a range falling inside its boundaries.
         m_handledChildren = true;
@@ -849,7 +849,7 @@ bool TextIterator::handleReplacedElement()
         // We want replaced elements to behave like punctuation for boundary
         // finding, and to simply take up space for the selection preservation
         // code in moveParagraphs, so we use a comma.
-        emitCharacter(',', protect(m_currentNode->parentNode()), protectedCurrentNode(), 0, 1);
+        emitCharacter(',', protect(m_currentNode->parentNode()), protect(m_currentNode), 0, 1);
         return true;
     }
 
@@ -1070,7 +1070,7 @@ bool TextIterator::shouldRepresentNodeOffsetZero()
     // and in that case we'll get null. We don't want to put in newlines at the start in that case.
     // The currPos.isNotNull() check is needed because positions in non-HTML content
     // (like SVG) do not have visible positions, and we don't want to emit for them either.
-    VisiblePosition startPos = VisiblePosition(Position(protectedStartContainer(), m_startOffset, Position::PositionIsOffsetInAnchor));
+    VisiblePosition startPos = VisiblePosition(Position(protect(m_startContainer), m_startOffset, Position::PositionIsOffsetInAnchor));
     VisiblePosition currPos = VisiblePosition(positionBeforeNode(currentNode.ptr()));
     return startPos.isNotNull() && currPos.isNotNull() && !inSameLine(startPos, currPos);
 }
@@ -1144,9 +1144,9 @@ void TextIterator::exitNode(Node* exitedNode)
     // the logic in _web_attributedStringFromRange match. We'll get that for free when we switch to use
     // TextIterator in _web_attributedStringFromRange.
     // See <rdar://problem/5428427> for an example of how this mismatch will cause problems.
-    if (m_lastTextNode && shouldEmitNewlineAfterNode(*protectedCurrentNode(), m_behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))) {
+    if (m_lastTextNode && shouldEmitNewlineAfterNode(*protect(m_currentNode), m_behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))) {
         // use extra newline to represent margin bottom, as needed
-        bool addNewline = shouldEmitExtraNewlineForNode(*protectedCurrentNode());
+        bool addNewline = shouldEmitExtraNewlineForNode(*protect(m_currentNode));
         
         // FIXME: We need to emit a '\n' as we leave an empty block(s) that
         // contain a VisiblePosition when doing selection preservation.
@@ -1163,7 +1163,7 @@ void TextIterator::exitNode(Node* exitedNode)
     }
     
     // If nothing was emitted, see if we need to emit a space.
-    if (!m_positionNode && shouldEmitSpaceBeforeAndAfterNode(*protectedCurrentNode())) {
+    if (!m_positionNode && shouldEmitSpaceBeforeAndAfterNode(*protect(m_currentNode))) {
         RefPtr parentNode = baseNode->parentNode();
         emitCharacter(' ', WTF::move(parentNode), WTF::move(baseNode), 1, 1);
     }
@@ -1234,11 +1234,6 @@ Node* TextIterator::node() const
     if (start.container->isCharacterDataNode())
         return start.container.unsafePtr();
     return start.container->traverseToChildAt(start.offset);
-}
-
-RefPtr<Node> TextIterator::protectedCurrentNode() const
-{
-    return m_currentNode;
 }
 
 #if ENABLE(TREE_DEBUGGING)
@@ -1321,11 +1316,11 @@ void SimplifiedBackwardsTextIterator::advance()
 
         if (!m_handledChildren && m_node->hasChildNodes()) {
             m_node = m_node->lastChild();
-            pushFullyClippedState(m_fullyClippedStack, *protectedNode(), m_behaviors);
+            pushFullyClippedState(m_fullyClippedStack, *protect(m_node), m_behaviors);
         } else {
             // Exit empty containers as we pass over them or containers
             // where [container, 0] is where we started iterating.
-            if (!m_handledNode && canHaveChildrenForEditing(*protectedNode()) && m_node->parentNode() && (!m_node->lastChild() || (m_node == m_endContainer && !m_endOffset))) {
+            if (!m_handledNode && canHaveChildrenForEditing(*protect(m_node)) && m_node->parentNode() && (!m_node->lastChild() || (m_node == m_endContainer && !m_endOffset))) {
                 exitNode();
                 if (m_positionNode) {
                     m_handledNode = true;
@@ -1349,14 +1344,14 @@ void SimplifiedBackwardsTextIterator::advance()
 
             m_fullyClippedStack.pop();
             if (advanceRespectingRange(protect(m_node->previousSibling()).get()))
-                pushFullyClippedState(m_fullyClippedStack, *protectedNode(), m_behaviors);
+                pushFullyClippedState(m_fullyClippedStack, *protect(m_node), m_behaviors);
             else
                 m_node = nullptr;
         }
 
         // For the purpose of word boundary detection,
         // we should iterate all visible text and trailing (collapsed) whitespaces. 
-        m_offset = m_node ? maxOffsetIncludingCollapsedSpaces(*protectedNode()) : 0;
+        m_offset = m_node ? maxOffsetIncludingCollapsedSpaces(*protect(m_node)) : 0;
         m_handledNode = false;
         m_handledChildren = false;
         
