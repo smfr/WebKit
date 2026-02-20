@@ -108,7 +108,7 @@ enum class LoadWillContinueInAnotherProcess : bool;
 enum class ShouldContinue;
 enum class ShouldTreatAsContinuingLoad : uint8_t;
 
-using ResourceLoaderMap = HashSet<RefPtr<ResourceLoader>>;
+using ResourceLoaderMap = HashSet<Ref<ResourceLoader>>;
 
 enum class AutoplayQuirk : uint8_t {
     SynthesizedPauseEvents = 1 << 0,

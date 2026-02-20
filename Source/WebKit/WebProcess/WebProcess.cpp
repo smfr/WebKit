@@ -1701,7 +1701,7 @@ void WebProcess::deleteWebsiteDataForOrigin(OptionSet<WebsiteDataType> websiteDa
     if (websiteDataTypes.contains(WebsiteDataType::MemoryCache)) {
         MemoryCache::singleton().removeResourcesWithOrigin(origin);
         if (origin.topOrigin == origin.clientOrigin)
-            BackForwardCache::singleton().clearEntriesForOrigins({ RefPtr<SecurityOrigin> { origin.clientOrigin.securityOrigin() } });
+            BackForwardCache::singleton().clearEntriesForOrigins({ Ref { origin.clientOrigin.securityOrigin() } });
     }
     completionHandler();
 }
@@ -1718,7 +1718,7 @@ void WebProcess::reloadExecutionContextsForOrigin(const ClientOrigin& origin, st
 void WebProcess::deleteWebsiteDataForOrigins(OptionSet<WebsiteDataType> websiteDataTypes, const Vector<WebCore::SecurityOriginData>& originDatas, CompletionHandler<void()>&& completionHandler)
 {
     if (websiteDataTypes.contains(WebsiteDataType::MemoryCache)) {
-        HashSet<RefPtr<SecurityOrigin>> origins;
+        HashSet<Ref<SecurityOrigin>> origins;
         for (auto& originData : originDatas)
             origins.add(originData.securityOrigin());
 

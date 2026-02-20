@@ -2039,7 +2039,7 @@ void DocumentLoader::addSubresourceLoader(SubresourceLoader& loader)
     }
 #endif
 
-    m_subresourceLoaders.add(&loader);
+    m_subresourceLoaders.add(loader);
 }
 
 void DocumentLoader::removeSubresourceLoader(LoadCompletionType type, SubresourceLoader& loader)
@@ -2055,7 +2055,7 @@ void DocumentLoader::addPlugInStreamLoader(ResourceLoader& loader)
 {
     ASSERT(!m_plugInStreamLoaders.contains(&loader));
 
-    m_plugInStreamLoaders.add(&loader);
+    m_plugInStreamLoaders.add(loader);
 }
 
 void DocumentLoader::removePlugInStreamLoader(ResourceLoader& loader)
@@ -2409,7 +2409,7 @@ void DocumentLoader::clearMainResource()
 
 void DocumentLoader::subresourceLoaderFinishedLoadingOnePart(ResourceLoader& loader)
 {
-    if (!m_multipartSubresourceLoaders.add(&loader).isNewEntry)
+    if (!m_multipartSubresourceLoaders.add(loader).isNewEntry)
         ASSERT(!m_subresourceLoaders.contains(&loader));
     else {
         ASSERT(m_subresourceLoaders.contains(&loader));

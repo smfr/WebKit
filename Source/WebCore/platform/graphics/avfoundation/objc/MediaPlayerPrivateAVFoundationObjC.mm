@@ -142,12 +142,6 @@
 
 #import <pal/cocoa/MediaToolboxSoftLink.h>
 
-namespace std {
-template <> struct iterator_traits<HashSet<RefPtr<WebCore::MediaSelectionOptionAVFObjC>>::iterator> {
-    typedef RefPtr<WebCore::MediaSelectionOptionAVFObjC> value_type;
-};
-}
-
 // Note: This must be defined before our SOFT_LINK macros:
 @class AVMediaSelectionOption;
 @interface AVMediaSelectionOption (OutOfBandExtensions)
