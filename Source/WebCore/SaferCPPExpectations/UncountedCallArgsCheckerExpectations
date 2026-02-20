@@ -211,7 +211,7 @@ css/CSSViewValue.cpp
 css/CSSViewValue.h
 css/DOMMatrixReadOnly.cpp
 css/DeprecatedCSSOMPrimitiveValue.h
-css/DeprecatedCSSOMRGBColor.h
+[ iOS ] css/DeprecatedCSSOMRGBColor.h
 css/FontFace.cpp
 css/FontFaceSet.cpp
 css/ImmutableStyleProperties.cpp
@@ -339,8 +339,7 @@ editing/markup.cpp
 html/CachedHTMLCollection.h
 html/CachedHTMLCollectionInlines.h
 html/CollectionTraversalInlines.h
-[ Mac ] html/ColorInputType.cpp
-[ iOS ] html/ColorInputType.cpp
+html/ColorInputType.cpp
 html/CustomPaintCanvas.cpp
 html/DirectoryFileListCreator.cpp
 html/FTPDirectoryDocument.cpp
@@ -370,8 +369,7 @@ html/ModelDocument.cpp
 html/OffscreenCanvas.cpp
 [ Mac ] html/RangeInputType.cpp
 [ Mac ] html/ResetInputType.cpp
-[ Mac ] html/TextFieldInputType.cpp
-[ iOS ] html/TextFieldInputType.cpp
+html/TextFieldInputType.cpp
 html/ValidatedFormListedElement.cpp
 html/ValidationMessage.cpp
 html/canvas/CanvasFilterContextSwitcher.cpp
@@ -434,12 +432,10 @@ layout/integration/inline/LayoutIntegrationInlineContentBuilder.cpp
 layout/integration/inline/LayoutIntegrationLineLayout.cpp
 loader/ApplicationManifestLoader.cpp
 loader/CrossOriginPreflightChecker.cpp
-[ Mac ] loader/DocumentLoader.cpp
-[ iOS ] loader/DocumentLoader.cpp
+loader/DocumentLoader.cpp
 [ Mac ] loader/DocumentWriter.cpp
 loader/FrameLoadRequest.cpp
-[ Mac ] loader/FrameLoader.cpp
-[ iOS ] loader/FrameLoader.cpp
+loader/FrameLoader.cpp
 [ Mac ] loader/HistoryController.cpp
 loader/MediaResourceLoader.cpp
 loader/NavigationScheduler.cpp
@@ -488,8 +484,7 @@ page/PerformanceUserTiming.cpp
 page/PointerCaptureController.cpp
 page/PointerLockController.cpp
 page/PrintContext.cpp
-[ Mac ] page/Quirks.cpp
-[ iOS ] page/Quirks.cpp
+page/Quirks.cpp
 page/RemoteDOMWindow.cpp
 page/RemoteFrame.cpp
 page/RenderingUpdateScheduler.cpp
@@ -617,7 +612,7 @@ platform/mock/MockRealtimeVideoSource.cpp
 platform/mock/RTCNotifiersMock.cpp
 platform/network/mac/ResourceHandleMac.mm
 platform/network/mac/WebCoreResourceHandleAsOperationQueueDelegate.mm
-platform/text/BidiContext.cpp
+[ iOS ] platform/text/BidiContext.cpp
 [ Mac ] plugins/PluginData.cpp
 rendering/AccessibilityRegionContext.cpp
 rendering/AttachmentLayout.mm

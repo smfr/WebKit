@@ -21,7 +21,7 @@ bytecode/AccessCase.cpp
 bytecode/BytecodeDumper.cpp
 bytecode/CallLinkInfo.cpp
 bytecode/CodeBlock.cpp
-bytecode/CodeBlock.h
+[ iOS ] bytecode/CodeBlock.h
 bytecode/CodeBlockHash.cpp
 bytecode/CodeBlockInlines.h
 bytecode/DirectEvalCodeCache.h

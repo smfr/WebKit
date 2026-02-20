@@ -134,7 +134,6 @@ tools/HeapVerifier.cpp
 tools/JSDollarVM.cpp
 tools/VMInspector.cpp
 wasm/WasmCalleeGroup.cpp
-[ Mac ] wasm/WasmIPIntSlowPaths.cpp
 wasm/WasmModule.cpp
 wasm/WasmOperations.cpp
 wasm/WasmStreamingCompiler.cpp

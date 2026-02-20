@@ -174,8 +174,7 @@ editing/markup.cpp
 html/CachedHTMLCollection.h
 html/CachedHTMLCollectionInlines.h
 html/CollectionTraversalInlines.h
-[ Mac ] html/ColorInputType.cpp
-[ iOS ] html/ColorInputType.cpp
+html/ColorInputType.cpp
 html/FTPDirectoryDocument.cpp
 [ Mac ] html/FormAssociatedCustomElement.cpp
 html/FormAssociatedElement.cpp
@@ -265,7 +264,7 @@ layout/formattingContexts/inline/InlineLineBox.cpp
 layout/formattingContexts/inline/InlineLineBox.h
 layout/formattingContexts/inline/InlineLineBoxBuilder.cpp
 layout/formattingContexts/inline/InlineLineBoxBuilder.h
-layout/formattingContexts/inline/InlineLineBoxVerticalAligner.cpp
+[ iOS ] layout/formattingContexts/inline/InlineLineBoxVerticalAligner.cpp
 layout/formattingContexts/inline/InlineLineBuilder.cpp
 layout/formattingContexts/inline/InlineQuirks.cpp
 layout/formattingContexts/inline/InlineTextItem.cpp
@@ -358,8 +357,7 @@ page/PerformanceMonitor.cpp
 page/PointerCaptureController.cpp
 page/PointerLockController.cpp
 page/PrintContext.cpp
-[ Mac ] page/Quirks.cpp
-[ iOS ] page/Quirks.cpp
+page/Quirks.cpp
 page/RemoteFrame.cpp
 page/ResizeObservation.cpp
 page/ResizeObserver.cpp
@@ -396,8 +394,7 @@ platform/graphics/ca/TileController.cpp
 platform/graphics/ca/TileCoverageMap.cpp
 platform/graphics/ca/cocoa/WebTiledBackingLayer.mm
 platform/graphics/cg/CGSubimageCacheWithTimer.cpp
-[ Mac ] platform/graphics/cocoa/TextTrackRepresentationCocoa.mm
-[ iOS ] platform/graphics/cocoa/TextTrackRepresentationCocoa.mm
+platform/graphics/cocoa/TextTrackRepresentationCocoa.mm
 [ iOS ] platform/ios/DeviceMotionClientIOS.mm
 [ iOS ] platform/ios/DeviceOrientationClientIOS.mm
 [ iOS ] platform/ios/PlatformScreenIOS.mm
