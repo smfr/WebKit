@@ -72,6 +72,7 @@ struct CSSParserContext {
     bool imageControlsEnabled : 1 { false };
 #endif
     bool colorLayersEnabled : 1 { false };
+    bool cssPickerPseudoElementEnabled : 1 { false };
     bool targetTextPseudoElementEnabled : 1 { false };
     bool htmlEnhancedSelectEnabled : 1 { false };
     bool cssRandomFunctionEnabled : 1 { false };

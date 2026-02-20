@@ -554,7 +554,7 @@
         },
         "picker": {
             "argument": "required",
-            "settings-flag": "htmlEnhancedSelectEnabled"
+            "settings-flag": ["htmlEnhancedSelectEnabled", "cssPickerPseudoElementEnabled"]
         },
         "picker-icon": {
             "settings-flag": "htmlEnhancedSelectEnabled"

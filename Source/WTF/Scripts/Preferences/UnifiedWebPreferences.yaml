@@ -1316,6 +1316,23 @@ CSSPaintingAPIEnabled:
     WebCore:
       default: false
 
+CSSPickerPseudoElementEnabled:
+  type: bool
+  status: internal
+  category: css
+  humanReadableName: "CSS ::picker() pseudo-element"
+  humanReadableDescription: "Enable the CSS ::picker() pseudo-element"
+  defaultValue:
+    WebKitLegacy:
+      "PLATFORM(WATCHOS)": false
+      default: true
+    WebKit:
+      "PLATFORM(WATCHOS)": false
+      default: true
+    WebCore:
+      "PLATFORM(WATCHOS)": false
+      default: true
+
 CSSRandomFunctionEnabled:
   type: bool
   category: css

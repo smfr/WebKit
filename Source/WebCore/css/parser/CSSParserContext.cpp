@@ -109,6 +109,7 @@ CSSParserContext::CSSParserContext(const Settings& settings)
     , imageControlsEnabled { settings.imageControlsEnabled() }
 #endif
     , colorLayersEnabled { settings.cssColorLayersEnabled() }
+    , cssPickerPseudoElementEnabled { settings.cssPickerPseudoElementEnabled() }
     , targetTextPseudoElementEnabled { settings.targetTextPseudoElementEnabled() }
     , htmlEnhancedSelectEnabled { settings.htmlEnhancedSelectEnabled() }
     , cssRandomFunctionEnabled { settings.cssRandomFunctionEnabled() }
@@ -147,6 +148,7 @@ void add(Hasher& hasher, const CSSParserContext& context)
         context.imageControlsEnabled,
 #endif
         context.colorLayersEnabled,
+        context.cssPickerPseudoElementEnabled,
         context.targetTextPseudoElementEnabled,
         context.htmlEnhancedSelectEnabled,
         context.cssRandomFunctionEnabled,
