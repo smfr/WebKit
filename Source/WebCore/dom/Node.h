@@ -460,7 +460,7 @@ public:
     bool isInDocumentTree() const { return isConnected() && !isInShadowTree(); }
 
     bool isDocumentTypeNode() const { return nodeType() == DOCUMENT_TYPE_NODE; }
-    virtual bool childTypeAllowed(NodeType) const { return false; }
+    virtual bool NODELETE childTypeAllowed(NodeType) const { return false; }
     inline unsigned countChildNodes() const;
     inline unsigned length() const;
     inline Node* traverseToChildAt(unsigned) const;

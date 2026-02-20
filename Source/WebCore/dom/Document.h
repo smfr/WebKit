@@ -2135,7 +2135,7 @@ private:
     void childrenChanged(const ChildChange&) final;
 
     String nodeName() const final;
-    bool childTypeAllowed(NodeType) const final;
+    bool NODELETE childTypeAllowed(NodeType) const final;
     Ref<Node> cloneNodeInternal(Document&, CloningOperation, CustomElementRegistry*) const final;
     ClonedDocumentType clonedDocumentType() const;
 
