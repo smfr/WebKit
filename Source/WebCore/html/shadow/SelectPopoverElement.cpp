@@ -91,8 +91,10 @@ void SelectPopoverElement::didRecalcStyle(OptionSet<Style::Change> change)
 
 void SelectPopoverElement::popoverWasHidden()
 {
-    if (RefPtr select = selectElement())
+    if (RefPtr select = selectElement()) {
         select->setPopupIsVisible(false);
+        select->focus();
+    }
 }
 
 } // namespace WebCore

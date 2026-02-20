@@ -38,6 +38,7 @@
 #include "HTMLOptGroupElement.h"
 #include "HTMLSelectElement.h"
 #include "HTMLSelectedContentElement.h"
+#include "KeyboardEvent.h"
 #include "MouseEvent.h"
 #include "NodeName.h"
 #include "NodeRenderStyle.h"
@@ -146,6 +147,14 @@ void HTMLOptionElement::finishParsingChildren()
     select->updateSelectedContent();
 }
 
+bool HTMLOptionElement::supportsFocus() const
+{
+    if (HTMLElement::supportsFocus())
+        return true;
+    RefPtr select = ownerSelectElement();
+    return select && select->usesBaseAppearancePicker();
+}
+
 bool HTMLOptionElement::isFocusable() const
 {
     RefPtr select = ownerSelectElement();
@@ -205,9 +214,48 @@ void HTMLOptionElement::defaultEventHandler(Event& event)
     if (!select || !select->document().settings().htmlEnhancedSelectEnabled() || !select->usesBaseAppearancePicker())
         return HTMLElement::defaultEventHandler(event);
 
-    RefPtr mouseEvent = dynamicDowncast<MouseEvent>(event);
-    if (event.type() == eventNames().mousedownEvent && mouseEvent && mouseEvent->button() == MouseButton::Left) {
-        select->setSelectedIndex(index());
+    auto& eventNames = WebCore::eventNames();
+
+    if (event.type() == eventNames.keydownEvent) {
+        RefPtr keyboardEvent = dynamicDowncast<KeyboardEvent>(event);
+        if (!keyboardEvent)
+            return HTMLElement::defaultEventHandler(event);
+
+        const String& keyIdentifier = keyboardEvent->keyIdentifier();
+
+        int currentIndex = select->optionToListIndex(index());
+        int listIndex = select->computeNavigationIndex(keyIdentifier, currentIndex, select->pickerNavigationKeyIdentifiers());
+        if (listIndex >= 0) {
+            select->focusOptionAtIndex(listIndex);
+            keyboardEvent->setDefaultHandled();
+            return;
+        }
+    }
+
+    if (event.type() == eventNames.keypressEvent) {
+        RefPtr keyboardEvent = dynamicDowncast<KeyboardEvent>(event);
+        if (!keyboardEvent)
+            return HTMLElement::defaultEventHandler(event);
+
+        int keyCode = keyboardEvent->keyCode();
+        if (keyCode == '\r' || keyCode == ' ') {
+            select->optionSelectedByUser(index(), true);
+            select->hidePickerPopoverElement();
+            keyboardEvent->setDefaultHandled();
+            return;
+        }
+
+        if (!keyboardEvent->ctrlKey() && !keyboardEvent->altKey() && !keyboardEvent->metaKey() && u_isprint(keyboardEvent->charCode())) {
+            int listIndex = select->typeAheadMatchIndex(*keyboardEvent);
+            if (listIndex >= 0)
+                select->focusOptionAtIndex(listIndex);
+            keyboardEvent->setDefaultHandled();
+            return;
+        }
+    }
+
+    if (RefPtr mouseEvent = dynamicDowncast<MouseEvent>(event); mouseEvent && event.type() == eventNames.mousedownEvent && mouseEvent->button() == MouseButton::Left) {
+        select->optionSelectedByUser(index(), true);
         select->hidePickerPopoverElement();
         event.setDefaultHandled();
         return;

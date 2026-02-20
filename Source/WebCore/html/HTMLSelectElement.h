@@ -188,6 +188,15 @@ public:
     SelectPopoverElement* pickerPopoverElement() const;
     void hidePickerPopoverElement();
 
+    struct NavigationKeyIdentifiers {
+        ASCIILiteral next;
+        ASCIILiteral previous;
+    };
+    NavigationKeyIdentifiers pickerNavigationKeyIdentifiers() const;
+    int computeNavigationIndex(const String& keyIdentifier, int currentListIndex, NavigationKeyIdentifiers) const;
+    void focusOptionAtIndex(int listIndex);
+    int typeAheadMatchIndex(KeyboardEvent&);
+
 protected:
     HTMLSelectElement(const QualifiedName&, Document&, HTMLFormElement*);
 
@@ -272,6 +281,7 @@ private:
     void didAddUserAgentShadowRoot(ShadowRoot&) final;
 
     void showPickerInternal();
+    void openPickerForUserInteraction();
 
     // TypeAheadDataSource functions.
     int indexOfSelectedOption() const final;

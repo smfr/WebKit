@@ -3,7 +3,5 @@ alpha
 charlie
 foxtrot
 
-FAIL Hidden options should be skipped when changing focus using the up and down keys. assert_equals: The `alpha` option should be initially focused. expected Element node <option id="alpha">alpha</option> but got Element node <select id="target">
-  <option id="alpha">alpha</option>
-...
+PASS Hidden options should be skipped when changing focus using the up and down keys.
 

@@ -77,6 +77,7 @@ private:
     InsertedIntoAncestorResult insertedIntoAncestor(InsertionType, ContainerNode&) final;
     void removedFromAncestor(RemovalType, ContainerNode& oldParentOfRemovedTree) final;
 
+    bool supportsFocus() const final;
     bool isFocusable() const final;
     bool rendererIsNeeded(const RenderStyle&) final;
     bool matchesDefaultPseudoClass() const final { return m_isDefault; }

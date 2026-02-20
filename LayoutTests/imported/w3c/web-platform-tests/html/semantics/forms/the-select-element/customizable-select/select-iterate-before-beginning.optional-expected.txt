@@ -3,10 +3,6 @@ button
 one
 two
 
-FAIL Attempting to focus the previous option while focused on the first option should not crash. assert_equals: The first option should be focused after opening the select. expected Element node <option class="one">one</option> but got Element node <select id="s1">
-  <button>button</button>
-  <option clas...
-FAIL Keyboard navigating backwards over an <hr> and <optgroup> should not crash. assert_equals: first option should be focused after opening select. expected Element node <option class="one">one</option> but got Element node <select id="s2">
-  <option class="one">one</option>
-  <hr...
+FAIL Attempting to focus the previous option while focused on the first option should not crash. assert_false: select should be closed at the end of the test. expected false got true
+FAIL Keyboard navigating backwards over an <hr> and <optgroup> should not crash. assert_false: select should be closed at the end of the test. expected false got true
 
