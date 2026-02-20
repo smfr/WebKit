@@ -2488,8 +2488,6 @@ webkit.org/b/307886 [ Release arm64 ] js/dom/promise-stack-overflow.html [ Pass 
 
 webkit.org/b/307889 http/tests/multipart/multipart-async-image.html [ Pass Failure ]
 
- webkit.org/b/308026 [ Release arm64 ] http/tests/webgpu/webgpu/shader/validation/functions/restrictions.html [ Pass Failure ]
-
 webkit.org/b/308079 [ Tahoe Release arm64 ] http/tests/site-isolation/inspector/console/message-from-iframe.html [ Failure ]
 webkit.org/b/308079 [ Tahoe Release arm64 ] http/tests/site-isolation/inspector/console/message-from-worker.html [ Failure ]
 
