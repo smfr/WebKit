@@ -887,8 +887,9 @@ bool ScrollingEffectsController::restoreRubberbandingState(const RubberbandingSt
     if (!shouldAttemptRubberbandingRestoration(state))
         return false;
 
-    auto timeSinceCapture = MonotonicTime::now() - state.captureTime;
-    auto totalElapsed = (state.captureTime - state.animationStartTime) + timeSinceCapture;
+    const auto now = MonotonicTime::now();
+    const auto timeSinceCapture = now - state.captureTime;
+    const auto totalElapsed = (state.captureTime - state.animationStartTime) + timeSinceCapture;
 
     LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::restoreRubberbandingState - restoring with initialOverscroll=" << state.initialOverscroll << " totalElapsed=" << totalElapsed.seconds() << "s");
 
@@ -899,6 +900,10 @@ bool ScrollingEffectsController::restoreRubberbandingState(const RubberbandingSt
 
     bool started = startRubberBandAnimationWithElapsedTime(state.initialVelocity, state.initialOverscroll, totalElapsed);
     LOG_WITH_STREAM(ScrollAnimations, stream << "ScrollingEffectsController::restoreRubberbandingState - startRubberBandAnimationWithElapsedTime returned " << started);
+
+    if (CheckedPtr currentAnimation = m_currentAnimation.get(); currentAnimation && started)
+        currentAnimation->serviceAnimation(now);
+
     return started;
 }
 
