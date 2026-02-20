@@ -50,7 +50,7 @@ inline MouseButton buttonFromShort(int16_t buttonValue)
 {
     static constexpr std::array knownMouseButtonCases { MouseButton::None, MouseButton::PointerHasNotChanged, MouseButton::Left, MouseButton::Middle, MouseButton::Right, MouseButton::Back, MouseButton::Forward };
     bool isKnownButton = std::ranges::any_of(knownMouseButtonCases, [buttonValue](MouseButton button) {
-        return buttonValue == enumToUnderlyingType(button);
+        return buttonValue == std::to_underlying(button);
     });
     return isKnownButton ? static_cast<MouseButton>(buttonValue) : MouseButton::Other;
 }

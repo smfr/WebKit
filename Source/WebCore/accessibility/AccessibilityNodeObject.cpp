@@ -4595,7 +4595,7 @@ AccessibilityRole AccessibilityNodeObject::determineAriaRoleAttribute() const
         else
             role = AccessibilityRole::Unknown;
     }
-    if (enumToUnderlyingType(role))
+    if (std::to_underlying(role))
         return role;
 
     return AccessibilityRole::Unknown;

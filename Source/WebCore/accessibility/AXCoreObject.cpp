@@ -2061,7 +2061,7 @@ String roleToPlatformString(AccessibilityRole role)
     // The only thing we need to make thread-safe is its initialization, accomplished
     // by expliciting initializing the map before the accessibility thread is started.
     static NeverDestroyed<PlatformRoleMap> roleMap = createPlatformRoleMap();
-    return roleMap->get(enumToUnderlyingType(role));
+    return roleMap->get(std::to_underlying(role));
 }
 
 bool inRenderTreeOrStyleUpdate(const Document& document)

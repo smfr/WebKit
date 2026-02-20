@@ -3530,7 +3530,7 @@ inline void Node::setCustomElementState(CustomElementState state)
         state == CustomElementState::Custom || state == CustomElementState::Uncustomized
     );
     auto bitfields = rareDataBitfields();
-    bitfields.customElementState = enumToUnderlyingType(state);
+    bitfields.customElementState = std::to_underlying(state);
     setRareDataBitfields(bitfields);
 }
 

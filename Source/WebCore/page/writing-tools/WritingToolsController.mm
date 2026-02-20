@@ -431,7 +431,7 @@ void WritingToolsController::proofreadingSessionDidUpdateStateForSuggestion(cons
         return;
     }
 
-    RELEASE_LOG(WritingTools, "WritingToolsController::proofreadingSessionDidUpdateStateForSuggestion (%s) [new state: %hhu, suggestion: %s]", state->session.identifier.toString().utf8().data(), enumToUnderlyingType(newTextSuggestionState), textSuggestion.identifier.toString().utf8().data());
+    RELEASE_LOG(WritingTools, "WritingToolsController::proofreadingSessionDidUpdateStateForSuggestion (%s) [new state: %hhu, suggestion: %s]", state->session.identifier.toString().utf8().data(), std::to_underlying(newTextSuggestionState), textSuggestion.identifier.toString().utf8().data());
 
     RefPtr document = this->document();
     if (!document) {
@@ -843,7 +843,7 @@ void WritingToolsController::writingToolsSessionDidReceiveAction<WritingTools::S
         return;
     }
 
-    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction<Proofreading> (%s) [action: %hhu]", state->session.identifier.toString().utf8().data(), enumToUnderlyingType(action));
+    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction<Proofreading> (%s) [action: %hhu]", state->session.identifier.toString().utf8().data(), std::to_underlying(action));
 
     RefPtr document = this->document();
     if (!document) {
@@ -903,7 +903,7 @@ void WritingToolsController::writingToolsSessionDidReceiveAction<WritingTools::S
         return;
     }
 
-    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction<Composition> [action: %hhu]", enumToUnderlyingType(action));
+    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction<Composition> [action: %hhu]", std::to_underlying(action));
 
     switch (action) {
     case WritingTools::Action::ShowOriginal: {
@@ -925,7 +925,7 @@ void WritingToolsController::writingToolsSessionDidReceiveAction<WritingTools::S
 
 void WritingToolsController::writingToolsSessionDidReceiveAction(const WritingTools::Session& session, WritingTools::Action action)
 {
-    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction [action: %hhu]", enumToUnderlyingType(action));
+    RELEASE_LOG(WritingTools, "WritingToolsController::writingToolsSessionDidReceiveAction [action: %hhu]", std::to_underlying(action));
 
     switch (session.type) {
     case WritingTools::Session::Type::Proofreading: {
