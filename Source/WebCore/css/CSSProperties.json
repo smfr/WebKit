@@ -11779,7 +11779,7 @@
                 "computed-style-storage-container": "struct",
                 "computed-style-storage-kind": "raw",
                 "computed-style-type": "Style::TextDecorationLine",
-                "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error@(settings-flag=cssTextDecorationLineErrorValues)",
+                "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error@(settings-flag=cssTextDecorationLineErrorValues) | grammar-error@(settings-flag=cssTextDecorationLineErrorValues)",
                 "comment": "FIXME: Should this be an alias of text-decoration-line?"
             },
             "status": "non-standard"
