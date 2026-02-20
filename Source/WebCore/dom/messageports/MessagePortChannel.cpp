@@ -91,7 +91,7 @@ void MessagePortChannel::entanglePortWithProcess(const MessagePortIdentifier& po
     ASSERT(!m_processes[i] || *m_processes[i] == process);
     m_processes[i] = process;
     m_entangledToProcessProtectors[i] = this;
-    m_pendingMessagePortTransfers[i].remove(this);
+    m_pendingMessagePortTransfers[i].remove(*this);
 }
 
 void MessagePortChannel::disentanglePort(const MessagePortIdentifier& port)
@@ -105,7 +105,7 @@ void MessagePortChannel::disentanglePort(const MessagePortIdentifier& port)
 
     ASSERT(m_processes[i] || m_isClosed[i]);
     m_processes[i] = std::nullopt;
-    m_pendingMessagePortTransfers[i].add(this);
+    m_pendingMessagePortTransfers[i].add(*this);
 
     // This set of steps is to guarantee that the lock is unlocked before the
     // last ref to this object is released.

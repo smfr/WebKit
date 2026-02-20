@@ -1332,7 +1332,7 @@ public:
 
     // Extension for manipulating canvas drawing contexts for use in CSS
     std::optional<RenderingContext> getCSSCanvasContext(const String& type, const String& name, int width, int height);
-    HTMLCanvasElement* getCSSCanvasElement(const String& name);
+    HTMLCanvasElement& getCSSCanvasElement(const String& name);
     String nameForCSSCanvasElement(const HTMLCanvasElement&) const;
 
     WEBCORE_EXPORT void postTask(Task&&) final; // Executes the task on context's thread asynchronously.
@@ -2395,7 +2395,7 @@ private:
     // would be managed.
     WeakHashSet<CanvasRenderingContext> m_canvasContextsToPrepare;
 
-    HashMap<String, RefPtr<HTMLCanvasElement>> m_cssCanvasElements;
+    HashMap<String, Ref<HTMLCanvasElement>> m_cssCanvasElements;
 
     WeakHashSet<Element, WeakPtrImplWithEventTargetData> m_documentSuspensionCallbackElements;
 

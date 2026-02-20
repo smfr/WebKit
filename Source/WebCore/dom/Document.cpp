@@ -8657,9 +8657,7 @@ void Document::detachRange(Range& range)
 
 std::optional<RenderingContext> Document::getCSSCanvasContext(const String& type, const String& name, int width, int height)
 {
-    RefPtr element = getCSSCanvasElement(name);
-    if (!element)
-        return std::nullopt;
+    Ref element = getCSSCanvasElement(name);
     element->setSizeForControllingContext({ width, height });
     auto context = element->getContext(type);
     if (!context)
@@ -8682,18 +8680,17 @@ std::optional<RenderingContext> Document::getCSSCanvasContext(const String& type
     return RenderingContext { downcast<CanvasRenderingContext2D>(*context) };
 }
 
-HTMLCanvasElement* Document::getCSSCanvasElement(const String& name)
+HTMLCanvasElement& Document::getCSSCanvasElement(const String& name)
 {
-    RefPtr<HTMLCanvasElement>& element = m_cssCanvasElements.add(name, nullptr).iterator->value;
-    if (!element)
-        element = HTMLCanvasElement::create(*this);
-    return element.get();
+    return m_cssCanvasElements.ensure(name, [&] {
+        return HTMLCanvasElement::create(*this);
+    }).iterator->value;
 }
 
 String Document::nameForCSSCanvasElement(const HTMLCanvasElement& canvasElement) const
 {
     for (const auto& entry : m_cssCanvasElements) {
-        if (entry.value.get() == &canvasElement)
+        if (entry.value.ptr() == &canvasElement)
             return entry.key;
     }
     return String();

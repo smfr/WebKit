@@ -88,8 +88,6 @@ public:
     void detachFromDocument();
 
 private:
-    Ref<Document> NODELETE protectedDocument() const;
-
     WeakRef<Document, WeakPtrImplWithEventTargetData> m_document;
 
     RefPtr<CSSStyleSheet> m_pageUserSheet;
@@ -105,7 +103,7 @@ private:
 
 #if ENABLE(CONTENT_EXTENSIONS)
     MemoryCompactRobinHoodHashMap<String, Ref<CSSStyleSheet>> m_contentExtensionSheets;
-    MemoryCompactRobinHoodHashMap<String, RefPtr<ContentExtensions::ContentExtensionStyleSheet>> m_contentExtensionSelectorSheets;
+    MemoryCompactRobinHoodHashMap<String, Ref<ContentExtensions::ContentExtensionStyleSheet>> m_contentExtensionSelectorSheets;
 #endif
 };
 

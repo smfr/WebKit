@@ -103,7 +103,6 @@ dom/ElementInternals.cpp
 [ Mac ] dom/ElementIteratorInlines.h
 [ Mac ] dom/ElementTraversal.h
 dom/EventLoop.cpp
-dom/ExtensionStyleSheets.cpp
 dom/FragmentDirectiveRangeFinder.cpp
 dom/IdTargetObserver.cpp
 dom/IdleCallbackController.cpp

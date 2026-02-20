@@ -35,8 +35,7 @@
 #include "RenderObjectInlines.h"
 #include <wtf/TZoneMallocInlines.h>
 
-namespace WebCore {
-namespace Style {
+namespace WebCore::Style {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(CanvasImage);
 
@@ -148,12 +147,9 @@ HTMLCanvasElement* CanvasImage::element(Document& document) const
 {
     if (!m_element) {
         m_element = document.getCSSCanvasElement(m_name);
-        if (!m_element)
-            return nullptr;
         m_element->addObserver(const_cast<CanvasImage&>(*this));
     }
     return m_element.get();
 }
 
-} // namespace Style
-} // namespace WebCore
+} // namespace WebCore::Style
