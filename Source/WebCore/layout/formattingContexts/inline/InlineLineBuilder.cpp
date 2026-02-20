@@ -1421,7 +1421,7 @@ void LineBuilder::handleBlockContent(const InlineItem& blockItem)
 LineBuilder::Result LineBuilder::handleInlineContent(const InlineItemRange& layoutRange, LineCandidate& lineCandidate)
 {
     auto result = tryPlacingCandidateInlineContentOnLine(layoutRange, lineCandidate);
-    if (!m_line.hasContent(Line::IncludeInsideListMarker::Yes))
+    if (!m_line.hasContentOrDecoration(Line::IncludeInsideListMarker::Yes))
         return result;
 
     if (!applyMarginInBlockDirectionIfNeeded(ShouldResetMarginValues::Yes) || floatingContext().isEmpty())
@@ -1449,7 +1449,7 @@ LineBuilder::Result LineBuilder::handleInlineContent(const InlineItemRange& layo
             if (!precedingNonContentfulContent.inlineContent.isEmpty()) {
                 commitCandidateContent(precedingNonContentfulContent, { });
                 // At this point we can't yet have contentful runs on the line.
-                ASSERT(!m_line.hasContent(Line::IncludeInsideListMarker::Yes));
+                ASSERT(!m_line.hasContentOrDecoration(Line::IncludeInsideListMarker::Yes));
             }
         };
         commitPrecedingNonContentfulContent();
