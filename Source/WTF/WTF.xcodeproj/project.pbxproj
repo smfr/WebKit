@@ -2231,7 +2231,6 @@
 				5D247B6E14689C4700E78B76 /* Base.xcconfig */,
 				5D247B7014689C4700E78B76 /* DebugRelease.xcconfig */,
 				DDF308DD27C44F84006A526F /* icu.xcconfig */,
-				07AC4F0D2EF5A62500468BCB /* module.modulemap */,
 				5D247B7314689C4700E78B76 /* WTF.xcconfig */,
 			);
 			path = Configurations;
@@ -2562,6 +2561,7 @@
 				A8A472CE151A825B004123FF /* MetaAllocator.h */,
 				A8A472CF151A825B004123FF /* MetaAllocatorHandle.h */,
 				46F071BA2CDEA45300074E61 /* MmapSpan.h */,
+				07AC4F0D2EF5A62500468BCB /* module.modulemap */,
 				0F66B2821DC97BAB004A1D3F /* MonotonicTime.cpp */,
 				0F66B2831DC97BAB004A1D3F /* MonotonicTime.h */,
 				FE8225301B2A1E5B00BA68FD /* NakedPtr.h */,
