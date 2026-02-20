@@ -620,6 +620,8 @@ rendering/RenderFrameSet.cpp
 rendering/RenderGeometryMap.cpp
 rendering/RenderHTMLCanvas.cpp
 rendering/RenderImage.cpp
+rendering/RenderImageResource.cpp
+rendering/RenderImageResource.h
 rendering/RenderLayer.cpp
 rendering/RenderLayer.h
 rendering/RenderLayerBacking.cpp

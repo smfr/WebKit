@@ -46,6 +46,7 @@ public:
     static Ref<CSSImageValue> create();
     static Ref<CSSImageValue> create(CSS::URL, AtomString initiatorType = { });
     static Ref<CSSImageValue> create(WTF::URL, AtomString initiatorType = { });
+    static Ref<CSSImageValue> create(CachedImage&);
     ~CSSImageValue();
 
     Ref<CSSImageValue> copyForComputedStyle(const CSS::URL& resolvedURL) const;
@@ -84,10 +85,11 @@ public:
 private:
     CSSImageValue();
     CSSImageValue(CSS::URL&&, AtomString&&);
+    explicit CSSImageValue(CachedImage&);
 
     CSS::URL m_location;
-    std::optional<CachedResourceHandle<CachedImage>> m_cachedImage;
     AtomString m_initiatorType;
+    std::optional<CachedResourceHandle<CachedImage>> m_cachedImage;
     RefPtr<CSSImageValue> m_unresolvedValue;
     bool m_isInvalid { false };
 };

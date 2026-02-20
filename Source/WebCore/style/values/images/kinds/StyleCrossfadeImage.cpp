@@ -170,6 +170,15 @@ RefPtr<WebCore::Image> CrossfadeImage::image(const RenderElement* renderer, cons
     return CrossfadeGeneratedImage::create(*protectedFromImage, *protectedToImage, m_percentage, fixedSize(*renderer), size);
 }
 
+bool CrossfadeImage::currentFrameIsComplete(const RenderElement* renderer) const
+{
+    if (m_from && !m_from->currentFrameIsComplete(renderer))
+        return false;
+    if (m_to && !m_to->currentFrameIsComplete(renderer))
+        return false;
+    return true;
+}
+
 bool CrossfadeImage::knownToBeOpaque(const RenderElement& renderer) const
 {
     if (m_from && !m_from->knownToBeOpaque(renderer))

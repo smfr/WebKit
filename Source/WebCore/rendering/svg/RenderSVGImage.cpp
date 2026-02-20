@@ -64,7 +64,7 @@ RenderSVGImage::~RenderSVGImage() = default;
 
 void RenderSVGImage::willBeDestroyed()
 {
-    imageResource().shutdown();
+    imageResource().willBeDestroyed();
     RenderSVGModelObject::willBeDestroyed();
 }
 

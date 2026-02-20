@@ -120,11 +120,11 @@ bool MultiImage::errorOccurred() const
     return m_selectedImage && m_selectedImage->errorOccurred();
 }
 
-FloatSize MultiImage::imageSize(const RenderElement* renderer, float multiplier) const
+FloatSize MultiImage::imageSize(const RenderElement* renderer, float multiplier, WebCore::CachedImage::SizeType sizeType) const
 {
     if (!m_selectedImage)
         return { };
-    return m_selectedImage->imageSize(renderer, multiplier);
+    return m_selectedImage->imageSize(renderer, multiplier, sizeType);
 }
 
 bool MultiImage::imageHasRelativeWidth() const
@@ -149,11 +149,11 @@ bool MultiImage::usesImageContainerSize() const
     return m_selectedImage && m_selectedImage->usesImageContainerSize();
 }
 
-void MultiImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom)
+void MultiImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom, const WTF::URL& url)
 {
     if (!m_selectedImage)
         return;
-    m_selectedImage->setContainerContextForRenderer(renderer, containerSize, containerZoom);
+    m_selectedImage->setContainerContextForRenderer(renderer, containerSize, containerZoom, url);
 }
 
 void MultiImage::addClient(RenderElement& renderer)
@@ -182,6 +182,11 @@ RefPtr<WebCore::Image> MultiImage::image(const RenderElement* renderer, const Fl
     if (!m_selectedImage)
         return nullptr;
     return m_selectedImage->image(renderer, size, destinationContext, isForFirstLine);
+}
+
+bool MultiImage::currentFrameIsComplete(const RenderElement* renderer) const
+{
+    return m_selectedImage && m_selectedImage->currentFrameIsComplete(renderer);
 }
 
 float MultiImage::imageScaleFactor() const

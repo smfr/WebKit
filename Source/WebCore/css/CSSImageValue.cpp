@@ -50,6 +50,14 @@ CSSImageValue::CSSImageValue(CSS::URL&& location, AtomString&& initiatorType)
 {
 }
 
+CSSImageValue::CSSImageValue(CachedImage& cachedImage)
+    : CSSValue(ClassType::Image)
+    , m_location(CSS::URL { .specified = cachedImage.url().string(), .resolved = cachedImage.url(), .modifiers = { } })
+    , m_initiatorType(cachedImage.initiatorType())
+    , m_cachedImage(cachedImage)
+{
+}
+
 Ref<CSSImageValue> CSSImageValue::create()
 {
     return adoptRef(*new CSSImageValue);
@@ -63,6 +71,11 @@ Ref<CSSImageValue> CSSImageValue::create(CSS::URL location, AtomString initiator
 Ref<CSSImageValue> CSSImageValue::create(WTF::URL imageURL, AtomString initiatorType)
 {
     return create(CSS::URL { .specified = imageURL.string(), .resolved = WTF::move(imageURL), .modifiers = { } }, WTF::move(initiatorType));
+}
+
+Ref<CSSImageValue> CSSImageValue::create(CachedImage& cachedImage)
+{
+    return adoptRef(*new CSSImageValue(cachedImage));
 }
 
 CSSImageValue::~CSSImageValue() = default;

@@ -157,11 +157,11 @@ void CursorImage::cursorElementChanged(SVGCursorElement& cursorElement)
     // FIXME: Why doesn't this funtion check for a change to the href of the cursor element? Why would we dynamically track changes to x/y but not href?
 }
 
-void CursorImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom)
+void CursorImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom, const WTF::URL& url)
 {
     if (!hasCachedImage())
         return;
-    cachedImage()->setContainerContextForClient(renderer.cachedImageClient(), LayoutSize(containerSize), containerZoom, m_originalURL.resolved);
+    cachedImage()->setContainerContextForClient(renderer.cachedImageClient(), LayoutSize(containerSize), containerZoom, !url.isNull() ? url : m_originalURL.resolved);
 }
 
 bool CursorImage::usesDataProtocol() const

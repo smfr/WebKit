@@ -444,8 +444,6 @@ rendering/RenderHTMLCanvas.cpp
 rendering/RenderImage.cpp
 rendering/RenderImage.h
 rendering/RenderImageResource.cpp
-rendering/RenderImageResourceStyleImage.cpp
-rendering/RenderImageResourceStyleImage.h
 rendering/RenderInline.cpp
 rendering/RenderIterator.h
 rendering/RenderLayer.cpp

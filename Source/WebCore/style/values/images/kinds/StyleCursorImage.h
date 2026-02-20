@@ -60,7 +60,7 @@ private:
     explicit CursorImage(const Ref<Image>&, std::optional<IntPoint> hotSpot, const URL&);
     explicit CursorImage(Ref<Image>&&, std::optional<IntPoint> hotSpot, URL&&);
 
-    void setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom) final;
+    void setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom, const WTF::URL& = WTF::URL()) final;
     Ref<CSSValue> computedStyleValue(const RenderStyle&) const final;
     ImageWithScale selectBestFitImage(const Document&) final;
 

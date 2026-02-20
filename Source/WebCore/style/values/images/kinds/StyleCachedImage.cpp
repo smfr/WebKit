@@ -52,7 +52,12 @@ Ref<CachedImage> CachedImage::create(URL&& url, Ref<CSSImageValue>&& cssValue, f
 
 Ref<CachedImage> CachedImage::create(const URL& url, const Ref<CSSImageValue>& cssValue, float scaleFactor)
 {
-    return adoptRef(*new CachedImage(url, cssValue, scaleFactor));
+    return CachedImage::create(URL { url }, cssValue.copyRef(), scaleFactor);
+}
+
+Ref<CachedImage> CachedImage::create(WebCore::CachedImage& cachedImage, float scaleFactor)
+{
+    return CachedImage::create(URL { .resolved = cachedImage.url(), .modifiers = { } }, CSSImageValue::create(cachedImage), scaleFactor);
 }
 
 Ref<CachedImage> CachedImage::copyOverridingScaleFactor(CachedImage& other, float scaleFactor)
@@ -66,17 +71,6 @@ CachedImage::CachedImage(URL&& url, Ref<CSSImageValue>&& cssValue, float scaleFa
     : Image { Type::CachedImage }
     , m_url { WTF::move(url) }
     , m_cssValue { WTF::move(cssValue) }
-    , m_scaleFactor { scaleFactor }
-{
-    m_cachedImage = m_cssValue->cachedImage();
-    if (m_cachedImage)
-        m_isPending = false;
-}
-
-CachedImage::CachedImage(const URL& url, const Ref<CSSImageValue>& cssValue, float scaleFactor)
-    : Image { Type::CachedImage }
-    , m_url { url }
-    , m_cssValue { cssValue }
     , m_scaleFactor { scaleFactor }
 {
     m_cachedImage = m_cssValue->cachedImage();
@@ -236,13 +230,13 @@ bool CachedImage::errorOccurred() const
     return m_cachedImage->errorOccurred();
 }
 
-FloatSize CachedImage::imageSize(const RenderElement* renderer, float multiplier) const
+FloatSize CachedImage::imageSize(const RenderElement* renderer, float multiplier, WebCore::CachedImage::SizeType sizeType) const
 {
     if (isRenderSVGResource(renderer))
         return m_containerSize;
     if (!m_cachedImage)
         return { };
-    return m_cachedImage->imageSizeForRenderer(renderer, multiplier) / m_scaleFactor;
+    return m_cachedImage->imageSizeForRenderer(renderer, multiplier, sizeType) / m_scaleFactor;
 }
 
 bool CachedImage::imageHasRelativeWidth() const
@@ -283,12 +277,12 @@ bool CachedImage::usesImageContainerSize() const
     return m_cachedImage->usesImageContainerSize();
 }
 
-void CachedImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom)
+void CachedImage::setContainerContextForRenderer(const RenderElement& renderer, const FloatSize& containerSize, float containerZoom, const WTF::URL& url)
 {
     m_containerSize = containerSize;
     if (!m_cachedImage)
         return;
-    m_cachedImage->setContainerContextForClient(renderer.cachedImageClient(), LayoutSize(containerSize), containerZoom, m_url.resolved);
+    m_cachedImage->setContainerContextForClient(protect(renderer.cachedImageClient()), LayoutSize(containerSize), containerZoom, !url.isNull() ? url : m_url.resolved);
 }
 
 void CachedImage::addClient(RenderElement& renderer)
@@ -336,6 +330,11 @@ RefPtr<WebCore::Image> CachedImage::image(const RenderElement* renderer, const F
         return nullptr;
 
     return m_cachedImage->imageForRenderer(renderer);
+}
+
+bool CachedImage::currentFrameIsComplete(const RenderElement* renderer) const
+{
+    return m_cachedImage && m_cachedImage->currentFrameIsComplete(renderer);
 }
 
 float CachedImage::imageScaleFactor() const

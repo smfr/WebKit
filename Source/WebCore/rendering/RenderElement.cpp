@@ -70,7 +70,6 @@
 #include "RenderGeometryMap.h"
 #include "RenderGrid.h"
 #include "RenderImage.h"
-#include "RenderImageResourceStyleImage.h"
 #include "RenderInline.h"
 #include "RenderIterator.h"
 #include "RenderLayer.h"

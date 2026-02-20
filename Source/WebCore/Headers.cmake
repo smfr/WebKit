@@ -3171,7 +3171,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     rendering/RenderIFrame.h
     rendering/RenderImage.h
     rendering/RenderImageResource.h
-    rendering/RenderImageResourceStyleImage.h
     rendering/RenderInline.h
     rendering/RenderLayer.h
     rendering/RenderLayerBacking.h

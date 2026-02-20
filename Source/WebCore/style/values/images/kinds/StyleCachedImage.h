@@ -47,6 +47,7 @@ class CachedImage final : public Image {
 public:
     static Ref<CachedImage> create(URL&&, Ref<CSSImageValue>&&, float scaleFactor = 1);
     static Ref<CachedImage> create(const URL&, const Ref<CSSImageValue>&, float scaleFactor = 1);
+    static Ref<CachedImage> create(WebCore::CachedImage&, float scaleFactor = 1);
     static Ref<CachedImage> copyOverridingScaleFactor(CachedImage&, float scaleFactor);
     virtual ~CachedImage();
 
@@ -64,17 +65,18 @@ public:
     void load(CachedResourceLoader&, const ResourceLoaderOptions&) final;
     bool isLoaded(const RenderElement*) const final;
     bool errorOccurred() const final;
-    FloatSize imageSize(const RenderElement*, float multiplier) const final;
+    FloatSize imageSize(const RenderElement*, float multiplier, WebCore::CachedImage::SizeType = WebCore::CachedImage::UsedSize) const final;
     bool imageHasRelativeWidth() const final;
     bool imageHasRelativeHeight() const final;
     void computeIntrinsicDimensions(const RenderElement*, float& intrinsicWidth, float& intrinsicHeight, FloatSize& intrinsicRatio) final;
     bool usesImageContainerSize() const final;
-    void setContainerContextForRenderer(const RenderElement&, const FloatSize&, float) final;
+    void setContainerContextForRenderer(const RenderElement&, const FloatSize&, float, const WTF::URL& = WTF::URL()) final;
     void addClient(RenderElement&) final;
     void removeClient(RenderElement&) final;
     bool hasClient(RenderElement&) const final;
     bool hasImage() const final;
     RefPtr<WebCore::Image> image(const RenderElement*, const FloatSize&, const GraphicsContext& destinationContext, bool isForFirstLine) const final;
+    bool currentFrameIsComplete(const RenderElement*) const final;
     float imageScaleFactor() const final;
     bool knownToBeOpaque(const RenderElement&) const final;
     bool usesDataProtocol() const final;
@@ -83,7 +85,6 @@ public:
 
 private:
     CachedImage(URL&&, Ref<CSSImageValue>&&, float);
-    CachedImage(const URL&, const Ref<CSSImageValue>&, float);
 
     LegacyRenderSVGResourceContainer* uncheckedRenderSVGResource(TreeScope&, const AtomString& fragment) const;
     LegacyRenderSVGResourceContainer* uncheckedRenderSVGResource(const RenderElement*) const;

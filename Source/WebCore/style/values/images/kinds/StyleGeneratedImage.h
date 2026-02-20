@@ -51,12 +51,12 @@ protected:
 
     WrappedImagePtr data() const final { return this; }
 
-    FloatSize imageSize(const RenderElement*, float multiplier) const final;
+    FloatSize imageSize(const RenderElement*, float multiplier, WebCore::CachedImage::SizeType = WebCore::CachedImage::UsedSize) const final;
     void computeIntrinsicDimensions(const RenderElement*, float& intrinsicWidth, float& intrinsicHeight, FloatSize& intrinsicRatio) final;
     bool imageHasRelativeWidth() const final { return !m_fixedSize; }
     bool imageHasRelativeHeight() const final { return !m_fixedSize; }
     bool usesImageContainerSize() const final { return !m_fixedSize; }
-    void setContainerContextForRenderer(const RenderElement&, const FloatSize& containerSize, float) final { m_containerSize = containerSize; }
+    void setContainerContextForRenderer(const RenderElement&, const FloatSize& containerSize, float, const WTF::URL& = WTF::URL()) final { m_containerSize = containerSize; }
     bool imageHasNaturalDimensions() const final { return !usesImageContainerSize(); }
 
     void addClient(RenderElement&) final;

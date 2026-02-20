@@ -59,7 +59,7 @@
 #include "RenderElementInlines.h"
 #include "RenderElementStyleInlines.h"
 #include "RenderFragmentedFlow.h"
-#include "RenderImageResourceStyleImage.h"
+#include "RenderImageResource.h"
 #include "RenderObjectInlines.h"
 #include "RenderStyle+GettersInlines.h"
 #include "RenderTheme.h"
@@ -154,7 +154,7 @@ using namespace HTMLNames;
 
 RenderImage::RenderImage(Type type, Element& element, RenderStyle&& style, OptionSet<ReplacedFlag> flags, Style::Image* styleImage, const float imageDevicePixelRatio)
     : RenderReplaced(type, element, WTF::move(style), IntSize(), flags | ReplacedFlag::IsImage)
-    , m_imageResource(styleImage ? makeUnique<RenderImageResourceStyleImage>(*styleImage) : makeUnique<RenderImageResource>())
+    , m_imageResource(makeUnique<RenderImageResource>(styleImage))
     , m_hasImageOverlay([&] {
         auto* htmlElement = dynamicDowncast<HTMLElement>(element);
         return htmlElement && ImageOverlay::hasOverlay(*htmlElement);
@@ -179,7 +179,7 @@ RenderImage::RenderImage(Type type, Element& element, RenderStyle&& style, Style
 
 RenderImage::RenderImage(Type type, Document& document, RenderStyle&& style, Style::Image* styleImage)
     : RenderReplaced(type, document, WTF::move(style), IntSize(), ReplacedFlag::IsImage)
-    , m_imageResource(styleImage ? makeUnique<RenderImageResourceStyleImage>(*styleImage) : makeUnique<RenderImageResource>())
+    , m_imageResource(makeUnique<RenderImageResource>(styleImage))
 {
 }
 
@@ -188,7 +188,7 @@ RenderImage::~RenderImage() = default;
 
 void RenderImage::willBeDestroyed()
 {
-    imageResource().shutdown();
+    imageResource().willBeDestroyed();
     RenderReplaced::willBeDestroyed();
 }
 

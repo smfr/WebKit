@@ -105,7 +105,7 @@ void GeneratedImage::evictCachedGeneratedImage(FloatSize size)
     m_images.remove(size);
 }
 
-FloatSize GeneratedImage::imageSize(const RenderElement* renderer, float multiplier) const
+FloatSize GeneratedImage::imageSize(const RenderElement* renderer, float multiplier, WebCore::CachedImage::SizeType) const
 {
     if (!m_fixedSize)
         return m_containerSize;

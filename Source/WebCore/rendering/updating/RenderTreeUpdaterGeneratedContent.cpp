@@ -36,7 +36,6 @@
 #include "RenderDescendantIterator.h"
 #include "RenderElementInlines.h"
 #include "RenderImage.h"
-#include "RenderImageResourceStyleImage.h"
 #include "RenderQuote.h"
 #include "RenderStyle+GettersInlines.h"
 #include "RenderTextFragment.h"

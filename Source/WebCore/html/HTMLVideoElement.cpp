@@ -134,7 +134,7 @@ void HTMLVideoElement::didAttachRenderers()
             lazyInitialize(m_imageLoader, makeUniqueWithoutRefCountedCheck<HTMLImageLoader>(*this));
         m_imageLoader->updateFromElement();
         if (CheckedPtr renderer = this->renderer())
-            renderer->checkedImageResource()->setCachedImage(protect(m_imageLoader->image()));
+            protect(renderer->imageResource())->setCachedImage(protect(m_imageLoader->image()));
     }
 }
 
@@ -215,12 +215,11 @@ void HTMLVideoElement::attributeChanged(const QualifiedName& name, const AtomStr
             m_imageLoader->updateFromElementIgnoringPreviousError();
         } else {
             if (CheckedPtr renderer = this->renderer()) {
-                renderer->checkedImageResource()->setCachedImage(nullptr);
+                protect(renderer->imageResource())->clearCachedImage();
                 renderer->updateFromElement();
             }
         }
-    }
-    else {
+    } else {
         HTMLMediaElement::attributeChanged(name, oldValue, newValue, attributeModificationReason);
 
 #if PLATFORM(IOS_FAMILY) && ENABLE(WIRELESS_PLAYBACK_TARGET)
