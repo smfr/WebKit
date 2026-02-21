@@ -3124,7 +3124,7 @@ RegisterID* VoidNode::emitBytecode(BytecodeGenerator& generator, RegisterID* dst
         generator.emitNodeInIgnoreResultPosition(m_expr);
         return nullptr;
     }
-    RefPtr<RegisterID> r0 = generator.emitNode(m_expr);
+    generator.emitNodeInIgnoreResultPosition(m_expr);
     return generator.emitLoad(dst, jsUndefined());
 }
 
