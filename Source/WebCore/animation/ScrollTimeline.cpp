@@ -413,7 +413,7 @@ bool ScrollTimeline::matchesAnonymousScrollFunctionForSource(const Style::Scroll
 }
 
 #if ENABLE(THREADED_ANIMATIONS)
-bool ScrollTimeline::computeCanBeAccelerated() const
+bool ScrollTimeline::canBeAccelerated() const
 {
     RefPtr source = this->source();
     if (!source)

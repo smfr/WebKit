@@ -90,6 +90,7 @@ public:
 #if ENABLE(THREADED_ANIMATIONS)
     WEBCORE_EXPORT std::optional<ScrollingNodeID> scrollingNodeIDForTesting() const;
     void updateAcceleratedRepresentation();
+    bool canBeAccelerated() const final;
 #endif
 
 protected:
@@ -117,7 +118,6 @@ private:
 
     bool isScrollTimeline() const final { return true; }
 #if ENABLE(THREADED_ANIMATIONS)
-    bool computeCanBeAccelerated() const final;
     Ref<AcceleratedTimeline> createAcceleratedRepresentation() const final;
 #endif
 
