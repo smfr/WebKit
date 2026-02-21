@@ -45,7 +45,7 @@
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(_WKInspectorExtension.class, self))
         return;
 
-    _extension->API::InspectorExtension::~InspectorExtension();
+    SUPPRESS_UNRETAINED_ARG _extension->API::InspectorExtension::~InspectorExtension();
 
     [super dealloc];
 }

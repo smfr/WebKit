@@ -55,7 +55,7 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(WKUserScript.class, self))
         return;
 
-    _userScript->~UserScript();
+    SUPPRESS_UNRETAINED_ARG _userScript->~UserScript();
 
     [super dealloc];
 }

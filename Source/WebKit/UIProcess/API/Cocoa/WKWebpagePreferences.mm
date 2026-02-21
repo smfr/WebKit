@@ -426,7 +426,7 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (void)_setCustomUserAgent:(NSString *)customUserAgent
 {
-    _websitePolicies->setCustomUserAgent(customUserAgent);
+    protect(*_websitePolicies)->setCustomUserAgent(customUserAgent);
 }
 
 - (NSString *)_customUserAgent
@@ -436,7 +436,7 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (void)_setCustomUserAgentAsSiteSpecificQuirks:(NSString *)customUserAgent
 {
-    _websitePolicies->setCustomUserAgentAsSiteSpecificQuirks(customUserAgent);
+    protect(*_websitePolicies)->setCustomUserAgentAsSiteSpecificQuirks(customUserAgent);
 }
 
 - (NSString *)_customUserAgentAsSiteSpecificQuirks
@@ -446,7 +446,7 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (void)_setCustomNavigatorPlatform:(NSString *)customNavigatorPlatform
 {
-    _websitePolicies->setCustomNavigatorPlatform(customNavigatorPlatform);
+    protect(*_websitePolicies)->setCustomNavigatorPlatform(customNavigatorPlatform);
 }
 
 - (NSString *)_customNavigatorPlatform
@@ -471,7 +471,7 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (void)_setApplicationNameForUserAgentWithModernCompatibility:(NSString *)applicationName
 {
-    _websitePolicies->setApplicationNameForDesktopUserAgent(applicationName);
+    protect(*_websitePolicies)->setApplicationNameForDesktopUserAgent(applicationName);
 }
 
 - (API::Object&)_apiObject
@@ -496,7 +496,7 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (void)setOverrideReferrer:(NSString *)referrer
 {
-    _websitePolicies->setOverrideReferrerForAllRequests(referrer);
+    protect(*_websitePolicies)->setOverrideReferrerForAllRequests(referrer);
 }
 
 - (void)_setOverrideReferrerForAllRequests:(NSString *)referrer

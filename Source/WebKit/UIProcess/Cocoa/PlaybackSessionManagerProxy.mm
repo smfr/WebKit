@@ -1147,7 +1147,7 @@ bool PlaybackSessionManagerProxy::wirelessVideoPlaybackDisabled()
     if (it == m_contextMap.end())
         return true;
 
-    return std::get<0>(it->value)->wirelessVideoPlaybackDisabled();
+    return protect(std::get<0>(it->value))->wirelessVideoPlaybackDisabled();
 }
 
 void PlaybackSessionManagerProxy::requestControlledElementID()

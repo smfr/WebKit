@@ -36,7 +36,7 @@
 {
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(_WKTargetedElementRequest.class, self))
         return;
-    _request->API::TargetedElementRequest::~TargetedElementRequest();
+    SUPPRESS_UNRETAINED_ARG _request->API::TargetedElementRequest::~TargetedElementRequest();
     [super dealloc];
 }
 

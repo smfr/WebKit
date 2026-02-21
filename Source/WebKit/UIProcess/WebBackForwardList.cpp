@@ -647,7 +647,7 @@ void WebBackForwardList::backForwardAddItemShared(IPC::Connection& connection, R
         item->setResourceDirectoryURL(webPageProxy->currentResourceDirectoryURL());
         item->setEnhancedSecurity(process->enhancedSecurity());
         if (loadedWebArchive == LoadedWebArchive::Yes)
-            item->setDataStoreForWebArchive(process->websiteDataStore());
+            item->setDataStoreForWebArchive(protect(process->websiteDataStore()));
         addItem(WTF::move(item));
     }
 }

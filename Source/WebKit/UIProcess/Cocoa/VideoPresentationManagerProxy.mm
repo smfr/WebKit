@@ -568,12 +568,12 @@ void VideoPresentationModelContext::requestHideCaptionDisplaySettingsPreview()
 #if !RELEASE_LOG_DISABLED
 uint64_t VideoPresentationModelContext::logIdentifier() const
 {
-    return m_playbackSessionModel->logIdentifier();
+    return protect(m_playbackSessionModel)->logIdentifier();
 }
 
 uint64_t VideoPresentationModelContext::nextChildIdentifier() const
 {
-    return LoggerHelper::childLogIdentifier(m_playbackSessionModel->logIdentifier(), ++m_childIdentifierSeed);
+    return LoggerHelper::childLogIdentifier(protect(m_playbackSessionModel)->logIdentifier(), ++m_childIdentifierSeed);
 }
 
 const Logger* VideoPresentationModelContext::loggerPtr() const
@@ -1689,7 +1689,7 @@ WTFLogChannel& VideoPresentationManagerProxy::logChannel() const
 RefPtr<PlatformVideoPresentationInterface> VideoPresentationManagerProxy::bestVideoForElementFullscreen()
 {
     if (m_lastInteractedWithVideo) {
-        if (auto* modelAndInterface = findModelAndInterface(*m_lastInteractedWithVideo); modelAndInterface && modelAndInterface->first->isChildOfElementFullscreen())
+        if (auto* modelAndInterface = findModelAndInterface(*m_lastInteractedWithVideo); modelAndInterface && protect(modelAndInterface->first)->isChildOfElementFullscreen())
             return protect(modelAndInterface->second);
     }
 #if PLATFORM(IOS_FAMILY)

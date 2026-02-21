@@ -67,7 +67,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
     if (injectedBundleURL && !injectedBundleURL.isFileURL)
         [NSException raise:NSInvalidArgumentException format:@"Injected Bundle URL must be a file URL"];
 
-    _processPoolConfiguration->setInjectedBundlePath(injectedBundleURL.path);
+    protect(*_processPoolConfiguration)->setInjectedBundlePath(injectedBundleURL.path);
 }
 
 - (NSSet<Class> *)customClassesForParameterCoder
@@ -377,7 +377,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
 - (void)setTimeZoneOverride:(NSString *)timeZone
 {
-    _processPoolConfiguration->setTimeZoneOverride(timeZone);
+    protect(*_processPoolConfiguration)->setTimeZoneOverride(timeZone);
 }
 
 - (void)setMemoryFootprintPollIntervalForTesting:(NSTimeInterval)pollInterval

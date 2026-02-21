@@ -1429,7 +1429,7 @@ struct WKWebsiteData {
 
 -(void)_setServiceWorkerOverridePreferences:(WKPreferences *)preferences
 {
-    _websiteDataStore->setServiceWorkerOverridePreferences(preferences ? preferences->_preferences.get() : nullptr);
+    protect(*_websiteDataStore)->setServiceWorkerOverridePreferences(protect(preferences ? preferences->_preferences.get() : nullptr));
 }
 
 -(void)_scopeURL:(NSURL *)scopeURL hasPushSubscriptionForTesting:(void(^)(BOOL))completionHandler

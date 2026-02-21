@@ -958,8 +958,9 @@ RefPtr<WebExtensionTab> WebExtensionContext::getCurrentTab(WebPageProxyIdentifie
         if (includeExtensionViews == IncludeExtensionViews::No)
             return nullptr;
 
-        RefPtr tab = entry.value->tab();
-        RefPtr window = tab ? tab->window() : entry.value->window();
+        Ref value = entry.value;
+        RefPtr tab = value->tab();
+        RefPtr window = tab ? tab->window() : value->window();
         if (!tab && window)
             tab = window->activeTab();
 
@@ -2207,8 +2208,9 @@ Vector<WebExtensionContext::PageIdentifierTuple> WebExtensionContext::popupPageI
     Vector<PageIdentifierTuple> result;
 
     for (auto entry : m_popupPageActionMap) {
-        RefPtr tab = entry.value->tab();
-        RefPtr window = tab ? tab->window() : entry.value->window();
+        Ref value = entry.value;
+        RefPtr tab = value->tab();
+        RefPtr window = tab ? tab->window() : value->window();
 
         auto tabIdentifier = tab ? std::optional(tab->identifier()) : std::nullopt;
         auto windowIdentifier = window ? std::optional(window->identifier()) : std::nullopt;

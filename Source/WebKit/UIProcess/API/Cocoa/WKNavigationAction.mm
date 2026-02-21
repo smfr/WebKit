@@ -86,7 +86,7 @@ static WKSyntheticClickType toWKSyntheticClickType(WebKit::WebMouseEventSyntheti
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(WKNavigationAction.class, self))
         return;
 
-    _navigationAction->~NavigationAction();
+    SUPPRESS_UNCOUNTED_ARG _navigationAction->~NavigationAction();
 
     [super dealloc];
 }

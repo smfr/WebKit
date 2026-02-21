@@ -86,7 +86,7 @@
 
 - (void)setSessionIdentifier:(NSString *)sessionIdentifier
 {
-    _session->setSessionIdentifier(sessionIdentifier);
+    protect(*_session)->setSessionIdentifier(sessionIdentifier);
 }
 
 - (_WKAutomationSessionConfiguration *)configuration

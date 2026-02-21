@@ -2858,7 +2858,7 @@ void WebPageProxy::setInspectable(bool inspectable)
 
 String WebPageProxy::remoteInspectionNameOverride() const
 {
-    return m_inspectorDebuggable ? m_inspectorDebuggable->nameOverride() : nullString();
+    return m_inspectorDebuggable ? protect(m_inspectorDebuggable)->nameOverride() : nullString();
 }
 
 void WebPageProxy::setRemoteInspectionNameOverride(const String& name)
@@ -5189,7 +5189,7 @@ void WebPageProxy::receivedNavigationActionPolicyDecision(WebProcessProxy& proce
 #endif
 
     URL sourceURL { pageLoadState().url() };
-    if (auto* provisionalPage = provisionalPageProxy()) {
+    if (RefPtr provisionalPage = provisionalPageProxy()) {
         if (provisionalPage->navigationID() == navigation.navigationID())
             sourceURL = provisionalPage->provisionalURL();
     }

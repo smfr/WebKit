@@ -321,7 +321,7 @@ static std::optional<WebCore::ApplicationManifest::Shortcut> makeVectorElement(c
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(_WKApplicationManifest.class, self))
         return;
 
-    _applicationManifest->~ApplicationManifest();
+    SUPPRESS_UNRETAINED_ARG _applicationManifest->~ApplicationManifest();
 
     [super dealloc];
 }

@@ -80,7 +80,7 @@ static _WKResourceLoadInfoResourceType toWKResourceLoadInfoResourceType(WebKit::
 {
     if (WebCoreObjCScheduleDeallocateOnMainRunLoop(_WKResourceLoadInfo.class, self))
         return;
-    _info->API::ResourceLoadInfo::~ResourceLoadInfo();
+    SUPPRESS_UNRETAINED_ARG _info->API::ResourceLoadInfo::~ResourceLoadInfo();
     [super dealloc];
 }
 
