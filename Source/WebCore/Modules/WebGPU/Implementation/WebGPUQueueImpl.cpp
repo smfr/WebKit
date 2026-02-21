@@ -72,7 +72,7 @@ void QueueImpl::onSubmittedWorkDone(CompletionHandler<void()>&& callback)
     wgpuQueueOnSubmittedWorkDone(m_backing.get(), &onSubmittedWorkDoneCallback, Block_copy(blockPtr.get())); // Block_copy is matched with Block_release above in onSubmittedWorkDoneCallback().
 }
 
-void NODELETE QueueImpl::writeBuffer(
+void QueueImpl::writeBuffer(
     const Buffer&,
     Size64,
     std::span<const uint8_t>,
@@ -82,7 +82,7 @@ void NODELETE QueueImpl::writeBuffer(
     RELEASE_ASSERT_NOT_REACHED();
 }
 
-void NODELETE QueueImpl::writeTexture(
+void QueueImpl::writeTexture(
     const ImageCopyTexture&,
     std::span<const uint8_t>,
     const ImageDataLayout&,
@@ -127,7 +127,7 @@ void QueueImpl::writeTexture(
     wgpuQueueWriteTexture(m_backing.get(), &backingDestination, source, &backingDataLayout, &backingSize);
 }
 
-void NODELETE QueueImpl::copyExternalImageToTexture(
+void QueueImpl::copyExternalImageToTexture(
     const ImageCopyExternalImage& source,
     const ImageCopyTextureTagged& destination,
     const Extent3D& copySize)

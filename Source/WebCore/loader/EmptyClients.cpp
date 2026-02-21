@@ -667,19 +667,19 @@ RefPtr<Icon> EmptyChromeClient::createIconForFiles(const Vector<String>& /* file
 
 // MARK: -
 
-void NODELETE EmptyFrameLoaderClient::dispatchDecidePolicyForNewWindowAction(const NavigationAction&, const ResourceRequest&, FormState*, const String&, std::optional<HitTestResult>&&, FramePolicyFunction&&)
+void EmptyFrameLoaderClient::dispatchDecidePolicyForNewWindowAction(const NavigationAction&, const ResourceRequest&, FormState*, const String&, std::optional<HitTestResult>&&, FramePolicyFunction&&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDecidePolicyForNavigationAction(const NavigationAction&, const ResourceRequest&, const ResourceResponse&, FormState*, const String&, std::optional<NavigationIdentifier>, std::optional<HitTestResult>&&, bool, NavigationUpgradeToHTTPSBehavior, SandboxFlags, PolicyDecisionMode, FramePolicyFunction&&)
+void EmptyFrameLoaderClient::dispatchDecidePolicyForNavigationAction(const NavigationAction&, const ResourceRequest&, const ResourceResponse&, FormState*, const String&, std::optional<NavigationIdentifier>, std::optional<HitTestResult>&&, bool, NavigationUpgradeToHTTPSBehavior, SandboxFlags, PolicyDecisionMode, FramePolicyFunction&&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::updateSandboxFlags(SandboxFlags)
+void EmptyFrameLoaderClient::updateSandboxFlags(SandboxFlags)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::updateOpener(std::optional<FrameIdentifier>)
+void EmptyFrameLoaderClient::updateOpener(std::optional<FrameIdentifier>)
 {
 }
 
@@ -687,7 +687,7 @@ void EmptyFrameLoaderClient::setPrinting(bool, FloatSize, FloatSize, float, Adju
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchWillSendSubmitEvent(Ref<FormState>&&)
+void EmptyFrameLoaderClient::dispatchWillSendSubmitEvent(Ref<FormState>&&)
 {
 }
 
@@ -716,12 +716,12 @@ RefPtr<Widget> EmptyFrameLoaderClient::createPlugin(HTMLPlugInElement&, const UR
     return nullptr;
 }
 
-bool NODELETE EmptyFrameLoaderClient::hasWebView() const
+bool EmptyFrameLoaderClient::hasWebView() const
 {
     return true; // mainly for assertions
 }
 
-void NODELETE EmptyFrameLoaderClient::makeRepresentation(DocumentLoader*)
+void EmptyFrameLoaderClient::makeRepresentation(DocumentLoader*)
 {
 }
 
@@ -734,46 +734,46 @@ bool EmptyFrameLoaderClient::forceLayoutOnRestoreFromBackForwardCache()
 
 #endif
 
-void NODELETE EmptyFrameLoaderClient::forceLayoutForNonHTML()
+void EmptyFrameLoaderClient::forceLayoutForNonHTML()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::setCopiesOnScroll()
+void EmptyFrameLoaderClient::setCopiesOnScroll()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::detachedFromParent2()
+void EmptyFrameLoaderClient::detachedFromParent2()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::detachedFromParent3()
+void EmptyFrameLoaderClient::detachedFromParent3()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::convertMainResourceLoadToDownload(DocumentLoader*, const ResourceRequest&, const ResourceResponse&)
+void EmptyFrameLoaderClient::convertMainResourceLoadToDownload(DocumentLoader*, const ResourceRequest&, const ResourceResponse&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::assignIdentifierToInitialRequest(ResourceLoaderIdentifier, DocumentLoader*, const ResourceRequest&)
+void EmptyFrameLoaderClient::assignIdentifierToInitialRequest(ResourceLoaderIdentifier, DocumentLoader*, const ResourceRequest&)
 {
 }
 
-bool NODELETE EmptyFrameLoaderClient::shouldUseCredentialStorage(DocumentLoader*, ResourceLoaderIdentifier)
+bool EmptyFrameLoaderClient::shouldUseCredentialStorage(DocumentLoader*, ResourceLoaderIdentifier)
 {
     return false;
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchWillSendRequest(DocumentLoader*, ResourceLoaderIdentifier, ResourceRequest&, const ResourceResponse&)
+void EmptyFrameLoaderClient::dispatchWillSendRequest(DocumentLoader*, ResourceLoaderIdentifier, ResourceRequest&, const ResourceResponse&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReceiveAuthenticationChallenge(DocumentLoader*, ResourceLoaderIdentifier, const AuthenticationChallenge&)
+void EmptyFrameLoaderClient::dispatchDidReceiveAuthenticationChallenge(DocumentLoader*, ResourceLoaderIdentifier, const AuthenticationChallenge&)
 {
 }
 
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 
-bool NODELETE EmptyFrameLoaderClient::canAuthenticateAgainstProtectionSpace(DocumentLoader*, ResourceLoaderIdentifier, const ProtectionSpace&)
+bool EmptyFrameLoaderClient::canAuthenticateAgainstProtectionSpace(DocumentLoader*, ResourceLoaderIdentifier, const ProtectionSpace&)
 {
     return false;
 }
@@ -789,44 +789,44 @@ RetainPtr<CFDictionaryRef> EmptyFrameLoaderClient::connectionProperties(Document
 
 #endif
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReceiveResponse(DocumentLoader*, ResourceLoaderIdentifier, const ResourceResponse&)
+void EmptyFrameLoaderClient::dispatchDidReceiveResponse(DocumentLoader*, ResourceLoaderIdentifier, const ResourceResponse&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReceiveContentLength(DocumentLoader*, ResourceLoaderIdentifier, int)
+void EmptyFrameLoaderClient::dispatchDidReceiveContentLength(DocumentLoader*, ResourceLoaderIdentifier, int)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFinishLoading(DocumentLoader*, ResourceLoaderIdentifier)
+void EmptyFrameLoaderClient::dispatchDidFinishLoading(DocumentLoader*, ResourceLoaderIdentifier)
 {
 }
 
 #if ENABLE(DATA_DETECTION)
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFinishDataDetection(NSArray *)
+void EmptyFrameLoaderClient::dispatchDidFinishDataDetection(NSArray *)
 {
 }
 
 #endif
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFailLoading(DocumentLoader*, ResourceLoaderIdentifier, const ResourceError&)
+void EmptyFrameLoaderClient::dispatchDidFailLoading(DocumentLoader*, ResourceLoaderIdentifier, const ResourceError&)
 {
 }
 
-bool NODELETE EmptyFrameLoaderClient::dispatchDidLoadResourceFromMemoryCache(DocumentLoader*, const ResourceRequest&, const ResourceResponse&, int)
+bool EmptyFrameLoaderClient::dispatchDidLoadResourceFromMemoryCache(DocumentLoader*, const ResourceRequest&, const ResourceResponse&, int)
 {
     return false;
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidDispatchOnloadEvents()
+void EmptyFrameLoaderClient::dispatchDidDispatchOnloadEvents()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReceiveServerRedirectForProvisionalLoad()
+void EmptyFrameLoaderClient::dispatchDidReceiveServerRedirectForProvisionalLoad()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidCancelClientRedirect()
+void EmptyFrameLoaderClient::dispatchDidCancelClientRedirect()
 {
 }
 
@@ -834,195 +834,195 @@ void EmptyFrameLoaderClient::dispatchWillPerformClientRedirect(const URL&, doubl
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidChangeLocationWithinPage()
+void EmptyFrameLoaderClient::dispatchDidChangeLocationWithinPage()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidPushStateWithinPage()
+void EmptyFrameLoaderClient::dispatchDidPushStateWithinPage()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReplaceStateWithinPage()
+void EmptyFrameLoaderClient::dispatchDidReplaceStateWithinPage()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidPopStateWithinPage()
+void EmptyFrameLoaderClient::dispatchDidPopStateWithinPage()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchWillClose()
+void EmptyFrameLoaderClient::dispatchWillClose()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidStartProvisionalLoad()
+void EmptyFrameLoaderClient::dispatchDidStartProvisionalLoad()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReceiveTitle(const StringWithDirection&)
+void EmptyFrameLoaderClient::dispatchDidReceiveTitle(const StringWithDirection&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidCommitLoad(std::optional<HasInsecureContent>, std::optional<UsedLegacyTLS>, std::optional<WasPrivateRelayed>)
+void EmptyFrameLoaderClient::dispatchDidCommitLoad(std::optional<HasInsecureContent>, std::optional<UsedLegacyTLS>, std::optional<WasPrivateRelayed>)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFailProvisionalLoad(const ResourceError&, WillContinueLoading, WillInternallyHandleFailure)
+void EmptyFrameLoaderClient::dispatchDidFailProvisionalLoad(const ResourceError&, WillContinueLoading, WillInternallyHandleFailure)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFailLoad(const ResourceError&)
+void EmptyFrameLoaderClient::dispatchDidFailLoad(const ResourceError&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFinishDocumentLoad()
+void EmptyFrameLoaderClient::dispatchDidFinishDocumentLoad()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidFinishLoad()
+void EmptyFrameLoaderClient::dispatchDidFinishLoad()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReachLayoutMilestone(OptionSet<LayoutMilestone>)
+void EmptyFrameLoaderClient::dispatchDidReachLayoutMilestone(OptionSet<LayoutMilestone>)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidReachVisuallyNonEmptyState()
+void EmptyFrameLoaderClient::dispatchDidReachVisuallyNonEmptyState()
 {
 }
 
-LocalFrame* NODELETE EmptyFrameLoaderClient::dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy)
+LocalFrame* EmptyFrameLoaderClient::dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy)
 {
     return nullptr;
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchShow()
+void EmptyFrameLoaderClient::dispatchShow()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDecidePolicyForResponse(const ResourceResponse&, const ResourceRequest&, const String&, FramePolicyFunction&&)
+void EmptyFrameLoaderClient::dispatchDecidePolicyForResponse(const ResourceResponse&, const ResourceRequest&, const String&, FramePolicyFunction&&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::cancelPolicyCheck()
+void EmptyFrameLoaderClient::cancelPolicyCheck()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchUnableToImplementPolicy(const ResourceError&)
+void EmptyFrameLoaderClient::dispatchUnableToImplementPolicy(const ResourceError&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::revertToProvisionalState(DocumentLoader*)
+void EmptyFrameLoaderClient::revertToProvisionalState(DocumentLoader*)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::setMainDocumentError(DocumentLoader*, const ResourceError&)
+void EmptyFrameLoaderClient::setMainDocumentError(DocumentLoader*, const ResourceError&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::setMainFrameDocumentReady(bool)
+void EmptyFrameLoaderClient::setMainFrameDocumentReady(bool)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::startDownload(const ResourceRequest&, const String&, FromDownloadAttribute)
+void EmptyFrameLoaderClient::startDownload(const ResourceRequest&, const String&, FromDownloadAttribute)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::willChangeTitle(DocumentLoader*)
+void EmptyFrameLoaderClient::willChangeTitle(DocumentLoader*)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::didChangeTitle(DocumentLoader*)
+void EmptyFrameLoaderClient::didChangeTitle(DocumentLoader*)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::willReplaceMultipartContent()
+void EmptyFrameLoaderClient::willReplaceMultipartContent()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::didReplaceMultipartContent()
+void EmptyFrameLoaderClient::didReplaceMultipartContent()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::committedLoad(DocumentLoader*, const SharedBuffer&)
+void EmptyFrameLoaderClient::committedLoad(DocumentLoader*, const SharedBuffer&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::finishedLoading(DocumentLoader*)
+void EmptyFrameLoaderClient::finishedLoading(DocumentLoader*)
 {
 }
 
-bool NODELETE EmptyFrameLoaderClient::shouldFallBack(const ResourceError&) const
-{
-    return false;
-}
-
-void NODELETE EmptyFrameLoaderClient::loadStorageAccessQuirksIfNeeded()
-{
-}
-
-bool NODELETE EmptyFrameLoaderClient::canHandleRequest(const ResourceRequest&) const
+bool EmptyFrameLoaderClient::shouldFallBack(const ResourceError&) const
 {
     return false;
 }
 
-bool NODELETE EmptyFrameLoaderClient::canShowMIMEType(const String&) const
+void EmptyFrameLoaderClient::loadStorageAccessQuirksIfNeeded()
+{
+}
+
+bool EmptyFrameLoaderClient::canHandleRequest(const ResourceRequest&) const
 {
     return false;
 }
 
-bool NODELETE EmptyFrameLoaderClient::canShowMIMETypeAsHTML(const String&) const
+bool EmptyFrameLoaderClient::canShowMIMEType(const String&) const
 {
     return false;
 }
 
-bool NODELETE EmptyFrameLoaderClient::representationExistsForURLScheme(StringView) const
+bool EmptyFrameLoaderClient::canShowMIMETypeAsHTML(const String&) const
 {
     return false;
 }
 
-String NODELETE EmptyFrameLoaderClient::generatedMIMETypeForURLScheme(StringView) const
+bool EmptyFrameLoaderClient::representationExistsForURLScheme(StringView) const
+{
+    return false;
+}
+
+String EmptyFrameLoaderClient::generatedMIMETypeForURLScheme(StringView) const
 {
     return emptyString();
 }
 
-void NODELETE EmptyFrameLoaderClient::frameLoadCompleted()
+void EmptyFrameLoaderClient::frameLoadCompleted()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::restoreViewState()
+void EmptyFrameLoaderClient::restoreViewState()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::provisionalLoadStarted()
+void EmptyFrameLoaderClient::provisionalLoadStarted()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::didFinishLoad()
+void EmptyFrameLoaderClient::didFinishLoad()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::prepareForDataSourceReplacement()
+void EmptyFrameLoaderClient::prepareForDataSourceReplacement()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::updateCachedDocumentLoader(DocumentLoader&)
+void EmptyFrameLoaderClient::updateCachedDocumentLoader(DocumentLoader&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::setTitle(const StringWithDirection&, const URL&)
+void EmptyFrameLoaderClient::setTitle(const StringWithDirection&, const URL&)
 {
 }
 
-String NODELETE EmptyFrameLoaderClient::userAgent(const URL&) const
+String EmptyFrameLoaderClient::userAgent(const URL&) const
 {
     return emptyString();
 }
 
-void NODELETE EmptyFrameLoaderClient::savePlatformDataToCachedFrame(CachedFrame*)
+void EmptyFrameLoaderClient::savePlatformDataToCachedFrame(CachedFrame*)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::transitionToCommittedFromCachedFrame(CachedFrame*)
+void EmptyFrameLoaderClient::transitionToCommittedFromCachedFrame(CachedFrame*)
 {
 }
 
@@ -1034,78 +1034,78 @@ void EmptyFrameLoaderClient::didRestoreFrameHierarchyForCachedFrame()
 
 #endif
 
-void NODELETE EmptyFrameLoaderClient::transitionToCommittedForNewPage(InitializingIframe)
+void EmptyFrameLoaderClient::transitionToCommittedForNewPage(InitializingIframe)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::didRestoreFromBackForwardCache()
+void EmptyFrameLoaderClient::didRestoreFromBackForwardCache()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::updateGlobalHistory()
+void EmptyFrameLoaderClient::updateGlobalHistory()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::updateGlobalHistoryRedirectLinks()
+void EmptyFrameLoaderClient::updateGlobalHistoryRedirectLinks()
 {
 }
 
-ShouldGoToHistoryItem NODELETE EmptyFrameLoaderClient::shouldGoToHistoryItem(HistoryItem&, IsSameDocumentNavigation) const
+ShouldGoToHistoryItem EmptyFrameLoaderClient::shouldGoToHistoryItem(HistoryItem&, IsSameDocumentNavigation) const
 {
     return ShouldGoToHistoryItem::No;
 }
 
-bool NODELETE EmptyFrameLoaderClient::supportsAsyncShouldGoToHistoryItem() const
+bool EmptyFrameLoaderClient::supportsAsyncShouldGoToHistoryItem() const
 {
     return false;
 }
 
-void NODELETE EmptyFrameLoaderClient::shouldGoToHistoryItemAsync(HistoryItem&, CompletionHandler<void(ShouldGoToHistoryItem)>&&) const
+void EmptyFrameLoaderClient::shouldGoToHistoryItemAsync(HistoryItem&, CompletionHandler<void(ShouldGoToHistoryItem)>&&) const
 {
     RELEASE_ASSERT_NOT_REACHED();
 }
 
-void NODELETE EmptyFrameLoaderClient::saveViewStateToItem(HistoryItem&)
+void EmptyFrameLoaderClient::saveViewStateToItem(HistoryItem&)
 {
 }
 
-bool NODELETE EmptyFrameLoaderClient::canCachePage() const
+bool EmptyFrameLoaderClient::canCachePage() const
 {
     return false;
 }
 
-ObjectContentType NODELETE EmptyFrameLoaderClient::objectContentType(const URL&, const String&)
+ObjectContentType EmptyFrameLoaderClient::objectContentType(const URL&, const String&)
 {
     return ObjectContentType::None;
 }
 
-AtomString NODELETE EmptyFrameLoaderClient::overrideMediaType() const
+AtomString EmptyFrameLoaderClient::overrideMediaType() const
 {
     return nullAtom();
 }
 
-void NODELETE EmptyFrameLoaderClient::redirectDataToPlugin(Widget&)
+void EmptyFrameLoaderClient::redirectDataToPlugin(Widget&)
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld&)
+void EmptyFrameLoaderClient::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld&)
 {
 }
 
 #if PLATFORM(COCOA)
 
-RemoteAXObjectRef NODELETE EmptyFrameLoaderClient::accessibilityRemoteObject()
+RemoteAXObjectRef EmptyFrameLoaderClient::accessibilityRemoteObject()
 {
     return nullptr;
 }
 
-IntPoint NODELETE EmptyFrameLoaderClient::accessibilityRemoteFrameOffset()
+IntPoint EmptyFrameLoaderClient::accessibilityRemoteFrameOffset()
 {
     return { };
 }
 
 #if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
-void NODELETE EmptyFrameLoaderClient::setIsolatedTree(Ref<WebCore::AXIsolatedTree>&&)
+void EmptyFrameLoaderClient::setIsolatedTree(Ref<WebCore::AXIsolatedTree>&&)
 {
 }
 
@@ -1122,12 +1122,12 @@ void EmptyFrameLoaderClient::willCacheResponse(DocumentLoader*, ResourceLoaderId
 
 #endif
 
-bool NODELETE EmptyFrameLoaderClient::isEmptyFrameLoaderClient() const
+bool EmptyFrameLoaderClient::isEmptyFrameLoaderClient() const
 {
     return true;
 }
 
-void NODELETE EmptyFrameLoaderClient::prefetchDNS(const String&)
+void EmptyFrameLoaderClient::prefetchDNS(const String&)
 {
 }
 
@@ -1145,16 +1145,16 @@ RefPtr<LegacyPreviewLoaderClient> EmptyFrameLoaderClient::createPreviewLoaderCli
 
 #endif
 
-bool NODELETE EmptyFrameLoaderClient::hasFrameSpecificStorageAccess()
+bool EmptyFrameLoaderClient::hasFrameSpecificStorageAccess()
 {
     return false;
 }
 
-void NODELETE EmptyFrameLoaderClient::revokeFrameSpecificStorageAccess()
+void EmptyFrameLoaderClient::revokeFrameSpecificStorageAccess()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchLoadEventToOwnerElementInAnotherProcess()
+void EmptyFrameLoaderClient::dispatchLoadEventToOwnerElementInAnotherProcess()
 {
 }
 

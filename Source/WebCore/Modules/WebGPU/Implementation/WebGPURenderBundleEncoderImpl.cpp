@@ -94,7 +94,7 @@ void RenderBundleEncoderImpl::setBindGroup(Index32 index, const BindGroup* bindG
     wgpuRenderBundleEncoderSetBindGroupWithDynamicOffsets(m_backing.get(), index, bindGroup ? m_convertToBackingContext->convertToBacking(*bindGroup) : nullptr, WTF::move(dynamicOffsets));
 }
 
-void NODELETE RenderBundleEncoderImpl::setBindGroup(Index32, const BindGroup*,
+void RenderBundleEncoderImpl::setBindGroup(Index32, const BindGroup*,
     std::span<const uint32_t>,
     Size64,
     Size32)
