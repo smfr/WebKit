@@ -2769,6 +2769,8 @@ imported/w3c/web-platform-tests/webrtc/protocol/transceiver-mline-recycling.html
 
 webrtc/RTCConfiguration-targetLatency.html [ Failure ]
 
+webkit.org/b/308371 imported/w3c/web-platform-tests/webrtc/simulcast/basic.https.html [ Pass Failure ]
+
 # Specific to LibWebRTC:
 webkit.org/b/235885 webrtc/disable-encryption.html [ Skip ]
 webkit.org/b/235885 webrtc/libwebrtc/ [ Skip ]
@@ -2806,7 +2808,6 @@ webkit.org/b/235885 http/tests/webrtc/video-mediastream-invisible-autoplay-detac
 webkit.org/b/235885 imported/w3c/web-platform-tests/mst-content-hint/RTCRtpSendParameters-degradationPreference.html [ Failure ]
 webkit.org/b/235885 webrtc/addTransceiver-then-addTrack.html [ Failure ]
 webkit.org/b/235885 webrtc/audio-peer-connection-g722.html [ Failure Timeout Pass ]
-webkit.org/b/235885 webrtc/audio-peer-connection-webaudio.html [ Pass Timeout ]
 webkit.org/b/235885 webrtc/audio-samplerate-change.html [ Pass Timeout ]
 webkit.org/b/235885 webrtc/audio-video-element-playing.html [ Failure ]
 webkit.org/b/235885 webrtc/canvas-to-peer-connection-2d.html [ Failure Pass Crash Timeout ]
@@ -3079,7 +3080,7 @@ imported/w3c/web-platform-tests/webrtc/RTCPeerConnection-setLocalDescription-par
 # Creates 256 PeerConnections. The test takes around 30 seconds to complete.
 webrtc/datachannel/multiple-connections.html [ Slow ]
 
-webkit.org/b/306207 imported/w3c/web-platform-tests/webrtc-stats/hardware-capability-stats.https.html [ Crash Pass ]
+webkit.org/b/306207 imported/w3c/web-platform-tests/webrtc-stats/hardware-capability-stats.https.html [ Crash Pass Failure ]
 
 # This test is almost the same as http/wpt/webrtc/transfer-datachannel-service-worker.https.html.
 # The main difference is that in this test an additional message is sent on the data-channel.
@@ -5187,6 +5188,8 @@ webkit.org/b/306384 svg/as-list-image/svg-list-image-intrinsic-size-1.html [ Ima
 webkit.org/b/306455 http/tests/xmlhttprequest/logout.html [ Failure Pass ]
 
 webkit.org/b/306458 imported/w3c/web-platform-tests/media-source/mediasource-config-change-mp4-v-bitrate.html [ Failure Pass ]
+webkit.org/b/308368 imported/w3c/web-platform-tests/media-source/mediasource-config-change-webm-a-bitrate.html [ Pass Failure ]
+
 
 webkit.org/b/306463 imported/w3c/web-platform-tests/import-maps/bare-specifiers.sub.html [ Failure Pass ]
 webkit.org/b/306463 imported/w3c/web-platform-tests/import-maps/data-url-specifiers.sub.html [ Failure Pass ]
