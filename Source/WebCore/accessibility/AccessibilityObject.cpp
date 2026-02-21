@@ -1266,7 +1266,7 @@ String AccessibilityObject::altTextFromAttributeOrStyle() const
     }
 
     CheckedPtr style = this->style();
-    return style ? style->altFromContent() : nullString();
+    return style ? style->content().altText() : nullString();
 }
 
 bool AccessibilityObject::isARIAInput(AccessibilityRole ariaRole)

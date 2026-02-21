@@ -3444,7 +3444,7 @@ void AccessibilityNodeObject::alternativeText(Vector<AccessibilityText>& textOrd
 #endif
 
     if (CheckedPtr style = this->style()) {
-        String altText = style->altFromContent();
+        String altText = style->content().altText();
         if (!altText.isEmpty())
             textOrder.append(AccessibilityText(WTF::move(altText), AccessibilityTextSource::Alternative));
     }

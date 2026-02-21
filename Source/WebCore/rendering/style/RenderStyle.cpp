@@ -294,13 +294,6 @@ bool RenderStyle::isIdempotentTextAutosizingCandidate(AutosizeStatus status) con
 
 // MARK: - Used Values
 
-String RenderStyle::altFromContent() const
-{
-    if (auto* contentData = content().tryData())
-        return contentData->altText.value_or(nullString());
-    return { };
-}
-
 const AtomString& RenderStyle::hyphenString() const
 {
     ASSERT(hyphens() != Hyphens::None);

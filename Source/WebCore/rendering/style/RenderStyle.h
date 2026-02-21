@@ -410,7 +410,6 @@ public:
 
     // MARK: - Used Values
 
-    String altFromContent() const;
     const AtomString& hyphenString() const;
     float usedStrokeWidth(const IntSize& viewportSize) const;
     Color usedStrokeColor() const;
