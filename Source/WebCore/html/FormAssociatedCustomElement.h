@@ -45,9 +45,9 @@ public:
     bool isFormListedElement() const final { return true; }
     bool isValidatedFormListedElement() const final { return true; }
 
-    FormAssociatedElement* asFormAssociatedElement() final { return this; }
-    FormListedElement* asFormListedElement() final { return this; }
-    ValidatedFormListedElement* asValidatedFormListedElement() final { return this; }
+    FormAssociatedElement* NODELETE asFormAssociatedElement() final { return this; }
+    FormListedElement* NODELETE asFormListedElement() final { return this; }
+    ValidatedFormListedElement* NODELETE asValidatedFormListedElement() final { return this; }
 
     HTMLElement& asHTMLElement() final { return *m_element.get(); }
     const HTMLElement& asHTMLElement() const final { return *m_element.get(); }

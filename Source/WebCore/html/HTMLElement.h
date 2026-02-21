@@ -106,7 +106,7 @@ public:
     virtual bool isLabelable() const { return false; }
     WEBCORE_EXPORT RefPtr<NodeList> labels();
 
-    virtual FormAssociatedElement* asFormAssociatedElement();
+    virtual FormAssociatedElement* NODELETE asFormAssociatedElement();
 
     virtual bool isInteractiveContent() const { return false; }
 

@@ -46,7 +46,7 @@ public:
     virtual void elementInsertedIntoAncestor(Element&, Node::InsertionType);
     virtual void elementRemovedFromAncestor(Element&, Node::RemovalType);
 
-    virtual FormAssociatedElement* asFormAssociatedElement() = 0;
+    virtual FormAssociatedElement* NODELETE asFormAssociatedElement() = 0;
 
 protected:
     explicit FormAssociatedElement(HTMLFormElement*);

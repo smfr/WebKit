@@ -417,8 +417,8 @@ public:
     void parserSetAttributes(std::span<const Attribute>, AttributeModificationReason = AttributeModificationReason::Parser);
 
     bool isEventHandlerAttribute(const Attribute&) const;
-    virtual FormListedElement* asFormListedElement();
-    virtual ValidatedFormListedElement* asValidatedFormListedElement();
+    virtual FormListedElement* NODELETE asFormListedElement();
+    virtual ValidatedFormListedElement* NODELETE asValidatedFormListedElement();
     virtual bool attributeContainsJavaScriptURL(const Attribute&) const;
 
 #if ENABLE(ATTACHMENT_ELEMENT)
@@ -662,7 +662,7 @@ public:
 
     virtual bool isFormListedElement() const { return false; }
     virtual bool isValidatedFormListedElement() const { return false; }
-    virtual bool isMaybeFormAssociatedCustomElement() const { return false; }
+    virtual bool NODELETE isMaybeFormAssociatedCustomElement() const { return false; }
     virtual bool isSpinButtonElement() const { return false; }
     virtual bool isTextFormControlElement() const { return false; }
     virtual bool isTextField() const { return false; }
@@ -936,7 +936,7 @@ protected:
     StylePropertyMap* NODELETE attributeStyleMap();
     void setAttributeStyleMap(Ref<StylePropertyMap>&&);
 
-    FormAssociatedCustomElement& formAssociatedCustomElementUnsafe() const;
+    FormAssociatedCustomElement& NODELETE formAssociatedCustomElementUnsafe() const;
     void ensureFormAssociatedCustomElement();
 
     void disconnectFromIntersectionObservers();

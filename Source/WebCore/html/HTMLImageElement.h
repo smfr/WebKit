@@ -215,7 +215,7 @@ private:
     void removedFromAncestor(RemovalType, ContainerNode&) override;
 
     bool isFormListedElement() const final { return false; }
-    FormAssociatedElement* asFormAssociatedElement() final { return this; }
+    FormAssociatedElement* NODELETE asFormAssociatedElement() final { return this; }
     HTMLImageElement& asHTMLElement() final { return *this; }
     const HTMLImageElement& asHTMLElement() const final { return *this; }
 

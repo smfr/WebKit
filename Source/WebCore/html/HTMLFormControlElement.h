@@ -139,9 +139,9 @@ private:
     HTMLElement& asHTMLElement() final { return *this; }
     const HTMLFormControlElement& asHTMLElement() const final { return *this; }
 
-    FormAssociatedElement* asFormAssociatedElement() final { return this; }
-    FormListedElement* asFormListedElement() final { return this; }
-    ValidatedFormListedElement* asValidatedFormListedElement() final { return this; }
+    FormAssociatedElement* NODELETE asFormAssociatedElement() final { return this; }
+    FormListedElement* NODELETE asFormListedElement() final { return this; }
+    ValidatedFormListedElement* NODELETE asValidatedFormListedElement() final { return this; }
 
     unsigned m_isRequired : 1;
     unsigned m_valueMatchesRenderer : 1;
