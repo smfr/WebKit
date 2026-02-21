@@ -159,6 +159,7 @@
 #include "StyleResolver.h"
 #include "StyleScope.h"
 #include "StyleTreeResolver.h"
+#include "StyleZoomPrimitivesInlines.h"
 #include "TextIterator.h"
 #include "TouchAction.h"
 #include "TrustedType.h"
@@ -1386,8 +1387,8 @@ void Element::scrollTo(const ScrollToOptions& options, ScrollClamping clamping, 
         return;
 
     auto scrollToOptions = normalizeNonFiniteCoordinatesOrFallBackTo(options,
-        adjustForAbsoluteZoom(renderer->scrollLeft(), *renderer),
-        adjustForAbsoluteZoom(renderer->scrollTop(), *renderer)
+        Style::adjustForAbsoluteZoom(renderer->scrollLeft(), *renderer),
+        Style::adjustForAbsoluteZoom(renderer->scrollTop(), *renderer)
     );
     IntPoint scrollPosition(
         clampToInteger(scrollToOptions.left.value() * renderer->style().usedZoom()),
@@ -1529,7 +1530,7 @@ int Element::offsetWidth()
     protect(document())->updateLayoutIfDimensionsOutOfDate(*this, DimensionsCheck::Width, { LayoutOptions::TreatContentVisibilityHiddenAsVisible, LayoutOptions::TreatContentVisibilityAutoAsVisible, LayoutOptions::IgnorePendingStylesheets });
     if (CheckedPtr renderer = renderBoxModelObject()) {
         auto offsetWidth = LayoutUnit { roundToInt(renderer->offsetWidth()) };
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(offsetWidth, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(offsetWidth, *renderer).toDouble());
     }
     return 0;
 }
@@ -1539,7 +1540,7 @@ int Element::offsetHeight()
     protect(document())->updateLayoutIfDimensionsOutOfDate(*this, DimensionsCheck::Height, { LayoutOptions::TreatContentVisibilityHiddenAsVisible, LayoutOptions::TreatContentVisibilityAutoAsVisible, LayoutOptions::IgnorePendingStylesheets });
     if (CheckedPtr renderer = renderBoxModelObject()) {
         auto offsetHeight = LayoutUnit { roundToInt(renderer->offsetHeight()) };
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(offsetHeight, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(offsetHeight, *renderer).toDouble());
     }
     return 0;
 }
@@ -1570,7 +1571,7 @@ int Element::clientLeft()
 
     if (CheckedPtr renderer = renderBox()) {
         auto clientLeft = LayoutUnit { roundToInt(renderer->clientLeft()) };
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(clientLeft, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(clientLeft, *renderer).toDouble());
     }
     return 0;
 }
@@ -1581,7 +1582,7 @@ int Element::clientTop()
 
     if (CheckedPtr renderer = renderBox()) {
         auto clientTop = LayoutUnit { roundToInt(renderer->clientTop()) };
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(clientTop, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(clientTop, *renderer).toDouble());
     }
     return 0;
 }
@@ -1600,7 +1601,7 @@ int Element::clientWidth()
     // When in quirks mode, clientWidth for the body element should return the width of the containing frame.
     bool inQuirksMode = document->inQuirksMode();
     if ((!inQuirksMode && document->documentElement() == this) || (inQuirksMode && isHTMLElement() && document->bodyOrFrameset() == this))
-        return adjustForAbsoluteZoom(renderView->frameView().layoutWidth(), renderView);
+        return Style::adjustForAbsoluteZoom(renderView->frameView().layoutWidth(), renderView);
     
     if (CheckedPtr renderer = renderBox()) {
         auto clientWidth = LayoutUnit { roundToInt(renderer->clientWidth()) };
@@ -1619,7 +1620,7 @@ int Element::clientWidth()
                 clientWidth += renderer->paddingLeft() + renderer->paddingRight();
             clientWidth += renderer->borderLeft() + renderer->borderRight();
         }
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(clientWidth, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(clientWidth, *renderer).toDouble());
     }
     return 0;
 }
@@ -1637,7 +1638,7 @@ int Element::clientHeight()
     // When in quirks mode, clientHeight for the body element should return the height of the containing frame.
     bool inQuirksMode = document->inQuirksMode();
     if ((!inQuirksMode && document->documentElement() == this) || (inQuirksMode && isHTMLElement() && document->bodyOrFrameset() == this))
-        return adjustForAbsoluteZoom(renderView->frameView().layoutHeight(), renderView);
+        return Style::adjustForAbsoluteZoom(renderView->frameView().layoutHeight(), renderView);
 
     if (CheckedPtr renderer = renderBox()) {
         auto clientHeight = LayoutUnit { roundToInt(renderer->clientHeight()) };
@@ -1656,7 +1657,7 @@ int Element::clientHeight()
                 clientHeight += renderer->paddingTop() + renderer->paddingBottom();
             clientHeight += renderer->borderTop() + renderer->borderBottom();
         }
-        return convertToNonSubpixelValue(adjustLayoutUnitForAbsoluteZoom(clientHeight, *renderer).toDouble());
+        return convertToNonSubpixelValue(Style::adjustLayoutUnitForAbsoluteZoom(clientHeight, *renderer).toDouble());
     }
     return 0;
 }
@@ -1696,7 +1697,7 @@ int Element::scrollLeft()
     }
 
     if (CheckedPtr renderer = renderBox())
-        return adjustForAbsoluteZoom(renderer->scrollLeft(), *renderer);
+        return Style::adjustForAbsoluteZoom(renderer->scrollLeft(), *renderer);
     return 0;
 }
 
@@ -1712,7 +1713,7 @@ int Element::scrollTop()
     }
 
     if (CheckedPtr renderer = renderBox())
-        return adjustForAbsoluteZoom(renderer->scrollTop(), *renderer);
+        return Style::adjustForAbsoluteZoom(renderer->scrollTop(), *renderer);
     return 0;
 }
 
@@ -1782,7 +1783,7 @@ int Element::scrollWidth()
     }
 
     if (CheckedPtr renderer = renderBox())
-        return adjustForAbsoluteZoom(renderer->scrollWidth(), *renderer);
+        return Style::adjustForAbsoluteZoom(renderer->scrollWidth(), *renderer);
     return 0;
 }
 
@@ -1800,7 +1801,7 @@ int Element::scrollHeight()
     }
 
     if (CheckedPtr renderer = renderBox())
-        return adjustForAbsoluteZoom(renderer->scrollHeight(), *renderer);
+        return Style::adjustForAbsoluteZoom(renderer->scrollHeight(), *renderer);
     return 0;
 }
 

@@ -31,8 +31,6 @@
 #include <WebCore/RenderStyleProperties+GettersInlines.h>
 #undef RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
 
-#include <WebCore/StylePrimitiveNumericTypes+Rounding.h>
-
 namespace WebCore {
 
 // MARK: - Comparisons
@@ -822,43 +820,6 @@ inline bool RenderStyle::isCollapsibleWhiteSpace(char16_t character) const
 constexpr bool RenderStyle::preserveNewline(WhiteSpaceCollapse mode)
 {
     return mode == WhiteSpaceCollapse::Preserve || mode == WhiteSpaceCollapse::PreserveBreaks || mode == WhiteSpaceCollapse::BreakSpaces;
-}
-
-inline float adjustFloatForAbsoluteZoom(float value, const RenderStyle& style)
-{
-    return value / style.usedZoom();
-}
-
-inline int adjustForAbsoluteZoom(int value, const RenderStyle& style)
-{
-    double zoomFactor = style.usedZoom();
-    if (zoomFactor == 1)
-        return value;
-    // Needed because resolveAsLength<int> truncates (rather than rounds) when scaling up.
-    if (zoomFactor > 1) {
-        if (value < 0)
-            value--;
-        else
-            value++;
-    }
-
-    return Style::roundForImpreciseConversion<int>(value / zoomFactor);
-}
-
-inline LayoutSize adjustLayoutSizeForAbsoluteZoom(LayoutSize size, const RenderStyle& style)
-{
-    auto zoom = style.usedZoom();
-    return { size.width() / zoom, size.height() / zoom };
-}
-
-inline LayoutUnit adjustLayoutUnitForAbsoluteZoom(LayoutUnit value, const RenderStyle& style)
-{
-    return LayoutUnit(value / style.usedZoom());
-}
-
-inline float applyZoom(float value, const RenderStyle& style)
-{
-    return value * style.usedZoom();
 }
 
 constexpr BorderStyle collapsedBorderStyle(BorderStyle style)

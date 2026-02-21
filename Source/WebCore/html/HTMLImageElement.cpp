@@ -66,6 +66,7 @@
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "SizesAttributeParser.h"
+#include "StyleZoomPrimitivesInlines.h"
 #include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringBuilder.h>
 
@@ -599,7 +600,7 @@ unsigned HTMLImageElement::width()
     if (!box)
         return 0;
     LayoutRect contentRect = box->contentBoxRect();
-    return adjustLayoutUnitForAbsoluteZoom(contentRect.width(), *box).round();
+    return Style::adjustLayoutUnitForAbsoluteZoom(contentRect.width(), *box).round();
 }
 
 unsigned HTMLImageElement::height()
@@ -622,7 +623,7 @@ unsigned HTMLImageElement::height()
     if (!box)
         return 0;
     LayoutRect contentRect = box->contentBoxRect();
-    return adjustLayoutUnitForAbsoluteZoom(contentRect.height(), *box).round();
+    return Style::adjustLayoutUnitForAbsoluteZoom(contentRect.height(), *box).round();
 }
 
 float HTMLImageElement::effectiveImageDevicePixelRatio() const

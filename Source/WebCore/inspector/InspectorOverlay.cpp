@@ -78,6 +78,7 @@
 #include "StyleGridData.h"
 #include "StyleGridTrackSizingDirection.h"
 #include "StyleResolver.h"
+#include "StyleZoomPrimitivesInlines.h"
 #include "WritingMode.h"
 #include <wtf/MathExtras.h>
 #include <wtf/TZoneMallocInlines.h>
@@ -1198,8 +1199,8 @@ Path InspectorOverlay::drawElementTitle(GraphicsContext& context, Node& node, co
     String elementHeight;
     if (is<RenderBoxModelObject>(renderer)) {
         CheckedPtr modelObject = downcast<RenderBoxModelObject>(renderer.get());
-        elementWidth = String::number(adjustForAbsoluteZoom(roundToInt(modelObject->offsetWidth()), *modelObject));
-        elementHeight = String::number(adjustForAbsoluteZoom(roundToInt(modelObject->offsetHeight()), *modelObject));
+        elementWidth = String::number(Style::adjustForAbsoluteZoom(roundToInt(modelObject->offsetWidth()), *modelObject));
+        elementHeight = String::number(Style::adjustForAbsoluteZoom(roundToInt(modelObject->offsetHeight()), *modelObject));
     } else {
         RefPtr containingView = node.document().frame()->view();
         IntRect boundingBox = snappedIntRect(containingView->contentsToRootView(renderer->absoluteBoundingBoxRect()));

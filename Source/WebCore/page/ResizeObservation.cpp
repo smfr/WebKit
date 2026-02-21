@@ -33,6 +33,7 @@
 #include "RenderBoxInlines.h"
 #include "RenderElementStyleInlines.h"
 #include "SVGElement.h"
+#include "StyleZoomPrimitivesInlines.h"
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -81,9 +82,9 @@ auto ResizeObservation::computeObservedSizes() const -> std::optional<BoxSizes>
         if (box->isSkippedContent())
             return std::nullopt;
         return { {
-            adjustLayoutSizeForAbsoluteZoom(box->contentBoxSize(), *box),
-            adjustLayoutSizeForAbsoluteZoom(box->contentBoxLogicalSize(), *box),
-            adjustLayoutSizeForAbsoluteZoom(box->borderBoxLogicalSize(), *box)
+            Style::adjustLayoutSizeForAbsoluteZoom(box->contentBoxSize(), *box),
+            Style::adjustLayoutSizeForAbsoluteZoom(box->contentBoxLogicalSize(), *box),
+            Style::adjustLayoutSizeForAbsoluteZoom(box->borderBoxLogicalSize(), *box)
         } };
     }
 

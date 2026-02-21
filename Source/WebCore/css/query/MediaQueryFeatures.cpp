@@ -42,6 +42,7 @@
 #include "ScreenProperties.h"
 #include "ScriptController.h"
 #include "Settings.h"
+#include "StyleZoomPrimitivesInlines.h"
 #include "Theme.h"
 #include <wtf/Function.h>
 
@@ -428,7 +429,7 @@ static const LengthSchema& heightFeatureSchema()
         [](auto& context) {
             auto height = protect(context.document->view())->layoutHeight();
             if (CheckedPtr renderView = context.document->renderView())
-                height = adjustForAbsoluteZoom(height, *renderView);
+                height = Style::adjustForAbsoluteZoom(height, *renderView);
             return height;
         }
     };
@@ -720,7 +721,7 @@ static const LengthSchema& widthFeatureSchema()
         [](auto& context) {
             auto width = protect(context.document->view())->layoutWidth();
             if (CheckedPtr renderView = context.document->renderView())
-                width = adjustForAbsoluteZoom(width, *renderView);
+                width = Style::adjustForAbsoluteZoom(width, *renderView);
             return width;
         }
     };
