@@ -2425,6 +2425,12 @@ constexpr CSSValueID toCSSValueIDForWebkitMaskSourceType(Style::MaskMode e)
     return CSSValueInvalid;
 }
 
+#define TYPE VisualBox
+#define FOR_EACH(CASE) CASE(ContentBox) CASE(BorderBox) CASE(PaddingBox)
+DEFINE_TO_FROM_CSS_VALUE_ID_FUNCTIONS
+#undef TYPE
+#undef FOR_EACH
+
 #if ENABLE(WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY)
 
 #define TYPE Style::WebkitOverflowScrolling

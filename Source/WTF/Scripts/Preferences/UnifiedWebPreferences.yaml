@@ -1300,6 +1300,20 @@ CSSMathDepthEnabled:
       default: true
     WebCore:
       default: true
+      
+CSSOverflowClipMarginEnabled:
+  type: bool
+  status: testable
+  category: css
+  humanReadableName: "CSS overflow-clip-margin"
+  humanReadableDescription: "Enable CSS overflow-clip-margin"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
 
 CSSPaintingAPIEnabled:
   type: bool

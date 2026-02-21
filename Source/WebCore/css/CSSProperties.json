@@ -7309,6 +7309,30 @@
                 "url": "https://drafts.csswg.org/css-overflow-3/#propdef-overflow-block"
             }
         },
+        "overflow-clip-margin": {
+            "animation-type": "not animatable",
+            "animation-type-comment": "FIXME: Current spec animation type is 'see prose'",
+            "inherited": false,
+            "initial": "0px",
+            "values": [
+              "border-box",
+              "content-box",
+              "padding-box"
+            ],
+            "codegen-properties": {
+                "computed-style-storage-path": ["m_nonInheritedData", "rareData"],
+                "computed-style-storage-kind": "reference",
+                "computed-style-type": "Style::OverflowClipMargin",
+                "parser-function": "consumeOverflowClipMargin",
+                "parser-grammar-unused": "<visual-box> || <length [0,inf]>",
+                "parser-grammar-unused-reason": "Needs support for transforming parsed input to minimal form and default values in '||' groups.",
+                "settings-flag": "cssOverflowClipMarginEnabled"
+            },
+            "specification": {
+                "category": "css-overflow",
+                "url": "https://drafts.csswg.org/css-overflow/#overflow-clip-margin"
+            }
+        },
         "overscroll-behavior": {
             "codegen-properties": {
                 "longhands": [
@@ -14347,6 +14371,14 @@
                 "category": "css-masking",
                 "url": "https://drafts.fxtf.org/css-masking-1/#typedef-geometry-box"
             }
+        },
+        "<visual-box>": {
+          "grammar": "border-box | content-box | padding-box",
+          "exported": true,
+          "specification": {
+            "category": "css-box-4",
+            "url": "https://drafts.csswg.org/css-box-4/#typedef-visual-box"
+          }
         },
         "<clip-source>": {
             "grammar": "<url>",

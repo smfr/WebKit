@@ -878,6 +878,12 @@ enum class CSSBoxType : uint8_t {
     ViewBox
 };
 
+enum class VisualBox : uint8_t {
+    BorderBox,
+    ContentBox,
+    PaddingBox
+};
+
 enum class ScrollSnapStrictness : bool {
     Proximity,
     Mandatory
@@ -1232,5 +1238,6 @@ WTF::TextStream& operator<<(WTF::TextStream&, MaskType);
 WTF::TextStream& operator<<(WTF::TextStream&, ShapeRendering);
 WTF::TextStream& operator<<(WTF::TextStream&, TextAnchor);
 WTF::TextStream& operator<<(WTF::TextStream&, VectorEffect);
+WTF::TextStream& operator<<(WTF::TextStream&, VisualBox);
 
 } // namespace WebCore
