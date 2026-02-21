@@ -391,7 +391,7 @@ CanvasRenderingContext2D* HTMLCanvasElement::getContext2d(const String& type, Ca
 
 #if ENABLE(WEBGL)
 
-static bool requiresAcceleratedCompositingForWebGL()
+static bool NODELETE requiresAcceleratedCompositingForWebGL()
 {
 #if PLATFORM(GTK) || PLATFORM(WIN)
     return false;
@@ -400,7 +400,7 @@ static bool requiresAcceleratedCompositingForWebGL()
 #endif
 
 }
-static bool shouldEnableWebGL(const Settings& settings)
+static bool NODELETE shouldEnableWebGL(const Settings& settings)
 {
     if (!settings.webGLEnabled())
         return false;

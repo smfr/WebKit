@@ -68,7 +68,7 @@ public:
 
     // ValidityState attribute implementations
     bool badInput() const { return hasBadInput(); }
-    virtual bool customError() const;
+    virtual bool NODELETE customError() const;
 
     // Implementations of patternMismatch, rangeOverflow, rangerUnderflow, stepMismatch, tooShort, tooLong and valueMissing must call willValidate.
     virtual bool hasBadInput() const;
@@ -106,7 +106,7 @@ protected:
     virtual void willChangeForm();
     virtual void didChangeForm();
 
-    String customValidationMessage() const;
+    String NODELETE customValidationMessage() const;
 
 private:
     void setFormInternal(RefPtr<HTMLFormElement>&&) final;

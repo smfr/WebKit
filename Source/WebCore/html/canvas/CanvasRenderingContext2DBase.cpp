@@ -111,7 +111,7 @@ static constexpr ASCIILiteral DefaultFont = "10px sans-serif"_s;
 // putImageData data smaller than this is cached in anticipation for next getImageData.
 static constexpr unsigned putImageDataCacheAreaLimit = 60 * 60;
 
-static CanvasLineCap toCanvasLineCap(LineCap lineCap)
+static CanvasLineCap NODELETE toCanvasLineCap(LineCap lineCap)
 {
     switch (lineCap) {
     case LineCap::Butt:
@@ -125,7 +125,7 @@ static CanvasLineCap toCanvasLineCap(LineCap lineCap)
     return CanvasLineCap::Butt;
 }
 
-static LineCap fromCanvasLineCap(CanvasLineCap canvasLineCap)
+static LineCap NODELETE fromCanvasLineCap(CanvasLineCap canvasLineCap)
 {
     switch (canvasLineCap) {
     case CanvasLineCap::Butt:
@@ -139,7 +139,7 @@ static LineCap fromCanvasLineCap(CanvasLineCap canvasLineCap)
     return LineCap::Butt;
 }
 
-static CanvasLineJoin toCanvasLineJoin(LineJoin lineJoin)
+static CanvasLineJoin NODELETE toCanvasLineJoin(LineJoin lineJoin)
 {
     switch (lineJoin) {
     case LineJoin::Round:
@@ -153,7 +153,7 @@ static CanvasLineJoin toCanvasLineJoin(LineJoin lineJoin)
     return CanvasLineJoin::Round;
 }
 
-static LineJoin fromCanvasLineJoin(CanvasLineJoin canvasLineJoin)
+static LineJoin NODELETE fromCanvasLineJoin(CanvasLineJoin canvasLineJoin)
 {
     switch (canvasLineJoin) {
     case CanvasLineJoin::Round:
@@ -167,7 +167,7 @@ static LineJoin fromCanvasLineJoin(CanvasLineJoin canvasLineJoin)
     return LineJoin::Round;
 }
 
-static CanvasTextAlign toCanvasTextAlign(TextAlign textAlign)
+static CanvasTextAlign NODELETE toCanvasTextAlign(TextAlign textAlign)
 {
     switch (textAlign) {
     case StartTextAlign:
@@ -185,7 +185,7 @@ static CanvasTextAlign toCanvasTextAlign(TextAlign textAlign)
     return CanvasTextAlign::Start;
 }
 
-static TextAlign fromCanvasTextAlign(CanvasTextAlign canvasTextAlign)
+static TextAlign NODELETE fromCanvasTextAlign(CanvasTextAlign canvasTextAlign)
 {
     switch (canvasTextAlign) {
     case CanvasTextAlign::Start:
@@ -203,7 +203,7 @@ static TextAlign fromCanvasTextAlign(CanvasTextAlign canvasTextAlign)
     return StartTextAlign;
 }
 
-static CanvasTextBaseline toCanvasTextBaseline(TextBaseline textBaseline)
+static CanvasTextBaseline NODELETE toCanvasTextBaseline(TextBaseline textBaseline)
 {
     switch (textBaseline) {
     case TopTextBaseline:
@@ -223,7 +223,7 @@ static CanvasTextBaseline toCanvasTextBaseline(TextBaseline textBaseline)
     return CanvasTextBaseline::Top;
 }
 
-static TextBaseline fromCanvasTextBaseline(CanvasTextBaseline canvasTextBaseline)
+static TextBaseline NODELETE fromCanvasTextBaseline(CanvasTextBaseline canvasTextBaseline)
 {
     switch (canvasTextBaseline) {
     case CanvasTextBaseline::Top:
@@ -1100,7 +1100,7 @@ static bool validateRectForCanvas(double& x, double& y, double& width, double& h
     return true;
 }
 
-static bool isFullCanvasCompositeMode(CompositeOperator op)
+static bool NODELETE isFullCanvasCompositeMode(CompositeOperator op)
 {
     // See 4.8.11.1.3 Compositing
     // CompositeOperator::SourceAtop and CompositeOperator::DestinationOut are not listed here as the platforms already
@@ -1108,7 +1108,7 @@ static bool isFullCanvasCompositeMode(CompositeOperator op)
     return op == CompositeOperator::SourceIn || op == CompositeOperator::SourceOut || op == CompositeOperator::DestinationIn || op == CompositeOperator::DestinationAtop;
 }
 
-static WindRule toWindRule(CanvasFillRule rule)
+static WindRule NODELETE toWindRule(CanvasFillRule rule)
 {
     return rule == CanvasFillRule::Nonzero ? WindRule::NonZero : WindRule::EvenOdd;
 }
@@ -1544,7 +1544,7 @@ static LayoutSize size(SVGImageElement& element, ImageSizeType sizeType = ImageS
     return size(element.cachedImage(), protect(element.renderer()).get(), sizeType);
 }
 
-static inline FloatSize size(CanvasBase& canvas)
+static inline FloatSize NODELETE size(CanvasBase& canvas)
 {
     return canvas.size();
 }
@@ -2723,7 +2723,7 @@ FloatRect CanvasRenderingContext2DBase::inflatedStrokeRect(const FloatRect& rect
     return inflatedStrokeRect;
 }
 
-static inline InterpolationQuality smoothingToInterpolationQuality(ImageSmoothingQuality quality)
+static inline InterpolationQuality NODELETE smoothingToInterpolationQuality(ImageSmoothingQuality quality)
 {
     switch (quality) {
     case ImageSmoothingQuality::Low:
@@ -2829,7 +2829,7 @@ bool CanvasRenderingContext2DBase::canDrawText(double x, double y, bool fill, st
     return true;
 }
 
-static inline bool isSpaceThatNeedsReplacing(char16_t c)
+static inline bool NODELETE isSpaceThatNeedsReplacing(char16_t c)
 {
     // According to specification all space characters should be replaced with 0x0020 space character.
     // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#text-preparation-algorithm
@@ -3153,7 +3153,7 @@ std::optional<CanvasRenderingContext2DBase::RenderingMode> CanvasRenderingContex
 
 // FIXME: The HTML spec currently doesn't define how <length> units should be resolved, so we only
 // allow units where the resolution is straightforward. See https://github.com/whatwg/html/issues/10893.
-static bool unitAllowedForSpacing(CSS::LengthUnit lenghtUnit)
+static bool NODELETE unitAllowedForSpacing(CSS::LengthUnit lenghtUnit)
 {
     using enum CSS::LengthUnit;
 

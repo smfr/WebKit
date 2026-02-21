@@ -177,7 +177,7 @@ void HTMLTextFormControlElement::forwardEvent(Event& event)
         innerText->defaultEventHandler(event);
 }
 
-static bool isNotLineBreak(char16_t ch) { return ch != newlineCharacter && ch != carriageReturn; }
+static bool NODELETE isNotLineBreak(char16_t ch) { return ch != newlineCharacter && ch != carriageReturn; }
 
 bool HTMLTextFormControlElement::isPlaceholderEmpty() const
 {

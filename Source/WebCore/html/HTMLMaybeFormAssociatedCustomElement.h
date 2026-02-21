@@ -40,7 +40,7 @@ public:
     bool isMaybeFormAssociatedCustomElement() const final { return true; }
     bool isFormListedElement() const final;
     bool isValidatedFormListedElement() const final;
-    bool isFormAssociatedCustomElement() const;
+    bool NODELETE isFormAssociatedCustomElement() const;
 
     FormAssociatedElement* asFormAssociatedElement() final;
     FormListedElement* asFormListedElement() final;

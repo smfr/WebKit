@@ -266,7 +266,7 @@ public:
         bool realized() const { return m_font.fontSelector(); }
         void initialize(FontSelector&, const FontCascade&);
         const FontMetrics& metricsOfPrimaryFont() const;
-        const FontCascadeDescription& fontDescription() const;
+        const FontCascadeDescription& NODELETE fontDescription() const;
         float width(const TextRun&, GlyphOverflow* = 0) const;
         void drawBidiText(GraphicsContext&, const TextRun&, const FloatPoint&, FontCascade::CustomFontNotReadyAction) const;
 
@@ -327,10 +327,10 @@ public:
 
         RefPtr<CanvasLayerContextSwitcher> targetSwitcher;
 
-        CanvasLineCap canvasLineCap() const;
-        CanvasLineJoin canvasLineJoin() const;
-        CanvasTextAlign canvasTextAlign() const;
-        CanvasTextBaseline canvasTextBaseline() const;
+        CanvasLineCap NODELETE canvasLineCap() const;
+        CanvasLineJoin NODELETE canvasLineJoin() const;
+        CanvasTextAlign NODELETE canvasTextAlign() const;
+        CanvasTextBaseline NODELETE canvasTextBaseline() const;
         String fontString() const;
         String globalCompositeOperationString() const;
         String shadowColorString() const;

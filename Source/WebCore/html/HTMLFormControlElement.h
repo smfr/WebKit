@@ -61,7 +61,7 @@ public:
     void setFormControlValueMatchesRenderer(bool b) { m_valueMatchesRenderer = b; }
 
     bool wasChangedSinceLastFormControlChangeEvent() const { return m_wasChangedSinceLastFormControlChangeEvent; }
-    void setChangedSinceLastFormControlChangeEvent(bool);
+    void NODELETE setChangedSinceLastFormControlChangeEvent(bool);
     bool wasCreatedByTaintedScript() const { return m_wasCreatedByTaintedScript; }
 
     virtual void dispatchFormControlChangeEvent();

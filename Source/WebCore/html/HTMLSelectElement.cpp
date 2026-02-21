@@ -95,7 +95,7 @@ static const AtomString& buttonSlotName()
     return buttonSlot;
 }
 
-static bool isFirstElementChildButton(const Node& child)
+static bool NODELETE isFirstElementChildButton(const Node& child)
 {
     return is<HTMLButtonElement>(child) && !child.previousElementSibling();
 }

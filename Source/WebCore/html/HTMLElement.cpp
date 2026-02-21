@@ -127,7 +127,7 @@ String HTMLElement::nodeName() const
     return Element::nodeName();
 }
 
-static inline CSSValueID unicodeBidiAttributeForDirAuto(HTMLElement& element)
+static inline CSSValueID NODELETE unicodeBidiAttributeForDirAuto(HTMLElement& element)
 {
     if (element.hasTagName(preTag) || element.hasTagName(textareaTag))
         return CSSValuePlaintext;

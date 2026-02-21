@@ -519,7 +519,7 @@ public:
 private:
     void constructTreeFromToken(Document&);
 
-    WebVTTNodeType currentType() const { return m_typeStack.isEmpty() ? WebVTTNodeType::None : m_typeStack.last(); }
+    WebVTTNodeType NODELETE currentType() const { return m_typeStack.isEmpty() ? WebVTTNodeType::None : m_typeStack.last(); }
 
     WebVTTToken m_token;
     Vector<WebVTTNodeType> m_typeStack;
@@ -632,7 +632,7 @@ bool WebVTTParser::collectTimeStamp(VTTScanner& input, MediaTime& timeStamp)
     return true;
 }
 
-static WebVTTNodeType tokenToNodeType(WebVTTToken& token)
+static WebVTTNodeType NODELETE tokenToNodeType(WebVTTToken& token)
 {
     switch (token.name().length()) {
     case 1:

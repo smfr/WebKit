@@ -34,7 +34,7 @@ class HTMLFieldSetElement final : public HTMLFormControlElement {
 public:
     static Ref<HTMLFieldSetElement> create(const QualifiedName&, Document&, HTMLFormElement*);
 
-    HTMLLegendElement* legend() const;
+    HTMLLegendElement* NODELETE legend() const;
 
     Ref<HTMLCollection> elements();
 

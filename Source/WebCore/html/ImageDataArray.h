@@ -39,7 +39,7 @@ namespace WebCore {
 class ImageDataArray {
 public:
     static constexpr bool isSupported(JSC::TypedArrayType type) { return !!toImageDataPixelFormat(type); }
-    static bool isSupported(const JSC::ArrayBufferView&);
+    static bool NODELETE isSupported(const JSC::ArrayBufferView&);
 
     ImageDataArray(Ref<JSC::Uint8ClampedArray>&&);
     ImageDataArray(Ref<JSC::Float16Array>&&);
@@ -47,7 +47,7 @@ public:
 
     static std::optional<ImageDataArray> tryCreate(size_t, ImageDataPixelFormat, std::span<const uint8_t> = { });
 
-    ImageDataPixelFormat pixelFormat() const;
+    ImageDataPixelFormat NODELETE pixelFormat() const;
     size_t length() const;
 
     JSC::ArrayBufferView& arrayBufferView() const { return m_arrayBufferView.get(); }

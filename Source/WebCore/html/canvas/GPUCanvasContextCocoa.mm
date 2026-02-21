@@ -68,7 +68,7 @@ public:
         } else
             layer.clearContents();
     }
-    GraphicsLayerCompositingCoordinatesOrientation orientation() const final
+    GraphicsLayerCompositingCoordinatesOrientation NODELETE orientation() const final
     {
         return GraphicsLayerCompositingCoordinatesOrientation::TopDown;
     }
@@ -84,11 +84,11 @@ public:
 
         m_displayBuffer = MachSendRight { displayBuffer };
     }
-    void setContentsFormat(ContentsFormat contentsFormat)
+    void NODELETE setContentsFormat(ContentsFormat contentsFormat)
     {
         m_contentsFormat = contentsFormat;
     }
-    void setOpaque(bool opaque)
+    void NODELETE setOpaque(bool opaque)
     {
         m_isOpaque = opaque;
     }
@@ -404,7 +404,7 @@ static DestinationColorSpace toWebCoreColorSpace(const GPUPredefinedColorSpace& 
     return DestinationColorSpace::SRGB();
 }
 
-static WebGPU::TextureFormat computeTextureFormat(GPUTextureFormat format, GPUCanvasToneMappingMode toneMappingMode)
+static WebGPU::TextureFormat NODELETE computeTextureFormat(GPUTextureFormat format, GPUCanvasToneMappingMode toneMappingMode)
 {
     // Force Bgra8unorm to both: clamp color values to SDR, and opt out of CALayer HDR.
     if (format == GPUTextureFormat::Rgba16float && toneMappingMode == GPUCanvasToneMappingMode::Standard)
@@ -413,7 +413,7 @@ static WebGPU::TextureFormat computeTextureFormat(GPUTextureFormat format, GPUCa
     return WebCore::convertToBacking(format);
 }
 
-static bool isSupportedContextFormat(GPUTextureFormat format)
+static bool NODELETE isSupportedContextFormat(GPUTextureFormat format)
 {
     return format == GPUTextureFormat::Bgra8unorm || format == GPUTextureFormat::Rgba8unorm || format == GPUTextureFormat::Rgba16float;
 }

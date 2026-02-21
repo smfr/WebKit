@@ -253,7 +253,7 @@ std::optional<Style::UnadjustedStyle> TextControlPlaceholderElement::resolveCust
 
 // MARK: SearchFieldResultsButtonElement
 
-static inline bool searchFieldStyleHasExplicitlySpecifiedTextFieldAppearance(const RenderStyle& style)
+static inline bool NODELETE searchFieldStyleHasExplicitlySpecifiedTextFieldAppearance(const RenderStyle& style)
 {
     auto appearance = style.appearance();
     return appearance == StyleAppearance::TextField && appearance == style.usedAppearance();

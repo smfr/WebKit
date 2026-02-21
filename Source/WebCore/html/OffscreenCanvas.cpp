@@ -173,7 +173,7 @@ void OffscreenCanvas::didUpdateSizeProperties(bool sizeChanged)
 }
 
 #if ENABLE(WEBGL)
-static bool requiresAcceleratedCompositingForWebGL()
+static bool NODELETE requiresAcceleratedCompositingForWebGL()
 {
 #if PLATFORM(GTK) || PLATFORM(WIN)
     return false;
@@ -182,7 +182,7 @@ static bool requiresAcceleratedCompositingForWebGL()
 #endif
 }
 
-static bool shouldEnableWebGL(const SettingsValues& settings, bool isWorker)
+static bool NODELETE shouldEnableWebGL(const SettingsValues& settings, bool isWorker)
 {
     if (!settings.webGLEnabled)
         return false;

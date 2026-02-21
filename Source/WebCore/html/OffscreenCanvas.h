@@ -89,7 +89,7 @@ public:
     WEBCORE_EXPORT ~DetachedOffscreenCanvas();
     const IntSize& size() const { return m_size; }
     bool originClean() const { return m_originClean; }
-    RefPtr<PlaceholderRenderingContextSource> takePlaceholderSource();
+    RefPtr<PlaceholderRenderingContextSource> NODELETE takePlaceholderSource();
 
 private:
     RefPtr<PlaceholderRenderingContextSource> m_placeholderSource;
@@ -144,7 +144,7 @@ public:
 
     SecurityOrigin* securityOrigin() const final;
 
-    bool canDetach() const;
+    bool NODELETE canDetach() const;
     std::unique_ptr<DetachedOffscreenCanvas> detach();
 
     void commitToPlaceholderCanvas();

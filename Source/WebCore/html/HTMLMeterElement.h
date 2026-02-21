@@ -57,7 +57,7 @@ private:
     HTMLMeterElement(const QualifiedName&, Document&);
     virtual ~HTMLMeterElement();
 
-    RenderMeter* renderMeter() const;
+    RenderMeter* NODELETE renderMeter() const;
 
     bool isLabelable() const final { return true; }
 

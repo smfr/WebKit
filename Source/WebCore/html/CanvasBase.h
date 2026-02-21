@@ -90,7 +90,7 @@ public:
 
     void addObserver(CanvasObserver&);
     void removeObserver(CanvasObserver&);
-    bool hasObserver(CanvasObserver&) const;
+    bool NODELETE hasObserver(CanvasObserver&) const;
     void notifyObserversCanvasChanged(const FloatRect&);
     void notifyObserversCanvasResized();
     void notifyObserversCanvasDestroyed(); // Must be called in destruction before clearing m_context.
@@ -112,7 +112,7 @@ public:
 
     bool shouldAccelerate() const;
 
-    WEBCORE_EXPORT static void setMaxCanvasAreaForTesting(std::optional<size_t>);
+    WEBCORE_EXPORT static void NODELETE setMaxCanvasAreaForTesting(std::optional<size_t>);
     [[nodiscard]] bool validateArea() const;
 
     virtual void queueTaskKeepingObjectAlive(TaskSource, Function<void(CanvasBase&)>&&) = 0;
@@ -140,7 +140,7 @@ protected:
     void removeCanvasNeedingPreparationForDisplayOrFlush();
 
 private:
-    bool shouldInjectNoiseBeforeReadback() const;
+    bool NODELETE shouldInjectNoiseBeforeReadback() const;
 
     mutable IntSize m_size;
     mutable std::unique_ptr<CSSParserContext> m_cssParserContext;
@@ -160,7 +160,7 @@ private:
 #endif
 };
 
-WebCoreOpaqueRoot root(CanvasBase*);
+WebCoreOpaqueRoot NODELETE root(CanvasBase*);
 
 
 inline const CSSParserContext& CanvasBase::cssParserContext() const

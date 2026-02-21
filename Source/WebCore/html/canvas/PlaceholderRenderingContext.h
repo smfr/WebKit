@@ -66,8 +66,8 @@ class PlaceholderRenderingContext final : public CanvasRenderingContext {
 public:
     static std::unique_ptr<PlaceholderRenderingContext> create(HTMLCanvasElement&);
 
-    HTMLCanvasElement& canvas() const;
-    IntSize size() const;
+    HTMLCanvasElement& NODELETE canvas() const;
+    IntSize NODELETE size() const;
     void setPlaceholderBuffer(Ref<ImageBuffer>&&, bool originClean, bool opaque);
 
     PlaceholderRenderingContextSource& source() const { return m_source; }

@@ -55,7 +55,7 @@ public:
     WEBCORE_EXPORT bool selected(AllowStyleInvalidation = AllowStyleInvalidation::Yes) const;
     WEBCORE_EXPORT void setSelected(bool);
 
-    WEBCORE_EXPORT HTMLSelectElement* ownerSelectElement() const;
+    WEBCORE_EXPORT HTMLSelectElement* NODELETE ownerSelectElement() const;
 
     WEBCORE_EXPORT String label() const;
     WEBCORE_EXPORT String displayLabel() const;
