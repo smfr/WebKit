@@ -144,7 +144,7 @@ public:
     WEBCORE_EXPORT void setStateObject(RefPtr<SerializedScriptValue>&&);
     SerializedScriptValue* stateObject() const { return m_stateObject.get(); }
 
-    void NODELETE setNavigationAPIStateObject(RefPtr<SerializedScriptValue>&&);
+    void setNavigationAPIStateObject(RefPtr<SerializedScriptValue>&&);
     SerializedScriptValue* navigationAPIStateObject() const { return m_navigationAPIStateObject.get(); }
 
     void setItemSequenceNumber(long long number) { m_itemSequenceNumber = number; }

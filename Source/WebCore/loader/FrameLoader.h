@@ -372,7 +372,7 @@ private:
         MayNotAttemptCacheOnlyLoadForFormSubmissionItem
     };
 
-    RefPtr<LocalFrame> NODELETE nonSrcdocFrame() const;
+    RefPtr<LocalFrame> nonSrcdocFrame() const;
 
     std::optional<PageIdentifier> NODELETE pageID() const;
     void executeJavaScriptURL(const URL&, const NavigationAction&);
@@ -463,7 +463,7 @@ private:
 
     // SubframeLoader specific.
     void loadURLIntoChildFrame(const URL&, const String& referer, LocalFrame&);
-    void NODELETE started();
+    void started();
 
     // PolicyChecker specific.
     void clearProvisionalLoadForPolicyCheck();

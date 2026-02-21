@@ -68,7 +68,7 @@ public:
     RequestPriority fetchPriority() const { return m_options.fetchPriority; }
 
     void setInitiator(Element&);
-    void NODELETE setInitiatorType(const AtomString&);
+    void setInitiatorType(const AtomString&);
     const AtomString& initiatorType() const;
 
     bool allowsCaching() const { return m_options.cachingPolicy == CachingPolicy::AllowCaching || m_options.cachingPolicy == CachingPolicy::AllowCachingMainResourcePrefetch; }

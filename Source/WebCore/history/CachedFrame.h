@@ -71,7 +71,7 @@ protected:
     Vector<UniqueRef<CachedFrame>> m_childFrames;
 
 private:
-    void NODELETE initializeWithLocalFrame(LocalFrame&);
+    void initializeWithLocalFrame(LocalFrame&);
 };
 
 class CachedFrame : private CachedFrameBase {

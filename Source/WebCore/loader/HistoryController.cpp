@@ -66,7 +66,7 @@ static inline void addVisitedLink(Page& page, const URL& url)
     page.protectedVisitedLinkStore()->addVisitedLink(page, computeSharedStringHash(url.string()));
 }
 
-static inline bool NODELETE canRecordHistoryForFrame(const LocalFrame& frame)
+static inline bool canRecordHistoryForFrame(const LocalFrame& frame)
 {
     RefPtr page = frame.page();
     if (!page)

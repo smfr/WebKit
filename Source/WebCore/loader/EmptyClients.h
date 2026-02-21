@@ -140,12 +140,12 @@ class EmptyChromeClient : public ChromeClient {
 
     void reachedMaxAppCacheSize(int64_t) final { }
 
-    RefPtr<ColorChooser> NODELETE createColorChooser(ColorChooserClient&, const Color&) final;
+    RefPtr<ColorChooser> createColorChooser(ColorChooserClient&, const Color&) final;
 
-    RefPtr<DataListSuggestionPicker> NODELETE createDataListSuggestionPicker(DataListSuggestionsClient&) final;
+    RefPtr<DataListSuggestionPicker> createDataListSuggestionPicker(DataListSuggestionsClient&) final;
     bool canShowDataListSuggestionLabels() const final { return false; }
 
-    RefPtr<DateTimeChooser> NODELETE createDateTimeChooser(DateTimeChooserClient&) final;
+    RefPtr<DateTimeChooser> createDateTimeChooser(DateTimeChooserClient&) final;
 
     void NODELETE setTextIndicator(RefPtr<TextIndicator>&&) const final;
     void NODELETE updateTextIndicator(RefPtr<TextIndicator>&&) const final;
@@ -224,7 +224,7 @@ class EmptyChromeClient : public ChromeClient {
     void didAssociateFormControls(const Vector<Ref<Element>>&, LocalFrame&) final { }
     bool shouldNotifyOnFormChanges() final { return false; }
 
-    RefPtr<Icon> NODELETE createIconForFiles(const Vector<String>& /* filenames */) final;
+    RefPtr<Icon> createIconForFiles(const Vector<String>& /* filenames */) final;
 };
 
 DiagnosticLoggingClient& emptyDiagnosticLoggingClient();

@@ -86,7 +86,7 @@ public:
 
     // FIXME: Delete this code. beforeload event no longer exists.
     bool hasPendingBeforeLoadEvent() const { return m_hasPendingBeforeLoadEvent; }
-    bool NODELETE hasPendingActivity() const;
+    bool hasPendingActivity() const;
 
     void dispatchPendingEvent(ImageEventSender*, const AtomString& eventType);
 
@@ -118,7 +118,7 @@ private:
     void updateRenderer();
 
     void clearImageWithoutConsideringPendingLoadEvent();
-    void NODELETE clearFailedLoadURL();
+    void clearFailedLoadURL();
 
     bool hasPendingDecodePromises() const { return !m_decodingPromises.isEmpty(); }
     void resolveDecodePromises();

@@ -939,7 +939,7 @@ bool FrameLoader::allChildrenAreComplete() const
     return true;
 }
 
-bool NODELETE FrameLoader::allAncestorsAreComplete() const
+bool FrameLoader::allAncestorsAreComplete() const
 {
     for (RefPtr<Frame> ancestor = m_frame.ptr(); ancestor; ancestor = ancestor->tree().parent()) {
         auto* localAncestor = dynamicDowncast<LocalFrame>(*ancestor);
@@ -3914,7 +3914,7 @@ void FrameLoader::dispatchUnloadEvents(UnloadEventPolicy unloadEventPolicy)
         protect(m_frame->document())->removeAllEventListeners();
 }
 
-static bool NODELETE shouldAskForNavigationConfirmation(Document& document, const BeforeUnloadEvent& event)
+static bool shouldAskForNavigationConfirmation(Document& document, const BeforeUnloadEvent& event)
 {
     // Confirmation dialog should not be displayed when the allow-modals flag is not set.
     if (document.isSandboxed(SandboxFlag::Modals))

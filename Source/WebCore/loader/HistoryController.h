@@ -89,7 +89,7 @@ public:
     void clearPreviousItem();
 
     HistoryItem* provisionalItem() const { return m_provisionalItem.get(); }
-    void NODELETE setProvisionalItem(RefPtr<HistoryItem>&&);
+    void setProvisionalItem(RefPtr<HistoryItem>&&);
 
     void pushState(RefPtr<SerializedScriptValue>&&, const String& url);
     void replaceState(RefPtr<SerializedScriptValue>&&, const String& url);
@@ -104,7 +104,7 @@ public:
 
 private:
     friend class Page;
-    bool NODELETE shouldStopLoadingForHistoryItem(HistoryItem&) const;
+    bool shouldStopLoadingForHistoryItem(HistoryItem&) const;
     void goToItem(HistoryItem&, FrameLoadType, ShouldTreatAsContinuingLoad);
     void goToItemForNavigationAPI(HistoryItem&, FrameLoadType, LocalFrame& triggeringFrame, NavigationAPIMethodTracker*);
     void goToItemShared(HistoryItem&, CompletionHandler<void(ShouldGoToHistoryItem)>&&, ShouldTreatAsContinuingLoad = ShouldTreatAsContinuingLoad::No);

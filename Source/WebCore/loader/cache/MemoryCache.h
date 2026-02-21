@@ -159,7 +159,7 @@ public:
     WEBCORE_EXPORT Statistics getStatistics();
     
     void resourceAccessed(CachedResource&);
-    bool NODELETE inLiveDecodedResourcesList(CachedResource&) const;
+    bool inLiveDecodedResourcesList(CachedResource&) const;
 
     using SecurityOriginSet = HashSet<Ref<SecurityOrigin>>;
     WEBCORE_EXPORT void removeResourcesWithOrigin(const SecurityOrigin&);
@@ -196,7 +196,7 @@ private:
     CachedResource* resourceForRequestImpl(const ResourceRequest&, CachedResourceMap&);
 
     CachedResourceMap& ensureSessionResourceMap(PAL::SessionID);
-    CachedResourceMap* NODELETE sessionResourceMap(PAL::SessionID) const;
+    CachedResourceMap* sessionResourceMap(PAL::SessionID) const;
 
     bool m_disabled { false };
     bool m_inPruneResources { false };

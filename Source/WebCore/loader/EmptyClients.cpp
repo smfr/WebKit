@@ -125,7 +125,7 @@ class EmptyBackForwardClient final : public BackForwardClient {
     void NODELETE setChildItem(BackForwardFrameItemIdentifier, Ref<HistoryItem>&&) final { }
     void NODELETE goToItem(HistoryItem&) final { }
     Vector<Ref<HistoryItem>> NODELETE allItems(FrameIdentifier) { return { }; }
-    RefPtr<HistoryItem> NODELETE itemAtIndex(int, FrameIdentifier) final { return nullptr; }
+    RefPtr<HistoryItem> itemAtIndex(int, FrameIdentifier) final { return nullptr; }
     unsigned NODELETE backListCount() const final { return 0; }
     unsigned NODELETE forwardListCount() const final { return 0; }
     bool NODELETE containsItem(const HistoryItem&) const final { return false; }
@@ -258,7 +258,7 @@ class EmptyDiagnosticLoggingClient final : public DiagnosticLoggingClient {
 
     void NODELETE logDiagnosticMessage(const String&, const String&, ShouldSample) final { }
     void NODELETE logDiagnosticMessageWithResult(const String&, const String&, DiagnosticLoggingResultType, ShouldSample) final { }
-    void NODELETE logDiagnosticMessageWithValue(const String&, const String&, double, unsigned, ShouldSample) final { }
+    void logDiagnosticMessageWithValue(const String&, const String&, double, unsigned, ShouldSample) final { }
     void NODELETE logDiagnosticMessageWithEnhancedPrivacy(const String&, const String&, ShouldSample) final { }
     void NODELETE logDiagnosticMessageWithValueDictionary(const String&, const String&, const ValueDictionary&, ShouldSample) final { }
     void NODELETE logDiagnosticMessageWithDomain(const String&, DiagnosticLoggingDomain) final { };
@@ -272,7 +272,7 @@ class EmptyDragClient final : public DragClient {
     void NODELETE willPerformDragDestinationAction(DragDestinationAction, const DragData&) final { }
     void NODELETE willPerformDragSourceAction(DragSourceAction, const IntPoint&, DataTransfer&) final { }
     OptionSet<DragSourceAction> dragSourceActionMaskForPoint(const IntPoint&) final { return { }; }
-    void NODELETE startDrag(DragItem, DataTransfer&, Frame&, const std::optional<NodeIdentifier>&) final { }
+    void startDrag(DragItem, DataTransfer&, Frame&, const std::optional<NodeIdentifier>&) final { }
 };
 
 #endif // ENABLE(DRAG_SUPPORT)
@@ -683,7 +683,7 @@ void NODELETE EmptyFrameLoaderClient::updateOpener(std::optional<FrameIdentifier
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::setPrinting(bool, FloatSize, FloatSize, float, AdjustViewSize)
+void EmptyFrameLoaderClient::setPrinting(bool, FloatSize, FloatSize, float, AdjustViewSize)
 {
 }
 
@@ -706,12 +706,12 @@ Ref<DocumentLoader> EmptyFrameLoaderClient::createDocumentLoader(ResourceRequest
     return DocumentLoader::create(WTF::move(request), WTF::move(substituteData), { });
 }
 
-RefPtr<LocalFrame> NODELETE EmptyFrameLoaderClient::createFrame(const AtomString&, HTMLFrameOwnerElement&)
+RefPtr<LocalFrame> EmptyFrameLoaderClient::createFrame(const AtomString&, HTMLFrameOwnerElement&)
 {
     return nullptr;
 }
 
-RefPtr<Widget> NODELETE EmptyFrameLoaderClient::createPlugin(HTMLPlugInElement&, const URL&, const Vector<AtomString>&, const Vector<AtomString>&, const String&, bool)
+RefPtr<Widget> EmptyFrameLoaderClient::createPlugin(HTMLPlugInElement&, const URL&, const Vector<AtomString>&, const Vector<AtomString>&, const String&, bool)
 {
     return nullptr;
 }
@@ -830,7 +830,7 @@ void NODELETE EmptyFrameLoaderClient::dispatchDidCancelClientRedirect()
 {
 }
 
-void NODELETE EmptyFrameLoaderClient::dispatchWillPerformClientRedirect(const URL&, double, WallTime, LockBackForwardList)
+void EmptyFrameLoaderClient::dispatchWillPerformClientRedirect(const URL&, double, WallTime, LockBackForwardList)
 {
 }
 
@@ -1109,7 +1109,7 @@ void NODELETE EmptyFrameLoaderClient::setIsolatedTree(Ref<WebCore::AXIsolatedTre
 {
 }
 
-RefPtr<WebCore::AXIsolatedTree> NODELETE EmptyFrameLoaderClient::isolatedTree() const
+RefPtr<WebCore::AXIsolatedTree> EmptyFrameLoaderClient::isolatedTree() const
 {
     return nullptr;
 }
@@ -1131,7 +1131,7 @@ void NODELETE EmptyFrameLoaderClient::prefetchDNS(const String&)
 {
 }
 
-RefPtr<HistoryItem> NODELETE EmptyFrameLoaderClient::createHistoryItemTree(bool, BackForwardItemIdentifier) const
+RefPtr<HistoryItem> EmptyFrameLoaderClient::createHistoryItemTree(bool, BackForwardItemIdentifier) const
 {
     return nullptr;
 }
@@ -1225,7 +1225,7 @@ private:
 
 class EmptySocketProvider final : public SocketProvider {
 public:
-    RefPtr<ThreadableWebSocketChannel> NODELETE createWebSocketChannel(Document&, WebSocketChannelClient&) final { return nullptr; }
+    RefPtr<ThreadableWebSocketChannel> createWebSocketChannel(Document&, WebSocketChannelClient&) final { return nullptr; }
 
     std::pair<RefPtr<WebTransportSession>, Ref<WebTransportSessionPromise>> initializeWebTransportSession(ScriptExecutionContext&, WebTransportSessionClient&, const URL&, const WebTransportOptions&) { return { nullptr, WebTransportSessionPromise::createAndReject() }; }
 
