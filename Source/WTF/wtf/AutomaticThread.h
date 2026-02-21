@@ -123,9 +123,9 @@ public:
     // running. Returns true if the thread has been stopped. A good idiom for stopping your automatic
     // thread is to first try this, and if that doesn't work, to tell the thread using your own
     // mechanism (set some flag and then notify the condition).
-    bool tryStop(const AbstractLocker&);
+    bool NODELETE tryStop(const AbstractLocker&);
 
-    bool isWaiting(const AbstractLocker&);
+    bool NODELETE isWaiting(const AbstractLocker&);
 
     bool notify(const AbstractLocker&);
 

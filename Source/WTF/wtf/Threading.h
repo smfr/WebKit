@@ -242,7 +242,7 @@ public:
     // Called in the thread during initialization.
     // Helpful for platforms where the thread name must be set from within the thread.
     static void initializeCurrentThreadInternal(const char* threadName);
-    static void initializeCurrentThreadEvenIfNonWTFCreated();
+    static void NODELETE initializeCurrentThreadEvenIfNonWTFCreated();
     
     WTF_EXPORT_PRIVATE static void yield();
 
@@ -250,7 +250,7 @@ public:
     WTF_EXPORT_PRIVATE static void registerGCThread(GCThreadType);
     WTF_EXPORT_PRIVATE static bool mayBeGCThread();
 
-    WTF_EXPORT_PRIVATE static void registerJSThread(Thread&);
+    WTF_EXPORT_PRIVATE static void NODELETE registerJSThread(Thread&);
 
     WTF_EXPORT_PRIVATE void dump(PrintStream& out) const;
 
@@ -344,7 +344,7 @@ protected:
     static qos_class_t adjustedQOSClass(qos_class_t);
 #endif
 
-    static const char* normalizeThreadName(const char* threadName);
+    static const char* NODELETE normalizeThreadName(const char* threadName);
 
     enum JoinableState : uint8_t {
         // The default thread state. The thread can be joined on.

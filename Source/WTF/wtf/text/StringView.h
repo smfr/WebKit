@@ -176,7 +176,7 @@ public:
     WTF_EXPORT_PRIVATE String convertToASCIIUppercase() const;
     WTF_EXPORT_PRIVATE AtomString convertToASCIILowercaseAtom() const;
 
-    WTF_EXPORT_PRIVATE std::optional<char32_t> convertToSingleCodePoint() const;
+    WTF_EXPORT_PRIVATE std::optional<char32_t> NODELETE convertToSingleCodePoint() const;
 
     bool contains(char16_t) const;
     template<typename CodeUnitMatchFunction>
@@ -229,8 +229,8 @@ private:
     template<typename CharacterType, typename MatchedCharacterPredicate>
     StringView trim(std::span<const CharacterType>, const MatchedCharacterPredicate&) const;
 
-    WTF_EXPORT_PRIVATE bool underlyingStringIsValidImpl() const;
-    WTF_EXPORT_PRIVATE void setUnderlyingStringImpl(const StringImpl*);
+    WTF_EXPORT_PRIVATE bool NODELETE underlyingStringIsValidImpl() const;
+    WTF_EXPORT_PRIVATE void NODELETE setUnderlyingStringImpl(const StringImpl*);
     WTF_EXPORT_PRIVATE void setUnderlyingStringImpl(const StringView&);
 
 #if CHECK_STRINGVIEW_LIFETIME
@@ -1287,7 +1287,7 @@ inline bool startsWith(StringView reference, StringView prefix)
     return equal(reference.span16().data(), prefix.span16());
 }
 
-inline bool startsWithIgnoringASCIICase(StringView reference, StringView prefix)
+inline bool NODELETE startsWithIgnoringASCIICase(StringView reference, StringView prefix)
 {
     if (prefix.length() > reference.length())
         return false;
@@ -1321,7 +1321,7 @@ inline bool endsWith(StringView reference, StringView suffix)
     return equal(reference.span16().subspan(startOffset).data(), suffix.span16());
 }
 
-inline bool endsWithIgnoringASCIICase(StringView reference, StringView suffix)
+inline bool NODELETE endsWithIgnoringASCIICase(StringView reference, StringView suffix)
 {
     unsigned suffixLength = suffix.length();
     unsigned referenceLength = reference.length();

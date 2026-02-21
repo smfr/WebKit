@@ -101,7 +101,7 @@ ThreadSuspendLocker::~ThreadSuspendLocker()
 }
 #endif
 
-static std::optional<size_t> stackSize(ThreadType threadType)
+static std::optional<size_t> NODELETE stackSize(ThreadType threadType)
 {
     // Return the stack size for the created thread based on its type.
     // If the stack size is not specified, then use the system default. Platforms can tune the values here.
@@ -295,7 +295,7 @@ Ref<Thread> Thread::create(ASCIILiteral name, Function<void()>&& entryPoint, Thr
     return thread;
 }
 
-static bool shouldRemoveThreadFromThreadGroup()
+static bool NODELETE shouldRemoveThreadFromThreadGroup()
 {
 #if OS(WINDOWS)
     // On Windows the thread specific destructor is also called when the
@@ -408,7 +408,7 @@ void Thread::setCurrentThreadIsUserInitiated(int relativePriority)
 }
 
 #if HAVE(QOS_CLASSES)
-static Thread::QOS toQOS(qos_class_t qosClass)
+static Thread::QOS NODELETE toQOS(qos_class_t qosClass)
 {
     switch (qosClass) {
     case QOS_CLASS_USER_INTERACTIVE:

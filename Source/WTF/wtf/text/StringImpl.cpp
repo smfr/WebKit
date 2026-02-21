@@ -379,7 +379,7 @@ Ref<StringImpl> StringImpl::substring(unsigned start, unsigned length)
     return create(span16().subspan(start, length));
 }
 
-char32_t StringImpl::characterStartingAt(unsigned i)
+char32_t NODELETE StringImpl::characterStartingAt(unsigned i)
 {
     if (is8Bit())
         return span8()[i];
@@ -595,7 +595,7 @@ Ref<StringImpl> StringImpl::convertToUppercaseWithoutLocaleUpconvert()
     return newImpl;
 }
 
-static inline bool needsTurkishCasingRules(const AtomString& locale)
+static inline bool NODELETE needsTurkishCasingRules(const AtomString& locale)
 {
     // Either "tr" or "az" locale, with ASCII case insensitive comparison and allowing for an ignored subtag.
     char16_t first = locale[0];
@@ -605,14 +605,14 @@ static inline bool needsTurkishCasingRules(const AtomString& locale)
         && (locale.length() == 2 || locale[2] == '-');
 }
 
-static inline bool needsGreekUppercasingRules(const AtomString& locale)
+static inline bool NODELETE needsGreekUppercasingRules(const AtomString& locale)
 {
     // The "el" locale, with ASCII case insensitive comparison and allowing for an ignored subtag.
     return isASCIIAlphaCaselessEqual(locale[0], 'e') && isASCIIAlphaCaselessEqual(locale[1], 'l')
         && (locale.length() == 2 || locale[2] == '-');
 }
 
-static inline bool needsLithuanianCasingRules(const AtomString& locale)
+static inline bool NODELETE needsLithuanianCasingRules(const AtomString& locale)
 {
     // The "lt" locale, with ASCII case insensitive comparison and allowing for an ignored subtag.
     return isASCIIAlphaCaselessEqual(locale[0], 'l') && isASCIIAlphaCaselessEqual(locale[1], 't')
@@ -1096,7 +1096,7 @@ bool StringImpl::startsWithIgnoringASCIICase(StringView prefix) const
     return prefix && ::WTF::startsWithIgnoringASCIICase(*this, prefix);
 }
 
-bool StringImpl::startsWith(char16_t character) const
+bool NODELETE StringImpl::startsWith(char16_t character) const
 {
     return m_length && (*this)[0] == character;
 }
@@ -1121,7 +1121,7 @@ bool StringImpl::endsWithIgnoringASCIICase(StringView suffix) const
     return suffix && ::WTF::endsWithIgnoringASCIICase(*this, suffix);
 }
 
-bool StringImpl::endsWith(char16_t character) const
+bool NODELETE StringImpl::endsWith(char16_t character) const
 {
     return m_length && (*this)[m_length - 1] == character;
 }
@@ -1528,7 +1528,7 @@ bool equalIgnoringASCIICase(const StringImpl* a, const StringImpl* b)
     return a == b || (a && b && equalIgnoringASCIICase(*a, *b));
 }
 
-bool equalIgnoringASCIICaseNonNull(const StringImpl* a, const StringImpl* b)
+bool NODELETE equalIgnoringASCIICaseNonNull(const StringImpl* a, const StringImpl* b)
 {
     ASSERT(a);
     ASSERT(b);
@@ -1562,7 +1562,7 @@ Ref<StringImpl> StringImpl::adopt(StringBuffer<char16_t>&& buffer)
     return adoptRef(*new StringImpl(buffer.release()));
 }
 
-size_t StringImpl::sizeInBytes() const
+size_t NODELETE StringImpl::sizeInBytes() const
 {
     // FIXME: support substrings
     size_t size = length();

@@ -161,7 +161,7 @@ void LibraryPathDiagnosticsLogger::logDYLDSharedCacheInfo(void)
 }
 
 #if HAVE(SHARED_REGION_SPI)
-static bool isAddressInSharedRegion(const void* addr)
+static bool NODELETE isAddressInSharedRegion(const void* addr)
 {
     return std::bit_cast<uintptr_t>(addr) >= SHARED_REGION_BASE && std::bit_cast<uintptr_t>(addr) < (SHARED_REGION_BASE + SHARED_REGION_SIZE);
 }

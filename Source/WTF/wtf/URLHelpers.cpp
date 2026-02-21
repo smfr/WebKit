@@ -461,7 +461,7 @@ static inline bool isSecondLevelDomainNameAllowedByTLDRules(std::span<const char
             return isSecondLevelDomainNameAllowedByTLDRules(buffer.first(buffer.size() - suffixLength), function); \
     }
 
-static bool isRussianDomainNameCharacter(char16_t ch)
+static bool NODELETE isRussianDomainNameCharacter(char16_t ch)
 {
     // Only modern Russian letters, digits and dashes are allowed.
     return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || isASCIIDigit(ch) || ch == '-';

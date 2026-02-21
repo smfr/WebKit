@@ -47,7 +47,7 @@ public:
     void clear();
     void swap(StringBuilder&);
 
-    void didOverflow();
+    void NODELETE didOverflow();
     bool hasOverflowed() const { return m_length > String::MaxLength; }
     bool crashesOnOverflow() const { return m_shouldCrashOnOverflow; }
 

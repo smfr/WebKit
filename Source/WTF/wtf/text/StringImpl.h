@@ -631,7 +631,7 @@ WTF_EXPORT_PRIVATE bool equal(const StringImpl& a, const StringImpl& b);
 WTF_EXPORT_PRIVATE bool equalIgnoringNullity(StringImpl*, StringImpl*);
 WTF_EXPORT_PRIVATE bool equalIgnoringNullity(std::span<const char16_t>, StringImpl*);
 
-bool equalIgnoringASCIICase(const StringImpl&, const StringImpl&);
+bool NODELETE equalIgnoringASCIICase(const StringImpl&, const StringImpl&);
 WTF_EXPORT_PRIVATE bool NODELETE equalIgnoringASCIICase(const StringImpl*, const StringImpl*);
 bool equalIgnoringASCIICase(const StringImpl&, ASCIILiteral);
 bool equalIgnoringASCIICase(const StringImpl*, ASCIILiteral);
