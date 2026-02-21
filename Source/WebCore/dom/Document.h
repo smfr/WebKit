@@ -1145,10 +1145,10 @@ public:
 
 #if ENABLE(CONTENT_CHANGE_OBSERVER)
     ContentChangeObserver* contentChangeObserverIfExists() { return m_contentChangeObserver.get(); }
-    WEBCORE_EXPORT ContentChangeObserver& NODELETE contentChangeObserver();
+    WEBCORE_EXPORT ContentChangeObserver& contentChangeObserver();
 
     DOMTimerHoldingTank* domTimerHoldingTankIfExists() { return m_domTimerHoldingTank.get(); }
-    DOMTimerHoldingTank& NODELETE domTimerHoldingTank();
+    DOMTimerHoldingTank& domTimerHoldingTank();
 #endif
     void processViewport(const String& features, ViewportArguments::Type origin);
     WEBCORE_EXPORT bool isViewportDocument() const;
