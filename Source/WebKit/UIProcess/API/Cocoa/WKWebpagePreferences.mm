@@ -406,7 +406,8 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (WKWebsiteDataStore *)_websiteDataStore
 {
-    return wrapper(_websitePolicies->websiteDataStore());
+    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
+    SUPPRESS_UNCOUNTED_ARG return wrapper(_websitePolicies->websiteDataStore());
 }
 
 - (void)_setWebsiteDataStore:(WKWebsiteDataStore *)websiteDataStore
@@ -416,7 +417,8 @@ static _WKWebsiteDeviceOrientationAndMotionAccessPolicy toWKWebsiteDeviceOrienta
 
 - (WKUserContentController *)_userContentController
 {
-    return wrapper(_websitePolicies->userContentController());
+    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
+    SUPPRESS_UNCOUNTED_ARG return wrapper(_websitePolicies->userContentController());
 }
 
 - (void)_setUserContentController:(WKUserContentController *)userContentController

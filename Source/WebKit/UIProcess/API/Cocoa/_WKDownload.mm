@@ -107,7 +107,8 @@ IGNORE_WARNINGS_END
 
 - (NSData *)resumeData
 {
-    return WebKit::wrapper(_download->_download->legacyResumeData());
+    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
+    SUPPRESS_UNCOUNTED_ARG return WebKit::wrapper(_download->_download->legacyResumeData());
 }
 
 - (WKFrameInfo *)originatingFrame

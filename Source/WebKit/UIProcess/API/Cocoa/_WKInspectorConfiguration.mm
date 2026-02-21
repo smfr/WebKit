@@ -69,7 +69,8 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
 
 - (WKProcessPool *)processPool
 {
-    return wrapper(protect(*_configuration)->processPool());
+    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
+    SUPPRESS_UNCOUNTED_ARG return wrapper(protect(*_configuration)->processPool());
 }
 ALLOW_DEPRECATED_DECLARATIONS_END
 

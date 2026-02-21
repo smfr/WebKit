@@ -58,7 +58,8 @@ template<typename DestinationClass, typename SourceClass> inline CLANG_POINTER_C
 
 template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(ObjectClass& object)
 {
-    return checkedObjCCast<typename WrapperTraits<ObjectClass>::WrapperClass>(object.wrapper());
+    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
+    SUPPRESS_UNCOUNTED_ARG return checkedObjCCast<typename WrapperTraits<ObjectClass>::WrapperClass>(object.wrapper());
 }
 
 template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(ObjectClass* object)
