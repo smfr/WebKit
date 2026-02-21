@@ -50,7 +50,7 @@ public:
     static Ref<ThreadableWebSocketChannelClientWrapper> create(ScriptExecutionContext&, WebSocketChannelClient&);
 
     WorkerThreadableWebSocketChannel::Peer* NODELETE peer() const;
-    void NODELETE didCreateWebSocketChannel(Ref<WorkerThreadableWebSocketChannel::Peer>&&);
+    void didCreateWebSocketChannel(Ref<WorkerThreadableWebSocketChannel::Peer>&&);
     void clearPeer();
 
     bool NODELETE failedWebSocketChannelCreation() const;

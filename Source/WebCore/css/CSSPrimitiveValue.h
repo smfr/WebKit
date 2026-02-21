@@ -232,7 +232,7 @@ private:
     std::optional<double> doubleValueInternal(CSSUnitType targetUnit, const CSSToLengthConversionData&) const;
     std::optional<double> doubleValueInternalDeprecated(CSSUnitType targetUnit) const;
 
-    bool NODELETE addDerivedHash(Hasher&) const;
+    bool addDerivedHash(Hasher&) const;
 
     ALWAYS_INLINE String serializeInternal(const CSS::SerializationContext&) const;
     NEVER_INLINE String formatNumberValue(ASCIILiteral suffix) const;

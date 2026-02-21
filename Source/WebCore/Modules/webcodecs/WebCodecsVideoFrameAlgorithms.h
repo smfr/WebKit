@@ -31,7 +31,7 @@
 
 namespace WebCore {
 
-bool NODELETE isValidVideoFrameBufferInit(const WebCodecsVideoFrame::BufferInit&);
+bool isValidVideoFrameBufferInit(const WebCodecsVideoFrame::BufferInit&);
 bool NODELETE verifyRectOffsetAlignment(VideoPixelFormat, const DOMRectInit&);
 ExceptionOr<DOMRectInit> parseVisibleRect(const DOMRectInit&, const std::optional<DOMRectInit>&, size_t codedWidth, size_t codedHeight, VideoPixelFormat);
 size_t NODELETE videoPixelFormatToPlaneCount(VideoPixelFormat);
@@ -47,7 +47,7 @@ ExceptionOr<CombinedPlaneLayout> computeLayoutAndAllocationSize(const DOMRectIni
 
 ExceptionOr<CombinedPlaneLayout> parseVideoFrameCopyToOptions(const WebCodecsVideoFrame&, const WebCodecsVideoFrame::CopyToOptions&);
 
-void NODELETE initializeVisibleRectAndDisplaySize(WebCodecsVideoFrame&, const WebCodecsVideoFrame::Init&, const DOMRectInit&, size_t defaultDisplayWidth, size_t defaultDisplayHeight);
+void initializeVisibleRectAndDisplaySize(WebCodecsVideoFrame&, const WebCodecsVideoFrame::Init&, const DOMRectInit&, size_t defaultDisplayWidth, size_t defaultDisplayHeight);
 
 VideoColorSpaceInit NODELETE videoFramePickColorSpace(const std::optional<VideoColorSpaceInit>&, VideoPixelFormat);
 

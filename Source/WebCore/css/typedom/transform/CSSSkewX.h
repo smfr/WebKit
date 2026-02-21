@@ -42,7 +42,7 @@ public:
     static ExceptionOr<Ref<CSSSkewX>> create(Ref<const CSSFunctionValue>, Document&);
 
     const CSSNumericValue& ax() const { return m_ax.get(); }
-    ExceptionOr<void> NODELETE setAx(Ref<CSSNumericValue>);
+    ExceptionOr<void> setAx(Ref<CSSNumericValue>);
 
     void serialize(StringBuilder&) const final;
     ExceptionOr<Ref<DOMMatrix>> toMatrix() final;

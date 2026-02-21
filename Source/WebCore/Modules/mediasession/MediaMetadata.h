@@ -113,7 +113,7 @@ private:
     };
 
     MediaMetadata();
-    void NODELETE setArtworkImage(Image*);
+    void setArtworkImage(Image*);
     void metadataUpdated();
     void refreshArtworkImage();
     void tryNextArtworkImage(uint32_t, Vector<Pair>&&);

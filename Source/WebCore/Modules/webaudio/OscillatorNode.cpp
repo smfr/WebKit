@@ -47,7 +47,7 @@ constexpr float interpolate2Point = 0.3;
 constexpr float interpolate3Point = 0.16;
 
 // Convert the detune value (in cents) to a frequency scale multiplier: 2^(d/1200).
-static inline float NODELETE detuneToFrequencyMultiplier(float detuneValue)
+static inline float detuneToFrequencyMultiplier(float detuneValue)
 {
     return std::exp2(detuneValue / 1200);
 }
@@ -178,7 +178,7 @@ bool OscillatorNode::calculateSampleAccuratePhaseIncrements(size_t framesToProce
     return hasSampleAccurateValues;
 }
 
-static float NODELETE doInterpolation(double virtualReadIndex, float incr, unsigned readIndexMask, float tableInterpolationFactor, std::span<const float> lowerWaveData, std::span<const float> higherWaveData)
+static float doInterpolation(double virtualReadIndex, float incr, unsigned readIndexMask, float tableInterpolationFactor, std::span<const float> lowerWaveData, std::span<const float> higherWaveData)
 {
     ASSERT(incr >= 0);
     ASSERT(std::isfinite(virtualReadIndex));

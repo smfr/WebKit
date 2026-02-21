@@ -210,7 +210,7 @@ public:
     void scheduleHoverStateUpdate();
     void scheduleCursorUpdate();
 
-    void NODELETE setResizingFrameSet(HTMLFrameSetElement*);
+    void setResizingFrameSet(HTMLFrameSetElement*);
 
     void setLastTouchedNode(Node* node) { m_lastTouchedNode = node; }
     Node* lastTouchedNode() const { return m_lastTouchedNode.get(); }

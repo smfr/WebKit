@@ -224,7 +224,7 @@ Vector<uint64_t> Frame::pathToFrame() const
     return path;
 }
 
-RenderWidget* NODELETE Frame::ownerRenderer() const
+RenderWidget* Frame::ownerRenderer() const
 {
     RefPtr ownerElement = this->ownerElement();
     if (!ownerElement)

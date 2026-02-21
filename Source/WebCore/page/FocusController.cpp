@@ -81,7 +81,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(FocusController);
 
 using namespace HTMLNames;
 
-static HTMLElement* NODELETE invokerForOpenPopover(const Node* candidatePopover)
+static HTMLElement* invokerForOpenPopover(const Node* candidatePopover)
 {
     RefPtr popover = dynamicDowncast<HTMLElement>(candidatePopover);
     if (popover && popover->isPopoverShowing())

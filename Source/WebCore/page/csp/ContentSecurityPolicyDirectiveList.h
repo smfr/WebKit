@@ -120,10 +120,10 @@ private:
     template <class CSPDirectiveType>
     void setCSPDirective(ParsedDirective&&, std::unique_ptr<CSPDirectiveType>&);
 
-    ContentSecurityPolicySourceListDirective* NODELETE operativeDirective(ContentSecurityPolicySourceListDirective*, const String&) const;
-    ContentSecurityPolicySourceListDirective* NODELETE operativeDirectiveScript(ContentSecurityPolicySourceListDirective*, const String&) const;
-    ContentSecurityPolicySourceListDirective* NODELETE operativeDirectiveStyle(ContentSecurityPolicySourceListDirective*, const String&) const;
-    ContentSecurityPolicySourceListDirective* NODELETE operativeDirectiveForWorkerSrc(ContentSecurityPolicySourceListDirective*, const String&) const;
+    ContentSecurityPolicySourceListDirective* operativeDirective(ContentSecurityPolicySourceListDirective*, const String&) const;
+    ContentSecurityPolicySourceListDirective* operativeDirectiveScript(ContentSecurityPolicySourceListDirective*, const String&) const;
+    ContentSecurityPolicySourceListDirective* operativeDirectiveStyle(ContentSecurityPolicySourceListDirective*, const String&) const;
+    ContentSecurityPolicySourceListDirective* operativeDirectiveForWorkerSrc(ContentSecurityPolicySourceListDirective*, const String&) const;
 
     void setEvalDisabledErrorMessage(const String& errorMessage) { m_evalDisabledErrorMessage = errorMessage; }
     void setWebAssemblyDisabledErrorMessage(const String& errorMessage) { m_webAssemblyDisabledErrorMessage = errorMessage; }

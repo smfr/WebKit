@@ -63,7 +63,7 @@ public:
     // the render quantum size such that the parameter value changes once per render quantum.
     float valuesForFrameRange(size_t startFrame, size_t endFrame, float defaultValue, float minValue, float maxValue, std::span<float> values, double sampleRate, double controlRate);
 
-    bool NODELETE hasValues(size_t startFrame, double sampleRate) const;
+    bool hasValues(size_t startFrame, double sampleRate) const;
 
     WEBCORE_EXPORT static float NODELETE exponentialRampAtTime(Seconds t, float value1, Seconds time1, float value2, Seconds time2);
 private:
@@ -197,10 +197,10 @@ private:
     void removeOldEvents(size_t eventCount) WTF_REQUIRES_LOCK(m_eventsLock);
     ExceptionOr<void> insertEvent(ParamEvent&&) WTF_REQUIRES_LOCK(m_eventsLock);
     float valuesForFrameRangeImpl(size_t startFrame, size_t endFrame, float defaultValue, std::span<float> values, double sampleRate, double controlRate) WTF_REQUIRES_LOCK(m_eventsLock);
-    float NODELETE linearRampAtTime(Seconds t, float value1, Seconds time1, float value2, Seconds time2);
+    float linearRampAtTime(Seconds t, float value1, Seconds time1, float value2, Seconds time2);
     float valueCurveAtTime(Seconds t, Seconds time1, Seconds duration, std::span<const float> curveData, size_t curveLength);
-    void NODELETE handleCancelValues(ParamEvent&, ParamEvent* nextEvent, float& value2, Seconds& time2, ParamEvent::Type& nextEventType);
-    bool NODELETE isEventCurrent(const ParamEvent&, const ParamEvent* nextEvent, size_t currentFrame, double sampleRate) const;
+    void handleCancelValues(ParamEvent&, ParamEvent* nextEvent, float& value2, Seconds& time2, ParamEvent::Type& nextEventType);
+    bool isEventCurrent(const ParamEvent&, const ParamEvent* nextEvent, size_t currentFrame, double sampleRate) const;
 
     void processLinearRamp(const AutomationState&, std::span<float> values, size_t& currentFrame, float& value, unsigned& writeIndex);
     void processExponentialRamp(const AutomationState&, std::span<float> values, size_t& currentFrame, float& value, unsigned& writeIndex);

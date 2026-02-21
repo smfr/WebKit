@@ -421,7 +421,7 @@ public:
     EditorClient& editorClient() { return m_editorClient.get(); }
 
     WEBCORE_EXPORT LocalFrame* NODELETE localMainFrame() const;
-    WEBCORE_EXPORT Document* NODELETE localTopDocument() const;
+    WEBCORE_EXPORT Document* localTopDocument() const;
 
     Frame& mainFrame() const { return m_mainFrame.get(); }
     WEBCORE_EXPORT void setMainFrame(Ref<Frame>&&);
@@ -446,7 +446,7 @@ public:
     WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(const DocumentSyncSerializationData&);
     WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(Ref<DocumentSyncData>&&);
 
-    WEBCORE_EXPORT void NODELETE setMainFrameURLFragment(String&&);
+    WEBCORE_EXPORT void setMainFrameURLFragment(String&&);
     String mainFrameURLFragment() const { return m_mainFrameURLFragment; }
 
     bool NODELETE openedByDOM() const;
@@ -529,7 +529,7 @@ public:
     WEBCORE_EXPORT Ref<DOMRectList> touchEventRectsForEventForTesting(EventTrackingRegionsEventType);
     WEBCORE_EXPORT Ref<DOMRectList> passiveTouchEventListenerRectsForTesting();
 
-    WEBCORE_EXPORT void NODELETE setConsoleMessageListenerForTesting(RefPtr<StringCallback>&&);
+    WEBCORE_EXPORT void setConsoleMessageListenerForTesting(RefPtr<StringCallback>&&);
     WEBCORE_EXPORT RefPtr<StringCallback> NODELETE consoleMessageListenerForTesting() const;
 
     WEBCORE_EXPORT void settingsDidChange();

@@ -62,7 +62,7 @@ public:
     explicit RenderMarquee(RenderLayer*);
     ~RenderMarquee();
 
-    bool NODELETE isHorizontal() const;
+    bool isHorizontal() const;
 
     void start();
     void suspend();

@@ -57,7 +57,7 @@ public:
     bool javaEnabled() const { return false; }
     const String& userAgent() const final;
     String platform() const final;
-    void NODELETE userAgentChanged();
+    void userAgentChanged();
     bool onLine() const final;
     bool canShare(Document&, const ShareData&);
     void share(Document&, const ShareData&, Ref<DeferredPromise>&&);

@@ -95,7 +95,7 @@ private:
     PickerState NODELETE currentState() const;
     void NODELETE setState(PickerState);
     bool hasCurrentPromise() const { return m_currentPromise.has_value(); }
-    void NODELETE setCurrentPromise(CredentialPromise&&);
+    void setCurrentPromise(CredentialPromise&&);
     CredentialPromise* NODELETE currentPromise();
 
     ExceptionOr<JSC::JSObject*> parseDigitalCredentialsResponseData(const String&) const;

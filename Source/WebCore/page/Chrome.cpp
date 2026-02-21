@@ -246,7 +246,7 @@ void Chrome::runModal()
     // JavaScript that runs within the nested event loop must not be run in the context of the
     // script that called showModalDialog. Null out entryScope to break the connection.
 
-    RefPtr localTopDocument = m_page->localTopDocument();
+    RefPtr localTopDocument = protect(m_page)->localTopDocument();
     if (!localTopDocument)
         return;
 

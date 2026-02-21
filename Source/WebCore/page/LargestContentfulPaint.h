@@ -49,10 +49,10 @@ public:
 
     // LargestContentfulPaint
     DOMHighResTimeStamp NODELETE loadTime() const;
-    void NODELETE setLoadTime(DOMHighResTimeStamp);
+    void setLoadTime(DOMHighResTimeStamp);
 
     DOMHighResTimeStamp NODELETE renderTime() const;
-    void NODELETE setRenderTime(DOMHighResTimeStamp);
+    void setRenderTime(DOMHighResTimeStamp);
 
     DOMHighResTimeStamp NODELETE startTime() const final;
 
@@ -60,10 +60,10 @@ public:
     void NODELETE setSize(unsigned);
 
     String NODELETE id() const;
-    void NODELETE setID(const String&);
+    void setID(const String&);
 
     String NODELETE url() const;
-    void NODELETE setURLString(const String&);
+    void setURLString(const String&);
 
     Element* element() const;
     void setElement(Element*);

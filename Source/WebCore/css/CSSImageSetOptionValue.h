@@ -47,7 +47,7 @@ public:
     void NODELETE setResolution(Ref<CSSPrimitiveValue>&&);
 
     String type() const { return m_mimeType; }
-    void NODELETE setType(String);
+    void setType(String);
 
     IterationStatus customVisitChildren(NOESCAPE const Function<IterationStatus(CSSValue&)>& func) const
     {

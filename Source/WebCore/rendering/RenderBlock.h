@@ -84,7 +84,7 @@ public:
     }
     void addPercentHeightDescendant(RenderBox&);
     static void removePercentHeightDescendant(RenderBox&);
-    TrackedRendererListHashSet* NODELETE percentHeightDescendants() const;
+    TrackedRendererListHashSet* percentHeightDescendants() const;
     bool hasPercentHeightDescendants() const
     {
         auto* renderers = percentHeightDescendants();
@@ -154,18 +154,18 @@ public:
     static TextRun constructTextRun(std::span<const char16_t> characters, const RenderStyle&,
         ExpansionBehavior = ExpansionBehavior::defaultBehavior());
 
-    LayoutUnit NODELETE paginationStrut() const;
+    LayoutUnit paginationStrut() const;
     void setPaginationStrut(LayoutUnit);
 
     // The page logical offset is the object's offset from the top of the page in the page progression
     // direction (so an x-offset in vertical text and a y-offset for horizontal text).
-    LayoutUnit NODELETE pageLogicalOffset() const;
+    LayoutUnit pageLogicalOffset() const;
     void setPageLogicalOffset(LayoutUnit);
 
     // Fieldset legends that are taller than the fieldset border add in intrinsic border
     // in order to ensure that content gets properly pushed down across all layout systems
     // (flexbox, block, etc.)
-    LayoutUnit NODELETE intrinsicBorderForFieldset() const;
+    LayoutUnit intrinsicBorderForFieldset() const;
     void setIntrinsicBorderForFieldset(LayoutUnit);
 
     RectEdges<LayoutUnit> borderWidths() const override;
@@ -221,7 +221,7 @@ public:
     bool canHaveChildren() const override { return true; }
     virtual bool canDropAnonymousBlockChild() const { return true; }
 
-    RenderFragmentedFlow* NODELETE cachedEnclosingFragmentedFlow() const;
+    RenderFragmentedFlow* cachedEnclosingFragmentedFlow() const;
     void setCachedEnclosingFragmentedFlowNeedsUpdate();
     virtual bool NODELETE cachedEnclosingFragmentedFlowNeedsUpdate() const;
     void resetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(RenderFragmentedFlow* = nullptr) final;
@@ -327,7 +327,7 @@ protected:
     virtual void computeChildIntrinsicLogicalWidths(RenderBox&, LayoutUnit& minPreferredLogicalWidth, LayoutUnit& maxPreferredLogicalWidth) const;
 
     RenderBlockRareData& ensureBlockRareData();
-    RenderBlockRareData* NODELETE blockRareData() const;
+    RenderBlockRareData* blockRareData() const;
     bool recomputeLogicalWidth();
 
 private:

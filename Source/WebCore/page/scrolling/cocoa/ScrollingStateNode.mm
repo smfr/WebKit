@@ -47,7 +47,7 @@ CALayer *NODELETE LayerRepresentation::makePlatformLayerTyped(void* typelessLaye
     return (__bridge CALayer *)typelessLayer;
 }
 
-void* NODELETE LayerRepresentation::makePlatformLayerTypeless(CALayer *layer)
+void* LayerRepresentation::makePlatformLayerTypeless(CALayer *layer)
 {
     return (__bridge void*)layer;
 }

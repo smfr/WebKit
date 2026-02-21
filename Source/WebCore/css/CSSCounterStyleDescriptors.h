@@ -119,15 +119,15 @@ struct CSSCounterStyleDescriptors {
     bool NODELETE isValid() const;
     static bool NODELETE areSymbolsValidForSystem(System, const Vector<Symbol>&, const AdditiveSymbols&);
 
-    void NODELETE setName(Name);
+    void setName(Name);
     void setSystem(System);
-    void NODELETE setSystemData(SystemData);
+    void setSystemData(SystemData);
     void setNegative(NegativeSymbols);
     void setPrefix(Symbol);
     void setSuffix(Symbol);
     void setRanges(Ranges);
     void setPad(Pad);
-    void NODELETE setFallbackName(Name);
+    void setFallbackName(Name);
     void setSymbols(Vector<Symbol>);
     void setAdditiveSymbols(AdditiveSymbols);
 

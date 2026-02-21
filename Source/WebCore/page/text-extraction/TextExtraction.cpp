@@ -134,7 +134,7 @@ using TextNodesAndText = Vector<std::pair<Ref<Text>, String>>;
 using TextAndSelectedRange = std::pair<String, std::optional<CharacterRange>>;
 using TextAndSelectedRangeMap = HashMap<Ref<Text>, TextAndSelectedRange>;
 
-static bool NODELETE hasEnclosingAutoFilledInput(Node& node)
+static bool hasEnclosingAutoFilledInput(Node& node)
 {
     RefPtr input = dynamicDowncast<HTMLInputElement>(node.shadowHost());
     if (!input)
@@ -456,7 +456,7 @@ enum class SkipExtraction : bool {
     SelfAndSubtree
 };
 
-static bool NODELETE shouldTreatAsPasswordField(const Element* element)
+static bool shouldTreatAsPasswordField(const Element* element)
 {
     RefPtr input = dynamicDowncast<HTMLInputElement>(element);
     return input && input->hasEverBeenPasswordField();
@@ -482,7 +482,7 @@ static inline Variant<SkipExtraction, ItemData, URL, Editable> extractItemData(N
         return { SkipExtraction::Self };
 
     if (RefPtr textNode = dynamicDowncast<Text>(node)) {
-        if (shouldTreatAsPasswordField(textNode->shadowHost()))
+        if (shouldTreatAsPasswordField(protect(textNode->shadowHost())))
             return { SkipExtraction::Self };
 
         if (auto iterator = context.visibleText.find(*textNode); iterator != context.visibleText.end()) {
@@ -1272,7 +1272,7 @@ struct TokenAndBlockOffset {
     int offset { 0 };
 };
 
-static IntSize NODELETE reducePrecision(FloatSize size)
+static IntSize reducePrecision(FloatSize size)
 {
     static constexpr auto resolution = 10;
     return {

@@ -43,8 +43,8 @@ using RectifiedCSSColorAngle = Variant<Ref<CSSNumericValue>, Ref<CSSKeywordValue
 
 class CSSOMColorValue : public CSSStyleValue {
 public:
-    RefPtr<CSSKeywordValue> NODELETE colorSpace();
-    RefPtr<CSSOMColorValue> NODELETE to(CSSKeywordish);
+    RefPtr<CSSKeywordValue> colorSpace();
+    RefPtr<CSSOMColorValue> to(CSSKeywordish);
     static std::optional<Variant<Ref<CSSOMColorValue>, Ref<CSSStyleValue>>> NODELETE parse(const String&);
 
     static ExceptionOr<RectifiedCSSColorPercent> rectifyCSSColorPercent(CSSColorPercent&&);
@@ -55,7 +55,7 @@ public:
     static CSSColorAngle toCSSColorAngle(const RectifiedCSSColorAngle&);
     static CSSColorNumber toCSSColorNumber(const RectifiedCSSColorNumber&);
 
-    RefPtr<CSSValue> NODELETE toCSSValue() const final;
+    RefPtr<CSSValue> toCSSValue() const final;
 };
 
 } // namespace WebCore

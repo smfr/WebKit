@@ -47,7 +47,7 @@ public:
 
     AudioWorkletGlobalScope* NODELETE globalScope() const;
 
-    void NODELETE clearProxies() final;
+    void clearProxies() final;
 
     // WorkerOrWorkletThread.
     WorkerLoaderProxy* NODELETE workerLoaderProxy() const final;

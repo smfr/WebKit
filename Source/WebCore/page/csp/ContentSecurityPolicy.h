@@ -206,7 +206,7 @@ public:
     void reportInvalidPathCharacter(const String& directiveName, const String& value, const char) const;
     void reportInvalidSourceExpression(const String& directiveName, const String& source) const;
     bool urlMatchesSelf(const URL&, bool forFrameSrc) const;
-    bool NODELETE allowContentSecurityPolicySourceStarToMatchAnyProtocol() const;
+    bool allowContentSecurityPolicySourceStarToMatchAnyProtocol() const;
 
     // Used by ContentSecurityPolicyDirectiveList
     void reportDuplicateDirective(const String&) const;

@@ -142,7 +142,7 @@ public:
 
     WEBCORE_EXPORT static void NODELETE overrideTransientActivationDurationForTesting(std::optional<Seconds>&&);
     void setLastActivationTimestamp(MonotonicTime lastActivationTimestamp) { m_lastActivationTimestamp = lastActivationTimestamp; }
-    void NODELETE consumeLastActivationIfNecessary();
+    void consumeLastActivationIfNecessary();
     MonotonicTime lastActivationTimestamp() const { return m_lastActivationTimestamp; }
     void notifyActivated(MonotonicTime);
     WEBCORE_EXPORT bool hasTransientActivation() const;
@@ -161,7 +161,7 @@ public:
 
     DOMSelection* getSelection();
 
-    HTMLFrameOwnerElement* NODELETE frameElement() const;
+    HTMLFrameOwnerElement* frameElement() const;
 
     WEBCORE_EXPORT void focus(bool allowFocus = false);
     void focus(LocalDOMWindow& incumbentWindow);
@@ -197,11 +197,11 @@ public:
 
     unsigned length() const;
 
-    AtomString NODELETE name() const;
+    AtomString name() const;
     void setName(const AtomString&);
 
     String status() const;
-    void NODELETE setStatus(const String&);
+    void setStatus(const String&);
 
     void disownOpener();
 
@@ -390,7 +390,7 @@ private:
     void eventListenersDidChange() final;
     void setLocation(LocalDOMWindow& activeWindow, const URL& completedURL, NavigationHistoryBehavior, SetLocationLocking, CanNavigateState) final;
 
-    bool NODELETE allowedToChangeWindowGeometry() const;
+    bool allowedToChangeWindowGeometry() const;
 
     static ExceptionOr<RefPtr<Frame>> createWindow(const String& urlString, const AtomString& frameName, const WindowFeatures&, LocalDOMWindow& activeWindow, LocalFrame& firstFrame, LocalFrame& openerFrame, NOESCAPE const Function<void(LocalDOMWindow&)>& prepareDialogFunction = nullptr);
 

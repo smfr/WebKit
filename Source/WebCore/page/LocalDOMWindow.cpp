@@ -267,7 +267,7 @@ static void removeAllBeforeUnloadEventListeners(LocalDOMWindow* domWindow)
         domWindow->enableSuddenTermination();
 }
 
-static bool NODELETE allowsBeforeUnloadListeners(LocalDOMWindow* window)
+static bool allowsBeforeUnloadListeners(LocalDOMWindow* window)
 {
     ASSERT_ARG(window, window);
     RefPtr frame = window->frame();

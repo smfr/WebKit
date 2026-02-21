@@ -235,7 +235,7 @@ public:
 
     virtual void lazyInitialize();
 
-    static bool NODELETE isSupportedSampleRate(float sampleRate);
+    static bool isSupportedSampleRate(float sampleRate);
 
     PeriodicWave& periodicWave(OscillatorType);
 
@@ -258,7 +258,7 @@ protected:
 
     void clear();
 
-    RefPtr<MediaSessionManagerInterface> NODELETE mediaSessionManagerIfExists() const;
+    RefPtr<MediaSessionManagerInterface> mediaSessionManagerIfExists() const;
     RefPtr<MediaSessionManagerInterface> mediaSessionManager() const;
 
 protected:

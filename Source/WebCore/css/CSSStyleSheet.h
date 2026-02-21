@@ -71,7 +71,7 @@ public:
 
     virtual ~CSSStyleSheet();
 
-    CSSStyleSheet* NODELETE parentStyleSheet() const final;
+    CSSStyleSheet* parentStyleSheet() const final;
     Node* NODELETE ownerNode() const final;
     MediaList* media() const final;
     String NODELETE href() const final;
@@ -111,8 +111,8 @@ public:
     void addAdoptingTreeScope(ContainerNode&);
     const WeakHashSet<ContainerNode, WeakPtrImplWithEventTargetData>& adoptingTreeScopes() const { return m_adoptingTreeScopes; }
 
-    Document* NODELETE ownerDocument() const;
-    CSSStyleSheet& NODELETE rootStyleSheet();
+    Document* ownerDocument() const;
+    CSSStyleSheet& rootStyleSheet();
     const CSSStyleSheet& rootStyleSheet() const;
     Style::Scope* NODELETE styleScope();
 

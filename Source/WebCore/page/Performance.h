@@ -94,7 +94,7 @@ public:
     PerformanceTiming& timing();
     EventCounts& eventCounts();
 
-    uint64_t NODELETE interactionCount();
+    uint64_t interactionCount();
 
     Vector<Ref<PerformanceEntry>> getEntries() const;
     Vector<Ref<PerformanceEntry>> getEntriesByType(const String& entryType) const;
@@ -126,13 +126,13 @@ public:
     void registerPerformanceObserver(PerformanceObserver&);
     void unregisterPerformanceObserver(PerformanceObserver&);
 
-    static void NODELETE allowHighPrecisionTime();
+    static void allowHighPrecisionTime();
     static Seconds NODELETE timeResolution();
     static Seconds reduceTimeResolution(Seconds);
 
     Seconds relativeTimeFromTimeOriginInReducedResolutionSeconds(MonotonicTime) const;
     DOMHighResTimeStamp relativeTimeFromTimeOriginInReducedResolution(MonotonicTime) const;
-    MonotonicTime NODELETE monotonicTimeFromRelativeTime(DOMHighResTimeStamp) const;
+    MonotonicTime monotonicTimeFromRelativeTime(DOMHighResTimeStamp) const;
 
     ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
 

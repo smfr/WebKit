@@ -50,7 +50,7 @@ public:
     ExceptionOr<void> setX(CSSNumberish);
     ExceptionOr<void> setY(CSSNumberish);
     ExceptionOr<void> setZ(CSSNumberish);
-    ExceptionOr<void> NODELETE setAngle(Ref<CSSNumericValue>);
+    ExceptionOr<void> setAngle(Ref<CSSNumericValue>);
 
     void serialize(StringBuilder&) const final;
     ExceptionOr<Ref<DOMMatrix>> toMatrix() final;

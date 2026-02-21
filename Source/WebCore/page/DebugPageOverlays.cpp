@@ -116,7 +116,7 @@ private:
     bool updateRegion() override;
 };
 
-bool NODELETE MouseWheelRegionOverlay::updateRegion()
+bool MouseWheelRegionOverlay::updateRegion()
 {
     RefPtr page = m_page;
     if (!page)

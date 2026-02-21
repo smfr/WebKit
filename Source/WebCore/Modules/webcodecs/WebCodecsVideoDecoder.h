@@ -80,7 +80,7 @@ private:
 
     ExceptionOr<void> closeDecoder(Exception&&);
     ExceptionOr<void> resetDecoder(const Exception&);
-    void NODELETE setInternalDecoder(Ref<VideoDecoder>&&);
+    void setInternalDecoder(Ref<VideoDecoder>&&);
 
     const Ref<WebCodecsVideoFrameOutputCallback> m_output;
     const Ref<WebCodecsErrorCallback> m_error;

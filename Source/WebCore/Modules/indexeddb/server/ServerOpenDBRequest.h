@@ -57,7 +57,7 @@ public:
     bool hasConnectionsPendingVersionChangeEvent() const { return !m_connectionsPendingVersionChangeEvent.isEmpty(); }
     bool hasNotifiedConnectionsOfVersionChange() const { return m_notifiedConnectionsOfVersionChange; }
 
-    void NODELETE setVersionChangeTransaction(UniqueIDBDatabaseTransaction&);
+    void setVersionChangeTransaction(UniqueIDBDatabaseTransaction&);
     void didDeleteDatabase(const IDBResultData&);
     void didOpenDatabase(const IDBResultData&);
 

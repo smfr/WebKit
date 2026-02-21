@@ -50,7 +50,7 @@ public:
     bool succeeded() const { return m_succeeded; }
     String failureReason() const { return m_failureReason; }
 
-    void NODELETE fail(const String& failureReason);
+    void fail(const String& failureReason);
 
 private:
     WebSocketDeflateFramer& m_framer;

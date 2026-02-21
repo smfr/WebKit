@@ -177,7 +177,7 @@ private:
     void suspendPlayback() final;
     bool NODELETE isPlaying() const final;
     bool isAudible() const final { return false; }
-    bool NODELETE isEnded() const final;
+    bool isEnded() const final;
     MediaTime mediaSessionDuration() const final;
     bool canReceiveRemoteControlCommands() const final { return false; }
     void didReceiveRemoteControlCommand(PlatformMediaSessionRemoteControlCommandType, const PlatformMediaSessionRemoteCommandArgument&) final { }

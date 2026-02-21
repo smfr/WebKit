@@ -169,7 +169,7 @@ public:
     void setFocusChanged(FocusDidChange changed) { m_focusChangedDuringOngoingNavigation = changed; }
 
     // EventTarget.
-    ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
+    ScriptExecutionContext* scriptExecutionContext() const final;
 
     void rejectFinishedPromise(NavigationAPIMethodTracker*);
     NavigationAPIMethodTracker* upcomingTraverseMethodTracker(const String& key) const;

@@ -61,7 +61,7 @@ bool isValidVideoFrameBufferInit(const WebCodecsVideoFrame::BufferInit& init)
     return true;
 }
 
-static bool NODELETE isMultiple(double value, unsigned factor)
+static bool isMultiple(double value, unsigned factor)
 {
      return !(static_cast<unsigned>(value) % factor);
 }
@@ -274,7 +274,7 @@ VideoColorSpaceInit videoFramePickColorSpace(const std::optional<VideoColorSpace
 }
 
 // https://w3c.github.io/webcodecs/#validate-videoframeinit
-static bool NODELETE isNegativeOrNonFinite(double value)
+static bool isNegativeOrNonFinite(double value)
 {
     return value < 0 || !std::isfinite(value);
 }

@@ -48,12 +48,12 @@ FrameTree::~FrameTree()
         child->disconnectView();
 }
 
-void NODELETE FrameTree::setSpecifiedName(const AtomString& specifiedName)
+void FrameTree::setSpecifiedName(const AtomString& specifiedName)
 {
     m_specifiedName = specifiedName;
 }
 
-void NODELETE FrameTree::clearName()
+void FrameTree::clearName()
 {
     m_specifiedName = nullAtom();
 }

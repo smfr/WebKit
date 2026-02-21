@@ -85,7 +85,7 @@ private:
         return status == AnchorSearchStatus::Constrain || status == AnchorSearchStatus::Choose;
     }
 
-    LocalFrameView& NODELETE frameView() const;
+    LocalFrameView& frameView() const;
 
     bool findPriorityCandidate(Document&);
 

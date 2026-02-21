@@ -67,7 +67,7 @@ private:
     explicit AudioWorkletMessagingProxy(AudioWorklet&);
 
     // WorkerLoaderProxy.
-    RefPtr<CacheStorageConnection> NODELETE createCacheStorageConnection() final;
+    RefPtr<CacheStorageConnection> createCacheStorageConnection() final;
     RefPtr<RTCDataChannelRemoteHandlerConnection> createRTCDataChannelRemoteHandlerConnection() final;
     void postTaskToLoader(ScriptExecutionContext::Task&&) final;
 

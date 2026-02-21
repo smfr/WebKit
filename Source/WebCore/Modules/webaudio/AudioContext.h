@@ -113,7 +113,7 @@ private:
     void willBeginPlayback(CompletionHandler<void(bool)>&&);
 
 #if !RELEASE_LOG_DISABLED
-    const Logger& NODELETE logger() const final;
+    const Logger& logger() const final;
     uint64_t logIdentifier() const final { return BaseAudioContext::logIdentifier(); }
 #endif
 
@@ -148,7 +148,7 @@ private:
     bool shouldOverrideBackgroundPlaybackRestriction(PlatformMediaSession::InterruptionType) const final;
     bool isSuspended() const final;
     bool NODELETE isPlaying() const final;
-    bool NODELETE isAudible() const final;
+    bool isAudible() const final;
     bool isNowPlayingEligible() const final;
     std::optional<NowPlayingInfo> nowPlayingInfo() const final;
     WeakPtr<PlatformMediaSessionInterface> selectBestMediaSession(const Vector<WeakPtr<PlatformMediaSessionInterface>>&, PlatformMediaSession::PlaybackControlsPurpose) final;

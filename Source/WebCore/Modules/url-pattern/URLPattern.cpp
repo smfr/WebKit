@@ -374,7 +374,7 @@ static inline void matchHelperAssignInputsFromURL(const URL& input, String& prot
     hash = input.fragmentIdentifier().toString();
 }
 
-static inline void NODELETE matchHelperAssignInputsFromInit(const URLPatternInit& input, String& protocol, String& username, String& password, String& hostname, String& port, String& pathname, String& search, String& hash)
+static inline void matchHelperAssignInputsFromInit(const URLPatternInit& input, String& protocol, String& username, String& password, String& hostname, String& port, String& pathname, String& search, String& hash)
 {
     protocol = input.protocol;
     username = input.username;

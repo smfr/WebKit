@@ -82,7 +82,7 @@ private:
 
     ExceptionOr<void> closeDecoder(Exception&&);
     ExceptionOr<void> resetDecoder(const Exception&);
-    void NODELETE setInternalDecoder(Ref<AudioDecoder>&&);
+    void setInternalDecoder(Ref<AudioDecoder>&&);
 
     const Ref<WebCodecsAudioDataOutputCallback> m_output;
     const Ref<WebCodecsErrorCallback> m_error;

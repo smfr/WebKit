@@ -83,8 +83,8 @@ public:
     void startLoadingDynamicSheet();
 
     StyleSheetContents* NODELETE rootStyleSheet() const;
-    Node* NODELETE singleOwnerNode() const;
-    Document* NODELETE singleOwnerDocument() const;
+    Node* singleOwnerNode() const;
+    Document* singleOwnerDocument() const;
 
     ASCIILiteral charset() const { return m_parserContext.charset; }
 
@@ -102,7 +102,7 @@ public:
 
     void parserAddNamespace(const AtomString& prefix, const AtomString& uri);
     void parserAppendRule(Ref<StyleRuleBase>&&);
-    void NODELETE parserSetEncodingFromCharsetRule(const String& encoding);
+    void parserSetEncodingFromCharsetRule(const String& encoding);
     void parserSetUsesStyleBasedEditability() { m_usesStyleBasedEditability = true; }
 
     void clearRules();
@@ -169,7 +169,7 @@ private:
     WEBCORE_EXPORT StyleSheetContents(StyleRuleImport* ownerRule, const String& originalURL, const CSSParserContext&);
     StyleSheetContents(const StyleSheetContents&);
 
-    void NODELETE clearCharsetRule();
+    void clearCharsetRule();
 
     StyleRuleImport* m_ownerRule { nullptr };
 

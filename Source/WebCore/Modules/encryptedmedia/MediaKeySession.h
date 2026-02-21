@@ -97,7 +97,7 @@ public:
 private:
     MediaKeySession(Document&, WeakPtr<MediaKeys>&&, MediaKeySessionType, bool useDistinctiveIdentifier, Ref<CDM>&&, Ref<CDMInstanceSession>&&);
     void enqueueMessage(MediaKeyMessageType, const SharedBuffer&);
-    void NODELETE updateExpiration(double);
+    void updateExpiration(double);
     void sessionClosed();
     String mediaKeysStorageDirectory() const;
     CDMKeyGroupingStrategy NODELETE keyGroupingStrategy() const;
@@ -105,8 +105,8 @@ private:
     // CDMInstanceSessionClient
     void updateKeyStatuses(CDMInstanceSessionClient::KeyStatusVector&&) override;
     void sendMessage(CDMMessageType, Ref<SharedBuffer>&& message) final;
-    void NODELETE sessionIdChanged(const String&) final;
-    PlatformDisplayID NODELETE displayID() final;
+    void sessionIdChanged(const String&) final;
+    PlatformDisplayID displayID() final;
 
     // EventTarget
     enum EventTargetInterfaceType eventTargetInterface() const override { return EventTargetInterfaceType::MediaKeySession; }

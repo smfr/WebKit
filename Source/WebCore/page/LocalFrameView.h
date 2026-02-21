@@ -113,8 +113,8 @@ public:
 
     WEBCORE_EXPORT RenderView* NODELETE renderView() const;
 
-    int NODELETE mapFromLayoutToCSSUnits(LayoutUnit) const;
-    LayoutUnit NODELETE mapFromCSSToLayoutUnits(int) const;
+    int mapFromLayoutToCSSUnits(LayoutUnit) const;
+    LayoutUnit mapFromCSSToLayoutUnits(int) const;
 
     WEBCORE_EXPORT void setCanHaveScrollbars(bool) final;
     WEBCORE_EXPORT void updateCanHaveScrollbars();
@@ -211,7 +211,7 @@ public:
     WEBCORE_EXPORT void setTransparent(bool isTransparent);
     
     // True if the FrameView is not transparent, and the base background color is opaque.
-    bool NODELETE hasOpaqueBackground() const;
+    bool hasOpaqueBackground() const;
 
     WEBCORE_EXPORT Color NODELETE baseBackgroundColor() const;
     WEBCORE_EXPORT void setBaseBackgroundColor(const Color&);
@@ -362,7 +362,7 @@ public:
     bool hasAnchorPositionedViewportConstrainedObjects() const;
     void NODELETE clearCachedHasAnchorPositionedViewportConstrainedObjects();
 
-    float NODELETE frameScaleFactor() const;
+    float frameScaleFactor() const;
 
     // Functions for querying the current scrolled position, negating the effects of overhang
     // and adjusting for page scale.
@@ -531,8 +531,8 @@ public:
     //    Similar to client coordinates, but affected by page zoom (but not page scale).
     //
 
-    float NODELETE documentToAbsoluteScaleFactor(std::optional<float> usedZoom = { }) const;
-    float NODELETE absoluteToDocumentScaleFactor(std::optional<float> usedZoom = { }) const;
+    float documentToAbsoluteScaleFactor(std::optional<float> usedZoom = { }) const;
+    float absoluteToDocumentScaleFactor(std::optional<float> usedZoom = { }) const;
 
     WEBCORE_EXPORT FloatRect absoluteToDocumentRect(FloatRect, std::optional<float> usedZoom = { }) const;
     WEBCORE_EXPORT FloatPoint NODELETE absoluteToDocumentPoint(FloatPoint, std::optional<float> usedZoom = { }) const;
@@ -946,7 +946,7 @@ private:
 
     void updateScrollCorner() final;
 
-    LocalFrameView* NODELETE parentFrameView() const;
+    LocalFrameView* parentFrameView() const;
 
     void markRootOrBodyRendererDirty() const;
 
@@ -978,7 +978,7 @@ private:
     void didFinishProhibitingScrollingWhenChangingContentSize() final;
 
     // ScrollableArea.
-    float NODELETE pageScaleFactor() const override;
+    float pageScaleFactor() const override;
     void didStartScrollAnimation() final;
 
     static MonotonicTime sCurrentPaintTimeStamp; // used for detecting decoded resource thrash in the cache

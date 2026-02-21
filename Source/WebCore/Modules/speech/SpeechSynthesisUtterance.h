@@ -63,7 +63,7 @@ public:
     void setLang(const String& lang) { m_platformUtterance->setLang(lang); }
 
     SpeechSynthesisVoice* NODELETE voice() const;
-    void NODELETE setVoice(SpeechSynthesisVoice*);
+    void setVoice(SpeechSynthesisVoice*);
 
     float volume() const { return m_platformUtterance->volume(); }
     void setVolume(float volume) { m_platformUtterance->setVolume(volume); }

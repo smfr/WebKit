@@ -82,7 +82,7 @@ private:
 
     ExceptionOr<void> closeEncoder(Exception&&);
     ExceptionOr<void> resetEncoder(const Exception&);
-    void NODELETE setInternalEncoder(Ref<VideoEncoder>&&);
+    void setInternalEncoder(Ref<VideoEncoder>&&);
 
     WebCodecsEncodedVideoChunkMetadata createEncodedChunkMetadata(std::optional<unsigned>);
     void updateRates(const WebCodecsVideoEncoderConfig&);

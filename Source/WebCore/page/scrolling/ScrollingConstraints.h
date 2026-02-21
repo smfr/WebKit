@@ -154,7 +154,7 @@ public:
     void setStickyOffsetAtLastLayout(FloatSize offset) { m_stickyOffsetAtLastLayout = offset; }
 
     WEBCORE_EXPORT FloatPoint anchorLayerPositionForConstrainingRect(const FloatRect& constrainingRect) const;
-    FloatPoint NODELETE anchorLayerPositionAtLastLayout() const;
+    FloatPoint anchorLayerPositionAtLastLayout() const;
 
     float leftOffset() const { return m_leftOffset; }
     float rightOffset() const { return m_rightOffset; }

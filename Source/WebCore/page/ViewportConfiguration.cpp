@@ -41,7 +41,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(ViewportConfiguration);
 
-static inline bool NODELETE viewportArgumentValueIsValid(float value)
+static inline bool viewportArgumentValueIsValid(float value)
 {
     return value > 0;
 }
@@ -512,7 +512,7 @@ static inline bool applyViewportArgument(double& value, float viewportArgumentVa
     return false;
 }
 
-static inline bool NODELETE booleanViewportArgumentIsSet(float value)
+static inline bool booleanViewportArgumentIsSet(float value)
 {
     return !value || value == 1;
 }

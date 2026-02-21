@@ -100,7 +100,7 @@ public:
 private:
     ScrollingStateTree(bool hasNewRootStateNode, bool hasChangedProperties, RefPtr<ScrollingStateFrameScrollingNode>&&);
 
-    void NODELETE setRootStateNode(Ref<ScrollingStateFrameScrollingNode>&&);
+    void setRootStateNode(Ref<ScrollingStateFrameScrollingNode>&&);
     void addNode(ScrollingStateNode&);
 
     Ref<ScrollingStateNode> createNode(ScrollingNodeType, ScrollingNodeID);

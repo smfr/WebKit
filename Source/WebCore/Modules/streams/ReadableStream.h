@@ -128,10 +128,10 @@ public:
     void close();
     JSC::JSValue storedError(JSDOMGlobalObject&) const;
 
-    size_t NODELETE getNumReadRequests() const;
+    size_t getNumReadRequests() const;
     void addReadRequest(Ref<ReadableStreamReadRequest>&&);
 
-    size_t NODELETE getNumReadIntoRequests() const;
+    size_t getNumReadIntoRequests() const;
     void addReadIntoRequest(Ref<ReadableStreamReadIntoRequest>&&);
 
     void error(JSDOMGlobalObject&, JSC::JSValue);

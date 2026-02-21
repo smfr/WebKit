@@ -106,7 +106,7 @@ public:
 
     ReadableStreamBYOBReader* NODELETE byobReader() const { return m_byobReader.get(); }
     RefPtr<ReadableStreamBYOBReader> takeBYOBReader() { return std::exchange(m_byobReader, { }); }
-    void NODELETE setReader(Ref<ReadableStreamBYOBReader>&& reader)
+    void setReader(Ref<ReadableStreamBYOBReader>&& reader)
     {
         ASSERT(!m_defaultReader);
         ASSERT(!m_byobReader);
@@ -115,7 +115,7 @@ public:
 
     ReadableStreamDefaultReader* NODELETE defaultReader() const { return m_defaultReader.get(); }
     RefPtr<ReadableStreamDefaultReader> takeDefaultReader() { return std::exchange(m_defaultReader, { }); }
-    void NODELETE setReader(Ref<ReadableStreamDefaultReader>&& reader)
+    void setReader(Ref<ReadableStreamDefaultReader>&& reader)
     {
         ASSERT(!m_defaultReader);
         ASSERT(!m_byobReader);

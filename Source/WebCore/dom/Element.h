@@ -369,7 +369,7 @@ public:
     WEBCORE_EXPORT ExceptionOr<RefPtr<Attr>> setAttributeNodeNS(Attr&);
     WEBCORE_EXPORT ExceptionOr<Ref<Attr>> removeAttributeNode(Attr&);
 
-    RefPtr<Attr> NODELETE attrIfExists(const QualifiedName&);
+    RefPtr<Attr> attrIfExists(const QualifiedName&);
     Ref<Attr> ensureAttr(const QualifiedName&);
 
     const Vector<Ref<Attr>>& NODELETE attrNodeList();
@@ -451,7 +451,7 @@ public:
     virtual bool isReplaced(const RenderStyle* = nullptr) const { return false; }
 
     inline ShadowRoot* shadowRoot() const; // Defined in ElementRareData.h
-    RefPtr<ShadowRoot> NODELETE shadowRootForBindings(JSC::JSGlobalObject&) const;
+    RefPtr<ShadowRoot> shadowRootForBindings(JSC::JSGlobalObject&) const;
     RefPtr<ShadowRoot> NODELETE openOrClosedShadowRoot() const;
     RefPtr<Element> resolveReferenceTarget() const;
     RefPtr<Element> retargetReferenceTargetForBindings(RefPtr<Element>) const;
@@ -633,7 +633,7 @@ public:
     PseudoElement& ensurePseudoElement(PseudoElementType);
     WEBCORE_EXPORT PseudoElement* NODELETE beforePseudoElement() const;
     WEBCORE_EXPORT PseudoElement* NODELETE afterPseudoElement() const;
-    RefPtr<PseudoElement> NODELETE pseudoElementIfExists(Style::PseudoElementIdentifier);
+    RefPtr<PseudoElement> pseudoElementIfExists(Style::PseudoElementIdentifier);
     RefPtr<const PseudoElement> pseudoElementIfExists(Style::PseudoElementIdentifier) const;
 
     bool childNeedsShadowWalker() const;

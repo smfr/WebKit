@@ -80,7 +80,7 @@ private:
 
     ExceptionOr<void> closeEncoder(Exception&&);
     ExceptionOr<void> resetEncoder(const Exception&);
-    void NODELETE setInternalEncoder(Ref<AudioEncoder>&&);
+    void setInternalEncoder(Ref<AudioEncoder>&&);
 
     WebCodecsEncodedAudioChunkMetadata createEncodedChunkMetadata();
 

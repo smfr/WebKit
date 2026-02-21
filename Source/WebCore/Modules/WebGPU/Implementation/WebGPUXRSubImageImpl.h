@@ -57,7 +57,7 @@ private:
     XRSubImageImpl& operator=(XRSubImageImpl&&) = delete;
     RefPtr<Texture> colorTexture() final;
     RefPtr<Texture> depthStencilTexture() final;
-    RefPtr<Texture> NODELETE motionVectorTexture() final;
+    RefPtr<Texture> motionVectorTexture() final;
 
     WGPUXRSubImage backing() const { return m_backing.get(); }
     bool isXRSubImageImpl() const final { return true; }

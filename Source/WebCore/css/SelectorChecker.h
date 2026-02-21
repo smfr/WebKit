@@ -93,7 +93,7 @@ public:
 
         const SelectorChecker::Mode resolvingMode;
 
-        void NODELETE setRequestedPseudoElement(Style::PseudoElementIdentifier);
+        void setRequestedPseudoElement(Style::PseudoElementIdentifier);
         std::optional<Style::PseudoElementIdentifier> NODELETE requestedPseudoElement() const;
 
     private:

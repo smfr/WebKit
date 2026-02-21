@@ -79,7 +79,7 @@ public:
 
     bool isStopped() const { return !m_backend; }
     void stop();
-    void NODELETE setTrack(Ref<MediaStreamTrack>&&);
+    void setTrack(Ref<MediaStreamTrack>&&);
     void setTrackToNull();
 
     void replaceTrack(RefPtr<MediaStreamTrack>&&, Ref<DeferredPromise>&&);

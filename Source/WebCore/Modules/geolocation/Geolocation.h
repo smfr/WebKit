@@ -97,7 +97,7 @@ private:
 
     bool isDenied() const { return m_allowGeolocation == AllowGeolocation::No; }
 
-    Page* NODELETE page() const;
+    Page* page() const;
     SecurityOrigin* securityOrigin() const;
 
     typedef Vector<Ref<GeoNotifier>> GeoNotifierVector;

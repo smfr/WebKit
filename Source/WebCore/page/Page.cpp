@@ -1055,7 +1055,7 @@ const String& Page::groupName() const
     return m_group ? m_group->name() : nullAtom().string();
 }
 
-void NODELETE Page::setBroadcastChannelRegistry(Ref<BroadcastChannelRegistry>&& broadcastChannelRegistry)
+void Page::setBroadcastChannelRegistry(Ref<BroadcastChannelRegistry>&& broadcastChannelRegistry)
 {
     m_broadcastChannelRegistry = WTF::move(broadcastChannelRegistry);
 }
@@ -1799,7 +1799,7 @@ void Page::windowScreenDidChange(PlatformDisplayID displayID, std::optional<Fram
     setNeedsRecalcStyleInAllFrames();
 }
 
-void NODELETE Page::setInitialScaleIgnoringContentSize(float scale)
+void Page::setInitialScaleIgnoringContentSize(float scale)
 {
     m_initialScaleIgnoringContentSize = scale;
 }
@@ -1994,7 +1994,7 @@ void Page::setVerticalScrollElasticity(ScrollElasticity elasticity)
         view->setVerticalScrollElasticity(elasticity);
 }
     
-void NODELETE Page::setHorizontalScrollElasticity(ScrollElasticity elasticity)
+void Page::setHorizontalScrollElasticity(ScrollElasticity elasticity)
 {
     if (m_horizontalScrollElasticity == elasticity)
         return;

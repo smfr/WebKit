@@ -796,7 +796,7 @@ static bool modelElementIsDraggable(const HTMLModelElement& modelElement)
 
 #if ENABLE(ATTACHMENT_ELEMENT)
 
-static RefPtr<HTMLAttachmentElement> NODELETE enclosingAttachmentElement(Element& element)
+static RefPtr<HTMLAttachmentElement> enclosingAttachmentElement(Element& element)
 {
     if (RefPtr attachment = dynamicDowncast<HTMLAttachmentElement>(element))
         return attachment;

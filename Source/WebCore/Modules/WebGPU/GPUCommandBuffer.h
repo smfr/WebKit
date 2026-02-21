@@ -46,11 +46,11 @@ public:
 
     String NODELETE label() const;
     void setLabel(String&&);
-    void NODELETE setOverrideLabel(String&&);
+    void setOverrideLabel(String&&);
 
     WebGPU::CommandBuffer& backing() { return m_backing; }
     const WebGPU::CommandBuffer& backing() const { return m_backing; }
-    void NODELETE setBacking(WebGPU::CommandEncoder&, WebGPU::CommandBuffer&);
+    void setBacking(WebGPU::CommandEncoder&, WebGPU::CommandBuffer&);
 
 private:
     GPUCommandBuffer(Ref<WebGPU::CommandBuffer>&& backing, GPUCommandEncoder& encoder)

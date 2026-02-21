@@ -49,7 +49,7 @@ public:
     }
 
     Element* element() const { return m_element.get(); }
-    RefPtr<ShadowRoot> NODELETE shadowRoot() const;
+    RefPtr<ShadowRoot> shadowRoot() const;
 
     ExceptionOr<RefPtr<HTMLFormElement>> form() const;
 

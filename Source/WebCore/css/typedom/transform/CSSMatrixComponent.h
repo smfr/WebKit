@@ -45,7 +45,7 @@ public:
     ~CSSMatrixComponent();
 
     DOMMatrix& NODELETE matrix();
-    void NODELETE setMatrix(Ref<DOMMatrix>&&);
+    void setMatrix(Ref<DOMMatrix>&&);
 
     void serialize(StringBuilder&) const final;
     ExceptionOr<Ref<DOMMatrix>> toMatrix() final;
