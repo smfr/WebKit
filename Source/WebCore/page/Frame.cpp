@@ -380,4 +380,10 @@ SecurityOrigin& Frame::topOrigin() const
     return SecurityOrigin::opaqueOrigin();
 }
 
+TextStream& operator<<(TextStream& ts, const Frame& frame)
+{
+    ts << frame.debugDescription();
+    return ts;
+}
+
 } // namespace WebCore

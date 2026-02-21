@@ -36,6 +36,10 @@
 #include <wtf/WeakHashSet.h>
 #include <wtf/WeakPtr.h>
 
+namespace WTF {
+class TextStream;
+}
+
 namespace WebCore {
 
 class DOMWindow;
@@ -182,5 +186,7 @@ private:
 
     Ref<FrameTreeSyncData> m_frameTreeSyncData;
 };
+
+WTF::TextStream& operator<<(WTF::TextStream&, const Frame&);
 
 } // namespace WebCore
