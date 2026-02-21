@@ -128,7 +128,7 @@ MarqueeDirection RenderMarquee::direction() const
     return result;
 }
 
-bool NODELETE RenderMarquee::isHorizontal() const
+bool RenderMarquee::isHorizontal() const
 {
     return direction() == MarqueeDirection::Left || direction() == MarqueeDirection::Right;
 }

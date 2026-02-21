@@ -128,7 +128,7 @@ private:
     bool isOfflineContext() const final { return false; }
 
     // MediaProducer
-    MediaProducerMediaStateFlags NODELETE mediaState() const final;
+    MediaProducerMediaStateFlags mediaState() const final;
     void pageMutedStateDidChange() final;
 #if PLATFORM(IOS_FAMILY)
     void sceneIdentifierDidChange() final;

@@ -228,7 +228,7 @@ public:
             m_containerMap.remove(renderer);
     }
     
-    TrackedRendererListHashSet* NODELETE positionedRenderers(const RenderBlock& containingBlock) const
+    TrackedRendererListHashSet* positionedRenderers(const RenderBlock& containingBlock) const
     {
         return m_descendantsMap.get(containingBlock);
     }

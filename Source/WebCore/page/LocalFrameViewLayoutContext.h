@@ -185,7 +185,7 @@ private:
     bool needsLayoutInternal() const;
 
     void performLayout(bool canDeferUpdateLayerPositions);
-    bool NODELETE canPerformLayout() const;
+    bool canPerformLayout() const;
     bool isLayoutSchedulingEnabled() const { return m_layoutSchedulingIsEnabled; }
 
     bool hasPendingUpdateLayerPositions() const { return !!m_pendingUpdateLayerPositions; }

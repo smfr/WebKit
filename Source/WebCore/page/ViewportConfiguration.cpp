@@ -57,7 +57,7 @@ static inline void adjustViewportArgumentsToAvoidExcessiveZooming(ViewportArgume
     arguments.width = zoomedWidthFromArguments / arguments.zoom;
 }
 
-static inline void NODELETE ignoreViewportArgumentsToAvoidEnlargedView(ViewportArguments& arguments, FloatSize viewLayoutSize)
+static inline void ignoreViewportArgumentsToAvoidEnlargedView(ViewportArguments& arguments, FloatSize viewLayoutSize)
 {
     if (!viewportArgumentValueIsValid(arguments.width))
         return;

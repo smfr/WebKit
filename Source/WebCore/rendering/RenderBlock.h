@@ -223,7 +223,7 @@ public:
 
     RenderFragmentedFlow* cachedEnclosingFragmentedFlow() const;
     void setCachedEnclosingFragmentedFlowNeedsUpdate();
-    virtual bool NODELETE cachedEnclosingFragmentedFlowNeedsUpdate() const;
+    virtual bool cachedEnclosingFragmentedFlowNeedsUpdate() const;
     void resetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(RenderFragmentedFlow* = nullptr) final;
 
     std::optional<LayoutUnit> availableLogicalHeightForPercentageComputation() const;

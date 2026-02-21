@@ -771,7 +771,7 @@ Ref<DOMRectList> Page::passiveTouchEventListenerRectsForTesting()
     return DOMRectList::create(rects.map([](auto& rect) { return FloatQuad { FloatRect { rect } }; }));
 }
 
-void NODELETE Page::setConsoleMessageListenerForTesting(RefPtr<StringCallback>&& listener)
+void Page::setConsoleMessageListenerForTesting(RefPtr<StringCallback>&& listener)
 {
     m_consoleMessageListenerForTesting = listener;
 }
@@ -978,7 +978,7 @@ void Page::updateTopDocumentSyncData(Ref<DocumentSyncData>&& data)
     m_topDocumentSyncData = WTF::move(data);
 }
 
-void NODELETE Page::setMainFrameURLFragment(String&& fragment)
+void Page::setMainFrameURLFragment(String&& fragment)
 {
     if (!fragment.isEmpty())
         m_mainFrameURLFragment = WTF::move(fragment);

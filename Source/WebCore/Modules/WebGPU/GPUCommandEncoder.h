@@ -112,7 +112,7 @@ public:
 
     WebGPU::CommandEncoder& backing() { return m_backing; }
     const WebGPU::CommandEncoder& backing() const { return m_backing; }
-    void NODELETE setBacking(WebGPU::CommandEncoder&);
+    void setBacking(WebGPU::CommandEncoder&);
 
 private:
     GPUCommandEncoder(Ref<WebGPU::CommandEncoder>&&, WebGPU::Device&);

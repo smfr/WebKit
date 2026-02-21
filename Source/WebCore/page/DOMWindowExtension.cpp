@@ -54,8 +54,7 @@ DOMWindowExtension::~DOMWindowExtension()
 
 LocalFrame* DOMWindowExtension::frame() const
 {
-    RefPtr window = m_window.get();
-    return window ? window->localFrame() : nullptr;
+    return m_window ? m_window->localFrame() : nullptr;
 }
 
 void DOMWindowExtension::suspendForBackForwardCache()
