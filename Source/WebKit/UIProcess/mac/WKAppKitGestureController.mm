@@ -346,10 +346,10 @@ ALLOW_NEW_API_WITHOUT_GUARDS_END
     auto windowNumber = viewImpl->windowNumber();
 
     RetainPtr mouseDown = [NSEvent mouseEventWithType:NSEventTypeRightMouseDown location:location modifierFlags:modifierFlags timestamp:GetCurrentEventTime() windowNumber:windowNumber context:NULL eventNumber:0 clickCount:1 pressure:1.0];
-    viewImpl->mouseDown(mouseDown.get(), WebKit::WebMouseEventInputSource::UserDriven);
+    viewImpl->mouseDown(mouseDown.get(), WebKit::WebMouseEventInputSource::Automation);
 
     RetainPtr mouseUp = [NSEvent mouseEventWithType:NSEventTypeRightMouseUp location:location modifierFlags:modifierFlags timestamp:GetCurrentEventTime() windowNumber:windowNumber context:NULL eventNumber:0 clickCount:1 pressure:0.0];
-    viewImpl->mouseUp(mouseUp.get(), WebKit::WebMouseEventInputSource::UserDriven);
+    viewImpl->mouseUp(mouseUp.get(), WebKit::WebMouseEventInputSource::Automation);
 }
 
 #pragma mark - Click Handling
@@ -381,7 +381,7 @@ ALLOW_NEW_API_WITHOUT_GUARDS_END
     _isClickHighlightIDValid = true;
     _isExpectingFastClickCommit = ![_doubleClickGestureRecognizer isEnabled];
 
-    page->potentialClickAtPosition(std::nullopt, WebCore::FloatPoint(position), false, *_latestClickID, WebKit::WebMouseEventInputSource::UserDriven);
+    page->potentialClickAtPosition(std::nullopt, WebCore::FloatPoint(position), false, *_latestClickID, WebKit::WebMouseEventInputSource::Automation);
 }
 
 - (void)_handleClickEnded:(NSGestureRecognizer *)gesture
