@@ -81,6 +81,7 @@
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "ShapeOutsideInfo.h"
+#include "StyleContainmentCheckerInlines.h"
 #include "TransformState.h"
 #include <wtf/NeverDestroyed.h>
 #include <wtf/SetForScope.h>
@@ -1296,7 +1297,8 @@ void RenderBlock::addContinuationWithOutline(RenderInline* flow)
 
 bool RenderBlock::establishesIndependentFormattingContextIgnoringDisplayType(const RenderStyle& style) const
 {
-    if (!element()) {
+    RefPtr element = this->element();
+    if (!element) {
         ASSERT(isAnonymous());
         return false;
     }
@@ -1314,7 +1316,7 @@ bool RenderBlock::establishesIndependentFormattingContextIgnoringDisplayType(con
         || isBlockBoxWithPotentiallyScrollableOverflow()
         || style.usedContain().contains(Style::ContainValue::Layout)
         || style.containerType() != ContainerType::Normal
-        || WebCore::shouldApplyPaintContainment(style, *protect(element()))
+        || Style::ContainmentChecker { style, *element }.shouldApplyPaintContainment()
         || (style.display().isBlockType() && !style.blockStepSize().isNone());
 }
 

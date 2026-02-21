@@ -3051,6 +3051,8 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     style/ScopedName.h
     style/StyleChange.h
     style/StyleColorResolver.h
+    style/StyleContainmentChecker.h
+    style/StyleContainmentCheckerInlines.h
     style/StyleCustomProperty.h
     style/StyleDifference.h
     style/StyleInterpolationClient.h

@@ -27,6 +27,7 @@
 
 #include <WebCore/RenderElementInlines.h>
 #include <WebCore/RenderStyle+GettersInlines.h>
+#include <WebCore/StyleContainmentCheckerInlines.h>
 
 namespace WebCore {
 
@@ -53,6 +54,17 @@ inline bool RenderElement::hasAppleVisualEffectRequiringBackdropFilter() const {
 
 inline bool RenderElement::mayContainOutOfFlowPositionedObjects(const RenderStyle* styleToUse) const
 {
+    auto shouldApplyLayoutOrPaintContainment = [this](const auto& style) {
+        RefPtr element = this->element();
+        if (!element)
+            return false;
+
+        Style::ContainmentChecker checker { style, *element };
+
+        return checker.shouldApplyLayoutContainment()
+            || checker.shouldApplyPaintContainment();
+    };
+
     auto& style = styleToUse ? *styleToUse : this->style();
     return isRenderView()
         || (canEstablishContainingBlockWithTransform() && (styleToUse ? styleToUse->hasTransformRelatedProperty() : hasTransformRelatedProperty()))
@@ -62,8 +74,7 @@ inline bool RenderElement::mayContainOutOfFlowPositionedObjects(const RenderStyl
         || (appleVisualEffectNeedsBackdrop(style.appleVisualEffect()) && !isDocumentElementRenderer())
 #endif
         || isRenderOrLegacyRenderSVGForeignObject()
-        || (element() && WebCore::shouldApplyLayoutContainment(style, *element()))
-        || (element() && WebCore::shouldApplyPaintContainment(style, *element()))
+        || shouldApplyLayoutOrPaintContainment(style)
         || isViewTransitionContainingBlock();
 }
 
@@ -102,11 +113,13 @@ inline bool RenderElement::shouldApplyAnyContainment() const
     if (!element)
         return false;
 
-    return WebCore::shouldApplyLayoutContainment(style(), *element)
-        || WebCore::shouldApplySizeContainment(style(), *element)
-        || WebCore::shouldApplyInlineSizeContainment(style(), *element)
-        || WebCore::shouldApplyStyleContainment(style(), *element)
-        || WebCore::shouldApplyPaintContainment(style(), *element);
+    Style::ContainmentChecker checker { style(), *element };
+
+    return checker.shouldApplyLayoutContainment()
+        || checker.shouldApplySizeContainment()
+        || checker.shouldApplyInlineSizeContainment()
+        || checker.shouldApplyStyleContainment()
+        || checker.shouldApplyPaintContainment();
 }
 
 inline bool RenderElement::shouldApplySizeOrInlineSizeContainment() const
@@ -115,33 +128,35 @@ inline bool RenderElement::shouldApplySizeOrInlineSizeContainment() const
     if (!element)
         return false;
 
-    return WebCore::shouldApplySizeContainment(style(), *element)
-        || WebCore::shouldApplyInlineSizeContainment(style(), *element);
+    Style::ContainmentChecker checker { style(), *element };
+
+    return checker.shouldApplySizeContainment()
+        || checker.shouldApplyInlineSizeContainment();
 }
 
 inline bool RenderElement::shouldApplyLayoutContainment() const
 {
-    return element() && WebCore::shouldApplyLayoutContainment(style(), *element());
+    return element() && Style::ContainmentChecker { style(), *element() }.shouldApplyLayoutContainment();
 }
 
 inline bool RenderElement::shouldApplySizeContainment() const
 {
-    return element() && WebCore::shouldApplySizeContainment(style(), *element());
+    return element() && Style::ContainmentChecker { style(), *element() }.shouldApplySizeContainment();
 }
 
 inline bool RenderElement::shouldApplyInlineSizeContainment() const
 {
-    return element() && WebCore::shouldApplyInlineSizeContainment(style(), *element());
+    return element() && Style::ContainmentChecker { style(), *element() }.shouldApplyInlineSizeContainment();
 }
 
 inline bool RenderElement::shouldApplyStyleContainment() const
 {
-    return element() && WebCore::shouldApplyStyleContainment(style(), *element());
+    return element() && Style::ContainmentChecker { style(), *element() }.shouldApplyStyleContainment();
 }
 
 inline bool RenderElement::shouldApplyPaintContainment() const
 {
-    return element() && WebCore::shouldApplyPaintContainment(style(), *element());
+    return element() && Style::ContainmentChecker { style(), *element() }.shouldApplyPaintContainment();
 }
 
 inline bool RenderElement::visibleToHitTesting(const std::optional<HitTestRequest>& request) const

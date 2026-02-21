@@ -70,6 +70,7 @@
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "StylableInlines.h"
+#include "StyleContainmentCheckerInlines.h"
 #include "StyleComputedStyle+InitialInlines.h"
 #include "StylePrimitiveNumericTypes+Evaluation.h"
 #include "StyleSelfAlignmentData.h"
@@ -787,7 +788,7 @@ void Adjuster::adjust(RenderStyle& style) const
     }
 
     if (m_parentStyle.contentVisibility() != ContentVisibility::Hidden) {
-        if (m_element && isSkippedContentRoot(style, *m_element))
+        if (m_element && ContainmentChecker { style, *m_element }.isSkippedContentRoot())
             style.setUsedContentVisibility(style.contentVisibility());
     }
     if (style.contentVisibility() == ContentVisibility::Auto) {
