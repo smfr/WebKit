@@ -289,7 +289,7 @@ static WKURLRequestRef willSendRequestForFrame(WKBundlePageRef, WKBundleFrameRef
     auto loadDelegate = pluginContextController->_loadDelegate.get();
 
     if ([loadDelegate respondsToSelector:@selector(webProcessPlugInBrowserContextController:frame:willSendRequestForResource:request:redirectResponse:)]) {
-        RetainPtr originalRequest = wrapper(*WebKit::toImpl(request));
+        RetainPtr originalRequest = wrapper(*protect(WebKit::toImpl(request)));
         RetainPtr<NSURLRequest> substituteRequest = [loadDelegate webProcessPlugInBrowserContextController:pluginContextController frame:protect(wrapper(*WebKit::toProtectedImpl(frame))).get() willSendRequestForResource:resourceIdentifier
             request:originalRequest.get() redirectResponse:WebKit::toImpl(redirectResponse)->resourceResponse().protectedNSURLResponse().get()];
 
@@ -444,7 +444,7 @@ static void setUpResourceLoadClient(WKWebProcessPlugInBrowserContextController *
 
 + (instancetype)lookUpBrowsingContextFromHandle:(WKBrowsingContextHandle *)handle
 {
-    return wrapper(WebKit::WebProcess::singleton().webPage(ObjectIdentifier<WebCore::PageIdentifierType>(handle.webPageID)));
+    SUPPRESS_UNCOUNTED_ARG return wrapper(WebKit::WebProcess::singleton().webPage(ObjectIdentifier<WebCore::PageIdentifierType>(handle.webPageID)));
 }
 
 - (_WKRemoteObjectRegistry *)_remoteObjectRegistry

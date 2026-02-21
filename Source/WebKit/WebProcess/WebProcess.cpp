@@ -1421,8 +1421,8 @@ void WebProcess::logDiagnosticMessageForNetworkProcessCrash()
 
     if (!page) {
         for (auto& webPage : m_pageMap.values()) {
-            if (auto* corePage = webPage->corePage()) {
-                page = corePage;
+            if (RefPtr corePage = webPage->corePage()) {
+                page = WTF::move(corePage);
                 break;
             }
         }

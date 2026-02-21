@@ -368,7 +368,7 @@ static RefPtr<DocumentLoader> policySourceDocumentLoaderForFrame(const LocalFram
     auto mainFrameDocumentLoader = mainFrame->loader().loaderForWebsitePolicies(canIncludeCurrentDocumentLoader);
 
     auto policySourceDocumentLoader = mainFrameDocumentLoader;
-    if (policySourceDocumentLoader && !policySourceDocumentLoader->request().url().hasSpecialScheme() && frame.document()->url().protocolIsInHTTPFamily())
+    if (policySourceDocumentLoader && !policySourceDocumentLoader->request().url().hasSpecialScheme() && protect(frame.document())->url().protocolIsInHTTPFamily())
         policySourceDocumentLoader = frame.loader().documentLoader();
 
     return policySourceDocumentLoader;
@@ -420,7 +420,7 @@ static void addParametersShared(const LocalFrame* frame, NetworkResourceLoadPara
         if (RefPtr parentFrame = ownerElement->document().frame()) {
             parameters.parentFrameID = parentFrame->loader().frameID();
             parameters.parentCrossOriginEmbedderPolicy = ownerElement->document().crossOriginEmbedderPolicy();
-            parameters.parentFrameURL = ownerElement->document().url();
+            parameters.parentFrameURL = protect(ownerElement->document())->url();
         }
     }
 
@@ -591,8 +591,8 @@ void WebLoaderStrategy::scheduleLoadFromNetworkProcess(ResourceLoader& resourceL
     loadParameters.isDisplayingInitialEmptyDocument = frame && frame->loader().stateMachine().isDisplayingInitialEmptyDocument();
     if (frame)
         loadParameters.effectiveSandboxFlags = frame->sandboxFlagsFromSandboxAttributeNotCSP();
-    if (auto* openerFrame = frame ? dynamicDowncast<LocalFrame>(frame->opener()) : nullptr) {
-        if (auto openerDocument = openerFrame->document())
+    if (RefPtr openerFrame = frame ? dynamicDowncast<LocalFrame>(frame->opener()) : nullptr) {
+        if (RefPtr openerDocument = openerFrame->document())
             loadParameters.openerURL = openerDocument->url();
     }
 

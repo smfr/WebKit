@@ -88,12 +88,13 @@ bool WebExtensionAPIExtension::parseViewFilters(NSDictionary *filter, std::optio
 
 bool WebExtensionAPIExtension::isPropertyAllowed(const ASCIILiteral& name, WebPage*)
 {
-    if (protect(extensionContext())->isUnsupportedAPI(propertyPath(), name)) [[unlikely]]
+    RefPtr context = extensionContext();
+    if (context->isUnsupportedAPI(propertyPath(), name)) [[unlikely]]
         return false;
 
     // This method was removed in manifest version 3.
     if (name == "getURL"_s)
-        return !extensionContext().supportsManifestVersion(3);
+        return !context->supportsManifestVersion(3);
 
     ASSERT_NOT_REACHED();
     return false;

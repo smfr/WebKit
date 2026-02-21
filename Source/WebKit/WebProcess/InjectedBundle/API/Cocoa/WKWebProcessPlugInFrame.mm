@@ -62,7 +62,7 @@
 + (instancetype)lookUpFrameFromHandle:(_WKFrameHandle *)handle
 {
     auto frameID = handle->_frameHandle->frameID();
-    return wrapper(frameID ? WebKit::WebProcess::singleton().webFrame(*frameID) : nullptr);
+    SUPPRESS_UNCOUNTED_ARG return wrapper(frameID ? WebKit::WebProcess::singleton().webFrame(*frameID) : nullptr);
 }
 
 + (instancetype)lookUpFrameFromJSContext:(JSContext *)context
@@ -156,7 +156,7 @@
     Ref frame = *_frame;
     if (!frame->page())
         return nil;
-    return WebKit::wrapper(*frame->page());
+    return WebKit::wrapper(*protect(frame->page()));
 }
 
 - (NSURL *)URL

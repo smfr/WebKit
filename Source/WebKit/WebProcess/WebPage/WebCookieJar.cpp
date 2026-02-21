@@ -82,7 +82,7 @@ static BlockCookies shouldBlockCookies(WebFrame* frame, const URL& firstPartyFor
         return BlockCookies::No;
 
     if (frame) {
-        if (frame->localFrameLoaderClient()->hasFrameSpecificStorageAccess())
+        if (protect(frame->localFrameLoaderClient())->hasFrameSpecificStorageAccess())
             return BlockCookies::No;
         if (RefPtr page = frame->page()) {
             if (page->hasPageLevelStorageAccess(firstPartyDomain, resourceDomain))
