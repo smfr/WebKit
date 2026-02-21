@@ -98,6 +98,9 @@ webkit.org/b/188509 fast/dom/Window/window-resize-update-scrollbars.html [ Timeo
 # Doesn't support removeViewFromWindow()
 media/no-fullscreen-when-hidden.html [ Skip ]
 
+platform/glib/damage/basic-propagation-002-non-composited.html [ Crash ]
+platform/glib/non-compositing/simple-dom.html [ Crash ]
+
 #//////////////////////////////////////////////////////////////////////////////////////////
 # End of Triaged Expectations
 #//////////////////////////////////////////////////////////////////////////////////////////
