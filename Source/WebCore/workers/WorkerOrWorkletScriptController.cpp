@@ -607,7 +607,8 @@ void WorkerOrWorkletScriptController::initScriptWithSubclass()
     auto* proxy = JSGlobalProxy::create(*m_vm, proxyStructure);
 
     RefPtr globalScope = m_globalScope.get();
-    m_globalScopeWrapper.set(*m_vm, JSGlobalScope::create(*m_vm, structure, static_cast<GlobalScope&>(*globalScope), proxy));
+    SUPPRESS_MEMORY_UNSAFE_CAST auto& scope = static_cast<GlobalScope&>(*globalScope);
+    m_globalScopeWrapper.set(*m_vm, JSGlobalScope::create(*m_vm, structure, scope, proxy));
     contextPrototypeStructure->setGlobalObject(*m_vm, m_globalScopeWrapper.get());
     ASSERT(structure->globalObject() == m_globalScopeWrapper);
     ASSERT(m_globalScopeWrapper->structure()->globalObject() == m_globalScopeWrapper);
