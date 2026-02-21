@@ -39,7 +39,7 @@ SymbolRegistry::SymbolRegistry(Type type)
 SymbolRegistry::~SymbolRegistry()
 {
     for (auto& key : m_table)
-        downcast<SymbolImpl>(key.get())->asRegisteredSymbolImpl()->clearSymbolRegistry();
+        SUPPRESS_UNCOUNTED_ARG downcast<SymbolImpl>(key.get())->asRegisteredSymbolImpl()->clearSymbolRegistry();
 }
 
 Ref<RegisteredSymbolImpl> SymbolRegistry::symbolForKey(const String& rep)
