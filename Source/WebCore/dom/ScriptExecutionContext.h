@@ -27,6 +27,7 @@
 
 #pragma once
 
+#include <JavaScriptCore/Weak.h>
 #include <WebCore/ScriptExecutionContextIdentifier.h>
 #include <WebCore/SecurityContext.h>
 #include <WebCore/ServiceWorkerIdentifier.h>
@@ -387,6 +388,11 @@ public:
 
     bool isAlwaysOnLoggingAllowed() const;
 
+    void setMicrotaskGlobalObject(JSC::JSGlobalObject*);
+    JSC::JSGlobalObject* microtaskGlobalObject() const;
+    void clearMicrotaskGlobalObject();
+    virtual bool isEventLoopGroupStoppedPermanently() const { return false; }
+
 protected:
     class AddConsoleMessageTask : public Task {
     public:
@@ -467,6 +473,7 @@ private:
 
     const RefPtr<GuaranteedSerialFunctionDispatcher> m_nativePromiseDispatcher;
     WeakHashSet<NativePromiseRequest> m_nativePromiseRequests;
+    JSC::Weak<JSC::JSGlobalObject> m_microtaskGlobalObject;
 };
 
 WebCoreOpaqueRoot root(ScriptExecutionContext*);

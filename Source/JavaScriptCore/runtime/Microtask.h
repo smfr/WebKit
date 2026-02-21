@@ -66,4 +66,10 @@ enum class InternalMicrotask : uint8_t {
 
 constexpr unsigned maxMicrotaskArguments = 3;
 
+enum class QueuedTaskResult : uint8_t {
+    Executed,
+    Discard,
+    Suspended,
+};
+
 } // namespace JSC

@@ -1211,6 +1211,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     runtime/JSMap.h
     runtime/JSMapInlines.h
     runtime/JSMapIterator.h
+    runtime/JSMicrotaskDispatcher.h
     runtime/MapIteratorPrototype.h
     runtime/MapIteratorPrototypeInlines.h
     runtime/JSMicrotask.h

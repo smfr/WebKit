@@ -363,6 +363,7 @@
 #include <JavaScriptCore/RegularExpression.h>
 #include <JavaScriptCore/ScriptCallStack.h>
 #include <JavaScriptCore/VM.h>
+#include <JavaScriptCore/WeakInlines.h>
 #include <algorithm>
 #include <ctime>
 #include <ranges>
@@ -980,6 +981,7 @@ void Document::removedLastRef()
 void Document::commonTeardown()
 {
     stopActiveDOMObjects();
+    clearMicrotaskGlobalObject();
 
 #if ENABLE(FULLSCREEN_API)
     if (RefPtr fullscreen = m_fullscreen.get())
@@ -3811,6 +3813,11 @@ void Document::stopActiveDOMObjects()
     // https://www.w3.org/TR/screen-wake-lock/#handling-document-loss-of-full-activity
     if (m_wakeLockManager)
         m_wakeLockManager->releaseAllLocks(WakeLockType::Screen);
+}
+
+bool Document::isEventLoopGroupStoppedPermanently() const
+{
+    return m_documentTaskGroup && m_documentTaskGroup->isStoppedPermanently();
 }
 
 void Document::clearAXObjectCache()
@@ -8787,6 +8794,7 @@ EventLoopTaskGroup& Document::eventLoop()
     ASSERT(isMainThread());
     if (!m_documentTaskGroup) [[unlikely]] {
         m_documentTaskGroup = makeUnique<EventLoopTaskGroup>(windowEventLoop());
+        m_documentTaskGroup->setScriptExecutionContext(*this);
         if (activeDOMObjectsAreStopped())
             m_documentTaskGroup->markAsReadyToStop();
         else if (activeDOMObjectsAreSuspended())

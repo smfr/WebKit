@@ -166,6 +166,7 @@
 #include "JSMapInlines.h"
 #include "JSMapIteratorInlines.h"
 #include "JSMicrotask.h"
+#include "JSMicrotaskDispatcher.h"
 #include "JSModuleEnvironmentInlines.h"
 #include "JSModuleLoaderInlines.h"
 #include "JSModuleNamespaceObjectInlines.h"
@@ -3594,7 +3595,7 @@ void JSGlobalObject::bumpGlobalLexicalBindingEpoch(VM& vm)
 void JSGlobalObject::queueMicrotaskToEventLoop(JSC::JSGlobalObject& globalObject, JSC::QueuedTask&& task)
 {
     if (globalObject.debugger()) [[unlikely]]
-        task.setDispatcher(DebuggableMicrotaskDispatcher::create());
+        task.setDispatcher(JSMicrotaskDispatcher::create(globalObject.vm(), DebuggableMicrotaskDispatcher::create(), &globalObject));
     globalObject.vm().queueMicrotask(WTF::move(task));
 }
 

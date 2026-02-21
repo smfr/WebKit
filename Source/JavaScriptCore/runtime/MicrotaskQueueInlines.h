@@ -26,10 +26,41 @@
 #pragma once
 
 #include <JavaScriptCore/Debugger.h>
+#include <JavaScriptCore/JSCellInlines.h>
+#include <JavaScriptCore/JSMicrotaskDispatcher.h>
 #include <JavaScriptCore/MicrotaskQueue.h>
 #include <JavaScriptCore/TopExceptionScope.h>
 
 namespace JSC {
+
+inline JSCell* QueuedTask::dispatcher() const
+{
+    return m_dispatcher.pointer();
+}
+
+inline JSGlobalObject* QueuedTask::globalObject() const
+{
+    auto* dispatcher = this->dispatcher();
+    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]]
+        return jsCast<JSMicrotaskDispatcher*>(dispatcher)->globalObject();
+    return jsCast<JSGlobalObject*>(dispatcher);
+}
+
+inline JSMicrotaskDispatcher* QueuedTask::jsMicrotaskDispatcher() const
+{
+    auto* dispatcher = this->dispatcher();
+    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]]
+        return jsCast<JSMicrotaskDispatcher*>(dispatcher);
+    return nullptr;
+}
+
+inline std::optional<MicrotaskIdentifier> QueuedTask::identifier() const
+{
+    auto* dispatcher = jsMicrotaskDispatcher();
+    if (!dispatcher)
+        return std::nullopt;
+    return MicrotaskIdentifier { std::bit_cast<uintptr_t>(dispatcher) };
+}
 
 template<bool useCallOnEachMicrotask>
 inline void MicrotaskQueue::performMicrotaskCheckpoint(VM& vm, NOESCAPE const Invocable<QueuedTask::Result(QueuedTask&)> auto& functor)

@@ -28,11 +28,18 @@
 #include <JavaScriptCore/JSCJSValue.h>
 #include <JavaScriptCore/Microtask.h>
 #include <JavaScriptCore/SlotVisitorMacros.h>
-#include <wtf/CompactRefPtrTuple.h>
+#include <wtf/CompactPointerTuple.h>
 #include <wtf/Compiler.h>
 #include <wtf/Deque.h>
 #include <wtf/SentinelLinkedList.h>
 #include <wtf/TZoneMalloc.h>
+#include <wtf/VectorTraits.h>
+
+namespace JSC {
+class JSCell;
+class JSMicrotaskDispatcher;
+}
+WTF_ALLOW_COMPACT_POINTERS_TO_INCOMPLETE_TYPE(JSC::JSCell);
 
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
 
@@ -44,12 +51,6 @@ class MicrotaskDispatcher;
 class MicrotaskQueue;
 class QueuedTask;
 class VM;
-
-enum class QueuedTaskResult : uint8_t {
-    Executed,
-    Discard,
-    Suspended,
-};
 
 class MicrotaskDispatcher : public RefCounted<MicrotaskDispatcher> {
     WTF_MAKE_COMPACT_TZONE_ALLOCATED(MicrotaskDispatcher);
@@ -102,49 +103,43 @@ public:
     static constexpr unsigned maxArguments = maxMicrotaskArguments;
     using Result = QueuedTaskResult;
 
-    QueuedTask(Ref<MicrotaskDispatcher>&& dispatcher)
-        : m_dispatcher(WTF::move(dispatcher), static_cast<uint16_t>(InternalMicrotask::Opaque))
-        , m_globalObject(nullptr)
+    QueuedTask(JSMicrotaskDispatcher* dispatcher)
+        : m_dispatcher(std::bit_cast<JSCell*>(dispatcher), static_cast<uint16_t>(InternalMicrotask::Opaque))
     {
     }
 
     template<typename... Args>
     requires (sizeof...(Args) <= maxArguments) && (std::is_convertible_v<Args, JSValue> && ...)
-    QueuedTask(RefPtr<MicrotaskDispatcher>&& dispatcher, InternalMicrotask job, uint8_t payload, JSGlobalObject* globalObject, Args&&...args)
-        : m_dispatcher(WTF::move(dispatcher), static_cast<uint16_t>(job) | (static_cast<uint16_t>(payload) << 8))
-        , m_globalObject(globalObject)
+    QueuedTask(JSMicrotaskDispatcher* dispatcher, InternalMicrotask job, uint8_t payload, JSGlobalObject* globalObject, Args&&...args)
+        : m_dispatcher(dispatcher ? std::bit_cast<JSCell*>(dispatcher) : std::bit_cast<JSCell*>(globalObject), static_cast<uint16_t>(job) | (static_cast<uint16_t>(payload) << 8))
         , m_arguments { std::forward<Args>(args)... }
     {
     }
 
-    void setDispatcher(RefPtr<MicrotaskDispatcher>&& dispatcher)
+    void setDispatcher(JSMicrotaskDispatcher* dispatcher)
     {
-        m_dispatcher.setPointer(WTF::move(dispatcher));
+        m_dispatcher.setPointer(std::bit_cast<JSCell*>(dispatcher));
     }
 
     bool isRunnable() const;
 
-    MicrotaskDispatcher* dispatcher() const { return m_dispatcher.pointer(); }
-    std::optional<MicrotaskIdentifier> identifier() const
-    {
-        auto* pointer = m_dispatcher.pointer();
-        if (!pointer)
-            return std::nullopt;
-        return MicrotaskIdentifier { std::bit_cast<uintptr_t>(pointer) };
-    }
-    JSGlobalObject* globalObject() const { return m_globalObject; }
+    // Defined in MicrotaskQueueInlines.h (requires JSType knowledge).
+    inline JSCell* dispatcher() const;
+    inline JSGlobalObject* globalObject() const;
+    inline JSMicrotaskDispatcher* jsMicrotaskDispatcher() const;
+    inline std::optional<MicrotaskIdentifier> identifier() const;
     InternalMicrotask job() const { return static_cast<InternalMicrotask>(static_cast<uint8_t>(m_dispatcher.type())); }
-    // Task-specific metadata stored in upper 8 bits of m_dispatcher's type field.
+    // Task-specific metadata stored in upper 8 bits of type field.
     // Typically holds JSPromise::Status or a nested InternalMicrotask value.
     uint8_t payload() const { return static_cast<uint8_t>(m_dispatcher.type() >> 8); }
     std::span<const JSValue, maxArguments> arguments() const { return std::span<const JSValue, maxArguments> { m_arguments, maxArguments }; }
 
 private:
-    CompactRefPtrTuple<MicrotaskDispatcher, uint16_t> m_dispatcher;
-    JSGlobalObject* m_globalObject;
+    CompactPointerTuple<JSCell*, uint16_t> m_dispatcher;
     JSValue m_arguments[maxArguments] { };
 };
-static_assert(sizeof(QueuedTask) <= 40, "Size of QueuedTask is critical for performance");
+static_assert(sizeof(QueuedTask) <= 32, "Size of QueuedTask is critical for performance");
+static_assert(std::is_trivially_destructible_v<QueuedTask>);
 
 class MarkedMicrotaskDeque {
 public:
@@ -241,5 +236,12 @@ private:
 };
 
 } // namespace JSC
+namespace WTF {
+
+template<> struct VectorTraits<JSC::QueuedTask> : VectorTraitsBase<true, JSC::QueuedTask> {
+    static constexpr bool canCompareWithMemcmp = false;
+};
+
+} // namespace WTF
 
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END

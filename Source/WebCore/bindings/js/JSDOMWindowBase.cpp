@@ -58,8 +58,10 @@
 #include <JavaScriptCore/DeferredWorkTimer.h>
 #include <JavaScriptCore/GlobalObjectMethodTable.h>
 #include <JavaScriptCore/JSInternalPromise.h>
+#include <JavaScriptCore/JSMicrotaskDispatcher.h>
 #include <JavaScriptCore/JSWebAssembly.h>
 #include <JavaScriptCore/Microtask.h>
+#include <JavaScriptCore/MicrotaskQueueInlines.h>
 #include <JavaScriptCore/StrongInlines.h>
 #include <JavaScriptCore/VMTrapsInlines.h>
 #include <wtf/Language.h>
@@ -295,10 +297,14 @@ void JSDOMWindowBase::queueMicrotaskToEventLoop(JSGlobalObject& object, QueuedTa
     if (userGestureToken && (!userGestureToken->shouldPropagateToMicroTask() || !objectScriptExecutionContext->settingsValues().userGesturePromisePropagationEnabled))
         userGestureToken = nullptr;
 
-    if (!userGestureToken)
-        task.setDispatcher(eventLoop->jsMicrotaskDispatcher(task));
-    else
-        task.setDispatcher(UserGestureInitiatedMicrotaskDispatcher::create(eventLoop.get(), Ref { *userGestureToken }));
+    if (!userGestureToken) {
+        if (object.debugger()) [[unlikely]]
+            task.setDispatcher(eventLoop->jsMicrotaskDispatcherForDebugger(object.vm(), &object));
+    } else {
+        auto& vm = object.vm();
+        JSC::JSLockHolder locker(vm);
+        task.setDispatcher(JSC::JSMicrotaskDispatcher::create(vm, UserGestureInitiatedMicrotaskDispatcher::create(eventLoop.get(), Ref { *userGestureToken }), &object));
+    }
 
     eventLoop->queueMicrotask(WTF::move(task));
 }

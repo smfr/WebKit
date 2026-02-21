@@ -76,6 +76,7 @@
 #include "JSLock.h"
 #include "JSMap.h"
 #include "JSMicrotask.h"
+#include "JSMicrotaskDispatcher.h"
 #include "JSPromise.h"
 #include "JSPromiseCombinatorsContextInlines.h"
 #include "JSPromiseCombinatorsGlobalContext.h"
@@ -338,6 +339,7 @@ VM::VM(VMType vmType, HeapType heapType, WTF::RunLoop* runLoop, bool* success)
 #endif
     moduleProgramExecutableStructure.setWithoutWriteBarrier(ModuleProgramExecutable::createStructure(*this, nullptr, jsNull()));
     promiseReactionStructure.setWithoutWriteBarrier(JSPromiseReaction::createStructure(*this, nullptr, jsNull()));
+    jsMicrotaskDispatcherStructure.setWithoutWriteBarrier(JSMicrotaskDispatcher::createStructure(*this, nullptr, jsNull()));
     promiseCombinatorsContextStructure.setWithoutWriteBarrier(JSPromiseCombinatorsContext::createStructure(*this, nullptr, jsNull()));
     promiseCombinatorsGlobalContextStructure.setWithoutWriteBarrier(JSPromiseCombinatorsGlobalContext::createStructure(*this, nullptr, jsNull()));
     regExpStructure.setWithoutWriteBarrier(RegExp::createStructure(*this, nullptr, jsNull()));
@@ -1425,11 +1427,16 @@ void VM::drainMicrotasks()
         while (true) {
             m_defaultMicrotaskQueue.performMicrotaskCheckpoint</* useCallOnEachMicrotask */ true>(*this,
                 [&](QueuedTask& task) ALWAYS_INLINE_LAMBDA {
-                    auto* globalObject = task.globalObject();
-                    entryScope->setGlobalObject(globalObject);
-                    if (RefPtr dispatcher = task.dispatcher())
-                        return dispatcher->run(task);
+                    auto* dispatcher = task.dispatcher();
+                    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]] {
+                        auto* jsMicrotaskDispatcher = jsCast<JSMicrotaskDispatcher*>(dispatcher);
+                        auto* globalObject = jsMicrotaskDispatcher->globalObject();
+                        entryScope->setGlobalObject(globalObject);
+                        return jsMicrotaskDispatcher->dispatcher()->run(task);
+                    }
 
+                    auto* globalObject = jsCast<JSGlobalObject*>(dispatcher);
+                    entryScope->setGlobalObject(globalObject);
                     auto catchScope = DECLARE_TOP_EXCEPTION_SCOPE(*this);
                     runInternalMicrotask(globalObject, task.job(), task.payload(), task.arguments());
                     catchScope.clearExceptionExceptTermination();
@@ -1867,6 +1874,7 @@ void VM::visitAggregateImpl(Visitor& visitor)
 #endif
     visitor.append(moduleProgramExecutableStructure);
     visitor.append(promiseReactionStructure);
+    visitor.append(jsMicrotaskDispatcherStructure);
     visitor.append(promiseCombinatorsContextStructure);
     visitor.append(promiseCombinatorsGlobalContextStructure);
     visitor.append(regExpStructure);
