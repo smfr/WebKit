@@ -171,7 +171,7 @@ void NetworkLoad::setSuggestedFilename(const String& suggestedName)
     if (!m_task)
         return;
 
-    m_task->setSuggestedFilename(suggestedName);
+    protect(m_task)->setSuggestedFilename(suggestedName);
 }
 
 void NetworkLoad::setPendingDownload(PendingDownload& pendingDownload)
@@ -352,8 +352,8 @@ void NetworkLoad::didNegotiateModernTLS(const URL& url)
 
 String NetworkLoad::description() const
 {
-    if (m_task.get())
-        return m_task->description();
+    if (RefPtr task = m_task.get())
+        return task->description();
     return emptyString();
 }
 

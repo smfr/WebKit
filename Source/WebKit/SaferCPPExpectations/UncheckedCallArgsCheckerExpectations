@@ -1,5 +1,3 @@
-[ Mac ] NetworkProcess/NetworkLoadChecker.cpp
-[ Mac ] NetworkProcess/webrtc/NetworkRTCSharedMonitor.cpp
 [ Mac ] UIProcess/Cocoa/PlaybackSessionManagerProxy.mm
 [ Mac ] UIProcess/Cocoa/VideoPresentationManagerProxy.mm
 [ Mac ] WebProcess/Network/WebLoaderStrategy.cpp

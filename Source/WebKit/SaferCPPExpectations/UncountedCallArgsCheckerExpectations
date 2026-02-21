@@ -1,5 +1,3 @@
-[ Mac ] NetworkProcess/NetworkLoad.cpp
-[ Mac ] NetworkProcess/webrtc/NetworkRTCSharedMonitor.cpp
 [ Mac ] Shared/API/Cocoa/_WKFrameHandle.mm
 [ Mac ] Shared/API/Cocoa/_WKHitTestResult.mm
 [ Mac ] Shared/Cocoa/WKNSArray.mm
