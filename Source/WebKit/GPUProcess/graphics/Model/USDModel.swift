@@ -810,7 +810,7 @@ private func makeMTLTextureFromImageAsset(
     let bytesPerRow = imageAsset.width * imageAsset.bytesPerPixel
     let bytesPerImage = bytesPerRow * imageAsset.height
 
-#if compiler(>=6.2)
+    #if compiler(>=6.2)
     unsafe imageAssetData.bytes.withUnsafeBytes { textureBytes in
         guard let textureBytesBaseAddress = textureBytes.baseAddress else {
             return
@@ -829,7 +829,7 @@ private func makeMTLTextureFromImageAsset(
             )
         }
     }
-#else
+    #else
     imageAssetData.bytes.withUnsafeBytes { textureBytes in
         guard let textureBytesBaseAddress = textureBytes.baseAddress else {
             return
@@ -848,7 +848,7 @@ private func makeMTLTextureFromImageAsset(
             )
         }
     }
-#endif
+    #endif
 
     return mtlTexture
 }
