@@ -156,8 +156,9 @@ void WebInspectorUIProxy::connect()
     legacyMainFrameProcess->send(Messages::WebInspectorInterruptDispatcher::NotifyNeedDebuggerBreak(), 0);
     legacyMainFrameProcess->sendWithAsyncReply(
         Messages::WebInspectorBackend::Show(),
-        [this, protectedThis = Ref { *this }] {
-            openLocalInspectorFrontend();
+        [this, protectedThis = Ref { *this }] (bool success) {
+            if (success)
+                openLocalInspectorFrontend();
         },
         m_inspectedPage->webPageIDInMainFrameProcess());
 }
