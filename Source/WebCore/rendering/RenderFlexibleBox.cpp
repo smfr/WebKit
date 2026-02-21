@@ -644,8 +644,8 @@ LayoutUnit RenderFlexibleBox::cachedFlexItemIntrinsicContentLogicalHeight(const 
     if (auto* renderReplaced = dynamicDowncast<RenderReplaced>(flexItem))
         return renderReplaced->intrinsicLogicalHeight();
     
-    if (m_intrinsicContentLogicalHeights.contains(flexItem))
-        return m_intrinsicContentLogicalHeights.get(flexItem);
+    if (auto it = m_intrinsicContentLogicalHeights.find(flexItem); it != m_intrinsicContentLogicalHeights.end())
+        return it->value;
     
     return flexItem.contentBoxLogicalHeight();
 }
