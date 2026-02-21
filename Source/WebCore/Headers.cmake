@@ -1139,37 +1139,23 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     css/CSSConditionRule.h
     css/CSSCounterStyle.h
     css/CSSCounterStyleDescriptors.h
-    css/CSSCounterStyleRegistry.h
-    css/CSSCounterStyleRule.h
     css/CSSCounterValue.h
-    css/CSSCursorImageValue.h
     css/CSSCustomPropertyValue.h
     css/CSSFontFaceDescriptors.h
     css/CSSFontFaceRule.h
-    css/CSSFontFeatureValue.h
     css/CSSFontPaletteValuesRule.h
-    css/CSSFunctionValue.h
-    css/CSSGradientValue.h
     css/CSSGridIntegerRepeatValue.h
     css/CSSGroupingRule.h
-    css/CSSImageSetValue.h
-    css/CSSImageValue.h
     css/CSSImportRule.h
     css/CSSMediaRule.h
-    css/CSSNamedImageValue.h
-    css/CSSNamespaceRule.h
-    css/CSSNestedDeclarations.h
     css/CSSPageDescriptors.h
     css/CSSPageRule.h
-    css/CSSPositionTryDescriptors.h
     css/CSSPrimitiveValue.h
     css/CSSPrimitiveValueMappings.h
     css/CSSProperty.h
     css/CSSPropertyInitialValues.h
-    css/CSSPropertySourceData.h
     css/CSSQuadValue.h
     css/CSSRectValue.h
-    css/CSSReflectValue.h
     css/CSSRegisteredCustomProperty.h
     css/CSSRule.h
     css/CSSRuleList.h
@@ -1181,7 +1167,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     css/CSSStyleSheet.h
     css/CSSSubgridValue.h
     css/CSSToLengthConversionData.h
-    css/CSSTransformListValue.h
     css/CSSUnits.h
     css/CSSValue.h
     css/CSSValueList.h
@@ -1189,7 +1174,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     css/CSSValuePool.h
     css/CSSVariableData.h
     css/CSSVariableReferenceValue.h
-    css/CSSViewValue.h
     css/CSSWideKeyword.h
     css/ComputedStyleDependencies.h
     css/DOMCSSPaintWorklet.h
@@ -1221,14 +1205,11 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
 
     css/calc/CSSCalcOperator.h
     css/calc/CSSCalcRandomCachingKey.h
-    css/calc/CSSCalcRandomCachingKeyMap.h
     css/calc/CSSCalcSymbolTable.h
-    css/calc/CSSCalcSymbolsAllowed.h
     css/calc/CSSCalcTree.h
     css/calc/CSSCalcType.h
     css/calc/CSSCalcValue.h
 
-    css/parser/CSSCustomPropertySyntax.h
     css/parser/CSSParser.h
     css/parser/CSSParserContext.h
     css/parser/CSSParserEnum.h
@@ -1239,9 +1220,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     css/parser/CSSParserTokenRange.h
     css/parser/CSSPropertyParser.h
     css/parser/CSSPropertyParserConsumer+Color.h
-    css/parser/CSSPropertyParserResult.h
-    css/parser/CSSPropertyParserState.h
-    css/parser/CSSSelectorParser.h
     css/parser/CSSSelectorParserContext.h
     css/parser/CSSTokenizer.h
     css/parser/CSSTokenizerInputStream.h
@@ -1265,7 +1243,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
 
     css/values/borders/CSSBorderRadius.h
     css/values/borders/CSSBoxShadow.h
-    css/values/borders/CSSBoxShadowProperty.h
 
     css/values/color-adjust/CSSColorScheme.h
 
