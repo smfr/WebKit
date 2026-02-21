@@ -612,8 +612,8 @@ void ContainerNode::insertBeforeCommon(Node& nextChild, Node& newChild)
     ASSERT(!newChild.previousSibling());
     ASSERT(!newChild.isShadowRoot());
 
-    RefPtr previousSibling = nextChild.previousSibling();
-    ASSERT(m_lastChild != previousSibling.get());
+    auto* previousSibling = nextChild.previousSibling();
+    ASSERT(m_lastChild != previousSibling);
     nextChild.setPreviousSibling(&newChild);
     if (previousSibling) {
         ASSERT(m_firstChild != &nextChild);
@@ -624,7 +624,7 @@ void ContainerNode::insertBeforeCommon(Node& nextChild, Node& newChild)
         m_firstChild = &newChild;
     }
     newChild.setParentNode(this);
-    newChild.setPreviousSibling(previousSibling.get());
+    newChild.setPreviousSibling(previousSibling);
     newChild.setNextSibling(&nextChild);
 }
 
@@ -634,8 +634,8 @@ void ContainerNode::appendChildCommon(Node& child)
 
     child.setParentNode(this);
 
-    if (RefPtr lastChild = this->lastChild()) {
-        child.setPreviousSibling(lastChild.get());
+    if (auto* lastChild = this->lastChild()) {
+        child.setPreviousSibling(lastChild);
         lastChild->setNextSibling(&child);
     } else
         m_firstChild = &child;
