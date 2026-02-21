@@ -6526,9 +6526,9 @@ static bool canDetachMediaStreamTracks(const Vector<Ref<MediaStreamTrack>>& trac
 
 static bool canDetachMediaStreamTrackHandles(const Vector<Ref<MediaStreamTrackHandle>>& handles)
 {
-    HashSet<RefPtr<MediaStreamTrackHandle>> visited;
+    HashSet<Ref<MediaStreamTrackHandle>> visited;
     for (auto& handle : handles) {
-        if (!visited.add(handle.ptr()))
+        if (!visited.add(handle.get()).isNewEntry)
             return false;
     }
     return true;
