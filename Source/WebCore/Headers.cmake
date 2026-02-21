@@ -1424,7 +1424,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     dom/FragmentDirectiveUtilities.h
     dom/FullscreenOptions.h
     dom/GCReachableRef.h
-    dom/GetHTMLOptions.h
     dom/IdTargetObserver.h
     dom/IdTargetObserverRegistry.h
     dom/ImageOverlay.h
@@ -1500,7 +1499,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     dom/SelectionRestorationMode.h
     dom/SerializedNode.h
     dom/ShadowRoot.h
-    dom/ShadowRootInit.h
     dom/ShadowRootMode.h
     dom/SimpleRange.h
     dom/SimulatedClickOptions.h
@@ -1717,7 +1715,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     html/HTMLQuoteElement.h
     html/HTMLScriptElement.h
     html/HTMLSelectElement.h
-    html/HTMLSelectedContentElement.h
     html/HTMLStyleElement.h
     html/HTMLSummaryElement.h
     html/HTMLTableCaptionElement.h
