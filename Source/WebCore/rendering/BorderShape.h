@@ -99,7 +99,7 @@ public:
 
     bool isEmpty() const { return m_borderRect.rect().isEmpty(); }
 
-    void move(LayoutSize);
+    void NODELETE move(LayoutSize);
 
     // This will inflate the m_borderRect, and scale the radii up accordingly. Note that this changes the meaning of "inner shape" which will no longer correspond to the padding box.
     void inflate(LayoutUnit);

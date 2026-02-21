@@ -196,7 +196,7 @@ void RenderScrollbar::updateScrollbarParts()
     }
 }
 
-static PseudoElementType pseudoForScrollbarPart(ScrollbarPart part)
+static PseudoElementType NODELETE pseudoForScrollbarPart(ScrollbarPart part)
 {
     switch (part) {
         case BackButtonStartPart:

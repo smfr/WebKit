@@ -248,7 +248,7 @@ static LayoutSize accumulateInFlowPositionOffsets(const RenderBoxModelObject& ch
     return offset;
 }
     
-static inline bool isOutOfFlowPositionedWithImplicitHeight(const RenderBoxModelObject& child)
+static inline bool NODELETE isOutOfFlowPositionedWithImplicitHeight(const RenderBoxModelObject& child)
 {
     return child.isOutOfFlowPositioned() && !child.style().logicalTop().isAuto() && !child.style().logicalBottom().isAuto();
 }
@@ -741,17 +741,17 @@ void RenderBoxModelObject::paintMaskForTextFillBox(GraphicsContext& context, con
     paint(maskInfo, scrolledPaintRect.location() - localOffset);
 }
 
-static inline LayoutUnit resolveWidthForRatio(LayoutUnit height, const LayoutSize& intrinsicRatio)
+static inline LayoutUnit NODELETE resolveWidthForRatio(LayoutUnit height, const LayoutSize& intrinsicRatio)
 {
     return height * intrinsicRatio.width() / intrinsicRatio.height();
 }
 
-static inline LayoutUnit resolveHeightForRatio(LayoutUnit width, const LayoutSize& intrinsicRatio)
+static inline LayoutUnit NODELETE resolveHeightForRatio(LayoutUnit width, const LayoutSize& intrinsicRatio)
 {
     return width * intrinsicRatio.height() / intrinsicRatio.width();
 }
 
-static inline LayoutSize resolveAgainstIntrinsicWidthOrHeightAndRatio(const LayoutSize& size, const LayoutSize& intrinsicRatio, LayoutUnit useWidth, LayoutUnit useHeight)
+static inline LayoutSize NODELETE resolveAgainstIntrinsicWidthOrHeightAndRatio(const LayoutSize& size, const LayoutSize& intrinsicRatio, LayoutUnit useWidth, LayoutUnit useHeight)
 {
     if (intrinsicRatio.isEmpty()) {
         if (useWidth)

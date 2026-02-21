@@ -42,7 +42,7 @@ public:
     HTMLAttachmentElement& NODELETE attachmentElement() const;
 
     void setShouldDrawBorder(bool drawBorder) { m_shouldDrawBorder = drawBorder; }
-    bool shouldDrawBorder() const;
+    bool NODELETE shouldDrawBorder() const;
 
     void setHasShadowControls(bool hasShadowControls) { m_hasShadowControls = hasShadowControls; }
     bool hasShadowControls() const { return m_hasShadowControls; }

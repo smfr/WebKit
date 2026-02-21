@@ -53,7 +53,7 @@
 
 namespace WebCore {
 
-static bool borderStyleFillsBorderArea(BorderStyle style)
+static bool NODELETE borderStyleFillsBorderArea(BorderStyle style)
 {
     switch (style) {
     case BorderStyle::None:
@@ -72,7 +72,7 @@ static bool borderStyleFillsBorderArea(BorderStyle style)
     return true;
 }
 
-static bool styleRequiresClipPolygon(BorderStyle style)
+static bool NODELETE styleRequiresClipPolygon(BorderStyle style)
 {
     switch (style) {
     case BorderStyle::None:
@@ -93,7 +93,7 @@ static bool styleRequiresClipPolygon(BorderStyle style)
     return false;
 }
 
-static bool borderStyleHasInnerDetail(BorderStyle style)
+static bool NODELETE borderStyleHasInnerDetail(BorderStyle style)
 {
     switch (style) {
     case BorderStyle::None:
@@ -114,12 +114,12 @@ static bool borderStyleHasInnerDetail(BorderStyle style)
     return false;
 }
 
-static bool borderStyleIsDottedOrDashed(BorderStyle style)
+static bool NODELETE borderStyleIsDottedOrDashed(BorderStyle style)
 {
     return style == BorderStyle::Dotted || style == BorderStyle::Dashed;
 }
 
-static bool decorationHasAllSimpleEdges(const RectEdges<BorderEdge>& edges)
+static bool NODELETE decorationHasAllSimpleEdges(const RectEdges<BorderEdge>& edges)
 {
     for (auto side : allBoxSides) {
         auto& currEdge = edges.at(side);

@@ -38,7 +38,7 @@ public:
     explicit RenderStyle(CreateDefaultStyleTag);
     RenderStyle(const RenderStyle&, CloneTag);
 
-    [[nodiscard]] RenderStyle replace(RenderStyle&&);
+    [[nodiscard]] RenderStyle NODELETE replace(RenderStyle&&);
 
     static RenderStyle& defaultStyleSingleton();
 
@@ -48,7 +48,7 @@ public:
     static std::unique_ptr<RenderStyle> createPtr();
     static std::unique_ptr<RenderStyle> createPtrWithRegisteredInitialValues(const Style::CustomPropertyRegistry&);
 
-    static RenderStyle clone(const RenderStyle&);
+    static RenderStyle NODELETE clone(const RenderStyle&);
     static RenderStyle cloneIncludingPseudoElements(const RenderStyle&);
     static std::unique_ptr<RenderStyle> clonePtr(const RenderStyle&);
 
@@ -68,7 +68,7 @@ public:
     // MARK: - Specific style change queries
 
     bool scrollAnchoringSuppressionStyleDidChange(const RenderStyle*) const;
-    bool outOfFlowPositionStyleDidChange(const RenderStyle*) const;
+    bool NODELETE outOfFlowPositionStyleDidChange(const RenderStyle*) const;
 
     // MARK: - Comparisons
 
@@ -376,10 +376,10 @@ public:
     inline const Style::InsetEdge& logicalBottom() const;
 
     // Logical Border (aggregate)
-    const BorderValue& borderBefore(const WritingMode) const;
-    const BorderValue& borderAfter(const WritingMode) const;
-    const BorderValue& borderStart(const WritingMode) const;
-    const BorderValue& borderEnd(const WritingMode) const;
+    const BorderValue& NODELETE borderBefore(const WritingMode) const;
+    const BorderValue& NODELETE borderAfter(const WritingMode) const;
+    const BorderValue& NODELETE borderStart(const WritingMode) const;
+    const BorderValue& NODELETE borderEnd(const WritingMode) const;
     inline const BorderValue& borderBefore() const;
     inline const BorderValue& borderAfter() const;
     inline const BorderValue& borderStart() const;
@@ -417,7 +417,7 @@ public:
     inline PointerEvents usedPointerEvents() const;
     inline Visibility usedVisibility() const;
     inline UserModify usedUserModify() const;
-    WEBCORE_EXPORT UserSelect usedUserSelect() const;
+    WEBCORE_EXPORT UserSelect NODELETE usedUserSelect() const;
     Style::Contain usedContain() const;
     inline TransformStyle3D usedTransformStyle3D() const;
     inline float usedPerspective() const;

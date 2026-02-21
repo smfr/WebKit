@@ -218,12 +218,12 @@ static constexpr auto logicalSwitchHeight = 18.f;
 static constexpr FloatSize idealRefreshedSwitchSize = { 64, 28 };
 static constexpr auto logicalRefreshedSwitchWidth = logicalSwitchHeight * (idealRefreshedSwitchSize.width() / idealRefreshedSwitchSize.height());
 
-static bool renderThemePaintSwitchThumb(OptionSet<ControlStyle::State>, const RenderElement&, const PaintInfo&, const FloatRect&, const Color&)
+static bool NODELETE renderThemePaintSwitchThumb(OptionSet<ControlStyle::State>, const RenderElement&, const PaintInfo&, const FloatRect&, const Color&)
 {
     return true;
 }
 
-static bool renderThemePaintSwitchTrack(OptionSet<ControlStyle::State>, const RenderElement&, const PaintInfo&, const FloatRect&)
+static bool NODELETE renderThemePaintSwitchTrack(OptionSet<ControlStyle::State>, const RenderElement&, const PaintInfo&, const FloatRect&)
 {
     return true;
 }
@@ -245,7 +245,7 @@ constexpr int kThumbnailBorderCornerRadius = 1;
 constexpr int kVisibleBackgroundImageWidth = 1;
 constexpr int kMultipleThumbnailShrinkSize = 2;
 
-static inline bool canShowCapsLockIndicator()
+static inline bool NODELETE canShowCapsLockIndicator()
 {
 #if HAVE(ACCELERATED_TEXT_INPUT)
     if (redesignedTextCursorEnabled())

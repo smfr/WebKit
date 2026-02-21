@@ -38,7 +38,7 @@ public:
     RenderSVGForeignObject(SVGForeignObjectElement&, RenderStyle&&);
     virtual ~RenderSVGForeignObject();
 
-    SVGForeignObjectElement& foreignObjectElement() const;
+    SVGForeignObjectElement& NODELETE foreignObjectElement() const;
 
     void paint(PaintInfo&, const LayoutPoint&) override;
 

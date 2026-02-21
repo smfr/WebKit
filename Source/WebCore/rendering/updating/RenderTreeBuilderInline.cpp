@@ -44,7 +44,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(RenderTreeBuilder::Inline);
 
-static bool canUseAsParentForContinuation(const RenderObject* renderer)
+static bool NODELETE canUseAsParentForContinuation(const RenderObject* renderer)
 {
     if (!renderer)
         return false;
@@ -94,7 +94,7 @@ static RenderPtr<RenderInline> cloneAsContinuation(RenderInline& renderer)
     return cloneInline;
 }
 
-static RenderElement* inFlowPositionedInlineAncestor(RenderElement& renderer)
+static RenderElement* NODELETE inFlowPositionedInlineAncestor(RenderElement& renderer)
 {
     auto* ancestor = &renderer;
     while (ancestor && ancestor->isRenderInline()) {

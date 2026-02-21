@@ -125,7 +125,7 @@ RenderTableSection* RenderTable::firstBody() const
     return m_firstBody.get();
 }
 
-RenderTableSection* RenderTable::topSection() const
+RenderTableSection* NODELETE RenderTable::topSection() const
 {
     ASSERT(!needsSectionRecalc());
     if (m_head)

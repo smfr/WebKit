@@ -45,7 +45,7 @@ public:
     IntRect videoBox() const;
     WEBCORE_EXPORT IntRect videoBoxInRootView() const;
 
-    static IntSize defaultSize();
+    static IntSize NODELETE defaultSize();
 
     bool supportsAcceleratedRendering() const;
     void acceleratedRenderingStateChanged();

@@ -142,7 +142,7 @@ struct RenderLayerCompositor::OverlapExtent {
     bool animationCausesExtentUncertainty { false };
     bool clippingScopesComputed { false };
 
-    bool knownToBeHaveExtentUncertainty() const { return extentComputed && animationCausesExtentUncertainty; }
+    bool NODELETE knownToBeHaveExtentUncertainty() const { return extentComputed && animationCausesExtentUncertainty; }
 };
 
 struct RenderLayerCompositor::CompositingState {
@@ -221,7 +221,7 @@ struct RenderLayerCompositor::CompositingState {
 #endif
     }
 
-    bool hasNonRootCompositedAncestor() const
+    bool NODELETE hasNonRootCompositedAncestor() const
     {
         return compositingAncestor && !compositingAncestor->isRenderViewLayer();
     }
@@ -251,7 +251,7 @@ struct RenderLayerCompositor::UpdateBackingTraversalState {
     {
     }
 
-    UpdateBackingTraversalState stateForDescendants() const
+    UpdateBackingTraversalState NODELETE stateForDescendants() const
     {
         UpdateBackingTraversalState state(compositingAncestor, layersClippedByScrollers, overflowScrollLayers);
 #if !LOG_DISABLED
@@ -325,17 +325,17 @@ public:
         LayoutRect absoluteBounds;
     };
 
-    auto& backingProviderCandidates() { return m_backingProviderCandidates; }
+    auto& NODELETE backingProviderCandidates() { return m_backingProviderCandidates; }
 
-    const RenderLayer* firstProviderCandidateLayer() const
+    const RenderLayer* NODELETE firstProviderCandidateLayer() const
     {
         return !m_backingProviderCandidates.isEmpty() ? m_backingProviderCandidates.first().providerLayer.get() : nullptr;
     }
 
-    RenderLayer* backingSharingStackingContext() const { return m_backingSharingStackingContext; }
+    RenderLayer* NODELETE backingSharingStackingContext() const { return m_backingSharingStackingContext; }
 
     Provider* backingProviderCandidateForLayer(const RenderLayer&, const RenderLayerCompositor&, LayerOverlapMap&, OverlapExtent&);
-    Provider* existingBackingProviderCandidateForLayer(const RenderLayer&);
+    Provider* NODELETE existingBackingProviderCandidateForLayer(const RenderLayer&);
     Provider* backingProviderForLayer(const RenderLayer&);
 
     // Add a layer that would repaint into a layer in m_backingSharingLayers.
@@ -350,13 +350,13 @@ public:
     void startBackingSharingSequence(RenderLayer& candidateLayer, LayoutRect candidateAbsoluteBounds, RenderLayer& candidateStackingContext);
     void endBackingSharingSequence(RenderLayer&);
 
-    std::optional<BackingSharingSnapshot> snapshot() const
+    std::optional<BackingSharingSnapshot> NODELETE snapshot() const
     {
         if (!m_backingSharingStackingContext)
             return std::nullopt;
         return BackingSharingSnapshot { m_sequenceIdentifier, m_backingProviderCandidates.size() };
     }
-    BackingSharingSequenceIdentifier sequenceIdentifier() const { return m_sequenceIdentifier; }
+    BackingSharingSequenceIdentifier NODELETE sequenceIdentifier() const { return m_sequenceIdentifier; }
 
 private:
     void layerWillBeComposited(RenderLayer&);
@@ -802,7 +802,7 @@ void RenderLayerCompositor::scheduleRenderingUpdate()
     protect(page())->scheduleRenderingUpdate(RenderingUpdateStep::LayerFlush);
 }
 
-static inline ScrollableArea::VisibleContentRectIncludesScrollbars scrollbarInclusionForVisibleRect()
+static inline ScrollableArea::VisibleContentRectIncludesScrollbars NODELETE scrollbarInclusionForVisibleRect()
 {
 #if USE(COORDINATED_GRAPHICS)
     return ScrollableArea::VisibleContentRectIncludesScrollbars::Yes;
@@ -2343,7 +2343,7 @@ void RenderLayerCompositor::clearBackingProviderSequencesInStackingContextOfLaye
 }
 
 // FIXME: remove and never ask questions about reflection layers.
-static RenderLayerModelObject& rendererForCompositingTests(const RenderLayer& layer)
+static RenderLayerModelObject& NODELETE rendererForCompositingTests(const RenderLayer& layer)
 {
     auto* renderer = &layer.renderer();
 
@@ -5466,7 +5466,7 @@ StickyPositionViewportConstraints RenderLayerCompositor::computeStickyViewportCo
     return constraints;
 }
 
-static inline ScrollCoordinationRole scrollCoordinationRoleForNodeType(ScrollingNodeType nodeType)
+static inline ScrollCoordinationRole NODELETE scrollCoordinationRoleForNodeType(ScrollingNodeType nodeType)
 {
     switch (nodeType) {
     case ScrollingNodeType::MainFrame:

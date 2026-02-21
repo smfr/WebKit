@@ -40,7 +40,7 @@
 
 namespace WebCore {
 
-static StrokeStyle textDecorationStyleToStrokeStyle(TextDecorationStyle decorationStyle)
+static StrokeStyle NODELETE textDecorationStyleToStrokeStyle(TextDecorationStyle decorationStyle)
 {
     StrokeStyle strokeStyle = StrokeStyle::SolidStroke;
     switch (decorationStyle) {

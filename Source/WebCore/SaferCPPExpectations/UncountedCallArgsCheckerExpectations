@@ -699,12 +699,10 @@ rendering/svg/RenderSVGPath.cpp
 rendering/svg/RenderSVGResourceClipper.cpp
 rendering/svg/RenderSVGResourceFilterInlines.h
 rendering/svg/RenderSVGResourceFilterPrimitive.cpp
-rendering/svg/RenderSVGResourceMarker.cpp
 rendering/svg/RenderSVGResourcePattern.cpp
 rendering/svg/RenderSVGRoot.cpp
 rendering/svg/RenderSVGText.cpp
 rendering/svg/RenderSVGTextPath.cpp
-rendering/svg/RenderSVGViewportContainer.cpp
 rendering/svg/SVGLayerTransformComputation.h
 rendering/svg/SVGRenderTreeAsText.cpp
 rendering/svg/SVGRenderingContext.cpp
@@ -727,7 +725,6 @@ rendering/svg/legacy/SVGResourcesCache.cpp
 rendering/updating/RenderTreeBuilder.cpp
 rendering/updating/RenderTreeBuilderFirstLetter.cpp
 rendering/updating/RenderTreeBuilderInline.cpp
-rendering/updating/RenderTreeBuilderList.cpp
 rendering/updating/RenderTreeBuilderMathML.cpp
 rendering/updating/RenderTreeBuilderMultiColumn.cpp
 rendering/updating/RenderTreeBuilderRuby.cpp

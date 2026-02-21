@@ -228,7 +228,7 @@ public:
             m_containerMap.remove(renderer);
     }
     
-    TrackedRendererListHashSet* positionedRenderers(const RenderBlock& containingBlock) const
+    TrackedRendererListHashSet* NODELETE positionedRenderers(const RenderBlock& containingBlock) const
     {
         return m_descendantsMap.get(containingBlock);
     }
@@ -476,7 +476,7 @@ void RenderBlock::endAndCommitUpdateScrollInfoAfterLayoutTransaction()
     }
 }
 
-static inline bool isDelayingUpdateScrollInfoAfterLayout(const RenderBlock& renderer)
+static inline bool NODELETE isDelayingUpdateScrollInfoAfterLayout(const RenderBlock& renderer)
 {
     auto* transaction = renderer.view().frameView().layoutContext().updateScrollInfoAfterLayoutTransactionIfExists();
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=97937
@@ -1562,7 +1562,7 @@ GapRects RenderBlock::selectionGaps(RenderBlock& rootBlock, const LayoutPoint& r
     return result;
 }
 
-GapRects RenderBlock::inlineSelectionGaps(RenderBlock&, const LayoutPoint&, const LayoutSize&, LayoutUnit&, LayoutUnit&, LayoutUnit&, const LogicalSelectionOffsetCaches&, const PaintInfo*)
+GapRects NODELETE RenderBlock::inlineSelectionGaps(RenderBlock&, const LayoutPoint&, const LayoutSize&, LayoutUnit&, LayoutUnit&, LayoutUnit&, const LogicalSelectionOffsetCaches&, const PaintInfo*)
 {
     ASSERT_NOT_REACHED();
     return GapRects();
@@ -2155,7 +2155,7 @@ PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const Layou
     return PositionWithAffinity();
 }
 
-static inline bool isChildHitTestCandidate(const RenderBox& box, HitTestSource source)
+static inline bool NODELETE isChildHitTestCandidate(const RenderBox& box, HitTestSource source)
 {
     auto visibility = source == HitTestSource::Script ? box.style().visibility() : box.style().usedVisibility();
     return box.height() && visibility == Visibility::Visible && !box.isOutOfFlowPositioned() && !box.isRenderFragmentedFlow();
@@ -2496,7 +2496,7 @@ std::optional<LayoutUnit> RenderBlock::lastLineBaseline() const
     return lastInFlowBaseline();
 }
 
-static inline bool isRenderBlockFlowOrRenderButton(RenderElement& renderElement)
+static inline bool NODELETE isRenderBlockFlowOrRenderButton(RenderElement& renderElement)
 {
     // We include isRenderButton in this check because buttons are implemented
     // using flex box but should still support first-line|first-letter.

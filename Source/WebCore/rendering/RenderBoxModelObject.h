@@ -261,7 +261,7 @@ public:
         ContinuationChainNode(RenderBoxModelObject&);
         ~ContinuationChainNode();
 
-        void insertAfter(ContinuationChainNode&);
+        void NODELETE insertAfter(ContinuationChainNode&);
     };
 
     ContinuationChainNode* continuationChainNode() const;

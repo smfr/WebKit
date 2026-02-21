@@ -317,7 +317,7 @@ void RenderVideo::styleDidChange(Style::Difference difference, const RenderStyle
         setNeedsLayout();
 }
 
-HTMLVideoElement& RenderVideo::videoElement() const
+HTMLVideoElement& NODELETE RenderVideo::videoElement() const
 {
     return downcast<HTMLVideoElement>(RenderMedia::mediaElement());
 }

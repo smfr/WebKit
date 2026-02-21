@@ -49,7 +49,7 @@ private:
 
     bool requiresLayer() const override;
 
-    bool isFullScreenIFrame() const;
+    bool NODELETE isFullScreenIFrame() const;
 };
 
 } // namespace WebCore

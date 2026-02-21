@@ -108,7 +108,7 @@ FloatRect selectionRectForTextFragment(const RenderSVGInlineText& renderer, Text
     return snappedSelectionRect;
 }
 
-static inline bool textShouldBePainted(const RenderSVGInlineText& textRenderer)
+static inline bool NODELETE textShouldBePainted(const RenderSVGInlineText& textRenderer)
 {
     return textRenderer.scaledFont().size() >= 0.5;
 }
@@ -414,7 +414,7 @@ static inline float positionOffsetForDecoration(Style::TextDecorationLine decora
     return 0.0f;
 }
 
-static inline float thicknessForDecoration(Style::TextDecorationLine, const FontCascade& font)
+static inline float NODELETE thicknessForDecoration(Style::TextDecorationLine, const FontCascade& font)
 {
     // FIXME: For SVG Fonts we need to use the attributes defined in the <font-face> if specified.
     // Compatible with Batik/Opera

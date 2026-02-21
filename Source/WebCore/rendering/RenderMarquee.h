@@ -75,7 +75,7 @@ private:
     int speed() const { return m_speed; }
     int marqueeSpeed() const;
 
-    MarqueeDirection direction() const;
+    MarqueeDirection NODELETE direction() const;
 
     int computePosition(MarqueeDirection, bool stopAtClientEdge);
 

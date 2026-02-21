@@ -288,7 +288,6 @@ layout/integration/LayoutIntegrationFormattingContextLayout.cpp
 layout/integration/flex/LayoutIntegrationFlexLayout.cpp
 layout/integration/flex/LayoutIntegrationFlexLayout.h
 layout/integration/inline/InlineIteratorBox.cpp
-layout/integration/inline/InlineIteratorBoxLegacyPath.h
 layout/integration/inline/InlineIteratorBoxModernPath.h
 layout/integration/inline/InlineIteratorInlineBox.cpp
 layout/integration/inline/InlineIteratorLineBox.cpp
@@ -408,7 +407,6 @@ platform/mock/MockRealtimeVideoSource.cpp
 platform/text/cocoa/LocalizedDateCache.mm
 [ Mac ] plugins/PluginData.cpp
 rendering/AccessibilityRegionContext.cpp
-rendering/AncestorSubgridIterator.cpp
 rendering/AttachmentLayout.mm
 rendering/AutoTableLayout.cpp
 rendering/BackgroundPainter.cpp
@@ -550,7 +548,6 @@ rendering/style/RenderStyle+SettersInlines.h
 rendering/style/RenderStyle.cpp
 rendering/style/RenderStyle.h
 rendering/svg/RenderSVGBlock.cpp
-rendering/svg/RenderSVGContainer.cpp
 rendering/svg/RenderSVGImage.cpp
 rendering/svg/RenderSVGInline.cpp
 rendering/svg/RenderSVGInlineText.cpp
@@ -559,7 +556,6 @@ rendering/svg/RenderSVGPath.cpp
 rendering/svg/RenderSVGResourceClipper.cpp
 rendering/svg/RenderSVGResourceFilterInlines.h
 rendering/svg/RenderSVGResourceFilterPrimitive.cpp
-rendering/svg/RenderSVGResourceMarker.cpp
 rendering/svg/RenderSVGRoot.cpp
 rendering/svg/RenderSVGShape.cpp
 rendering/svg/RenderSVGText.cpp

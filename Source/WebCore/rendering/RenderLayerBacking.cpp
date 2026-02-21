@@ -163,7 +163,7 @@ public:
     }
 
 #if HAVE(SUPPORT_HDR_DISPLAY)
-    void setDetectsHDRContent()
+    void NODELETE setDetectsHDRContent()
     {
         m_hdrContent = RequestState::Unknown;
         m_rendererHDRContent = RequestState::Unknown;
@@ -178,7 +178,7 @@ public:
     }
 
 
-    bool isPaintsContentSatisfied() const
+    bool NODELETE isPaintsContentSatisfied() const
     {
 #if HAVE(SUPPORT_HDR_DISPLAY)
         if (m_hdrContent == RequestState::Unknown)
@@ -202,7 +202,7 @@ public:
     }
 #endif
 
-    bool isContentsTypeSatisfied() const
+    bool NODELETE isContentsTypeSatisfied() const
     {
 #if HAVE(SUPPORT_HDR_DISPLAY)
         if (m_rendererHDRContent == RequestState::Unknown)
@@ -979,7 +979,7 @@ void RenderLayerBacking::updateAppleVisualEffect(const RenderStyle& style)
 }
 #endif
 
-static bool layerOrAncestorIsTransformedOrUsingCompositedScrolling(RenderLayer& layer)
+static bool NODELETE layerOrAncestorIsTransformedOrUsingCompositedScrolling(RenderLayer& layer)
 {
     for (auto* curr = &layer; curr; curr = curr->parent()) {
         if (curr->isTransformed() || curr->hasCompositedScrollableOverflow())

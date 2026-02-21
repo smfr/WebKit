@@ -61,7 +61,7 @@ enum class ClippingMode {
     MaskClipping
 };
 
-static ClippingMode& currentClippingMode()
+static ClippingMode& NODELETE currentClippingMode()
 {
     static ClippingMode s_clippingMode { ClippingMode::NoClipping };
     return s_clippingMode;

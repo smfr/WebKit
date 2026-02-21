@@ -49,7 +49,7 @@ public:
     bool isTableColumn() const { return style().display() == Style::DisplayType::TableColumn; }
     bool isTableColumnGroup() const { return style().display() == Style::DisplayType::TableColumnGroup; }
 
-    RenderTableCol* enclosingColumnGroup() const;
+    RenderTableCol* NODELETE enclosingColumnGroup() const;
     RenderTableCol* enclosingColumnGroupIfAdjacentBefore() const;
     RenderTableCol* enclosingColumnGroupIfAdjacentAfter() const;
 
@@ -87,8 +87,8 @@ private:
     void styleDidChange(Style::Difference, const RenderStyle* oldStyle) override;
     void paint(PaintInfo&, const LayoutPoint&) override { }
 
-    RenderTable* table() const;
-    CheckedPtr<RenderTable> checkedTable() const;
+    RenderTable* NODELETE table() const;
+    CheckedPtr<RenderTable> NODELETE checkedTable() const;
 
     unsigned m_span { 1 };
 };

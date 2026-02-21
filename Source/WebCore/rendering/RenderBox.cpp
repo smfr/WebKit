@@ -443,7 +443,7 @@ void RenderBox::styleDidChange(Style::Difference diff, const RenderStyle* oldSty
         layoutContext().invalidateAnchorDependenciesForScroller(*this);
 }
 
-static bool hasEquivalentGridPositioningStyle(const RenderStyle& style, const RenderStyle& oldStyle)
+static bool NODELETE hasEquivalentGridPositioningStyle(const RenderStyle& style, const RenderStyle& oldStyle)
 {
     return oldStyle.gridItemColumnStart() == style.gridItemColumnStart()
         && oldStyle.gridItemColumnEnd() == style.gridItemColumnEnd()
@@ -3211,7 +3211,7 @@ RenderBoxFragmentInfo* RenderBox::renderBoxFragmentInfo(RenderFragmentContainer*
     return nullptr;
 }
 
-static bool shouldFlipBeforeAfterMargins(WritingMode containingBlockWritingMode, WritingMode childWritingMode)
+static bool NODELETE shouldFlipBeforeAfterMargins(WritingMode containingBlockWritingMode, WritingMode childWritingMode)
 {
     ASSERT(containingBlockWritingMode.isOrthogonal(childWritingMode));
     auto childBlockFlowDirection = childWritingMode.blockDirection();
@@ -3516,7 +3516,7 @@ std::optional<LayoutUnit> RenderBox::computeContentLogicalHeight(const Style::Fl
     return computeContentLogicalHeightGeneric(logicalHeight, intrinsicContentHeight);
 }
 
-static inline bool isOrthogonal(const RenderBox& renderer, const RenderElement& ancestor)
+static inline bool NODELETE isOrthogonal(const RenderBox& renderer, const RenderElement& ancestor)
 {
     return renderer.isHorizontalWritingMode() != ancestor.isHorizontalWritingMode();
 }
@@ -3680,7 +3680,7 @@ bool RenderBox::skipContainingBlockForPercentHeightCalculation(const RenderBox& 
     return document().inQuirksMode() && !containingBlock.isRenderTableCell() && !containingBlock.isOutOfFlowPositioned() && !containingBlock.isRenderGrid() && !containingBlock.isFlexibleBoxIncludingDeprecated() && containingBlock.style().logicalHeight().isAuto();
 }
 
-static bool tableCellShouldHaveZeroInitialSize(const RenderTableCell& tableCell, const RenderBox& child, bool scrollsOverflowY)
+static bool NODELETE tableCellShouldHaveZeroInitialSize(const RenderTableCell& tableCell, const RenderBox& child, bool scrollsOverflowY)
 {
     // Normally we would let the cell size intrinsically, but scrolling overflow has to be
     // treated differently, since WinIE lets scrolled overflow fragments shrink as needed.
@@ -4437,7 +4437,7 @@ void RenderBox::addVisualEffectOverflow()
         fragmentedFlow->addFragmentsVisualEffectOverflow(*this);
 }
 
-static void convertOutsetsToOverflowCoordinates(LayoutBoxExtent& outsets, WritingMode writingMode)
+static void NODELETE convertOutsetsToOverflowCoordinates(LayoutBoxExtent& outsets, WritingMode writingMode)
 {
     switch (writingMode.blockDirection()) {
     case FlowDirection::TopToBottom:

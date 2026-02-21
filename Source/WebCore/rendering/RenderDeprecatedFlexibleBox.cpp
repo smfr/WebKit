@@ -72,7 +72,7 @@ public:
         reset();
     }
 
-    void reset()
+    void NODELETE reset()
     {
         m_currentChild = nullptr;
         m_ordinalIteration = std::numeric_limits<unsigned>::max();
@@ -155,7 +155,7 @@ static LayoutUnit marginWidthForChild(RenderBox* child)
     return margin;
 }
 
-static bool childDoesNotAffectWidthOrFlexing(RenderObject* child)
+static bool NODELETE childDoesNotAffectWidthOrFlexing(RenderObject* child)
 {
     // Positioned children don't affect the min/max width.
     return child->isOutOfFlowPositioned();

@@ -1410,7 +1410,7 @@ public:
         }
     }
 
-    CollapsedBorder* nextBorder()
+    CollapsedBorder* NODELETE nextBorder()
     {
         for (unsigned i = 0; i < m_count; i++) {
             if (m_borders[i].borderValue.exists() && m_borders[i].shouldPaint) {
@@ -1520,7 +1520,7 @@ void RenderTableCell::paintCollapsedBorders(PaintInfo& paintInfo, const LayoutPo
     }
 }
 
-static LayoutRect backgroundRectForRow(const RenderBox& tableRow, const RenderTable& table)
+static LayoutRect NODELETE backgroundRectForRow(const RenderBox& tableRow, const RenderTable& table)
 {
     LayoutRect rect = tableRow.frameRect();
     if (!table.collapseBorders()) {
@@ -1535,7 +1535,7 @@ static LayoutRect backgroundRectForRow(const RenderBox& tableRow, const RenderTa
     return rect;
 }
 
-static LayoutRect backgroundRectForSection(const RenderTableSection& tableSection, const RenderTable& table)
+static LayoutRect NODELETE backgroundRectForSection(const RenderTableSection& tableSection, const RenderTable& table)
 {
     LayoutRect rect = { { }, tableSection.size() };
     if (!table.collapseBorders()) {

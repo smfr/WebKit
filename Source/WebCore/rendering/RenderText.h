@@ -124,9 +124,9 @@ public:
 
     float hangablePunctuationStartWidth(unsigned index) const;
     float hangablePunctuationEndWidth(unsigned index) const;
-    unsigned firstCharacterIndexStrippingSpaces() const;
-    unsigned lastCharacterIndexStrippingSpaces() const;
-    static bool isHangableStopOrComma(char16_t);
+    unsigned NODELETE firstCharacterIndexStrippingSpaces() const;
+    unsigned NODELETE lastCharacterIndexStrippingSpaces() const;
+    static bool NODELETE isHangableStopOrComma(char16_t);
     
     WEBCORE_EXPORT virtual IntRect linesBoundingBox() const;
     WEBCORE_EXPORT IntPoint firstRunLocation() const;
@@ -177,7 +177,7 @@ public:
 
     Vector<std::pair<unsigned, unsigned>> contentRangesBetweenOffsetsForType(const DocumentMarkerType, unsigned startOffset, unsigned endOffset) const;
 
-    RenderInline* inlineWrapperForDisplayContents();
+    RenderInline* NODELETE inlineWrapperForDisplayContents();
     void setInlineWrapperForDisplayContents(RenderInline*);
 
     template <typename MeasureTextCallback>
@@ -268,8 +268,8 @@ String applyTextTransform(const RenderStyle&, const String&, Vector<char16_t> pr
 String applyTextTransform(const RenderStyle&, const String&);
 String capitalize(const String&, Vector<char16_t> previousCharacter);
 String capitalize(const String&);
-TextBreakIterator::LineMode::Behavior mapLineBreakToIteratorMode(LineBreak);
-TextBreakIterator::ContentAnalysis mapWordBreakToContentAnalysis(WordBreak);
+TextBreakIterator::LineMode::Behavior NODELETE mapLineBreakToIteratorMode(LineBreak);
+TextBreakIterator::ContentAnalysis NODELETE mapWordBreakToContentAnalysis(WordBreak);
 
 inline char16_t RenderText::characterAt(unsigned i) const
 {

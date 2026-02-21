@@ -217,7 +217,7 @@ public:
     
     void markForPaginationRelayoutIfNeeded() final;
 
-    void willInsertTableColumn(RenderTableCol& child, RenderObject* beforeChild);
+    void NODELETE willInsertTableColumn(RenderTableCol& child, RenderObject* beforeChild);
     void willInsertTableSection(RenderTableSection& child, RenderObject* beforeChild);
 
     LayoutUnit sumCaptionsLogicalHeight() const;

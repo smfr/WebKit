@@ -1530,7 +1530,7 @@ Vector<LayoutUnit> RenderGrid::trackSizesForComputedStyle(Style::GridTrackSizing
     return tracks;
 }
 
-static const StyleContentAlignmentData& contentAlignmentNormalBehaviorGrid()
+static const StyleContentAlignmentData& NODELETE contentAlignmentNormalBehaviorGrid()
 {
     static const StyleContentAlignmentData normalBehavior = {ContentPosition::Normal, ContentDistribution::Stretch};
     return normalBehavior;
@@ -2318,7 +2318,7 @@ std::pair<LayoutUnit, LayoutUnit> RenderGrid::gridAreaPositionForInFlowGridItem(
     return { start, end };
 }
 
-std::pair<OverflowAlignment, ContentPosition> static resolveContentDistributionFallback(ContentDistribution distribution)
+std::pair<OverflowAlignment, ContentPosition> static NODELETE resolveContentDistributionFallback(ContentDistribution distribution)
 {
     switch (distribution) {
     case ContentDistribution::SpaceBetween:

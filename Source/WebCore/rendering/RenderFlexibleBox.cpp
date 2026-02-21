@@ -358,7 +358,7 @@ std::optional <LayoutUnit> RenderFlexibleBox::lastLineBaseline() const
     return (settings().subpixelInlineLayoutEnabled() ? LayoutUnit(baselineFlexItem->logicalTop()) : LayoutUnit(baselineFlexItem->logicalTop().toInt())) + *baseline;
 }
 
-static const StyleContentAlignmentData& contentAlignmentNormalBehavior()
+static const StyleContentAlignmentData& NODELETE contentAlignmentNormalBehavior()
 {
     // The justify-content property applies along the main axis, but since
     // flexing in the main axis is controlled by flex, stretch behaves as
@@ -559,17 +559,17 @@ bool RenderFlexibleBox::isColumnFlow() const
     return style().isColumnFlexDirection();
 }
 
-bool RenderFlexibleBox::isColumnOrRowReverse() const
+bool NODELETE RenderFlexibleBox::isColumnOrRowReverse() const
 {
     return style().flexDirection() == FlexDirection::ColumnReverse || style().flexDirection() == FlexDirection::RowReverse;
 }
 
-bool RenderFlexibleBox::isWrapReverse() const
+bool NODELETE RenderFlexibleBox::isWrapReverse() const
 {
     return style().flexWrap() == FlexWrap::Reverse;
 }
 
-bool RenderFlexibleBox::isHorizontalFlow() const
+bool NODELETE RenderFlexibleBox::isHorizontalFlow() const
 {
     if (isHorizontalWritingMode())
         return !isColumnFlow();
@@ -583,7 +583,7 @@ bool RenderFlexibleBox::isLeftToRightFlow() const
     return writingMode().isLogicalLeftInlineStart() ^ (style().flexDirection() == FlexDirection::RowReverse);
 }
 
-RenderFlexibleBox::Direction RenderFlexibleBox::crossAxisDirection() const
+RenderFlexibleBox::Direction NODELETE RenderFlexibleBox::crossAxisDirection() const
 {
     auto crossAxisDirection = style().isRowFlexDirection() ? writingMode().blockDirection() : writingMode().inlineDirection();
     switch (crossAxisDirection) {
@@ -2046,7 +2046,7 @@ static LayoutUnit justifyContentSpaceBetweenFlexItems(LayoutUnit availableFreeSp
     return 0;
 }
 
-static LayoutUnit alignmentOffset(LayoutUnit availableFreeSpace, ItemPosition position, std::optional<LayoutUnit> ascent, std::optional<LayoutUnit> maxAscent, bool isWrapReverse)
+static LayoutUnit NODELETE alignmentOffset(LayoutUnit availableFreeSpace, ItemPosition position, std::optional<LayoutUnit> ascent, std::optional<LayoutUnit> maxAscent, bool isWrapReverse)
 {
     switch (position) {
     case ItemPosition::Legacy:

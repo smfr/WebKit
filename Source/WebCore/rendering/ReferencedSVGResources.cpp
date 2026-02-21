@@ -58,7 +58,7 @@ public:
 
     void resourceChanged(SVGElement&) final;
 
-    const RenderElement& renderer() const final { return m_clientRenderer.get(); }
+    const RenderElement& NODELETE renderer() const final { return m_clientRenderer.get(); }
 
 private:
     const CheckedRef<RenderElement> m_clientRenderer;

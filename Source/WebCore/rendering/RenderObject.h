@@ -346,7 +346,7 @@ public:
     Type type() const { return m_type; }
     Layout::Box* layoutBox() { return m_layoutBox.get(); }
     const Layout::Box* layoutBox() const { return m_layoutBox.get(); }
-    void setLayoutBox(Layout::Box&);
+    void NODELETE setLayoutBox(Layout::Box&);
     void clearLayoutBox();
 
     WEBCORE_EXPORT RenderTheme& theme() const;
@@ -610,7 +610,7 @@ public:
     // to inherit from RenderSVGObject -> RenderObject (some need RenderBlock inheritance for instance)
     void invalidateCachedBoundaries();
     bool usesBoundaryCaching() const;
-    virtual void setNeedsBoundariesUpdate();
+    virtual void NODELETE setNeedsBoundariesUpdate();
     virtual void setNeedsTransformUpdate() { }
 
     // Per SVG 1.1 objectBoundingBox ignores clipping, masking, filter effects, opacity and stroke-width.
@@ -645,7 +645,7 @@ public:
 
     // This only returns the transform="" value from the element
     // most callsites want localToParentTransform() instead.
-    virtual AffineTransform localTransform() const;
+    virtual AffineTransform NODELETE localTransform() const;
 
     // Returns the full transform mapping from local coordinates to local coords for the parent SVG renderer
     // This includes any viewport transforms and x/y offsets as well as the transform="" value off the element.
@@ -732,7 +732,7 @@ public:
     bool effectiveCapturedInViewTransition() const;
 
     inline RenderView& view() const; // Defined in RenderObjectDocument.h
-    CheckedRef<RenderView> checkedView() const;
+    CheckedRef<RenderView> NODELETE checkedView() const;
     inline LocalFrameViewLayoutContext& layoutContext() const;
 
     HostWindow* hostWindow() const;

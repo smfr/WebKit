@@ -191,7 +191,7 @@ static inline void dirtyLineBoxesForRenderer(RenderObject& renderer)
         renderInline->deleteLegacyLineBoxes();
 }
 
-static bool parentIsConstructedOrHaveNext(LegacyInlineFlowBox* parentBox)
+static bool NODELETE parentIsConstructedOrHaveNext(LegacyInlineFlowBox* parentBox)
 {
     do {
         if (parentBox->isConstructed() || parentBox->nextOnLine())

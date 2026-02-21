@@ -204,7 +204,7 @@ void SVGRenderingContext::prepareToRenderSVGContent(RenderElement& renderer, Pai
     m_renderingFlags |= RenderingPrepared;
 }
 
-static AffineTransform& currentContentTransformation()
+static AffineTransform& NODELETE currentContentTransformation()
 {
     static NeverDestroyed<AffineTransform> s_currentContentTransformation;
     return s_currentContentTransformation;

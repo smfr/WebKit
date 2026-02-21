@@ -78,7 +78,7 @@ public:
 
     void scrollDidEnd() final;
 
-    bool isScrollableOrRubberbandable() final;
+    bool NODELETE isScrollableOrRubberbandable() final;
 
 private:
     bool isVisibleToHitTesting() const final;
@@ -136,7 +136,7 @@ private:
     ScrollPosition maximumScrollPosition() const final;
 
     void invalidateScrollbarRect(Scrollbar&, const IntRect&) final;
-    bool isActive() const final;
+    bool NODELETE isActive() const final;
     bool isScrollCornerVisible() const final { return false; } // We don't support resize on list boxes yet. If we did these would have to change.
     IntRect scrollCornerRect() const final { return IntRect(); }
     void invalidateScrollCornerRect(const IntRect&) final { }
@@ -144,19 +144,19 @@ private:
     IntRect convertFromContainingViewToScrollbar(const Scrollbar&, const IntRect&) const final;
     IntPoint convertFromScrollbarToContainingView(const Scrollbar&, const IntPoint&) const final;
     IntPoint convertFromContainingViewToScrollbar(const Scrollbar&, const IntPoint&) const final;
-    Scrollbar* verticalScrollbar() const final;
-    Scrollbar* horizontalScrollbar() const final;
+    Scrollbar* NODELETE verticalScrollbar() const final;
+    Scrollbar* NODELETE horizontalScrollbar() const final;
     IntSize contentsSize() const final;
     IntSize visibleSize() const final { return IntSize(width(), height()); }
     IntPoint lastKnownMousePositionInView() const final;
     bool isHandlingWheelEvent() const final;
     bool shouldSuspendScrollAnimations() const final;
-    bool forceUpdateScrollbarsOnMainThreadForPerformanceTesting() const final;
+    bool NODELETE forceUpdateScrollbarsOnMainThreadForPerformanceTesting() const final;
 
     ScrollableArea* enclosingScrollableArea() const final;
     bool hasScrollableOrRubberbandableAncestor() final;
     IntRect scrollableAreaBoundingBox(bool* = nullptr) const final;
-    bool mockScrollbarsControllerEnabled() const final;
+    bool NODELETE mockScrollbarsControllerEnabled() const final;
     void logMockScrollbarsControllerMessage(const String&) const final;
     String debugDescription() const final;
     void didStartScrollAnimation() final;
@@ -191,7 +191,7 @@ private:
 
     std::optional<int> optionRowIndex(const HTMLOptionElement&) const;
 
-    float deviceScaleFactor() const final;
+    float NODELETE deviceScaleFactor() const final;
 
     LayoutRect rectForScrollbar(const Scrollbar&) const;
 
@@ -200,7 +200,7 @@ private:
     void paintItemBackground(PaintInfo&, const LayoutPoint&, int listIndex);
     void scrollToRevealSelection();
 
-    ScrollbarOrientation scrollbarOrientationForWritingMode() const;
+    ScrollbarOrientation NODELETE scrollbarOrientationForWritingMode() const;
 
     bool shouldPlaceVerticalScrollbarOnLeft() const final { return RenderBlockFlow::shouldPlaceVerticalScrollbarOnLeft(); }
 

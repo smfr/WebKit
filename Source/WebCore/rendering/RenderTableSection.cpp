@@ -506,7 +506,7 @@ LayoutUnit RenderTableSection::distributeExtraLogicalHeightToRows(LayoutUnit ext
     return extraLogicalHeight - remainingExtraLogicalHeight;
 }
 
-static bool shouldFlexCellChild(const RenderTableCell& cell, const RenderBox& cellDescendant)
+static bool NODELETE shouldFlexCellChild(const RenderTableCell& cell, const RenderBox& cellDescendant)
 {
     if (!cell.style().logicalHeight().isSpecified())
         return false;
@@ -957,14 +957,14 @@ void RenderTableSection::paint(PaintInfo& paintInfo, const LayoutPoint& paintOff
         paintOutline(paintInfo, LayoutRect(adjustedPaintOffset, size()));
 }
 
-static inline bool compareCellPositions(const SingleThreadWeakPtr<RenderTableCell>& elem1, const SingleThreadWeakPtr<RenderTableCell>& elem2)
+static inline bool NODELETE compareCellPositions(const SingleThreadWeakPtr<RenderTableCell>& elem1, const SingleThreadWeakPtr<RenderTableCell>& elem2)
 {
     return elem1->rowIndex() < elem2->rowIndex();
 }
 
 // This comparison is used only when we have overflowing cells as we have an unsorted array to sort. We thus need
 // to sort both on rows and columns to properly repaint.
-static inline bool compareCellPositionsWithOverflowingCells(const SingleThreadWeakPtr<RenderTableCell>& elem1, const SingleThreadWeakPtr<RenderTableCell>& elem2)
+static inline bool NODELETE compareCellPositionsWithOverflowingCells(const SingleThreadWeakPtr<RenderTableCell>& elem1, const SingleThreadWeakPtr<RenderTableCell>& elem2)
 {
     if (elem1->rowIndex() != elem2->rowIndex())
         return elem1->rowIndex() < elem2->rowIndex();
@@ -1268,7 +1268,7 @@ void RenderTableSection::paintRowGroupBorderIfRequired(const PaintInfo& paintInf
 
 }
 
-static BoxSide physicalBorderForDirection(const WritingMode writingMode, CollapsedBorderSide side)
+static BoxSide NODELETE physicalBorderForDirection(const WritingMode writingMode, CollapsedBorderSide side)
 {
     // FIXME: Replace this with types/methods from BoxSides.h
     switch (side) {

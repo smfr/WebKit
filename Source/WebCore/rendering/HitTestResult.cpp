@@ -152,7 +152,7 @@ HitTestResult& HitTestResult::operator=(const HitTestResult& other)
     return *this;
 }
 
-static Node* moveOutOfUserAgentShadowTree(Node& node)
+static Node* NODELETE moveOutOfUserAgentShadowTree(Node& node)
 {
     if (node.isInShadowTree()) {
         if (ShadowRoot* root = node.containingShadowRoot()) {

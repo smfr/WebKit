@@ -2040,7 +2040,7 @@ static inline bool needsAppleMailPaginationQuirk(const RenderBlockFlow& renderer
     return false;
 }
 
-static void clearShouldBreakAtLineToAvoidWidowIfNeeded(RenderBlockFlow& blockFlow)
+static void NODELETE clearShouldBreakAtLineToAvoidWidowIfNeeded(RenderBlockFlow& blockFlow)
 {
     if (!blockFlow.shouldBreakAtLineToAvoidWidow())
         return;
@@ -4007,7 +4007,7 @@ bool RenderBlockFlow::layoutSimpleBlockContentInInline(MarginInfo& marginInfo)
     return true;
 }
 
-static bool hasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(const RenderStyle& rootStyle)
+static bool NODELETE hasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(const RenderStyle& rootStyle)
 {
     if (rootStyle.textAlign() != Style::TextAlign::Start)
         return false;
@@ -4360,7 +4360,7 @@ static inline bool resizeTextPermitted(const RenderObject& renderer)
     return true;
 }
 
-static bool isNonBlocksOrNonFixedHeightListItems(const RenderObject& renderer)
+static bool NODELETE isNonBlocksOrNonFixedHeightListItems(const RenderObject& renderer)
 {
     if (!renderer.isRenderBlock())
         return true;
@@ -4615,7 +4615,7 @@ struct InlineMinMaxIterator {
         }
 
     RenderObject* next();
-    bool isEndOfInline() const { return m_isEndOfInline; }
+    bool NODELETE isEndOfInline() const { return m_isEndOfInline; }
 
 private:
     const RenderBlockFlow& m_blockContainer;

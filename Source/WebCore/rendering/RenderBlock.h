@@ -126,7 +126,7 @@ public:
     GapRects selectionGapRectsForRepaint(const RenderLayerModelObject* repaintContainer);
     LayoutRect logicalLeftSelectionGap(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock, RenderElement* selObj, LayoutUnit logicalLeft, LayoutUnit logicalTop, LayoutUnit logicalHeight, const LogicalSelectionOffsetCaches&, const PaintInfo*);
     LayoutRect logicalRightSelectionGap(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock, RenderElement* selObj, LayoutUnit logicalRight, LayoutUnit logicalTop, LayoutUnit logicalHeight, const LogicalSelectionOffsetCaches&, const PaintInfo*);
-    void getSelectionGapInfo(HighlightState, bool& leftGap, bool& rightGap);
+    void NODELETE getSelectionGapInfo(HighlightState, bool& leftGap, bool& rightGap);
     bool isSelectionRoot() const;
 
     LayoutRect logicalRectToPhysicalRect(const LayoutPoint& physicalPosition, const LayoutRect& logicalRect);
@@ -223,7 +223,7 @@ public:
 
     RenderFragmentedFlow* NODELETE cachedEnclosingFragmentedFlow() const;
     void setCachedEnclosingFragmentedFlowNeedsUpdate();
-    virtual bool cachedEnclosingFragmentedFlowNeedsUpdate() const;
+    virtual bool NODELETE cachedEnclosingFragmentedFlowNeedsUpdate() const;
     void resetEnclosingFragmentedFlowAndChildInfoIncludingDescendants(RenderFragmentedFlow* = nullptr) final;
 
     std::optional<LayoutUnit> availableLogicalHeightForPercentageComputation() const;

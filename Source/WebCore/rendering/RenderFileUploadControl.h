@@ -57,7 +57,7 @@ private:
 
     PositionWithAffinity positionForPoint(const LayoutPoint&, HitTestSource, const RenderFragmentContainer*) override;
 
-    HTMLInputElement* uploadButton() const;
+    HTMLInputElement* NODELETE uploadButton() const;
 
     bool m_canReceiveDroppedFiles;
 };

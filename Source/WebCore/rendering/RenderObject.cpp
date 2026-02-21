@@ -891,7 +891,7 @@ LayoutRect RenderObject::paintingRootRect(LayoutRect& topLevelRect)
     return result;
 }
 
-static inline bool canRelyOnAncestorLayerFullRepaint(const RenderObject& rendererToRepaint, const RenderLayer& ancestorLayer)
+static inline bool NODELETE canRelyOnAncestorLayerFullRepaint(const RenderObject& rendererToRepaint, const RenderLayer& ancestorLayer)
 {
     auto* renderElement = dynamicDowncast<RenderElement>(rendererToRepaint);
     if (!renderElement || !renderElement->hasSelfPaintingLayer())
@@ -2611,7 +2611,7 @@ static bool shouldRenderSelectionOnSeparateLine(const RenderObject* currentRende
     return false;
 }
 
-static bool hasAncestorWithSelectionOnSeparateLine(RenderObject* descendant, const RenderObject* stayWithin)
+static bool NODELETE hasAncestorWithSelectionOnSeparateLine(RenderObject* descendant, const RenderObject* stayWithin)
 {
     for (CheckedPtr current = descendant; current; current = current->parent()) {
         if (current->isOutOfFlowPositioned())
@@ -2624,7 +2624,7 @@ static bool hasAncestorWithSelectionOnSeparateLine(RenderObject* descendant, con
     return false;
 }
 
-static bool shouldRenderPreviousSelectionOnSeparateLine(RenderObject* previousRenderer, const RenderObject* stayWithin)
+static bool NODELETE shouldRenderPreviousSelectionOnSeparateLine(RenderObject* previousRenderer, const RenderObject* stayWithin)
 {
     if (!previousRenderer || !stayWithin)
         return false;

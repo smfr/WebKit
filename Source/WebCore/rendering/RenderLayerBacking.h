@@ -129,7 +129,7 @@ public:
     bool needsRepaintOnCompositedScroll() const;
 
     bool requiresBackgroundLayer() const { return m_requiresBackgroundLayer; }
-    void setRequiresBackgroundLayer(bool);
+    void NODELETE setRequiresBackgroundLayer(bool);
 
     bool hasScrollingLayer() const { return m_scrollContainerLayer != nullptr; }
     GraphicsLayer* scrollContainerLayer() const { return m_scrollContainerLayer.get(); }
@@ -162,7 +162,7 @@ public:
 
     bool hasMaskLayer() const { return m_maskLayer; }
 
-    WEBCORE_EXPORT GraphicsLayer* parentForSublayers() const;
+    WEBCORE_EXPORT GraphicsLayer* NODELETE parentForSublayers() const;
     GraphicsLayer* childForSuperlayers() const;
     GraphicsLayer* childForSuperlayersExcludingViewTransitions() const;
 
@@ -199,9 +199,9 @@ public:
     void updateAcceleratedEffectsAndBaseValues(HashSet<Ref<AcceleratedTimeline>>&);
 #endif
 
-    WEBCORE_EXPORT LayoutRect compositedBounds() const;
+    WEBCORE_EXPORT LayoutRect NODELETE compositedBounds() const;
     // Returns true if changed.
-    bool setCompositedBounds(const LayoutRect&);
+    bool NODELETE setCompositedBounds(const LayoutRect&);
     // Returns true if changed.
     bool updateCompositedBounds();
     
@@ -212,7 +212,7 @@ public:
     void updateEventRegion();
     
     bool needsEventRegionUpdate() const { return m_needsEventRegionUpdate; }
-    void setNeedsEventRegionUpdate(bool needsUpdate = true);
+    void NODELETE setNeedsEventRegionUpdate(bool needsUpdate = true);
 #endif
 
 #if ENABLE(INTERACTION_REGIONS_IN_EVENT_REGION)
@@ -363,7 +363,7 @@ private:
 
     void setBackgroundLayerPaintsFixedRootBackground(bool);
 
-    LayoutSize contentOffsetInCompositingLayer() const;
+    LayoutSize NODELETE contentOffsetInCompositingLayer() const;
     LayoutSize offsetRelativeToRendererOriginForDescendantLayers() const;
     
     void ensureClippingStackLayers(LayerAncestorClippingStack&);
@@ -433,8 +433,8 @@ private:
     
     void paintDebugOverlays(const GraphicsLayer*, GraphicsContext&);
 
-    static CSSPropertyID graphicsLayerToCSSProperty(AnimatedProperty);
-    static AnimatedProperty cssToGraphicsLayerProperty(CSSPropertyID);
+    static CSSPropertyID NODELETE graphicsLayerToCSSProperty(AnimatedProperty);
+    static AnimatedProperty NODELETE cssToGraphicsLayerProperty(CSSPropertyID);
 
     bool canIssueSetNeedsDisplay() const { return !paintsIntoWindow() && !paintsIntoCompositedAncestor(); }
     LayoutRect computeParentGraphicsLayerRect(const RenderLayer* compositedAncestor) const;

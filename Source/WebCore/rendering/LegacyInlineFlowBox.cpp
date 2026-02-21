@@ -74,7 +74,7 @@ void LegacyInlineFlowBox::setHasBadChildList()
 
 #endif
 
-static void setHasTextDescendantsOnAncestors(LegacyInlineFlowBox* box)
+static void NODELETE setHasTextDescendantsOnAncestors(LegacyInlineFlowBox* box)
 {
     while (box && !box->hasTextDescendants()) {
         box->setHasTextDescendants();

@@ -128,7 +128,7 @@ void RenderInline::updateFromStyle()
     setHasReflection(false);    
 }
 
-static RenderElement* inFlowPositionedInlineAncestor(RenderElement* p)
+static RenderElement* NODELETE inFlowPositionedInlineAncestor(RenderElement* p)
 {
     while (p && p->isRenderInline()) {
         if (p->isInFlowPositioned())

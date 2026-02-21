@@ -37,7 +37,7 @@ public:
     double animationProgress() const;
     MonotonicTime animationStartTime() const { return m_animationStartTime; }
 
-    bool isDeterminate() const;
+    bool NODELETE isDeterminate() const;
     void updateFromElement() override;
 
     HTMLProgressElement* NODELETE progressElement() const;

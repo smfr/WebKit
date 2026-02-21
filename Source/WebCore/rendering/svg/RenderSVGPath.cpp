@@ -190,7 +190,7 @@ void RenderSVGPath::strokeZeroLengthSubpaths(GraphicsContext& context) const
     }
 }
 
-static inline RenderSVGResourceMarker* markerForType(SVGMarkerType type, RenderSVGResourceMarker* markerStart, RenderSVGResourceMarker* markerMid, RenderSVGResourceMarker* markerEnd)
+static inline RenderSVGResourceMarker* NODELETE markerForType(SVGMarkerType type, RenderSVGResourceMarker* markerStart, RenderSVGResourceMarker* markerMid, RenderSVGResourceMarker* markerEnd)
 {
     switch (type) {
     case StartMarker:

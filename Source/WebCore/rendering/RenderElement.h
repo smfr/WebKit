@@ -105,7 +105,7 @@ public:
     RenderObject* firstInFlowChild() const;
     RenderObject* lastInFlowChild() const;
 
-    Layout::ElementBox* layoutBox();
+    Layout::ElementBox* NODELETE layoutBox();
     const Layout::ElementBox* layoutBox() const;
 
     // Note that even if these 2 "canContain" functions return true for a particular renderer, it does not necessarily mean the renderer is the containing block (see containingBlockForAbsolute(Fixed)Position).
@@ -148,8 +148,8 @@ public:
     virtual void dirtyLineFromChangedChild() { }
 
     void setChildNeedsLayout(MarkingBehavior = MarkContainingBlockChain);
-    void setOutOfFlowChildNeedsStaticPositionLayout();
-    void clearChildNeedsLayout();
+    void NODELETE setOutOfFlowChildNeedsStaticPositionLayout();
+    void NODELETE clearChildNeedsLayout();
     void setNeedsOutOfFlowMovementLayout(const RenderStyle* oldStyle);
     void setNeedsLayoutForStyleDifference(Style::Difference, const RenderStyle* oldStyle);
     void setNeedsLayoutForOverflowChange();
@@ -338,9 +338,9 @@ public:
 
     inline bool hasPotentiallyScrollableOverflow() const;
 
-    inline bool isBeforeContent() const;
-    inline bool isAfterContent() const;
-    inline bool isBeforeOrAfterContent() const;
+    inline bool NODELETE isBeforeContent() const;
+    inline bool NODELETE isAfterContent() const;
+    inline bool NODELETE isBeforeOrAfterContent() const;
     static bool isBeforeContent(const RenderElement*);
     static bool isAfterContent(const RenderElement*);
     static bool isBeforeOrAfterContent(const RenderElement*);
@@ -351,7 +351,7 @@ protected:
     RenderElement(Type, Element&, RenderStyle&&, OptionSet<TypeFlag>, TypeSpecificFlags);
     RenderElement(Type, Document&, RenderStyle&&, OptionSet<TypeFlag>, TypeSpecificFlags);
 
-    bool layerCreationAllowedForSubtree() const;
+    bool NODELETE layerCreationAllowedForSubtree() const;
 
     enum class StylePropagationType {
         AllChildren,

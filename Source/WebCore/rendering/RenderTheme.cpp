@@ -212,7 +212,7 @@ StyleAppearance RenderTheme::adjustAppearanceForElement(RenderStyle& style, cons
     return appearance;
 }
 
-static bool isAppearanceAllowedForAllElements(StyleAppearance appearance)
+static bool NODELETE isAppearanceAllowedForAllElements(StyleAppearance appearance)
 {
 #if ENABLE(APPLE_PAY)
     if (appearance == StyleAppearance::ApplePayButton)
@@ -233,7 +233,7 @@ static bool devolvableWidgetsEnabledAndSupported(const Element* element)
 #endif
 }
 
-static bool shouldCheckLegacyStylesForNativeAppearance(const Element* element)
+static bool NODELETE shouldCheckLegacyStylesForNativeAppearance(const Element* element)
 {
 #if PLATFORM(MAC)
 #if ENABLE(FORM_CONTROL_REFRESH)
