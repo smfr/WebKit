@@ -1,7 +1,3 @@
-[ Mac ] Shared/API/Cocoa/_WKFrameHandle.mm
-[ Mac ] Shared/API/Cocoa/_WKHitTestResult.mm
-[ Mac ] Shared/Cocoa/WKNSArray.mm
-[ Mac ] Shared/Cocoa/WKNSNumber.mm
 [ Mac ] UIProcess/API/C/WKContext.cpp
 [ Mac ] UIProcess/API/C/WKContextConfigurationRef.cpp
 [ Mac ] UIProcess/API/C/WKWebsiteDataStoreConfigurationRef.cpp
