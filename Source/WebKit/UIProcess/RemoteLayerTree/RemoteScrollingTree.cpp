@@ -75,10 +75,6 @@ void RemoteScrollingTree::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNode&
 
     ScrollingTree::scrollingTreeNodeDidScroll(node, scrollingLayerPositionAction);
 
-    CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get();
-    if (!scrollingCoordinatorProxy)
-        return;
-
     std::optional<FloatPoint> layoutViewportOrigin;
     if (auto* scrollingNode = dynamicDowncast<ScrollingTreeFrameScrollingNode>(node))
         layoutViewportOrigin = scrollingNode->layoutViewport().location();
@@ -90,17 +86,11 @@ void RemoteScrollingTree::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNode&
         .updateLayerPositionAction = scrollingLayerPositionAction,
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
-
-    scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
 }
 
 void RemoteScrollingTree::scrollingTreeNodeDidStopAnimatedScroll(ScrollingTreeScrollingNode& node)
 {
     ASSERT(isMainRunLoop());
-
-    CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get();
-    if (!scrollingCoordinatorProxy)
-        return;
 
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
@@ -109,17 +99,11 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopAnimatedScroll(ScrollingTreeSc
         .updateType = ScrollUpdateType::AnimatedScrollDidEnd,
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
-
-    scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
 }
 
 void RemoteScrollingTree::scrollingTreeNodeDidStopWheelEventScroll(WebCore::ScrollingTreeScrollingNode& node)
 {
     ASSERT(isMainRunLoop());
-
-    CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get();
-    if (!scrollingCoordinatorProxy)
-        return;
 
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
@@ -128,8 +112,6 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopWheelEventScroll(WebCore::Scro
         .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
-
-    scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
 }
 
 bool RemoteScrollingTree::scrollingTreeNodeRequestsScroll(ScrollingNodeID nodeID, const RequestedScrollData& request)
@@ -171,10 +153,6 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopProgrammaticScroll(ScrollingTr
 {
     ASSERT(isMainRunLoop());
 
-    CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get();
-    if (!scrollingCoordinatorProxy)
-        return;
-
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
         .scrollPosition = { },
@@ -182,8 +160,12 @@ void RemoteScrollingTree::scrollingTreeNodeDidStopProgrammaticScroll(ScrollingTr
         .updateType = ScrollUpdateType::ProgrammaticScrollDidEnd,
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
+}
 
-    scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
+void RemoteScrollingTree::didAddPendingScrollUpdate()
+{
+    if (CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get())
+        scrollingCoordinatorProxy->scrollingThreadAddedPendingUpdate();
 }
 
 void RemoteScrollingTree::scrollingTreeNodeWillStartScroll(ScrollingNodeID nodeID)

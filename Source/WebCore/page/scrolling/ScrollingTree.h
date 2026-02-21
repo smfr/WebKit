@@ -238,7 +238,6 @@ public:
 
     WEBCORE_EXPORT void willProcessWheelEvent();
 
-    WEBCORE_EXPORT void addPendingScrollUpdate(ScrollUpdate&&);
     WEBCORE_EXPORT Vector<ScrollUpdate> takePendingScrollUpdates();
     WEBCORE_EXPORT bool hasPendingScrollUpdates();
 
@@ -305,6 +304,10 @@ protected:
     HashSet<ScrollingNodeID> nodesWithActiveScrollAnimations();
     WEBCORE_EXPORT void serviceScrollAnimations(MonotonicTime) WTF_REQUIRES_LOCK(m_treeLock);
 
+    void addPendingScrollUpdateInternal(ScrollUpdate&&);
+    WEBCORE_EXPORT void addPendingScrollUpdate(ScrollUpdate&&);
+    virtual void didAddPendingScrollUpdate() { }
+
     mutable Lock m_treeLock; // Protects the scrolling tree.
 
 private:
@@ -316,7 +319,7 @@ private:
     void traverseScrollingTreeRecursive(ScrollingTreeNode&, NOESCAPE const VisitorFunction&) WTF_REQUIRES_LOCK(m_treeLock);
     
     void NODELETE setOverlayScrollbarsEnabled(bool);
-    
+
     virtual void didCommitTree() { }
 
     WEBCORE_EXPORT virtual RefPtr<ScrollingTreeNode> NODELETE scrollingNodeForPoint(FloatPoint);
