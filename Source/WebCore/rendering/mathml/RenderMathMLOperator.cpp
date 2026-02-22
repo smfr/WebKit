@@ -278,6 +278,7 @@ void RenderMathMLOperator::updateTokenContent()
 void RenderMathMLOperator::updateFromElement()
 {
     updateTokenContent();
+    resetStretchSize();
 }
 
 bool RenderMathMLOperator::useMathOperator() const
