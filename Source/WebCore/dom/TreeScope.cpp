@@ -465,7 +465,7 @@ Vector<Ref<Element>> TreeScope::elementsFromPoint(double clientX, double clientY
         if (!node)
             continue;
 
-        if (auto pseudoElement = dynamicDowncast<PseudoElement>(*node))
+        if (RefPtr pseudoElement = dynamicDowncast<PseudoElement>(*node))
             node = pseudoElement->hostElement();
 
         // Prune duplicate entries. A pseudo ::before content above its parent
