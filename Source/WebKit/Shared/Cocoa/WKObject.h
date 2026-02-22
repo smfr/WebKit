@@ -51,38 +51,37 @@ namespace WebKit {
 
 template<typename WrappedObjectClass> struct WrapperTraits;
 
-template<typename DestinationClass, typename SourceClass> inline CLANG_POINTER_CONVERSION DestinationClass *checkedObjCCast(SourceClass *source)
+template<typename DestinationClass, typename SourceClass> inline DestinationClass *CLANG_POINTER_CONVERSION checkedObjCCast(SourceClass *source)
 {
     return checked_objc_cast<DestinationClass>(source);
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(ObjectClass& object)
+template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *CLANG_POINTER_CONVERSION wrapper(ObjectClass& object)
 {
-    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
-    SUPPRESS_UNCOUNTED_ARG return checkedObjCCast<typename WrapperTraits<ObjectClass>::WrapperClass>(object.wrapper());
+    return checkedObjCCast<typename WrapperTraits<ObjectClass>::WrapperClass>(object.wrapper());
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(ObjectClass* object)
+template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *CLANG_POINTER_CONVERSION wrapper(ObjectClass* object)
 {
     return object ? wrapper(*object) : nil;
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(const Ref<ObjectClass>& object)
+template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *CLANG_POINTER_CONVERSION wrapper(const Ref<ObjectClass>& object)
 {
     return wrapper(object.get());
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION typename WrapperTraits<ObjectClass>::WrapperClass *wrapper(const RefPtr<ObjectClass>& object)
+template<typename ObjectClass> inline typename WrapperTraits<ObjectClass>::WrapperClass *CLANG_POINTER_CONVERSION wrapper(const RefPtr<ObjectClass>& object)
 {
     return wrapper(object.get());
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> wrapper(Ref<ObjectClass>&& object)
+template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> CLANG_POINTER_CONVERSION wrapper(Ref<ObjectClass>&& object)
 {
     return wrapper(object.get());
 }
 
-template<typename ObjectClass> inline CLANG_POINTER_CONVERSION RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> wrapper(RefPtr<ObjectClass>&& object)
+template<typename ObjectClass> inline RetainPtr<typename WrapperTraits<ObjectClass>::WrapperClass> CLANG_POINTER_CONVERSION wrapper(RefPtr<ObjectClass>&& object)
 {
     return object ? wrapper(object.releaseNonNull()) : nil;
 }

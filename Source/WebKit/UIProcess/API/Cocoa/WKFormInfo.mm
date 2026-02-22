@@ -34,14 +34,12 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (WKFrameInfo *)targetFrame
 {
-    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
-    SUPPRESS_UNCOUNTED_ARG return wrapper(protect(*_formInfo)->targetFrame());
+    return wrapper(protect(*_formInfo)->targetFrame());
 }
 
 - (WKFrameInfo *)sourceFrame
 {
-    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
-    SUPPRESS_UNCOUNTED_ARG return wrapper(protect(*_formInfo)->sourceFrame());
+    return wrapper(protect(*_formInfo)->sourceFrame());
 }
 
 - (NSURL *)submissionURL

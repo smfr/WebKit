@@ -54,8 +54,7 @@
 
 - (WKContentWorld *)world
 {
-    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
-    SUPPRESS_UNCOUNTED_ARG return wrapper(API::ContentWorld::worldForIdentifier(_ref->info().worldIdentifier));
+    return wrapper(API::ContentWorld::worldForIdentifier(_ref->info().worldIdentifier));
 }
 
 - (void)windowProxyFrameInfo:(void (^)(WKFrameInfo *))completionHandler

@@ -88,8 +88,7 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (WKFrameInfo *)_navigationInitiatingFrame
 {
-    // Static analyzer false positive. CLANG_POINTER_CONVERSION should make this warning go away but doesn't.
-    SUPPRESS_UNCOUNTED_ARG return wrapper(RefPtr { _navigationResponse.get() }->navigationInitiatingFrame());
+    return wrapper(RefPtr { _navigationResponse.get() }->navigationInitiatingFrame());
 }
 
 - (WKNavigation *)_navigation
