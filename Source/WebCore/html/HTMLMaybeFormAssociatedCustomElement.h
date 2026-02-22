@@ -38,8 +38,8 @@ public:
     static Ref<HTMLMaybeFormAssociatedCustomElement> create(const QualifiedName& tagName, Document&);
 
     bool NODELETE isMaybeFormAssociatedCustomElement() const final { return true; }
-    bool isFormListedElement() const final;
-    bool isValidatedFormListedElement() const final;
+    bool NODELETE isFormListedElement() const final;
+    bool NODELETE isValidatedFormListedElement() const final;
     bool NODELETE isFormAssociatedCustomElement() const;
 
     FormAssociatedElement* NODELETE asFormAssociatedElement() final;

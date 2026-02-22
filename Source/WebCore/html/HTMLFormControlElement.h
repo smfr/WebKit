@@ -41,8 +41,8 @@ public:
 
     virtual ~HTMLFormControlElement();
 
-    bool isValidatedFormListedElement() const final { return true; }
-    bool isFormListedElement() const final { return true; }
+    bool NODELETE isValidatedFormListedElement() const final { return true; }
+    bool NODELETE isFormListedElement() const final { return true; }
 
     bool matchesValidPseudoClass() const override { return ValidatedFormListedElement::matchesValidPseudoClass(); }
     bool matchesInvalidPseudoClass() const override { return ValidatedFormListedElement::matchesInvalidPseudoClass(); }

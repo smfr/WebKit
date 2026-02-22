@@ -48,8 +48,8 @@ public:
 
     ValidityState& validity();
 
-    virtual bool isValidatedFormListedElement() const = 0;
-    virtual bool isEnumeratable() const = 0;
+    virtual bool NODELETE isValidatedFormListedElement() const = 0;
+    virtual bool NODELETE isEnumeratable() const = 0;
 
     // Returns the 'name' attribute value. If this element has no name
     // attribute, it returns an empty string instead of null string.

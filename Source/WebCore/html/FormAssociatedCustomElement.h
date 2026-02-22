@@ -42,8 +42,8 @@ public:
     FormAssociatedCustomElement(HTMLMaybeFormAssociatedCustomElement&);
     virtual ~FormAssociatedCustomElement();
 
-    bool isFormListedElement() const final { return true; }
-    bool isValidatedFormListedElement() const final { return true; }
+    bool NODELETE isFormListedElement() const final { return true; }
+    bool NODELETE isValidatedFormListedElement() const final { return true; }
 
     FormAssociatedElement* NODELETE asFormAssociatedElement() final { return this; }
     FormListedElement* NODELETE asFormListedElement() final { return this; }
@@ -53,7 +53,7 @@ public:
     const HTMLElement& asHTMLElement() const final { return *m_element.get(); }
 
     void reset() final;
-    bool isEnumeratable() const final;
+    bool NODELETE isEnumeratable() const final;
 
     void setFormValue(CustomElementFormValue&& submissionValue, std::optional<CustomElementFormValue>&& state);
     ExceptionOr<void> setValidity(ValidityStateFlags, String&& message, HTMLElement* validationAnchor);

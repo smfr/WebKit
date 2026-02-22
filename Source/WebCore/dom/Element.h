@@ -660,8 +660,8 @@ public:
     virtual bool isMediaElement() const { return false; }
 #endif
 
-    virtual bool isFormListedElement() const { return false; }
-    virtual bool isValidatedFormListedElement() const { return false; }
+    virtual bool NODELETE isFormListedElement() const { return false; }
+    virtual bool NODELETE isValidatedFormListedElement() const { return false; }
     virtual bool NODELETE isMaybeFormAssociatedCustomElement() const { return false; }
     virtual bool isSpinButtonElement() const { return false; }
     virtual bool isTextFormControlElement() const { return false; }

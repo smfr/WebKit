@@ -75,7 +75,7 @@ public:
     // This must be called any time the result of willValidate() has changed.
     bool isValidFormControlElement() const { return m_isValid; }
 
-    bool isEnumeratable() const override { return false; }
+    bool NODELETE isEnumeratable() const override { return false; }
 
     bool wasInteractedWithSinceLastFormSubmitEvent() const { return m_wasInteractedWithSinceLastFormSubmitEvent; }
     void setInteractedWithSinceLastFormSubmitEvent(bool);

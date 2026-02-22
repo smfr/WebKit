@@ -214,7 +214,7 @@ private:
     InsertedIntoAncestorResult insertedIntoAncestor(InsertionType, ContainerNode&) override;
     void removedFromAncestor(RemovalType, ContainerNode&) override;
 
-    bool isFormListedElement() const final { return false; }
+    bool NODELETE isFormListedElement() const final { return false; }
     FormAssociatedElement* NODELETE asFormAssociatedElement() final { return this; }
     HTMLImageElement& asHTMLElement() final { return *this; }
     const HTMLImageElement& asHTMLElement() const final { return *this; }

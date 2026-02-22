@@ -383,7 +383,7 @@ private:
     int defaultTabIndex() const final;
     bool isKeyboardFocusable(const FocusEventData&) const final;
     bool isMouseFocusable() const final;
-    bool isEnumeratable() const final;
+    bool NODELETE isEnumeratable() const final;
     bool isLabelable() const final;
     void updateFocusAppearance(SelectionRestorationMode, SelectionRevealMode) final;
     bool shouldUseInputMethod() final;

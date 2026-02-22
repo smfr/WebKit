@@ -35,7 +35,7 @@ public:
     Ref<HTMLElement> asProtectedHTMLElement() { return asHTMLElement(); }
     virtual const HTMLElement& asHTMLElement() const = 0;
     Ref<const HTMLElement> asProtectedHTMLElement() const { return asHTMLElement(); }
-    virtual bool isFormListedElement() const = 0;
+    virtual bool NODELETE isFormListedElement() const = 0;
 
     virtual void formWillBeDestroyed() { m_form = nullptr; }
 
