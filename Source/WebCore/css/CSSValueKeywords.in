@@ -539,7 +539,6 @@ flow
 -webkit-inline-flex
 -webkit-flex
 // ruby
-block-ruby
 ruby-base
 ruby-text
 // none

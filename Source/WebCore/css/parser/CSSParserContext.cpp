@@ -48,6 +48,7 @@ static void NODELETE applyUASheetBehaviorsToContext(CSSParserContext& context)
 {
     // FIXME: We should turn all of the features on from their WebCore Settings defaults.
     context.cssAppearanceBaseEnabled = true;
+    context.cssRubyDisplayTypesEnabled = true;
     context.cssTextTransformMathAutoEnabled = true;
     context.popoverAttributeEnabled = true;
     context.propertySettings.cssInputSecurityEnabled = true;
@@ -113,6 +114,7 @@ CSSParserContext::CSSParserContext(const Settings& settings)
     , targetTextPseudoElementEnabled { settings.targetTextPseudoElementEnabled() }
     , htmlEnhancedSelectEnabled { settings.htmlEnhancedSelectEnabled() }
     , cssRandomFunctionEnabled { settings.cssRandomFunctionEnabled() }
+    , cssRubyDisplayTypesEnabled { settings.cssRubyDisplayTypesInAuthorStylesEnabled() }
     , cssTreeCountingFunctionsEnabled { settings.cssTreeCountingFunctionsEnabled() }
     , cssURLModifiersEnabled { settings.cssURLModifiersEnabled() }
     , cssURLIntegrityModifierEnabled { settings.cssURLIntegrityModifierEnabled() }
@@ -152,6 +154,7 @@ void add(Hasher& hasher, const CSSParserContext& context)
         context.targetTextPseudoElementEnabled,
         context.htmlEnhancedSelectEnabled,
         context.cssRandomFunctionEnabled,
+        context.cssRubyDisplayTypesEnabled,
         context.cssTreeCountingFunctionsEnabled,
         context.cssURLModifiersEnabled,
         context.cssURLIntegrityModifierEnabled,

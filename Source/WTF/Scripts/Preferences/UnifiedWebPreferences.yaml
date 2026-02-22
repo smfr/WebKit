@@ -1375,6 +1375,20 @@ CSSRhythmicSizingEnabled:
     WebCore:
       default: false
 
+CSSRubyDisplayTypesInAuthorStylesEnabled:
+  type: bool
+  status: unstable
+  category: css
+  humanReadableName: "CSS Ruby Display Types in Author Styles"
+  humanReadableDescription: "Enable CSS Ruby Display types in author styles"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 CSSScrollAnchoringEnabled:
   type: bool
   status: stable

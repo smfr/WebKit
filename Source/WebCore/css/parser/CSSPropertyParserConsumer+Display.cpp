@@ -39,43 +39,7 @@
 namespace WebCore {
 namespace CSSPropertyParserHelpers {
 
-enum class DisplayOutside : uint8_t { NoOutside, Block, Inline };
-enum class DisplayInside  : uint8_t { NoInside, Flow, FlowRoot, Table, Flex, Grid, GridLanes, Ruby };
-
-} // namespace CSSPropertyParserHelpers
-} // namespace WebCore
-
-namespace WTF {
-
-template<> struct EnumTraits<WebCore::CSSPropertyParserHelpers::DisplayOutside> {
-    using values = EnumValues<
-        WebCore::CSSPropertyParserHelpers::DisplayOutside,
-        WebCore::CSSPropertyParserHelpers::DisplayOutside::NoOutside,
-        WebCore::CSSPropertyParserHelpers::DisplayOutside::Block,
-        WebCore::CSSPropertyParserHelpers::DisplayOutside::Inline
-    >;
-};
-
-template<> struct EnumTraits<WebCore::CSSPropertyParserHelpers::DisplayInside> {
-    using values = EnumValues<
-        WebCore::CSSPropertyParserHelpers::DisplayInside,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::NoInside,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::Flow,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::FlowRoot,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::Table,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::Flex,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::Grid,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::GridLanes,
-        WebCore::CSSPropertyParserHelpers::DisplayInside::Ruby
-    >;
-};
-
-} // namespace WTF
-
-namespace WebCore {
-namespace CSSPropertyParserHelpers {
-
-using DisplayOutsideInsideMap = EnumeratedArray<DisplayOutside, EnumeratedArray<DisplayInside, CSSValueID>>;
+using DisplayOutsideInsideMap = EnumeratedArray<DisplayOutside, EnumeratedArray<DisplayInside, std::pair<CSSValueID, CSSValueID>>>;
 
 consteval DisplayOutsideInsideMap NODELETE makeDisplayOutsideInsideMap()
 {
@@ -85,23 +49,23 @@ consteval DisplayOutsideInsideMap NODELETE makeDisplayOutsideInsideMap()
     DisplayOutsideInsideMap result;
 
     // One of either <display-inside> or <display-outside> is needed, so this is case is invalid.
-    result[NoOutside][NoInside]  = CSSValueInvalid;
+    result[NoOutside][NoInside]  = { CSSValueInvalid, CSSValueInvalid };
 
     // Aliasing `block <display-inside>`.
     //
     // Everything shortens to be just `<display-inside>` except:
     //   - `block` on its own is aliased to `block flow`, thus stays `block`.
     //   - `block flow` is aliased to `block`, not `flow`.
-    //   - `block ruby` is aliased to `block-ruby`, not `ruby` (FIXME: This is non-standard. Should still be an exception but instead not aliased at all).
+    //   - `block ruby` is not aliased to anything.
 
-    result[Block][NoInside]      = CSSValueBlock;
-    result[Block][Flow]          = CSSValueBlock;
-    result[Block][FlowRoot]      = CSSValueFlowRoot;
-    result[Block][Table]         = CSSValueTable;
-    result[Block][Flex]          = CSSValueFlex;
-    result[Block][Grid]          = CSSValueGrid;
-    result[Block][GridLanes]     = CSSValueGridLanes;
-    result[Block][Ruby]          = CSSValueBlockRuby;
+    result[Block][NoInside]      = { CSSValueBlock,     CSSValueInvalid };
+    result[Block][Flow]          = { CSSValueBlock,     CSSValueInvalid };
+    result[Block][FlowRoot]      = { CSSValueFlowRoot,  CSSValueInvalid };
+    result[Block][Table]         = { CSSValueTable,     CSSValueInvalid };
+    result[Block][Flex]          = { CSSValueFlex,      CSSValueInvalid };
+    result[Block][Grid]          = { CSSValueGrid,      CSSValueInvalid };
+    result[Block][GridLanes]     = { CSSValueGridLanes, CSSValueInvalid };
+    result[Block][Ruby]          = { CSSValueBlock,     CSSValueRuby };
 
     // Aliasing `inline <display-inside>`.
     //
@@ -111,14 +75,14 @@ consteval DisplayOutsideInsideMap NODELETE makeDisplayOutsideInsideMap()
     //   - `inline flow-root` is aliased to `inline-block`. not `inline-flow-root`.
     //   - `inline ruby` is aliased to `ruby`, not `inline-ruby`.
 
-    result[Inline][NoInside]     = CSSValueInline;
-    result[Inline][Flow]         = CSSValueInline;
-    result[Inline][FlowRoot]     = CSSValueInlineBlock;
-    result[Inline][Table]        = CSSValueInlineTable;
-    result[Inline][Flex]         = CSSValueInlineFlex;
-    result[Inline][Grid]         = CSSValueInlineGrid;
-    result[Inline][GridLanes]    = CSSValueInlineGridLanes;
-    result[Inline][Ruby]         = CSSValueRuby;
+    result[Inline][NoInside]     = { CSSValueInline,          CSSValueInvalid };
+    result[Inline][Flow]         = { CSSValueInline,          CSSValueInvalid };
+    result[Inline][FlowRoot]     = { CSSValueInlineBlock,     CSSValueInvalid };
+    result[Inline][Table]        = { CSSValueInlineTable,     CSSValueInvalid };
+    result[Inline][Flex]         = { CSSValueInlineFlex,      CSSValueInvalid };
+    result[Inline][Grid]         = { CSSValueInlineGrid,      CSSValueInvalid };
+    result[Inline][GridLanes]    = { CSSValueInlineGridLanes, CSSValueInvalid };
+    result[Inline][Ruby]         = { CSSValueRuby,            CSSValueInvalid };
 
     // Aliasing `<display-inside>` on its own.
     //
@@ -136,11 +100,25 @@ consteval DisplayOutsideInsideMap NODELETE makeDisplayOutsideInsideMap()
     return result;
 }
 
+constexpr auto displayOutsideInsideMap = makeDisplayOutsideInsideMap();
+
+template<DisplayOutside outside, DisplayInside inside>
+constexpr RefPtr<CSSValue> mappedDisplayValue()
+{
+    static constexpr auto result = displayOutsideInsideMap[outside][inside];
+
+    if constexpr (result.first == CSSValueInvalid && result.second == CSSValueInvalid)
+        return nullptr;
+    else if constexpr (result.second == CSSValueInvalid)
+        return CSSPrimitiveValue::create(result.first);
+    else
+        return CSSValuePair::createNoncoalescing(CSSPrimitiveValue::create(result.first), CSSPrimitiveValue::create(result.second));
+}
+
 template<DisplayOutside outside>
 static RefPtr<CSSValue> consumeAfterInitialDisplayOutside(CSSParserTokenRange& range, CSS::PropertyParserState& state)
 {
     using enum DisplayInside;
-    static constexpr auto map = makeDisplayOutsideInsideMap();
 
     CSSParserTokenRangeGuard guard { range };
     range.consumeIncludingWhitespace();
@@ -149,27 +127,27 @@ static RefPtr<CSSValue> consumeAfterInitialDisplayOutside(CSSParserTokenRange& r
     case CSSValueFlow:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][Flow]);
+        return mappedDisplayValue<outside, Flow>();
 
     case CSSValueFlowRoot:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][FlowRoot]);
+        return mappedDisplayValue<outside, FlowRoot>();
 
     case CSSValueTable:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][Table]);
+        return mappedDisplayValue<outside, Table>();
 
     case CSSValueFlex:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][Flex]);
+        return mappedDisplayValue<outside, Flex>();
 
     case CSSValueGrid:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][Grid]);
+        return mappedDisplayValue<outside, Grid>();
 
     case CSSValueGridLanes:
         if (!state.context.gridLanesEnabled)
@@ -177,19 +155,19 @@ static RefPtr<CSSValue> consumeAfterInitialDisplayOutside(CSSParserTokenRange& r
 
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][GridLanes]);
+        return mappedDisplayValue<outside, GridLanes>();
 
     case CSSValueRuby:
-        if (!isUASheetBehavior(state.context.mode))
+        if (!state.context.cssRubyDisplayTypesEnabled)
             return nullptr;
 
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][Ruby]);
+        return mappedDisplayValue<outside, Ruby>();
 
     case CSSValueInvalid:
         guard.commit();
-        return CSSPrimitiveValue::create(map[outside][NoInside]);
+        return mappedDisplayValue<outside, NoInside>();
 
     default:
         return nullptr;
@@ -200,7 +178,6 @@ template<DisplayInside inside>
 static RefPtr<CSSValue> consumeAfterInitialDisplayInside(CSSParserTokenRange& range, CSS::PropertyParserState&)
 {
     using enum DisplayOutside;
-    static constexpr auto map = makeDisplayOutsideInsideMap();
 
     CSSParserTokenRangeGuard guard { range };
     range.consumeIncludingWhitespace();
@@ -209,16 +186,16 @@ static RefPtr<CSSValue> consumeAfterInitialDisplayInside(CSSParserTokenRange& ra
     case CSSValueBlock:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[Block][inside]);
+        return mappedDisplayValue<Block, inside>();
 
     case CSSValueInline:
         range.consumeIncludingWhitespace();
         guard.commit();
-        return CSSPrimitiveValue::create(map[Inline][inside]);
+        return mappedDisplayValue<Inline, inside>();
 
     case CSSValueInvalid:
         guard.commit();
-        return CSSPrimitiveValue::create(map[NoOutside][inside]);
+        return mappedDisplayValue<NoOutside, inside>();
 
     default:
         return nullptr;
@@ -268,7 +245,7 @@ RefPtr<CSSValue> consumeDisplay(CSSParserTokenRange& range, CSS::PropertyParserS
             return nullptr;
         return consumeAfterInitialDisplayInside<DisplayInside::GridLanes>(range, state);
     case CSSValueRuby:
-        if (!isUASheetBehavior(state.context.mode))
+        if (!state.context.cssRubyDisplayTypesEnabled)
             return nullptr;
         return consumeAfterInitialDisplayInside<DisplayInside::Ruby>(range, state);
 
@@ -290,7 +267,7 @@ RefPtr<CSSValue> consumeDisplay(CSSParserTokenRange& range, CSS::PropertyParserS
         return CSSPrimitiveValue::create(range.consumeIncludingWhitespace().id());
     case CSSValueRubyBase:
     case CSSValueRubyText:
-        if (!isUASheetBehavior(state.context.mode))
+        if (!state.context.cssRubyDisplayTypesEnabled)
             return nullptr;
         return CSSPrimitiveValue::create(range.consumeIncludingWhitespace().id());
 

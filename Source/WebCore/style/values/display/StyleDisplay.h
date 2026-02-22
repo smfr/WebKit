@@ -368,7 +368,7 @@ template<> struct ValueRepresentation<DisplayType> {
         case DisplayType::BlockGridLanes:
             return visitor(CSS::Keyword::GridLanes { });
         case DisplayType::BlockRuby:
-            return visitor(CSS::Keyword::BlockRuby { });
+            return visitor(SpaceSeparatedTuple { CSS::Keyword::Block { }, CSS::Keyword::Ruby { } });
         case DisplayType::BlockDeprecatedFlex:
             return visitor(CSS::Keyword::WebkitBox { });
 
