@@ -62,7 +62,7 @@ public:
         WebCore::FrameIdentifier frameID;
         WebCore::PageIdentifier pageID;
     };
-    void setHasFrameSpecificStorageAccess(FrameSpecificStorageAccessIdentifier&&);
+    void NODELETE setHasFrameSpecificStorageAccess(FrameSpecificStorageAccessIdentifier&&);
     void didLoadFromRegistrableDomain(WebCore::RegistrableDomain&&) final;
     Vector<WebCore::RegistrableDomain> loadedSubresourceDomains() const final;
 
@@ -273,7 +273,7 @@ private:
 
     void getLoadDecisionForIcons(const Vector<std::pair<WebCore::LinkIcon&, uint64_t>>&) final;
 
-    inline bool hasPlugInView() const;
+    inline bool NODELETE hasPlugInView() const;
 
     void documentLoaderDetached(WebCore::NavigationIdentifier, WebCore::LoadWillContinueInAnotherProcess) final;
 

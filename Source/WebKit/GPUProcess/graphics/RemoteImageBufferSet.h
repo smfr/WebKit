@@ -69,7 +69,7 @@ private:
     RemoteImageBufferSet(ImageBufferSetIdentifier, RemoteGraphicsContextIdentifier, RemoteRenderingBackend&);
 
     void startListeningForIPC();
-    IPC::StreamConnectionWorkQueue& workQueue() const;
+    IPC::StreamConnectionWorkQueue& NODELETE workQueue() const;
 
     // IPC::StreamMessageReceiver
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;

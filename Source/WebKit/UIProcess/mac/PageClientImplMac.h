@@ -65,7 +65,7 @@ public:
     virtual ~PageClientImpl();
 
     // FIXME: Eventually WebViewImpl should become the PageClient.
-    void setImpl(WebViewImpl&);
+    void NODELETE setImpl(WebViewImpl&);
 
     void viewWillMoveToAnotherWindow();
 

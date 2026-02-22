@@ -138,7 +138,7 @@ namespace WebKit {
 using namespace JSC;
 using namespace WebCore;
 
-static uint64_t generateListenerID()
+static uint64_t NODELETE generateListenerID()
 {
     static uint64_t uniqueListenerID = 1;
     return uniqueListenerID++;

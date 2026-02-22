@@ -168,7 +168,7 @@ private:
     unsigned resourceTypeValue() const final;
 #ifdef __OBJC__
     // FIXME: Remove when WebPrivacyHelpersAdditions.mm no longer depends on it.
-    WPResourceType resourceType() const;
+    WPResourceType NODELETE resourceType() const;
 #endif
 };
 

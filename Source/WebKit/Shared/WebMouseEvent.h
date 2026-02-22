@@ -58,7 +58,7 @@ enum class WebMouseEventSyntheticClickType : uint8_t {
     OneFingerTap,
     TwoFingerTap
 };
-WebMouseEventSyntheticClickType syntheticClickType(const WebCore::NavigationAction&);
+WebMouseEventSyntheticClickType NODELETE syntheticClickType(const WebCore::NavigationAction&);
 
 enum class WebMouseEventInputSource : uint8_t { UserDriven, Automation };
 
@@ -102,7 +102,7 @@ public:
     void setPredictedEvents(const Vector<WebMouseEvent>& predictedEvents) { m_predictedEvents = predictedEvents; }
     Vector<WebMouseEvent> predictedEvents() const { return m_predictedEvents; }
 
-    static bool isMouseEventType(WebEventType);
+    static bool NODELETE isMouseEventType(WebEventType);
 
 private:
     WebMouseEventButton m_button { WebMouseEventButton::None };

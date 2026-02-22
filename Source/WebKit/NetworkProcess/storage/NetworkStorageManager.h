@@ -165,7 +165,7 @@ private:
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess(IPC::Connection&) const;
     bool isStorageTypeEnabled(IPC::Connection&, WebCore::StorageType) const;
     bool isStorageAreaTypeEnabled(IPC::Connection&, StorageAreaBase::StorageType) const;
-    bool useSQLiteMemoryBackingStore() const;
+    bool NODELETE useSQLiteMemoryBackingStore() const;
 
     void writeOriginToFileIfNecessary(const WebCore::ClientOrigin&, StorageAreaBase* = nullptr);
     enum class ShouldWriteOriginFile : bool { No, Yes };
@@ -259,7 +259,7 @@ private:
     void cacheStorageRepresentation(CompletionHandler<void(const String&)>&&);
 
     void cloneSessionStorageNamespace(StorageNamespaceIdentifier, StorageNamespaceIdentifier);
-    bool shouldManageServiceWorkerRegistrationsByOrigin();
+    bool NODELETE shouldManageServiceWorkerRegistrationsByOrigin();
     void migrateServiceWorkerRegistrationsToOrigins();
     Vector<WebCore::ServiceWorkerScripts> updateServiceWorkerRegistrationsByOrigin(Vector<WebCore::ServiceWorkerContextData>&&, Vector<WebCore::ServiceWorkerRegistrationKey>&&);
 

@@ -64,9 +64,9 @@ public:
     Ref<FrameState> navigatedFrameState() const;
     Ref<FrameState> mainFrameState() const;
 
-    const String& originalURL() const;
-    const String& url() const;
-    const String& title() const;
+    const String& NODELETE originalURL() const;
+    const String& NODELETE url() const;
+    const String& NODELETE title() const;
     bool wasCreatedByJSWithoutUserInteraction() const;
 
     const URL& resourceDirectoryURL() const { return m_resourceDirectoryURL; }
@@ -86,7 +86,7 @@ public:
 
     WebBackForwardCacheEntry* backForwardCacheEntry() const { return m_backForwardCacheEntry.get(); }
 
-    SuspendedPageProxy* suspendedPage() const;
+    SuspendedPageProxy* NODELETE suspendedPage() const;
 
     std::optional<WebCore::FrameIdentifier> navigatedFrameID() const { return m_navigatedFrameID; }
 

@@ -40,11 +40,11 @@ public:
 
     virtual ~FormInfo();
 
-    API::FrameInfo* targetFrame() const;
-    API::FrameInfo* sourceFrame() const;
-    const WTF::URL& submissionURL() const;
-    const WTF::String& httpMethod() const;
-    const Vector<std::pair<WTF::String, WTF::String>>& formValues() const;
+    API::FrameInfo* NODELETE targetFrame() const;
+    API::FrameInfo* NODELETE sourceFrame() const;
+    const WTF::URL& NODELETE submissionURL() const;
+    const WTF::String& NODELETE httpMethod() const;
+    const Vector<std::pair<WTF::String, WTF::String>>& NODELETE formValues() const;
 
 private:
     FormInfo(API::FrameInfo&, API::FrameInfo& sourceFrame, const WTF::URL& submissionURL, const WTF::String& httpMethod, const Vector<std::pair<WTF::String, WTF::String>>& formValues);

@@ -238,7 +238,7 @@ OptionSet<WebEventModifier> kit(OptionSet<WebCore::PlatformEvent::Modifier> modi
     return result;
 }
 
-static double forceForEvent(const WebMouseEvent& webEvent)
+static double NODELETE forceForEvent(const WebMouseEvent& webEvent)
 {
     switch (webEvent.type()) {
     case WebEventType::MouseDown:

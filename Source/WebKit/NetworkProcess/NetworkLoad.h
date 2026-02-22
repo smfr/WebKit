@@ -87,9 +87,9 @@ public:
     void setH2PingCallback(const URL&, CompletionHandler<void(Expected<WTF::Seconds, WebCore::ResourceError>&&)>&&);
 
     void setTimingAllowFailedFlag();
-    std::optional<WebCore::FrameIdentifier> webFrameID() const;
-    std::optional<WebCore::PageIdentifier> webPageID() const;
-    Ref<NetworkProcess> networkProcess();
+    std::optional<WebCore::FrameIdentifier> NODELETE webFrameID() const;
+    std::optional<WebCore::PageIdentifier> NODELETE webPageID() const;
+    Ref<NetworkProcess> NODELETE networkProcess();
 
     size_t bytesTransferredOverNetwork() const;
 

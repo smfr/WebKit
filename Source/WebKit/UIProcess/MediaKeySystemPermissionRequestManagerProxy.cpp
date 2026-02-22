@@ -53,7 +53,7 @@ static ASCIILiteral logClassName()
     return "MediaKeySystemPermissionRequestManagerProxy"_s;
 }
 
-static WTFLogChannel& logChannel()
+static WTFLogChannel& NODELETE logChannel()
 {
     return JOIN_LOG_CHANNEL_WITH_PREFIX(LOG_CHANNEL_PREFIX, EME);
 }

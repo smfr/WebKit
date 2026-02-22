@@ -66,13 +66,13 @@
 
 namespace WebKit {
 
-static HashMap<IPC::Connection::UniqueID, WeakPtr<AuxiliaryProcessProxy>>& connectionToProcessMap()
+static HashMap<IPC::Connection::UniqueID, WeakPtr<AuxiliaryProcessProxy>>& NODELETE connectionToProcessMap()
 {
     static MainRunLoopNeverDestroyed<HashMap<IPC::Connection::UniqueID, WeakPtr<AuxiliaryProcessProxy>>> map;
     return map.get();
 }
 
-static Seconds adjustedTimeoutForThermalState(Seconds timeout)
+static Seconds NODELETE adjustedTimeoutForThermalState(Seconds timeout)
 {
 #if PLATFORM(VISION)
     return WebCore::ThermalMitigationNotifier::isThermalMitigationEnabled() ? (timeout * 20) : timeout;

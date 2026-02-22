@@ -33,7 +33,7 @@
 #import "_WKResourceLoadInfoInternal.h"
 #import <WebCore/WebCoreObjCExtras.h>
 
-static _WKResourceLoadInfoResourceType toWKResourceLoadInfoResourceType(WebKit::ResourceLoadInfo::Type type)
+static _WKResourceLoadInfoResourceType NODELETE toWKResourceLoadInfoResourceType(WebKit::ResourceLoadInfo::Type type)
 {
     using namespace WebKit;
     switch (type) {

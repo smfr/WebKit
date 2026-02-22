@@ -52,7 +52,7 @@ public:
 
     void didReceiveGeolocationPermissionDecision(GeolocationIdentifier, const String& authorizationToken);
 
-    void ref() const;
+    void NODELETE ref() const;
     void deref() const;
 
 private:

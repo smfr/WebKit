@@ -100,7 +100,7 @@ private:
 #if PLATFORM(COCOA)
     void startFrame(uint64_t frameIndex, MachSendRight&& colorBuffer, MachSendRight&& depthBuffer, MachSendRight&& completionSyncEvent, uint64_t reusableTextureIndex, PlatformXR::RateMapDescription&&);
 #endif
-    void endFrame();
+    void NODELETE endFrame();
 
     Ref<WebCore::WebGPU::XRProjectionLayer> m_backing;
     WeakRef<WebGPU::ObjectHeap> m_objectHeap;

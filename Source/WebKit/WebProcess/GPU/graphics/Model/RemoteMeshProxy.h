@@ -94,7 +94,7 @@ private:
     void render() final;
     void setLabelInternal(const String&) final;
     void setEntityTransform(const WebModel::Float4x4&) final;
-    void setEntityTransformInternal(const WebModel::Float4x4&);
+    void NODELETE setEntityTransformInternal(const WebModel::Float4x4&);
 #if PLATFORM(COCOA)
     std::optional<WebModel::Float4x4> entityTransform() const final;
 #endif

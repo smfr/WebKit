@@ -134,10 +134,10 @@ protected:
     };
     virtual Vector<LayerCoverage> layerCoveragesForRepaintPageCoverage(RepaintRequirements, const PDFPageCoverage&) = 0;
 
-    static Ref<WebCore::GraphicsLayer> pageBackgroundLayerForPageContainerLayer(WebCore::GraphicsLayer&);
+    static Ref<WebCore::GraphicsLayer> NODELETE pageBackgroundLayerForPageContainerLayer(WebCore::GraphicsLayer&);
 
     Ref<AsyncPDFRenderer> asyncRenderer();
-    RefPtr<AsyncPDFRenderer> asyncRendererIfExists() const;
+    RefPtr<AsyncPDFRenderer> NODELETE asyncRendererIfExists() const;
     void clearAsyncRenderer();
 
     bool shouldUseInProcessBackingStore() const;

@@ -178,9 +178,9 @@ public:
 
     Logger& logger();
 
-    const String& mediaCacheDirectory() const;
+    const String& NODELETE mediaCacheDirectory() const;
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA)
-    const String& mediaKeysStorageDirectory() const;
+    const String& NODELETE mediaKeysStorageDirectory() const;
 #endif
 
 #if ENABLE(MEDIA_STREAM)
@@ -196,7 +196,7 @@ public:
     bool allowsDisplayCapture() const { return m_allowsDisplayCapture; }
 #endif
 #if ENABLE(VIDEO)
-    RemoteVideoFrameObjectHeap& videoFrameObjectHeap() const;
+    RemoteVideoFrameObjectHeap& NODELETE videoFrameObjectHeap() const;
 #endif
 #if PLATFORM(COCOA) && ENABLE(MEDIA_STREAM)
     void startCapturingAudio();
@@ -273,7 +273,7 @@ public:
     void takeInvalidMessageStringForTesting(CompletionHandler<void(String&&)>&&);
 #endif
 
-    bool isAlwaysOnLoggingAllowed() const;
+    bool NODELETE isAlwaysOnLoggingAllowed() const;
 
 #if USE(AUDIO_SESSION)
     RemoteAudioSessionProxy& audioSessionProxy();

@@ -66,14 +66,14 @@ public:
     class ConnectionStateTracker : public ThreadSafeRefCounted<ConnectionStateTracker> {
     public:
         static Ref<ConnectionStateTracker> create() { return adoptRef(*new ConnectionStateTracker()); }
-        void markAsStopped() { m_isStopped = true; }
-        bool isStopped() const { return m_isStopped; }
-        bool shouldLogMissingECN() const { return !m_didLogMissingECN; }
-        void didLogMissingECN() { m_didLogMissingECN = true; }
+        void NODELETE markAsStopped() { m_isStopped = true; }
+        bool NODELETE isStopped() const { return m_isStopped; }
+        bool NODELETE shouldLogMissingECN() const { return !m_didLogMissingECN; }
+        void NODELETE didLogMissingECN() { m_didLogMissingECN = true; }
 
-        bool hasPendingSend() const { return m_pendingSendCount; }
-        void incrementPendingSendCount() { ++m_pendingSendCount; }
-        void decrementPendingSendCount()
+        bool NODELETE hasPendingSend() const { return m_pendingSendCount; }
+        void NODELETE incrementPendingSendCount() { ++m_pendingSendCount; }
+        void NODELETE decrementPendingSendCount()
         {
             ASSERT(m_pendingSendCount);
             --m_pendingSendCount;

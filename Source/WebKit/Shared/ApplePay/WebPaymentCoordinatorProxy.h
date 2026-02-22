@@ -123,7 +123,7 @@ public:
     void ref() const final { RefCounted::ref(); }
     void deref() const final { RefCounted::deref(); }
 
-    void webProcessExited();
+    void NODELETE webProcessExited();
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess() const
     {
         CheckedPtr client = m_client.get();
@@ -175,10 +175,10 @@ private:
     void platformBeginApplePaySetup(const PaymentSetupConfiguration&, const PaymentSetupFeatures&, CompletionHandler<void(bool)>&&);
     void platformEndApplePaySetup();
 
-    bool canBegin() const;
-    bool canCancel() const;
-    bool canCompletePayment() const;
-    bool canAbort() const;
+    bool NODELETE canBegin() const;
+    bool NODELETE canCancel() const;
+    bool NODELETE canCompletePayment() const;
+    bool NODELETE canAbort() const;
 
     void didReachFinalState(WebCore::PaymentSessionError&& = { });
 

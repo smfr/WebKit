@@ -51,7 +51,7 @@ public:
     using BackendCallback = CompletionHandler<void(WebCore::ContentExtensions::ContentExtensionsBackend&)>;
     void contentExtensionsBackend(UserContentControllerIdentifier, BackendCallback&&);
 
-    void ref() const;
+    void NODELETE ref() const;
     void deref() const;
 
 private:

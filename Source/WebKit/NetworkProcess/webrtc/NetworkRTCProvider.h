@@ -158,7 +158,7 @@ private:
 
     void signalSocketIsClosed(WebCore::LibWebRTCSocketIdentifier);
 
-    void assertIsRTCNetworkThread();
+    void NODELETE assertIsRTCNetworkThread();
 
     static constexpr size_t maxSockets { 256 };
 

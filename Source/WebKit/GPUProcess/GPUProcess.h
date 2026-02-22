@@ -109,15 +109,15 @@ public:
 
     void prepareToSuspend(bool isSuspensionImminent, MonotonicTime estimatedSuspendTime, CompletionHandler<void()>&&);
     void processDidResume();
-    void resume();
+    void NODELETE resume();
 
-    void connectionToWebProcessClosed(IPC::Connection&);
+    void NODELETE connectionToWebProcessClosed(IPC::Connection&);
 
     GPUConnectionToWebProcess* webProcessConnection(WebCore::ProcessIdentifier) const;
 
-    const String& mediaCacheDirectory(PAL::SessionID) const;
+    const String& NODELETE mediaCacheDirectory(PAL::SessionID) const;
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA)
-    const String& mediaKeysStorageDirectory(PAL::SessionID) const;
+    const String& NODELETE mediaKeysStorageDirectory(PAL::SessionID) const;
 #endif
 
 #if ENABLE(GPU_PROCESS) && USE(AUDIO_SESSION)
@@ -203,7 +203,7 @@ private:
     void removeSession(PAL::SessionID);
     void updateSandboxAccess(const Vector<SandboxExtension::Handle>&);
 
-    bool updatePreference(std::optional<bool>& oldPreference, std::optional<bool>& newPreference);
+    bool NODELETE updatePreference(std::optional<bool>& oldPreference, std::optional<bool>& newPreference);
     void userPreferredLanguagesChanged(Vector<String>&&);
 
 #if ENABLE(MEDIA_STREAM)

@@ -131,9 +131,9 @@ public:
 
     static WebFrame* webFrame(std::optional<WebCore::FrameIdentifier>);
     static RefPtr<WebFrame> fromCoreFrame(const WebCore::Frame&);
-    WebCore::LocalFrame* coreLocalFrame() const;
-    WebCore::RemoteFrame* coreRemoteFrame() const;
-    WebCore::Frame* coreFrame() const;
+    WebCore::LocalFrame* NODELETE coreLocalFrame() const;
+    WebCore::RemoteFrame* NODELETE coreRemoteFrame() const;
+    WebCore::Frame* NODELETE coreFrame() const;
 
     void createProvisionalFrame(ProvisionalFrameCreationParameters&&);
     void commitProvisionalFrame();
@@ -265,7 +265,7 @@ public:
     WebCore::HandleUserInputEventResult handleMouseEvent(const WebMouseEvent&);
     bool handleKeyEvent(const WebKeyboardEvent&);
 
-    bool isFocused() const;
+    bool NODELETE isFocused() const;
 
     String frameTextForTesting(bool);
 

@@ -43,29 +43,29 @@ public:
 
     Ref<ContentWorldConfiguration> copy() const;
 
-    const WTF::String& name() const;
+    const WTF::String& NODELETE name() const;
     void setName(WTF::String&&);
 
-    bool allowAccessToClosedShadowRoots() const;
-    void setAllowAccessToClosedShadowRoots(bool);
+    bool NODELETE allowAccessToClosedShadowRoots() const;
+    void NODELETE setAllowAccessToClosedShadowRoots(bool);
 
-    bool allowAutofill() const;
-    void setAllowAutofill(bool);
+    bool NODELETE allowAutofill() const;
+    void NODELETE setAllowAutofill(bool);
 
-    bool allowElementUserInfo() const;
-    void setAllowElementUserInfo(bool);
+    bool NODELETE allowElementUserInfo() const;
+    void NODELETE setAllowElementUserInfo(bool);
 
-    bool disableLegacyBuiltinOverrides() const;
-    void setDisableLegacyBuiltinOverrides(bool);
+    bool NODELETE disableLegacyBuiltinOverrides() const;
+    void NODELETE setDisableLegacyBuiltinOverrides(bool);
 
-    bool allowJSHandleCreation() const;
-    void setAllowJSHandleCreation(bool);
+    bool NODELETE allowJSHandleCreation() const;
+    void NODELETE setAllowJSHandleCreation(bool);
 
-    bool allowNodeSerialization() const;
-    void setAllowNodeSerialization(bool);
+    bool NODELETE allowNodeSerialization() const;
+    void NODELETE setAllowNodeSerialization(bool);
 
-    bool isInspectable() const;
-    void setInspectable(bool);
+    bool NODELETE isInspectable() const;
+    void NODELETE setInspectable(bool);
 
     OptionSet<WebKit::ContentWorldOption> optionSet() const;
 

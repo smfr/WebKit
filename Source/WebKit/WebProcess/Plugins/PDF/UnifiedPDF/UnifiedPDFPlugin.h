@@ -100,7 +100,7 @@ public:
 
     PDFAnnotation *trackedAnnotation() const { return m_trackedAnnotation.get(); }
     RetainPtr<PDFAnnotation> protectedTrackedAnnotation() const { return m_trackedAnnotation; }
-    bool isBeingHovered() const;
+    bool NODELETE isBeingHovered() const;
 
 private:
     void resetAnnotationTrackingState();
@@ -187,7 +187,7 @@ public:
 
     void handleClickForDataDetectionResult(const WebCore::DataDetectorElementInfo&, const WebCore::IntPoint&);
 
-    bool canShowDataDetectorHighlightOverlays() const;
+    bool NODELETE canShowDataDetectorHighlightOverlays() const;
 #endif
 
     void scheduleRenderingUpdate(OptionSet<WebCore::RenderingUpdateStep> = WebCore::RenderingUpdateStep::LayerFlush);
@@ -319,7 +319,7 @@ private:
 
     WebCore::IntRect availableContentsRect() const;
 
-    WebCore::DelegatedScrollingMode scrollingMode() const;
+    WebCore::DelegatedScrollingMode NODELETE scrollingMode() const;
     bool isFullMainFramePlugin() const;
 
     void scrollbarStyleChanged(WebCore::ScrollbarStyle, bool forceUpdate) override;
@@ -377,18 +377,18 @@ private:
     std::optional<PDFContextMenu> createContextMenu(const WebMouseEvent&) const;
     PDFContextMenuItem contextMenuItem(ContextMenuItemTag, bool hasAction = true) const;
     String titleForContextMenuItemTag(ContextMenuItemTag) const;
-    bool isDisplayModeContextMenuItemTag(ContextMenuItemTag) const;
-    PDFContextMenuItem separatorContextMenuItem() const;
+    bool NODELETE isDisplayModeContextMenuItemTag(ContextMenuItemTag) const;
+    PDFContextMenuItem NODELETE separatorContextMenuItem() const;
     Vector<PDFContextMenuItem> selectionContextMenuItems(const WebCore::IntPoint& contextMenuEventRootViewPoint, bool shouldPresentLookupAndSearchOptions) const;
     Vector<PDFContextMenuItem> displayModeContextMenuItems() const;
     Vector<PDFContextMenuItem> scaleContextMenuItems() const;
     Vector<PDFContextMenuItem> navigationContextMenuItemsForPageAtIndex(PDFDocumentLayout::PageIndex) const;
-    WebCore::ContextMenuAction contextMenuActionFromTag(ContextMenuItemTag) const;
+    WebCore::ContextMenuAction NODELETE contextMenuActionFromTag(ContextMenuItemTag) const;
     static ContextMenuItemTag toContextMenuItemTag(int tagValue);
     void performContextMenuAction(ContextMenuItemTag, const WebCore::IntPoint& contextMenuEventRootViewPoint);
 
-    ContextMenuItemTag contextMenuItemTagFromDisplayMode(const PDFDisplayMode&) const;
-    PDFDisplayMode displayModeFromContextMenuItemTag(const ContextMenuItemTag&) const;
+    ContextMenuItemTag NODELETE contextMenuItemTagFromDisplayMode(const PDFDisplayMode&) const;
+    PDFDisplayMode NODELETE displayModeFromContextMenuItemTag(const ContextMenuItemTag&) const;
 #endif
 
     // Autoscroll
@@ -396,7 +396,7 @@ private:
     void beginAutoscroll();
     void autoscrollTimerFired();
     void continueAutoscroll();
-    void stopAutoscroll();
+    void NODELETE stopAutoscroll();
     void scrollWithDelta(const WebCore::IntSize&);
 
     // Selections
@@ -414,7 +414,7 @@ private:
     enum class IsDraggingSelection : bool { No, Yes };
     enum class IsMarqueeSelection : bool { No, Yes };
 
-    SelectionGranularity selectionGranularityForMouseEvent(const WebMouseEvent&) const;
+    SelectionGranularity NODELETE selectionGranularityForMouseEvent(const WebMouseEvent&) const;
     void beginTrackingSelection(PDFDocumentLayout::PageIndex, const WebCore::FloatPoint& pagePoint, const WebMouseEvent&);
     void extendCurrentSelectionIfNeeded();
     void updateCurrentSelectionForContextMenuEventIfNeeded();
@@ -534,7 +534,7 @@ private:
     bool requestStartKeyboardScrollAnimation(const WebCore::KeyboardScroll& scrollData) override;
     bool requestStopKeyboardScrollAnimation(bool immediate) override;
 
-    WebCore::OverscrollBehavior overscrollBehavior() const;
+    WebCore::OverscrollBehavior NODELETE overscrollBehavior() const;
     WebCore::OverscrollBehavior horizontalOverscrollBehavior() const override { return overscrollBehavior(); }
     WebCore::OverscrollBehavior verticalOverscrollBehavior() const override { return overscrollBehavior(); }
 
@@ -613,8 +613,8 @@ private:
     void createPasswordEntryForm();
     void teardownPasswordEntryForm() override;
 
-    bool isInDiscreteDisplayMode() const;
-    bool isShowingTwoPages() const;
+    bool NODELETE isInDiscreteDisplayMode() const;
+    bool NODELETE isShowingTwoPages() const;
 
     WebCore::PlatformWheelEvent wheelEventCopyWithVelocity(const WebCore::PlatformWheelEvent&) const;
 
@@ -656,7 +656,7 @@ private:
     void clearSelection() final;
 #endif
 
-    bool shouldUseInProcessBackingStore() const;
+    bool NODELETE shouldUseInProcessBackingStore() const;
 
     bool delegatesScrollingToMainFrame() const final;
 

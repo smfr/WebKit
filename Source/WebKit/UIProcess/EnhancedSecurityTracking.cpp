@@ -38,7 +38,7 @@ using namespace WebCore;
 
 using EnhancedSecuritySitesMap = HashMap<WebCore::RegistrableDomain, EnhancedSecurityReason>;
 
-static EnhancedSecuritySitesMap& enabledSitesMap()
+static EnhancedSecuritySitesMap& NODELETE enabledSitesMap()
 {
     static MainRunLoopNeverDestroyed<EnhancedSecuritySitesMap> staticEnabledSites;
     return staticEnabledSites;
@@ -115,7 +115,7 @@ void EnhancedSecurityTracking::makeActive()
     m_activeState = ActivationState::Active;
 }
 
-static EnhancedSecurityReason reasonForEnhancedSecurity(EnhancedSecurity state)
+static EnhancedSecurityReason NODELETE reasonForEnhancedSecurity(EnhancedSecurity state)
 {
     switch (state) {
     case EnhancedSecurity::Disabled:

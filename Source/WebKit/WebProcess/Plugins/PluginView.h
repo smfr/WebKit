@@ -72,9 +72,9 @@ class PluginView final : public WebCore::PluginViewBase {
 public:
     static RefPtr<PluginView> create(WebCore::HTMLPlugInElement&, const URL&, const String& contentType, bool shouldUseManualLoader);
 
-    WebCore::LocalFrame* frame() const;
+    WebCore::LocalFrame* NODELETE frame() const;
 
-    bool isBeingDestroyed() const;
+    bool NODELETE isBeingDestroyed() const;
 
     void manualLoadDidReceiveResponse(const WebCore::ResourceResponse&);
     void manualLoadDidReceiveData(const WebCore::SharedBuffer&);
@@ -157,7 +157,7 @@ public:
 
     void didSameDocumentNavigationForFrame(WebFrame&);
 
-    PDFPluginIdentifier pdfPluginIdentifier() const;
+    PDFPluginIdentifier NODELETE pdfPluginIdentifier() const;
 
     void setPDFDisplayMode(PDFDisplayMode);
 
@@ -199,7 +199,7 @@ private:
 
     void updateDocumentForPluginSizingBehavior();
 
-    WebCore::RenderEmbeddedObject* renderer() const;
+    WebCore::RenderEmbeddedObject* NODELETE renderer() const;
 
     // WebCore::PluginViewBase
     WebCore::PluginLayerHostingStrategy layerHostingStrategy() const final;

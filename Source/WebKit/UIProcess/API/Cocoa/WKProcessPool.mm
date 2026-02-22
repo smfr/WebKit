@@ -742,7 +742,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 @synthesize totalSystemCPUTime = _totalSystemCPUTime;
 @synthesize physicalFootprint = _physicalFootprint;
 
-static _WKProcessState processStateFromThrottleState(WebKit::ProcessThrottleState state)
+static _WKProcessState NODELETE processStateFromThrottleState(WebKit::ProcessThrottleState state)
 {
     switch (state) {
     case WebKit::ProcessThrottleState::Foreground:

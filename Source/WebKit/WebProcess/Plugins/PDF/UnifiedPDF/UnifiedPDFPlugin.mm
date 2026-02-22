@@ -1970,7 +1970,7 @@ auto UnifiedPDFPlugin::pdfElementTypesForPagePoint(const IntPoint& pointInPDFPag
 
 #pragma mark Events
 
-static bool isContextMenuEvent(const WebMouseEvent& event)
+static bool NODELETE isContextMenuEvent(const WebMouseEvent& event)
 {
 #if PLATFORM(MAC)
     return event.menuTypeForEvent();
@@ -3304,7 +3304,7 @@ void UnifiedPDFPlugin::scrollWithDelta(const IntSize& scrollDelta)
 
 #pragma mark -
 
-static NSStringCompareOptions compareOptionsForFindOptions(WebCore::FindOptions options)
+static NSStringCompareOptions NODELETE compareOptionsForFindOptions(WebCore::FindOptions options)
 {
     bool searchForward = !options.contains(FindOption::Backwards);
     bool isCaseSensitive = !options.contains(FindOption::CaseInsensitive);

@@ -108,7 +108,7 @@ public:
         }
     }
 
-    bool isObservingMedia() const { return m_isObservingMedia; }
+    bool NODELETE isObservingMedia() const { return m_isObservingMedia; }
 
     void whenReady(UserMediaCaptureManagerProxy::CreateSourceCallback&& createCallback)
     {
@@ -122,8 +122,8 @@ public:
         });
     }
 
-    bool isUsingSource(const RealtimeMediaSource& source) const { return m_source.ptr() == &source; }
-    RealtimeMediaSource& source() { return m_source; }
+    bool NODELETE isUsingSource(const RealtimeMediaSource& source) const { return m_source.ptr() == &source; }
+    RealtimeMediaSource& NODELETE source() { return m_source; }
 
     void audioUnitWillStart() final
     {
@@ -521,7 +521,7 @@ CaptureSourceOrError UserMediaCaptureManagerProxy::createMicrophoneSource(const 
     return source;
 }
 
-static bool canCaptureFromMultipleCameras()
+static bool NODELETE canCaptureFromMultipleCameras()
 {
 #if PLATFORM(IOS_FAMILY)
     return false;

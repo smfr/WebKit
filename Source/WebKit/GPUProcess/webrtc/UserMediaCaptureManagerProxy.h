@@ -100,7 +100,7 @@ public:
     void didReceiveMessageFromGPUProcess(IPC::Connection& connection, IPC::Decoder& decoder) { didReceiveMessage(connection, decoder); }
     void didReceiveSyncMessage(IPC::Connection&, IPC::Decoder&, UniqueRef<IPC::Encoder>&);
 
-    bool hasSourceProxies() const;
+    bool NODELETE hasSourceProxies() const;
 
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess() const;
 

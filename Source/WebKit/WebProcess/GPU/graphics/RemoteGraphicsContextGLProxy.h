@@ -374,7 +374,7 @@ public:
 #endif
     // End of list used by generate-gpup-webgl script.
 
-    static bool handleMessageToRemovedDestination(IPC::Connection&, IPC::Decoder&);
+    static bool NODELETE handleMessageToRemovedDestination(IPC::Connection&, IPC::Decoder&);
 
 protected:
     explicit RemoteGraphicsContextGLProxy(const WebCore::GraphicsContextGLAttributes&, RemoteRenderingBackendProxy&);
@@ -404,11 +404,11 @@ private:
     void wasLost();
     void addDebugMessage(GCGLenum, GCGLenum, GCGLenum, CString&&);
 
-    void initialize(const RemoteGraphicsContextGLInitializationState&);
+    void NODELETE initialize(const RemoteGraphicsContextGLInitializationState&);
     void waitUntilInitialized();
     void disconnectGpuProcessIfNeeded();
     void abandonGpuProcess();
-    uint32_t createObjectName();
+    uint32_t NODELETE createObjectName();
 
     WeakPtr<GPUProcessConnection> m_gpuProcessConnection; // Only main thread use.
     RefPtr<IPC::StreamClientConnection> m_streamConnection;

@@ -341,47 +341,47 @@ public:
         return index;
     }
 
-    bool useTagNameForTextFormControls() const
+    bool NODELETE useTagNameForTextFormControls() const
     {
         return m_versionBehaviors.contains(TextExtractionVersionBehavior::TagNameForTextFormControls);
     }
 
-    bool includeRects() const
+    bool NODELETE includeRects() const
     {
         return !onlyIncludeText() && m_options.flags.contains(TextExtractionOptionFlag::IncludeRects);
     }
 
-    bool includeURLs() const
+    bool NODELETE includeURLs() const
     {
         return !onlyIncludeText() && m_options.flags.contains(TextExtractionOptionFlag::IncludeURLs);
     }
 
-    bool shortenURLs() const
+    bool NODELETE shortenURLs() const
     {
         return m_options.flags.contains(TextExtractionOptionFlag::ShortenURLs);
     }
 
-    bool onlyIncludeText() const
+    bool NODELETE onlyIncludeText() const
     {
         return m_options.flags.contains(TextExtractionOptionFlag::OnlyIncludeText);
     }
 
-    bool useHTMLOutput() const
+    bool NODELETE useHTMLOutput() const
     {
         return m_options.outputFormat == TextExtractionOutputFormat::HTMLMarkup;
     }
 
-    bool useMarkdownOutput() const
+    bool NODELETE useMarkdownOutput() const
     {
         return m_options.outputFormat == TextExtractionOutputFormat::Markdown;
     }
 
-    bool useTextTreeOutput() const
+    bool NODELETE useTextTreeOutput() const
     {
         return m_options.outputFormat == TextExtractionOutputFormat::TextTree;
     }
 
-    bool useJSONOutput() const
+    bool NODELETE useJSONOutput() const
     {
         return m_options.outputFormat == TextExtractionOutputFormat::MinifiedJSON;
     }
@@ -421,7 +421,7 @@ public:
         m_urlStringStack.append(WTF::move(urlString));
     }
 
-    std::optional<String> currentURLString() const
+    std::optional<String> NODELETE currentURLString() const
     {
         if (m_urlStringStack.isEmpty())
             return std::nullopt;
@@ -429,7 +429,7 @@ public:
         return { m_urlStringStack.last() };
     }
 
-    void popURLString()
+    void NODELETE popURLString()
     {
         if (m_urlStringStack.isEmpty()) {
             ASSERT_NOT_REACHED();
@@ -439,9 +439,9 @@ public:
         m_urlStringStack.removeLast();
     }
 
-    void pushSuperscript() { m_superscriptLevel++; }
-    bool superscriptLevel() const { return m_superscriptLevel; }
-    void popSuperscript()
+    void NODELETE pushSuperscript() { m_superscriptLevel++; }
+    bool NODELETE superscriptLevel() const { return m_superscriptLevel; }
+    void NODELETE popSuperscript()
     {
         if (!m_superscriptLevel) {
             ASSERT_NOT_REACHED();
@@ -450,9 +450,9 @@ public:
         m_superscriptLevel--;
     }
 
-    void pushStrikethrough() { m_strikethroughLevel++; }
-    bool isInsideStrikethrough() const { return m_strikethroughLevel > 0; }
-    void popStrikethrough()
+    void NODELETE pushStrikethrough() { m_strikethroughLevel++; }
+    bool NODELETE isInsideStrikethrough() const { return m_strikethroughLevel > 0; }
+    void NODELETE popStrikethrough()
     {
         if (!m_strikethroughLevel) {
             ASSERT_NOT_REACHED();
@@ -570,7 +570,7 @@ private:
         protect(rootJSONObject())->setInteger("version"_s, version());
     }
 
-    uint32_t version() const
+    uint32_t NODELETE version() const
     {
         return m_options.version.value_or(currentTextExtractionOutputVersion);
     }

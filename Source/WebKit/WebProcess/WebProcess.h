@@ -291,7 +291,7 @@ public:
 
     void networkProcessConnectionClosed(NetworkProcessConnection*);
     NetworkProcessConnection* existingNetworkProcessConnection() { return m_networkProcessConnection.get(); }
-    WebLoaderStrategy& webLoaderStrategy();
+    WebLoaderStrategy& NODELETE webLoaderStrategy();
     WebFileSystemStorageConnection& fileSystemStorageConnection();
 
     RefPtr<WebTransportSession> webTransportSession(WebTransportSessionIdentifier);
@@ -465,16 +465,16 @@ public:
     void updatePageScreenProperties();
 #endif
 
-    void setChildProcessDebuggabilityEnabled(bool);
+    void NODELETE setChildProcessDebuggabilityEnabled(bool);
 
 #if ENABLE(GPU_PROCESS)
-    void setUseGPUProcessForCanvasRendering(bool);
-    void setUseGPUProcessForDOMRendering(bool);
+    void NODELETE setUseGPUProcessForCanvasRendering(bool);
+    void NODELETE setUseGPUProcessForDOMRendering(bool);
     void setUseGPUProcessForMedia(bool);
-    bool shouldUseRemoteRenderingFor(WebCore::RenderingPurpose);
+    bool NODELETE shouldUseRemoteRenderingFor(WebCore::RenderingPurpose);
 #if ENABLE(WEBGL)
-    void setUseGPUProcessForWebGL(bool);
-    bool shouldUseRemoteRenderingForWebGL() const;
+    void NODELETE setUseGPUProcessForWebGL(bool);
+    bool NODELETE shouldUseRemoteRenderingForWebGL() const;
 #endif
 #endif
 
@@ -577,7 +577,7 @@ private:
 
     void platformTerminate();
 
-    void setHasSuspendedPageProxy(bool);
+    void NODELETE setHasSuspendedPageProxy(bool);
     void setIsInProcessCache(bool, CompletionHandler<void()>&&);
     void markIsNoLongerPrewarmed();
 
@@ -607,7 +607,7 @@ private:
     void flushResourceLoadStatistics();
     void seedResourceLoadStatisticsForTesting(const WebCore::RegistrableDomain& firstPartyDomain, const WebCore::RegistrableDomain& thirdPartyDomain, bool shouldScheduleNotification, CompletionHandler<void()>&&);
     void userPreferredLanguagesChanged(const Vector<String>&) const;
-    void fullKeyboardAccessModeChanged(bool fullKeyboardAccessEnabled);
+    void NODELETE fullKeyboardAccessModeChanged(bool fullKeyboardAccessEnabled);
 #if ENABLE(OPT_IN_PARTITIONED_COOKIES)
     void setOptInCookiePartitioningEnabled(bool);
 #endif
@@ -645,7 +645,7 @@ private:
     void clearCachedPage(WebCore::BackForwardFrameItemIdentifier, CompletionHandler<void()>&&);
 
 #if ENABLE(SERVICE_CONTROLS)
-    void setEnabledServices(bool hasImageServices, bool hasSelectionServices, bool hasRichContentServices);
+    void NODELETE setEnabledServices(bool hasImageServices, bool hasSelectionServices, bool hasRichContentServices);
 #endif
 
     void handleInjectedBundleMessage(const String& messageName, const UserData& messageBody);

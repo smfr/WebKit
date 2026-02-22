@@ -69,7 +69,7 @@ public:
     void connectionClosed(IPC::Connection::UniqueID);
     WebCore::StorageEstimate estimate();
     const String& path() const { return m_path; }
-    OriginQuotaManager& quotaManager();
+    OriginQuotaManager& NODELETE quotaManager();
     FileSystemStorageManager& fileSystemStorageManager(FileSystemStorageHandleRegistry&);
     FileSystemStorageManager* existingFileSystemStorageManager();
     LocalStorageManager& localStorageManager(StorageAreaRegistry&);

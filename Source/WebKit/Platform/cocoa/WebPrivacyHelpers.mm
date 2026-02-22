@@ -358,7 +358,7 @@ RestrictedOpenerDomainsController::RestrictedOpenerDomainsController()
     }]);
 }
 
-static RestrictedOpenerType restrictedOpenerType(WPRestrictedOpenerType type)
+static RestrictedOpenerType NODELETE restrictedOpenerType(WPRestrictedOpenerType type)
 {
     switch (type) {
     case WPRestrictedOpenerTypeNoOpener: return RestrictedOpenerType::NoOpener;
@@ -526,10 +526,10 @@ public:
 
     TrackerAddressLookupInfo() = default;
 
-    const CString& owner() const { return m_owner; }
-    const CString& host() const { return m_host; }
+    const CString& NODELETE owner() const { return m_owner; }
+    const CString& NODELETE host() const { return m_host; }
 
-    CanBlock canBlock() const { return m_canBlock; }
+    CanBlock NODELETE canBlock() const { return m_canBlock; }
 
     static void populateIfNeeded()
     {
@@ -655,9 +655,9 @@ public:
 
     TrackerDomainLookupInfo() = default;
 
-    const CString& owner() const { return m_owner; }
+    const CString& NODELETE owner() const { return m_owner; }
 
-    CanBlock canBlock() const { return m_canBlock; }
+    CanBlock NODELETE canBlock() const { return m_canBlock; }
 
     static void populateIfNeeded()
     {

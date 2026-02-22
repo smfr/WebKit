@@ -37,7 +37,7 @@
 namespace WebKit {
 using namespace WebCore;
 
-static CFHTTPCookieStorageAcceptPolicy toCFHTTPCookieStorageAcceptPolicy(HTTPCookieAcceptPolicy policy)
+static CFHTTPCookieStorageAcceptPolicy NODELETE toCFHTTPCookieStorageAcceptPolicy(HTTPCookieAcceptPolicy policy)
 {
     switch (policy) {
     case HTTPCookieAcceptPolicy::AlwaysAccept:
