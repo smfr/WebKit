@@ -3141,7 +3141,7 @@ void WebProcessProxy::setResourceMonitorRuleLists(RefPtr<WebCompiledContentRuleL
 std::optional<SandboxExtension::Handle> WebProcessProxy::sandboxExtensionForFile(const String& fileName) const
 {
     auto handle = m_fileSandboxExtensions.getOptional(fileName);
-    WEBPROCESSPROXY_RELEASE_LOG(Sandbox, "sandboxExtensionForFile: %" PRIVATE_LOG_STRING ", has cached extension: %d", fileName.utf8().data(), handle ? true : false);
+    WEBPROCESSPROXY_RELEASE_LOG(Sandbox, "sandboxExtensionForFile: %" PRIVATE_LOG_STRING ", has cached extension: %d", fileName.utf8().data(), !!handle);
     return handle;
 }
 

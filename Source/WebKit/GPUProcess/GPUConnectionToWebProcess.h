@@ -173,8 +173,8 @@ public:
     PAL::SessionID sessionID() const { return m_sessionID; }
 
     bool isLockdownModeEnabled() const { return m_isLockdownModeEnabled; }
-    bool isLockdownSafeFontParserEnabled() const { return sharedPreferencesForWebProcess() ? sharedPreferencesForWebProcess()->lockdownFontParserEnabled : false; }
-    bool isForceLockdownSafeFontParserEnabled() const { return sharedPreferencesForWebProcess() ? sharedPreferencesForWebProcess()->forceLockdownFontParserEnabled : false; }
+    bool isLockdownSafeFontParserEnabled() const { return sharedPreferencesForWebProcess() && sharedPreferencesForWebProcess()->lockdownFontParserEnabled; }
+    bool isForceLockdownSafeFontParserEnabled() const { return sharedPreferencesForWebProcess() && sharedPreferencesForWebProcess()->forceLockdownFontParserEnabled; }
 
     Logger& logger();
 

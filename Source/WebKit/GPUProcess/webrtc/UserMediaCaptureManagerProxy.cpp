@@ -829,7 +829,7 @@ void UserMediaCaptureManagerProxy::setIsInBackground(RealtimeMediaSourceIdentifi
 void UserMediaCaptureManagerProxy::isPowerEfficient(WebCore::RealtimeMediaSourceIdentifier sourceID, CompletionHandler<void(bool)>&& callback)
 {
     RefPtr proxy = m_proxies.get(sourceID);
-    callback(proxy ? proxy->isPowerEfficient() : false);
+    callback(proxy && proxy->isPowerEfficient());
 }
 
 void UserMediaCaptureManagerProxy::clear()

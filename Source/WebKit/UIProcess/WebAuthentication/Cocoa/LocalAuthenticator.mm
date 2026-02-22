@@ -212,7 +212,7 @@ static inline void performEnterpriseAttestation(const WebCore::PublicKeyCredenti
 
 static inline bool emptyTransportsOrContain(const Vector<AuthenticatorTransport>& transports, AuthenticatorTransport target)
 {
-    return transports.isEmpty() ? true : transports.contains(target);
+    return transports.isEmpty() || transports.contains(target);
 }
 
 // A Base64 encoded string of the Credential ID is used as the key of the hash set.

@@ -2511,7 +2511,7 @@ void WebPage::drawRect(GraphicsContext& graphicsContext, const IntRect& rect)
     if (!localMainFrame)
         return;
     RefPtr mainFrameView = localMainFrame->view();
-    LocalDefaultSystemAppearance localAppearance(mainFrameView ? mainFrameView->useDarkAppearance() : false);
+    LocalDefaultSystemAppearance localAppearance(mainFrameView && mainFrameView->useDarkAppearance());
 #endif
 
     GraphicsContextStateSaver stateSaver(graphicsContext);

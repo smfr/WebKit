@@ -760,7 +760,7 @@ void UnifiedPDFPlugin::notifyFlushRequired(const GraphicsLayer*)
 bool UnifiedPDFPlugin::isInWindow() const
 {
     RefPtr page = this->page();
-    return page ? page->isInWindow() : false;
+    return page && page->isInWindow();
 }
 
 void UnifiedPDFPlugin::didChangeIsInWindow()

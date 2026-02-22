@@ -205,7 +205,7 @@ static void* kWindowContentLayoutObserverContext = &kWindowContentLayoutObserver
 
 - (BOOL)inspectorViewControllerInspectorIsUnderTest:(WKInspectorViewController *)inspectorViewController
 {
-    return _inspectorProxy ? _inspectorProxy->isUnderTest() : false;
+    return _inspectorProxy && _inspectorProxy->isUnderTest();
 }
 
 - (BOOL)inspectorViewControllerInspectorIsHorizontallyAttached:(WKInspectorViewController *)inspectorViewController

@@ -315,7 +315,7 @@ FrameInfoData WebFrame::info(WithCertificateInfo withCertificateInfo) const
         withCertificateInfo == WithCertificateInfo::Yes ? certificateInfo() : CertificateInfo(),
         getCurrentProcessID(),
         isFocused(),
-        coreLocalFrame ? coreLocalFrame->loader().errorOccurredInLoading() : false,
+        coreLocalFrame && coreLocalFrame->loader().errorOccurredInLoading(),
         WTF::move(metrics)
     };
 }

@@ -233,7 +233,7 @@ static WebCore::FloatBoxExtent NODELETE coreBoxExtentsFromEdgeInsets(NSEdgeInset
 
 - (void)_setSemanticContext:(NSViewSemanticContext)semanticContext
 {
-    auto wasUsingFormSemanticContext = _impl ? _impl->useFormSemanticContext() : false;
+    auto wasUsingFormSemanticContext = _impl && _impl->useFormSemanticContext();
 
     [super _setSemanticContext:semanticContext];
 

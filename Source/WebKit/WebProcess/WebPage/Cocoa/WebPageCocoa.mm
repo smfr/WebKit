@@ -677,7 +677,7 @@ void WebPage::updateMockAccessibilityElementAfterCommittingLoad()
 {
     RefPtr mainFrame = dynamicDowncast<WebCore::LocalFrame>(this->mainFrame());
     RefPtr document = mainFrame ? mainFrame->document() : nullptr;
-    [m_mockAccessibilityElement setHasMainFramePlugin:document ? document->isPluginDocument() : false];
+    [m_mockAccessibilityElement setHasMainFramePlugin:document && document->isPluginDocument()];
 }
 
 void WebPage::getProcessDisplayName(CompletionHandler<void(String&&)>&& completionHandler)

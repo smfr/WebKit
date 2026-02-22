@@ -1507,7 +1507,7 @@ void WebAutomationSession::computeElementLayout(const Inspector::Protocol::Autom
         callback({ { WTF::move(rectObject), WTF::move(inViewCenterPointObject), isObscured } });
     };
 
-    bool scrollIntoViewIfNeeded = optionalScrollIntoViewIfNeeded ? *optionalScrollIntoViewIfNeeded : false;
+    bool scrollIntoViewIfNeeded = optionalScrollIntoViewIfNeeded && *optionalScrollIntoViewIfNeeded;
     page->sendWithAsyncReplyToProcessContainingFrameWithoutDestinationIdentifier(frameID, Messages::WebAutomationSessionProxy::ComputeElementLayout(page->webPageIDInMainFrameProcess(), frameID, nodeHandle, scrollIntoViewIfNeeded, coordinateSystem.value()), WTF::move(completionHandler));
 }
 
@@ -2829,8 +2829,8 @@ void WebAutomationSession::takeScreenshot(const Inspector::Protocol::Automation:
     bool frameNotFound = false;
     auto frameID = webFrameIDForHandle(frameHandle, frameNotFound);
     ASYNC_FAIL_WITH_PREDEFINED_ERROR_IF(frameNotFound, WindowNotFound);
-    bool scrollIntoViewIfNeeded = optionalScrollIntoViewIfNeeded ? *optionalScrollIntoViewIfNeeded : false;
-    bool clipToViewport = optionalClipToViewport ? *optionalClipToViewport : false;
+    bool scrollIntoViewIfNeeded = optionalScrollIntoViewIfNeeded && *optionalScrollIntoViewIfNeeded;
+    bool clipToViewport = optionalClipToViewport && *optionalClipToViewport;
 
 #if PLATFORM(COCOA) || (!PLATFORM(GTK) && !PLATFORM(WPE))
     auto ipcCompletionHandler = [] (CommandCallback<String>&& callback) mutable {

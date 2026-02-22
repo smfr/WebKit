@@ -12725,7 +12725,7 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
     parameters.shouldRelaxThirdPartyCookieBlocking = m_configuration->shouldRelaxThirdPartyCookieBlocking();
     parameters.canUseCredentialStorage = m_canUseCredentialStorage;
 
-    parameters.httpsUpgradeEnabled = preferences->upgradeKnownHostsToHTTPSEnabled() ? m_configuration->httpsUpgradeEnabled() : false;
+    parameters.httpsUpgradeEnabled = preferences->upgradeKnownHostsToHTTPSEnabled() && m_configuration->httpsUpgradeEnabled();
     parameters.allowPostingLegacySynchronousMessages = m_configuration->allowPostingLegacySynchronousMessages();
     parameters.backgroundTextExtractionEnabled = m_configuration->backgroundTextExtractionEnabled();
 
@@ -13969,7 +13969,7 @@ void WebPageProxy::setCanRunModal(bool canRunModal)
 
 bool WebPageProxy::canRunModal()
 {
-    return hasRunningProcess() ? m_canRunModal : false;
+    return hasRunningProcess() && m_canRunModal;
 }
 
 void WebPageProxy::beginPrinting(WebFrameProxy* frame, const PrintInfo& printInfo)

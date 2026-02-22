@@ -3219,7 +3219,7 @@ void WebExtensionContext::loadDeclarativeNetRequestRules(CompletionHandler<void(
         if (!allJSONData.get().allKeys.count) {
             removeDeclarativeNetRequestRules();
             API::ContentRuleListStore::defaultStoreSingleton().removeContentRuleListFile(declarativeNetRequestContentRuleListFilePath(), [completionHandler = WTF::move(completionHandler)](std::error_code error) mutable {
-                completionHandler(error ? false : true);
+                completionHandler(!error);
             });
             return;
         }

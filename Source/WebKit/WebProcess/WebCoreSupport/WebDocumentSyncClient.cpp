@@ -47,7 +47,7 @@ WebDocumentSyncClient::WebDocumentSyncClient(WebPage& webPage)
 bool WebDocumentSyncClient::siteIsolationEnabled()
 {
     RefPtr corePage = protect(m_page)->corePage();
-    return corePage ? corePage->settings().siteIsolationEnabled() : false;
+    return corePage && corePage->settings().siteIsolationEnabled();
 }
 
 void WebDocumentSyncClient::broadcastDocumentSyncDataToOtherProcesses(const WebCore::DocumentSyncSerializationData& data)
