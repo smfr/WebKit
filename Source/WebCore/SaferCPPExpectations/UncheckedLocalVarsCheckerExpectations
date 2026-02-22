@@ -8,7 +8,6 @@ accessibility/AXObjectCache.cpp
 [ Mac ] dom/Document.cpp
 dom/Position.cpp
 [ Mac ] dom/Range.cpp
-[ Mac ] dom/TreeScope.cpp
 [ Mac ] editing/DeleteSelectionCommand.cpp
 editing/Editing.cpp
 [ iOS ] editing/cocoa/EditorCocoa.mm
