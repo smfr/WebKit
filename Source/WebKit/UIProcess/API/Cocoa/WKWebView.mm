@@ -971,7 +971,7 @@ static void addBrowsingContextControllerMethodStubsIfNeeded()
 #if PLATFORM(IOS_FAMILY)
     [_remoteObjectRegistry _invalidate];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_scrollView setInternalDelegate:nil];
+    [_scrollView _invalidateInternalDelegate];
 #endif
 
 #if PLATFORM(MAC) && HAVE(NSWINDOW_SNAPSHOT_READINESS_HANDLER)
