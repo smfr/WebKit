@@ -380,6 +380,8 @@ bool hasCapacityToUseLargeGigacage();
     v(Double, desiredProfileLivenessRate, 0.75, Normal, nullptr) \
     v(Double, desiredProfileFullnessRate, 0.35, Normal, nullptr) \
     \
+    v(Double, quickDFGTierUpThresholdFactor, 0.2, Normal, "Threshold factor for quick DFG tier-up"_s) \
+    \
     v(Double, doubleVoteRatioForDoubleFormat, 2, Normal, nullptr) \
     v(Double, structureCheckVoteRatioForHoisting, 1, Normal, nullptr) \
     v(Double, checkArrayVoteRatioForHoisting, 1, Normal, nullptr) \
