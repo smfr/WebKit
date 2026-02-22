@@ -63,7 +63,6 @@ dom/Node.cpp
 dom/Position.cpp
 [ Mac ] dom/Range.cpp
 dom/SpaceSplitString.cpp
-dom/TreeScope.cpp
 [ Mac ] editing/DeleteSelectionCommand.cpp
 [ Mac ] editing/TextCheckingHelper.cpp
 [ iOS ] editing/ios/DictationCommandIOS.cpp

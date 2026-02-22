@@ -347,7 +347,6 @@ html/FormAssociatedElement.cpp
 [ iOS ] html/HTMLAnchorElement.cpp
 html/HTMLAttachmentElement.cpp
 html/HTMLCanvasElement.cpp
-html/HTMLFormControlsCollection.cpp
 html/HTMLFormElement.cpp
 html/HTMLInputElement.cpp
 html/HTMLLinkElement.cpp
