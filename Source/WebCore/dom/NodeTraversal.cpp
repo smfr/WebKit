@@ -151,7 +151,7 @@ Node* nextPostOrder(const Node& current, const Node* stayWithin)
     return next;
 }
 
-static Node* previousAncestorSiblingPostOrder(const Node& current, const Node* stayWithin)
+static Node* NODELETE previousAncestorSiblingPostOrder(const Node& current, const Node* stayWithin)
 {
     ASSERT(!current.previousSibling());
     for (auto* ancestor = current.parentNode(); ancestor; ancestor = ancestor->parentNode()) {

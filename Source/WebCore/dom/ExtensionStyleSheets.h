@@ -64,7 +64,7 @@ public:
     const Vector<Ref<CSSStyleSheet>>& injectedAuthorStyleSheets() const;
     const Vector<Ref<CSSStyleSheet>>& authorStyleSheetsForTesting() const { return m_authorStyleSheetsForTesting; }
 
-    bool hasCachedInjectedStyleSheets() const;
+    bool NODELETE hasCachedInjectedStyleSheets() const;
 
     void clearPageUserSheet();
     void updatePageUserSheet();
@@ -83,7 +83,7 @@ public:
     void injectPageSpecificUserStyleSheet(const UserStyleSheet&);
     void removePageSpecificUserStyleSheet(const UserStyleSheet&);
 
-    String contentForInjectedStyleSheet(CSSStyleSheet&) const;
+    String NODELETE contentForInjectedStyleSheet(CSSStyleSheet&) const;
 
     void detachFromDocument();
 

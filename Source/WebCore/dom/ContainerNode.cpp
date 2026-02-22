@@ -398,7 +398,7 @@ void ContainerNode::removeDetachedChildren()
     removeDetachedChildrenInContainer(*this);
 }
 
-static inline bool hasDisplayContents(Element *element)
+static inline bool NODELETE hasDisplayContents(Element *element)
 {
     return element && element->hasDisplayContents();
 }

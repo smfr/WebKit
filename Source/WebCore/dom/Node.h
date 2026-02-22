@@ -152,7 +152,7 @@ public:
         DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
     };
 
-    static void dumpStatistics();
+    static void NODELETE dumpStatistics();
 
     virtual ~Node();
     void willBeDeletedFrom(Document&);
@@ -292,10 +292,10 @@ public:
 
     HTMLSlotElement* assignedSlot() const;
     HTMLSlotElement* assignedSlotForBindings() const;
-    HTMLSlotElement* manuallyAssignedSlot() const;
+    HTMLSlotElement* NODELETE manuallyAssignedSlot() const;
     void setManuallyAssignedSlot(HTMLSlotElement*);
 
-    bool hasEverPaintedImages() const;
+    bool NODELETE hasEverPaintedImages() const;
     void setHasEverPaintedImages(bool);
 
     bool isUncustomizedCustomElement() const { return customElementState() == CustomElementState::Uncustomized; }
@@ -345,7 +345,7 @@ public:
     // Use when it's guaranteed to that shadowHost is null.
     inline ContainerNode* parentNodeGuaranteedHostFree() const;
     // Returns the parent node, but null if the parent node is a ShadowRoot.
-    ContainerNode* nonShadowBoundaryParentNode() const;
+    ContainerNode* NODELETE nonShadowBoundaryParentNode() const;
 
     bool selfOrPrecedingNodesAffectDirAuto() const { return hasStateFlag(StateFlag::SelfOrPrecedingNodesAffectDirAuto); }
     void setSelfOrPrecedingNodesAffectDirAuto(bool flag) { setStateFlag(StateFlag::SelfOrPrecedingNodesAffectDirAuto, flag); }
@@ -393,7 +393,7 @@ public:
     bool hasDidMutateSubtreeAfterSetInnerHTML() const { return hasStateFlag(StateFlag::DidMutateSubtreeAfterSetInnerHTML); }
     void setDidMutateSubtreeAfterSetInnerHTML() { setStateFlag(StateFlag::DidMutateSubtreeAfterSetInnerHTML); }
     void clearDidMutateSubtreeAfterSetInnerHTML() { clearStateFlag(StateFlag::DidMutateSubtreeAfterSetInnerHTML); }
-    void setDidMutateSubtreeAfterSetInnerHTMLOnAncestors();
+    void NODELETE setDidMutateSubtreeAfterSetInnerHTMLOnAncestors();
 
     bool hasWasParsedWithFastPath() const { return hasStateFlag(StateFlag::WasParsedWithFastPath); }
     void setWasParsedWithFastPath() { setStateFlag(StateFlag::WasParsedWithFastPath); }
@@ -805,7 +805,7 @@ private:
     bool checkIsInUserAgentShadowTree(bool value) const { return value; }
 #endif
 
-    void trackForDebugging();
+    void NODELETE trackForDebugging();
     void materializeRareData();
 
     Vector<Ref<MutationObserverRegistration>>* NODELETE mutationObserverRegistry();
@@ -851,7 +851,7 @@ template<TreeType = Tree> std::partial_ordering treeOrder(const Node&, const Nod
 
 WEBCORE_EXPORT std::partial_ordering treeOrderForTesting(TreeType, const Node&, const Node&);
 
-bool isTouchRelatedEventType(const EventTypeInfo&, const EventTarget&);
+bool NODELETE isTouchRelatedEventType(const EventTypeInfo&, const EventTarget&);
 
 #if ASSERT_ENABLED
 

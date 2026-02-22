@@ -60,7 +60,7 @@ enum class BoundaryPointIsAtEnd : bool { No, Yes };
 enum class WordBounded : bool { No, Yes };
 
 // https://wicg.github.io/scroll-to-text-fragment/#search-invisible
-static bool isSearchInvisible(const Node& node)
+static bool NODELETE isSearchInvisible(const Node& node)
 {
     if (!node.renderStyle() || node.renderStyle()->display() == Style::DisplayType::None)
         return true;
@@ -87,7 +87,7 @@ static bool isSearchInvisible(const Node& node)
 }
 
 // https://wicg.github.io/scroll-to-text-fragment/#non-searchable-subtree
-static bool isNonSearchableSubtree(const Node& node)
+static bool NODELETE isNonSearchableSubtree(const Node& node)
 {
     const Node* traversingNode = &node;
     while (traversingNode) {
@@ -122,14 +122,14 @@ static bool indexIsAtWordBoundary(const String& string, unsigned index)
 }
 
 // https://wicg.github.io/scroll-to-text-fragment/#visible-text-node
-static bool isVisibleTextNode(const Node& node)
+static bool NODELETE isVisibleTextNode(const Node& node)
 {
     if (CheckedPtr renderText = dynamicDowncast<RenderText>(node.renderer()))
         return renderText->style().visibility() == Visibility::Visible;
     return false;
 }
 
-static bool isVisibleTextNode(const Text& node)
+static bool NODELETE isVisibleTextNode(const Text& node)
 {
     return node.renderer() && node.renderer()->style().visibility() == Visibility::Visible;
 }

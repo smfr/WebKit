@@ -48,8 +48,8 @@ public:
     const MessagePortIdentifier& port1() const { return m_ports[0]; }
     const MessagePortIdentifier& port2() const { return m_ports[1]; }
 
-    WEBCORE_EXPORT std::optional<ProcessIdentifier> processForPort(const MessagePortIdentifier&);
-    bool includesPort(const MessagePortIdentifier&);
+    WEBCORE_EXPORT std::optional<ProcessIdentifier> NODELETE processForPort(const MessagePortIdentifier&);
+    bool NODELETE includesPort(const MessagePortIdentifier&);
     void entanglePortWithProcess(const MessagePortIdentifier&, ProcessIdentifier);
     void disentanglePort(const MessagePortIdentifier&);
     void closePort(const MessagePortIdentifier&);
@@ -57,7 +57,7 @@ public:
 
     void takeAllMessagesForPort(const MessagePortIdentifier&, CompletionHandler<void(Vector<MessageWithMessagePorts>&&, CompletionHandler<void()>&&)>&&);
 
-    WEBCORE_EXPORT bool hasAnyMessagesPendingOrInFlight() const;
+    WEBCORE_EXPORT bool NODELETE hasAnyMessagesPendingOrInFlight() const;
 
     uint64_t beingTransferredCount();
 

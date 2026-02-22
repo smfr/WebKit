@@ -393,7 +393,7 @@ Node::Node(Document& document, NodeType type, OptionSet<TypeFlag> flags)
 #endif
 }
 
-static HashMap<WeakRef<Node, WeakPtrImplWithEventTargetData>, NodeIdentifier>& nodeIdentifiersMap()
+static HashMap<WeakRef<Node, WeakPtrImplWithEventTargetData>, NodeIdentifier>& NODELETE nodeIdentifiersMap()
 {
     static MainThreadNeverDestroyed<HashMap<WeakRef<Node, WeakPtrImplWithEventTargetData>, NodeIdentifier>> map;
     return map;
@@ -1327,7 +1327,7 @@ bool Node::isClosedShadowHidden(const Node& otherNode) const
     return true;
 }
 
-static inline ShadowRoot* parentShadowRoot(const Node& node)
+static inline ShadowRoot* NODELETE parentShadowRoot(const Node& node)
 {
     if (auto* parent = node.parentElement())
         return parent->shadowRoot();
@@ -3053,7 +3053,7 @@ template Node* commonInclusiveAncestor<Tree>(const Node&, const Node&);
 template Node* commonInclusiveAncestor<ComposedTree>(const Node&, const Node&);
 template Node* commonInclusiveAncestor<ShadowIncludingTree>(const Node&, const Node&);
 
-static bool isSiblingSubsequent(const Node& siblingA, const Node& siblingB)
+static bool NODELETE isSiblingSubsequent(const Node& siblingA, const Node& siblingB)
 {
     ASSERT(siblingA.parentNode());
     ASSERT(siblingA.parentNode() == siblingB.parentNode());

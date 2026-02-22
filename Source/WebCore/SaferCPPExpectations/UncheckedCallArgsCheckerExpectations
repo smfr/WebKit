@@ -124,8 +124,6 @@ dom/RangeBoundaryPoint.h
 dom/ScriptElement.cpp
 dom/SelectorQuery.cpp
 dom/ShadowRoot.cpp
-dom/SimpleRange.cpp
-dom/SimulatedClick.cpp
 dom/TreeScope.cpp
 dom/TreeScopeOrderedMap.cpp
 dom/TypedElementDescendantIteratorInlines.h
@@ -358,7 +356,6 @@ page/PointerLockController.cpp
 page/PrintContext.cpp
 page/Quirks.cpp
 page/RemoteFrame.cpp
-page/ResizeObservation.cpp
 page/ResizeObserver.cpp
 page/ScrollBehavior.cpp
 page/SettingsBase.cpp
@@ -630,7 +627,6 @@ style/StyleChangedAnimatableProperties.cpp
 style/StyleCustomPropertyRegistry.cpp
 style/StyleExtractor.cpp
 style/StyleExtractorCustom.h
-style/StyleInterpolation.cpp
 style/StyleInvalidationFunctions.h
 style/StyleInvalidator.cpp
 style/StyleResolveForDocument.cpp

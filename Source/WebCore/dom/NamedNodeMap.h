@@ -41,7 +41,7 @@ public:
     {
     }
 
-    WEBCORE_EXPORT void ref();
+    WEBCORE_EXPORT void NODELETE ref();
     WEBCORE_EXPORT void deref();
 
     bool isSupportedPropertyIndex(unsigned index) const { return index < length(); }

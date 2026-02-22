@@ -105,7 +105,7 @@ private:
         else
             m_arraySizeAndFlags &= ~flag;
     }
-    static inline uint32_t arraySizeAndFlagsFromOther(const ElementData& other, bool isUnique);
+    static inline uint32_t NODELETE arraySizeAndFlagsFromOther(const ElementData& other, bool isUnique);
 
 protected:
     ElementData();

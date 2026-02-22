@@ -36,7 +36,7 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(DocumentSharedObjectPool);
 
-static HashMap<RegistrableDomain, size_t>& peakSizeInPast()
+static HashMap<RegistrableDomain, size_t>& NODELETE peakSizeInPast()
 {
     static MainThreadNeverDestroyed<HashMap<RegistrableDomain, size_t>> map;
     return map;
