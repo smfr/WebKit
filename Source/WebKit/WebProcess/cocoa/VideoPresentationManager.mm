@@ -77,7 +77,7 @@ static FloatRect inlineVideoFrame(HTMLVideoElement& element)
     if (!renderer)
         return { };
 
-    if (renderer->hasLayer() && renderer->checkedEnclosingLayer()->isComposited()) {
+    if (renderer->hasLayer() && protect(renderer->enclosingLayer())->isComposited()) {
         FloatQuad contentsBox = static_cast<FloatRect>(renderer->enclosingLayer()->backing()->contentsBox());
         contentsBox = renderer->localToAbsoluteQuad(contentsBox);
         return protect(document->view())->contentsToRootView(contentsBox.boundingBox());

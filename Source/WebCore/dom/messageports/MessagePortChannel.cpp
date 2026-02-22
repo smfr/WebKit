@@ -51,17 +51,12 @@ MessagePortChannel::MessagePortChannel(MessagePortChannelRegistry& registry, con
     m_processes[1] = port2.processIdentifier;
     m_entangledToProcessProtectors[1] = this;
 
-    checkedRegistry()->messagePortChannelCreated(*this);
+    protect(m_registry)->messagePortChannelCreated(*this);
 }
 
 MessagePortChannel::~MessagePortChannel()
 {
-    checkedRegistry()->messagePortChannelDestroyed(*this);
-}
-
-CheckedRef<MessagePortChannelRegistry> MessagePortChannel::checkedRegistry() const
-{
-    return m_registry;
+    protect(m_registry)->messagePortChannelDestroyed(*this);
 }
 
 std::optional<ProcessIdentifier> MessagePortChannel::processForPort(const MessagePortIdentifier& port)

@@ -115,7 +115,7 @@ void AudioNodeInput::disable(AudioNodeOutput* output)
     }
 
     // Propagate disabled state to outputs.
-    checkedNode()->disableOutputsIfNecessary();
+    protect(node())->disableOutputsIfNecessary();
 }
 
 void AudioNodeInput::enable(AudioNodeOutput* output)
@@ -139,12 +139,12 @@ void AudioNodeInput::enable(AudioNodeOutput* output)
     m_disabledOutputs.remove(output);
 
     // Propagate enabled state to outputs.
-    checkedNode()->enableOutputsIfNecessary();
+    protect(node())->enableOutputsIfNecessary();
 }
 
 void AudioNodeInput::didUpdate()
 {
-    checkedNode()->checkNumberOfChannelsForInput(this);
+    protect(node())->checkNumberOfChannelsForInput(this);
 }
 
 void AudioNodeInput::updateInternalBus()

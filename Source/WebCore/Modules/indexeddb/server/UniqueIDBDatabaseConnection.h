@@ -53,7 +53,6 @@ public:
 
     const IDBResourceIdentifier& openRequestIdentifier() { return m_openRequestIdentifier; }
     UniqueIDBDatabase* database() { return m_database.get(); }
-    CheckedPtr<UniqueIDBDatabase> NODELETE checkedDatabase();
     UniqueIDBDatabaseManager* NODELETE manager();
     IDBConnectionToClient& connectionToClient() { return m_connectionToClient; }
     Ref<IDBConnectionToClient> NODELETE protectedConnectionToClient();

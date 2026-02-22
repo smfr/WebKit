@@ -138,7 +138,6 @@ public:
     void setIsInWindow(bool);
 
     WEBCORE_EXPORT RenderLayerCompositor& compositor();
-    WEBCORE_EXPORT CheckedRef<RenderLayerCompositor> checkedCompositor();
     WEBCORE_EXPORT bool NODELETE usesCompositing() const;
 
     WEBCORE_EXPORT IntRect unscaledDocumentRect() const;

@@ -51,8 +51,7 @@ public:
 
     // Can be called from any thread.
     AudioNode* node() const { return m_node.get(); }
-    CheckedPtr<AudioNode> checkedNode() const { return m_node.get(); }
-    BaseAudioContext& context() { return checkedNode()->context(); }
+    BaseAudioContext& context() { return protect(node())->context(); }
     
     // Causes our AudioNode to process if it hasn't already for this render quantum.
     // It returns the bus containing the processed audio for this output, returning inPlaceBus if in-place processing was possible.

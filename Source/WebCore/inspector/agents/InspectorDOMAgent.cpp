@@ -285,7 +285,7 @@ public:
             data->setBoolean("enabled"_s, !!node->document().fullscreen().fullscreenElement());
 #endif // ENABLE(FULLSCREEN_API)
 
-        auto timestamp = domAgent->checkedEnvironment()->executionStopwatch().elapsedTime().seconds();
+        auto timestamp = protect(domAgent->environment())->executionStopwatch().elapsedTime().seconds();
         domAgent->m_frontendDispatcher->didFireEvent(nodeId, event.type(), timestamp, data->size() ? WTF::move(data) : nullptr);
     }
 
@@ -3070,7 +3070,7 @@ void InspectorDOMAgent::mediaMetricsTimerFired()
             iterator->value.isPowerEfficient = isPowerEfficient;
 
             if (auto nodeId = pushNodePathToFrontend(mediaElement.ptr())) {
-                auto timestamp = checkedEnvironment()->executionStopwatch().elapsedTime().seconds();
+                auto timestamp = protect(environment())->executionStopwatch().elapsedTime().seconds();
                 m_frontendDispatcher->powerEfficientPlaybackStateChanged(nodeId, timestamp, iterator->value.isPowerEfficient);
             }
         }

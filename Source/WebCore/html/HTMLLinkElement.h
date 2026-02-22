@@ -154,8 +154,6 @@ private:
 
     void removePendingSheet();
 
-    CheckedPtr<Style::Scope> NODELETE checkedStyleScope();
-
     const Ref<LinkLoader> m_linkLoader;
     CheckedPtr<Style::Scope> m_styleScope;
     CachedResourceHandle<CachedCSSStyleSheet> m_cachedSheet;

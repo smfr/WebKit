@@ -127,9 +127,7 @@ public:
     unsigned numberOfOutputs() const { return m_outputs.size(); }
 
     AudioNodeInput* NODELETE input(unsigned);
-    CheckedPtr<AudioNodeInput> NODELETE checkedInput(unsigned);
     AudioNodeOutput* NODELETE output(unsigned);
-    CheckedPtr<AudioNodeOutput> NODELETE checkedOutput(unsigned);
 
     // Called from main thread by corresponding JavaScript methods.
     ExceptionOr<void> connect(AudioNode&, unsigned outputIndex, unsigned inputIndex);
@@ -327,6 +325,11 @@ namespace WTF {
 template<> struct LogArgument<WebCore::AudioNode::NodeType> {
     static String toString(WebCore::AudioNode::NodeType type) { return convertEnumerationToString(type); }
 };
+
+// Make sure `protect()` returns a CheckedPtr/CheckedRef for AudioNodes instead of a RefPtr/Ref
+// since AudioNode's ref-counting is not thread-safe and protect() gets called from the AudioThread.
+inline CheckedRef<WebCore::AudioNode> protect(WebCore::AudioNode& node) { return node; }
+inline CheckedPtr<WebCore::AudioNode> protect(WebCore::AudioNode* node) { return node; }
 
 } // namespace WTF
 

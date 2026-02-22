@@ -64,7 +64,6 @@ public:
 
     UniqueIDBDatabaseConnection* NODELETE databaseConnection() const;
     UniqueIDBDatabase* NODELETE database() const;
-    CheckedPtr<UniqueIDBDatabase> NODELETE checkedDatabase() const;
     const IDBTransactionInfo& info() const { return m_transactionInfo; }
     WEBCORE_EXPORT bool NODELETE isVersionChange() const;
     bool NODELETE isReadOnly() const;

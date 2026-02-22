@@ -63,8 +63,7 @@ public:
     WEBCORE_EXPORT Text* NODELETE textNode() const;
 
     const RenderStyle& style() const;
-    // FIXME: Remove checkedStyle once https://github.com/llvm/llvm-project/pull/142485 lands. This is a false positive.
-    const CheckedRef<const RenderStyle> checkedStyle() const { return style(); }
+
     const RenderStyle& firstLineStyle() const;
     const RenderStyle* getCachedPseudoStyle(const Style::PseudoElementIdentifier&, const RenderStyle* parentStyle = nullptr) const;
 

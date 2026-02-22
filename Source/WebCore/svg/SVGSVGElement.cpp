@@ -160,7 +160,7 @@ void SVGSVGElement::updateCurrentTranslate()
     if (document().settings().layerBasedSVGEngineEnabled()) {
         if (CheckedPtr svgRoot = dynamicDowncast<RenderSVGRoot>(*renderer)) {
             ASSERT(svgRoot->viewportContainer());
-            svgRoot->checkedViewportContainer()->updateHasSVGTransformFlags();
+            protect(svgRoot->viewportContainer())->updateHasSVGTransformFlags();
         }
 
         // TODO: [LBSE] Avoid relayout upon transform changes (not possible in legacy, but should be in LBSE).
@@ -245,7 +245,7 @@ void SVGSVGElement::svgAttributeChanged(const QualifiedName& attrName)
             // FIXME: try to get rid of this custom handling of embedded SVG invalidation, maybe through abstraction.
             if (CheckedPtr renderer = this->renderer()) {
                 if (isEmbeddedThroughFrameContainingSVGDocument(*renderer))
-                    renderer->checkedView()->setNeedsLayout(MarkOnlyThis);
+                    protect(renderer->view())->setNeedsLayout(MarkOnlyThis);
             }
         }
         invalidateResourceImageBuffersIfNeeded();
@@ -257,7 +257,7 @@ void SVGSVGElement::svgAttributeChanged(const QualifiedName& attrName)
         if (document().settings().layerBasedSVGEngineEnabled()) {
             if (CheckedPtr svgRoot = dynamicDowncast<RenderSVGRoot>(renderer())) {
                 ASSERT(svgRoot->viewportContainer());
-                svgRoot->checkedViewportContainer()->updateHasSVGTransformFlags();
+                protect(svgRoot->viewportContainer())->updateHasSVGTransformFlags();
                 svgRoot->setNeedsLayoutIfNeededAfterIntrinsicSizeChange();
             } else if (CheckedPtr viewportContainer = dynamicDowncast<RenderSVGViewportContainer>(renderer()))
                 viewportContainer->updateHasSVGTransformFlags();
@@ -717,7 +717,7 @@ bool SVGSVGElement::scrollToFragment(StringView fragmentIdentifier)
         if (renderer.document().settings().layerBasedSVGEngineEnabled()) {
             if (CheckedPtr svgRoot = dynamicDowncast<RenderSVGRoot>(renderer)) {
                 ASSERT(svgRoot->viewportContainer());
-                svgRoot->checkedViewportContainer()->updateHasSVGTransformFlags();
+                protect(svgRoot->viewportContainer())->updateHasSVGTransformFlags();
             }
             updateSVGRendererForElementChange();
             return;

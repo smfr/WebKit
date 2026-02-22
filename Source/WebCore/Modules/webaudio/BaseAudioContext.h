@@ -333,8 +333,8 @@ private:
         }
         TailProcessingNode& operator=(const TailProcessingNode&) = delete;
         TailProcessingNode& operator=(TailProcessingNode&&) = delete;
-        CheckedPtr<AudioNode> checkedNode() const { return m_node.get(); }
         AudioNode* operator->() const { return m_node.get(); }
+        AudioNode* node() const { return m_node.get(); }
         friend bool operator==(const TailProcessingNode&, const TailProcessingNode&) = default;
         bool operator==(const AudioNode& node) const { return m_node == &node; }
     private:

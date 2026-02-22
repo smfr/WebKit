@@ -209,7 +209,6 @@ public:
     };
 
     WEBCORE_EXPORT EditorClient* client() const;
-    WEBCORE_EXPORT CheckedPtr<EditorClient> checkedClient() const;
     WEBCORE_EXPORT TextCheckerClient* textChecker() const;
 
     CompositeEditCommand* lastEditCommand() { return m_lastEditCommand.get(); }

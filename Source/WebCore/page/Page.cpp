@@ -3638,7 +3638,7 @@ void Page::setUnderPageBackgroundColorOverride(Color&& underPageBackgroundColorO
     if (RefPtr frameView = localMainFrame ? localMainFrame->view() : nullptr) {
         if (CheckedPtr renderView = frameView->renderView()) {
             if (renderView->usesCompositing())
-                renderView->checkedCompositor()->updateLayerForOverhangAreasBackgroundColor();
+                protect(renderView->compositor())->updateLayerForOverhangAreasBackgroundColor();
         }
     }
 #endif // HAVE(RUBBER_BANDING)
@@ -3702,7 +3702,7 @@ void Page::addRelevantRepaintedObject(const RenderObject& object, const LayoutRe
     if (&object.frame() != &mainFrame())
         return;
 
-    LayoutRect relevantRect = relevantViewRect(object.checkedView().ptr());
+    LayoutRect relevantRect = relevantViewRect(protect(object.view()).ptr());
 
     // The objects are only relevant if they are being painted within the viewRect().
     if (!objectPaintRect.intersects(snappedIntRect(relevantRect)))
@@ -3760,7 +3760,7 @@ void Page::addRelevantUnpaintedObject(const RenderObject& object, const LayoutRe
         return;
 
     // The objects are only relevant if they are being painted within the relevantViewRect().
-    if (!objectPaintRect.intersects(snappedIntRect(relevantViewRect(object.checkedView().ptr()))))
+    if (!objectPaintRect.intersects(snappedIntRect(relevantViewRect(protect(object.view()).ptr()))))
         return;
 
     m_relevantUnpaintedRenderObjects.add(object);
@@ -5420,7 +5420,7 @@ void Page::updateFixedContainerEdges(BoxSideSet sides)
     if (RefPtr layer = frameView->setWantsLayerForTopOverhangColorExtension(topOverhangColor.isVisible())) {
         layer->setBackgroundColor(WTF::move(topOverhangColor));
         if (CheckedPtr renderView = frameView->renderView())
-            renderView->checkedCompositor()->updateSizeAndPositionForTopOverhangColorExtensionLayer();
+            protect(renderView->compositor())->updateSizeAndPositionForTopOverhangColorExtensionLayer();
     }
 #endif
 }

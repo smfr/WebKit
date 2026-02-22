@@ -109,7 +109,7 @@ void ConvolverNode::process(size_t framesToProcess)
         // Note that we can handle the case where nothing is connected to the input, in which case we'll just feed silence into the convolver.
         // FIXME: If we wanted to get fancy we could try to factor in the 'tail time' and stop processing once the tail dies down if
         // we keep getting fed silence.
-        m_reverb->process(checkedInput(0)->bus(), outputBus, framesToProcess);
+        m_reverb->process(protect(input(0))->bus(), outputBus, framesToProcess);
     }
 }
 
@@ -156,7 +156,7 @@ ExceptionOr<void> ConvolverNode::setBufferForBindings(RefPtr<AudioBuffer>&& buff
         m_buffer = WTF::move(buffer);
         if (m_buffer) {
             // This will propagate the channel count to any nodes connected further downstream in the graph.
-            checkedOutput(0)->setNumberOfChannels(computeNumberOfOutputChannels(checkedInput(0)->numberOfChannels(), m_buffer->numberOfChannels()));
+            protect(output(0))->setNumberOfChannels(computeNumberOfOutputChannels(protect(input(0))->numberOfChannels(), m_buffer->numberOfChannels()));
         }
     }
 
@@ -234,7 +234,7 @@ void ConvolverNode::checkNumberOfChannelsForInput(AudioNodeInput* input)
         if (!isInitialized()) {
             // This will propagate the channel count to any nodes connected further
             // downstream in the graph.
-            checkedOutput(0)->setNumberOfChannels(numberOfOutputChannels);
+            protect(output(0))->setNumberOfChannels(numberOfOutputChannels);
             initialize();
         }
     }

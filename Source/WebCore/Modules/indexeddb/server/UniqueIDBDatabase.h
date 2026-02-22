@@ -163,8 +163,6 @@ private:
     enum class DidCreateIndexInBackingStore : bool { No, Yes };
     void didCreateIndexAsyncForTransaction(UniqueIDBDatabaseTransaction&, const IDBIndexInfo&, const IDBError&, DidCreateIndexInBackingStore = DidCreateIndexInBackingStore::Yes);
 
-    CheckedPtr<IDBBackingStore> NODELETE checkedBackingStore() const;
-
     WeakPtr<UniqueIDBDatabaseManager> m_manager;
     IDBDatabaseIdentifier m_identifier;
 

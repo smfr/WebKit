@@ -55,7 +55,6 @@ public:
 
     bool NODELETE hasSelfPaintingLayer() const;
     RenderLayer* layer() const { return m_layer.get(); }
-    CheckedPtr<RenderLayer> NODELETE checkedLayer() const;
 
     void styleWillChange(Style::Difference, const RenderStyle& newStyle) override;
     void styleDidChange(Style::Difference, const RenderStyle* oldStyle) override;

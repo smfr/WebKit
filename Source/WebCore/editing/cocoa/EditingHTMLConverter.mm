@@ -484,7 +484,7 @@ static AttributedString editingAttributedStringInternal(const SimpleRange& range
         CheckedPtr renderer = node->renderer();
 
         if (renderer)
-            updateAttributes(node.get(), renderer->checkedStyle(), includedElements, elementQualifiesForWritingToolsPreservationCache, enclosingLinkCache, enclosingListCache, attributes.get(), textListsForListElements);
+            updateAttributes(node.get(), protect(renderer->style()), includedElements, elementQualifiesForWritingToolsPreservationCache, enclosingLinkCache, enclosingListCache, attributes.get(), textListsForListElements);
         else if (!includedElements.contains(IncludedElement::NonRenderedContent))
             continue;
 

@@ -1744,7 +1744,7 @@ void UnifiedPDFPlugin::updateScrollingExtents()
 
     EventRegion eventRegion;
     auto eventRegionContext = eventRegion.makeContext();
-    eventRegionContext.unite(FloatRoundedRect(FloatRect({ }, size())), *renderer, renderer->checkedStyle().get());
+    eventRegionContext.unite(FloatRoundedRect(FloatRect({ }, size())), *renderer, protect(renderer->style()).get());
     scrollContainerLayer->setEventRegion(WTF::move(eventRegion));
 }
 

@@ -79,7 +79,6 @@ public:
 
     void setAsFormData(Ref<FormData>&& data) { m_data = WTF::move(data); }
     FetchBodyConsumer& consumer();
-    CheckedRef<FetchBodyConsumer> checkedConsumer() { return consumer(); }
 
     void consumeOnceLoadingFinished(FetchBodyConsumer::Type, Ref<DeferredPromise>&&);
 

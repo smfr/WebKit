@@ -248,7 +248,6 @@ public:
     // MARK: - Fonts
 
     inline const FontCascade& fontCascade() const;
-    inline CheckedRef<const FontCascade> checkedFontCascade() const;
     inline FontCascade& mutableFontCascadeWithoutUpdate();
     inline void setFontCascade(FontCascade&&);
 

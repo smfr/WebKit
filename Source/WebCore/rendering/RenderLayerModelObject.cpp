@@ -669,11 +669,6 @@ bool RenderLayerModelObject::pointInSVGClippingArea(const FloatPoint& point) con
     );
 }
 
-CheckedPtr<RenderLayer> RenderLayerModelObject::checkedLayer() const
-{
-    return m_layer.get();
-}
-
 void RenderLayerModelObject::repaintOrRelayoutAfterSVGTransformChange()
 {
     ASSERT(document().settings().layerBasedSVGEngineEnabled());

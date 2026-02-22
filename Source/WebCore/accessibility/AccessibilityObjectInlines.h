@@ -57,11 +57,6 @@ inline AXObjectCache* AccessibilityObject::axObjectCache() const
     return m_axObjectCache.get();
 }
 
-inline CheckedPtr<AXObjectCache> AccessibilityObject::checkedAxObjectCache() const
-{
-    return axObjectCache();
-}
-
 inline bool AccessibilityObject::isDetached() const
 {
     return !wrapper();

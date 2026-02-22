@@ -82,6 +82,20 @@ private:
     RefPtr<T> m_object;
 };
 
+} // namespace WebCore
+
+namespace WTF {
+
+template<typename T, unsigned target>
+ALWAYS_INLINE RefPtr<T> protect(const WebCore::WebGLBindingPoint<T, target>& bindingPoint)
+{
+    return bindingPoint.get();
+}
+
+} // namespace WTF
+
+namespace WebCore {
+
 class WebGLObject : public RefCounted<WebGLObject> {
 public:
     virtual ~WebGLObject();

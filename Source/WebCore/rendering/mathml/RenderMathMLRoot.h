@@ -46,7 +46,7 @@ public:
     virtual ~RenderMathMLRoot();
 
     void updateStyle();
-    void resetRadicalOperator() { m_radicalOperator.reset(checkedStyle()); }
+    void resetRadicalOperator() { m_radicalOperator.reset(protect(style())); }
 
 private:
     bool isValid() const;

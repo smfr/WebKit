@@ -37,7 +37,6 @@ public:
     static ExceptionOr<Ref<DelayNode>> create(BaseAudioContext&, const DelayOptions&);
 
     AudioParam& NODELETE delayTime();
-    CheckedRef<AudioParam> NODELETE checkedDelayTime();
 
 private:
     DelayNode(BaseAudioContext&, double maxDelayTime);

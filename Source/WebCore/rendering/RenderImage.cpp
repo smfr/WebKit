@@ -977,9 +977,4 @@ RenderBox* RenderImage::embeddedContentBox() const
     return nullptr;
 }
 
-CheckedRef<RenderImageResource> RenderImage::checkedImageResource() const
-{
-    return *m_imageResource;
-}
-
 } // namespace WebCore

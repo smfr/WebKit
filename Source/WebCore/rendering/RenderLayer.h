@@ -181,7 +181,6 @@ public:
     WEBCORE_EXPORT ~RenderLayer();
 
     WEBCORE_EXPORT RenderLayerScrollableArea* NODELETE scrollableArea() const;
-    WEBCORE_EXPORT CheckedPtr<RenderLayerScrollableArea> NODELETE checkedScrollableArea() const;
     WEBCORE_EXPORT RenderLayerScrollableArea* ensureLayerScrollableArea();
 
     String name() const;
@@ -525,7 +524,7 @@ public:
     bool isForcedStackingContext() const { return m_forcedStackingContext; }
     bool isOpportunisticStackingContext() const { return m_isOpportunisticStackingContext; }
 
-    RenderLayerCompositor& compositor() const { return renderer().checkedView()->compositor(); }
+    RenderLayerCompositor& compositor() const { return protect(renderer().view())->compositor(); }
 
     // Notification from the renderer that its content changed (e.g. current frame of image changed).
     // Allows updates of layer content without repainting.

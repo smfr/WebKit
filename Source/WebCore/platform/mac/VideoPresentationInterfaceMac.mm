@@ -509,7 +509,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
 
     CheckedPtr videoPresentationInterfaceMac = _videoPresentationInterfaceMac;
     if (videoPresentationInterfaceMac && videoPresentationInterfaceMac->playbackSessionModel())
-        videoPresentationInterfaceMac->checkedPlaybackSessionModel()->play();
+        protect(videoPresentationInterfaceMac->playbackSessionModel())->play();
 }
 
 - (void)pipActionPause:(PIPViewController *)pip
@@ -518,7 +518,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
 
     CheckedPtr videoPresentationInterfaceMac = _videoPresentationInterfaceMac;
     if (videoPresentationInterfaceMac && videoPresentationInterfaceMac->playbackSessionModel())
-        videoPresentationInterfaceMac->checkedPlaybackSessionModel()->pause();
+        protect(videoPresentationInterfaceMac->playbackSessionModel())->pause();
 }
 
 - (void)pipActionStop:(PIPViewController *)pip

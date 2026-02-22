@@ -370,11 +370,6 @@ inline const FontCascade& RenderStyle::fontCascade() const
     return m_computedStyle.fontCascade();
 }
 
-inline CheckedRef<const FontCascade> RenderStyle::checkedFontCascade() const
-{
-    return m_computedStyle.checkedFontCascade();
-}
-
 inline FontCascade& RenderStyle::mutableFontCascadeWithoutUpdate()
 {
     return m_computedStyle.mutableFontCascadeWithoutUpdate();

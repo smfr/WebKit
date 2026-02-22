@@ -2665,7 +2665,7 @@ AccessibilityObject* AccessibilityNodeObject::parentTable() const
         // https://bugs.webkit.org/show_bug.cgi?id=42652
         RefPtr<AccessibilityObject> tableFromRenderTree;
         if (CheckedPtr renderTableCell = dynamicDowncast<RenderTableCell>(renderer()))
-            tableFromRenderTree = cache->get(renderTableCell->checkedTable().get());
+            tableFromRenderTree = cache->get(protect(renderTableCell->table()).get());
 
         if (!tableFromRenderTree || !tableFromRenderTree->isTable()) {
             if (node()) {

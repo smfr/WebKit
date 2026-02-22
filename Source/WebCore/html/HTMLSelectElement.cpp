@@ -2141,7 +2141,7 @@ String HTMLSelectElement::itemText(unsigned listIndex) const
         itemString = optionElement->textIndentedToRespectGroupLabel();
 
     if (CheckedPtr renderer = this->renderer())
-        return applyTextTransform(renderer->checkedStyle().get(), itemString);
+        return applyTextTransform(protect(renderer->style()).get(), itemString);
     return itemString;
 }
 

@@ -184,11 +184,6 @@ void ComputedStyleBase::addCustomPaintWatchProperty(const AtomString& name)
 
 // MARK: - FontCascade support.
 
-CheckedRef<const FontCascade> ComputedStyleBase::checkedFontCascade() const
-{
-    return fontCascade();
-}
-
 FontCascade& ComputedStyleBase::mutableFontCascadeWithoutUpdate()
 {
     return m_inheritedData.access().fontData.access().fontCascade;

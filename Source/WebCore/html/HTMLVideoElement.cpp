@@ -172,7 +172,7 @@ void HTMLVideoElement::computeAcceleratedRenderingStateAndUpdateMediaPlayer()
     bool isInFullScreen = false;
 #endif
     CheckedPtr renderer = this->renderer();
-    bool canBeAccelerated = player->supportsAcceleratedRendering() && (isInFullScreen || (renderer && renderer->checkedView()->compositor().hasAcceleratedCompositing()));
+    bool canBeAccelerated = player->supportsAcceleratedRendering() && (isInFullScreen || (renderer && protect(renderer->view())->compositor().hasAcceleratedCompositing()));
     if (canBeAccelerated == m_renderingCanBeAccelerated)
         return;
     m_renderingCanBeAccelerated = canBeAccelerated;

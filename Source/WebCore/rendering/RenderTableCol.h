@@ -88,7 +88,6 @@ private:
     void paint(PaintInfo&, const LayoutPoint&) override { }
 
     RenderTable* NODELETE table() const;
-    CheckedPtr<RenderTable> NODELETE checkedTable() const;
 
     unsigned m_span { 1 };
 };

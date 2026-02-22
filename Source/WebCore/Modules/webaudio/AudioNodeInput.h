@@ -54,7 +54,6 @@ public:
 
     // Can be called from any thread.
     AudioNode* node() const { return m_node.get(); }
-    CheckedPtr<AudioNode> checkedNode() const { return m_node.get(); }
 
     // Must be called with the context's graph lock.
     void connect(AudioNodeOutput*);

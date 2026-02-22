@@ -69,7 +69,7 @@ public:
     inline LayoutUnit borderTop() const final;
     inline LayoutUnit borderBottom() const final;
 
-    Color bgColor() const { return checkedStyle()->visitedDependentBackgroundColorApplyingColorFilter(); }
+    Color bgColor() const { return protect(style())->visitedDependentBackgroundColorApplyingColorFilter(); }
 
     LayoutUnit outerBorderBefore() const;
     LayoutUnit outerBorderAfter() const;

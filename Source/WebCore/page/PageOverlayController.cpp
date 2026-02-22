@@ -460,7 +460,7 @@ bool PageOverlayController::shouldDumpPropertyForLayer(const GraphicsLayer* laye
 void PageOverlayController::tiledBackingUsageChanged(const GraphicsLayer* graphicsLayer, bool usingTiledBacking)
 {
     if (usingTiledBacking)
-        graphicsLayer->checkedTiledBacking()->setIsInWindow(m_page->isInWindow());
+        protect(graphicsLayer->tiledBacking())->setIsInWindow(m_page->isInWindow());
 }
 
 } // namespace WebKit

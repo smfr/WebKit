@@ -1097,7 +1097,7 @@ AccessibilityObject* AccessibilityRenderObject::titleUIElement() const
 
         // Table cells that are th cannot have title ui elements, since by definition
         // they are title ui elements
-        if (WebCore::elementName(checkedNode().get()) == ElementName::HTML_th)
+        if (WebCore::elementName(protect(node()).get()) == ElementName::HTML_th)
             return nullptr;
 
         CheckedRef renderCell = downcast<RenderTableCell>(*m_renderer);

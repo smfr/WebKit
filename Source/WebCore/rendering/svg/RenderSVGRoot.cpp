@@ -89,11 +89,6 @@ RenderSVGViewportContainer* RenderSVGRoot::viewportContainer() const
     return dynamicDowncast<RenderSVGViewportContainer>(child);
 }
 
-CheckedPtr<RenderSVGViewportContainer> RenderSVGRoot::checkedViewportContainer() const
-{
-    return viewportContainer();
-}
-
 bool RenderSVGRoot::hasIntrinsicAspectRatio() const
 {
     return computeIntrinsicAspectRatio();

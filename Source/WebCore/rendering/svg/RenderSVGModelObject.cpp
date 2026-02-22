@@ -316,7 +316,7 @@ Path RenderSVGModelObject::computeClipPath(AffineTransform& transform) const
 
     if (RefPtr useElement = dynamicDowncast<SVGUseElement>(protect(element()))) {
         if (CheckedPtr clipChildRenderer = useElement->rendererClipChild())
-            transform.multiply(downcast<RenderLayerModelObject>(*clipChildRenderer).checkedLayer()->currentTransform(Style::TransformResolver::individualTransformOperations).toAffineTransform());
+            transform.multiply(protect(downcast<RenderLayerModelObject>(*clipChildRenderer).layer())->currentTransform(Style::TransformResolver::individualTransformOperations).toAffineTransform());
         if (RefPtr clipChild = useElement->clipChild())
             return pathFromGraphicsElement(*clipChild);
     }

@@ -76,7 +76,6 @@ public:
     void invalidateCachedVisualOverflowRect() final { m_cachedVisualOverflowRect = std::nullopt; }
 
     RenderSVGViewportContainer* viewportContainer() const;
-    CheckedPtr<RenderSVGViewportContainer> checkedViewportContainer() const;
 
 private:
     void element() const = delete;

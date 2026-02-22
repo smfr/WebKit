@@ -545,17 +545,17 @@ bool RenderElement::repaintBeforeStyleChange(Style::Difference diff, const Rende
 
     if (shouldRepaintBeforeStyleChange == RequiredRepaint::RendererAndDescendantsRenderersWithLayers) {
         ASSERT(hasLayer());
-        downcast<RenderLayerModelObject>(*this).checkedLayer()->repaintIncludingDescendants();
+        protect(downcast<RenderLayerModelObject>(*this).layer())->repaintIncludingDescendants();
         return true;
     }
 
     if (shouldRepaintBeforeStyleChange == RequiredRepaint::RendererOnly) {
-        if (isOutOfFlowPositioned() && downcast<RenderLayerModelObject>(*this).checkedLayer()->isSelfPaintingLayer()) {
+        if (isOutOfFlowPositioned() && protect(downcast<RenderLayerModelObject>(*this).layer())->isSelfPaintingLayer()) {
             if (oldStyle.usedVisibility() == Visibility::Hidden) {
                 // Repaint on hidden renderer is a no-op.
                 return false;
             }
-            if (auto cachedClippedOverflowRect = downcast<RenderLayerModelObject>(*this).checkedLayer()->cachedClippedOverflowRect()) {
+            if (auto cachedClippedOverflowRect = protect(downcast<RenderLayerModelObject>(*this).layer())->cachedClippedOverflowRect()) {
                 repaintUsingContainer(containerForRepaint().renderer.get(), *cachedClippedOverflowRect);
                 return true;
             }
@@ -670,7 +670,7 @@ void RenderElement::didAttachChild(RenderObject& child, RenderObject*)
     // To avoid the problem alltogether, detect early if we're inside a hidden SVG subtree
     // and stop creating layers at all for these cases - they're not used anyways.
     if (child.hasLayer() && !layerCreationAllowedForSubtree())
-        downcast<RenderLayerModelObject>(child).checkedLayer()->removeOnlyThisLayer();
+        protect(downcast<RenderLayerModelObject>(child).layer())->removeOnlyThisLayer();
 }
 
 RenderObject* RenderElement::attachRendererInternal(RenderPtr<RenderObject> child, RenderObject* beforeChild)
@@ -748,7 +748,7 @@ static RenderLayer* findNextLayer(const RenderElement& currRenderer, const Rende
     // Step 4: If |checkParent| is set, climb up to our parent and check its siblings that
     // follow us to see if we can locate a layer.
     if (checkParent && currRenderer.parent())
-        return findNextLayer(*currRenderer.checkedParent(), parentLayer, &currRenderer, true);
+        return findNextLayer(*protect(currRenderer.parent()), parentLayer, &currRenderer, true);
 
     return nullptr;
 }
@@ -767,7 +767,7 @@ static RenderLayer* layerNextSiblingRespectingTopLayer(const RenderElement& rend
         return nullptr;
     }
 
-    return findNextLayer(*renderer.checkedParent(), parentLayer, &renderer);
+    return findNextLayer(*protect(renderer.parent()), parentLayer, &renderer);
 }
 
 static void addLayers(const RenderElement& insertedRenderer, RenderElement& currentRenderer, RenderLayer& parentLayer)
@@ -784,7 +784,7 @@ static void addLayers(const RenderElement& insertedRenderer, RenderElement& curr
             layerToUse = insertedRenderer.view().layer();
         }
         CheckedPtr beforeChild = layerNextSiblingRespectingTopLayer(insertedRenderer, *layerToUse);
-        layerToUse->addChild(*downcast<RenderLayerModelObject>(currentRenderer).checkedLayer(), beforeChild.get());
+        layerToUse->addChild(*protect(downcast<RenderLayerModelObject>(currentRenderer).layer()), beforeChild.get());
         return;
     }
 
@@ -799,7 +799,7 @@ void RenderElement::removeLayers()
         return;
 
     if (hasLayer()) {
-        parentLayer->removeChild(*downcast<RenderLayerModelObject>(*this).checkedLayer());
+        parentLayer->removeChild(*protect(downcast<RenderLayerModelObject>(*this).layer()));
         return;
     }
 
@@ -1034,9 +1034,9 @@ void RenderElement::styleWillChange(Style::Difference diff, const RenderStyle& n
     bool hasOutline = newStyle.hasOutline();
     if (hadOutline != hasOutline) {
         if (hasOutline)
-            checkedView()->incrementRendersWithOutline();
+            protect(view())->incrementRendersWithOutline();
         else
-            checkedView()->decrementRendersWithOutline();
+            protect(view())->decrementRendersWithOutline();
     }
 
     bool newStyleSlowScroll = false;
@@ -1254,14 +1254,14 @@ void RenderElement::willBeDestroyed()
         unregisterImages(m_style);
 
         if (style().hasOutline())
-            checkedView()->decrementRendersWithOutline();
+            protect(view())->decrementRendersWithOutline();
 
         if (auto* firstLineStyle = style().getCachedPseudoStyle({ PseudoElementType::FirstLine }))
             unregisterImages(*firstLineStyle);
     }
 
     if (m_hasPausedImageAnimations)
-        checkedView()->removeRendererWithPausedImageAnimations(*this);
+        protect(view())->removeRendererWithPausedImageAnimations(*this);
 
     if (style().contentVisibility() == ContentVisibility::Auto && element())
         ContentVisibilityDocumentState::unobserve(*protect(element()));
@@ -1687,7 +1687,7 @@ void RenderElement::registerForVisibleInViewportCallback()
         return;
     m_isRegisteredForVisibleInViewportCallback = true;
 
-    checkedView()->registerForVisibleInViewportCallback(*this);
+    protect(view())->registerForVisibleInViewportCallback(*this);
 }
 
 void RenderElement::unregisterForVisibleInViewportCallback()
@@ -1696,7 +1696,7 @@ void RenderElement::unregisterForVisibleInViewportCallback()
         return;
     m_isRegisteredForVisibleInViewportCallback = false;
 
-    checkedView()->unregisterForVisibleInViewportCallback(*this);
+    protect(view())->unregisterForVisibleInViewportCallback(*this);
 }
 
 void RenderElement::setVisibleInViewportState(VisibleInViewportState state)
@@ -1731,7 +1731,7 @@ VisibleInViewportState RenderElement::imageFrameAvailable(CachedImage& image, Im
     bool isVisible = isVisibleInViewport();
 
     if (!isVisible && animatingState == ImageAnimatingState::Yes)
-        checkedView()->addRendererWithPausedImageAnimations(*this, image);
+        protect(view())->addRendererWithPausedImageAnimations(*this, image);
 
     // Static images should repaint even if they are outside the viewport rectangle
     // because they should be inside the TileCoverageRect.
@@ -1770,7 +1770,7 @@ bool RenderElement::allowsAnimation() const
 void RenderElement::didRemoveCachedImageClient(CachedImage& cachedImage)
 {
     if (hasPausedImageAnimations())
-        checkedView()->removeRendererWithPausedImageAnimations(*this, cachedImage);
+        protect(view())->removeRendererWithPausedImageAnimations(*this, cachedImage);
 }
 
 void RenderElement::imageContentChanged(CachedImage& cachedImage)
@@ -2481,7 +2481,7 @@ void RenderElement::repaintOldAndNewPositionsForSVGRenderer() const
         if (!isSVGLayerAwareRenderer() || needsLayout())
             return std::nullopt;
 
-        return std::make_optional(downcast<RenderLayerModelObject>(*this).checkedLayer());
+        return std::make_optional(protect(downcast<RenderLayerModelObject>(*this).layer()));
     };
 
     // LBSE: Instead of repainting the current boundaries, utilize RenderLayer::updateLayerPositionsAfterStyleChange() to repaint

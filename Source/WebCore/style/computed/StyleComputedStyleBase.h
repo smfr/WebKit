@@ -624,7 +624,6 @@ public:
     // MARK: - Fonts
 
     inline const FontCascade& fontCascade() const;
-    CheckedRef<const FontCascade> checkedFontCascade() const;
     WEBCORE_EXPORT FontCascade& mutableFontCascadeWithoutUpdate();
     void setFontCascade(FontCascade&&);
 

@@ -173,11 +173,6 @@ RenderObject::~RenderObject()
     ASSERT(!hasRareData());
 }
 
-CheckedRef<RenderView> RenderObject::checkedView() const
-{
-    return view();
-}
-
 void RenderObject::setLayoutBox(Layout::Box& box)
 {
     m_layoutBox = &box;
@@ -486,11 +481,6 @@ RenderLayer* RenderObject::enclosingLayer() const
     return nullptr;
 }
 
-CheckedPtr<RenderLayer> RenderObject::checkedEnclosingLayer() const
-{
-    return enclosingLayer();
-}
-
 RenderBox& RenderObject::enclosingBox() const
 {
     return *lineageOfType<RenderBox>(const_cast<RenderObject&>(*this)).first();
@@ -711,13 +701,13 @@ void RenderObject::invalidateContainerPreferredLogicalWidths()
 void RenderObject::setLayerNeedsFullRepaint()
 {
     ASSERT(hasLayer());
-    downcast<RenderLayerModelObject>(*this).checkedLayer()->setRepaintStatus(RepaintStatus::NeedsFullRepaint);
+    protect(downcast<RenderLayerModelObject>(*this).layer())->setRepaintStatus(RepaintStatus::NeedsFullRepaint);
 }
 
 void RenderObject::setLayerNeedsFullRepaintForOutOfFlowMovementLayout()
 {
     ASSERT(hasLayer());
-    downcast<RenderLayerModelObject>(*this).checkedLayer()->setRepaintStatus(RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
+    protect(downcast<RenderLayerModelObject>(*this).layer())->setRepaintStatus(RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
 }
 
 static inline RenderBlock* nearestNonAnonymousContainingBlockIncludingSelf(RenderElement* renderer)
@@ -794,11 +784,6 @@ RenderBlock* RenderObject::containingBlock() const
     return containingBlockForRenderer(downcast<RenderElement>(*this));
 }
 
-CheckedPtr<RenderBlock> RenderObject::checkedContainingBlock() const
-{
-    return containingBlock();
-}
-
 // This function is similar in spirit to RenderText::absoluteRectsForRange, but returns rectangles
 // which are annotated with additional state which helps iOS draw selections in its unique way.
 // No annotations are added in this class.
@@ -824,7 +809,7 @@ void RenderObject::collectSelectionGeometries(Vector<SelectionGeometry>& geometr
     }
 
     for (auto& quad : quads)
-        geometries.append(SelectionGeometry(quad, HTMLElement::selectionRenderingBehavior(protect(node()).get()), isHorizontalWritingMode(), checkedView()->pageNumberForBlockProgressionOffset(quad.enclosingBoundingBox().x())));
+        geometries.append(SelectionGeometry(quad, HTMLElement::selectionRenderingBehavior(protect(node()).get()), isHorizontalWritingMode(), protect(view())->pageNumberForBlockProgressionOffset(quad.enclosingBoundingBox().x())));
 }
 
 IntRect RenderObject::absoluteBoundingBoxRect(bool useTransforms, bool* wasFixed) const
@@ -993,7 +978,7 @@ void RenderObject::repaintUsingContainer(SingleThreadWeakPtr<const RenderLayerMo
     propagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, r);
 
     if (repaintContainer->hasFilter() && repaintContainer->layer() && repaintContainer->layer()->requiresFullLayerImageForFilters()) {
-        repaintContainer->checkedLayer()->setFilterBackendNeedsRepaintingInRect(r);
+        protect(repaintContainer->layer())->setFilterBackendNeedsRepaintingInRect(r);
         return;
     }
 
@@ -1264,7 +1249,7 @@ void RenderObject::outputRegionsInformation(TextStream& stream) const
         // Try to get the flow thread containing block information
         // from the containing block of this box.
         if (is<RenderBox>(*this))
-            fragmentedFlow = enclosingFragmentedFlowFromRenderer(checkedContainingBlock().get());
+            fragmentedFlow = enclosingFragmentedFlowFromRenderer(protect(containingBlock()).get());
     }
 
     if (!fragmentedFlow)
@@ -1786,7 +1771,7 @@ void RenderObject::willBeDestroyed()
             node->setRenderer({ });
     }
 
-    checkedView()->willDestroyRenderer();
+    protect(view())->willDestroyRenderer();
 
     removeRareData();
 }
@@ -1795,14 +1780,14 @@ void RenderObject::insertedIntoTree()
 {
     // FIXME: We should ASSERT(isRooted()) here but generated content makes some out-of-order insertion.
     if (!isFloating() && parent()->isSVGRenderer() && parent()->childrenInline())
-        checkedParent()->dirtyLineFromChangedChild();
+        protect(parent())->dirtyLineFromChangedChild();
 }
 
 void RenderObject::willBeRemovedFromTree()
 {
     // FIXME: We should ASSERT(isRooted()) but we have some out-of-order removals which would need to be fixed first.
     // Update cached boundaries in SVG renderers, if a child is removed.
-    checkedParent()->invalidateCachedBoundaries();
+    protect(parent())->invalidateCachedBoundaries();
 }
 
 void RenderObject::destroy()
@@ -2273,7 +2258,7 @@ static Vector<FloatRect> borderAndTextRects(const SimpleRange& range, Coordinate
                     auto localBounds = renderer->borderBoundingBox();
                     auto rootClippedBounds = renderer->computeVisibleRectsInContainer(
                         { localBounds },
-                        renderer->checkedView().ptr(),
+                        protect(renderer->view()).ptr(),
                         {
                             .hasPositionFixedDescendant = false,
                             .dirtyRectIsFlipped = false,

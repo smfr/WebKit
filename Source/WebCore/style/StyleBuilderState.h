@@ -109,11 +109,9 @@ public:
 
     ComputedStyle& style() { return m_style.computedStyle(); }
     const ComputedStyle& style() const { return m_style.computedStyle(); }
-    CheckedRef<const ComputedStyle> checkedStyle() const { return style(); }
 
     RenderStyle& renderStyle() { return m_style; }
     const RenderStyle& renderStyle() const { return m_style; }
-    CheckedRef<const RenderStyle> checkedRenderStyle() const { return renderStyle(); }
 
     const ComputedStyle& parentStyle() const { return m_context.parentStyle->computedStyle(); }
     const RenderStyle& parentRenderStyle() const { return *m_context.parentStyle; }

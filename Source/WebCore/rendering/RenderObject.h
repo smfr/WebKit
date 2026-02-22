@@ -354,7 +354,6 @@ public:
     virtual ASCIILiteral renderName() const = 0;
 
     inline RenderElement* parent() const; // Defined in RenderElement.h.
-    inline CheckedPtr<RenderElement> checkedParent() const; // Defined in RenderElement.h.
     bool NODELETE isDescendantOf(const RenderObject*) const;
 
     RenderObject* previousSibling() const { return m_previous.get(); }
@@ -396,7 +395,6 @@ public:
 #endif
 
     WEBCORE_EXPORT RenderLayer* enclosingLayer() const;
-    WEBCORE_EXPORT CheckedPtr<RenderLayer> checkedEnclosingLayer() const;
 
     WEBCORE_EXPORT RenderBox& NODELETE enclosingBox() const;
     RenderBoxModelObject& NODELETE enclosingBoxModelObject() const;
@@ -732,7 +730,6 @@ public:
     bool effectiveCapturedInViewTransition() const;
 
     inline RenderView& view() const; // Defined in RenderObjectDocument.h
-    CheckedRef<RenderView> NODELETE checkedView() const;
     inline LocalFrameViewLayoutContext& layoutContext() const;
 
     HostWindow* hostWindow() const;
@@ -806,7 +803,6 @@ public:
 
     // Returns the containing block level element for this element.
     WEBCORE_EXPORT RenderBlock* containingBlock() const;
-    CheckedPtr<RenderBlock> checkedContainingBlock() const;
     static RenderBlock* containingBlockForPositionType(PositionType, const RenderObject&);
 
     // Convert the given local point to absolute coordinates. If OptionSet<MapCoordinatesMode> includes UseTransforms, take transforms into account.
@@ -864,7 +860,6 @@ public:
     WEBCORE_EXPORT LayoutRect paintingRootRect(LayoutRect& topLevelRect);
 
     inline const RenderStyle& style() const; // Defined in RenderObjectStyle.h.
-    inline CheckedRef<const RenderStyle> checkedStyle() const; // Defined in RenderObjectStyle.h.
     inline const RenderStyle& firstLineStyle() const;
     inline WritingMode writingMode() const; // Defined in RenderObjectStyle.h.
     // writingMode().isHorizontal() is cached by isHorizontalWritingMode() above.
