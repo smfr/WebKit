@@ -1314,3 +1314,5 @@ webkit.org/b/308140 fast/dom/webtiming.html [ Pass Failure ]
 webkit.org/b/308145 imported/w3c/web-platform-tests/css/css-position/sticky/position-sticky-writing-modes.html [ Pass ImageOnlyFailure ]
 
 webkit.org/b/308148 imported/w3c/web-platform-tests/css/css-conditional/container-queries/crashtests/chrome-bug-439886903-crash.html [ Pass Timeout ]
+
+webkit.org/b/308479 imported/w3c/web-platform-tests/html/canvas/element/manual/drawing-text-to-the-canvas/canvas.2d.disconnected-font-size-math.html [ ImageOnlyFailure Pass ]

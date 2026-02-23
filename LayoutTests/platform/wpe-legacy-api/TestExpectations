@@ -82,7 +82,6 @@ imported/w3c/web-platform-tests/css/css-view-transitions/pseudo-with-classes-mis
 imported/w3c/web-platform-tests/css/css-view-transitions/pseudo-with-classes-mismatch-wildcard.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/window-resize-aborts-transition.html [ Failure ]
 imported/w3c/web-platform-tests/css/css-view-transitions/window-resize-aborts-transition-before-ready.html [ Failure ]
-webkit.org/b/307586 imported/w3c/web-platform-tests/css/css-view-transitions/no-raf-while-render-blocked.html [ Failure ]
 
 # Path with marker failures
 svg/W3C-SVG-1.1/painting-marker-03-f.svg [ Failure ]
