@@ -365,7 +365,6 @@ TestWebKitAPI.PAL
 TestWebKitAPI.PDFSnapshot
 TestWebKitAPI.ParsedContentType
 TestWebKitAPI.Path
-TestWebKitAPI.PermissionsAPI
 TestWebKitAPI.PlatformCAAnimation
 TestWebKitAPI.PlatformDynamicRangeLimit
 TestWebKitAPI.PreferredContentMode
