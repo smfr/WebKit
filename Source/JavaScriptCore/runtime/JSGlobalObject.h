@@ -1029,7 +1029,6 @@ public:
 #if ENABLE(REMOTE_INSPECTOR)
     // FIXME: <http://webkit.org/b/246237> Local inspection should be controlled by `inspectable` API.
     Inspector::JSGlobalObjectInspectorController& inspectorController() const;
-    CheckedRef<Inspector::JSGlobalObjectInspectorController> checkedInspectorController() const;
     JSGlobalObjectDebuggable& inspectorDebuggable() { return *m_inspectorDebuggable; }
     Ref<JSGlobalObjectDebuggable> protectedInspectorDebuggable();
 #endif

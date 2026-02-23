@@ -46,7 +46,6 @@ public:
     IntrinsicWidthConstraints computedIntrinsicWidthConstraints();
 
     const ElementBox& root() const { return m_flexBox; }
-    CheckedRef<const ElementBox> checkedRoot() const { return m_flexBox; }
     const FlexFormattingUtils& formattingUtils() const { return m_flexFormattingUtils; }
 
     const BoxGeometry& geometryForFlexItem(const Box&) const;

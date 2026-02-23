@@ -930,7 +930,7 @@ JSGlobalObject::~JSGlobalObject()
 {
     clearWeakTickets();
 #if ENABLE(REMOTE_INSPECTOR)
-    checkedInspectorController()->globalObjectDestroyed();
+    protect(inspectorController())->globalObjectDestroyed();
     m_inspectorDebuggable->globalObjectDestroyed();
 #endif
 
@@ -1052,7 +1052,7 @@ void JSGlobalObject::init(VM& vm)
     m_inspectorController = makeUnique<Inspector::JSGlobalObjectInspectorController>(*this);
     m_inspectorDebuggable = JSGlobalObjectDebuggable::create(*this);
     m_inspectorDebuggable->init();
-    m_consoleClient = checkedInspectorController()->consoleClient().get();
+    m_consoleClient = protect(inspectorController())->consoleClient().get();
 #endif
 
     m_functionPrototype.set(vm, this, FunctionPrototype::create(vm, FunctionPrototype::createStructure(vm, this, jsNull()))); // The real prototype will be set once ObjectPrototype is created.
@@ -3789,11 +3789,6 @@ Ref<JSGlobalObjectDebuggable> JSGlobalObject::protectedInspectorDebuggable()
 Inspector::JSGlobalObjectInspectorController& JSGlobalObject::inspectorController() const
 {
     return *m_inspectorController.get();
-}
-
-CheckedRef<Inspector::JSGlobalObjectInspectorController> JSGlobalObject::checkedInspectorController() const
-{
-    return *m_inspectorController;
 }
 #endif
 

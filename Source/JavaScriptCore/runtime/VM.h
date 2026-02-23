@@ -633,9 +633,7 @@ public:
 
     AtomStringTable* atomStringTable() const { return m_atomStringTable; }
     SymbolRegistry& symbolRegistry() { return m_symbolRegistry.get(); }
-    CheckedRef<SymbolRegistry> checkedSymbolRegistry() { return m_symbolRegistry.get(); }
     SymbolRegistry& privateSymbolRegistry() { return m_privateSymbolRegistry.get(); }
-    CheckedRef<SymbolRegistry> checkedPrivateSymbolRegistry() { return m_privateSymbolRegistry.get(); }
 
     WriteBarrier<JSBigInt> heapBigIntConstantOne;
 
