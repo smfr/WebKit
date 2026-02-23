@@ -649,7 +649,7 @@ String intlStringOption(JSGlobalObject* globalObject, JSObject* options, Propert
         String stringValue = value.toWTFString(globalObject);
         RETURN_IF_EXCEPTION(scope, String());
 
-        if (values.size() && std::find(values.begin(), values.end(), stringValue) == values.end()) {
+        if (values.size() && std::ranges::find(values, stringValue) == values.end()) {
             throwException(globalObject, scope, createRangeError(globalObject, notFound));
             return { };
         }
