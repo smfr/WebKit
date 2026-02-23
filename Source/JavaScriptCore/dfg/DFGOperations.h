@@ -376,6 +376,11 @@ JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareStringImplLess, uintptr_t, (S
 JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareStringImplLessEq, uintptr_t, (StringImpl*, StringImpl*));
 JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareStringImplGreater, uintptr_t, (StringImpl*, StringImpl*));
 JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareStringImplGreaterEq, uintptr_t, (StringImpl*, StringImpl*));
+JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntLess, uintptr_t, (JSCell*, JSCell*));
+JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntLessEq, uintptr_t, (JSCell*, JSCell*));
+JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntGreater, uintptr_t, (JSCell*, JSCell*));
+JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntGreaterEq, uintptr_t, (JSCell*, JSCell*));
+JSC_DECLARE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntEq, uintptr_t, (JSCell*, JSCell*));
 JSC_DECLARE_JIT_OPERATION(operationCompareStringLess, uintptr_t, (JSGlobalObject*, JSString*, JSString*));
 JSC_DECLARE_JIT_OPERATION(operationCompareStringLessEq, uintptr_t, (JSGlobalObject*, JSString*, JSString*));
 JSC_DECLARE_JIT_OPERATION(operationCompareStringGreater, uintptr_t, (JSGlobalObject*, JSString*, JSString*));

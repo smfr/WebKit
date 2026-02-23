@@ -4014,6 +4014,33 @@ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareStringImplGreaterEq, uintptr_t
     return codePointCompare(a, b) >= 0;
 }
 
+JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntLess, uintptr_t, (JSCell* a, JSCell* b))
+{
+    return JSBigInt::compare(jsCast<JSBigInt*>(a), jsCast<JSBigInt*>(b)) == JSBigInt::ComparisonResult::LessThan;
+}
+
+JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntLessEq, uintptr_t, (JSCell* a, JSCell* b))
+{
+    auto result = JSBigInt::compare(jsCast<JSBigInt*>(a), jsCast<JSBigInt*>(b));
+    return result == JSBigInt::ComparisonResult::LessThan || result == JSBigInt::ComparisonResult::Equal;
+}
+
+JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntGreater, uintptr_t, (JSCell* a, JSCell* b))
+{
+    return JSBigInt::compare(jsCast<JSBigInt*>(a), jsCast<JSBigInt*>(b)) == JSBigInt::ComparisonResult::GreaterThan;
+}
+
+JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntGreaterEq, uintptr_t, (JSCell* a, JSCell* b))
+{
+    auto result = JSBigInt::compare(jsCast<JSBigInt*>(a), jsCast<JSBigInt*>(b));
+    return result == JSBigInt::ComparisonResult::GreaterThan || result == JSBigInt::ComparisonResult::Equal;
+}
+
+JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationCompareHeapBigIntEq, uintptr_t, (JSCell* a, JSCell* b))
+{
+    return JSBigInt::equals(jsCast<JSBigInt*>(a), jsCast<JSBigInt*>(b));
+}
+
 JSC_DEFINE_JIT_OPERATION(operationCompareStringLess, uintptr_t, (JSGlobalObject* globalObject, JSString* a, JSString* b))
 {
     VM& vm = globalObject->vm();

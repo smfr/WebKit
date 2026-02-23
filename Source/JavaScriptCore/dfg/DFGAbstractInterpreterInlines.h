@@ -990,7 +990,7 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
                 break;
             }
 
-            setNonCellTypeForNode(node, 
+            setNonCellTypeForNode(node,
                 typeOfDoubleSum(
                     forNode(node->child1()).m_type, forNode(node->child2()).m_type));
             break;
@@ -1078,7 +1078,7 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
                 setConstant(node, jsDoubleNumber(left.asNumber() - right.asNumber()));
                 break;
             }
-            setNonCellTypeForNode(node, 
+            setNonCellTypeForNode(node,
                 typeOfDoubleDifference(
                     forNode(node->child1()).m_type, forNode(node->child2()).m_type));
             break;
@@ -1277,7 +1277,7 @@ bool AbstractInterpreter<AbstractStateType>::executeEffects(unsigned clobberLimi
                 break;
             }
 
-            setNonCellTypeForNode(node, 
+            setNonCellTypeForNode(node,
                 typeOfDoubleProduct(
                     forNode(node->child1()).m_type, forNode(node->child2()).m_type));
             break;

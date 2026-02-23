@@ -4215,7 +4215,7 @@ void SpeculativeJIT::emitUntypedOrAnyBigIntBitOp(Node* node)
     Edge& leftChild = node->child1();
     Edge& rightChild = node->child2();
 
-    DFG_ASSERT(m_graph, node, node->isBinaryUseKind(UntypedUse) || node->isBinaryUseKind(AnyBigIntUse) || node->isBinaryUseKind(HeapBigIntUse) || node->isBinaryUseKind(BigInt32Use));
+    DFG_ASSERT(m_graph, node, node->isBinaryUseKind(UntypedUse) || node->isBinaryUseKind(AnyBigIntUse) || node->isBinaryUseKind(BigInt32Use));
 
     if (isKnownNotNumber(leftChild.node()) || isKnownNotNumber(rightChild.node())) {
         JSValueOperand left(this, leftChild, ManualOperandSpeculation);
@@ -5148,7 +5148,7 @@ void SpeculativeJIT::compileArithAdd(Node* node)
         doubleResult(result.fpr(), node);
         return;
     }
-        
+
     default:
         RELEASE_ASSERT_NOT_REACHED();
         break;
@@ -6474,7 +6474,7 @@ void SpeculativeJIT::compileArithMod(Node* node)
         doubleResult(result.fpr(), node);
         return;
     }
-        
+
     default:
         RELEASE_ASSERT_NOT_REACHED();
         return;
@@ -7022,8 +7022,14 @@ bool SpeculativeJIT::compare(Node* node, RelationalCondition condition, DoubleCo
         return false;
     }
 
-    // FIXME: add HeapBigInt case here.
-    // Not having it means that the compare will not be fused with the branch for this case.
+    if (node->isBinaryUseKind(HeapBigIntUse)) {
+        if (node->op() == CompareEq) {
+            compileHeapBigIntEquality(node);
+            return false;
+        }
+        compileHeapBigIntCompare(node, condition);
+        return false;
+    }
 
     if (node->op() == CompareEq) {
         if (node->isBinaryUseKind(BooleanUse)) {
@@ -16781,7 +16787,7 @@ void SpeculativeJIT::compileProfileType(Node* node)
 
 void SpeculativeJIT::genericJSValueNonPeepholeCompare(Node* node, RelationalCondition cond, S_JITOperation_GJJ helperFunction)
 {
-    ASSERT(node->isBinaryUseKind(UntypedUse) || node->isBinaryUseKind(AnyBigIntUse) || node->isBinaryUseKind(HeapBigIntUse));
+    ASSERT(node->isBinaryUseKind(UntypedUse) || node->isBinaryUseKind(AnyBigIntUse));
     JSValueOperand arg1(this, node->child1(), ManualOperandSpeculation);
     JSValueOperand arg2(this, node->child2(), ManualOperandSpeculation);
     speculate(node, node->child1());
@@ -16896,8 +16902,6 @@ void SpeculativeJIT::genericJSValuePeepholeBranch(Node* node, Node* branchNode, 
 
 void SpeculativeJIT::compileHeapBigIntEquality(Node* node)
 {
-    // FIXME: [ESNext][BigInt] Create specialized version of strict equals for big ints
-    // https://bugs.webkit.org/show_bug.cgi?id=182895
     SpeculateCellOperand left(this, node->child1());
     SpeculateCellOperand right(this, node->child2());
     GPRTemporary result(this, Reuse, left);
@@ -16920,12 +16924,40 @@ void SpeculativeJIT::compileHeapBigIntEquality(Node* node)
     notEqualCase.link(this);
 
     silentSpillAllRegisters(resultGPR);
-    callOperationWithoutExceptionCheck(operationCompareStrictEqCell, resultGPR, LinkableConstant::globalObject(*this, node), leftGPR, rightGPR);
+    callOperationWithoutExceptionCheck(operationCompareHeapBigIntEq, resultGPR, leftGPR, rightGPR);
     silentFillAllRegisters();
 
     done.link(this);
 
     unblessedBooleanResult(resultGPR, node, UseChildrenCalledExplicitly);
+}
+
+void SpeculativeJIT::compileHeapBigIntCompare(Node* node, RelationalCondition condition)
+{
+    SpeculateCellOperand left(this, node->child1());
+    SpeculateCellOperand right(this, node->child2());
+    GPRReg leftGPR = left.gpr();
+    GPRReg rightGPR = right.gpr();
+
+    speculateHeapBigInt(node->child1(), leftGPR);
+    speculateHeapBigInt(node->child2(), rightGPR);
+
+    flushRegisters();
+    GPRFlushedCallResult result(this);
+    GPRReg resultGPR = result.gpr();
+
+    if (condition == LessThan)
+        callOperationWithoutExceptionCheck(operationCompareHeapBigIntLess, resultGPR, leftGPR, rightGPR);
+    else if (condition == LessThanOrEqual)
+        callOperationWithoutExceptionCheck(operationCompareHeapBigIntLessEq, resultGPR, leftGPR, rightGPR);
+    else if (condition == GreaterThan)
+        callOperationWithoutExceptionCheck(operationCompareHeapBigIntGreater, resultGPR, leftGPR, rightGPR);
+    else if (condition == GreaterThanOrEqual)
+        callOperationWithoutExceptionCheck(operationCompareHeapBigIntGreaterEq, resultGPR, leftGPR, rightGPR);
+    else
+        RELEASE_ASSERT_NOT_REACHED();
+
+    unblessedBooleanResult(resultGPR, node);
 }
 
 void SpeculativeJIT::compileMakeRope(Node* node)

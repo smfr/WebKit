@@ -505,6 +505,35 @@ public:
     }
 #endif
 
+    bool binaryArithShouldSpeculateHeapBigInt(Node* node)
+    {
+        if (Node::shouldSpeculateHeapBigInt(node->child1().node(), node->child2().node()))
+            return true;
+
+        if (hasExitSite(node, BadType))
+            return false;
+
+        auto isHeapBigIntOrOther = [](Node* n) {
+            SpeculatedType prediction = n->prediction();
+            return prediction && !(prediction & ~(SpecHeapBigInt | SpecOther));
+        };
+
+        return (node->child1()->shouldSpeculateHeapBigInt() && isHeapBigIntOrOther(node->child2().node()))
+            || (node->child2()->shouldSpeculateHeapBigInt() && isHeapBigIntOrOther(node->child1().node()));
+    }
+
+    bool unaryArithShouldSpeculateHeapBigInt(Node* node)
+    {
+        if (node->child1()->shouldSpeculateHeapBigInt())
+            return true;
+
+        if (hasExitSite(node, BadType))
+            return false;
+
+        SpeculatedType prediction = node->child1()->prediction();
+        return prediction && !(prediction & ~(SpecHeapBigInt | SpecOther));
+    }
+
     bool variadicArithShouldSpeculateInt32(Node* node, PredictionPass pass)
     {
         bool result = true;

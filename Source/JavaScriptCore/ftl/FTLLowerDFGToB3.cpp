@@ -12232,7 +12232,6 @@ IGNORE_CLANG_WARNINGS_END
 
     void compileCompareStrictEq()
     {
-        JSGlobalObject* globalObject = m_graph.globalObjectFor(m_origin.semantic);
         if (m_node->isBinaryUseKind(Int32Use)) {
             setBoolean(
                 m_out.equal(lowInt32(m_node->child1()), lowInt32(m_node->child2())));
@@ -12240,6 +12239,7 @@ IGNORE_CLANG_WARNINGS_END
         }
 
 #if USE(BIGINT32)
+        JSGlobalObject* globalObject = m_graph.globalObjectFor(m_origin.semantic);
         if (m_node->isBinaryUseKind(BigInt32Use)) {
             LValue left = lowBigInt32(m_node->child1());
             LValue right = lowBigInt32(m_node->child2());
@@ -12420,8 +12420,6 @@ IGNORE_CLANG_WARNINGS_END
         }
 
         if (m_node->isBinaryUseKind(HeapBigIntUse)) {
-            // FIXME: [ESNext][BigInt] Create specialized version of strict equals for big ints
-            // https://bugs.webkit.org/show_bug.cgi?id=182895
             LValue left = lowHeapBigInt(m_node->child1());
             LValue right = lowHeapBigInt(m_node->child2());
 
@@ -12433,8 +12431,8 @@ IGNORE_CLANG_WARNINGS_END
 
             LBasicBlock lastNext = m_out.appendTo(notTriviallyEqualCase, continuation);
 
-            ValueFromBlock slowResult = m_out.anchor(m_out.notNull(vmCall(
-                pointerType(), operationCompareStrictEq, weakPointer(globalObject), left, right)));
+            ValueFromBlock slowResult = m_out.anchor(m_out.notZero64(
+                m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntEq, left, right)));
             m_out.jump(continuation);
 
             m_out.appendTo(continuation, lastNext);
@@ -19371,7 +19369,36 @@ IGNORE_CLANG_WARNINGS_END
             return;
         }
 
-        DFG_ASSERT(m_graph, m_node, m_node->isBinaryUseKind(UntypedUse) || m_node->isBinaryUseKind(HeapBigIntUse) || m_node->isBinaryUseKind(AnyBigIntUse), m_node->child1().useKind(), m_node->child2().useKind());
+        if (m_node->isBinaryUseKind(HeapBigIntUse)) {
+            LValue left = lowHeapBigInt(m_node->child1());
+            LValue right = lowHeapBigInt(m_node->child2());
+
+            LValue result;
+            switch (m_node->op()) {
+            case CompareLess:
+                result = m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntLess, left, right);
+                break;
+            case CompareLessEq:
+                result = m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntLessEq, left, right);
+                break;
+            case CompareGreater:
+                result = m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntGreater, left, right);
+                break;
+            case CompareGreaterEq:
+                result = m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntGreaterEq, left, right);
+                break;
+            case CompareEq:
+                result = m_out.callWithoutSideEffects(Int64, operationCompareHeapBigIntEq, left, right);
+                break;
+            default:
+                RELEASE_ASSERT_NOT_REACHED();
+            }
+
+            setBoolean(m_out.notZero64(result));
+            return;
+        }
+
+        DFG_ASSERT(m_graph, m_node, m_node->isBinaryUseKind(UntypedUse) || m_node->isBinaryUseKind(AnyBigIntUse), m_node->child1().useKind(), m_node->child2().useKind());
         genericJSValueCompare(intFunctor, fallbackFunction);
     }
 

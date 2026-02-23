@@ -1396,6 +1396,7 @@ public:
 
     void compileSymbolEquality(Node*);
     void compileHeapBigIntEquality(Node*);
+    void compileHeapBigIntCompare(Node*, RelationalCondition);
     void compilePeepHoleSymbolEquality(Node*, Node* branchNode);
 #if USE(JSVALUE64)
     void compileNeitherDoubleNorHeapBigIntToNotDoubleStrictEquality(Node*, Edge neitherDoubleNorHeapBigInt, Edge notDouble);
