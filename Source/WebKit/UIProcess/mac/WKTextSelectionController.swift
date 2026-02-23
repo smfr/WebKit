@@ -83,7 +83,6 @@ extension WKTextSelectionController {
     func isTextSelected(at point: NSPoint) -> Bool {
         // The `point` location is relative to the view.
 
-        // FIXME: Address warning "Cannot infer ownership of foreign reference value returned by 'get()'"
         guard let page = view?._protectedPage().get() else {
             return false
         }

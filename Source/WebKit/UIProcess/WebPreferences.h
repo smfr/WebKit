@@ -152,7 +152,7 @@ private:
     bool m_needUpdateAfterBatch { false };
 
     FOR_EACH_WEBKIT_PREFERENCE_WITH_INSPECTOR_OVERRIDE(DECLARE_INSPECTOR_OVERRIDE_STORE)
-} SWIFT_SHARED_REFERENCE(refPrefs, derefPrefs);
+} SWIFT_SHARED_REFERENCE(refPrefs, derefPrefs) SWIFT_RETURNED_AS_UNRETAINED_BY_DEFAULT;
 
 } // namespace WebKit
 
