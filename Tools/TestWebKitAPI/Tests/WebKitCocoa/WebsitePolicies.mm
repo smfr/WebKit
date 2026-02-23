@@ -1790,7 +1790,8 @@ TEST(WebpagePreferences, UserExplicitlyPrefersColorSchemeDarkForContentThatDoesN
     EXPECT_WK_STREQ(backgroundColorWithoutPreference, backgroundColorWithPreference);
 }
 
-TEST(WebpagePreferences, ContentRuleListEnablement)
+// FIXME when webkit.org/b/308064 is resolved.
+TEST(WebpagePreferences, DISABLED_ContentRuleListEnablement)
 {
     [TestProtocol registerWithScheme:@"https"];
 
