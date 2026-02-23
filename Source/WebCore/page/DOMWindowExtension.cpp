@@ -54,7 +54,7 @@ DOMWindowExtension::~DOMWindowExtension()
 
 LocalFrame* DOMWindowExtension::frame() const
 {
-    return m_window ? m_window->localFrame() : nullptr;
+    return m_window ? m_window->frame() : nullptr;
 }
 
 void DOMWindowExtension::suspendForBackForwardCache()

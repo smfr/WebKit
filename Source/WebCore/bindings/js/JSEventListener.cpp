@@ -163,10 +163,7 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
             if (!protect(scriptExecutionContext.contentSecurityPolicy())->allowInlineEventHandlers(sourceURL().string(), sourcePosition().m_line, code(), element.get()))
                 return;
         }
-        // FIXME: Is this check needed for other contexts?
-        RefPtr frame = dynamicDowncast<LocalFrame>(localDOMWindow->frame());
-        if (!frame)
-            return;
+        Ref frame = *localDOMWindow->frame();
         CheckedRef script = frame->script();
         if (!script->canExecuteScripts(ReasonForCallingCanExecuteScripts::AboutToExecuteScript) || script->isPaused())
             return;

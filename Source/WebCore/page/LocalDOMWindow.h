@@ -31,6 +31,7 @@
 #include <WebCore/DOMHighResTimeStamp.h>
 #include <WebCore/DOMWindow.h>
 #include <WebCore/EventTargetInterfaces.h>
+#include <WebCore/LocalFrame.h>
 #include <WebCore/PerformanceEventTimingCandidate.h>
 #include <WebCore/PushSubscriptionOwner.h>
 #include <WebCore/Supplementable.h>
@@ -53,7 +54,6 @@ template <typename, ShouldStrongDestructorGrabLock> class Strong;
 namespace WebCore {
 
 class CloseWatcherManager;
-class LocalFrame;
 class SecurityOriginData;
 struct ScrollToOptions;
 struct WindowPostMessageOptions;
@@ -110,8 +110,7 @@ public:
     void suspendForBackForwardCache();
     void resumeFromBackForwardCache();
 
-    WEBCORE_EXPORT Frame* NODELETE frame() const final;
-    WEBCORE_EXPORT LocalFrame* NODELETE localFrame() const;
+    WEBCORE_EXPORT LocalFrame* NODELETE frame() const final;
 
     RefPtr<WebCore::MediaQueryList> matchMedia(const String&);
 

@@ -9827,7 +9827,7 @@ void WebPage::remotePostMessage(WebCore::FrameIdentifier source, const WebCore::
     if (!targetWindow)
         return;
 
-    RefPtr targetCoreFrame = targetWindow->localFrame();
+    RefPtr targetCoreFrame = targetWindow->frame();
     if (!targetCoreFrame)
         return;
 

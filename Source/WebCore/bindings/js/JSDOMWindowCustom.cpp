@@ -498,7 +498,7 @@ inline void DialogHandler::dialogCreated(DOMWindow& dialog)
     if (!localDOMWindow)
         return;
     VM& vm = m_globalObject.vm();
-    m_frame = localDOMWindow->localFrame();
+    m_frame = localDOMWindow->frame();
     RefPtr frame = m_frame.get();
 
     // FIXME: This looks like a leak between the normal world and an isolated
