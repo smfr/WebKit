@@ -243,7 +243,6 @@ public:
         EffectiveLang = 1 << 7,
         Dataset = 1 << 8,
         ClassList = 1 << 9,
-        ShadowRoot = 1 << 10,
         CustomElementReactionQueue = 1 << 11,
         CustomElementDefaultARIA = 1 << 12,
         FormAssociatedCustomElement = 1 << 13,

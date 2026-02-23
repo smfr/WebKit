@@ -278,16 +278,13 @@ public:
     bool hasShadowRootContainingSlots() const { return hasEventTargetFlag(EventTargetFlag::HasShadowRootContainingSlots); }
     void setHasShadowRootContainingSlots(bool flag) { setEventTargetFlag(EventTargetFlag::HasShadowRootContainingSlots, flag); }
 
-    bool hasShadowRoot() const { return hasStateFlag(StateFlag::HasShadowRoot); }
-    void setHasShadowRoot(bool flag) { setStateFlag(StateFlag::HasShadowRoot, flag); }
-
     bool needsSVGRendererUpdate() const { return hasStateFlag(StateFlag::NeedsSVGRendererUpdate); }
     void setNeedsSVGRendererUpdate(bool flag) { setStateFlag(StateFlag::NeedsSVGRendererUpdate, flag); }
 
     // If this node is in a shadow tree, returns its shadow host. Otherwise, returns null.
     WEBCORE_EXPORT Element* NODELETE shadowHost() const;
     ShadowRoot* NODELETE containingShadowRoot() const;
-    inline ShadowRoot* shadowRoot() const; // Defined in ElementRareData.h
+    inline ShadowRoot* shadowRoot() const; // Defined in Element.h.
     bool isClosedShadowHidden(const Node&) const;
 
     HTMLSlotElement* assignedSlot() const;
@@ -680,8 +677,7 @@ protected:
         InLargestContentfulPaintTextContentSet = 1 << 20,
         DidMutateSubtreeAfterSetInnerHTML = 1 << 21,
         WasParsedWithFastPath = 1 << 22,
-        HasShadowRoot = 1 << 23,
-        // 8 bits free.
+        // 9 bits free.
     };
 
     enum class TabIndexState : uint8_t {

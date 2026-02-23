@@ -66,6 +66,7 @@
 #include "ImageOverlay.h"
 #include "JSNode.h"
 #include "LocalFrame.h"
+#include "NodeList.h"
 #include "Page.h"
 #include "PlatformKeyboardEvent.h"
 #include "PlatformMouseEvent.h"

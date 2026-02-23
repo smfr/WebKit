@@ -81,6 +81,7 @@ class PseudoElement;
 class RenderStyle;
 class RenderTreePosition;
 class Settings;
+class ShadowRoot;
 class SpaceSplitString;
 class StylePropertyMap;
 class StylePropertyMapReadOnly;
@@ -450,7 +451,7 @@ public:
     virtual bool rendererIsNeeded(const RenderStyle&);
     virtual bool isReplaced(const RenderStyle* = nullptr) const { return false; }
 
-    inline ShadowRoot* shadowRoot() const; // Defined in ElementRareData.h
+    inline ShadowRoot* shadowRoot() const;
     RefPtr<ShadowRoot> shadowRootForBindings(JSC::JSGlobalObject&) const;
     RefPtr<ShadowRoot> NODELETE openOrClosedShadowRoot() const;
     RefPtr<Element> resolveReferenceTarget() const;
@@ -1013,7 +1014,7 @@ private:
     void cloneShadowTreeIfPossible(Element& newHost) const;
     virtual Ref<Element> cloneElementWithoutAttributesAndChildren(Document&, CustomElementRegistry*) const;
 
-    inline void removeShadowRoot(); // Defined in ElementRareData.h.
+    inline void removeShadowRoot();
     void removeShadowRootSlow(ShadowRoot&);
 
     enum class ResolveComputedStyleMode : uint8_t { Normal, RenderedOnly, Editability };
@@ -1070,6 +1071,7 @@ private:
 
     QualifiedName m_tagName;
     RefPtr<ElementData> m_elementData;
+    RefPtr<ShadowRoot> m_shadowRoot;
 };
 
 inline void Element::setSavedLayerScrollPosition(const ScrollPosition& position)
@@ -1111,6 +1113,16 @@ void invalidateForSiblingCombinators(Element* sibling);
 inline bool isInTopLayerOrBackdrop(const RenderStyle&, const Element*);
 
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, ContentRelevancy);
+
+inline ShadowRoot* Node::shadowRoot() const
+{
+    return is<Element>(*this) ? uncheckedDowncast<Element>(*this).shadowRoot() : nullptr;
+}
+
+inline ShadowRoot* Element::shadowRoot() const
+{
+    return m_shadowRoot.get();
+}
 
 } // namespace WebCore
 

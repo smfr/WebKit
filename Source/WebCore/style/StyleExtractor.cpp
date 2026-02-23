@@ -34,6 +34,7 @@
 #include "ContainerNodeInlines.h"
 #include "FontCascade.h"
 #include "HTMLFrameOwnerElement.h"
+#include "KeyframeEffectStack.h"
 #include "NodeRenderStyle.h"
 #include "PseudoElementIdentifier.h"
 #include "RenderBoxInlines.h"

@@ -198,6 +198,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(Element);
 struct SameSizeAsElement : public ContainerNode {
     QualifiedName tagName;
     void* elementData;
+    void* shadowRoot;
 };
 
 static_assert(sizeof(Element) == sizeof(SameSizeAsElement), "Element should stay small");
@@ -3303,8 +3304,7 @@ void Element::addShadowRoot(Ref<ShadowRoot>&& newShadowRoot)
         if (renderer() || hasDisplayContents())
             RenderTreeUpdater::tearDownRenderersForShadowRootInsertion(*this);
 
-        ensureElementRareData().setShadowRoot(WTF::move(newShadowRoot));
-        setHasShadowRoot(true);
+        m_shadowRoot = WTF::move(newShadowRoot);
 
         shadowRoot->setHost(*this);
         shadowRoot->setParentTreeScope(treeScope());
@@ -3322,6 +3322,14 @@ void Element::addShadowRoot(Ref<ShadowRoot>&& newShadowRoot)
         didAddUserAgentShadowRoot(shadowRoot);
 }
 
+inline void Element::removeShadowRoot()
+{
+    RefPtr shadowRoot = this->shadowRoot();
+    if (!shadowRoot) [[likely]]
+        return;
+    removeShadowRootSlow(*shadowRoot);
+}
+
 void Element::removeShadowRootSlow(ShadowRoot& oldRoot)
 {
     ASSERT(&oldRoot == shadowRoot());
@@ -3331,8 +3339,7 @@ void Element::removeShadowRootSlow(ShadowRoot& oldRoot)
 
     ASSERT(!oldRoot.renderer());
 
-    elementRareData()->clearShadowRoot();
-    setHasShadowRoot(false);
+    m_shadowRoot = nullptr;
 
     oldRoot.setHost(nullptr);
     oldRoot.setParentTreeScope(document());

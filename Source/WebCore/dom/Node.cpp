@@ -172,8 +172,6 @@ static ASCIILiteral stringForRareDataUseType(NodeRareData::UseType useType)
         return "Dataset"_s;
     case NodeRareData::UseType::ClassList:
         return "ClassList"_s;
-    case NodeRareData::UseType::ShadowRoot:
-        return "ShadowRoot"_s;
     case NodeRareData::UseType::CustomElementReactionQueue:
         return "CustomElementReactionQueue"_s;
     case NodeRareData::UseType::CustomElementDefaultARIA:
