@@ -90,11 +90,6 @@ public:
         return OBJECT_OFFSETOF(JSBigInt, m_length);
     }
 
-    static constexpr size_t offsetOfSign()
-    {
-        return OBJECT_OFFSETOF(JSBigInt, m_sign);
-    }
-
     static constexpr size_t offsetOfData()
     {
         return WTF::roundUpToMultipleOf<alignof(Digit)>(sizeof(JSBigInt));
@@ -104,8 +99,8 @@ public:
 
     JSValue toPrimitive(JSGlobalObject*, PreferredPrimitiveType) const;
 
-    void setSign(bool sign) { m_sign = sign; }
-    bool sign() const { return m_sign; }
+    void setSign(bool sign) { setPerCellBit(sign); }
+    bool sign() const { return perCellBit(); }
 
     unsigned length() const { return m_length; }
 
@@ -625,7 +620,6 @@ private:
 
     const unsigned m_length;
     unsigned m_hash { 0 };
-    uint8_t m_sign { false };
 };
 
 inline JSBigInt* asHeapBigInt(JSValue value)

@@ -3621,7 +3621,7 @@ std::optional<unsigned> JSBigInt::concurrentHash()
 unsigned JSBigInt::hashSlow()
 {
     ASSERT(!m_hash);
-    m_hash = computeHash(dataStorage(), length(), m_sign);
+    m_hash = computeHash(dataStorage(), length(), sign());
     return m_hash;
 }
 

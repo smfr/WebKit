@@ -1027,7 +1027,7 @@ public:
         JumpList doneCases;
         doneCases.append(branchTest32(Zero, destGPR));
         load64(Address(cellGPR, JSBigInt::offsetOfData()), destGPR);
-        doneCases.append(branchTest8(Zero, Address(cellGPR, JSBigInt::offsetOfSign())));
+        doneCases.append(branchTest8(Zero, Address(cellGPR, JSCell::typeInfoFlagsOffset()), TrustedImm32(TypeInfoPerCellBit)));
         neg64(destGPR);
         doneCases.link(this);
     }
