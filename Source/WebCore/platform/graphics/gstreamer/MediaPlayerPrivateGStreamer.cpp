@@ -553,7 +553,7 @@ bool MediaPlayerPrivateGStreamer::paused() const
         && (stateChange == GST_STATE_CHANGE_SUCCESS || stateChange == GST_STATE_CHANGE_NO_PREROLL)) {
         GST_WARNING_OBJECT(pipeline(), "states are not synchronized, player paused %s, pipeline paused %s. Current state is %s with %s pending",
             boolForPrinting(!m_isPipelinePlaying), boolForPrinting(isPipelinePaused),
-            gst_element_state_get_name(state), gst_element_state_get_name(pending));
+            gst_state_get_name(state), gst_state_get_name(pending));
         ASSERT_NOT_REACHED_WITH_MESSAGE("pipeline and player states are not synchronized");
     }
 #else
@@ -711,7 +711,7 @@ void MediaPlayerPrivateGStreamer::seekToTarget(const SeekTarget& inTarget)
     GstState state;
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, nullptr, 0);
     if (getStateResult == GST_STATE_CHANGE_FAILURE || getStateResult == GST_STATE_CHANGE_NO_PREROLL) {
-        GST_DEBUG_OBJECT(pipeline(), "[Seek] cannot seek, current state change is %s", gst_element_state_change_return_get_name(getStateResult));
+        GST_DEBUG_OBJECT(pipeline(), "[Seek] cannot seek, current state change is %s", gst_state_change_return_get_name(getStateResult));
         return;
     }
 
@@ -1115,7 +1115,7 @@ MediaPlayerPrivateGStreamer::ChangePipelineStateResult MediaPlayerPrivateGStream
     ASSERT(m_pipeline);
 
     if (isPausedByViewport() && newState > GST_STATE_PAUSED) {
-        GST_DEBUG_OBJECT(pipeline(), "Saving state for when player becomes visible: %s", gst_element_state_get_name(newState));
+        GST_DEBUG_OBJECT(pipeline(), "Saving state for when player becomes visible: %s", gst_state_get_name(newState));
         m_stateToRestoreWhenVisible = newState;
         return ChangePipelineStateResult::Ok;
     }
@@ -1127,16 +1127,16 @@ MediaPlayerPrivateGStreamer::ChangePipelineStateResult MediaPlayerPrivateGStream
         return ChangePipelineStateResult::Rejected;
     }
 
-    GST_DEBUG_OBJECT(pipeline(), "Changing state change to %s from %s with %s pending", gst_element_state_get_name(newState),
-        gst_element_state_get_name(currentState), gst_element_state_get_name(pending));
+    GST_DEBUG_OBJECT(pipeline(), "Changing state change to %s from %s with %s pending", gst_state_get_name(newState),
+        gst_state_get_name(currentState), gst_state_get_name(pending));
 
     change = gst_element_set_state(m_pipeline.get(), newState);
-    GST_DEBUG_OBJECT(pipeline(), "Changing state returned %s", gst_element_state_change_return_get_name(change));
+    GST_DEBUG_OBJECT(pipeline(), "Changing state returned %s", gst_state_change_return_get_name(change));
 
     GstState pausedOrPlaying = newState == GST_STATE_PLAYING ? GST_STATE_PAUSED : GST_STATE_PLAYING;
     if (currentState != pausedOrPlaying && change == GST_STATE_CHANGE_FAILURE) {
-        GST_WARNING_OBJECT(pipeline(), "Changing state to %s from %s with %s pending failed", gst_element_state_get_name(newState),
-            gst_element_state_get_name(currentState), gst_element_state_get_name(pending));
+        GST_WARNING_OBJECT(pipeline(), "Changing state to %s from %s with %s pending failed", gst_state_get_name(newState),
+            gst_state_get_name(currentState), gst_state_get_name(pending));
         return ChangePipelineStateResult::Failed;
     }
 
@@ -1392,7 +1392,7 @@ MediaTime MediaPlayerPrivateGStreamer::platformDuration() const
     if (isMediaStreamPlayer())
         return MediaTime::positiveInfiniteTime();
 
-    GST_TRACE_OBJECT(pipeline(), "errorOccured: %s, pipeline state: %s", boolForPrinting(m_didErrorOccur), gst_element_state_get_name(GST_STATE(m_pipeline.get())));
+    GST_TRACE_OBJECT(pipeline(), "errorOccured: %s, pipeline state: %s", boolForPrinting(m_didErrorOccur), gst_state_get_name(GST_STATE(m_pipeline.get())));
     if (m_didErrorOccur)
         return MediaTime::invalidTime();
 
@@ -1744,7 +1744,7 @@ void MediaPlayerPrivateGStreamer::playbin3SendSelectStreamsIfAppropriate()
     bool haveDifferentStreamIds = (m_wantedAudioStreamId != m_currentAudioStreamId || m_wantedVideoStreamId != m_currentVideoStreamId);
     bool shouldSendSelectStreams = !m_waitingForStreamsSelectedEvent && haveDifferentStreamIds && m_currentState == GST_STATE_PLAYING;
     GST_DEBUG_OBJECT(m_pipeline.get(), "Checking if to send SELECT_STREAMS, m_waitingForStreamsSelectedEvent = %s, haveDifferentStreamIds = %s, m_currentState = %s... shouldSendSelectStreams = %s",
-        boolForPrinting(m_waitingForStreamsSelectedEvent), boolForPrinting(haveDifferentStreamIds), gst_element_state_get_name(m_currentState), boolForPrinting(shouldSendSelectStreams));
+        boolForPrinting(m_waitingForStreamsSelectedEvent), boolForPrinting(haveDifferentStreamIds), gst_state_get_name(m_currentState), boolForPrinting(shouldSendSelectStreams));
     if (!shouldSendSelectStreams)
         return;
 
@@ -2279,7 +2279,7 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         if (!messageSourceIsPlaybin || m_isDelayingLoad)
             break;
 
-        GST_DEBUG_OBJECT(pipeline(), "Changed state from %s to %s", gst_element_state_get_name(currentState), gst_element_state_get_name(newState));
+        GST_DEBUG_OBJECT(pipeline(), "Changed state from %s to %s", gst_state_get_name(currentState), gst_state_get_name(newState));
 
         if (!m_isLegacyPlaybin && currentState == GST_STATE_PAUSED && newState == GST_STATE_PLAYING)
             playbin3SendSelectStreamsIfAppropriate();
@@ -2301,7 +2301,7 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         gst_element_get_state(m_pipeline.get(), &currentState, nullptr, 250 * GST_NSECOND);
         if (requestedState < currentState) {
             GST_INFO_OBJECT(pipeline(), "Element %s requested state change to %s", GST_MESSAGE_SRC_NAME(message),
-                gst_element_state_get_name(requestedState));
+                gst_state_get_name(requestedState));
             m_requestedState = requestedState;
             if (changePipelineState(requestedState) == ChangePipelineStateResult::Failed)
                 loadingFailed(MediaPlayer::NetworkState::Empty);
@@ -2918,7 +2918,7 @@ void MediaPlayerPrivateGStreamer::updateStates()
     bool shouldUpdatePlaybackState = false;
     switch (getStateResult) {
     case GST_STATE_CHANGE_SUCCESS: {
-        GST_DEBUG_OBJECT(pipeline(), "State: %s, pending: %s", gst_element_state_get_name(m_currentState), gst_element_state_get_name(pending));
+        GST_DEBUG_OBJECT(pipeline(), "State: %s, pending: %s", gst_state_get_name(m_currentState), gst_state_get_name(pending));
 
         // Do nothing if on EOS and state changed to READY to avoid recreating the player
         // on HTMLMediaElement and properly generate the video 'ended' event.
@@ -2998,10 +2998,10 @@ void MediaPlayerPrivateGStreamer::updateStates()
         } else
             m_isPaused = true;
 
-        GST_DEBUG_OBJECT(pipeline(), "Old state: %s, new state: %s (requested: %s)", gst_element_state_get_name(m_oldState), gst_element_state_get_name(m_currentState), gst_element_state_get_name(m_requestedState));
+        GST_DEBUG_OBJECT(pipeline(), "Old state: %s, new state: %s (requested: %s)", gst_state_get_name(m_oldState), gst_state_get_name(m_currentState), gst_state_get_name(m_requestedState));
         if (m_requestedState == GST_STATE_PAUSED && m_currentState == GST_STATE_PAUSED) {
             shouldUpdatePlaybackState = true;
-            GST_INFO_OBJECT(pipeline(), "Requested state change to %s was completed", gst_element_state_get_name(m_currentState));
+            GST_INFO_OBJECT(pipeline(), "Requested state change to %s was completed", gst_state_get_name(m_currentState));
         }
 
         if (player && player->isLooping() && m_oldState == GST_STATE_PAUSED && m_currentState == GST_STATE_PLAYING) {
@@ -3015,14 +3015,14 @@ void MediaPlayerPrivateGStreamer::updateStates()
         // and test timeouts.
         if (stateReallyChanged && (m_oldState != m_currentState) && (m_oldState == GST_STATE_PAUSED && m_currentState == GST_STATE_PLAYING) && !shouldPauseForBuffering
             && !m_isSeeking) {
-            GST_INFO_OBJECT(pipeline(), "Playback state changed from %s to %s. Notifying the media player client", gst_element_state_get_name(m_oldState), gst_element_state_get_name(m_currentState));
+            GST_INFO_OBJECT(pipeline(), "Playback state changed from %s to %s. Notifying the media player client", gst_state_get_name(m_oldState), gst_state_get_name(m_currentState));
             shouldUpdatePlaybackState = true;
         }
 
         break;
     }
     case GST_STATE_CHANGE_ASYNC:
-        GST_DEBUG_OBJECT(pipeline(), "Async: State: %s, pending: %s", gst_element_state_get_name(m_currentState), gst_element_state_get_name(pending));
+        GST_DEBUG_OBJECT(pipeline(), "Async: State: %s, pending: %s", gst_state_get_name(m_currentState), gst_state_get_name(pending));
         // Change in progress.
 
         if (m_currentState == GST_STATE_PAUSED && m_isBuffering) {
@@ -3042,11 +3042,11 @@ void MediaPlayerPrivateGStreamer::updateStates()
 
         break;
     case GST_STATE_CHANGE_FAILURE:
-        GST_DEBUG_OBJECT(pipeline(), "Failure: State: %s, pending: %s", gst_element_state_get_name(m_currentState), gst_element_state_get_name(pending));
+        GST_DEBUG_OBJECT(pipeline(), "Failure: State: %s, pending: %s", gst_state_get_name(m_currentState), gst_state_get_name(pending));
         // Change failed.
         return;
     case GST_STATE_CHANGE_NO_PREROLL:
-        GST_DEBUG_OBJECT(pipeline(), "No preroll: State: %s, pending: %s", gst_element_state_get_name(m_currentState), gst_element_state_get_name(pending));
+        GST_DEBUG_OBJECT(pipeline(), "No preroll: State: %s, pending: %s", gst_state_get_name(m_currentState), gst_state_get_name(pending));
 
         // Live pipelines go in PAUSED without prerolling.
         m_isLiveStream = true;
@@ -3066,7 +3066,7 @@ void MediaPlayerPrivateGStreamer::updateStates()
 
         if (!isMediaStreamPlayer() && m_isLiveStream.value_or(false) && m_readyState < MediaPlayer::ReadyState::HaveEnoughData
             && m_currentState >= GST_STATE_PAUSED) {
-            GST_DEBUG_OBJECT(pipeline(), "live stream reached %s", gst_element_state_get_name(m_currentState));
+            GST_DEBUG_OBJECT(pipeline(), "live stream reached %s", gst_state_get_name(m_currentState));
             m_readyState = MediaPlayer::ReadyState::HaveEnoughData;
             if (player)
                 player->readyStateChanged();
@@ -4141,14 +4141,14 @@ void MediaPlayerPrivateGStreamer::setVisibleInViewport(bool isVisible)
         }
         m_stateToRestoreWhenVisible = targetState;
         GST_DEBUG_OBJECT(pipeline(), "Media element is muted and not visible in viewport, pausing it to save resources. Will resume afterwards to %s state.",
-            gst_element_state_get_name(m_stateToRestoreWhenVisible));
+            gst_state_get_name(m_stateToRestoreWhenVisible));
         gst_element_set_state(m_pipeline.get(), GST_STATE_PAUSED);
         gst_element_get_state(m_pipeline.get(), &currentState, &pendingState, 0);
-        GST_DEBUG_OBJECT(pipeline(), "Now pipeline is in %s state with %s pending", gst_element_state_get_name(currentState), gst_element_state_get_name(pendingState));
+        GST_DEBUG_OBJECT(pipeline(), "Now pipeline is in %s state with %s pending", gst_state_get_name(currentState), gst_state_get_name(pendingState));
         m_isPipelinePlaying = false;
     } else if (isVisible && isPausedByViewport()) {
         GST_DEBUG_OBJECT(pipeline(), "Element in viewport again, resuming playback via state change to %s.",
-            gst_element_state_get_name(m_stateToRestoreWhenVisible));
+            gst_state_get_name(m_stateToRestoreWhenVisible));
         changePipelineState(m_stateToRestoreWhenVisible);
         m_stateToRestoreWhenVisible = GST_STATE_VOID_PENDING;
     }

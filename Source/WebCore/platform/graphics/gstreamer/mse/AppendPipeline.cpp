@@ -102,7 +102,7 @@ static void assertedElementSetState(GstElement* element, GstState desiredState)
     gst_element_get_state(element, &newState, nullptr, 0);
 
     if (desiredState != newState || result != GST_STATE_CHANGE_SUCCESS) {
-        GST_ERROR_OBJECT(element, "AppendPipeline state change failed (returned %s): %s -> %s (expected %s)", gst_element_state_change_return_get_name(result), gst_element_state_get_name(oldState), gst_element_state_get_name(newState), gst_element_state_get_name(desiredState));
+        GST_ERROR_OBJECT(element, "AppendPipeline state change failed (returned %s): %s -> %s (expected %s)", gst_state_change_return_get_name(result), gst_state_get_name(oldState), gst_state_get_name(newState), gst_state_get_name(desiredState));
         ASSERT_NOT_REACHED();
     }
 }

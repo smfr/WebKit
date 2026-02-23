@@ -1125,7 +1125,7 @@ static GstStateChangeReturn webkitMediaStreamSrcChangeState(GstElement* element,
 
     result = GST_ELEMENT_CLASS(webkit_media_stream_src_parent_class)->change_state(element, transition);
     if (result == GST_STATE_CHANGE_FAILURE) {
-        GST_DEBUG_OBJECT(element, "%s : %s", gst_state_change_get_name(transition), gst_element_state_change_return_get_name(result));
+        GST_DEBUG_OBJECT(element, "%s : %s", gst_state_change_get_name(transition), gst_state_change_return_get_name(result));
         return result;
     }
 
@@ -1142,7 +1142,7 @@ static GstStateChangeReturn webkitMediaStreamSrcChangeState(GstElement* element,
     if (noPreroll && result == GST_STATE_CHANGE_SUCCESS)
         result = GST_STATE_CHANGE_NO_PREROLL;
 
-    GST_DEBUG_OBJECT(element, "%s : %s", gst_state_change_get_name(transition), gst_element_state_change_return_get_name(result));
+    GST_DEBUG_OBJECT(element, "%s : %s", gst_state_change_get_name(transition), gst_state_change_return_get_name(result));
     return result;
 }
 

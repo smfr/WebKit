@@ -201,7 +201,7 @@ void MediaPlayerPrivateGStreamerMSE::checkPlayingConsistency()
         return;
 
     if ((state == GST_STATE_PLAYING && m_playbackRatePausedState == PlaybackRatePausedState::Playing) || (state == GST_STATE_PAUSED && m_playbackRatePausedState == PlaybackRatePausedState::ManuallyPaused)) {
-        GST_DEBUG_OBJECT(pipeline(), "Notifying MediaPlayer of pipeline state change to %s", gst_element_state_get_name(state));
+        GST_DEBUG_OBJECT(pipeline(), "Notifying MediaPlayer of pipeline state change to %s", gst_state_get_name(state));
         player->playbackStateChanged();
     }
 }

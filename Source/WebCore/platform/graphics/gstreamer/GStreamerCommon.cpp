@@ -1084,10 +1084,10 @@ void connectSimpleBusMessageCallback(GstElement* pipeline, Function<void(GstMess
             GstState pending;
             gst_message_parse_state_changed(message, &oldState, &newState, &pending);
 
-            GST_INFO_OBJECT(pipeline.get(), "State changed (old: %s, new: %s, pending: %s)", gst_element_state_get_name(oldState),
-                gst_element_state_get_name(newState), gst_element_state_get_name(pending));
+            GST_INFO_OBJECT(pipeline.get(), "State changed (old: %s, new: %s, pending: %s)", gst_state_get_name(oldState),
+                gst_state_get_name(newState), gst_state_get_name(pending));
 
-            auto dotFileName = makeString(unsafeSpan(GST_OBJECT_NAME(pipeline.get())), '_', unsafeSpan(gst_element_state_get_name(oldState)), '_', unsafeSpan(gst_element_state_get_name(newState)));
+            auto dotFileName = makeString(unsafeSpan(GST_OBJECT_NAME(pipeline.get())), '_', unsafeSpan(gst_state_get_name(oldState)), '_', unsafeSpan(gst_state_get_name(newState)));
             dumpPipeline(pipeline, WTF::move(dotFileName), data->asynchronousPipelineDumping);
             break;
         }
@@ -1172,7 +1172,7 @@ GstElement* /* (transfer floating) */ createPlatformAudioSink(const String& role
 
 bool webkitGstSetElementStateSynchronously(GstElement* pipeline, GstState targetState, Function<bool(GstMessage*)>&& messageHandler)
 {
-    GST_DEBUG_OBJECT(pipeline, "Setting state to %s", gst_element_state_get_name(targetState));
+    GST_DEBUG_OBJECT(pipeline, "Setting state to %s", gst_state_get_name(targetState));
 
     GstState currentState;
     auto result = gst_element_get_state(pipeline, &currentState, nullptr, 10);
@@ -1192,7 +1192,7 @@ bool webkitGstSetElementStateSynchronously(GstElement* pipeline, GstState target
 #else
         GstState currentState;
         auto result = gst_element_get_state(pipeline, &currentState, nullptr, 0);
-        GST_DEBUG_OBJECT(pipeline, "Task finished, result: %s, target state reached: %s", gst_element_state_change_return_get_name(result), boolForPrinting(currentState == targetState));
+        GST_DEBUG_OBJECT(pipeline, "Task finished, result: %s, target state reached: %s", gst_state_change_return_get_name(result), boolForPrinting(currentState == targetState));
 #endif
     });
 
