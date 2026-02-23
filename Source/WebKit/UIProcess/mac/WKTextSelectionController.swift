@@ -91,7 +91,7 @@ extension WKTextSelectionController {
         Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
 
         let editorState = unsafe page.editorState
-        let hasSelection = unsafe !editorState.selectionIsNone
+        let hasSelection = unsafe editorState.selectionType != .None
 
         if unsafe !hasSelection || !editorState.hasPostLayoutAndVisualData() {
             Logger.viewGestures.log(
@@ -100,7 +100,7 @@ extension WKTextSelectionController {
             return false
         }
 
-        let isRange = unsafe editorState.selectionIsRange
+        let isRange = unsafe editorState.selectionType == .Range
         let isContentEditable = unsafe editorState.isContentEditable
 
         if !isContentEditable && !isRange {
@@ -191,7 +191,7 @@ extension WKTextSelectionController {
         // FIXME: Reduce duplication of this logic.
 
         let distance = unsafe CGRect(previousVisualData.caretRectAtStart).distance(to: point)
-        let clickLocationIsNearCaret = unsafe !previousState.selectionIsRange && distance < Self.nearCaretDistance
+        let clickLocationIsNearCaret = unsafe previousState.selectionType != .Range && distance < Self.nearCaretDistance
         let caretLocationIsSame = unsafe previousVisualData.caretRectAtStart == newVisualData.caretRectAtStart
 
         Logger.viewGestures.log(

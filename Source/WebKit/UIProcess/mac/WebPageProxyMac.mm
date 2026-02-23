@@ -260,7 +260,7 @@ String WebPageProxy::stringSelectionForPasteboard()
     if (!hasRunningProcess())
         return { };
 
-    if (!editorState().selectionIsRange)
+    if (editorState().selectionType != WebCore::SelectionType::Range)
         return { };
 
     auto sendResult = protect(legacyMainFrameProcess())->sendSync(Messages::WebPage::GetStringSelectionForPasteboard(), webPageIDInMainFrameProcess(), timeoutForPasteboardSyncIPC);
@@ -273,7 +273,7 @@ RefPtr<WebCore::SharedBuffer> WebPageProxy::dataSelectionForPasteboard(const Str
     if (!hasRunningProcess())
         return nullptr;
 
-    if (!editorState().selectionIsRange)
+    if (editorState().selectionType != WebCore::SelectionType::Range)
         return nullptr;
 
     auto sendResult = protect(legacyMainFrameProcess())->sendSync(Messages::WebPage::GetDataSelectionForPasteboard(pasteboardType), webPageIDInMainFrameProcess(), timeoutForPasteboardSyncIPC);
@@ -719,9 +719,9 @@ CGRect WebPageProxy::boundsOfLayerInLayerBackedWindowCoordinates(CALayer *layer)
 
 void WebPageProxy::didUpdateEditorState(const EditorState& oldEditorState, const EditorState& newEditorState)
 {
-    bool couldChangeSecureInputState = newEditorState.isInPasswordField != oldEditorState.isInPasswordField || oldEditorState.selectionIsNone;
+    bool couldChangeSecureInputState = newEditorState.isInPasswordField != oldEditorState.isInPasswordField || oldEditorState.selectionType == WebCore::SelectionType::None;
     // Selection being none is a temporary state when editing. Flipping secure input state too quickly was causing trouble (not fully understood).
-    if (couldChangeSecureInputState && !newEditorState.selectionIsNone) {
+    if (couldChangeSecureInputState && newEditorState.selectionType != WebCore::SelectionType::None) {
         if (RefPtr pageClient = this->pageClient())
             pageClient->updateSecureInputState();
     }
@@ -1063,7 +1063,7 @@ void WebPageProxy::handleContextMenuWritingTools(WebCore::WritingTools::Requeste
 
 WebCore::FloatRect WebPageProxy::selectionBoundingRectInRootViewCoordinates() const
 {
-    if (editorState().selectionIsNone)
+    if (editorState().selectionType == WebCore::SelectionType::None)
         return { };
 
     if (!editorState().hasPostLayoutData())

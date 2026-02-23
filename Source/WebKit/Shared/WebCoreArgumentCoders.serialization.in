@@ -9318,6 +9318,12 @@ enum class WebCore::SelectionRestorationMode : uint8_t {
     PlaceCaretAtStart,
 };
 
+enum class WebCore::SelectionType : uint8_t {
+    None,
+    Caret,
+    Range,
+};
+
 header: <WebCore/FocusOptions.h>
 [CustomHeader] enum class WebCore::FocusRemovalEventsMode : bool;
 

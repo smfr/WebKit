@@ -131,6 +131,7 @@
 #import <WebCore/PromisedAttachmentInfo.h>
 #import <WebCore/ReferrerPolicy.h>
 #import <WebCore/ResolvedCaptionDisplaySettingsOptions.h>
+#import <WebCore/SelectionType.h>
 #import <WebCore/ShareableBitmap.h>
 #import <WebCore/Site.h>
 #import <WebCore/TextAlternativeWithRange.h>
@@ -2258,10 +2259,7 @@ bool WebViewImpl::mightBeginDragWhileInactive()
     if ([m_view.get() window].isKeyWindow)
         return false;
 
-    if (m_page->editorState().selectionIsNone || !m_page->editorState().selectionIsRange)
-        return false;
-
-    return true;
+    return m_page->editorState().selectionType == WebCore::SelectionType::Range;
 }
 
 bool WebViewImpl::mightBeginScrollWhileInactive()
@@ -2914,7 +2912,7 @@ id WebViewImpl::validRequestorForSendAndReturnTypes(NSString *sendType, NSString
     EditorState editorState = m_page->editorState();
     bool isValidSendType = !sendType;
 
-    if (sendType && !editorState.selectionIsNone) {
+    if (sendType && editorState.selectionType != WebCore::SelectionType::None) {
         if (editorState.isInPlugin)
             isValidSendType = [sendType isEqualToString:WebCore::legacyStringPasteboardTypeSingleton()];
         else
@@ -2969,7 +2967,7 @@ void WebViewImpl::selectionDidChange()
 #if ENABLE(WRITING_TOOLS)
     bool wantsCompleteWritingTools = isEditable() || page->configuration().writingToolsBehavior() == WebCore::WritingTools::Behavior::Complete;
     if (wantsCompleteWritingTools && !alreadyNotifiedClient) {
-        auto isRange = page->editorState().hasPostLayoutData() && page->editorState().selectionIsRange;
+        auto isRange = page->editorState().hasPostLayoutData() && page->editorState().selectionType == WebCore::SelectionType::Range;
         auto selectionRect = isRange ? page->editorState().postLayoutData->selectionBoundingRect : IntRect { };
 
         // The affordance will only show up if the selected range consists of >= 50 characters.
@@ -3072,14 +3070,14 @@ NSRect WebViewImpl::unionRectInVisibleSelectedRangeInScreen() const
 
     Ref page = m_page.get();
     auto& editorState = page->editorState();
-    if (editorState.selectionIsNone)
+    if (editorState.selectionType == WebCore::SelectionType::None)
         return NSZeroRect;
 
     auto selectionRect = page->selectionBoundingRectInRootViewCoordinates();
     if (selectionRect.isEmpty())
         return NSZeroRect;
 
-    if (!editorState.selectionIsRange && editorState.isContentEditable)
+    if (editorState.selectionType != WebCore::SelectionType::Range && editorState.isContentEditable)
         selectionRect.setWidth(0);
 
     return convertFromViewToScreen(selectionRect);
@@ -3106,7 +3104,7 @@ void WebViewImpl::changeFontColorFromSender(id sender)
         return;
 
     auto& editorState = m_page->editorState();
-    if (!editorState.isContentEditable || editorState.selectionIsNone)
+    if (!editorState.isContentEditable || editorState.selectionType == WebCore::SelectionType::None)
         return;
 
     WebCore::FontAttributeChanges changes;
@@ -3117,7 +3115,7 @@ void WebViewImpl::changeFontColorFromSender(id sender)
 void WebViewImpl::changeFontAttributesFromSender(id sender)
 {
     auto& editorState = m_page->editorState();
-    if (!editorState.isContentEditable || editorState.selectionIsNone)
+    if (!editorState.isContentEditable || editorState.selectionType == WebCore::SelectionType::None)
         return;
 
     m_page->changeFontAttributes(WebCore::computedFontAttributeChanges(NSFontManager.sharedFontManager, sender));
@@ -3126,7 +3124,7 @@ void WebViewImpl::changeFontAttributesFromSender(id sender)
 void WebViewImpl::changeFontFromFontManager()
 {
     auto& editorState = m_page->editorState();
-    if (!editorState.isContentEditable || editorState.selectionIsNone)
+    if (!editorState.isContentEditable || editorState.selectionType == WebCore::SelectionType::None)
         return;
 
     m_page->changeFont(WebCore::computedFontChanges(NSFontManager.sharedFontManager));
@@ -3221,14 +3219,14 @@ bool WebViewImpl::validateUserInterfaceItem(id<NSValidatedUserInterfaceItem> ite
     }
 
     if (action == @selector(uppercaseWord:) || action == @selector(lowercaseWord:) || action == @selector(capitalizeWord:))
-        return m_page->editorState().selectionIsRange && m_page->editorState().isContentEditable;
+        return m_page->editorState().selectionType == WebCore::SelectionType::Range && m_page->editorState().isContentEditable;
 
     if (action == @selector(stopSpeaking:))
         return [NSApp isSpeaking];
 
     // The centerSelectionInVisibleArea: selector is enabled if there's a selection range or if there's an insertion point in an editable area.
     if (action == @selector(centerSelectionInVisibleArea:))
-        return m_page->editorState().selectionIsRange || (m_page->editorState().isContentEditable && !m_page->editorState().selectionIsNone);
+        return m_page->editorState().selectionType == WebCore::SelectionType::Range || (m_page->editorState().isContentEditable && m_page->editorState().selectionType == WebCore::SelectionType::Caret);
 
 #if ENABLE(WRITING_TOOLS) && HAVE(NSRESPONDER_WRITING_TOOLS_SUPPORT)
     if (action == @selector(showWritingTools:))
@@ -5044,7 +5042,7 @@ void WebViewImpl::showWritingTools(WTRequestedTool tool)
     FloatRect selectionRect;
 
     auto& editorState = m_page->editorState();
-    if (editorState.selectionIsRange)
+    if (editorState.selectionType == WebCore::SelectionType::Range)
         selectionRect = page().selectionBoundingRectInRootViewCoordinates();
 
 ALLOW_DEPRECATED_DECLARATIONS_BEGIN
@@ -5654,7 +5652,7 @@ NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
     if (!protect(m_page->preferences())->textInputClientSelectionUpdatesEnabled())
         return inputContext();
 
-    if (!m_page->editorState().isContentEditable && !m_page->editorState().selectionIsRange)
+    if (!m_page->editorState().isContentEditable && m_page->editorState().selectionType != WebCore::SelectionType::Range)
         return nil;
 
     return [protect(m_view) _web_superInputContext];
@@ -6703,7 +6701,7 @@ void WebViewImpl::updateTextTouchBar()
     }
 
     if ([NSSpellChecker isAutomaticTextCompletionEnabled] && !m_isCustomizingTouchBar) {
-        BOOL showCandidatesList = !m_page->editorState().selectionIsRange || m_isHandlingAcceptedCandidate;
+        BOOL showCandidatesList = m_page->editorState().selectionType != WebCore::SelectionType::Range || m_isHandlingAcceptedCandidate;
         RetainPtr candidateListTouchBarItem = WebViewImpl::candidateListTouchBarItem();
         [candidateListTouchBarItem updateWithInsertionPointVisibility:showCandidatesList];
         [m_view.get() _didUpdateCandidateListVisibility:showCandidatesList];

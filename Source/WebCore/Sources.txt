@@ -1358,6 +1358,7 @@ dom/ScriptedAnimationController.cpp
 dom/SecurityContext.cpp
 dom/SecurityOriginPolicy.cpp
 dom/SecurityPolicyViolationEvent.cpp
+dom/SelectionType.cpp
 dom/SelectorQuery.cpp
 dom/SerializedNode.cpp
 dom/ShadowRoot.cpp

@@ -1429,8 +1429,7 @@ bool PDFPluginBase::populateEditorStateIfNeeded(EditorState& state) const
     if (selectionString().isNull())
         return false;
 
-    state.selectionIsNone = false;
-    state.selectionIsRange = true;
+    state.selectionType = WebCore::SelectionType::Range;
     state.isInPlugin = true;
     return true;
 }

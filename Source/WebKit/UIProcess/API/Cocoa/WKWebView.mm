@@ -2364,16 +2364,14 @@ static NSTextAlignment NODELETE nsTextAlignment(WebKit::TextAlignment alignment)
 
 static _WKSelectionAttributes NODELETE selectionAttributes(const WebKit::EditorState& editorState, _WKSelectionAttributes previousAttributes)
 {
-    _WKSelectionAttributes attributes = _WKSelectionAttributeNoSelection;
-    if (editorState.selectionIsNone)
-        return attributes;
-
-    if (editorState.selectionIsRange)
-        attributes |= _WKSelectionAttributeIsRange;
-    else
-        attributes |= _WKSelectionAttributeIsCaret;
-
-    return attributes;
+    switch (editorState.selectionType) {
+    case WebCore::SelectionType::None:
+        return _WKSelectionAttributeNoSelection;
+    case WebCore::SelectionType::Caret:
+        return _WKSelectionAttributeIsCaret;
+    case WebCore::SelectionType::Range:
+        return _WKSelectionAttributeIsRange;
+    }
 }
 
 - (void)_didChangeEditorState

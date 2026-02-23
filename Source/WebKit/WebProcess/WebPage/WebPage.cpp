@@ -1669,8 +1669,7 @@ EditorState WebPage::editorState(ShouldPerformLayout shouldPerformLayout) const
     const VisibleSelection& selection = frame->selection().selection();
     Ref editor = frame->editor();
 
-    result.selectionIsNone = selection.isNone();
-    result.selectionIsRange = selection.isRange();
+    result.selectionType = selection.type();
     result.isContentEditable = selection.hasEditableStyle();
     result.isContentRichlyEditable = selection.isContentRichlyEditable();
     result.isInPasswordField = selection.isInPasswordField();
@@ -1680,7 +1679,7 @@ EditorState WebPage::editorState(ShouldPerformLayout shouldPerformLayout) const
 
     Ref<Document> document = *frame->document();
 
-    if (result.selectionIsRange) {
+    if (result.selectionType == WebCore::SelectionType::Range) {
         auto selectionRange = selection.range();
         result.selectionIsRangeInsideImageOverlay = selectionRange && ImageOverlay::isInsideOverlay(*selectionRange);
         result.selectionIsRangeInAutoFilledAndViewableField = selection.isInAutoFilledAndViewableField();

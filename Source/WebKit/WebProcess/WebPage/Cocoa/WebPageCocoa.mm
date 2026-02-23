@@ -827,7 +827,7 @@ void WebPage::getPlatformEditorStateCommon(LocalFrame& frame, EditorState& resul
 #if PLATFORM(IOS_FAMILY)
         result.visualData->editableRootBounds = rootViewInteractionBounds(Ref { *editableRootOrFormControl });
 #endif
-    } else if (result.selectionIsRange)
+    } else if (result.selectionType == WebCore::SelectionType::Range)
         postLayoutData.selectionIsTransparentOrFullyClipped = selectionIsTransparentOrFullyClipped(selection);
 
 #if PLATFORM(IOS_FAMILY)

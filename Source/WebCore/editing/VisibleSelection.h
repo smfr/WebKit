@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <WebCore/SelectionType.h>
 #include <WebCore/TextGranularity.h>
 #include <WebCore/VisiblePosition.h>
 
@@ -88,13 +89,17 @@ public:
 
     operator VisiblePositionRange() const { return { visibleStart(), visibleEnd() }; }
 
-    bool isNone() const { return m_type == Type::None; }
-    bool isCaret() const { return m_type == Type::Caret; }
-    bool isRange() const { return m_type == Type::Range; }
+    SelectionType type() const { return m_type; }
+
+    bool isNone() const { return type() == SelectionType::None; }
+    bool isCaret() const { return type() == SelectionType::Caret; }
+    bool isRange() const { return type() == SelectionType::Range; }
+
     bool isCaretOrRange() const { return !isNone(); }
     bool isNonOrphanedRange() const { return isRange() && !start().isOrphan() && !end().isOrphan(); }
     bool isNoneOrOrphaned() const { return isNone() || start().isOrphan() || end().isOrphan(); }
     bool isOrphan() const;
+
     RefPtr<Document> document() const;
 
     bool isBaseFirst() const { return m_anchorIsFirst; }
@@ -168,8 +173,7 @@ private:
     Affinity m_affinity { defaultAffinity };
 
     // These are cached, can be recalculated by validate()
-    enum class Type : uint8_t { None, Caret, Range };
-    Type m_type { Type::None };
+    SelectionType m_type { SelectionType::None };
     bool m_anchorIsFirst { true }; // True if the anchor is before the focus. FIXME: Rename to m_anchorIsBeforeFocus since that's what the comment says.
     Directionality m_directionality { Directionality::None };
 };

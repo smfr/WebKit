@@ -3541,7 +3541,7 @@ const EditorState& WebPageProxy::editorState() const
 
 bool WebPageProxy::hasSelectedRange() const
 {
-    return internals().editorState.selectionIsRange;
+    return internals().editorState.selectionType == WebCore::SelectionType::Range;
 }
 
 bool WebPageProxy::isContentEditable() const

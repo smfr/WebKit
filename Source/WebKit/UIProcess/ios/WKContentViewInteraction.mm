@@ -393,18 +393,18 @@ static NSArray<NSString *> *supportedRichTextPasteboardTypesWithAttachmentsForPa
 #endif // HAVE(UI_PASTE_CONFIGURATION)
 
 WKSelectionDrawingInfo::WKSelectionDrawingInfo()
-    : type(SelectionType::None)
+    : type(WebCore::SelectionType::None)
 {
 }
 
 WKSelectionDrawingInfo::WKSelectionDrawingInfo(const EditorState& editorState)
 {
-    if (editorState.selectionIsNone || (!editorState.selectionIsRange && !editorState.isContentEditable)) {
-        type = SelectionType::None;
+    if (editorState.selectionType == WebCore::SelectionType::None || (editorState.selectionType == WebCore::SelectionType::Caret && !editorState.isContentEditable)) {
+        type = WebCore::SelectionType::None;
         return;
     }
 
-    type = SelectionType::Range;
+    type = WebCore::SelectionType::Range;
     if (!editorState.postLayoutData)
         return;
 
@@ -424,7 +424,7 @@ auto WKSelectionDrawingInfo::compare(const WKSelectionDrawingInfo& other) const 
     if (type != other.type)
         return VisuallyDistinct;
 
-    if (type == WKSelectionDrawingInfo::SelectionType::Range) {
+    if (type == WebCore::SelectionType::Range) {
         if (caretRect != other.caretRect)
             return VisuallyDistinct;
 
@@ -449,7 +449,7 @@ auto WKSelectionDrawingInfo::compare(const WKSelectionDrawingInfo& other) const 
         }
     }
 
-    if (type != WKSelectionDrawingInfo::SelectionType::None && selectionClipRect != other.selectionClipRect)
+    if (type != WebCore::SelectionType::None && selectionClipRect != other.selectionClipRect)
         return VisuallyDistinct;
 
     if (enclosingLayerID != other.enclosingLayerID)
@@ -458,20 +458,10 @@ auto WKSelectionDrawingInfo::compare(const WKSelectionDrawingInfo& other) const 
     return EquivalentIncludingEnclosingLayer;
 }
 
-static TextStream& operator<<(TextStream& stream, WKSelectionDrawingInfo::SelectionType type)
-{
-    switch (type) {
-    case WKSelectionDrawingInfo::SelectionType::None: stream << "none"; break;
-    case WKSelectionDrawingInfo::SelectionType::Range: stream << "range"; break;
-    }
-    
-    return stream;
-}
-
 TextStream& operator<<(TextStream& stream, const WKSelectionDrawingInfo& info)
 {
     TextStream::GroupScope group(stream);
-    stream.dumpProperty("type"_s, info.type);
+    stream.dumpProperty("type"_s, std::to_underlying(info.type));
     stream.dumpProperty("caret rect"_s, info.caretRect);
     stream.dumpProperty("caret color"_s, info.caretColor);
     stream.dumpProperty("selection geometries"_s, info.selectionGeometries);
@@ -1869,7 +1859,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     ASSERT([keyPath isEqualToString:@"transform"]);
     ASSERT(object == self.layer);
 
-    if ([UIView _isInAnimationBlock] && protect(_page)->editorState().selectionIsNone) {
+    if ([UIView _isInAnimationBlock] && protect(_page)->editorState().selectionType == WebCore::SelectionType::None) {
         // If the utility views are not already visible, we don't want them to become visible during the animation since
         // they could not start from a reasonable state.
         // This is not perfect since views could also get updated during the animation, in practice this is rare and the end state
@@ -1881,7 +1871,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
     [self _updateTapHighlight];
 
-    if (protect(_page)->editorState().selectionIsNone && _lastSelectionDrawingInfo.type == WebKit::WKSelectionDrawingInfo::SelectionType::None)
+    if (protect(_page)->editorState().selectionType == WebCore::SelectionType::None && _lastSelectionDrawingInfo.type == WebCore::SelectionType::None)
         return;
 
     _selectionNeedsUpdate = YES;
@@ -1953,7 +1943,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         return _focusedElementInformation.insideFixedPosition;
 
     auto& editorState = protect(_page)->editorState();
-    return editorState.hasPostLayoutData() && editorState.selectionIsRange && editorState.postLayoutData->insideFixedPosition;
+    return editorState.hasPostLayoutData() && editorState.selectionType == WebCore::SelectionType::Range && editorState.postLayoutData->insideFixedPosition;
 }
 
 - (BOOL)isEditable
@@ -3623,7 +3613,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         return NO;
 
     auto& state = protect(_page)->editorState();
-    return state.hasPostLayoutData() && !state.selectionIsNone;
+    return state.hasPostLayoutData() && state.selectionType != WebCore::SelectionType::None;
 }
 
 - (BOOL)hasSelectablePositionAtPoint:(CGPoint)point
@@ -3726,7 +3716,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
                 // finger tap, which subsequently prevents the UI process from handling any incoming IPC messages.
                 return NO;
             }
-            return protect(_page)->editorState().selectionIsRange;
+            return protect(_page)->editorState().selectionType == WebCore::SelectionType::Range;
         }
     }
 
@@ -3785,7 +3775,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 {
     ASSERT_ASYNC_TEXT_INTERACTIONS_DISABLED();
 
-    if (!protect(_page)->editorState().hasPostLayoutAndVisualData() || protect(_page)->editorState().selectionIsNone)
+    if (!protect(_page)->editorState().hasPostLayoutAndVisualData() || protect(_page)->editorState().selectionType == WebCore::SelectionType::None)
         return nil;
     const auto& selectionGeometries = protect(_page)->editorState().visualData->selectionGeometries;
     return [self webSelectionRectsForSelectionGeometries:selectionGeometries];
@@ -4274,7 +4264,7 @@ static void cancelPotentialTapIfNecessary(WKContentView* contentView)
 
 - (NSArray *)supportedPasteboardTypesForCurrentSelection
 {
-    if (protect(_page)->editorState().selectionIsNone)
+    if (protect(_page)->editorState().selectionType == WebCore::SelectionType::None)
         return nil;
 
     if (protect(_page)->editorState().isContentRichlyEditable)
@@ -4321,7 +4311,7 @@ FOR_EACH_PRIVATE_WKCONTENTVIEW_ACTION(FORWARD_ACTION_TO_WKWEBVIEW)
             return;
         auto& visualData = *editorState.visualData;
         CGRect presentationRect;
-        if (editorState.selectionIsRange && !visualData.selectionGeometries.isEmpty())
+        if (editorState.selectionType == WebCore::SelectionType::Range && !visualData.selectionGeometries.isEmpty())
             presentationRect = page->selectionBoundingRectInRootViewCoordinates();
         else
             presentationRect = visualData.caretRectAtStart;
@@ -4730,7 +4720,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         return NO;
 
     auto editorState = page->editorState();
-    return editorState.selectionIsRange && !editorState.isContentEditable && !editorState.selectionIsRangeInsideImageOverlay;
+    return editorState.selectionType == WebCore::SelectionType::Range && !editorState.isContentEditable && !editorState.selectionIsRangeInsideImageOverlay;
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender
@@ -4742,7 +4732,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 #if USE(BROWSERENGINEKIT)
     if (self.shouldUseAsyncInteractions) {
         if (action == @selector(moveInLayoutDirection:) || action == @selector(extendInLayoutDirection:) || action == @selector(moveInStorageDirection:byGranularity:) || action == @selector(extendInStorageDirection:byGranularity:))
-            return !editorState.selectionIsNone;
+            return editorState.selectionType != WebCore::SelectionType::None;
 
         if (action == @selector(deleteInDirection:toGranularity:) || action == @selector(transposeCharactersAroundSelection))
             return editorState.isContentEditable;
@@ -4754,7 +4744,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
             || action == @selector(_moveToEndOfDocument:withHistory:) || action == @selector(_moveToEndOfLine:withHistory:) || action == @selector(_moveToEndOfParagraph:withHistory:)
             || action == @selector(_moveToEndOfWord:withHistory:) || action == @selector(_moveToStartOfDocument:withHistory:) || action == @selector(_moveToStartOfLine:withHistory:)
             || action == @selector(_moveToStartOfParagraph:withHistory:) || action == @selector(_moveToStartOfWord:withHistory:) || action == @selector(_moveUp:withHistory:))
-            return !editorState.selectionIsNone;
+            return editorState.selectionType != WebCore::SelectionType::None;
 
         if (action == @selector(_deleteByWord) || action == @selector(_deleteForwardByWord) || action == @selector(_deleteForwardAndNotify:)
             || action == @selector(_deleteToEndOfParagraph) || action == @selector(_deleteToStartOfLine) || action == @selector(_transpose))
@@ -4788,10 +4778,10 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         return editorState.isContentRichlyEditable;
     }
     if (action == @selector(cut:))
-        return !editorState.isInPasswordField && editorState.isContentEditable && editorState.selectionIsRange;
+        return !editorState.isInPasswordField && editorState.isContentEditable && editorState.selectionType == WebCore::SelectionType::Range;
 
     if (action == @selector(paste:) || action == @selector(_pasteAsQuotation:) || action == @selector(_pasteAndMatchStyle:) || action == @selector(pasteAndMatchStyle:)) {
-        if (editorState.selectionIsNone || !editorState.isContentEditable)
+        if (editorState.selectionType == WebCore::SelectionType::None || !editorState.isContentEditable)
             return NO;
         UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
         NSArray *types = [self supportedPasteboardTypesForCurrentSelection];
@@ -4819,11 +4809,11 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (action == @selector(copy:)) {
         if (editorState.isInPasswordField && !editorState.selectionIsRangeInAutoFilledAndViewableField)
             return NO;
-        return editorState.selectionIsRange;
+        return editorState.selectionType == WebCore::SelectionType::Range;
     }
 
     if (action == @selector(_define:) || action == @selector(define:) || action == @selector(lookup:)) {
-        if (editorState.isInPasswordField || !editorState.selectionIsRange)
+        if (editorState.isInPasswordField || editorState.selectionType != WebCore::SelectionType::Range)
             return NO;
 
         NSUInteger textLength = editorState.postLayoutData ? editorState.postLayoutData->selectedTextLength : 0;
@@ -4850,18 +4840,18 @@ ALLOW_DEPRECATED_DECLARATIONS_END
             return NO;
 #endif
 
-        return editorState.selectionIsRange;
+        return editorState.selectionType == WebCore::SelectionType::Range;
     }
 
     if (action == @selector(_share:) || action == @selector(share:)) {
-        if (editorState.isInPasswordField || !editorState.selectionIsRange)
+        if (editorState.isInPasswordField || editorState.selectionType != WebCore::SelectionType::Range)
             return NO;
 
         return editorState.postLayoutData && editorState.postLayoutData->selectedTextLength > 0;
     }
 
     if (action == @selector(_addShortcut:) || action == @selector(addShortcut:)) {
-        if (editorState.isInPasswordField || !editorState.selectionIsRange)
+        if (editorState.isInPasswordField || editorState.selectionType != WebCore::SelectionType::Range)
             return NO;
 
         NSString *selectedText = [self selectedText];
@@ -4876,7 +4866,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     }
 
     if (action == @selector(_promptForReplace:) || action == @selector(promptForReplace:)) {
-        if (!editorState.selectionIsRange || !editorState.postLayoutData || !editorState.postLayoutData->isReplaceAllowed || ![[UIKeyboardImpl activeInstance] autocorrectSpellingEnabled])
+        if (editorState.selectionType != WebCore::SelectionType::Range || !editorState.postLayoutData || !editorState.postLayoutData->isReplaceAllowed || ![[UIKeyboardImpl activeInstance] autocorrectSpellingEnabled])
             return NO;
         if ([[self selectedText] _containsCJScriptsOnly])
             return NO;
@@ -4884,7 +4874,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     }
 
     if (action == @selector(_transliterateChinese:) || action == @selector(transliterateChinese:)) {
-        if (!editorState.selectionIsRange || !editorState.postLayoutData || !editorState.postLayoutData->isReplaceAllowed || ![[UIKeyboardImpl activeInstance] autocorrectSpellingEnabled])
+        if (editorState.selectionType != WebCore::SelectionType::Range || !editorState.postLayoutData || !editorState.postLayoutData->isReplaceAllowed || ![[UIKeyboardImpl activeInstance] autocorrectSpellingEnabled])
             return NO;
         return UIKeyboardEnabledInputModesAllowChineseTransliterationForText([self selectedText]);
     }
@@ -4893,13 +4883,13 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (action == @selector(_translate:) || action == @selector(translate:)) {
         if (!PAL::isTranslationUIServicesFrameworkAvailable() || ![PAL::getLTUITranslationViewControllerClassSingleton() isAvailable])
             return NO;
-        return !editorState.isInPasswordField && editorState.selectionIsRange;
+        return !editorState.isInPasswordField && editorState.selectionType == WebCore::SelectionType::Range;
     }
 #endif // HAVE(TRANSLATION_UI_SERVICES)
 
     if (action == @selector(select:)) {
         // Disable select in password fields so that you can't see word boundaries.
-        return !editorState.isInPasswordField && !editorState.selectionIsRange && self._hasContent;
+        return !editorState.isInPasswordField && editorState.selectionType != WebCore::SelectionType::Range && self._hasContent;
     }
 
     auto isPreparingEditMenu = [&] {
@@ -4909,7 +4899,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     if (action == @selector(selectAll:)) {
         if (isPreparingEditMenu()) {
             // By platform convention we don't show Select All in the edit menu for a range selection.
-            return !editorState.selectionIsRange && self._hasContent;
+            return editorState.selectionType != WebCore::SelectionType::Range && self._hasContent;
         }
         return YES;
     }
@@ -4942,7 +4932,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         if (!mayContainSelectableText(_focusedElementInformation.elementType) || _focusedElementInformation.isReadOnly)
             return NO;
 
-        if (isPreparingEditMenu() && editorState.selectionIsRange)
+        if (isPreparingEditMenu() && editorState.selectionType == WebCore::SelectionType::Range)
             return NO;
     }
 #endif // ENABLE(IMAGE_ANALYSIS)
@@ -4952,7 +4942,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         if (!self.webView._findInteractionEnabled)
             return NO;
 
-        if (!editorState.selectionIsRange || !self.selectedText.length)
+        if (editorState.selectionType != WebCore::SelectionType::Range || !self.selectedText.length)
             return NO;
 
         return YES;
@@ -5929,7 +5919,7 @@ static void logTextInteraction(const char* methodName, UIGestureRecognizer *loup
         return *_lastInsertedCharacterToOverrideCharacterBeforeSelection;
 
     auto& state = protect(_page)->editorState();
-    if (!state.isContentEditable || state.selectionIsNone || state.selectionIsRange || !state.postLayoutData)
+    if (!state.isContentEditable || state.selectionType != WebCore::SelectionType::Caret || !state.postLayoutData)
         return 0;
 
     switch (amount) {
@@ -6513,7 +6503,7 @@ static void logTextInteraction(const char* methodName, UIGestureRecognizer *loup
     if (!editorState.hasPostLayoutData())
         return nil;
 
-    if (self.selectedTextRange == range && editorState.selectionIsRange)
+    if (self.selectedTextRange == range && editorState.selectionType == WebCore::SelectionType::Range)
         return editorState.postLayoutData->wordAtSelection.createNSString().autorelease();
 
     if (auto relativeRange = dynamic_objc_cast<WKRelativeTextRange>(range))
@@ -6547,11 +6537,11 @@ static void logTextInteraction(const char* methodName, UIGestureRecognizer *loup
 {
     Ref page = *_page;
     auto& editorState = page->editorState();
-    auto hasSelection = !editorState.selectionIsNone;
+    auto hasSelection = editorState.selectionType != WebCore::SelectionType::None;
     if (!hasSelection || !editorState.hasPostLayoutAndVisualData())
         return nil;
 
-    auto isRange = editorState.selectionIsRange;
+    auto isRange = editorState.selectionType == WebCore::SelectionType::Range;
     auto isContentEditable = editorState.isContentEditable;
     // UIKit does not expect caret selections in non-editable content.
     if (!isContentEditable && !isRange)
@@ -8144,7 +8134,7 @@ static UITextAutocapitalizationType toUITextAutocapitalize(WebCore::Autocapitali
 - (BOOL)_hasContent
 {
     auto& editorState = protect(_page)->editorState();
-    return !editorState.selectionIsNone && editorState.postLayoutData && editorState.postLayoutData->hasContent;
+    return editorState.selectionType != WebCore::SelectionType::None && editorState.postLayoutData && editorState.postLayoutData->hasContent;
 }
 
 - (void)selectAll
@@ -8906,7 +8896,7 @@ ALLOW_DEPRECATED_DECLARATIONS_END
         return;
 
     auto& editorState = protect(_page)->editorState();
-    if (editorState.selectionIsNone || editorState.selectionIsRange)
+    if (editorState.selectionType != WebCore::SelectionType::Caret)
         return;
 
     UIKeyboardImpl *keyboard = UIKeyboardImpl.activeInstance;
@@ -9339,7 +9329,7 @@ static bool canUseQuickboardControllerFor(UITextContentType type)
 
     BOOL selectionIsTransparentOrFullyClipped = NO;
     BOOL focusedElementIsTooSmall = NO;
-    if (!editorState.selectionIsNone) {
+    if (editorState.selectionType != WebCore::SelectionType::None) {
         auto& postLayoutData = *editorState.postLayoutData;
         auto& visualData = *editorState.visualData;
         if (postLayoutData.selectionIsTransparentOrFullyClipped)
@@ -12194,7 +12184,7 @@ static WebKit::DocumentEditingContextRequest toWebRequest(id request)
 - (UIMenu *)appHighlightMenu
 {
     Ref page = *_page;
-    if (!protect(page->preferences())->appHighlightsEnabled() || !page->editorState().selectionIsRange || !self.shouldAllowHighlightLinkCreation)
+    if (!protect(page->preferences())->appHighlightsEnabled() || page->editorState().selectionType != WebCore::SelectionType::Range || !self.shouldAllowHighlightLinkCreation)
         return nil;
 
     bool isVisible = page->appHighlightsVisibility();
@@ -14774,7 +14764,7 @@ static inline WKTextAnimationType toWKTextAnimationType(WebCore::TextAnimationTy
 - (void)_simulateSelectionStart
 {
     _usingGestureForSelection = YES;
-    _lastSelectionDrawingInfo.type = WebKit::WKSelectionDrawingInfo::SelectionType::Range;
+    _lastSelectionDrawingInfo.type = WebCore::SelectionType::Range;
 }
 
 #if ENABLE(ACCESSIBILITY_ANIMATION_CONTROL)

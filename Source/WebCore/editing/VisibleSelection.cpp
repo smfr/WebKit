@@ -402,12 +402,12 @@ void VisibleSelection::updateSelectionType()
 {
     if (m_start.isNull()) {
         ASSERT(m_end.isNull());
-        m_type = Type::None;
+        m_type = SelectionType::None;
         m_affinity = Affinity::Downstream;
     } else if (m_start == m_end || m_start.upstream() == m_end.upstream())
-        m_type = Type::Caret;
+        m_type = SelectionType::Caret;
     else {
-        m_type = Type::Range;
+        m_type = SelectionType::Range;
         m_affinity = Affinity::Downstream;
     }
 }
@@ -475,7 +475,7 @@ void VisibleSelection::setWithoutValidation(const Position& anchor, const Positi
     m_extent = focus;
     m_start = m_anchorIsFirst ? anchor : focus;
     m_end = m_anchorIsFirst ? focus : anchor;
-    m_type = anchor == focus ? Type::Caret : Type::Range;
+    m_type = anchor == focus ? SelectionType::Caret : SelectionType::Range;
 }
 
 Position VisibleSelection::adjustPositionForEnd(const Position& currentPosition, Node* startContainerNode)

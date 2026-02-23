@@ -32,6 +32,7 @@
 #include <WebCore/IntRect.h>
 #include <WebCore/PlatformLayerIdentifier.h>
 #include <WebCore/ScrollTypes.h>
+#include <WebCore/SelectionType.h>
 #include <WebCore/WritingDirection.h>
 #include <wtf/text/WTFString.h>
 
@@ -72,9 +73,8 @@ struct EditorState {
     void move(float x, float y);
 
     EditorStateIdentifier identifier;
+    WebCore::SelectionType selectionType { WebCore::SelectionType::None };
     bool shouldIgnoreSelectionChanges { false };
-    bool selectionIsNone { true }; // This will be false when there is a caret selection.
-    bool selectionIsRange { false };
     bool selectionIsRangeInsideImageOverlay { false };
     bool selectionIsRangeInAutoFilledAndViewableField { false };
     bool isContentEditable { false };

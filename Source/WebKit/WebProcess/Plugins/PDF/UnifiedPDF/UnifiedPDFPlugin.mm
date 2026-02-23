@@ -4583,8 +4583,7 @@ bool UnifiedPDFPlugin::platformPopulateEditorStateIfNeeded(EditorState& state) c
     }
 
     state.isInPlugin = true;
-    state.selectionIsNone = false;
-    state.selectionIsRange = selectionGeometries.size();
+    state.selectionType = selectionGeometries.isEmpty() ? WebCore::SelectionType::Caret : WebCore::SelectionType::Range;
 
     auto selectedString = String { [selection string] };
     state.postLayoutData = EditorState::PostLayoutData { };

@@ -35,10 +35,8 @@ TextStream& operator<<(TextStream& ts, const EditorState& editorState)
 {
     if (editorState.shouldIgnoreSelectionChanges)
         ts.dumpProperty("shouldIgnoreSelectionChanges"_s, editorState.shouldIgnoreSelectionChanges);
-    if (!editorState.selectionIsNone)
-        ts.dumpProperty("selectionIsNone"_s, editorState.selectionIsNone);
-    if (editorState.selectionIsRange)
-        ts.dumpProperty("selectionIsRange"_s, editorState.selectionIsRange);
+    if (editorState.selectionType != WebCore::SelectionType::None)
+        ts.dumpProperty("selectionType"_s, editorState.selectionType);
     if (editorState.isContentEditable)
         ts.dumpProperty("isContentEditable"_s, editorState.isContentEditable);
     if (editorState.isContentRichlyEditable)

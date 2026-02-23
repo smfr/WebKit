@@ -1474,6 +1474,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     dom/SecurityPolicyViolationEvent.h
     dom/SecurityPolicyViolationEventDisposition.h
     dom/SelectionRestorationMode.h
+    dom/SelectionType.h
     dom/SerializedNode.h
     dom/ShadowRoot.h
     dom/ShadowRootMode.h

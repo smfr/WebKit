@@ -1393,7 +1393,7 @@ WebCore::WritingTools::Behavior WebPageProxy::writingToolsBehavior() const
     auto& editorState = this->editorState();
     auto& configuration = this->configuration();
 
-    if (configuration.writingToolsBehavior() == WebCore::WritingTools::Behavior::None || editorState.selectionIsNone || editorState.isInPasswordField || editorState.isInPlugin)
+    if (configuration.writingToolsBehavior() == WebCore::WritingTools::Behavior::None || editorState.selectionType == WebCore::SelectionType::None || editorState.isInPasswordField || editorState.isInPlugin)
         return WebCore::WritingTools::Behavior::None;
 
     if (configuration.writingToolsBehavior() == WebCore::WritingTools::Behavior::Complete && editorState.isContentEditable)
