@@ -27,7 +27,7 @@ internal import CommonCrypto
 internal import CoreGraphics
 internal import CoreImage
 import os
-import UniformTypeIdentifiers
+internal import UniformTypeIdentifiers
 internal import WebKit_Internal
 
 extension WKSeparatedImageView {
