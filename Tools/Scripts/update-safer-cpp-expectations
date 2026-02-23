@@ -30,6 +30,17 @@ from webkitpy.safer_cpp.checkers import Checker
 EXPECTATION_LINE_RE = r'(\s*\[\s*(?P<platform>\w+)\s*\]\s*)?(?P<path>.+)'
 
 
+def normalize_platform(platform):
+    if not platform:
+        return None
+    platform = platform.lower()
+    if platform == "mac" or platform == "macos":
+        return "macOS"
+    elif platform == "ios":
+        return "iOS"
+    return None
+
+
 def parser():
     parser = argparse.ArgumentParser(description='Automated tooling for updating safer CPP expectations', epilog='Example: update-safer-cpp-expectations -p WebKit --RefCntblBaseVirtualDtor platform/Scrollbar.h --UncountedCallArgsChecker platform/ScrollAnimator.h')
 
@@ -103,9 +114,7 @@ def update_expectations_from_file(unexpected_results, project, add=False, platfo
 
 
 def modify_expectations_for_checker(checker, unexpected_contents, project, add, platform):
-    if platform:
-        platform = platform.lower()
-    if platform != None and platform != 'mac' and platform != 'ios':
+    if normalize_platform(platform) not in [None, 'macOS', 'iOS']:
         print(f'Unknown platform: {platform}')
         return
 
@@ -127,9 +136,9 @@ def modify_expectations_for_checker(checker, unexpected_contents, project, add, 
             expectation_platform = match.group('platform')
             path = match.group('path')
             if path in expectation_map:
-                if expectation_platform.lower() == 'mac' and platform == 'ios':
+                if normalize_platform(platform) == 'macOS' and normalize_platform(platform) == 'iOS':
                     expectation_platform = None
-                elif expectation_platform.lower() == 'ios' and platform == 'mac':
+                elif normalize_platform(platform) == 'macOS' and normalize_platform(platform) == 'iOS':
                     expectation_platform = None
                 else:
                     print(f'Conflicting or duplicate line in {expectation_relpath}: {path}')
@@ -142,16 +151,15 @@ def modify_expectations_for_checker(checker, unexpected_contents, project, add, 
         for path in unexpected_contents:
             if path in expectation_map:
                 expectation_platform = expectation_map[path]['platform']
-                lowercase_platform = expectation_platform.lower() if expectation_platform else None
-                if lowercase_platform == platform:
+                if normalize_platform(expectation_platform) == normalize_platform(platform):
                     print(f'Path is already present in {expectation_relpath}: {path}')
                     continue
-                if lowercase_platform != 'mac' and lowercase_platform != 'ios':
+                if normalize_platform(expectation_platform) not in [None, 'macOS', 'iOS']:
                     print(f'Unexpected platform in {expectation_relpath}: {expectation_platform}')
                     continue
                 expectation_map[path]['platform'] = None
             else:
-                expectation_map[path] = {'platform': platform, 'comments': []}
+                expectation_map[path] = {'platform': normalize_platform(platform), 'comments': []}
             count += 1
         print(f'Added {count} files with issues.\n')
     else:
@@ -160,14 +168,13 @@ def modify_expectations_for_checker(checker, unexpected_contents, project, add, 
                 print(f'Path not found in {expectation_relpath}: {path}')
                 continue
             if platform:
-                expectation_platform = expectation_map[path]['platform']
-                lowercase_platform = expectation_platform.lower() if expectation_platform else None
-                if lowercase_platform and lowercase_platform != platform:
-                    platform_name = 'Mac' if platform == 'mac' else 'iOS'
-                    print(f'Expectation not found in {expectation_relpath}: {path} for {platform_name}')
+                expectation_platform = normalize_platform(expectation_map[path]['platform'])
+                if expectation_platform not in [None, normalize_platform(platform)]:
+                    print(f'Expectation not found in {expectation_relpath}: {path} for {normalized_platform(platform)}')
                     continue # Expectation is for another platform. We're done
                 if expectation_platform == None:
-                    expectation_map[path]['platform'] = 'Mac' if platform == 'ios' else 'iOS'
+                    # None means it currently applies to both. Keep the expectation for the other platform.
+                    expectation_map[path]['platform'] = 'macOS' if normalize_platform(platform) == 'iOS' else 'iOS'
                 else:
                     del expectation_map[path]
             else:
