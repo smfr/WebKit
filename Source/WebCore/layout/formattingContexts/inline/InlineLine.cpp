@@ -872,6 +872,10 @@ Line::Run::Run(const InlineTextItem& inlineTextItem, const RenderStyle& style, I
         if (*whitespaceType == TrailingWhitespace::Type::Collapsed)
             length =  1;
         m_trailingWhitespace = { *whitespaceType, length, logicalWidth };
+    } else {
+        auto glyphOverflow = inlineTextItem.glyphOverflow();
+        if (glyphOverflow.first || glyphOverflow.second)
+            m_glyphOverflow = { glyphOverflow.first, glyphOverflow.second };
     }
     m_textContent = { inlineTextItem.start(), length };
 }
@@ -891,6 +895,10 @@ void Line::Run::expand(const InlineTextItem& inlineTextItem, InlineLayoutUnit lo
         m_trailingWhitespace = { };
         m_textContent.length += inlineTextItem.length();
         m_lastNonWhitespaceContentStart = inlineTextItem.start();
+
+        auto glyphOverflow = inlineTextItem.glyphOverflow();
+        if (glyphOverflow.first || glyphOverflow.second)
+            m_glyphOverflow = { std::max(m_glyphOverflow.top, glyphOverflow.first), std::max(m_glyphOverflow.bottom, glyphOverflow.second) };
         return;
     }
     auto whitespaceWidth = !hasTrailingWhitespace() ? logicalWidth : m_trailingWhitespace.width + logicalWidth;

@@ -225,15 +225,20 @@ void InlineDisplayContentBuilder::appendTextDisplayBox(const Line::Run& lineRun,
         addTextShadow();
 
         auto addGlyphOverflow = [&] {
-            if (inlineTextBox->canUseSimpleFontCodePath()) {
-                // canUseSimpleFontCodePath maps to CodePath::Simple (and content with potential glyph overflow would says CodePath::SimpleWithGlyphOverflow).
+            auto glyphOverflow = lineRun.glyphOverflow();
+            if (glyphOverflow.isEmpty())
                 return;
+
+            // Maxed-out glyph overflow values indicate arithmetic overflow. Fallback to collecting overflow post-measure.
+            constexpr size_t maximumAscent = 31;
+            constexpr size_t maximumDescent = 7;
+            if (glyphOverflow.top == maximumAscent || glyphOverflow.bottom == maximumDescent) {
+                auto enclosingAscentAndDescent = TextUtil::enclosingGlyphBoundsForText(StringView(content).substring(text.start, text.length), style, inlineTextBox->shouldUseSimpleGlyphOverflowCodePath() ? TextUtil::ShouldUseSimpleGlyphOverflowCodePath::Yes : TextUtil::ShouldUseSimpleGlyphOverflowCodePath::No);
+                auto& fontMetrics = style.metricsOfPrimaryFont();
+                glyphOverflow.top = std::max(0.f, InlineFormattingUtils::snapToInt(-enclosingAscentAndDescent.ascent, inlineTextBox) - InlineFormattingUtils::ascent(fontMetrics, FontBaseline::Alphabetic, inlineTextBox));
+                glyphOverflow.bottom = std::max(0.f, InlineFormattingUtils::snapToInt(enclosingAscentAndDescent.descent, inlineTextBox) - InlineFormattingUtils::descent(fontMetrics, FontBaseline::Alphabetic, inlineTextBox));
             }
-            auto enclosingAscentAndDescent = TextUtil::enclosingGlyphBoundsForText(StringView(content).substring(text.start, text.length), style, inlineTextBox->shouldUseSimpleGlyphOverflowCodePath() ? TextUtil::ShouldUseSimpleGlyphOverflowCodePath::Yes : TextUtil::ShouldUseSimpleGlyphOverflowCodePath::No);
-            auto& fontMetrics = style.metricsOfPrimaryFont();
-            auto glyphOverflowTop = std::max(0.f, InlineFormattingUtils::snapToInt(-enclosingAscentAndDescent.ascent, inlineTextBox) - InlineFormattingUtils::ascent(fontMetrics, FontBaseline::Alphabetic, inlineTextBox));
-            auto glyphOverflowBottom = std::max(0.f, InlineFormattingUtils::snapToInt(enclosingAscentAndDescent.descent, inlineTextBox) - InlineFormattingUtils::descent(fontMetrics, FontBaseline::Alphabetic, inlineTextBox));
-            inkOverflow.inflate(glyphOverflowTop, { }, glyphOverflowBottom, { });
+            inkOverflow.inflate(glyphOverflow.top, { }, glyphOverflow.bottom, { });
         };
         addGlyphOverflow();
 

@@ -147,6 +147,14 @@ public:
         InlineLayoutUnit trailingWhitespaceWidth() const { return m_trailingWhitespace.width; }
         bool isWhitespaceOnly() const { return hasTrailingWhitespace() && m_trailingWhitespace.length == m_textContent.length; }
 
+        struct GlyphOverflow {
+            bool isEmpty() const { return !top && !bottom; }
+
+            uint8_t top : 5 { 0 };
+            uint8_t bottom: 3 { 0 };
+        };
+        GlyphOverflow glyphOverflow() const { return m_glyphOverflow; }
+
         inline TextDirection inlineDirection() const;
         InlineLayoutUnit letterSpacing() const;
         bool hasTextCombine() const;
@@ -210,6 +218,7 @@ public:
         InlineLayoutUnit m_logicalWidth { 0 };
         UBiDiLevel m_bidiLevel { UBIDI_DEFAULT_LTR };
         InlineLayoutUnit m_textSpacingAdjustment { 0 };
+        GlyphOverflow m_glyphOverflow;
         const Box* m_layoutBox { nullptr };
         const RenderStyle& m_style;
         InlineDisplay::Box::Expansion m_expansion;
