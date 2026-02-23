@@ -486,7 +486,6 @@ public:
     String m_profilerOutput;
     String m_uncaughtExceptionName;
     bool m_interactive { false };
-    bool m_dump { false };
     bool m_module { false };
     bool m_exitCode { false };
     bool m_destroyVM { false };
@@ -3798,8 +3797,6 @@ static void checkException(GlobalObject* globalObject, bool isLastFile, bool has
 
     if (!options.m_uncaughtExceptionName || !isLastFile) {
         success = success && (!hasException || options.m_ignoreUncaughtExceptions);
-        if (options.m_dump && !hasException)
-            printf("End: %s\n", value.toWTFString(globalObject).utf8().data());
         if (hasException && !options.m_ignoreUncaughtExceptions)
             dumpException(globalObject, value);
     } else
@@ -3990,7 +3987,7 @@ static void runInteractive(GlobalObject* globalObject)
 [[noreturn]] static void printUsageStatement(bool help = false)
 {
     fprintf(stderr, "Usage: jsc [options] [files] [-- arguments]\n");
-    fprintf(stderr, "  -d         Dumps bytecode\n");
+    fprintf(stderr, "  -d         Dumps bytecode and disassembly\n");
     fprintf(stderr, "  -s         Synchronous compilation (equivalent to `--useConcurrentJIT=0`)\n");
     fprintf(stderr, "  -e         Evaluate argument as script code\n");
     fprintf(stderr, "  -f         Specifies a source file (deprecated)\n");
@@ -4131,7 +4128,8 @@ void CommandLine::parseArguments(int argc, char** argv, int start)
             continue;
         }
         if (!strcmp(arg, "-d")) {
-            m_dump = true;
+            Options::dumpGeneratedBytecodes() = true;
+            Options::dumpDisassembly() = true;
             continue;
         }
         if (!strcmp(arg, "-s")) {
@@ -4546,8 +4544,6 @@ int jscmain(int argc, char** argv)
     {
         Options::AllowUnfinalizedAccessScope scope;
         processConfigFile(Options::configFile(), "jsc");
-        if (mainCommandLine->m_dump)
-            Options::dumpGeneratedBytecodes() = true;
     }
 
     JSC::initialize();
