@@ -591,7 +591,7 @@ auto Blending<ArcCommand>::blend(const ArcCommand& a, const ArcCommand& b, const
 
 // MARK: - Shape (path conversion)
 
-WebCore::Path PathComputation<Shape>::operator()(const Shape& value, const FloatRect& boundingBox)
+WebCore::Path PathComputation<Shape>::operator()(const Shape& value, const FloatRect& boundingBox, ZoomFactor)
 {
     // FIXME: We should do some caching here.
     auto pathSource = ShapeSVGPathSource(value.startingPoint, value, boundingBox.size());

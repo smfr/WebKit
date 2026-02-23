@@ -156,7 +156,7 @@ void TransformResolver::applyCSSTransform(const TransformOperationData& transfor
 
     // 6. Translate and rotate by the transform specified by offset.
     if (options.contains(Option::Offset))
-        applyMotionPathTransform(transformData);
+        applyMotionPathTransform(transformData, m_style->usedZoomForLength());
 
     // 7. Multiply by each of the transform functions in transform from left to right.
     m_style->transform().apply(m_transform, boundingBox.size());
@@ -202,9 +202,9 @@ TransformationMatrix TransformResolver::computeTransform(const RenderStyle& styl
     return computeTransform(computedStyle, transformData, options);
 }
 
-void TransformResolver::applyMotionPathTransform(const TransformOperationData& transformData)
+void TransformResolver::applyMotionPathTransform(const TransformOperationData& transformData, ZoomFactor zoom)
 {
-    auto offsetPath = tryPath(m_style->offsetPath(), transformData);
+    auto offsetPath = tryPath(m_style->offsetPath(), transformData, zoom);
     if (!offsetPath)
         return;
 

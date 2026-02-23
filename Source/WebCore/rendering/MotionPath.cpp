@@ -221,7 +221,7 @@ static FloatPoint currentOffsetForData(const MotionPathData& data)
     return FloatPoint(data.usedStartingPosition - data.offsetFromContainingBlock);
 }
 
-std::optional<Path> MotionPath::computePathForRay(const RayPathOperation& rayPathOperation, const TransformOperationData& transformData)
+std::optional<Path> MotionPath::computePathForRay(const RayPathOperation& rayPathOperation, const TransformOperationData& transformData, Style::ZoomFactor)
 {
     auto motionPathData = transformData.motionPathData;
     if (!motionPathData || motionPathData->containingBlockBoundingRect.rect().isZero())
@@ -250,7 +250,7 @@ static FloatRoundedRect offsetRectForData(const MotionPathData& data)
     return rect;
 }
 
-std::optional<Path> MotionPath::computePathForBox(const BoxPathOperation&, const TransformOperationData& transformData)
+std::optional<Path> MotionPath::computePathForBox(const BoxPathOperation&, const TransformOperationData& transformData, Style::ZoomFactor)
 {
     if (auto motionPathData = transformData.motionPathData) {
         Path path;
@@ -260,7 +260,7 @@ std::optional<Path> MotionPath::computePathForBox(const BoxPathOperation&, const
     return std::nullopt;
 }
 
-std::optional<Path> MotionPath::computePathForShape(const ShapePathOperation& pathOperation, const TransformOperationData& transformData)
+std::optional<Path> MotionPath::computePathForShape(const ShapePathOperation& pathOperation, const TransformOperationData& transformData, Style::ZoomFactor zoom)
 {
     if (auto motionPathData = transformData.motionPathData) {
         auto containingBlockRect = offsetRectForData(*motionPathData).rect();
@@ -268,14 +268,14 @@ std::optional<Path> MotionPath::computePathForShape(const ShapePathOperation& pa
             [&]<Style::ShapeWithCenterCoordinate T>(const T& shape) -> std::optional<Path> {
                 if (!shape->position)
                     return Style::pathForCenterCoordinate(*shape, containingBlockRect, motionPathData->usedStartingPosition);
-                return Style::path(shape, containingBlockRect);
+                return Style::path(shape, containingBlockRect, zoom);
             },
             [&](const auto& shape) -> std::optional<Path> {
-                return Style::path(shape, containingBlockRect);
+                return Style::path(shape, containingBlockRect, zoom);
             }
         );
     }
-    return pathOperation.pathForReferenceRect(transformData.boundingBox);
+    return pathOperation.pathForReferenceRect(transformData.boundingBox, zoom);
 }
 
 } // namespace WebCore

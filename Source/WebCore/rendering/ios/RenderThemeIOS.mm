@@ -233,7 +233,8 @@ void RenderThemeIOS::adjustRadioStyle(RenderStyle& style, const Element*) const
     style.setWidth(Style::PreferredSize::Fixed { size });
     style.setHeight(Style::PreferredSize::Fixed { size });
 
-    auto radius = Style::LengthPercentage<CSS::Nonnegative>::Dimension { std::trunc(size / 2.0f) };
+    auto usedZoom = style.usedZoomForLength();
+    auto radius = Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { std::trunc(size / 2 / usedZoom.value) };
     style.setBorderRadius({ radius, radius });
 }
 
@@ -415,22 +416,27 @@ void RenderThemeIOS::adjustRoundBorderRadius(RenderStyle& style, RenderBox& box)
     if (!canAdjustBorderRadiusForAppearance(style.usedAppearance(), box) || Style::hasImageInAnyLayer(style.backgroundLayers()))
         return;
 
+    auto usedZoom = style.usedZoomForLength();
+
     auto boxLogicalHeight = box.logicalHeight();
+    auto unzoomedBoxLogicalHeight = box.logicalHeight() / usedZoom.value;
+
     auto minDimension = std::min(box.width(), box.height());
+    auto unzoomedMinDimension = minDimension / usedZoom.value;
 
     if ((is<RenderButton>(box) || is<RenderMenuList>(box)) && boxLogicalHeight >= largeButtonSize) {
-        auto largeButtonBorderRadius = Style::LengthPercentage<CSS::Nonnegative>::Dimension { minDimension * largeButtonBorderRadiusRatio };
+        auto largeButtonBorderRadius = Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { unzoomedMinDimension * largeButtonBorderRadiusRatio };
         style.setBorderRadius({ largeButtonBorderRadius, largeButtonBorderRadius });
         return;
     }
 
     // FIXME: We should not be relying on border radius for the appearance of our controls <rdar://problem/7675493>.
     auto borderRadius = Style::BorderRadiusValue {
-        Style::LengthPercentage<CSS::Nonnegative>::Dimension { minDimension / 2 },
-        Style::LengthPercentage<CSS::Nonnegative>::Dimension { boxLogicalHeight / 2 },
+        Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { unzoomedMinDimension / 2 },
+        Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { unzoomedBoxLogicalHeight / 2 },
     };
     if (!style.writingMode().isHorizontal())
-        borderRadius = { borderRadius.height(), borderRadius.width() };
+        borderRadius.transpose();
 
     style.setBorderRadius(WTF::move(borderRadius));
 }
@@ -644,7 +650,7 @@ void RenderThemeIOS::adjustSliderTrackStyle(RenderStyle& style, const Element* e
     RenderTheme::adjustSliderTrackStyle(style, element);
 
     // FIXME: We should not be relying on border radius for the appearance of our controls <rdar://problem/7675493>.
-    constexpr auto radius = Style::LengthPercentage<CSS::Nonnegative>::Dimension { defaultTrackRadius };
+    constexpr auto radius = Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { defaultTrackRadius };
     style.setBorderRadius({ radius, radius });
 }
 

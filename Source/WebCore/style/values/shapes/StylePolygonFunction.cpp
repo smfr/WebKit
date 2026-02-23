@@ -58,7 +58,7 @@ static const WebCore::Path& cachedPolygonPath(const Vector<FloatPoint>& points)
 
 // MARK: - Path
 
-WebCore::Path PathComputation<Polygon>::operator()(const Polygon& value, const FloatRect& boundingBox)
+WebCore::Path PathComputation<Polygon>::operator()(const Polygon& value, const FloatRect& boundingBox, ZoomFactor)
 {
     auto boundingLocation = boundingBox.location();
     auto boundingSize = boundingBox.size();

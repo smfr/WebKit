@@ -121,7 +121,7 @@ AcceleratedEffectValues::AcceleratedEffectValues(const RenderStyle& style, const
     rotate = Style::toPlatform(style.rotate(), borderBoxSize);
 
     if (!style.offsetPath().isNone() && transformOperationData) {
-        if (auto path = Style::tryPath(style.offsetPath(), *transformOperationData)) {
+        if (auto path = Style::tryPath(style.offsetPath(), *transformOperationData, style.usedZoomForLength())) {
             transformOrigin = { .value = Style::TransformResolver::computeTransformOrigin(style, transformOperationData->boundingBox).xy() };
             offsetPath = Style::toPlatform(style.offsetPath());
             offsetDistance = Style::evaluate<AcceleratedEffectOffsetDistance>(style.offsetDistance(), path->length(), Style::ZoomNeeded { });
@@ -163,7 +163,8 @@ TransformationMatrix AcceleratedEffectValues::computedTransformationMatrix(const
 
     // 6. Translate and rotate by the transform specified by offset.
     if (transformOperationData && offsetPath) {
-        if (auto path = Style::tryPath(Style::OffsetPath { *offsetPath }, *transformOperationData)) {
+        // Passing the special `none` zoom factor is correct here as zoom was previously applied when `offsetPath` was initialized.
+        if (auto path = Style::tryPath(Style::OffsetPath { *offsetPath }, *transformOperationData, Style::ZoomFactor::none())) {
             // FIXME: This transform of `transformOrigin` is not present in the overload of MotionPath::applyMotionPathTransform() that takes a `RenderStyle`.
             auto computedTransformOrigin = boundingBox.location() + transformOrigin.value;
 

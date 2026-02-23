@@ -409,7 +409,7 @@ template<typename> struct Shadows;
 
 using Animations = CoordinatedValueList<Animation>;
 using BackgroundLayers = CoordinatedValueList<BackgroundLayer>;
-using BorderRadiusValue = MinimallySerializingSpaceSeparatedSize<LengthPercentage<CSS::Nonnegative>>;
+using BorderRadiusValue = MinimallySerializingSpaceSeparatedSize<LengthPercentage<CSS::NonnegativeUnzoomed>>;
 using BoxShadows = Shadows<BoxShadow>;
 using FlexGrow = Number<CSS::Nonnegative, float>;
 using FlexShrink = Number<CSS::Nonnegative, float>;

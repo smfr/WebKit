@@ -112,7 +112,7 @@ WebCore::Path pathForCenterCoordinate(const Ellipse& value, const FloatRect& bou
     return cachedEllipsePath(bounding);
 }
 
-WebCore::Path PathComputation<Ellipse>::operator()(const Ellipse& value, const FloatRect& boundingBox)
+WebCore::Path PathComputation<Ellipse>::operator()(const Ellipse& value, const FloatRect& boundingBox, ZoomFactor)
 {
     return pathForCenterCoordinate(value, boundingBox, resolvePosition(value, boundingBox.size()));
 }

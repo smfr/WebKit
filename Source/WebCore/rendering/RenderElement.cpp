@@ -1522,8 +1522,11 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
     // It's not really correct to do math here with oldOutlineBoundsRect/newOutlineBoundsRect and local shadow/radius values, since
     // oldOutlineBoundsRect/newOutlineBoundsRect are in the coordinate space of the repaint container, and have been mapped through ancestor transforms.
 
-    const RenderStyle& outlineStyle = outlineStyleForRepaint();
+    auto& outlineStyle = outlineStyleForRepaint();
+
     auto& style = this->style();
+    auto zoom = style.usedZoomForLength();
+
     auto outlineWidth = LayoutUnit { outlineStyle.usedOutlineSize() };
     auto insetShadowExtent = Style::shadowInsetExtent(style.boxShadow(), style.usedZoomForLength());
     auto sizeDelta = LayoutSize { absoluteValue(newOutlineBoundsRect.width() - oldOutlineBoundsRect.width()), absoluteValue(newOutlineBoundsRect.height() - oldOutlineBoundsRect.height()) };
@@ -1539,8 +1542,8 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
                 auto borderBoxWidth = renderBox->width();
                 return std::max({
                     renderBox->borderRight(),
-                    Style::evaluate<LayoutUnit>(style.borderTopRightRadius().width(), borderBoxWidth, Style::ZoomNeeded { }),
-                    Style::evaluate<LayoutUnit>(style.borderBottomRightRadius().width(), borderBoxWidth, Style::ZoomNeeded { }),
+                    Style::evaluate<LayoutUnit>(style.borderTopRightRadius().width(), borderBoxWidth, zoom),
+                    Style::evaluate<LayoutUnit>(style.borderBottomRightRadius().width(), borderBoxWidth, zoom),
                 });
             };
             auto outlineRightInsetExtent = [&] -> LayoutUnit {
@@ -1583,8 +1586,8 @@ bool RenderElement::repaintAfterLayoutIfNeeded(SingleThreadWeakPtr<const RenderL
                 auto borderBoxHeight = renderBox->height();
                 return std::max({
                     renderBox->borderBottom(),
-                    Style::evaluate<LayoutUnit>(style.borderBottomLeftRadius().height(), borderBoxHeight, Style::ZoomNeeded { }),
-                    Style::evaluate<LayoutUnit>(style.borderBottomRightRadius().height(), borderBoxHeight, Style::ZoomNeeded { }),
+                    Style::evaluate<LayoutUnit>(style.borderBottomLeftRadius().height(), borderBoxHeight, zoom),
+                    Style::evaluate<LayoutUnit>(style.borderBottomRightRadius().height(), borderBoxHeight, zoom),
                 });
             };
             auto outlineBottomInsetExtent = [&] -> LayoutUnit {

@@ -458,7 +458,7 @@ inline bool isPointInCSSClippingArea(const RenderElement& renderer, const FloatP
             auto referenceBox = clipPathReferenceBox(renderer, clipPath.referenceBox());
             if (!referenceBox.contains(point))
                 return false;
-            return Style::path(clipPath.shape(), referenceBox).contains(point, Style::windRule(clipPath.shape()));
+            return Style::path(clipPath.shape(), referenceBox, renderer.style().usedZoomForLength()).contains(point, Style::windRule(clipPath.shape()));
         },
         [&](const Style::BoxPath& clipPath) {
             auto referenceBox = clipPathReferenceBox(renderer, clipPath.referenceBox());
@@ -481,7 +481,7 @@ void SVGRenderSupport::clipContextToCSSClippingArea(GraphicsContext& context, co
             auto referenceBox = clipPathReferenceBox(renderer, clipPath.referenceBox());
             referenceBox = localToParentTransform.mapRect(referenceBox);
 
-            auto path = Style::path(clipPath.shape(), referenceBox);
+            auto path = Style::path(clipPath.shape(), referenceBox, renderer.style().usedZoomForLength());
             path.transform(valueOrDefault(localToParentTransform.inverse()));
 
             context.clipPath(path, Style::windRule(clipPath.shape()));

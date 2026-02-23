@@ -104,7 +104,7 @@ WebCore::Path pathForCenterCoordinate(const Circle& value, const FloatRect& boun
     return cachedCirclePath(bounding);
 }
 
-WebCore::Path PathComputation<Circle>::operator()(const Circle& value, const FloatRect& boundingBox)
+WebCore::Path PathComputation<Circle>::operator()(const Circle& value, const FloatRect& boundingBox, ZoomFactor)
 {
     return pathForCenterCoordinate(value, boundingBox, resolvePosition(value, boundingBox.size()));
 }

@@ -1609,9 +1609,7 @@ bool RenderBox::hitTestClipPath(const HitTestLocation& hitTestLocation, const La
 
     return WTF::switchOn(style().clipPath(),
         [&](const Style::BasicShapePath& clipPath) {
-            auto& shape = clipPath.shape();
-            auto path = Style::path(shape, referenceBoxRect(clipPath.referenceBox()));
-            return path.contains(hitTestLocationInLocalCoordinates, Style::windRule(shape));
+            return Style::path(clipPath.shape(), referenceBoxRect(clipPath.referenceBox()), style().usedZoomForLength()).contains(hitTestLocationInLocalCoordinates, Style::windRule(clipPath.shape()));
         },
         [&](const Style::ReferencePath& clipPath) {
             RefPtr element = document().getElementById(clipPath.fragment());

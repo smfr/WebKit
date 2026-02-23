@@ -1417,11 +1417,13 @@ void RenderThemeMac::adjustMenuListButtonStyle(RenderStyle& style, const Element
 #else
     UNUSED_PARAM(element);
 #endif
-    float fontScale = style.computedFontSize() / baseFontSize;
+
+    auto usedZoom = style.usedZoomForLength();
+    float fontScale = style.computedFontSize() / baseFontSize / usedZoom.value;
 
     style.resetPadding();
 
-    auto radius = Style::LengthPercentage<CSS::Nonnegative>::Dimension { std::trunc(baseBorderRadius + fontScale - 1) }; // FIXME: Round up?
+    auto radius = Style::LengthPercentage<CSS::NonnegativeUnzoomed>::Dimension { std::trunc(baseBorderRadius + fontScale - 1) }; // FIXME: Round up?
     style.setBorderRadius({ radius, radius });
 
     style.setMinHeight(18_css_px);

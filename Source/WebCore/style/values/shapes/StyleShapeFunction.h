@@ -397,7 +397,7 @@ template<size_t I> const auto& get(const Shape& value)
 
 DEFINE_TYPE_MAPPING(CSS::Shape, Shape)
 
-template<> struct PathComputation<Shape> { WebCore::Path operator()(const Shape&, const FloatRect&); };
+template<> struct PathComputation<Shape> { WebCore::Path operator()(const Shape&, const FloatRect&, ZoomFactor); };
 template<> struct WindRuleComputation<Shape> { WebCore::WindRule operator()(const Shape&); };
 
 template<> struct Blending<Shape> {

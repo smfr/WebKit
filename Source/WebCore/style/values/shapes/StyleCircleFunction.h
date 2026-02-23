@@ -58,7 +58,7 @@ FloatPoint resolvePosition(const Circle& value, FloatSize boxSize);
 float resolveRadius(const Circle& value, FloatSize boxSize, FloatPoint center);
 WebCore::Path pathForCenterCoordinate(const Circle&, const FloatRect&, FloatPoint);
 
-template<> struct PathComputation<Circle> { WebCore::Path operator()(const Circle&, const FloatRect&); };
+template<> struct PathComputation<Circle> { WebCore::Path operator()(const Circle&, const FloatRect&, ZoomFactor); };
 
 template<> struct Blending<Circle> {
     auto canBlend(const Circle&, const Circle&) -> bool;

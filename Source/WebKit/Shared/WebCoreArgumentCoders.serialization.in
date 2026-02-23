@@ -2994,34 +2994,61 @@ header: <WebCore/StylePrimitiveNumericTypes.h>
 [CustomHeader, Nested] struct WebCore::Style::PercentageNonnegativeFloat {
     float value;
 };
+[CustomHeader, Nested] struct WebCore::Style::PercentageNonnegativeUnzoomedFloat {
+    float value;
+};
 
 [CustomHeader, Nested] struct WebCore::Style::PercentageAllFloat {
+    float value;
+};
+[CustomHeader, Nested] struct WebCore::Style::PercentageAllUnzoomedFloat {
     float value;
 };
 
 [CustomHeader, Nested] struct WebCore::Style::LengthNonnegative {
     float unresolvedValue();
 };
+[CustomHeader, Nested] struct WebCore::Style::LengthNonnegativeUnzoomed {
+    float unresolvedValue();
+};
 using WebCore::Style::LengthAll = WebCore::Style::Length<WebCore::CSS::All>;
 [CustomHeader, Nested] struct WebCore::Style::Length<WebCore::CSS::All> {
+    float unresolvedValue();
+};
+using WebCore::Style::LengthAllUnzoomed = WebCore::Style::Length<WebCore::CSS::AllUnzoomed>;
+[CustomHeader, Nested] struct WebCore::Style::Length<WebCore::CSS::AllUnzoomed> {
     float unresolvedValue();
 };
 
 [CustomHeader, Nested] struct WebCore::Style::LengthPercentage<WebCore::CSS::All> {
     Variant<WebCore::Style::LengthAll, WebCore::Style::PercentageAllFloat> ipcData()
 };
+[CustomHeader, Nested] struct WebCore::Style::LengthPercentage<WebCore::CSS::AllUnzoomed> {
+    Variant<WebCore::Style::LengthAllUnzoomed, WebCore::Style::PercentageAllUnzoomedFloat> ipcData()
+};
 [CustomHeader, Nested] struct WebCore::Style::LengthPercentage<WebCore::CSS::Nonnegative> {
     Variant<WebCore::Style::LengthNonnegative, WebCore::Style::PercentageNonnegativeFloat> ipcData();
 };
+[CustomHeader, Nested] struct WebCore::Style::LengthPercentage<WebCore::CSS::NonnegativeUnzoomed> {
+    Variant<WebCore::Style::LengthNonnegativeUnzoomed, WebCore::Style::PercentageNonnegativeUnzoomedFloat> ipcData();
+};
 
 using WebCore::Style::LengthPercentageNonnegative = WebCore::Style::LengthPercentage<WebCore::CSS::Nonnegative>;
+using WebCore::Style::LengthPercentageNonnegativeUnzoomed = WebCore::Style::LengthPercentage<WebCore::CSS::NonnegativeUnzoomed>;
 using WebCore::Style::LengthPercentageAll = WebCore::Style::LengthPercentage<WebCore::CSS::All>;
+using WebCore::Style::LengthPercentageAllUnzoomed = WebCore::Style::LengthPercentage<WebCore::CSS::AllUnzoomed>;
 
 [CustomHeader, Nested] struct WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegative> {
     std::array<WebCore::Style::LengthPercentageNonnegative, 2> value;
 };
+[CustomHeader, Nested] struct WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegativeUnzoomed> {
+    std::array<WebCore::Style::LengthPercentageNonnegativeUnzoomed, 2> value;
+};
 [CustomHeader, Nested] struct WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAll> {
     std::array<WebCore::Style::LengthPercentageAll, 2> value;
+};
+[CustomHeader, Nested] struct WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAllUnzoomed> {
+    std::array<WebCore::Style::LengthPercentageAllUnzoomed, 2> value;
 };
 [CustomHeader, Nested] struct WebCore::SpaceSeparatedPair<WebCore::Style::CoordinatePair> {
     std::array<WebCore::Style::CoordinatePair, 2> value;
@@ -3030,25 +3057,45 @@ using WebCore::Style::LengthPercentageAll = WebCore::Style::LengthPercentage<Web
 [CustomHeader, Nested] struct WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageNonnegative> {
     WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegative> value;
 };
+[CustomHeader, Nested] struct WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageNonnegativeUnzoomed> {
+    WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegativeUnzoomed> value;
+};
 [CustomHeader, Nested] struct WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageAll> {
     WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAll> value;
+};
+[CustomHeader, Nested] struct WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageAllUnzoomed> {
+    WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAllUnzoomed> value;
 };
 
 [CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegative> {
     WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegative> value;
 };
+[CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegativeUnzoomed> {
+    WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageNonnegativeUnzoomed> value;
+};
 [CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageAll> {
     WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAll> value;
 };
+[CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageAllUnzoomed> {
+    WebCore::SpaceSeparatedPair<WebCore::Style::LengthPercentageAllUnzoomed> value;
+};
 
 using WebCore::Style::LengthPercentageSpaceSeparatedPointAll = WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageAll>;
+using WebCore::Style::LengthPercentageSpaceSeparatedPointAllUnzoomed = WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageAllUnzoomed>;
 using WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegative = WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageNonnegative>;
+using WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegativeUnzoomed = WebCore::SpaceSeparatedPoint<WebCore::Style::LengthPercentageNonnegativeUnzoomed>;
 
 [CustomHeader, Nested] struct WebCore::CommaSeparatedVector<WebCore::Style::LengthPercentageSpaceSeparatedPointAll> {
     Vector<WebCore::Style::LengthPercentageSpaceSeparatedPointAll> value;
 };
+[CustomHeader, Nested] struct WebCore::CommaSeparatedVector<WebCore::Style::LengthPercentageSpaceSeparatedPointAllUnzoomed> {
+    Vector<WebCore::Style::LengthPercentageSpaceSeparatedPointAllUnzoomed> value;
+};
 [CustomHeader, Nested] struct WebCore::CommaSeparatedVector<WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegative> {
     Vector<WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegative> value;
+};
+[CustomHeader, Nested] struct WebCore::CommaSeparatedVector<WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegativeUnzoomed> {
+    Vector<WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegativeUnzoomed> value;
 };
 
 [CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedRectEdges<WebCore::Style::LengthPercentageAll> {
@@ -3056,6 +3103,12 @@ using WebCore::Style::LengthPercentageSpaceSeparatedPointNonnegative = WebCore::
     WebCore::Style::LengthPercentageAll right();
     WebCore::Style::LengthPercentageAll bottom();
     WebCore::Style::LengthPercentageAll left();
+};
+[CustomHeader, Nested] struct WebCore::MinimallySerializingSpaceSeparatedRectEdges<WebCore::Style::LengthPercentageAllUnzoomed> {
+    WebCore::Style::LengthPercentageAllUnzoomed top();
+    WebCore::Style::LengthPercentageAllUnzoomed right();
+    WebCore::Style::LengthPercentageAllUnzoomed bottom();
+    WebCore::Style::LengthPercentageAllUnzoomed left();
 };
 
 using WebCore::Style::ShapeCommand = Variant<WebCore::Style::MoveCommand, WebCore::Style::LineCommand, WebCore::Style::HLineCommand, WebCore::Style::VLineCommand, WebCore::Style::CurveCommand, WebCore::Style::SmoothCommand, WebCore::Style::ArcCommand, WebCore::Style::CloseCommand>;
@@ -3290,10 +3343,10 @@ using WebCore::Style::LengthPercentageMinimallySerializingSpaceSeparatedSizeAll 
 
 header: <WebCore/StyleBorderRadius.h>
 [CustomHeader, Nested] struct WebCore::Style::BorderRadius {
-    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegative> topLeft();
-    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegative> topRight();
-    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegative> bottomRight();
-    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegative> bottomLeft();
+    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegativeUnzoomed> topLeft();
+    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegativeUnzoomed> topRight();
+    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegativeUnzoomed> bottomRight();
+    WebCore::MinimallySerializingSpaceSeparatedSize<WebCore::Style::LengthPercentageNonnegativeUnzoomed> bottomLeft();
 };
 
 header: <WebCore/StyleRayFunction.h>
