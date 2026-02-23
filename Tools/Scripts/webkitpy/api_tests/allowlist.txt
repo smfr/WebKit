@@ -390,7 +390,6 @@ TestWebKitAPI.SOAuthorizationPopUp
 TestWebKitAPI.STUNMessageParsing
 TestWebKitAPI.SVGImageCasts
 TestWebKitAPI.SampleMapTest
-TestWebKitAPI.ScrollbarTests
 TestWebKitAPI.ScrollbarWidthCrash
 TestWebKitAPI.ScrollingCoordinatorTests
 TestWebKitAPI.SecurityOriginTest
