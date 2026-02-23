@@ -25,7 +25,7 @@
 
 public import CoreTransferable
 import Foundation
-import UniformTypeIdentifiers
+internal import UniformTypeIdentifiers
 @_weakLinked internal import SwiftUI
 internal import WebKit_Private
 internal import WebKit_Private.WKSnapshotConfigurationPrivate
