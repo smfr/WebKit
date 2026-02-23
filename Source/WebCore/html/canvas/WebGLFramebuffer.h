@@ -84,11 +84,8 @@ public:
 
     void didBind() { m_hasEverBeenBound = true; }
 
-    // Wrapper for drawBuffersEXT/drawBuffersARB to work around a driver bug.
+    // Set draw buffers for this framebuffer. ANGLE handles filtering internally.
     void drawBuffers(const Vector<GCGLenum>& bufs);
-
-    // Apply m_filteredDrawBuffers to GL state if pending sync is needed.
-    void applyFilteredDrawBuffers();
 
     GCGLenum NODELETE getDrawBuffer(GCGLenum);
 
@@ -123,9 +120,6 @@ private:
     // Check if the framebuffer is currently bound to the given target.
     bool isBound(GCGLenum target) const;
 
-    // Update m_filteredDrawBuffers based on current attachments. Returns true if changed.
-    bool updateFilteredDrawBuffers(bool force);
-
     void setAttachmentInternal(GCGLenum attachment, AttachmentEntry);
     // If a given attachment point for the currently bound framebuffer is not
     // null, remove the attached object.
@@ -139,8 +133,6 @@ private:
     HashMap<GCGLenum, AttachmentEntry> m_attachments;
     bool m_hasEverBeenBound { false };
     Vector<GCGLenum> m_drawBuffers;
-    Vector<GCGLenum> m_filteredDrawBuffers;
-    bool m_drawBufferStatePendingSync { false };
 #if ENABLE(WEBXR)
     const bool m_isOpaque;
     bool m_insideWebXRRAF { false };
