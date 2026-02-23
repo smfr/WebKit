@@ -278,7 +278,7 @@ void AudioFileReader::handleMessage(GstMessage* message)
             gst_state_get_name(oldState), gst_state_get_name(newState), gst_state_get_name(pending));
 
         auto dotFileName = makeString(unsafeSpan(GST_OBJECT_NAME(m_pipeline.get())), '_', unsafeSpan(gst_state_get_name(oldState)), '_', unsafeSpan(gst_state_get_name(newState)));
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN_CAST(m_pipeline.get()), GST_DEBUG_GRAPH_SHOW_ALL, dotFileName.ascii().data());
+        dumpBinToDotFile(m_pipeline, dotFileName);
         break;
     }
     case GST_MESSAGE_LATENCY:

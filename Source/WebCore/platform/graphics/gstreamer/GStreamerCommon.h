@@ -384,6 +384,9 @@ GstStateChangeReturn gstElementLockAndSetState(GstElement*, GstState);
 
 GRefPtr<GstElement> createVideoConvertScaleElement(const String& name = emptyString());
 
+void dumpBinToDotFile(GstBin*, const String&, GstDebugGraphDetails = GST_DEBUG_GRAPH_SHOW_ALL);
+void dumpBinToDotFile(const GRefPtr<GstElement>&, const String&, GstDebugGraphDetails = GST_DEBUG_GRAPH_SHOW_ALL);
+
 } // namespace WebCore
 
 #ifndef GST_BUFFER_DTS_OR_PTS

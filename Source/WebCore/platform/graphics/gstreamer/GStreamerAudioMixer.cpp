@@ -127,7 +127,7 @@ GRefPtr<GstPad> GStreamerAudioMixer::registerProducer(GstElement* interaudioSink
         gst_bin_sync_children_states(GST_BIN_CAST(m_pipeline.get()));
 
     GST_DEBUG_OBJECT(m_pipeline.get(), "Registered audio producer %" GST_PTR_FORMAT, mixerPad.get());
-    GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN_CAST(m_pipeline.get()), GST_DEBUG_GRAPH_SHOW_ALL, "audio-mixer-after-producer-registration");
+    dumpBinToDotFile(m_pipeline, "audio-mixer-after-producer-registration"_s);
     return mixerPad;
 }
 
@@ -154,7 +154,7 @@ void GStreamerAudioMixer::unregisterProducer(const GRefPtr<GstPad>& mixerPad)
     if (!m_mixer->numsinkpads)
         gst_element_set_state(m_pipeline.get(), GST_STATE_NULL);
 
-    GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN_CAST(m_pipeline.get()), GST_DEBUG_GRAPH_SHOW_ALL, "audio-mixer-after-producer-unregistration");
+    dumpBinToDotFile(m_pipeline, "audio-mixer-after-producer-unregistration"_s);
 }
 
 void GStreamerAudioMixer::configureSourcePeriodTime(CStringView sourceName, uint64_t periodTime)

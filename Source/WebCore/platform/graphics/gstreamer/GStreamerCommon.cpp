@@ -122,6 +122,7 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(GstMappedFrame);
 WTF_MAKE_TZONE_ALLOCATED_IMPL(WebCoreLogObserver);
 
 static GstClockTime s_webkitGstInitTime;
+static bool s_isGstDebugDotFilesSupportEnabled;
 
 [[nodiscard]] GstPad* webkitGstGhostPadFromStaticTemplate(GstStaticPadTemplate* staticPadTemplate, CStringView name, GstPad* target)
 {
@@ -474,6 +475,11 @@ bool ensureGStreamerInitialized()
         g_strfreev(argv);
         GST_DEBUG_CATEGORY_INIT(webkit_gst_common_debug, "webkitcommon", 0, "WebKit Common utilities");
 
+#ifndef GST_DISABLE_GST_DEBUG
+        s_isGstDebugDotFilesSupportEnabled = g_getenv("GST_DEBUG_DUMP_DOT_DIR");
+#else
+        s_isGstDebugDotFilesSupportEnabled = false;
+#endif
         if (isFastMallocEnabled()) {
             auto disableFastMalloc = CStringView::unsafeFromUTF8(getenv("WEBKIT_GST_DISABLE_FAST_MALLOC"));
             if (!disableFastMalloc || disableFastMalloc == "0"_s)
@@ -1041,7 +1047,7 @@ WEBKIT_DEFINE_ASYNC_DATA_STRUCT(AsyncPipelineDumpData)
 static void dumpPipeline(const GRefPtr<GstElement>& pipeline, String&& dotFileName, AsynchronousPipelineDumping asynchronousPipelineDumping)
 {
     if (asynchronousPipelineDumping == AsynchronousPipelineDumping::No) {
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN_CAST(pipeline.get()), GST_DEBUG_GRAPH_SHOW_ALL, dotFileName.utf8().data());
+        dumpBinToDotFile(pipeline, dotFileName);
         return;
     }
 
@@ -1049,7 +1055,7 @@ static void dumpPipeline(const GRefPtr<GstElement>& pipeline, String&& dotFileNa
     data->dotFileName = WTF::move(dotFileName);
     gst_element_call_async(pipeline.get(), reinterpret_cast<GstElementCallAsyncFunc>(+[](GstElement* pipeline, gpointer userData) {
         auto data = reinterpret_cast<AsyncPipelineDumpData*>(userData);
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN_CAST(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, data->dotFileName.utf8().data());
+        dumpBinToDotFile(GST_BIN_CAST(pipeline), data->dotFileName);
     }), data, reinterpret_cast<GDestroyNotify>(destroyAsyncPipelineDumpData));
 }
 
@@ -1071,6 +1077,9 @@ void connectSimpleBusMessageCallback(GstElement* pipeline, Function<void(GstMess
         switch (GST_MESSAGE_TYPE(message)) {
         case GST_MESSAGE_ERROR: {
             GST_ERROR_OBJECT(pipeline.get(), "Got message: %" GST_PTR_FORMAT, message);
+            if (!s_isGstDebugDotFilesSupportEnabled)
+                break;
+
             auto dotFileName = makeString(unsafeSpan(GST_OBJECT_NAME(pipeline.get())), "_error"_s);
             dumpPipeline(pipeline, WTF::move(dotFileName), data->asynchronousPipelineDumping);
             break;
@@ -1086,6 +1095,8 @@ void connectSimpleBusMessageCallback(GstElement* pipeline, Function<void(GstMess
 
             GST_INFO_OBJECT(pipeline.get(), "State changed (old: %s, new: %s, pending: %s)", gst_state_get_name(oldState),
                 gst_state_get_name(newState), gst_state_get_name(pending));
+            if (!s_isGstDebugDotFilesSupportEnabled)
+                break;
 
             auto dotFileName = makeString(unsafeSpan(GST_OBJECT_NAME(pipeline.get())), '_', unsafeSpan(gst_state_get_name(oldState)), '_', unsafeSpan(gst_state_get_name(newState)));
             dumpPipeline(pipeline, WTF::move(dotFileName), data->asynchronousPipelineDumping);
@@ -1097,8 +1108,7 @@ void connectSimpleBusMessageCallback(GstElement* pipeline, Function<void(GstMess
             // This can happen if the latency of live elements changes, or
             // for one reason or another a new live element is added or
             // removed from the pipeline.
-            gst_element_call_async(pipeline.get(), reinterpret_cast<GstElementCallAsyncFunc>(+[](GstElement* pipeline, gpointer userData) {
-                UNUSED_PARAM(userData);
+            gst_element_call_async(pipeline.get(), reinterpret_cast<GstElementCallAsyncFunc>(+[](GstElement* pipeline, gpointer) {
                 gst_bin_recalculate_latency(GST_BIN_CAST(pipeline));
             }), nullptr, nullptr);
             break;
@@ -2239,6 +2249,23 @@ GRefPtr<GstElement> createVideoConvertScaleElement(const String& name)
     pad = adoptGRef(gst_element_get_static_pad(videoConvert, "src"));
     gst_element_add_pad(bin.get(), gst_ghost_pad_new("src", pad.get()));
     return bin;
+}
+
+void dumpBinToDotFile(GstBin* bin, const String& filename, GstDebugGraphDetails details)
+{
+    if (!s_isGstDebugDotFilesSupportEnabled)
+        return;
+
+    if (!bin) [[unlikely]]
+        return;
+
+    GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(bin, details, filename.utf8().data());
+}
+
+void dumpBinToDotFile(const GRefPtr<GstElement>& element, const String& filename, GstDebugGraphDetails details)
+{
+    ASSERT(GST_IS_BIN(element.get()));
+    dumpBinToDotFile(GST_BIN_CAST(element.get()), filename, details);
 }
 
 #undef GST_CAT_DEFAULT
