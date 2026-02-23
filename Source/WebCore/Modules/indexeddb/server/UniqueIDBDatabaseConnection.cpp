@@ -68,11 +68,6 @@ UniqueIDBDatabaseManager* UniqueIDBDatabaseConnection::manager()
     return m_manager.get();
 }
 
-Ref<IDBConnectionToClient> UniqueIDBDatabaseConnection::protectedConnectionToClient()
-{
-    return m_connectionToClient;
-}
-
 bool UniqueIDBDatabaseConnection::hasNonFinishedTransactions() const
 {
     return !m_transactionMap.isEmpty();

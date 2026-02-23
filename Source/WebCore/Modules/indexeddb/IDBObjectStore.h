@@ -75,7 +75,6 @@ public:
     const std::optional<IDBKeyPath>& NODELETE keyPath() const;
     Ref<DOMStringList> indexNames() const;
     IDBTransaction& NODELETE transaction();
-    Ref<IDBTransaction> NODELETE protectedTransaction();
     bool NODELETE autoIncrement() const;
 
     struct IndexParameters {

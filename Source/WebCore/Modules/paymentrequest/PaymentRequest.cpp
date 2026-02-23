@@ -500,11 +500,6 @@ ScriptExecutionContext* PaymentRequest::scriptExecutionContext() const
     return ActiveDOMObject::scriptExecutionContext();
 }
 
-RefPtr<ScriptExecutionContext> PaymentRequest::protectedScriptExecutionContext() const
-{
-    return scriptExecutionContext();
-}
-
 // https://www.w3.org/TR/payment-request/#abort()-method
 void PaymentRequest::abort(AbortPromise&& promise)
 {
@@ -647,7 +642,7 @@ void PaymentRequest::dispatchAndCheckUpdateEvent(Ref<PaymentRequestUpdateEvent>&
     if (event->didCallUpdateWith())
         return;
 
-    protectedScriptExecutionContext()->addConsoleMessage(JSC::MessageSource::PaymentRequest, JSC::MessageLevel::Warning, makeString("updateWith() should be called synchronously when handling \""_s, event->type(), "\"."_s));
+    protect(scriptExecutionContext())->addConsoleMessage(JSC::MessageSource::PaymentRequest, JSC::MessageLevel::Warning, makeString("updateWith() should be called synchronously when handling \""_s, event->type(), "\"."_s));
 }
 
 void PaymentRequest::settleDetailsPromise(UpdateReason reason)
@@ -744,7 +739,7 @@ void PaymentRequest::accept(const String& methodName, PaymentResponse::DetailsFu
     RefPtr response = m_response;
     bool isRetry = m_response;
     if (!isRetry) {
-        response = PaymentResponse::create(protectedScriptExecutionContext().get(), *this);
+        response = PaymentResponse::create(protect(scriptExecutionContext()).get(), *this);
         m_response = response.copyRef();
         response->setRequestId(m_details.id);
     }
@@ -775,7 +770,7 @@ void PaymentRequest::accept(const String& methodName, PaymentResponse::DetailsFu
     RefPtr response = m_response;
     bool isRetry = m_response;
     if (!isRetry) {
-        response = PaymentResponse::create(protectedScriptExecutionContext().get(), *this);
+        response = PaymentResponse::create(protect(scriptExecutionContext()).get(), *this);
         m_response = response.copyRef();
         response->setRequestId(m_details.id);
     }
@@ -836,7 +831,7 @@ void PaymentRequest::cancel()
 
     if (m_isUpdating) {
         m_isCancelPending = true;
-        protectedScriptExecutionContext()->addConsoleMessage(JSC::MessageSource::PaymentRequest, JSC::MessageLevel::Error, "payment request timed out while waiting for Promise given to show() or updateWith() to settle."_s);
+        protect(scriptExecutionContext())->addConsoleMessage(JSC::MessageSource::PaymentRequest, JSC::MessageLevel::Error, "payment request timed out while waiting for Promise given to show() or updateWith() to settle."_s);
         return;
     }
 

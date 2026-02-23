@@ -123,11 +123,6 @@ IDBClient::IDBConnectionProxy& IDBTransaction::connectionProxy()
     return m_database->connectionProxy();
 }
 
-Ref<IDBClient::IDBConnectionProxy> IDBTransaction::protectedConnectionProxy()
-{
-    return connectionProxy();
-}
-
 Ref<DOMStringList> IDBTransaction::objectStoreNames() const
 {
     ASSERT(canCurrentThreadAccessThreadLocalData(m_database->originThread()));
@@ -293,7 +288,7 @@ void IDBTransaction::abortInProgressOperations(const IDBError& error)
     m_transactionOperationResultMap.clear();
 
     m_currentlyCompletingRequest = nullptr;
-    protectedConnectionProxy()->forgetActiveOperations(inProgressAbortVector);
+    protect(connectionProxy())->forgetActiveOperations(inProgressAbortVector);
 }
 
 void IDBTransaction::abortOnServerAndCancelRequests(IDBClient::TransactionOperation& operation)
@@ -1572,15 +1567,15 @@ void IDBTransaction::generateIndexKeyForRecord(const IDBResourceIdentifier& requ
     RefPtr context = scriptExecutionContext();
     auto* globalObject = context ? context->globalObject() : nullptr;
     if (!globalObject)
-        return protectedConnectionProxy()->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, IndexKey { }, recordID);
+        return protect(connectionProxy())->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, IndexKey { }, recordID);
 
     auto jsValue = deserializeIDBValueToJSValue(*globalObject, value);
     if (jsValue.isUndefinedOrNull())
-        return protectedConnectionProxy()->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, IndexKey { }, recordID);
+        return protect(connectionProxy())->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, IndexKey { }, recordID);
 
     IndexKey indexKey;
     generateIndexKeyForValue(*globalObject, indexInfo, jsValue, indexKey, keyPath, key);
-    return protectedConnectionProxy()->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, indexKey, recordID);
+    return protect(connectionProxy())->didGenerateIndexKeyForRecord(info().identifier(), requestIdentifier, indexInfo, key, indexKey, recordID);
 }
 
 #if ASSERT_ENABLED

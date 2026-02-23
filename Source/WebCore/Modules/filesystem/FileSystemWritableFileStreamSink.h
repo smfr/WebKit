@@ -38,7 +38,6 @@ public:
 
 private:
     FileSystemWritableFileStreamSink(FileSystemWritableFileStreamIdentifier, FileSystemFileHandle&);
-    Ref<FileSystemFileHandle> protectedSource() const { return m_source; }
 
     // WritableStreamSink
     void write(ScriptExecutionContext&, JSC::JSValue, DOMPromiseDeferred<void>&&) final;

@@ -80,7 +80,6 @@ public:
 
 private:
     SpeechSynthesis(ScriptExecutionContext&);
-    RefPtr<SpeechSynthesisUtterance> NODELETE protectedCurrentSpeechUtterance();
 
     // PlatformSpeechSynthesizerClient
     void voicesDidChange() override;
@@ -116,6 +115,8 @@ private:
     PlatformSpeechSynthesizer& ensurePlatformSpeechSynthesizer();
     Ref<PlatformSpeechSynthesizer> ensureProtectedPlatformSpeechSynthesizer();
     
+    SpeechSynthesisUtterance* currentSpeechUtterance();
+
     RefPtr<PlatformSpeechSynthesizer> m_platformSpeechSynthesizer;
     std::optional<Vector<Ref<SpeechSynthesisVoice>>> m_voiceList;
     std::unique_ptr<SpeechSynthesisUtteranceActivity> m_currentSpeechUtterance;

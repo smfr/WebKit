@@ -137,7 +137,6 @@ private:
     // EventTarget
     enum EventTargetInterfaceType eventTargetInterface() const final { return EventTargetInterfaceType::PaymentRequest; }
     ScriptExecutionContext* NODELETE scriptExecutionContext() const final;
-    RefPtr<ScriptExecutionContext> protectedScriptExecutionContext() const;
     bool isPaymentRequest() const final { return true; }
     void refEventTarget() final { ref(); }
     void derefEventTarget() final { deref(); }

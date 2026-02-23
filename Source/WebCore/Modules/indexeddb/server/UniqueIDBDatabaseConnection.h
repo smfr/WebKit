@@ -55,7 +55,6 @@ public:
     UniqueIDBDatabase* database() { return m_database.get(); }
     UniqueIDBDatabaseManager* NODELETE manager();
     IDBConnectionToClient& connectionToClient() { return m_connectionToClient; }
-    Ref<IDBConnectionToClient> NODELETE protectedConnectionToClient();
 
     WEBCORE_EXPORT void NODELETE connectionPendingCloseFromClient();
     WEBCORE_EXPORT void connectionClosedFromClient();

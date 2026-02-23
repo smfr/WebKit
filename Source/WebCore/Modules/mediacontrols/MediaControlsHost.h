@@ -194,8 +194,6 @@ private:
     std::pair<Vector<MenuItem>, MenuDataMap> mediaControlsContextMenuItems(String&& optionsJSONString);
 #endif
 
-    Ref<HTMLMediaElement> NODELETE protectedMediaElement() const;
-
     WeakRef<HTMLMediaElement> m_mediaElement;
     RefPtr<MediaControlTextTrackContainerElement> m_textTrackContainer;
     RefPtr<TextTrack> m_previouslySelectedTextTrack;

@@ -54,7 +54,6 @@ public:
     const String& group() const { return m_group; }
     bool synchronizable() const { return m_synchronizable; }
     LAContext * laContext() const { return m_laContext.get(); }
-    RetainPtr<LAContext> protectedLAContext() const { return m_laContext; }
     RefPtr<ArrayBuffer> largeBlob() const { return m_largeBlob; }
     const String& accessGroup() const { return m_accessGroup; }
 

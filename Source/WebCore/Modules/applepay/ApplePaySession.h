@@ -130,7 +130,6 @@ private:
     void didCancelPaymentSession(PaymentSessionError&&) override;
 
     PaymentCoordinator& NODELETE paymentCoordinator() const;
-    Ref<PaymentCoordinator> NODELETE protectedPaymentCoordinator() const;
 
     bool NODELETE canBegin() const;
     bool NODELETE canAbort() const;

@@ -184,7 +184,7 @@ void SpeechSynthesis::cancel()
 {
     // Remove all the items from the utterance queue.
     // Hold on to the current utterance so the platform synthesizer can have a chance to clean up.
-    RefPtr current = protectedCurrentSpeechUtterance();
+    RefPtr current = currentSpeechUtterance();
     // Clear m_utteranceQueue before calling cancel to avoid picking up new utterances
     // on completion callback
     auto utteranceQueue = WTF::move(m_utteranceQueue);
@@ -273,42 +273,42 @@ void SpeechSynthesis::didStartSpeaking()
 {
     if (!m_currentSpeechUtterance)
         return;
-    didStartSpeaking(protectedCurrentSpeechUtterance()->platformUtterance());
+    didStartSpeaking(protect(currentSpeechUtterance())->platformUtterance());
 }
 
 void SpeechSynthesis::didFinishSpeaking()
 {
     if (!m_currentSpeechUtterance)
         return;
-    didFinishSpeaking(protectedCurrentSpeechUtterance()->platformUtterance());
+    didFinishSpeaking(protect(currentSpeechUtterance())->platformUtterance());
 }
 
 void SpeechSynthesis::didPauseSpeaking()
 {
     if (!m_currentSpeechUtterance)
         return;
-    didPauseSpeaking(protectedCurrentSpeechUtterance()->platformUtterance());
+    didPauseSpeaking(protect(currentSpeechUtterance())->platformUtterance());
 }
 
 void SpeechSynthesis::didResumeSpeaking()
 {
     if (!m_currentSpeechUtterance)
         return;
-    didResumeSpeaking(protectedCurrentSpeechUtterance()->platformUtterance());
+    didResumeSpeaking(protect(currentSpeechUtterance())->platformUtterance());
 }
 
 void SpeechSynthesis::speakingErrorOccurred()
 {
     if (!m_currentSpeechUtterance)
         return;
-    speakingErrorOccurred(protectedCurrentSpeechUtterance()->platformUtterance());
+    speakingErrorOccurred(protect(currentSpeechUtterance())->platformUtterance());
 }
 
 void SpeechSynthesis::boundaryEventOccurred(bool wordBoundary, unsigned charIndex, unsigned charLength)
 {
     if (!m_currentSpeechUtterance)
         return;
-    boundaryEventOccurred(protectedCurrentSpeechUtterance()->platformUtterance(), wordBoundary ? SpeechBoundary::SpeechWordBoundary : SpeechBoundary::SpeechSentenceBoundary, charIndex, charLength);
+    boundaryEventOccurred(protect(currentSpeechUtterance())->platformUtterance(), wordBoundary ? SpeechBoundary::SpeechWordBoundary : SpeechBoundary::SpeechSentenceBoundary, charIndex, charLength);
 }
 
 void SpeechSynthesis::voicesChanged()
@@ -348,7 +348,7 @@ void SpeechSynthesis::speakingErrorOccurred(PlatformSpeechSynthesisUtterance& ut
         handleSpeakingCompleted(downcast<SpeechSynthesisUtterance>(*utterance.client()), true);
 }
 
-RefPtr<SpeechSynthesisUtterance> SpeechSynthesis::protectedCurrentSpeechUtterance()
+SpeechSynthesisUtterance* SpeechSynthesis::currentSpeechUtterance()
 {
     return m_currentSpeechUtterance ? &m_currentSpeechUtterance->utterance() : nullptr;
 }

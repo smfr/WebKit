@@ -2001,7 +2001,7 @@ void Internals::setEnableWebRTCEncryption(bool value)
 
 bool Internals::hasPeerConnectionEnabledServiceClass(const RTCPeerConnection& connection)
 {
-    return connection.protectedBackend()->shouldEnableServiceClass();
+    return protect(connection.backend())->shouldEnableServiceClass();
 }
 #endif // ENABLE(WEB_RTC)
 

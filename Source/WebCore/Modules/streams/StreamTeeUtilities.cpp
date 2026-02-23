@@ -337,7 +337,7 @@ static Ref<DOMPromise> pull1Steps(JSDOMGlobalObject& globalObject, StreamTeeStat
 
     state.setReading(true);
 
-    RefPtr byobRequest = branch1.protectedController()->getByobRequest();
+    RefPtr byobRequest = protect(branch1.controller())->getByobRequest();
     if (!byobRequest)
         pullWithDefaultReader(globalObject, state);
     else
@@ -359,7 +359,7 @@ static Ref<DOMPromise> pull2Steps(JSDOMGlobalObject& globalObject, StreamTeeStat
 
     state.setReading(true);
 
-    RefPtr byobRequest = branch2.protectedController()->getByobRequest();
+    RefPtr byobRequest = protect(branch2.controller())->getByobRequest();
     if (!byobRequest)
         pullWithDefaultReader(globalObject, state);
     else
@@ -423,9 +423,9 @@ private:
             chunk2 = resultOrException.releaseReturnValue();
         }
         if (!m_state->canceled1() && branch1)
-            branch1->protectedController()->enqueue(*globalObject, chunk1);
+            protect(branch1->controller())->enqueue(*globalObject, chunk1);
         if (!m_state->canceled2() && branch2)
-            branch2->protectedController()->enqueue(*globalObject, chunk2);
+            protect(branch2->controller())->enqueue(*globalObject, chunk2);
 
         m_state->setReading(false);
         if (m_state->readAgainForBranch1() && branch1)
@@ -449,10 +449,10 @@ private:
         if (!m_state->canceled2() && branch2)
             branch2->controller()->close(*globalObject);
 
-        if (branch1 && branch1->protectedController()->hasPendingPullIntos())
-            branch1->protectedController()->respond(*globalObject, 0);
-        if (branch2 && branch2->protectedController()->hasPendingPullIntos())
-            branch2->protectedController()->respond(*globalObject, 0);
+        if (branch1 && protect(branch1->controller())->hasPendingPullIntos())
+            protect(branch1->controller())->respond(*globalObject, 0);
+        if (branch2 && protect(branch2->controller())->hasPendingPullIntos())
+            protect(branch2->controller())->respond(*globalObject, 0);
 
         if (!m_state->canceled1() || !m_state->canceled2())
             m_state->resolveCancelPromise();
@@ -538,11 +538,11 @@ private:
             }
             Ref clonedChunk = resultOrException.releaseReturnValue();
             if (!byobCanceled && byobBranch)
-                byobBranch->protectedController()->respondWithNewView(*globalObject, chunk);
+                protect(byobBranch->controller())->respondWithNewView(*globalObject, chunk);
             if (otherBranch)
-                otherBranch->protectedController()->enqueue(*globalObject, clonedChunk);
+                protect(otherBranch->controller())->enqueue(*globalObject, clonedChunk);
         } else if (!byobCanceled && byobBranch)
-            byobBranch->protectedController()->respondWithNewView(*globalObject, chunk);
+            protect(byobBranch->controller())->respondWithNewView(*globalObject, chunk);
 
         m_state->setReading(false);
         if (m_state->readAgainForBranch1() && branch1)
@@ -586,9 +586,9 @@ private:
             ASSERT(!chunk->byteLength());
 
             if (!byobCanceled && branch1)
-                branch1->protectedController()->respondWithNewView(*globalObject, chunk);
+                protect(branch1->controller())->respondWithNewView(*globalObject, chunk);
             if (!otherCanceled && branch2 && branch2->controller()->hasPendingPullIntos())
-                branch2->protectedController()->respond(*globalObject, 0);
+                protect(branch2->controller())->respond(*globalObject, 0);
         }
 
         if (!byobCanceled || !otherCanceled)

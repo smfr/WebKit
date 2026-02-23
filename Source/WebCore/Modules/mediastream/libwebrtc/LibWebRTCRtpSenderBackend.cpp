@@ -124,13 +124,8 @@ bool LibWebRTCRtpSenderBackend::replaceTrack(RTCRtpSender& sender, MediaStreamTr
         });
     }
 
-    protectedPeerConnectionBackend()->setSenderSourceFromTrack(*this, *track);
+    protect(m_peerConnectionBackend)->setSenderSourceFromTrack(*this, *track);
     return true;
-}
-
-RefPtr<LibWebRTCPeerConnectionBackend> LibWebRTCRtpSenderBackend::protectedPeerConnectionBackend() const
-{
-    return m_peerConnectionBackend.get();
 }
 
 RTCRtpSendParameters LibWebRTCRtpSenderBackend::getParameters() const

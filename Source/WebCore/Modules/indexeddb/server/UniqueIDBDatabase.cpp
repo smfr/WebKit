@@ -1372,7 +1372,7 @@ void UniqueIDBDatabase::connectionClosedFromServer(UniqueIDBDatabaseConnection& 
     ASSERT(!isMainThread());
     LOG(IndexedDB, "UniqueIDBDatabase::connectionClosedFromServer - %s (%" PRIu64 ")", connection.openRequestIdentifier().loggingString().utf8().data(), connection.identifier().toUInt64());
 
-    connection.protectedConnectionToClient()->didCloseFromServer(connection, IDBError::userDeleteError());
+    protect(connection.connectionToClient())->didCloseFromServer(connection, IDBError::userDeleteError());
 
     m_openDatabaseConnections.remove(&connection);
 }

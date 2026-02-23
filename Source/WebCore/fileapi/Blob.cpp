@@ -435,7 +435,7 @@ ExceptionOr<Ref<ReadableStream>> Blob::stream()
                 return;
 
             RefPtr controller = m_controller.get();
-            auto* globalObject = controller->protectedStream()->globalObject();
+            auto* globalObject = protect(controller->stream())->globalObject();
             if (!globalObject)
                 return;
 
@@ -470,7 +470,7 @@ ExceptionOr<Ref<ReadableStream>> Blob::stream()
             });
 
             if (!globalObject) {
-                globalObject = controller.protectedStream()->globalObject();
+                globalObject = protect(controller.stream())->globalObject();
                 if (!globalObject)
                     return;
             }

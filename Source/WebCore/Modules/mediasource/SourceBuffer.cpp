@@ -236,7 +236,7 @@ ExceptionOr<void> SourceBuffer::setTimestampOffset(double offset)
     // 4. If the readyState attribute of the parent media source is in the "ended" state then run the following steps:
     // 4.1 Set the readyState attribute of the parent media source to "open"
     // 4.2 Queue a task to fire a simple event named sourceopen at the parent media source.
-    protectedSource()->openIfInEndedState();
+    protect(m_source)->openIfInEndedState();
 
     // 5. If the append state equals PARSING_MEDIA_SEGMENT, then throw an InvalidStateError and abort these steps.
     if (m_appendState == ParsingMediaSegment)
@@ -254,11 +254,6 @@ ExceptionOr<void> SourceBuffer::setTimestampOffset(double offset)
     m_private->resetTimestampOffsetInTrackBuffers();
 
     return { };
-}
-
-RefPtr<MediaSource> SourceBuffer::protectedSource() const
-{
-    return m_source.get();
 }
 
 double SourceBuffer::appendWindowStart() const
@@ -455,7 +450,7 @@ void SourceBuffer::rangeRemoval(const MediaTime& start, const MediaTime& end)
         // 9. Queue a task to fire a simple event named updateend at this SourceBuffer object.
         protectedThis->scheduleEvent(eventNames().updateendEvent);
 
-        protectedThis->protectedSource()->monitorSourceBuffers();
+        protect(protectedThis->m_source)->monitorSourceBuffers();
     });
 
     // 5. Return control to the caller and run the rest of the steps asynchronously.
@@ -464,7 +459,7 @@ void SourceBuffer::rangeRemoval(const MediaTime& start, const MediaTime& end)
         if (!protectedThis)
             return;
         // 6. Run the coded frame removal algorithm with start and end as the start and end of the removal range.
-        protectedThis->m_private->removeCodedFrames(start, end, protectedThis->protectedSource()->currentTime())->chainTo(WTF::move(producer));
+        protectedThis->m_private->removeCodedFrames(start, end, protect(protectedThis->m_source)->currentTime())->chainTo(WTF::move(producer));
     }, true);
 }
 
@@ -500,7 +495,7 @@ ExceptionOr<void> SourceBuffer::changeType(const String& type)
     // steps:
     // 5.1. Set the readyState attribute of the parent media source to "open"
     // 5.2. Queue a task to fire a simple event named sourceopen at the parent media source.
-    protectedSource()->openIfInEndedState();
+    protect(m_source)->openIfInEndedState();
 
     // 6. Run the reset parser state algorithm.
     resetParserState();
@@ -607,7 +602,7 @@ ExceptionOr<void> SourceBuffer::appendBufferInternal(std::span<const uint8_t> da
     if (isRemoved() || m_updating)
         return Exception { ExceptionCode::InvalidStateError };
 
-    ALWAYS_LOG(LOGIDENTIFIER, "size = ", data.size(), " maximumBufferSize = ", maximumBufferSize(), " buffered = ", Ref { m_buffered }->ranges(), " streaming = ", protectedSource()->streaming());
+    ALWAYS_LOG(LOGIDENTIFIER, "size = ", data.size(), " maximumBufferSize = ", maximumBufferSize(), " buffered = ", Ref { m_buffered }->ranges(), " streaming = ", protect(m_source)->streaming());
 
     // 3. If the readyState attribute of the parent media source is in the "ended" state then run the following steps:
     // 3.1. Set the readyState attribute of the parent media source to "open"
@@ -776,7 +771,7 @@ void SourceBuffer::setActive(bool active)
     m_active = active;
     m_private->setActive(active);
     if (!isRemoved())
-        protectedSource()->sourceBufferDidChangeActiveState(*this, active);
+        protect(m_source)->sourceBufferDidChangeActiveState(*this, active);
 }
 
 Ref<MediaPromise> SourceBuffer::sourceBufferPrivateDidReceiveInitializationSegment(SourceBufferPrivateClient::InitializationSegment&& segment)
@@ -1109,7 +1104,7 @@ void SourceBuffer::appendError(bool decodeError)
 
     // 5. If decode error is true, then run the end of stream algorithm with the error parameter set to "decode".
     if (decodeError && !isRemoved())
-        protectedSource()->streamEndedWithError(MediaSource::EndOfStreamError::Decode);
+        protect(m_source)->streamEndedWithError(MediaSource::EndOfStreamError::Decode);
 }
 
 bool SourceBuffer::hasAudio() const
@@ -1251,7 +1246,7 @@ void SourceBuffer::textTrackLanguageChanged(TextTrack& track)
 Ref<MediaPromise> SourceBuffer::sourceBufferPrivateDurationChanged(const MediaTime& duration)
 {
     if (!isRemoved())
-        protectedSource()->setDurationInternal(duration);
+        protect(m_source)->setDurationInternal(duration);
     if (RefPtr textTracks = m_textTracks)
         textTracks->setDuration(duration);
     return MediaPromise::createAndResolve();
@@ -1265,7 +1260,7 @@ void SourceBuffer::sourceBufferPrivateHighestPresentationTimestampChanged(const 
 void SourceBuffer::sourceBufferPrivateDidDropSample()
 {
     if (!isRemoved())
-        protectedSource()->incrementDroppedFrameCount();
+        protect(m_source)->incrementDroppedFrameCount();
 }
 
 void SourceBuffer::reportExtraMemoryAllocated(uint64_t extraMemory)
@@ -1399,7 +1394,7 @@ void SourceBuffer::updateBuffered()
             queueTaskToDispatchEvent(*this, TaskSource::MediaElement, BufferedChangeEvent::create(WTF::move(addedTimeRanges), WTF::move(removedTimeRanges)));
         }
         if (!isRemoved())
-            protectedSource()->monitorSourceBuffers();
+            protect(m_source)->monitorSourceBuffers();
     });
 
     // 3.1 Attributes, buffered
@@ -1459,7 +1454,7 @@ void SourceBuffer::setBufferedDirty(bool flag)
     m_bufferedDirty = flag;
 
     if (!isRemoved() && flag)
-        protectedSource()->sourceBufferBufferedChanged();
+        protect(m_source)->sourceBufferBufferedChanged();
 }
 
 void SourceBuffer::setMediaSourceEnded(bool isEnded)
@@ -1485,7 +1480,7 @@ void SourceBuffer::memoryPressure()
         return;
 
     if (!isRemoved())
-        m_private->memoryPressure(protectedSource()->currentTime());
+        m_private->memoryPressure(protect(m_source)->currentTime());
 }
 
 #if !RELEASE_LOG_DISABLED

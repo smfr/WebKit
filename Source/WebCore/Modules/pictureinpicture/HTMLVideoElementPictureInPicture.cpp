@@ -85,11 +85,6 @@ HTMLVideoElementPictureInPicture& HTMLVideoElementPictureInPicture::from(HTMLVid
     return *downcast<HTMLVideoElementPictureInPicture>(Supplement<HTMLVideoElement>::from(&videoElement, supplementName()));
 }
 
-Ref<HTMLVideoElementPictureInPicture> HTMLVideoElementPictureInPicture::protectedFrom(HTMLVideoElement& videoElement)
-{
-    return from(videoElement);
-}
-
 void HTMLVideoElementPictureInPicture::providePictureInPictureTo(HTMLVideoElement& videoElement)
 {
     auto newSupplement = makeUniqueWithoutRefCountedCheck<HTMLVideoElementPictureInPicture>(videoElement);

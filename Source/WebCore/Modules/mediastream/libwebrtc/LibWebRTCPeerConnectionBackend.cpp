@@ -291,7 +291,7 @@ void LibWebRTCPeerConnectionBackend::doAddIceCandidate(RTCIceCandidate& candidat
 
 Ref<RTCRtpReceiver> LibWebRTCPeerConnectionBackend::createReceiver(std::unique_ptr<LibWebRTCRtpReceiverBackend>&& backend)
 {
-    Ref document = downcast<Document>(*protectedPeerConnection()->scriptExecutionContext());
+    Ref document = downcast<Document>(*protect(m_peerConnection)->scriptExecutionContext());
 
     auto source = backend->createSource(document.get());
 
@@ -381,7 +381,7 @@ static inline LibWebRTCRtpTransceiverBackend& NODELETE backendFromRTPTransceiver
 
 RefPtr<RTCRtpTransceiver> LibWebRTCPeerConnectionBackend::existingTransceiver(Function<bool(LibWebRTCRtpTransceiverBackend&)>&& matchingFunction)
 {
-    for (auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (matchingFunction(backendFromRTPTransceiver(transceiver)))
             return transceiver.ptr();
     }
@@ -411,7 +411,7 @@ void LibWebRTCPeerConnectionBackend::removeTrack(RTCRtpSender& sender)
 
 void LibWebRTCPeerConnectionBackend::applyRotationForOutgoingVideoSources()
 {
-    for (auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (!transceiver->sender().isStopped()) {
             if (RefPtr videoSource = protectedBackendFromRTPSender(transceiver->sender())->videoSource())
                 videoSource->applyRotation();

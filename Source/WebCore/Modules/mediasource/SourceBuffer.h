@@ -211,7 +211,6 @@ private:
     bool hasAudio() const;
 
     void rangeRemoval(const MediaTime&, const MediaTime&);
-    RefPtr<MediaSource> NODELETE protectedSource() const;
 
     friend class Internals;
     using SamplesPromise = NativePromise<Vector<String>, PlatformMediaError>;

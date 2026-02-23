@@ -162,7 +162,7 @@ GStreamerRtpSenderBackend& GStreamerPeerConnectionBackend::backendFromRTPSender(
 
 void GStreamerPeerConnectionBackend::dispatchSenderBitrateRequest(const GRefPtr<GstWebRTCDTLSTransport>& transport, uint32_t bitrate)
 {
-    for (auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         auto& senderBackend = backendFromRTPSender(transceiver->sender());
         GRefPtr<GstWebRTCDTLSTransport> candidate;
         g_object_get(senderBackend.rtcSender(), "transport", &candidate.outPtr(), nullptr);
@@ -251,7 +251,7 @@ void GStreamerPeerConnectionBackend::doAddIceCandidate(RTCIceCandidate& candidat
 
 Ref<RTCRtpReceiver> GStreamerPeerConnectionBackend::createReceiver(std::unique_ptr<GStreamerRtpReceiverBackend>&& backend, const String& trackKind, const String& trackId)
 {
-    auto& document = downcast<Document>(*protectedPeerConnection()->scriptExecutionContext());
+    auto& document = downcast<Document>(*protect(m_peerConnection)->scriptExecutionContext());
 
     auto source = backend->createSource(trackKind, trackId);
     // Remote source is initially muted and will be unmuted when receiving the first packet.
@@ -276,7 +276,7 @@ ExceptionOr<Ref<RTCRtpSender>> GStreamerPeerConnectionBackend::addTrack(MediaStr
     // This is already done in RTCPeerConnection so no need to repeat:
     // If an RTCRtpSender for track already exists in senders, throw an InvalidAccessError.
     Vector<RefPtr<RTCRtpSender>> senders;
-    for (const auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (const auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (transceiver->stopped())
             continue;
         senders.append(&transceiver->sender());
@@ -339,7 +339,7 @@ ExceptionOr<Ref<RTCRtpSender>> GStreamerPeerConnectionBackend::addTrack(MediaStr
 
         // 4. Let transceiver be the RTCRtpTransceiver associated with sender.
         RefPtr<RTCRtpTransceiver> transceiver;
-        for (const auto& currentTransceiver : protectedPeerConnection()->currentTransceivers()) {
+        for (const auto& currentTransceiver : protect(m_peerConnection)->currentTransceivers()) {
             if (&currentTransceiver->sender() == sender.get()) {
                 transceiver = currentTransceiver.ptr();
                 break;
@@ -423,7 +423,7 @@ static inline GStreamerRtpTransceiverBackend& backendFromRTPTransceiver(RTCRtpTr
 
 RefPtr<RTCRtpTransceiver> GStreamerPeerConnectionBackend::existingTransceiver(WTF::Function<bool(GStreamerRtpTransceiverBackend&)>&& matchingFunction)
 {
-    for (auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (matchingFunction(backendFromRTPTransceiver(transceiver)))
             return transceiver.ptr();
     }
@@ -456,7 +456,7 @@ void GStreamerPeerConnectionBackend::removeTrack(RTCRtpSender& sender)
 
 void GStreamerPeerConnectionBackend::applyRotationForOutgoingVideoSources()
 {
-    for (auto& transceiver : protectedPeerConnection()->currentTransceivers()) {
+    for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (!transceiver->sender().isStopped()) {
             if (auto* videoSource = backendFromRTPSender(transceiver->sender()).videoSource())
                 videoSource->setApplyRotation(true);

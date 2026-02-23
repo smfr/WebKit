@@ -275,7 +275,7 @@ void MediaSource::setPrivateAndOpen(Ref<MediaSourcePrivate>&& mediaSourcePrivate
     ASSERT(!m_private);
 
     setPrivate(WTF::move(mediaSourcePrivate));
-    protectedPrivate()->setTimeFudgeFactor(currentTimeFudgeFactor());
+    protect(m_private)->setTimeFudgeFactor(currentTimeFudgeFactor());
 
     open();
 }
@@ -370,7 +370,7 @@ MediaTime MediaSource::currentTime() const
 
 PlatformTimeRanges MediaSource::buffered() const
 {
-    return isClosed() ? PlatformTimeRanges::emptyRanges() : protectedPrivate()->buffered();
+    return isClosed() ? PlatformTimeRanges::emptyRanges() : protect(m_private)->buffered();
 }
 
 Ref<MediaTimePromise> MediaSource::waitForTarget(const SeekTarget& target)
@@ -479,7 +479,7 @@ ExceptionOr<void> MediaSource::setLiveSeekableRange(double start, double end)
     if (!isOpen())
         return Exception { ExceptionCode::InvalidStateError };
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     // If start is negative or greater than end, then throw a TypeError exception and abort these steps.
     if (start < 0 || start > end)
@@ -502,7 +502,7 @@ ExceptionOr<void> MediaSource::clearLiveSeekableRange()
     // If the readyState attribute is not "open" then throw an InvalidStateError exception and abort these steps.
     if (!isOpen())
         return Exception { ExceptionCode::InvalidStateError };
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
     msp->clearLiveSeekableRange();
     return { };
 }
@@ -530,7 +530,7 @@ bool MediaSource::hasBufferedTime(const MediaTime& time)
     if (time > duration())
         return false;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
     auto ranges = msp->buffered();
     if (!ranges.length())
         return false;
@@ -548,7 +548,7 @@ bool MediaSource::hasFutureTime()
     if (isClosed())
         return false;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     return msp->hasFutureTime(currentTime(), msp->timeIsProgressing() ? MediaTime::zeroTime() : MediaSourcePrivate::futureDataThreshold());
 }
@@ -558,7 +558,7 @@ bool MediaSource::isBuffered(const PlatformTimeRanges& ranges) const
     if (isClosed())
         return true;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     auto bufferedRanges = msp->buffered();
     return bufferedRanges.containWithEpsilon(ranges, msp->timeFudgeFactor());
@@ -569,7 +569,7 @@ void MediaSource::monitorSourceBuffers()
     if (isClosed())
         return;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     // 2.4.4 SourceBuffer Monitoring
     // https://rawgit.com/w3c/media-source/45627646344eea0170dd1cbc5a3d508ca751abb8/media-source-respec.html#buffer-monitoring
@@ -710,7 +710,7 @@ ExceptionOr<void> MediaSource::setDurationInternal(const MediaTime& newDuration)
 
     // 5. Update duration to new duration.
     // 6. Update the media duration to new duration and run the HTMLMediaElement duration change algorithm.
-    protectedPrivate()->durationChanged(duration);
+    protect(m_private)->durationChanged(duration);
 
     // Changing the duration may affect the buffered range.
     updateBufferedIfNeeded(true);
@@ -766,7 +766,7 @@ void MediaSource::streamEndedWithError(std::optional<EndOfStreamError> error)
     if (isClosed())
         return;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     // 2.4.7 https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html#end-of-stream-algorithm
 
@@ -1312,7 +1312,7 @@ void MediaSource::openIfInEndedState()
     ALWAYS_LOG(LOGIDENTIFIER);
 
     setReadyState(ReadyState::Open);
-    protectedPrivate()->unmarkEndOfStream();
+    protect(m_private)->unmarkEndOfStream();
     for (Ref sourceBuffer : m_sourceBuffers.get())
         sourceBuffer->setMediaSourceEnded(false);
 }
@@ -1363,7 +1363,7 @@ void MediaSource::stop()
 
 MediaSource::ReadyState MediaSource::readyState() const
 {
-    return (m_openDeferred || !m_private) ? ReadyState::Closed : protectedPrivate()->readyState();
+    return (m_openDeferred || !m_private) ? ReadyState::Closed : protect(m_private)->readyState();
 }
 
 void MediaSource::onReadyStateChange(ReadyState oldState, ReadyState newState)
@@ -1421,7 +1421,7 @@ ExceptionOr<Ref<SourceBufferPrivate>> MediaSource::createSourceBufferPrivate(con
         type = addVP9FullRangeVideoFlagToContentType(incomingType);
 
     ASSERT(isOpen());
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     RefPtr<SourceBufferPrivate> sourceBufferPrivate;
     MediaSourceConfiguration configuration = {
@@ -1518,7 +1518,7 @@ void MediaSource::updateBufferedIfNeeded(bool force)
     if (isClosed())
         return;
 
-    Ref msp = protectedPrivate().releaseNonNull();
+    Ref msp = *m_private;
 
     if (!force && m_activeSourceBuffers->length() && std::all_of(m_activeSourceBuffers->begin(), m_activeSourceBuffers->end(), [](auto& buffer) { return !buffer->isBufferedDirty(); }))
         return;
@@ -1713,11 +1713,6 @@ Ref<SourceBufferList> MediaSource::sourceBuffers() const
 Ref<SourceBufferList> MediaSource::activeSourceBuffers() const
 {
     return m_activeSourceBuffers;
-}
-
-RefPtr<MediaSourcePrivate> MediaSource::protectedPrivate() const
-{
-    return m_private;
 }
 
 #if ENABLE(MEDIA_SOURCE_IN_WORKERS)

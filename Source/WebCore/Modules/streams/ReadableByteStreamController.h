@@ -68,7 +68,6 @@ public:
     void respondPendingPullIntosOnClose(JSDOMGlobalObject&);
 
     ReadableStream& NODELETE stream();
-    Ref<ReadableStream> NODELETE protectedStream();
 
     void pullInto(JSDOMGlobalObject&, JSC::ArrayBufferView&, uint64_t, Ref<ReadableStreamReadIntoRequest>&&);
 

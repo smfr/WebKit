@@ -126,7 +126,7 @@ FileSystemWritableFileStreamSink::FileSystemWritableFileStreamSink(FileSystemWri
 FileSystemWritableFileStreamSink::~FileSystemWritableFileStreamSink()
 {
     if (!m_isClosed)
-        protectedSource()->closeWritable(m_identifier, FileSystemWriteCloseReason::Completed);
+        protect(m_source)->closeWritable(m_identifier, FileSystemWriteCloseReason::Completed);
 }
 
 static ExceptionOr<FileSystemWritableFileStream::ChunkType> convertFileSystemWritableChunk(ScriptExecutionContext& context, JSC::JSValue value)
@@ -147,14 +147,14 @@ void FileSystemWritableFileStreamSink::write(ScriptExecutionContext& context, JS
     auto chunkResultOrException = convertFileSystemWritableChunk(context, value);
     if (chunkResultOrException.hasException()) {
         promise.reject(chunkResultOrException.releaseException());
-        protectedSource()->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
+        protect(m_source)->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
         return;
     }
 
     auto writeParamsOrException = writeParamsFromChunk(chunkResultOrException.releaseReturnValue());
     if (writeParamsOrException.hasException()) {
         promise.reject(writeParamsOrException.releaseException());
-        protectedSource()->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
+        protect(m_source)->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
         return;
     }
 
@@ -162,12 +162,12 @@ void FileSystemWritableFileStreamSink::write(ScriptExecutionContext& context, JS
     switch (writeParams.type) {
     case FileSystemWriteCommandType::Seek:
     case FileSystemWriteCommandType::Truncate:
-        return protectedSource()->executeCommandForWritable(m_identifier, writeParams.type, writeParams.position, writeParams.size, { }, false, WTF::move(promise));
+        return protect(m_source)->executeCommandForWritable(m_identifier, writeParams.type, writeParams.position, writeParams.size, { }, false, WTF::move(promise));
     case FileSystemWriteCommandType::Write:
         if (!writeParams.data)
-            return protectedSource()->executeCommandForWritable(m_identifier, writeParams.type, writeParams.position, writeParams.size, { }, true, WTF::move(promise));
+            return protect(m_source)->executeCommandForWritable(m_identifier, writeParams.type, writeParams.position, writeParams.size, { }, true, WTF::move(promise));
 
-        fetchDataBytesForWrite(*writeParams.data, [source = protectedSource(), identifier = m_identifier, promise = WTF::move(promise), type = writeParams.type, size = writeParams.size, position = writeParams.position](auto result) mutable {
+        fetchDataBytesForWrite(*writeParams.data, [source = protect(m_source), identifier = m_identifier, promise = WTF::move(promise), type = writeParams.type, size = writeParams.size, position = writeParams.position](auto result) mutable {
             if (result.hasException()) {
                 promise.reject(result.releaseException());
                 source->closeWritable(identifier, FileSystemWriteCloseReason::Aborted);
@@ -183,7 +183,7 @@ void FileSystemWritableFileStreamSink::close(JSDOMGlobalObject&)
     ASSERT(!m_isClosed);
 
     m_isClosed = true;
-    protectedSource()->closeWritable(m_identifier, FileSystemWriteCloseReason::Completed);
+    protect(m_source)->closeWritable(m_identifier, FileSystemWriteCloseReason::Completed);
 }
 
 void FileSystemWritableFileStreamSink::abort(JSDOMGlobalObject&, JSC::JSValue, DOMPromiseDeferred<void>&& promise)
@@ -191,7 +191,7 @@ void FileSystemWritableFileStreamSink::abort(JSDOMGlobalObject&, JSC::JSValue, D
     ASSERT(!m_isClosed);
 
     m_isClosed = true;
-    protectedSource()->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
+    protect(m_source)->closeWritable(m_identifier, FileSystemWriteCloseReason::Aborted);
     promise.resolve();
 }
 

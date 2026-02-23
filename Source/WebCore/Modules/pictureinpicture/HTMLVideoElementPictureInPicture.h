@@ -51,7 +51,6 @@ class HTMLVideoElementPictureInPicture
 public:
     HTMLVideoElementPictureInPicture(HTMLVideoElement&);
     static HTMLVideoElementPictureInPicture& from(HTMLVideoElement&);
-    static Ref<HTMLVideoElementPictureInPicture> protectedFrom(HTMLVideoElement&);
     static void providePictureInPictureTo(HTMLVideoElement&);
     virtual ~HTMLVideoElementPictureInPicture();
 
