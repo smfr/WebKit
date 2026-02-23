@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <WebCore/FloatRect.h>
-#include <WebCore/ScrollTypes.h>
+#include "FloatRect.h"
+#include "ScrollTypes.h"
 #include <wtf/CheckedRef.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/WeakPtr.h>

@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include <WebCore/FreeSpaceScenario.h>
-#include <WebCore/GridFormattingContext.h>
-#include <WebCore/GridTypeAliases.h>
-#include <WebCore/StyleGridTrackBreadth.h>
+#include "FreeSpaceScenario.h"
+#include "GridFormattingContext.h"
+#include "GridTypeAliases.h"
+#include "StyleGridTrackBreadth.h"
 
 namespace WebCore {
 class RenderStyle;

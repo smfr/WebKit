@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include <WebCore/FreeSpaceScenario.h>
-#include <WebCore/GridTypeAliases.h>
-#include <WebCore/LayoutUnit.h>
+#include "FreeSpaceScenario.h"
+#include "GridTypeAliases.h"
+#include "LayoutUnit.h"
 
 namespace WebCore {
 

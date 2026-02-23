@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <WebCore/SimpleRange.h>
-#include <WebCore/TextChecking.h>
+#include "SimpleRange.h"
+#include "TextChecking.h"
 
 namespace WebCore {
 

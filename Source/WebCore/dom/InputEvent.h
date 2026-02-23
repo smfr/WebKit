@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <WebCore/StaticRange.h>
-#include <WebCore/UIEvent.h>
+#include "StaticRange.h"
+#include "UIEvent.h"
 
 namespace WebCore {
 

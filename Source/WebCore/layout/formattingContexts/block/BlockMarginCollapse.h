@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <WebCore/MarginTypes.h>
+#include "MarginTypes.h"
 #include <wtf/CheckedRef.h>
 
 namespace WebCore {

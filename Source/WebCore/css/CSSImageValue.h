@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <WebCore/CSSURL.h>
-#include <WebCore/CSSValue.h>
-#include <WebCore/CachedImage.h>
-#include <WebCore/CachedResourceHandle.h>
-#include <WebCore/ResourceLoaderOptions.h>
+#include "CSSURL.h"
+#include "CSSValue.h"
+#include "CachedImage.h"
+#include "CachedResourceHandle.h"
+#include "ResourceLoaderOptions.h"
 #include <wtf/Function.h>
 #include <wtf/Ref.h>
 

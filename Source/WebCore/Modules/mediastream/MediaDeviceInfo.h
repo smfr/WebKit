@@ -27,9 +27,9 @@
 
 #if ENABLE(MEDIA_STREAM)
 
-#include <WebCore/CaptureDevice.h>
-#include <WebCore/ContextDestructionObserver.h>
-#include <WebCore/ScriptWrappable.h>
+#include "CaptureDevice.h"
+#include "ContextDestructionObserver.h"
+#include "ScriptWrappable.h"
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {

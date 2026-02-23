@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <WebCore/GraphicsLayerAnimationValue.h>
+#include "GraphicsLayerAnimationValue.h"
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {

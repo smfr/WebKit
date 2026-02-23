@@ -23,14 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef KJS_RUNTIME_OBJECT_H
-#define KJS_RUNTIME_OBJECT_H
+#pragma once
 
+#include "BridgeJSC.h"
 #include <JavaScriptCore/JSGlobalObject.h>
-#include <WebCore/BridgeJSC.h>
 
-namespace JSC {
-namespace Bindings {
+namespace JSC::Bindings {
 
 Exception* throwRuntimeObjectInvalidAccessError(JSGlobalObject*, ThrowScope&);
 
@@ -92,6 +90,3 @@ private:
 };
     
 }
-}
-
-#endif
