@@ -127,6 +127,8 @@ ExitMode mayExitImpl(Graph& graph, Node* node, StateType& state)
     case MapIteratorKey:
     case MapIteratorValue:
     case MapStorage:
+    case LogShadowChickenPrologue:
+    case LogShadowChickenTail:
         break;
 
     case Switch: {
