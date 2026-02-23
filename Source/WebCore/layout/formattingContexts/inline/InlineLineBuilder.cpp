@@ -511,8 +511,8 @@ UniqueRef<LineContent> LineBuilder::placeInlineAndFloatContent(const InlineItemR
             // 2. Apply floats and shrink the available horizontal space e.g. <span>intru_<div style="float: left"></div>sive_float</span>.
             // 3. Check if the content fits the line and commit the content accordingly (full, partial or not commit at all).
             // 4. Return if we are at the end of the line either by not being able to fit more content or because of an explicit line break.
-            auto canidateStartEndIndex = std::pair<size_t, size_t> { currentItemIndex, formattingContext().formattingUtils().nextWrapOpportunity(currentItemIndex, needsLayoutRange, m_inlineItemList) };
-            candidateContentForLine(lineCandidate, canidateStartEndIndex, needsLayoutRange, m_line.contentLogicalRight());
+            auto candidateStartEndIndex = std::pair<size_t, size_t> { currentItemIndex, formattingContext().formattingUtils().nextWrapOpportunity(currentItemIndex, needsLayoutRange, m_inlineItemList) };
+            candidateContentForLine(lineCandidate, candidateStartEndIndex, needsLayoutRange, m_line.contentLogicalRight());
             // Now check if we can put this content on the current line.
             if (auto* floatItem = lineCandidate->floatItem) {
                 ASSERT(lineCandidate->inlineContent.isEmpty());
@@ -1436,7 +1436,7 @@ LineBuilder::Result LineBuilder::handleInlineContent(const InlineItemRange& layo
     if (!applyMarginInBlockDirectionIfNeeded(ShouldResetMarginValues::Yes) || floatingContext().isEmpty())
         return result;
 
-    auto relayoutCanidateContent = [&] {
+    auto relayoutCandidateContent = [&] {
         // This is similar to what we do in block layout when the estimated top position turns out to be incorrect
         // and now we have to relayout the content with the adjusted vertical position to make sure we avoid floats properly.
         m_line.initialize(m_lineSpanningInlineBoxes, isFirstFormattedLineCandidate());
@@ -1464,7 +1464,7 @@ LineBuilder::Result LineBuilder::handleInlineContent(const InlineItemRange& layo
         commitPrecedingNonContentfulContent();
         return tryPlacingCandidateInlineContentOnLine(layoutRange, lineCandidate);
     };
-    return relayoutCanidateContent();
+    return relayoutCandidateContent();
 }
 
 LineBuilder::Result LineBuilder::tryPlacingCandidateInlineContentOnLine(const InlineItemRange& layoutRange, LineCandidate& lineCandidate)
@@ -1873,10 +1873,10 @@ size_t LineBuilder::rebuildLineWithInlineContent(const InlineItemRange& layoutRa
     ASSERT(endOfCandidateContent < layoutRange.endIndex());
 
     LineCandidate lineCandidate;
-    auto canidateStartEndIndex = std::pair<size_t, size_t> { layoutRange.startIndex(), endOfCandidateContent };
+    auto candidateStartEndIndex = std::pair<size_t, size_t> { layoutRange.startIndex(), endOfCandidateContent };
     // We might already have added floats. They shrink the available horizontal space for the line.
     // Let's just reuse what the line has at this point.
-    candidateContentForLine(lineCandidate, canidateStartEndIndex, layoutRange, m_line.contentLogicalRight(), SkipFloats::Yes);
+    candidateContentForLine(lineCandidate, candidateStartEndIndex, layoutRange, m_line.contentLogicalRight(), SkipFloats::Yes);
     auto result = processLineBreakingResult(lineCandidate, layoutRange, { InlineContentBreaker::Result::Action::Keep, InlineContentBreaker::IsEndOfLine::Yes, { }, { } });
 
     // Remove floats that are outside of this "rebuild" range to ensure we don't add them twice.

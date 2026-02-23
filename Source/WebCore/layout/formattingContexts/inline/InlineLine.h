@@ -151,7 +151,7 @@ public:
             bool isEmpty() const { return !top && !bottom; }
 
             uint8_t top : 5 { 0 };
-            uint8_t bottom: 3 { 0 };
+            uint8_t bottom : 3 { 0 };
         };
         GlyphOverflow glyphOverflow() const { return m_glyphOverflow; }
 

@@ -74,7 +74,7 @@ static inline InlineRect annotationMarginBoxVisualRect(const Box& annotationBox,
 static InlineLayoutUnit baseLogicalWidthFromRubyBaseEnd(const Box& rubyBaseLayoutBox, const Line::RunList& lineRuns, const InlineContentBreaker::ContinuousContent::RunList& candidateRuns)
 {
     ASSERT(rubyBaseLayoutBox.isRubyBase());
-    // Canidate content is supposed to hold the base content and in case of soft wrap opportunities, line may have some base content too.
+    // Candidate content is supposed to hold the base content and in case of soft wrap opportunities, line may have some base content too.
     auto baseLogicalWidth = InlineLayoutUnit { 0.f };
     auto hasSeenRubyBaseStart = false;
     for (auto& candidateRun : candidateRuns | std::views::reverse) {
