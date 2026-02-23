@@ -2667,7 +2667,7 @@ bool WebProcess::requiresScriptTrackingPrivacyProtections(const URL& url, const 
 
 bool WebProcess::shouldAllowScriptAccess(const URL& url, const SecurityOrigin& topOrigin, ScriptTrackingPrivacyCategory category) const
 {
-    return m_scriptTrackingPrivacyFilter && m_scriptTrackingPrivacyFilter->shouldAllowAccess(url, topOrigin, category);
+    return !m_scriptTrackingPrivacyFilter || m_scriptTrackingPrivacyFilter->shouldAllowAccess(url, topOrigin, category);
 }
 
 bool WebProcess::requiresConsistentPrivacyQuirkForDomain(const URL& url) const
