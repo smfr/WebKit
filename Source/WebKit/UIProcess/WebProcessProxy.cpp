@@ -408,6 +408,19 @@ void WebProcessProxy::addSharedProcessDomain(const RegistrableDomain& domain)
     m_sharedProcessDomains.add(domain);
 }
 
+void WebProcessProxy::setIsolatedProcessType(IsolatedProcessType isolatedProcessType, std::optional<WebCore::Site> mainFrameSite)
+{
+    ASSERT(isolatedProcessType != IsolatedProcessType::Unspecified);
+
+    m_isolatedProcessType = isolatedProcessType;
+
+    if (m_isolatedProcessType == IsolatedProcessType::MainFrame)
+        return;
+
+    ASSERT(mainFrameSite.has_value());
+    m_mainFrameSite = mainFrameSite;
+}
+
 void WebProcessProxy::setIsInProcessCache(bool value, WillShutDown willShutDown)
 {
     WEBPROCESSPROXY_RELEASE_LOG(Process, "setIsInProcessCache(%d)", value);
