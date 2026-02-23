@@ -23,9 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef KeyedDecoderCF_h
+#define KeyedDecoderCF_h
 
-#include "KeyedCoding.h"
+#include <WebCore/KeyedCoding.h>
 #include <wtf/RetainPtr.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/Vector.h>
@@ -65,3 +66,5 @@ private:
 };
 
 } // namespace WebCore
+
+#endif // KeyedDecoderCF_h

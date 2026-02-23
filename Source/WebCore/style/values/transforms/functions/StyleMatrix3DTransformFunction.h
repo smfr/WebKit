@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "StylePrimitiveNumericTypes.h"
-#include "StyleTransformFunctionBase.h"
-#include "TransformationMatrix.h"
+#include <WebCore/StylePrimitiveNumericTypes.h>
+#include <WebCore/StyleTransformFunctionBase.h>
+#include <WebCore/TransformationMatrix.h>
 
 namespace WebCore {
 namespace Style {

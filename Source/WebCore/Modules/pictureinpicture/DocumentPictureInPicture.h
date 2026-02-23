@@ -28,7 +28,7 @@
 
 #if ENABLE(PICTURE_IN_PICTURE_API)
 
-#include "Supplementable.h"
+#include <WebCore/Supplementable.h>
 #include <wtf/TZoneMalloc.h>
 
 namespace WebCore {

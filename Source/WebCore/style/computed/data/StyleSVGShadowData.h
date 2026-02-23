@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include "StyleBoxShadow.h"
+#include <WebCore/StyleBoxShadow.h>
 #include <wtf/Ref.h>
 #include <wtf/RefCounted.h>
 

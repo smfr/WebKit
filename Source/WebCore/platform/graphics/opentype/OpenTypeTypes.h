@@ -22,16 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef OpenTypeTypes_h
+#define OpenTypeTypes_h
 
 #if ENABLE(OPENTYPE_MATH)
-#include "Glyph.h"
+#include <WebCore/Glyph.h>
 #endif
 
-#include "SharedBuffer.h"
+#include <WebCore/SharedBuffer.h>
 #include <wtf/StdLibExtras.h>
 
-namespace WebCore::OpenType {
+namespace WebCore {
+namespace OpenType {
 
 struct BigEndianShort {
     operator short() const { return (v & 0x00ff) << 8 | v >> 8; }
@@ -196,4 +198,7 @@ protected:
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
 #endif
 
-} // namespace WebCore::OpenType
+} // namespace OpenType
+} // namespace WebCore
+
+#endif // OpenTypeTypes_h

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "AccessibilityRole.h"
+#include <WebCore/AccessibilityRole.h>
 
 namespace WebCore {
 

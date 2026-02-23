@@ -27,10 +27,10 @@
 
 #if ENABLE(APPLE_PAY)
 
-#include "ActiveDOMObject.h"
-#include "ApplePaySetupConfiguration.h"
-#include "JSDOMPromiseDeferred.h"
-#include "JSDOMPromiseDeferredForward.h"
+#include <WebCore/ActiveDOMObject.h>
+#include <WebCore/ApplePaySetupConfiguration.h>
+#include <WebCore/JSDOMPromiseDeferred.h>
+#include <WebCore/JSDOMPromiseDeferredForward.h>
 #include <wtf/Forward.h>
 #include <wtf/Ref.h>
 #include <wtf/RefCounted.h>

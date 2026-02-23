@@ -25,15 +25,15 @@
 
 #pragma once
 
-#include "EventNames.h"
-#include "EventTarget.h"
-#include "EventTargetInterfaces.h"
-#include "IDBActiveDOMObject.h"
-#include "IDBConnectionProxy.h"
-#include "IDBDatabaseConnectionIdentifier.h"
-#include "IDBDatabaseInfo.h"
-#include "IDBKeyPath.h"
-#include "IDBTransactionMode.h"
+#include <WebCore/EventNames.h>
+#include <WebCore/EventTarget.h>
+#include <WebCore/EventTargetInterfaces.h>
+#include <WebCore/IDBActiveDOMObject.h>
+#include <WebCore/IDBConnectionProxy.h>
+#include <WebCore/IDBDatabaseConnectionIdentifier.h>
+#include <WebCore/IDBDatabaseInfo.h>
+#include <WebCore/IDBKeyPath.h>
+#include <WebCore/IDBTransactionMode.h>
 #include <wtf/ThreadSafeWeakPtr.h>
 
 namespace WebCore {

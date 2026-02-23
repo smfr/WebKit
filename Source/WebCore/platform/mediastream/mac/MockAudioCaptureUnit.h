@@ -27,7 +27,7 @@
 
 #if ENABLE(MEDIA_STREAM)
 
-#include "CoreAudioCaptureUnit.h"
+#include <WebCore/CoreAudioCaptureUnit.h>
 
 namespace WebCore {
 

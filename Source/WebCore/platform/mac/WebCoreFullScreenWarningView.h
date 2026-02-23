@@ -23,14 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
 #import <wtf/Platform.h>
 
 #if PLATFORM(MAC) && ENABLE(FULLSCREEN_API)
 
-#import "PlatformExportMacros.h"
 #import <AppKit/NSBox.h>
+#import <WebCore/PlatformExportMacros.h>
 #import <wtf/RetainPtr.h>
 
 @class NSTextField;
