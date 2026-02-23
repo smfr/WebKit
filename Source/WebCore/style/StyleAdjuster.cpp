@@ -1218,7 +1218,7 @@ auto Adjuster::adjustmentForTextAutosizing(const RenderStyle& style, const Eleme
         || document->settings().idempotentModeAutosizingOnlyHonorsPercentages())
         return adjustmentForTextAutosizing;
 
-    auto newStatus = AutosizeStatus::computeStatus(style);
+    auto newStatus = AutosizeStatus::compute(style);
     if (newStatus != style.autosizeStatus())
         adjustmentForTextAutosizing.newStatus = newStatus;
 
@@ -1246,7 +1246,8 @@ auto Adjuster::adjustmentForTextAutosizing(const RenderStyle& style, const Eleme
     auto& fontDescription = style.fontDescription();
     auto initialComputedFontSize = fontDescription.computedSize();
     auto specifiedFontSize = fontDescription.specifiedSize();
-    bool isCandidate = style.isIdempotentTextAutosizingCandidate(newStatus);
+
+    bool isCandidate = newStatus.isIdempotentTextAutosizingCandidate(style);
     if (!isCandidate && WTF::areEssentiallyEqual(initialComputedFontSize, specifiedFontSize))
         return adjustmentForTextAutosizing;
 
@@ -1270,7 +1271,8 @@ auto Adjuster::adjustmentForTextAutosizing(const RenderStyle& style, const Eleme
 
 bool Adjuster::adjustForTextAutosizing(RenderStyle& style, AdjustmentForTextAutosizing adjustment)
 {
-    AutosizeStatus::updateStatus(style);
+    style.setAutosizeStatus(AutosizeStatus::compute(style));
+
     if (auto newFontSize = adjustment.newFontSize) {
         auto fontDescription = style.fontDescription();
         fontDescription.setComputedSize(*newFontSize);

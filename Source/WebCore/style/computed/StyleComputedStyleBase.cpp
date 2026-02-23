@@ -42,10 +42,6 @@
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/TextStream.h>
 
-#if ENABLE(TEXT_AUTOSIZING)
-#include <wtf/text/StringHash.h>
-#endif
-
 #define SET_VAR(group, variable, value) do { \
         if (!compareEqual(group->variable, value)) \
             group.access().variable = value; \

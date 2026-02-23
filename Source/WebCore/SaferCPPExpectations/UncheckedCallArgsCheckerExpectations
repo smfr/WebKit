@@ -513,7 +513,6 @@ rendering/RenderViewTransitionCapture.cpp
 rendering/RenderWidget.cpp
 rendering/StyledMarkedText.cpp
 rendering/TextAutoSizing.cpp
-rendering/TextAutoSizing.h
 rendering/TextBoxPainter.cpp
 rendering/TextBoxTrimmer.cpp
 rendering/TextDecorationPainter.cpp
@@ -542,7 +541,6 @@ rendering/shapes/ShapeOutsideInfo.cpp
 rendering/style/RenderStyle+GettersInlines.h
 rendering/style/RenderStyle+SettersInlines.h
 rendering/style/RenderStyle.cpp
-rendering/style/RenderStyle.h
 rendering/svg/RenderSVGBlock.cpp
 rendering/svg/RenderSVGImage.cpp
 rendering/svg/RenderSVGInline.cpp
@@ -638,7 +636,6 @@ style/StyleUpdate.cpp
 style/Styleable.cpp
 style/Styleable.h
 [ Mac ] style/calc/StyleCalculationTree+Conversion.cpp
-style/computed/StyleComputedStyle.cpp
 style/computed/StyleComputedStyleBase.cpp
 style/values/color/StyleColor.cpp
 style/values/content/StyleContent.cpp
