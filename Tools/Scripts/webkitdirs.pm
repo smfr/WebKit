@@ -3525,9 +3525,9 @@ sub commandLineArgumentsForRestrictedEnvironmentVariables($)
     return map { ($prefix, "$_=$ENV{$_}") } grep { /^DYLD_/ } keys %ENV;
 }
 
-sub runMacWebKitApp($;$)
+sub runMacWebKitApp($;$$)
 {
-    my ($appPath, $useOpenCommand) = @_;
+    my ($appPath, $useOpenCommand, $openDocumentPath) = @_;
     my $productDir = productDir();
     print "Starting @{[basename($appPath)]} with DYLD_FRAMEWORK_PATH set to point to built WebKit in $productDir.\n";
 
@@ -3535,7 +3535,15 @@ sub runMacWebKitApp($;$)
     setupMacWebKitEnvironment($productDir);
 
     if (defined($useOpenCommand) && $useOpenCommand == USE_OPEN_COMMAND) {
-        return system("open", "-W", "-a", $appPath, commandLineArgumentsForRestrictedEnvironmentVariables("--env"), "--args", argumentsForRunAndDebugMacWebKitApp());
+        my $appPathForOpen = $appPath;
+        if ($appPathForOpen =~ m#^(.*\.app)/Contents/MacOS/[^/]+$#) {
+            $appPathForOpen = $1;
+        }
+
+        my @openCommand = ("open", "-W", "-a", $appPathForOpen);
+        push(@openCommand, $openDocumentPath) if defined($openDocumentPath);
+        push(@openCommand, commandLineArgumentsForRestrictedEnvironmentVariables("--env"), "--args", argumentsForRunAndDebugMacWebKitApp());
+        return system(@openCommand);
     }
     if (architecture()) {
         return system "arch", "-" . architecture(), commandLineArgumentsForRestrictedEnvironmentVariables("-e"), $appPath, argumentsForRunAndDebugMacWebKitApp();
@@ -3608,6 +3616,10 @@ sub runSafari
     }
 
     if (isAppleMacWebKit()) {
+        my $openDocumentPath;
+        if (checkForArgumentAndRemoveFromARGVGettingValue("-NSOpen", \$openDocumentPath)) {
+            return runMacWebKitApp(safariPath(), USE_OPEN_COMMAND, $openDocumentPath);
+        }
         return runMacWebKitApp(safariPath());
     }
 
