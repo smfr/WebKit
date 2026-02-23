@@ -4529,6 +4529,18 @@ class TestCheckChangeRelevance(BuildStepMixinAdditions, unittest.TestCase):
         return rc
 
     @expectedFailure
+    def test_relevant_safer_cpp_pull_request(self):
+        file_names = ['Tools/CISupport/safer-cpp-llvm-version', 'Tools/CISupport/safer-cpp-swift-version']
+        self.setup_step(CheckChangeRelevance())
+        self.setProperty('buildername', 'Safer-CPP-Checks-EWS')
+        self.setProperty('github.number', 1234)
+        for file_name in file_names:
+            CheckChangeRelevance._get_patch = lambda x: file_name
+            self.expect_outcome(result=SUCCESS, state_string='Pull request contains relevant changes')
+            rc = self.run_step()
+        return rc
+
+    @expectedFailure
     def test_relevant_bindings_tests_patch(self):
         file_names = ['Source/WebCore', 'Tools']
         self.setup_step(CheckChangeRelevance())
