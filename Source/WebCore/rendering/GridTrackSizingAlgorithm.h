@@ -139,7 +139,6 @@ public:
     std::optional<LayoutUnit> estimatedGridAreaBreadthForGridItem(const RenderBox&, Style::GridTrackSizingDirection) const;
 
     void cacheBaselineAlignedItem(const RenderBox&, Style::GridTrackSizingDirection alignmentContextType, bool cachingRowSubgridsForRootGrid);
-    void copyBaselineItemsCache(const GridTrackSizingAlgorithm&, Style::GridTrackSizingDirection alignmentContextType);
     void clearBaselineItemsCache();
 
     Vector<UniqueRef<GridTrack>>& tracks(Style::GridTrackSizingDirection direction) { return direction == Style::GridTrackSizingDirection::Columns ? m_columns : m_rows; }

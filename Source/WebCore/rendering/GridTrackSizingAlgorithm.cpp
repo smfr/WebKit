@@ -1293,14 +1293,6 @@ void GridTrackSizingAlgorithm::cacheBaselineAlignedItem(const RenderBox& item, S
     }
 }
 
-void GridTrackSizingAlgorithm::copyBaselineItemsCache(const GridTrackSizingAlgorithm& source, Style::GridTrackSizingDirection alignmentContextType)
-{
-    if (alignmentContextType == Style::GridTrackSizingDirection::Rows)
-        m_baselineAlignmentItemsForRows = source.m_baselineAlignmentItemsForRows;
-    else
-        m_baselineAlignmentItemsForColumns = source.m_baselineAlignmentItemsForColumns;
-}
-
 bool GridTrackSizingAlgorithmStrategy::updateOverridingContainingBlockContentSizeForGridItem(RenderBox& gridItem, Style::GridTrackSizingDirection direction, std::optional<LayoutUnit> overrideSize) const
 {
     if (!overrideSize)

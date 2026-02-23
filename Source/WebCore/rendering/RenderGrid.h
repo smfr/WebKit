@@ -300,8 +300,6 @@ private:
 
     mutable GridMasonryLayout m_masonryLayout;
 
-    bool m_baselineItemsCached {false};
-
     mutable std::optional<GridItemSizeCache> m_intrinsicLogicalHeightsForRowSizingFirstPass;
 
     bool layoutUsingGridFormattingContext();

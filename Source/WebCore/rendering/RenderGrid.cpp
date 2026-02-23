@@ -358,8 +358,6 @@ Vector<RenderBox*> RenderGrid::computeAspectRatioDependentAndBaselineItems(Rende
 {
     Vector<RenderBox*> dependentGridItems;
 
-    m_baselineItemsCached = true;
-
     auto computeOrthogonalAndDependentItems = [&](RenderBox* gridItem) {
         // For a grid item that has an aspect-ratio and block-constraints such as the relative logical height,
         // when the grid width is auto, we may need get the real grid width before laying out the item.
@@ -561,7 +559,6 @@ void RenderGrid::layoutGrid(RelayoutChildren relayoutChildren)
     repainter.repaintAfterLayout();
 
     m_trackSizingAlgorithm.clearBaselineItemsCache();
-    m_baselineItemsCached = false;
 }
 
 bool RenderGrid::layoutUsingGridFormattingContext()
@@ -706,7 +703,6 @@ void RenderGrid::layoutMasonry(RelayoutChildren relayoutChildren)
     repainter.repaintAfterLayout();
 
     m_trackSizingAlgorithm.clearBaselineItemsCache();
-    m_baselineItemsCached = false;
 }
 
 LayoutUnit RenderGrid::gridGap(Style::GridTrackSizingDirection direction, std::optional<LayoutUnit> availableSize) const
@@ -835,12 +831,8 @@ void RenderGrid::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, Layo
 
     performPreLayoutForGridItems(algorithm, ShouldUpdateGridAreaLogicalSize::No);
 
-    if (m_baselineItemsCached)
-        algorithm.copyBaselineItemsCache(m_trackSizingAlgorithm, Style::GridTrackSizingDirection::Columns);
-    else {
-        auto emptyCallback = [](RenderBox*) { };
-        cacheBaselineAlignedGridItems(*this, algorithm, { AlignmentContextTypes::Columns }, emptyCallback, !isSubgridRows());
-    }
+    auto emptyCallback = [](RenderBox*) { };
+    cacheBaselineAlignedGridItems(*this, algorithm, { AlignmentContextTypes::Columns }, emptyCallback, !isSubgridRows());
 
     computeTrackSizesForIndefiniteSize(algorithm, Style::GridTrackSizingDirection::Columns, gridLayoutState, &minLogicalWidth, &maxLogicalWidth);
 
