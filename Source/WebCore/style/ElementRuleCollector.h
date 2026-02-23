@@ -87,6 +87,7 @@ private:
     void matchUserAgentPartRules(DeclarationOrigin);
     void matchHostPseudoClassRules(DeclarationOrigin);
     void matchSlottedPseudoElementRules(DeclarationOrigin);
+    void matchSlottedPseudoElementRulesInUserAgentShadowTree(DeclarationOrigin);
     void matchPartPseudoElementRules(DeclarationOrigin);
     void matchPartPseudoElementRulesForScope(const Element& partMatchingElement, DeclarationOrigin);
 

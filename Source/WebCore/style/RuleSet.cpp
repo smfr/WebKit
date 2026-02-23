@@ -347,6 +347,13 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
             return;
         }
 
+        if (previousSelector && previousSelector->match() == CSSSelector::Match::PseudoElement && previousSelector->pseudoElement() == CSSSelector::PseudoElement::Slotted) {
+            // Handle selectors like ::slotted(select)::picker(select) with the slotted codepath.
+            ruleData.disableSelectorFiltering();
+            m_slottedPseudoElementRules.append(ruleData);
+            return;
+        }
+
         if (pickerPseudoElementSelector) [[unlikely]] {
             // Look up useragentpart="picker(...)".
             addToRuleSet(AtomString(makeString("picker("_s, pickerPseudoElementSelector->stringList()->at(0), ')')), m_userAgentPartRules, ruleData);

@@ -551,15 +551,23 @@ static bool NODELETE isPseudoClassValidAfterPseudoElement(CSSSelector::PseudoCla
     }
 }
 
-static bool NODELETE isTreeAbidingPseudoElement(CSSSelector::PseudoElement pseudoElement)
+static bool isTreeAbidingPseudoElement(const MutableCSSSelector& simpleSelector)
 {
-    switch (pseudoElement) {
-    // FIXME: This list should also include ::placeholder and ::file-selector-button
+    if (simpleSelector.match() != CSSSelector::Match::PseudoElement)
+        return false;
+
+    switch (simpleSelector.pseudoElement()) {
     case CSSSelector::PseudoElement::Before:
     case CSSSelector::PseudoElement::After:
     case CSSSelector::PseudoElement::Marker:
     case CSSSelector::PseudoElement::Backdrop:
+    case CSSSelector::PseudoElement::Picker:
+    case CSSSelector::PseudoElement::PickerIcon:
         return true;
+    case CSSSelector::PseudoElement::UserAgentPart:
+        return simpleSelector.value() == UserAgentParts::detailsContent()
+            || simpleSelector.value() == UserAgentParts::fileSelectorButton()
+            || simpleSelector.value() == UserAgentParts::placeholder();
     default:
         return false;
     }
@@ -576,7 +584,7 @@ static bool isSimpleSelectorValidAfterPseudoElement(const MutableCSSSelector& si
             return true;
     }
     if (compoundPseudoElement.pseudoElement() == CSSSelector::PseudoElement::Slotted) {
-        if (simpleSelector.match() == CSSSelector::Match::PseudoElement && isTreeAbidingPseudoElement(simpleSelector.pseudoElement()))
+        if (isTreeAbidingPseudoElement(simpleSelector))
             return true;
     }
     if (simpleSelector.match() != CSSSelector::Match::PseudoClass)
@@ -1315,7 +1323,7 @@ std::unique_ptr<MutableCSSSelector> CSSSelectorParser::splitCompoundAtImplicitSh
     bool isSlotted = splitAfter->precedingInComplexSelector()->match() == CSSSelector::Match::PseudoElement && splitAfter->precedingInComplexSelector()->pseudoElement() == CSSSelector::PseudoElement::Slotted;
 
     std::unique_ptr<MutableCSSSelector> secondCompound;
-    if (isUASheetBehavior(context.mode) || isPart) {
+    if (isUASheetBehavior(context.mode) || isPart || isSlotted) {
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=161747
         // We have to recur, since we have rules in media controls like video::a::b. This should not be allowed, and
         // we should remove this recursion once those rules are gone.

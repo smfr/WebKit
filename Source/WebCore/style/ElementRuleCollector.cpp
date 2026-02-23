@@ -210,6 +210,9 @@ void ElementRuleCollector::collectMatchingRules(DeclarationOrigin origin)
         if (isFirstMatchModeAndHasMatchedAnyRules())
             return;
         matchPartPseudoElementRules(origin);
+        if (isFirstMatchModeAndHasMatchedAnyRules())
+            return;
+        matchSlottedPseudoElementRulesInUserAgentShadowTree(origin);
     }
 }
 
@@ -443,6 +446,37 @@ void ElementRuleCollector::matchPartPseudoElementRulesForScope(const Element& pa
             break;
 
         if (styleScopeOrdinal == ScopeOrdinal::ContainingHostLimit)
+            break;
+    }
+}
+
+void ElementRuleCollector::matchSlottedPseudoElementRulesInUserAgentShadowTree(DeclarationOrigin origin)
+{
+    ASSERT(element().isInShadowTree());
+    auto* shadowRoot = element().containingShadowRoot();
+    if (!shadowRoot || shadowRoot->mode() != ShadowRootMode::UserAgent)
+        return;
+
+    auto* host = shadowRoot->host();
+    if (!host)
+        return;
+
+    auto* slot = host->assignedSlot();
+    auto styleScopeOrdinal = ScopeOrdinal::FirstSlot;
+
+    for (; slot; slot = slot->assignedSlot(), ++styleScopeOrdinal) {
+        auto& styleScope = Scope::forNode(*slot);
+        if (!styleScope.resolver().ruleSets().isAuthorStyleDefined())
+            continue;
+
+        auto* scopeRules = styleScope.resolver().ruleSets().styleForDeclarationOrigin(origin);
+        if (!scopeRules)
+            continue;
+
+        MatchRequest scopeMatchRequest(*scopeRules, styleScopeOrdinal);
+        collectMatchingRulesForList(&scopeRules->slottedPseudoElementRules(), scopeMatchRequest);
+
+        if (styleScopeOrdinal == ScopeOrdinal::SlotLimit)
             break;
     }
 }
