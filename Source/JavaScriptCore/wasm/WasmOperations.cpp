@@ -848,7 +848,7 @@ static void doOSREntry(JSWebAssemblyInstance* instance, Probe::Context& context,
     loadValuesIntoBuffer(context, osrEntryData.values(), buffer);
 
     // 2. Restore callee saves.
-    auto dontRestoreRegisters = RegisterSetBuilder::stackRegisters();
+    auto dontRestoreRegisters = RegisterSet::stackRegisters();
     for (const RegisterAtOffset& entry : *callee.calleeSaveRegisters()) {
         if (dontRestoreRegisters.contains(entry.reg(), IgnoreVectors))
             continue;

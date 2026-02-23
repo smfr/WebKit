@@ -396,7 +396,7 @@ void JIT::emit_op_iterator_open(const JSInstruction* instruction)
     const Identifier* ident = &vm().propertyNames->next;
 
     JITGetByIdGenerator gen(
-        nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSetBuilder::stubUnavailableRegisters(),
+        nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSet::stubUnavailableRegisters(),
         CacheableIdentifier::createFromImmortalIdentifier(ident->impl()), baseJSR, resultJSR, stubInfoGPR, AccessType::GetById, cacheType);
 
     gen.generateDataICFastPath(*this);
@@ -488,7 +488,7 @@ void JIT::emit_op_iterator_next(const JSInstruction* instruction)
         loadStructureStubInfo(stubInfoIndex, stubInfoGPR);
 
         JITGetByIdGenerator gen(
-            nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSetBuilder::stubUnavailableRegisters(),
+            nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSet::stubUnavailableRegisters(),
             CacheableIdentifier::createFromImmortalIdentifier(vm().propertyNames->done.impl()), baseJSR, resultJSR, stubInfoGPR, AccessType::GetById, CacheType::GetByIdSelf);
 
         gen.generateDataICFastPath(*this);
@@ -503,7 +503,7 @@ void JIT::emit_op_iterator_next(const JSInstruction* instruction)
     }
 
     {
-        auto usedRegisters = RegisterSetBuilder(resultJSR).buildAndValidate();
+        auto usedRegisters = RegisterSet(resultJSR);
         ScratchRegisterAllocator scratchAllocator(usedRegisters);
         GPRReg scratch1 = scratchAllocator.allocateScratchGPR();
         GPRReg scratch2 = scratchAllocator.allocateScratchGPR();
@@ -515,7 +515,7 @@ void JIT::emit_op_iterator_next(const JSInstruction* instruction)
         loadStructureStubInfo(stubInfoIndex, stubInfoGPR);
 
         JITGetByIdGenerator gen(
-            nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSetBuilder::stubUnavailableRegisters(),
+            nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSet::stubUnavailableRegisters(),
             CacheableIdentifier::createFromImmortalIdentifier(vm().propertyNames->value.impl()), baseJSR, resultJSR, stubInfoGPR, AccessType::GetById, CacheType::GetByIdSelf);
 
         gen.generateDataICFastPath(*this);
@@ -586,7 +586,7 @@ void JIT::emit_op_instanceof(const JSInstruction* instruction)
 
         JITGetByIdGenerator gen(
             nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex),
-            CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSetBuilder::stubUnavailableRegisters(),
+            CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSet::stubUnavailableRegisters(),
             CacheableIdentifier::createFromImmortalIdentifier(vm().propertyNames->hasInstanceSymbol.impl()),
             GetById::baseJSR, GetById::resultJSR, GetById::stubInfoGPR, AccessType::GetById, CacheType::GetByIdSelf);
 
@@ -631,7 +631,7 @@ void JIT::emit_op_instanceof(const JSInstruction* instruction)
 
         JITGetByIdGenerator gen(
             nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex),
-            CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSetBuilder::stubUnavailableRegisters(),
+            CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())), RegisterSet::stubUnavailableRegisters(),
             CacheableIdentifier::createFromImmortalIdentifier(vm().propertyNames->prototype.impl()),
             GetById::baseJSR, GetById::resultJSR, GetById::stubInfoGPR, AccessType::GetById, CacheType::GetByIdSelf);
 
@@ -659,7 +659,7 @@ void JIT::emit_op_instanceof(const JSInstruction* instruction)
 
         JITInstanceOfGenerator gen(
             nullptr, stubInfo, JITType::BaselineJIT, CodeOrigin(m_bytecodeIndex), CallSiteIndex(BytecodeIndex(m_bytecodeIndex.offset())),
-            RegisterSetBuilder::stubUnavailableRegisters(),
+            RegisterSet::stubUnavailableRegisters(),
             Instanceof::resultJSR.payloadGPR(),
             Instanceof::valueJSR.payloadGPR(),
             Instanceof::protoJSR.payloadGPR(),

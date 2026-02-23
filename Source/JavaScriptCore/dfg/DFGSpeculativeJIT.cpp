@@ -661,9 +661,9 @@ void SpeculativeJIT::typeCheck(JSValueSource source, Edge edge, SpeculatedType t
     speculationCheck(exitKind, source, edge.node(), jumpListToFail);
 }
 
-RegisterSetBuilder SpeculativeJIT::usedRegisters()
+RegisterSet SpeculativeJIT::usedRegisters()
 {
-    RegisterSetBuilder result;
+    RegisterSet result;
     
     for (unsigned i = GPRInfo::numberOfRegisters; i--;) {
         GPRReg gpr = GPRInfo::toRegister(i);
@@ -679,7 +679,7 @@ RegisterSetBuilder SpeculativeJIT::usedRegisters()
     // FIXME: This is overly conservative. We could subtract out those callee-saves that we
     // actually saved.
     // https://bugs.webkit.org/show_bug.cgi?id=185686
-    result.merge(RegisterSetBuilder::stubUnavailableRegisters());
+    result.merge(RegisterSet::stubUnavailableRegisters());
     
     return result;
 }
@@ -14188,7 +14188,7 @@ void SpeculativeJIT::compileObjectDefineProperty(Node* node)
 
 void SpeculativeJIT::emitAllocateButterfly(GPRReg storageResultGPR, GPRReg sizeGPR, GPRReg scratch1, GPRReg scratch2, GPRReg scratch3, JumpList& slowCases)
 {
-    RELEASE_ASSERT(RegisterSetBuilder(storageResultGPR, sizeGPR, scratch1, scratch2, scratch3).numberOfSetGPRs() == 5);
+    RELEASE_ASSERT(RegisterSet(storageResultGPR, sizeGPR, scratch1, scratch2, scratch3).numberOfSetGPRs() == 5);
     ASSERT((1 << 3) == sizeof(JSValue));
     lshift32(sizeGPR, TrustedImm32(3), scratch1);
     add32(TrustedImm32(sizeof(IndexingHeader)), scratch1, scratch2);

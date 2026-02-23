@@ -269,13 +269,13 @@ void JITCode::reconstruct(CallFrame* callFrame, CodeBlock* codeBlock, CodeOrigin
         result[i] = recoveries[i].recover(callFrame);
 }
 
-RegisterSetBuilder JITCode::liveRegistersToPreserveAtExceptionHandlingCallSite(CodeBlock* codeBlock, CallSiteIndex callSiteIndex)
+RegisterSet JITCode::liveRegistersToPreserveAtExceptionHandlingCallSite(CodeBlock* codeBlock, CallSiteIndex callSiteIndex)
 {
     for (OSRExit& exit : m_osrExit) {
         if (exit.isExceptionHandler() && exit.m_exceptionHandlerCallSiteIndex.bits() == callSiteIndex.bits()) {
             Operands<ValueRecovery> valueRecoveries;
             reconstruct(codeBlock, exit.m_codeOrigin, exit.m_streamIndex, valueRecoveries);
-            RegisterSetBuilder liveAtOSRExit;
+            RegisterSet liveAtOSRExit;
             for (size_t index = 0; index < valueRecoveries.size(); ++index) {
                 const ValueRecovery& recovery = valueRecoveries[index];
                 if (recovery.isInRegisters()) {

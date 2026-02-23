@@ -270,7 +270,7 @@ public:
     
     void shrinkToFit() final;
 
-    RegisterSetBuilder liveRegistersToPreserveAtExceptionHandlingCallSite(CodeBlock*, CallSiteIndex) final;
+    RegisterSet liveRegistersToPreserveAtExceptionHandlingCallSite(CodeBlock*, CallSiteIndex) final;
 #if ENABLE(FTL_JIT)
     CodeBlock* osrEntryBlock() { return m_osrEntryBlock.get(); }
     void setOSREntryBlock(VM&, const JSCell* owner, CodeBlock* osrEntryBlock);

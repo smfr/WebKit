@@ -132,7 +132,7 @@ public:
     ALWAYS_INLINE void shuffleRegisters(std::array<RegType, NumberOfRegisters> sources, std::array<RegType, NumberOfRegisters> destinations)
     {
         if (ASSERT_ENABLED) {
-            RegisterSetBuilder set;
+            RegisterSet set;
             for (RegType dest : destinations)
                 set.add(dest, IgnoreVectors);
             ASSERT_WITH_MESSAGE(set.numberOfSetRegisters() == NumberOfRegisters, "Destinations should not be aliased.");

@@ -782,7 +782,7 @@ private:
                 ASSERT(!m_code.isPinned(r));
             }
         });
-        ASSERT(m_allAllowedRegisters == m_code.mutableRegs().buildScalarRegisterSet());
+        ASSERT(m_allAllowedRegisters == m_code.mutableRegs().toScalarRegisterSet());
     }
 
     void buildIndices()

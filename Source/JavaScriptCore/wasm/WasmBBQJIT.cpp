@@ -669,16 +669,16 @@ BBQJIT::BBQJIT(CompilationContext& compilationContext, const TypeDefinition& sig
     , m_pcToCodeOriginMapBuilder(Options::useSamplingProfiler())
     , m_profile(module.createMergedProfile(profiledCallee))
 {
-    RegisterSetBuilder gprSetBuilder = RegisterSetBuilder::allGPRs();
-    gprSetBuilder.exclude(RegisterSetBuilder::specialRegisters());
-    gprSetBuilder.exclude(RegisterSetBuilder::macroClobberedGPRs());
-    gprSetBuilder.exclude(RegisterSetBuilder::wasmPinnedRegisters());
-    gprSetBuilder.exclude(RegisterSetBuilder::bbqCalleeSaveRegisters());
+    RegisterSet gprSetBuilder = RegisterSet::allGPRs();
+    gprSetBuilder.exclude(RegisterSet::specialRegisters());
+    gprSetBuilder.exclude(RegisterSet::macroClobberedGPRs());
+    gprSetBuilder.exclude(RegisterSet::wasmPinnedRegisters());
+    gprSetBuilder.exclude(RegisterSet::bbqCalleeSaveRegisters());
     // FIXME: handle callee-saved registers better.
-    gprSetBuilder.exclude(RegisterSetBuilder::vmCalleeSaveRegisters());
+    gprSetBuilder.exclude(RegisterSet::vmCalleeSaveRegisters());
 
-    RegisterSetBuilder fprSetBuilder = RegisterSetBuilder::allFPRs();
-    RegisterSetBuilder::macroClobberedFPRs().forEach([&](Reg reg) {
+    RegisterSet fprSetBuilder = RegisterSet::allFPRs();
+    RegisterSet::macroClobberedFPRs().forEach([&](Reg reg) {
         fprSetBuilder.remove(reg);
     });
 #if USE(JSVALUE32_64) && CPU(ARM_NEON)
@@ -687,12 +687,12 @@ BBQJIT::BBQJIT(CompilationContext& compilationContext, const TypeDefinition& sig
         fprSetBuilder.remove(reg);
 #endif
     // TODO: handle callee-saved registers better.
-    RegisterSetBuilder::vmCalleeSaveRegisters().forEach([&](Reg reg) {
+    RegisterSet::vmCalleeSaveRegisters().forEach([&](Reg reg) {
         fprSetBuilder.remove(reg);
     });
 
-    RegisterSetBuilder callerSaveGprs = gprSetBuilder;
-    RegisterSetBuilder callerSaveFprs = fprSetBuilder;
+    RegisterSet callerSaveGprs = gprSetBuilder;
+    RegisterSet callerSaveFprs = fprSetBuilder;
 
     gprSetBuilder.remove(wasmScratchGPR);
 #if USE(JSVALUE32_64)
@@ -701,11 +701,11 @@ BBQJIT::BBQJIT(CompilationContext& compilationContext, const TypeDefinition& sig
     fprSetBuilder.remove(wasmScratchFPR);
 
     ASCIILiteral logPrefix = Options::verboseBBQJITAllocation() ? "BBQ"_s : ASCIILiteral();
-    m_gprAllocator.initialize(gprSetBuilder.buildAndValidate(), logPrefix);
-    m_fprAllocator.initialize(fprSetBuilder.buildAndValidate(), logPrefix);
-    m_callerSaveGPRs = callerSaveGprs.buildAndValidate();
-    m_callerSaveFPRs = callerSaveFprs.buildAndValidate();
-    m_callerSaves = callerSaveGprs.merge(callerSaveFprs).buildAndValidate();
+    m_gprAllocator.initialize(gprSetBuilder, logPrefix);
+    m_fprAllocator.initialize(fprSetBuilder, logPrefix);
+    m_callerSaveGPRs = callerSaveGprs;
+    m_callerSaveFPRs = callerSaveFprs;
+    m_callerSaves = callerSaveGprs.merge(callerSaveFprs);
 
     if (shouldDumpDisassemblyFor(CompilationMode::BBQMode)) [[unlikely]] {
         m_disassembler = makeUnique<BBQDisassembler>();
@@ -4520,8 +4520,8 @@ void BBQJIT::emitTailCall(FunctionSpaceIndex functionIndexSpace, const TypeDefin
 void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, const Value& callee, GPRReg importableFunction, const TypeDefinition& signature, ArgumentList& arguments, ResultList& results)
 {
     ASSERT(importableFunction == GPRInfo::nonPreservedNonArgumentGPR1);
-    ASSERT(!RegisterSetBuilder::argumentGPRs().contains(importableFunction, IgnoreVectors));
-    ASSERT(!RegisterSetBuilder::argumentGPRs().contains(wasmScratchGPR, IgnoreVectors));
+    ASSERT(!RegisterSet::argumentGPRs().contains(importableFunction, IgnoreVectors));
+    ASSERT(!RegisterSet::argumentGPRs().contains(wasmScratchGPR, IgnoreVectors));
 
     const auto& callingConvention = wasmCallingConvention();
     CallInformation wasmCalleeInfo = callingConvention.callInformationFor(signature, CallRole::Caller);
@@ -4599,8 +4599,8 @@ void BBQJIT::emitIndirectCall(const char* opcode, unsigned callProfileIndex, con
 
 void BBQJIT::emitIndirectTailCall(const char* opcode, const Value& callee, GPRReg importableFunction, const TypeDefinition& signature, ArgumentList& arguments)
 {
-    ASSERT(!RegisterSetBuilder::argumentGPRs().contains(importableFunction, IgnoreVectors));
-    ASSERT(!RegisterSetBuilder::argumentGPRs().contains(wasmScratchGPR, IgnoreVectors));
+    ASSERT(!RegisterSet::argumentGPRs().contains(importableFunction, IgnoreVectors));
+    ASSERT(!RegisterSet::argumentGPRs().contains(wasmScratchGPR, IgnoreVectors));
 
     m_jit.loadPtr(CCallHelpers::Address(importableFunction, WasmToWasmImportableFunction::offsetOfBoxedCallee()), wasmScratchGPR);
     m_jit.storeWasmCalleeToCalleeCallFrame(wasmScratchGPR);

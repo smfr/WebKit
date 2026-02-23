@@ -1029,12 +1029,12 @@ const ScalarRegisterSet& InlineCacheCompiler::liveRegistersToPreserveAtException
     return m_liveRegistersToPreserveAtExceptionHandlingCallSite;
 }
 
-static RegisterSetBuilder calleeSaveRegisters()
+static RegisterSet calleeSaveRegisters()
 {
-    return RegisterSetBuilder(RegisterSetBuilder::vmCalleeSaveRegisters())
-        .filter(RegisterSetBuilder::calleeSaveRegisters())
-        .merge(RegisterSetBuilder::reservedHardwareRegisters())
-        .merge(RegisterSetBuilder::stackRegisters());
+    return RegisterSet(RegisterSet::vmCalleeSaveRegisters())
+        .filter(RegisterSet::calleeSaveRegisters())
+        .merge(RegisterSet::reservedHardwareRegisters())
+        .merge(RegisterSet::stackRegisters());
 }
 
 const ScalarRegisterSet& InlineCacheCompiler::calculateLiveRegistersForCallAndExceptionHandling()
@@ -1042,60 +1042,60 @@ const ScalarRegisterSet& InlineCacheCompiler::calculateLiveRegistersForCallAndEx
     if (!m_calculatedRegistersForCallAndExceptionHandling) {
         m_calculatedRegistersForCallAndExceptionHandling = true;
 
-        m_liveRegistersToPreserveAtExceptionHandlingCallSite = m_jit->codeBlock()->jitCode()->liveRegistersToPreserveAtExceptionHandlingCallSite(m_jit->codeBlock(), m_stubInfo.callSiteIndex).buildScalarRegisterSet();
+        m_liveRegistersToPreserveAtExceptionHandlingCallSite = m_jit->codeBlock()->jitCode()->liveRegistersToPreserveAtExceptionHandlingCallSite(m_jit->codeBlock(), m_stubInfo.callSiteIndex).toScalarRegisterSet();
         m_needsToRestoreRegistersIfException = m_liveRegistersToPreserveAtExceptionHandlingCallSite.numberOfSetRegisters() > 0;
         if (m_needsToRestoreRegistersIfException) {
             RELEASE_ASSERT(JSC::JITCode::isOptimizingJIT(m_jit->codeBlock()->jitType()));
             ASSERT(!useHandlerIC());
         }
 
-        auto liveRegistersForCall = RegisterSetBuilder(m_liveRegistersToPreserveAtExceptionHandlingCallSite.toRegisterSet(), m_allocator->usedRegisters());
+        auto liveRegistersForCall = RegisterSet(m_liveRegistersToPreserveAtExceptionHandlingCallSite.toRegisterSet(), m_allocator->usedRegisters());
         if (m_stubInfo.useDataIC)
             liveRegistersForCall.add(m_stubInfo.m_stubInfoGPR, IgnoreVectors);
-        liveRegistersForCall.exclude(calleeSaveRegisters().buildAndValidate().includeWholeRegisterWidth());
-        m_liveRegistersForCall = liveRegistersForCall.buildScalarRegisterSet();
+        liveRegistersForCall.exclude(calleeSaveRegisters().includeWholeRegisterWidth());
+        m_liveRegistersForCall = liveRegistersForCall.toScalarRegisterSet();
     }
     return m_liveRegistersForCall;
 }
 
 auto InlineCacheCompiler::preserveLiveRegistersToStackForCall(const RegisterSet& extra) -> SpillState
 {
-    RegisterSetBuilder liveRegisters = liveRegistersForCall().toRegisterSet();
+    RegisterSet liveRegisters = liveRegistersForCall().toRegisterSet();
     liveRegisters.merge(extra);
-    liveRegisters.filter(RegisterSetBuilder::allScalarRegisters());
+    liveRegisters.filter(RegisterSet::allScalarRegisters());
 
     unsigned extraStackPadding = 0;
-    unsigned numberOfStackBytesUsedForRegisterPreservation = ScratchRegisterAllocator::preserveRegistersToStackForCall(*m_jit, liveRegisters.buildAndValidate(), extraStackPadding);
-    RELEASE_ASSERT(liveRegisters.buildAndValidate().numberOfSetRegisters() == liveRegisters.buildScalarRegisterSet().numberOfSetRegisters(),
-        liveRegisters.buildAndValidate().numberOfSetRegisters(),
-        liveRegisters.buildScalarRegisterSet().numberOfSetRegisters());
-    RELEASE_ASSERT(liveRegisters.buildScalarRegisterSet().numberOfSetRegisters() || !numberOfStackBytesUsedForRegisterPreservation,
-        liveRegisters.buildScalarRegisterSet().numberOfSetRegisters(),
+    unsigned numberOfStackBytesUsedForRegisterPreservation = ScratchRegisterAllocator::preserveRegistersToStackForCall(*m_jit, liveRegisters, extraStackPadding);
+    RELEASE_ASSERT(liveRegisters.numberOfSetRegisters() == liveRegisters.toScalarRegisterSet().numberOfSetRegisters(),
+        liveRegisters.numberOfSetRegisters(),
+        liveRegisters.toScalarRegisterSet().numberOfSetRegisters());
+    RELEASE_ASSERT(liveRegisters.toScalarRegisterSet().numberOfSetRegisters() || !numberOfStackBytesUsedForRegisterPreservation,
+        liveRegisters.toScalarRegisterSet().numberOfSetRegisters(),
         numberOfStackBytesUsedForRegisterPreservation);
     return SpillState {
-        liveRegisters.buildScalarRegisterSet(),
+        liveRegisters.toScalarRegisterSet(),
         numberOfStackBytesUsedForRegisterPreservation
     };
 }
 
 auto InlineCacheCompiler::preserveLiveRegistersToStackForCallWithoutExceptions() -> SpillState
 {
-    RegisterSetBuilder liveRegisters = m_allocator->usedRegisters();
+    RegisterSet liveRegisters = m_allocator->usedRegisters();
     if (m_stubInfo.useDataIC)
         liveRegisters.add(m_stubInfo.m_stubInfoGPR, IgnoreVectors);
-    liveRegisters.exclude(calleeSaveRegisters().buildAndValidate().includeWholeRegisterWidth());
-    liveRegisters.filter(RegisterSetBuilder::allScalarRegisters());
+    liveRegisters.exclude(calleeSaveRegisters().includeWholeRegisterWidth());
+    liveRegisters.filter(RegisterSet::allScalarRegisters());
 
     constexpr unsigned extraStackPadding = 0;
-    unsigned numberOfStackBytesUsedForRegisterPreservation = ScratchRegisterAllocator::preserveRegistersToStackForCall(*m_jit, liveRegisters.buildAndValidate(), extraStackPadding);
-    RELEASE_ASSERT(liveRegisters.buildAndValidate().numberOfSetRegisters() == liveRegisters.buildScalarRegisterSet().numberOfSetRegisters(),
-        liveRegisters.buildAndValidate().numberOfSetRegisters(),
-        liveRegisters.buildScalarRegisterSet().numberOfSetRegisters());
-    RELEASE_ASSERT(liveRegisters.buildScalarRegisterSet().numberOfSetRegisters() || !numberOfStackBytesUsedForRegisterPreservation,
-        liveRegisters.buildScalarRegisterSet().numberOfSetRegisters(),
+    unsigned numberOfStackBytesUsedForRegisterPreservation = ScratchRegisterAllocator::preserveRegistersToStackForCall(*m_jit, liveRegisters, extraStackPadding);
+    RELEASE_ASSERT(liveRegisters.numberOfSetRegisters() == liveRegisters.toScalarRegisterSet().numberOfSetRegisters(),
+        liveRegisters.numberOfSetRegisters(),
+        liveRegisters.toScalarRegisterSet().numberOfSetRegisters());
+    RELEASE_ASSERT(liveRegisters.toScalarRegisterSet().numberOfSetRegisters() || !numberOfStackBytesUsedForRegisterPreservation,
+        liveRegisters.toScalarRegisterSet().numberOfSetRegisters(),
         numberOfStackBytesUsedForRegisterPreservation);
     return SpillState {
-        liveRegisters.buildScalarRegisterSet(),
+        liveRegisters.toScalarRegisterSet(),
         numberOfStackBytesUsedForRegisterPreservation
     };
 }
@@ -1108,14 +1108,14 @@ void InlineCacheCompiler::restoreLiveRegistersFromStackForCallWithThrownExceptio
     // inline cache. The subtlety here is if the base and the result are the same register,
     // and the getter threw, we want OSR exit to see the original base value, not the result
     // of the getter call.
-    RegisterSetBuilder dontRestore = spillState.spilledRegisters.toRegisterSet().includeWholeRegisterWidth();
+    RegisterSet dontRestore = spillState.spilledRegisters.toRegisterSet().includeWholeRegisterWidth();
     // As an optimization here, we only need to restore what is live for exception handling.
     // We can construct the dontRestore set to accomplish this goal by having it contain only
     // what is live for call but not live for exception handling. By ignoring things that are
     // only live at the call but not the exception handler, we will only restore things live
     // at the exception handler.
     dontRestore.exclude(liveRegistersToPreserveAtExceptionHandlingCallSite().toRegisterSet().includeWholeRegisterWidth());
-    restoreLiveRegistersFromStackForCall(spillState, dontRestore.buildAndValidate());
+    restoreLiveRegistersFromStackForCall(spillState, dontRestore);
 }
 
 void InlineCacheCompiler::restoreLiveRegistersFromStackForCall(const SpillState& spillState, const RegisterSet& dontRestore)
@@ -3983,7 +3983,7 @@ void InlineCacheCompiler::emitDOMJITGetter(JSGlobalObject* globalObjectForDOMJIT
     // they must be in the used register set passed by the callers (Baseline, DFG, and FTL) if they need to be kept.
     // Some registers can be locked, but not in the used register set. For example, the caller could make baseGPR
     // same to valueRegs, and not include it in the used registers since it will be changed.
-    RegisterSetBuilder usedRegisters;
+    RegisterSet usedRegisters;
     for (auto& value : regs) {
         SnippetReg reg = value.reg();
         if (reg.isJSValueRegs())
@@ -3999,7 +3999,7 @@ void InlineCacheCompiler::emitDOMJITGetter(JSGlobalObject* globalObjectForDOMJIT
         usedRegisters.add(reg, IgnoreVectors);
     if (m_stubInfo.useDataIC)
         usedRegisters.add(m_stubInfo.m_stubInfoGPR, IgnoreVectors);
-    auto registersToSpillForCCall = RegisterSetBuilder::registersToSaveForCCall(usedRegisters);
+    auto registersToSpillForCCall = RegisterSet::registersToSaveForCCall(usedRegisters);
 
     AccessCaseSnippetParams params(m_vm, WTF::move(regs), WTF::move(gpScratch), WTF::move(fpScratch));
     snippet->generator()->run(jit, params);

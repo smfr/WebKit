@@ -160,7 +160,7 @@ void SpeculativeJIT::cachedGetById(Node* node, CodeOrigin codeOrigin, JSValueReg
 {
     UNUSED_PARAM(node);
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 1>(
@@ -192,7 +192,7 @@ void SpeculativeJIT::cachedGetByIdWithThis(Node* node, CodeOrigin codeOrigin, JS
 {
     UNUSED_PARAM(node);
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -2704,7 +2704,7 @@ void SpeculativeJIT::compileGetByVal(Node* node, const ScopedLambda<std::tuple<J
 
         CodeOrigin codeOrigin = node->origin.semantic;
         CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-        RegisterSetBuilder usedRegisters = this->usedRegisters();
+        RegisterSet usedRegisters = this->usedRegisters();
 
         JSValueRegs baseRegs { baseGPR };
         JSValueRegs propertyRegs { propertyGPR };
@@ -5915,7 +5915,7 @@ void SpeculativeJIT::compile(Node* node)
 
             CodeOrigin codeOrigin = node->origin.semantic;
             CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-            RegisterSetBuilder usedRegisters = this->usedRegisters();
+            RegisterSet usedRegisters = this->usedRegisters();
 
             auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
             shuffleRegisters<GPRReg, 2>(
@@ -6931,7 +6931,7 @@ void SpeculativeJIT::compileGetByValWithThis(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     JSValueRegs baseRegs { baseGPR };
     JSValueRegs propertyRegs { propertyGPR };
@@ -7041,7 +7041,7 @@ void SpeculativeJIT::compileDeleteById(Node* node)
 
         CodeOrigin codeOrigin = node->origin.semantic;
         CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-        RegisterSetBuilder usedRegisters = this->usedRegisters();
+        RegisterSet usedRegisters = this->usedRegisters();
 
         auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
         shuffleRegisters<GPRReg, 1>(
@@ -7103,7 +7103,7 @@ void SpeculativeJIT::compileDeleteByVal(Node* node)
 
         CodeOrigin codeOrigin = node->origin.semantic;
         CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-        RegisterSetBuilder usedRegisters = this->usedRegisters();
+        RegisterSet usedRegisters = this->usedRegisters();
 
         auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
         shuffleRegisters<GPRReg, 2>(
@@ -7166,7 +7166,7 @@ void SpeculativeJIT::compileInById(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 1>(
@@ -7209,7 +7209,7 @@ void SpeculativeJIT::compileInByVal(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -7257,7 +7257,7 @@ void SpeculativeJIT::compileHasPrivate(Node* node, AccessType type)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -7374,7 +7374,7 @@ void SpeculativeJIT::compilePutByVal(Node* node)
         ECMAMode ecmaMode = node->ecmaMode();
         CodeOrigin codeOrigin = node->origin.semantic;
         CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-        RegisterSetBuilder usedRegisters = this->usedRegisters();
+        RegisterSet usedRegisters = this->usedRegisters();
 
         auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
         shuffleRegisters<GPRReg, 3>(
@@ -7535,7 +7535,7 @@ void SpeculativeJIT::compileGetPrivateNameByVal(Node* node, JSValueRegs baseRegs
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -7650,7 +7650,7 @@ void SpeculativeJIT::compilePutPrivateName(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 3>(
@@ -7701,7 +7701,7 @@ void SpeculativeJIT::compileCheckPrivateBrand(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -7751,7 +7751,7 @@ void SpeculativeJIT::compileSetPrivateBrand(Node* node)
 
     CodeOrigin codeOrigin = node->origin.semantic;
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -7791,7 +7791,7 @@ void SpeculativeJIT::compileInstanceOf(Node* node)
         bool prototypeIsKnownObject = m_state.forNode(node->child2()).isType(SpecObject | ~SpecCell);
         CodeOrigin codeOrigin = node->origin.semantic;
         CallSiteIndex callSiteIndex = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-        RegisterSetBuilder usedRegisters = this->usedRegisters();
+        RegisterSet usedRegisters = this->usedRegisters();
 
         auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
         shuffleRegisters<GPRReg, 2>(
@@ -7901,7 +7901,7 @@ void SpeculativeJIT::compileInstanceOfMegamorphic(Node* node)
 void SpeculativeJIT::cachedPutById(Node*, CodeOrigin codeOrigin, GPRReg baseGPR, JSValueRegs valueRegs, CacheableIdentifier identifier, AccessType accessType)
 {
     CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-    RegisterSetBuilder usedRegisters = this->usedRegisters();
+    RegisterSet usedRegisters = this->usedRegisters();
 
     auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
     shuffleRegisters<GPRReg, 2>(
@@ -8266,7 +8266,7 @@ void SpeculativeJIT::compileEnumeratorPutByVal(Node* node)
         {
             CodeOrigin codeOrigin = node->origin.semantic;
             CallSiteIndex callSite = recordCallSiteAndGenerateExceptionHandlingOSRExitIfNeeded(codeOrigin, m_stream.size());
-            RegisterSetBuilder usedRegisters = this->usedRegisters();
+            RegisterSet usedRegisters = this->usedRegisters();
 
             auto [ stubInfo, stubInfoConstant ] = addStructureStubInfo();
             shuffleRegisters<GPRReg, 3>(

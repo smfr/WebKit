@@ -673,7 +673,7 @@ public:
     void countReoptimization();
 
 #if !ENABLE(C_LOOP)
-    static unsigned numberOfLLIntBaselineCalleeSaveRegisters() { return RegisterSetBuilder::llintBaselineCalleeSaveRegisters().numberOfSetRegisters(); }
+    static unsigned numberOfLLIntBaselineCalleeSaveRegisters() { return RegisterSet::llintBaselineCalleeSaveRegisters().numberOfSetRegisters(); }
     static size_t llintBaselineCalleeSaveSpaceAsVirtualRegisters();
     static size_t calleeSaveSpaceAsVirtualRegisters(const RegisterAtOffsetList&);
 #else

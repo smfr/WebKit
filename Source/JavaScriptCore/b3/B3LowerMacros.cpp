@@ -705,7 +705,7 @@ private:
                     PatchpointValue* patchpoint = before->appendNew<PatchpointValue>(m_proc, pointerType(), m_origin);
                     if (isARM64()) {
                         // emitAllocateWithNonNullAllocator uses the scratch registers on ARM.
-                        patchpoint->clobber(RegisterSetBuilder::macroClobberedGPRs());
+                        patchpoint->clobber(RegisterSet::macroClobberedGPRs());
                     }
                     patchpoint->effects.terminal = true;
                     patchpoint->appendSomeRegisterWithClobber(allocator);
@@ -992,7 +992,7 @@ private:
                 patchpoint->effects.terminal = true;
                 patchpoint->appendSomeRegister(load);
                 // Technically, we don't have to clobber macro registers on X86_64. This is probably OK though.
-                patchpoint->clobber(RegisterSetBuilder::macroClobberedGPRs());
+                patchpoint->clobber(RegisterSet::macroClobberedGPRs());
 
                 before->clearSuccessors();
                 BitVector handledIndices;

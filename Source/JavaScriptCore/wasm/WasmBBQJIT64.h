@@ -136,10 +136,10 @@ static inline RegisterSet clobbersForDivX86()
     std::call_once(
         flag,
         []() {
-            RegisterSetBuilder builder;
+            RegisterSet builder;
             builder.add(X86Registers::eax, IgnoreVectors);
             builder.add(X86Registers::edx, IgnoreVectors);
-            x86DivClobbers = builder.buildAndValidate();
+            x86DivClobbers = builder;
         });
     return x86DivClobbers;
 }

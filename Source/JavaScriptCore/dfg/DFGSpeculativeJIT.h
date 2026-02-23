@@ -322,7 +322,7 @@ public:
         use(nodeUse.node());
     }
     
-    RegisterSetBuilder usedRegisters();
+    RegisterSet usedRegisters();
     
     bool masqueradesAsUndefinedWatchpointSetIsStillValid()
     {
@@ -370,9 +370,9 @@ public:
     void silentSpillImpl(const SilentRegisterSavePlan&);
     void silentFillImpl(const SilentRegisterSavePlan&);
 
-    RegisterSetBuilder spilledRegsForSilentSpillPlans(const auto& plans)
+    RegisterSet spilledRegsForSilentSpillPlans(const auto& plans)
     {
-        RegisterSetBuilder usedRegisters;
+        RegisterSet usedRegisters;
         for (auto& plan : plans)
             usedRegisters.add(plan.reg(), IgnoreVectors);
         return usedRegisters;
@@ -1083,7 +1083,7 @@ public:
         }
 
         if (exceptionReg != InvalidGPRReg) {
-            RegisterSetBuilder spilledRegs = spilledRegsForSilentSpillPlans(plans);
+            RegisterSet spilledRegs = spilledRegsForSilentSpillPlans(plans);
             if constexpr (std::same_as<GPRReg, ResultRegType> || std::same_as<JSValueRegs, ResultRegType>) {
                 spilledRegs.add(GPRInfo::returnValueGPR, IgnoreVectors);
                 spilledRegs.add(result, IgnoreVectors);
@@ -1097,13 +1097,13 @@ public:
                 (addRegIfNeeded(spilledRegs, otherSpilledRegs), ...);
             }
 
-            if (spilledRegs.buildAndValidate().contains(exceptionReg, IgnoreVectors)) {
+            if (spilledRegs.contains(exceptionReg, IgnoreVectors)) {
                 // It would be nice if we could do m_gprs.tryAllocate() but we're possibly on a slow path and register allocation state is
                 // probably garbage.
-                constexpr RegisterSetBuilder registersInBank = decltype(m_gprs)::registersInBank();
+                constexpr RegisterSet registersInBank = decltype(m_gprs)::registersInBank();
                 // Move to a non-constexpr local so we can call exclude.
-                RegisterSetBuilder possibleRegisters = registersInBank;
-                RegisterSet freeRegs = possibleRegisters.exclude(spilledRegs).buildAndValidate();
+                RegisterSet possibleRegisters = registersInBank;
+                RegisterSet freeRegs = possibleRegisters.exclude(spilledRegs);
                 auto iter = freeRegs.begin();
                 if (iter != freeRegs.end()) {
                     move(exceptionReg, iter.gpr());

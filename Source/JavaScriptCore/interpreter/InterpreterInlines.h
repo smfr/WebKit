@@ -182,8 +182,8 @@ inline void UnwindFunctorBase::copyCalleeSavesToEntryFrameCalleeSavesBuffer(Stac
     if (!currentCalleeSaves)
         return;
 
-    RegisterAtOffsetList* allCalleeSaves = RegisterSetBuilder::vmCalleeSaveRegisterOffsets();
-    auto dontCopyRegisters = RegisterSetBuilder::stackRegisters();
+    RegisterAtOffsetList* allCalleeSaves = RegisterSet::vmCalleeSaveRegisterOffsets();
+    auto dontCopyRegisters = RegisterSet::stackRegisters();
     CPURegister* frame = reinterpret_cast<CPURegister*>(callFrame->registers());
 
     unsigned registerCount = currentCalleeSaves->registerCount();
