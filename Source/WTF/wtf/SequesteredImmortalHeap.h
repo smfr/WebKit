@@ -115,7 +115,8 @@ public:
         {
             Locker lock(m_lock);
             retval = allocateImpl(bytes);
-            newAllocHead = reinterpret_cast<void*>(m_allocHead);
+            if constexpr (verbose)
+                newAllocHead = reinterpret_cast<void*>(m_allocHead);
         }
         dataLogLnIf(verbose,
             "SequesteredImmortalAllocator at ", RawPointer(this),
@@ -132,7 +133,8 @@ public:
         {
             Locker lock(m_lock);
             retval = alignedAllocateImpl(alignment, bytes);
-            newAllocHead = reinterpret_cast<void*>(m_allocHead);
+            if constexpr (verbose)
+                newAllocHead = reinterpret_cast<void*>(m_allocHead);
         }
         dataLogLnIf(verbose,
             "SequesteredImmortalAllocator at ", RawPointer(this),
