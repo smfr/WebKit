@@ -2381,7 +2381,8 @@ class BuildSwift(steps.ShellSequence, ShellMixin):
             self.build.buildFinished(['Failed to set up swift, retrying update'], RETRY)
         else:
             self.setProperty('swift_toolchain_rebuilt', True)
-            steps_to_add += [InstallSwiftToolchain()]
+            self.setProperty('is_clean', True)
+            steps_to_add += [InstallSwiftToolchain(), CleanBuildIfScheduled()]
 
         self.build.addStepsAfterCurrentStep(steps_to_add)
 
