@@ -458,8 +458,8 @@ public:
 
     bool isDocumentTypeNode() const { return nodeType() == DOCUMENT_TYPE_NODE; }
     virtual bool NODELETE childTypeAllowed(NodeType) const { return false; }
-    inline unsigned countChildNodes() const;
-    inline unsigned length() const;
+    inline unsigned NODELETE countChildNodes() const;
+    inline unsigned NODELETE length() const;
     inline Node* traverseToChildAt(unsigned) const;
 
     ExceptionOr<void> checkSetPrefix(const AtomString& prefix);

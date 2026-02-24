@@ -280,7 +280,7 @@ Position firstEditablePositionAfterPositionInRoot(const Position& position, Cont
     Position candidate = position;
 
     if (&position.deprecatedNode()->treeScope() != &highestRoot->treeScope()) {
-        RefPtr shadowAncestor = highestRoot->treeScope().ancestorNodeInThisScope(protect(position.deprecatedNode()).get());
+        RefPtr shadowAncestor = highestRoot->treeScope().ancestorNodeInThisScope(position.deprecatedNode());
         if (!shadowAncestor)
             return { };
 
@@ -308,7 +308,7 @@ Position lastEditablePositionBeforePositionInRoot(const Position& position, Cont
     Position candidate = position;
 
     if (&position.deprecatedNode()->treeScope() != &highestRoot->treeScope()) {
-        RefPtr shadowAncestor = highestRoot->treeScope().ancestorNodeInThisScope(protect(position.deprecatedNode()).get());
+        RefPtr shadowAncestor = highestRoot->treeScope().ancestorNodeInThisScope(position.deprecatedNode());
         if (!shadowAncestor)
             return { };
 

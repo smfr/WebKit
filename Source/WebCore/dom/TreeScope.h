@@ -103,7 +103,7 @@ public:
     static constexpr ptrdiff_t documentScopeMemoryOffset() { return OBJECT_OFFSETOF(TreeScope, m_documentScope); }
 
     // https://dom.spec.whatwg.org/#retarget
-    Ref<Node> retargetToScope(Node&) const;
+    Ref<Node> NODELETE retargetToScope(Node&) const;
 
     WEBCORE_EXPORT Node* NODELETE ancestorNodeInThisScope(Node*) const;
     WEBCORE_EXPORT Element* NODELETE ancestorElementInThisScope(Element*) const;

@@ -255,7 +255,7 @@ Ref<Node> TreeScope::retargetToScope(Node& node) const
     return nodeInCommonAncestorTreeScope ? *nodeInCommonAncestorTreeScope : node;
 }
 
-Node* TreeScope::ancestorNodeInThisScope(SUPPRESS_UNCHECKED_ARG Node* node) const
+Node* TreeScope::ancestorNodeInThisScope(Node* node) const
 {
     for (; node; node = node->shadowHost()) {
         if (&node->treeScope() == this)
@@ -266,7 +266,7 @@ Node* TreeScope::ancestorNodeInThisScope(SUPPRESS_UNCHECKED_ARG Node* node) cons
     return nullptr;
 }
 
-Element* TreeScope::ancestorElementInThisScope(SUPPRESS_UNCHECKED_ARG Element* element) const
+Element* TreeScope::ancestorElementInThisScope(Element* element) const
 {
     for (; element; element = element->shadowHost()) {
         if (&element->treeScope() == this)
@@ -530,13 +530,13 @@ static Element* NODELETE focusedFrameOwnerElement(Frame* focusedFrame, LocalFram
 
 Element* TreeScope::focusedElementInScope()
 {
-    Ref document = documentScope();
-    RefPtr element = document->focusedElement();
+    auto& document = documentScope();
+    auto* element = document.focusedElement();
 
-    if (!element && document->page())
-        element = focusedFrameOwnerElement(document->page()->focusController().focusedFrame(), document->frame());
+    if (!element && document.page())
+        element = focusedFrameOwnerElement(document.page()->focusController().focusedFrame(), document.frame());
 
-    return ancestorElementInThisScope(element.get());
+    return ancestorElementInThisScope(element);
 }
 
 #if ENABLE(POINTER_LOCK)

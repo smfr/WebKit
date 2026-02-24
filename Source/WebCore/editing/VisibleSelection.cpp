@@ -484,7 +484,7 @@ Position VisibleSelection::adjustPositionForEnd(const Position& currentPosition,
 
     ASSERT(&currentPosition.containerNode()->treeScope() != treeScope.ptr());
 
-    if (RefPtr ancestor = treeScope->ancestorNodeInThisScope(protect(currentPosition.containerNode()).get())) {
+    if (RefPtr ancestor = treeScope->ancestorNodeInThisScope(currentPosition.containerNode())) {
         if (ancestor->contains(startContainerNode))
             return positionAfterNode(ancestor.get());
         return positionBeforeNode(ancestor.get());
@@ -502,7 +502,7 @@ Position VisibleSelection::adjustPositionForStart(const Position& currentPositio
 
     ASSERT(&currentPosition.containerNode()->treeScope() != treeScope.ptr());
     
-    if (RefPtr ancestor = treeScope->ancestorNodeInThisScope(protect(currentPosition.containerNode()).get())) {
+    if (RefPtr ancestor = treeScope->ancestorNodeInThisScope(currentPosition.containerNode())) {
         if (ancestor->contains(endContainerNode))
             return positionBeforeNode(ancestor.get());
         return positionAfterNode(ancestor.get());

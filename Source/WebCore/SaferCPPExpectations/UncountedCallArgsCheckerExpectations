@@ -260,7 +260,6 @@ dom/ElementInternals.cpp
 [ Mac ] dom/ElementTraversal.h
 dom/EventPath.cpp
 dom/ExtensionStyleSheets.cpp
-[ iOS ] dom/FragmentDirectiveRangeFinder.cpp
 dom/GCReachableRef.h
 dom/IdleCallbackController.cpp
 dom/ImageOverlay.cpp
