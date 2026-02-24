@@ -474,21 +474,21 @@ Vector<Ref<StyleRuleKeyframe>> Resolver::keyframeRulesForName(const AtomString& 
         return Animation::initialCompositeOperation();
     };
 
-    auto timingFunctionForKeyframe = [&](Ref<StyleRuleKeyframe> keyframe) -> RefPtr<const TimingFunction> {
-        if (auto timingFunctionCSSValue = keyframe->properties().getPropertyCSSValue(CSSPropertyAnimationTimingFunction)) {
-            if (auto timingFunction = createTimingFunctionDeprecated(*timingFunctionCSSValue))
-                return timingFunction;
+    auto timingFunctionForKeyframe = [&](Ref<StyleRuleKeyframe> keyframe) -> Ref<const TimingFunction> {
+        if (RefPtr timingFunctionCSSValue = keyframe->properties().getPropertyCSSValue(CSSPropertyAnimationTimingFunction)) {
+            if (RefPtr timingFunction = createTimingFunctionDeprecated(timingFunctionCSSValue.releaseNonNull()))
+                return timingFunction.releaseNonNull();
         }
         if (defaultTimingFunction)
-            return defaultTimingFunction;
-        return &CubicBezierTimingFunction::defaultTimingFunction();
+            return *defaultTimingFunction;
+        return CubicBezierTimingFunction::defaultTimingFunction();
     };
 
-    HashSet<RefPtr<const TimingFunction>> timingFunctions;
-    auto uniqueTimingFunctionForKeyframe = [&](Ref<StyleRuleKeyframe> keyframe) -> RefPtr<const TimingFunction> {
-        auto timingFunction = timingFunctionForKeyframe(keyframe);
-        for (auto existingTimingFunction : timingFunctions) {
-            if (arePointingToEqualData(timingFunction, existingTimingFunction))
+    HashSet<Ref<const TimingFunction>> timingFunctions;
+    auto uniqueTimingFunctionForKeyframe = [&](Ref<StyleRuleKeyframe> keyframe) -> Ref<const TimingFunction> {
+        Ref timingFunction = timingFunctionForKeyframe(keyframe);
+        for (auto& existingTimingFunction : timingFunctions) {
+            if (arePointingToEqualData(timingFunction.ptr(), existingTimingFunction.ptr()))
                 return existingTimingFunction;
         }
         timingFunctions.add(timingFunction);
@@ -498,7 +498,7 @@ Vector<Ref<StyleRuleKeyframe>> Resolver::keyframeRulesForName(const AtomString& 
     Ref keyframesRule = it->value;
     auto* keyframes = &keyframesRule->keyframes();
 
-    using KeyframeUniqueKey = std::tuple<StyleRuleKeyframe::Key, RefPtr<const TimingFunction>, CompositeOperation>;
+    using KeyframeUniqueKey = std::tuple<StyleRuleKeyframe::Key, Ref<const TimingFunction>, CompositeOperation>;
     auto hasDuplicateKeys = [&]() -> bool {
         HashSet<KeyframeUniqueKey> uniqueKeyframeKeys;
         for (auto& keyframe : *keyframes) {
@@ -559,10 +559,10 @@ bool Resolver::keyframeStylesForAnimation(Element& element, const RenderStyle& e
         for (auto& key : keyframeRule->keys()) {
             BlendingKeyframe blendingKeyframe({ Style::convertCSSValueIDToSingleAnimationRangeName(key.rangeName), key.offset }, { nullptr });
             blendingKeyframe.setStyle(styleForKeyframe(element, elementStyle, context, keyframeRule.get(), blendingKeyframe));
-            if (auto timingFunctionCSSValue = keyframeRule->properties().getPropertyCSSValue(CSSPropertyAnimationTimingFunction))
-                blendingKeyframe.setTimingFunction(createTimingFunctionDeprecated(*timingFunctionCSSValue));
-            if (auto compositeOperationCSSValue = keyframeRule->properties().getPropertyCSSValue(CSSPropertyAnimationComposition)) {
-                if (auto compositeOperation = toCompositeOperation(*compositeOperationCSSValue))
+            if (RefPtr timingFunctionCSSValue = keyframeRule->properties().getPropertyCSSValue(CSSPropertyAnimationTimingFunction))
+                blendingKeyframe.setTimingFunction(createTimingFunctionDeprecated(timingFunctionCSSValue.releaseNonNull()));
+            if (RefPtr compositeOperationCSSValue = keyframeRule->properties().getPropertyCSSValue(CSSPropertyAnimationComposition)) {
+                if (auto compositeOperation = toCompositeOperation(compositeOperationCSSValue.releaseNonNull()))
                     blendingKeyframe.setCompositeOperation(*compositeOperation);
             }
             list.insert(WTF::move(blendingKeyframe));

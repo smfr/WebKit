@@ -204,14 +204,14 @@ class RevalidateStyleAttributeTask final : public CanMakeCheckedPtr<RevalidateSt
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(RevalidateStyleAttributeTask);
 public:
     RevalidateStyleAttributeTask(InspectorDOMAgent*);
-    void scheduleFor(Element*);
+    void scheduleFor(Element&);
     void reset() { m_timer.stop(); }
     void timerFired();
 
 private:
     const CheckedPtr<InspectorDOMAgent> m_domAgent;
     Timer m_timer;
-    HashSet<RefPtr<Element>> m_elements;
+    HashSet<Ref<Element>> m_elements;
 };
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(RevalidateStyleAttributeTask);
@@ -222,7 +222,7 @@ RevalidateStyleAttributeTask::RevalidateStyleAttributeTask(InspectorDOMAgent* do
 {
 }
 
-void RevalidateStyleAttributeTask::scheduleFor(Element* element)
+void RevalidateStyleAttributeTask::scheduleFor(Element& element)
 {
     m_elements.add(element);
     if (!m_timer.isActive())
@@ -234,7 +234,7 @@ void RevalidateStyleAttributeTask::timerFired()
     // The timer is stopped on m_domAgent destruction, so this method will never be called after m_domAgent has been destroyed.
     Vector<Element*> elements;
     for (auto& element : m_elements)
-        elements.append(element.get());
+        elements.append(element.ptr());
     m_domAgent->styleAttributeInvalidated(elements);
 
     m_elements.clear();
@@ -2862,7 +2862,7 @@ void InspectorDOMAgent::didInvalidateStyleAttr(Element& element)
 
     if (!m_revalidateStyleAttrTask)
         m_revalidateStyleAttrTask = makeUnique<RevalidateStyleAttributeTask>(this);
-    m_revalidateStyleAttrTask->scheduleFor(&element);
+    m_revalidateStyleAttrTask->scheduleFor(element);
 }
 
 void InspectorDOMAgent::didPushShadowRoot(Element& host, ShadowRoot& root)

@@ -126,6 +126,7 @@ struct WEBCORE_EXPORT ModifyHeadersAction {
     ModifyHeadersAction(EmptyValueTag) : hashTableType(HashTableType::Empty) { }
     ModifyHeadersAction(DeletedValueTag) : hashTableType(HashTableType::Deleted) { }
     bool isDeletedValue() const { return hashTableType == HashTableType::Deleted; }
+    bool isEmptyValue() const { return hashTableType == HashTableType::Empty; }
     static constexpr bool safeToCompareToHashTableEmptyOrDeletedValue = true;
 
     static Expected<ModifyHeadersAction, std::error_code> parse(const JSON::Object&);
@@ -226,6 +227,7 @@ struct WEBCORE_EXPORT RedirectAction {
     RedirectAction(EmptyValueTag) : hashTableType(HashTableType::Empty) { }
     RedirectAction(DeletedValueTag) : hashTableType(HashTableType::Deleted) { }
     bool isDeletedValue() const { return hashTableType == HashTableType::Deleted; }
+    bool isEmptyValue() const { return hashTableType == HashTableType::Empty; }
     static constexpr bool safeToCompareToHashTableEmptyOrDeletedValue = true;
 
     static Expected<RedirectAction, std::error_code> parse(const JSON::Object&, const String& urlFilter);

@@ -241,7 +241,7 @@ Blob::~Blob()
 {
     ThreadableBlobRegistry::unregisterBlobURL(m_internalURL, std::nullopt);
     while (!m_blobLoaders.isEmpty())
-        RefPtr { (*m_blobLoaders.begin()).get() }->cancel();
+        protect(*m_blobLoaders.begin())->cancel();
 }
 
 Ref<Blob> Blob::slice(long long start, long long end, const String& contentType) const

@@ -81,12 +81,12 @@ StorageNamespace& StorageNamespaceProvider::localStorageNamespace(PAL::SessionID
 
 StorageNamespace& StorageNamespaceProvider::transientLocalStorageNamespace(SecurityOrigin& securityOrigin, PAL::SessionID sessionID)
 {
-    auto& slot = m_transientLocalStorageNamespaces.add(securityOrigin.data(), nullptr).iterator->value;
-    if (!slot)
-        slot = createTransientLocalStorageNamespace(securityOrigin, localStorageDatabaseQuotaInBytes, sessionID);
+    auto& slot = m_transientLocalStorageNamespaces.ensure(securityOrigin.data(), [&] {
+        return createTransientLocalStorageNamespace(securityOrigin, localStorageDatabaseQuotaInBytes, sessionID);
+    }).iterator->value;
 
     ASSERT(slot->sessionID() == sessionID);
-    return *slot;
+    return slot;
 }
 
 void StorageNamespaceProvider::setSessionIDForTesting(PAL::SessionID newSessionID)
