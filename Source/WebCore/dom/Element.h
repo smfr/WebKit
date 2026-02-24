@@ -515,7 +515,7 @@ public:
 
     virtual bool shouldUseInputMethod();
 
-    virtual int tabIndexForBindings() const;
+    WEBCORE_EXPORT int tabIndexForBindings() const;
     WEBCORE_EXPORT void setTabIndexForBindings(int);
 
     // Used by the HTMLElement and SVGElement IDLs.
