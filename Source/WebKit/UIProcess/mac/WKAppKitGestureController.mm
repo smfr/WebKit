@@ -63,6 +63,52 @@
 
 #define WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(pageID, fmt, ...) RELEASE_LOG(ViewGestures, "[pageProxyID=%llu] %s: " fmt, pageID, std::source_location::current().function_name(), ##__VA_ARGS__)
 
+@interface WKPanGestureRecognizer : NSPanGestureRecognizer
+
+@end
+
+@implementation WKPanGestureRecognizer {
+    WeakPtr<WebKit::WebPageProxy> _page;
+}
+
+- (instancetype)initWithPage:(WebKit::WebPageProxy&)page target:(id)target action:(SEL)action
+{
+    if (!(self = [super initWithTarget:target action:action]))
+        return nil;
+
+    _page = page;
+
+    return self;
+}
+
+- (BOOL)shouldRecognizeForDelta:(NSPoint)delta
+{
+    RefPtr page = _page.get();
+    if (!page)
+        return NO;
+
+    if (![page->cocoaView() enclosingScrollView])
+        return YES;
+
+    auto pinnedState = page->pinnedStateIncludingAncestorsAtPoint([self locationInView:page->cocoaView().get()]);
+
+    if (std::fabs(delta.x) > std::fabs(delta.y)) {
+        if (delta.x < 0 && pinnedState.right())
+            return NO;
+        if (delta.x > 0 && pinnedState.left())
+            return NO;
+    } else {
+        if (delta.y < 0 && pinnedState.top())
+            return NO;
+        if (delta.y > 0 && pinnedState.bottom())
+            return NO;
+    }
+
+    return YES;
+}
+
+@end
+
 static WebCore::FloatSize translationInView(NSPanGestureRecognizer *gesture, WKWebView *view)
 {
     auto translation = WebCore::toFloatSize(WebCore::FloatPoint { [gesture translationInView:view] });
@@ -155,7 +201,11 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
 
 - (void)setUpPanGestureRecognizer
 {
-    _panGestureRecognizer = adoptNS([[NSPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureRecognized:)]);
+    RefPtr page = _page.get();
+    if (!page)
+        return;
+
+    _panGestureRecognizer = adoptNS([[WKPanGestureRecognizer alloc] initWithPage:*page target:self action:@selector(panGestureRecognized:)]);
     [self configureForScrolling:_panGestureRecognizer.get()];
     [_panGestureRecognizer setDelegate:self];
     [_panGestureRecognizer setName:@"WKPanGesture"];
@@ -661,6 +711,12 @@ ALLOW_NEW_API_WITHOUT_GUARDS_END
 
 #pragma mark - NSGestureRecognizerDelegate
 
+static BOOL isBuiltInScrollViewPanGestureRecognizer(NSGestureRecognizer *recognizer)
+{
+    static Class scrollViewPanGestureClass = NSClassFromString(@"NSScrollViewPanGestureRecognizer");
+    return [recognizer isKindOfClass:scrollViewPanGestureClass];
+}
+
 static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NSGestureRecognizer *x, NSGestureRecognizer *y)
 {
     return (a == x && b == y) || (b == x && a == y);
@@ -671,6 +727,11 @@ static inline bool isSamePair(NSGestureRecognizer *a, NSGestureRecognizer *b, NS
     WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(RefPtr { _page.get() }->logIdentifier(), "Gesture: %@, Other gesture: %@", gestureRecognizer, otherGestureRecognizer);
 
     if (isSamePair(gestureRecognizer, otherGestureRecognizer, _singleClickGestureRecognizer.get(), _panGestureRecognizer.get()))
+        return YES;
+
+    if (gestureRecognizer == _singleClickGestureRecognizer
+        && isBuiltInScrollViewPanGestureRecognizer(otherGestureRecognizer)
+        && [otherGestureRecognizer.view isKindOfClass:NSScrollView.class])
         return YES;
 
     CheckedPtr viewImpl = _viewImpl.get();

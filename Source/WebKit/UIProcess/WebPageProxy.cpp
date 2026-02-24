@@ -13697,6 +13697,15 @@ RectEdges<bool> WebPageProxy::pinnedState() const
     return internals().mainFramePinnedState;
 }
 
+RectEdges<bool> WebPageProxy::pinnedStateIncludingAncestorsAtPoint(FloatPoint point)
+{
+#if PLATFORM(COCOA)
+    if (CheckedPtr scrollingCoordinatorProxy = m_scrollingCoordinatorProxy.get())
+        return scrollingCoordinatorProxy->pinnedStateIncludingAncestorsAtPoint(point);
+#endif
+    return { };
+}
+
 void WebPageProxy::didChangeScrollOffsetPinningForMainFrame(RectEdges<bool> pinnedState)
 {
     RefPtr pageClient = this->pageClient();

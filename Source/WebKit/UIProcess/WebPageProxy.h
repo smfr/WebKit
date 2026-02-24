@@ -1603,6 +1603,7 @@ public:
     bool areScrollbarAnimationsSuppressed() const { return m_suppressScrollbarAnimations; }
 
     WebCore::RectEdges<bool> NODELETE pinnedState() const;
+    WebCore::RectEdges<bool> pinnedStateIncludingAncestorsAtPoint(WebCore::FloatPoint);
 
     WebCore::RectEdges<bool> rubberBandableEdgesRespectingHistorySwipe() const;
     WebCore::RectEdges<bool> NODELETE rubberBandableEdges() const;

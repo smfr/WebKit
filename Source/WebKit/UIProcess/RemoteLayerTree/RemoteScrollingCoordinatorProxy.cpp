@@ -184,6 +184,11 @@ TrackingType RemoteScrollingCoordinatorProxy::eventTrackingTypeForPoint(WebCore:
     return m_scrollingTree->eventTrackingTypeForPoint(eventType, p);
 }
 
+WebCore::RectEdges<bool> RemoteScrollingCoordinatorProxy::pinnedStateIncludingAncestorsAtPoint(FloatPoint p)
+{
+    return m_scrollingTree->pinnedStateIncludingAncestorsAtPoint(p);
+}
+
 void RemoteScrollingCoordinatorProxy::viewportChangedViaDelegatedScrolling(const FloatPoint& scrollPosition, const FloatRect& layoutViewport, double scale)
 {
     m_scrollingTree->mainFrameViewportChangedViaDelegatedScrolling(scrollPosition, layoutViewport, scale);

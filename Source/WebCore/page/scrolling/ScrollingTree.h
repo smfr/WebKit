@@ -170,6 +170,8 @@ public:
 
     WEBCORE_EXPORT TrackingType eventTrackingTypeForPoint(EventTrackingRegions::EventType, IntPoint);
 
+    WEBCORE_EXPORT WebCore::RectEdges<bool> pinnedStateIncludingAncestorsAtPoint(FloatPoint);
+
     virtual void receivedWheelEventWithPhases(PlatformWheelEventPhase /* phase */, PlatformWheelEventPhase /* momentumPhase */) { }
     virtual void deferWheelEventTestCompletionForReason(ScrollingNodeID, WheelEventTestMonitor::DeferReason) { }
     virtual void removeWheelEventTestCompletionDeferralForReason(ScrollingNodeID, WheelEventTestMonitor::DeferReason) { }

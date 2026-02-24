@@ -781,6 +781,37 @@ TrackingType ScrollingTree::eventTrackingTypeForPoint(EventTrackingRegions::Even
     return m_treeState.eventTrackingRegions.trackingTypeForPoint(eventType, p);
 }
 
+WebCore::RectEdges<bool> ScrollingTree::pinnedStateIncludingAncestorsAtPoint(FloatPoint viewPoint)
+{
+    RefPtr rootNode = m_rootNode;
+    if (!rootNode)
+        return false;
+
+    Locker locker { m_treeStateLock };
+
+    FloatPoint position = viewPoint;
+    position.move(rootNode->viewToContentsOffset(m_treeState.mainFrameScrollPosition));
+
+    WebCore::RectEdges<bool> pinnedState = { true, true, true, true };
+
+    RefPtr node = scrollingNodeForPoint(position);
+    while (node) {
+        if (RefPtr scrollingNode = dynamicDowncast<ScrollingTreeScrollingNode>(*node))
+            pinnedState &= scrollingNode->edgePinnedState();
+
+        if (RefPtr scrollProxyNode = dynamicDowncast<ScrollingTreeOverflowScrollProxyNode>(*node)) {
+            if (RefPtr relatedNode = nodeForID(scrollProxyNode->overflowScrollingNodeID())) {
+                node = WTF::move(relatedNode);
+                continue;
+            }
+        }
+
+        node = node->parent();
+    }
+
+    return pinnedState;
+}
+
 // Can be called from the main thread.
 bool ScrollingTree::isRubberBandInProgressForNode(std::optional<ScrollingNodeID> nodeID)
 {
