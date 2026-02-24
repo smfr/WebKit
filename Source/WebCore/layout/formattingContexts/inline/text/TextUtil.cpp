@@ -117,7 +117,7 @@ InlineLayoutUnit TextUtil::width(const InlineTextItem& inlineTextItem, const Fon
         if (singleWhiteSpace)
             return std::max(0.f, singleSpaceWidth(fontCascade, inlineTextBox->canUseSimplifiedContentMeasuring()));
     }
-    return width(inlineTextItem.inlineTextBox(), fontCascade, from, to, contentLogicalLeft, useTrailingWhitespaceMeasuringOptimization, spacingState, glyphOverflow);
+    return width(protect(inlineTextItem.inlineTextBox()), fontCascade, from, to, contentLogicalLeft, useTrailingWhitespaceMeasuringOptimization, spacingState, glyphOverflow);
 }
 
 InlineLayoutUnit TextUtil::trailingWhitespaceWidth(const InlineTextBox& inlineTextBox, const FontCascade& fontCascade, size_t startPosition, size_t endPosition)
@@ -220,22 +220,22 @@ TextUtil::EnclosingAscentDescent TextUtil::enclosingGlyphBoundsForText(StringVie
         return { };
 
     if (shouldUseSimpleGlyphOverflowCodePath == ShouldUseSimpleGlyphOverflowCodePath::No) {
-        auto overflow = ComplexTextController::enclosingGlyphBoundsForTextRun(style.fontCascade(), TextRun { textContent });
+        auto overflow = ComplexTextController::enclosingGlyphBoundsForTextRun(protect(style.fontCascade()), TextRun { textContent });
         return { overflow.first, overflow.second };
     }
 
     if (textContent.is8Bit()) {
         Latin1TextIterator textIterator { textContent.span8(), 0, textContent.length() };
-        return enclosingGlyphBoundsForRunWithIterator(style.fontCascade(), style.writingMode().isBidiRTL(), textIterator);
+        return enclosingGlyphBoundsForRunWithIterator(protect(style.fontCascade()), style.writingMode().isBidiRTL(), textIterator);
     }
 
     SurrogatePairAwareTextIterator textIterator { textContent.span16(), 0, textContent.length() };
-    return enclosingGlyphBoundsForRunWithIterator(style.fontCascade(), style.writingMode().isBidiRTL(), textIterator);
+    return enclosingGlyphBoundsForRunWithIterator(protect(style.fontCascade()), style.writingMode().isBidiRTL(), textIterator);
 }
 
 TextUtil::WordBreakLeft TextUtil::breakWord(const InlineTextItem& inlineTextItem, const FontCascade& fontCascade, InlineLayoutUnit textWidth, InlineLayoutUnit availableWidth, InlineLayoutUnit contentLogicalLeft)
 {
-    return breakWord(inlineTextItem.inlineTextBox(), inlineTextItem.start(), inlineTextItem.length(), textWidth, availableWidth, contentLogicalLeft, fontCascade);
+    return breakWord(protect(inlineTextItem.inlineTextBox()), inlineTextItem.start(), inlineTextItem.length(), textWidth, availableWidth, contentLogicalLeft, fontCascade);
 }
 
 TextUtil::WordBreakLeft TextUtil::breakWord(const InlineTextBox& inlineTextBox, size_t startPosition, size_t length, InlineLayoutUnit textWidth, InlineLayoutUnit availableWidth, InlineLayoutUnit contentLogicalLeft, const FontCascade& fontCascade)
@@ -367,7 +367,7 @@ bool TextUtil::mayBreakInBetween(const InlineTextItem& previousInlineItem, const
 {
     // Check if these 2 adjacent non-whitespace inline items are connected at a breakable position.
     ASSERT(!previousInlineItem.isWhitespace() && !nextInlineItem.isWhitespace());
-    return mayBreakInBetween(previousInlineItem.inlineTextBox().content(), previousInlineItem.style(), nextInlineItem.inlineTextBox().content(), nextInlineItem.style());
+    return mayBreakInBetween(previousInlineItem.inlineTextBox().content(), protect(previousInlineItem.style()), nextInlineItem.inlineTextBox().content(), protect(nextInlineItem.style()));
 }
 
 bool TextUtil::mayBreakInBetween(String previousContent, const RenderStyle& previousContentStyle, String nextContent, const RenderStyle& nextContentStyle)
@@ -598,7 +598,7 @@ size_t TextUtil::firstUserPerceivedCharacterLength(const InlineTextBox& inlineTe
 
 size_t TextUtil::firstUserPerceivedCharacterLength(const InlineTextItem& inlineTextItem)
 {
-    auto length = firstUserPerceivedCharacterLength(inlineTextItem.inlineTextBox(), inlineTextItem.start(), inlineTextItem.length());
+    auto length = firstUserPerceivedCharacterLength(protect(inlineTextItem.inlineTextBox()), inlineTextItem.start(), inlineTextItem.length());
     return std::min<size_t>(inlineTextItem.length(), length);
 }
 
@@ -619,7 +619,7 @@ AtomString TextUtil::ellipsisTextInInlineDirection(bool isHorizontal)
 
 InlineLayoutUnit TextUtil::hyphenWidth(const RenderStyle& style)
 {
-    return std::max(0.f, style.fontCascade().width(StringView { style.hyphenString() }));
+    return std::max(0.f, protect(style.fontCascade())->width(StringView { style.hyphenString() }));
 }
 
 bool TextUtil::hasHangablePunctuationStart(const InlineTextItem& inlineTextItem, const RenderStyle& style)
@@ -636,7 +636,7 @@ float TextUtil::hangablePunctuationStartWidth(const InlineTextItem& inlineTextIt
         return { };
     ASSERT(inlineTextItem.length());
     auto leadingPosition = inlineTextItem.start();
-    return width(inlineTextItem, style.fontCascade(), leadingPosition, leadingPosition + 1, { });
+    return width(inlineTextItem, protect(style.fontCascade()), leadingPosition, leadingPosition + 1, { });
 }
 
 bool TextUtil::hasHangablePunctuationEnd(const InlineTextItem& inlineTextItem, const RenderStyle& style)
@@ -653,7 +653,7 @@ float TextUtil::hangablePunctuationEndWidth(const InlineTextItem& inlineTextItem
         return { };
     ASSERT(inlineTextItem.length());
     auto trailingPosition = inlineTextItem.end() - 1;
-    return width(inlineTextItem, style.fontCascade(), trailingPosition, trailingPosition + 1, { });
+    return width(inlineTextItem, protect(style.fontCascade()), trailingPosition, trailingPosition + 1, { });
 }
 
 bool TextUtil::hasHangableStopOrCommaEnd(const InlineTextItem& inlineTextItem, const RenderStyle& style)
@@ -678,7 +678,7 @@ float TextUtil::hangableStopOrCommaEndWidth(const InlineTextItem& inlineTextItem
         return { };
     ASSERT(inlineTextItem.length());
     auto trailingPosition = inlineTextItem.end() - 1;
-    return width(inlineTextItem, style.fontCascade(), trailingPosition, trailingPosition + 1, { });
+    return width(inlineTextItem, protect(style.fontCascade()), trailingPosition, trailingPosition + 1, { });
 }
 
 template<typename CharacterType>

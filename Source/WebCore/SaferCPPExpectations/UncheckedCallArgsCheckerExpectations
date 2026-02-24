@@ -271,7 +271,6 @@ layout/formattingContexts/inline/display/InlineDisplayContentBuilder.cpp
 layout/formattingContexts/inline/display/InlineDisplayContentBuilder.h
 layout/formattingContexts/inline/display/InlineDisplayLineBuilder.cpp
 layout/formattingContexts/inline/ruby/RubyFormattingContext.cpp
-layout/formattingContexts/inline/text/TextUtil.cpp
 layout/formattingContexts/table/TableFormattingContext.cpp
 layout/formattingContexts/table/TableFormattingGeometry.cpp
 layout/formattingContexts/table/TableGrid.cpp
