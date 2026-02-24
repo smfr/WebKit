@@ -536,14 +536,9 @@ void HTMLTextAreaElement::updatePlaceholderText()
     }
     if (!m_placeholder) {
         m_placeholder = TextControlPlaceholderElement::create(protect(document()));
-        protect(userAgentShadowRoot())->insertBefore(*protectedPlaceholderElement(), protect(innerTextElement()->nextSibling()));
+        protect(userAgentShadowRoot())->insertBefore(*protect(m_placeholder), protect(innerTextElement()->nextSibling()));
     }
-    protectedPlaceholderElement()->setInnerText(String { placeholderText });
-}
-
-RefPtr<HTMLElement> HTMLTextAreaElement::protectedPlaceholderElement() const
-{
-    return m_placeholder;
+    protect(m_placeholder)->setInnerText(String { placeholderText });
 }
 
 RenderStyle HTMLTextAreaElement::createInnerTextStyle(const RenderStyle& style)

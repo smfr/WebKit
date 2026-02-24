@@ -2111,7 +2111,7 @@ static bool eventTimeCueCompare(const std::pair<MediaTime, RefPtr<TextTrackCue>>
     // compare the two tracks by the relative cue order, so return the relative
     // track order.
     if (a.second->track() != b.second->track())
-        return trackIndexCompare(*a.second->protectedTrack(), *b.second->protectedTrack());
+        return trackIndexCompare(*protect(a.second->track()), *protect(b.second->track()));
 
     // 12 - Further sort tasks in events that have the same time by the
     // relative text track cue order of the text track cues associated
@@ -2441,7 +2441,7 @@ void HTMLMediaElement::speakCueText(TextTrackCue& cue)
         cancelSpeakingCueText();
 
     m_cueBeingSpoken = cue;
-    RefPtr { m_cueBeingSpoken }->prepareToSpeak(protectedSpeechSynthesis(), m_reportedPlaybackRate ? m_reportedPlaybackRate : m_requestedPlaybackRate, volume(), [weakThis = WeakPtr { *this }](const TextTrackCue&) {
+    protect(m_cueBeingSpoken)->prepareToSpeak(protect(speechSynthesis()), m_reportedPlaybackRate ? m_reportedPlaybackRate : m_requestedPlaybackRate, volume(), [weakThis = WeakPtr { *this }](const TextTrackCue&) {
         ASSERT(isMainThread());
         RefPtr<HTMLMediaElement> protectedThis = weakThis.get();
         if (!protectedThis)
@@ -2458,13 +2458,6 @@ void HTMLMediaElement::speakCueText(TextTrackCue& cue)
     UNUSED_PARAM(cue);
 #endif
 }
-
-#if ENABLE(SPEECH_SYNTHESIS)
-Ref<SpeechSynthesis> HTMLMediaElement::protectedSpeechSynthesis()
-{
-    return speechSynthesis();
-}
-#endif
 
 void HTMLMediaElement::pauseSpeakingCueText()
 {
@@ -2616,7 +2609,7 @@ void HTMLMediaElement::textTrackModeChanged(TextTrack& track)
     track.setHasBeenConfigured(true);
 
     if (track.mode() != TextTrack::Mode::Disabled && trackIsLoaded)
-        textTrackAddCues(track, *track.protectedCues());
+        textTrackAddCues(track, *protect(track.cues()));
 
     configureTextTrackDisplay(AssumeTextTrackVisibilityChanged);
 
@@ -2721,7 +2714,7 @@ void HTMLMediaElement::textTrackRemoveCues(TextTrack&, const TextTrackCueList& c
     TrackDisplayUpdateScope scope { *this };
     for (unsigned i = 0; i < cues.length(); ++i) {
         Ref cue = *cues.item(i);
-        textTrackRemoveCue(*cue->protectedTrack(), cue);
+        textTrackRemoveCue(*protect(cue->track()), cue);
     }
 }
 

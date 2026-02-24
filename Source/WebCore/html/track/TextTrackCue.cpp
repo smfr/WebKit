@@ -247,11 +247,6 @@ Document* TextTrackCue::document() const
     return downcast<Document>(scriptExecutionContext());
 }
 
-RefPtr<Document> TextTrackCue::protectedDocument() const
-{
-    return document();
-}
-
 void TextTrackCue::willChange()
 {
     if (++m_processingCueChanges > 1)
@@ -274,11 +269,6 @@ void TextTrackCue::didChange(bool affectOrder)
 }
 
 TextTrack* TextTrackCue::track() const
-{
-    return m_track.get();
-}
-
-RefPtr<TextTrack> TextTrackCue::protectedTrack() const
 {
     return m_track.get();
 }

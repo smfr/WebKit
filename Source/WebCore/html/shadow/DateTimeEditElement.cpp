@@ -193,7 +193,7 @@ void DateTimeEditBuilder::visitLiteral(const String& text)
         element->setInlineStyleProperty(CSSPropertyMarginInlineEnd, -1, CSSUnitType::CSS_PX);
 
     element->appendChild(Text::create(document.get(), String { text }));
-    m_editElement->protectedFieldsWrapperElement()->appendChild(element);
+    protect(m_editElement->fieldsWrapperElement())->appendChild(element);
 }
 
 DateTimeEditElementEditControlOwner::~DateTimeEditElementEditControlOwner() = default;
@@ -213,17 +213,12 @@ inline Element& DateTimeEditElement::fieldsWrapperElement() const
     return downcast<Element>(*firstChild());
 }
 
-inline Ref<Element> DateTimeEditElement::protectedFieldsWrapperElement() const
-{
-    return fieldsWrapperElement();
-}
-
 void DateTimeEditElement::addField(Ref<DateTimeFieldElement> field)
 {
     if (m_fields.size() == m_fields.capacity())
         return;
     m_fields.append(field);
-    protectedFieldsWrapperElement()->appendChild(field);
+    protect(fieldsWrapperElement())->appendChild(field);
 }
 
 size_t DateTimeEditElement::fieldIndexOf(const DateTimeFieldElement& fieldToFind) const

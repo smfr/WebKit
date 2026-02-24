@@ -486,7 +486,7 @@ void VTTCue::setText(const String& text)
 void VTTCue::createWebVTTNodeTree()
 {
     if (!m_webVTTNodeTree && document())
-        m_webVTTNodeTree = WebVTTParser::createDocumentFragmentFromCueText(*protectedDocument().get(), m_content);
+        m_webVTTNodeTree = WebVTTParser::createDocumentFragmentFromCueText(*protect(document()), m_content);
 }
 
 static void copyWebVTTNodeToDOMTree(ContainerNode& webVTTNode, Node& parent)
@@ -1021,7 +1021,7 @@ void VTTCue::updateDisplayTree(const MediaTime& movieTime)
 {
     // The display tree may contain WebVTT timestamp objects representing
     // timestamps (processing instructions), along with displayable nodes.
-    if (!track() || !protectedTrack()->isRendered())
+    if (!track() || !protect(track())->isRendered())
         return;
 
     // Mutating the VTT contents is safe because it's never exposed to author scripts.
@@ -1046,7 +1046,7 @@ RefPtr<TextTrackCueBox> VTTCue::getDisplayTree()
     ASSERT(track());
 
     RefPtr displayTree = displayTreeInternal();
-    if (!displayTree || !m_displayTreeShouldChange || !track() || !protectedTrack()->isRendered())
+    if (!displayTree || !m_displayTreeShouldChange || !track() || !protect(track())->isRendered())
         return displayTree;
 
     if (region())

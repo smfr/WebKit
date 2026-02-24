@@ -758,7 +758,7 @@ FocusableElementSearchResult FocusController::findFocusableElementInDocumentOrde
 
         if (shouldFocusElement == ShouldFocusElement::Yes) {
             document->setFocusedElement(nullptr);
-            setFocusedFrame(owner->protectedContentFrame().get());
+            setFocusedFrame(protect(owner->contentFrame()).get());
         }
         return findResult;
     }

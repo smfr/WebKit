@@ -429,7 +429,7 @@ RefPtr<InjectedBundleNodeHandle> InjectedBundleNodeHandle::htmlTableCellElementC
     if (!tableCell)
         return nullptr;
 
-    return getOrCreate(tableCell->protectedCellAbove().get());
+    return getOrCreate(protect(tableCell->cellAbove()).get());
 }
 
 RefPtr<WebFrame> InjectedBundleNodeHandle::documentFrame()

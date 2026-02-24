@@ -687,7 +687,6 @@ public:
     TextTrackCue* cueBeingSpoken() const { return m_cueBeingSpoken.get(); }
 #if ENABLE(SPEECH_SYNTHESIS)
     WEBCORE_EXPORT SpeechSynthesis& speechSynthesis();
-    Ref<SpeechSynthesis> protectedSpeechSynthesis();
 #endif
 
     bool hasSource() const { return hasCurrentSrc() || srcObject(); }

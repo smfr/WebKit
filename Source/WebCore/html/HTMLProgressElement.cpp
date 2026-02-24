@@ -74,11 +74,6 @@ RenderProgress* HTMLProgressElement::renderProgress() const
     return downcast<RenderProgress>(descendantsOfType<Element>(*protect(userAgentShadowRoot())).first()->renderer());
 }
 
-RefPtr<ProgressValueElement> HTMLProgressElement::protectedValueElement()
-{
-    return m_valueElement.get();
-}
-
 void HTMLProgressElement::attributeChanged(const QualifiedName& name, const AtomString& oldValue, const AtomString& newValue, AttributeModificationReason attributeModificationReason)
 {
     if (name == valueAttr) {
@@ -132,7 +127,7 @@ void HTMLProgressElement::updateDeterminateState()
 
 void HTMLProgressElement::didElementStateChange()
 {
-    protectedValueElement()->setInlineSizePercentage(position() * 100);
+    protect(m_valueElement)->setInlineSizePercentage(position() * 100);
     if (CheckedPtr renderer = renderProgress())
         renderer->updateFromElement();
 

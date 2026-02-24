@@ -3213,9 +3213,4 @@ bool HTMLTreeBuilder::isOnStackOfOpenElements(Element& element) const
     return m_tree.openElements().contains(element);
 }
 
-RefPtr<const ScriptElement> HTMLTreeBuilder::protectedScriptToProcess() const
-{
-    return m_scriptToProcess;
-}
-
 }

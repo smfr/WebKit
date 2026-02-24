@@ -85,11 +85,9 @@ public:
     void setReadinessState(ReadinessState state) { m_readinessState = state; }
 
     TextTrackCueList* cues();
-    RefPtr<TextTrackCueList> protectedCues();
     TextTrackCueList* activeCues() const LIFETIME_BOUND;
 
     TextTrackCueList* cuesInternal() const { return m_cues.get(); }
-    inline RefPtr<TextTrackCueList> protectedCues() const;
 
     void addClient(TextTrackClient&);
     void clearClient(TextTrackClient&);
@@ -98,7 +96,6 @@ public:
     virtual ExceptionOr<void> removeCue(TextTrackCue&);
 
     VTTRegionList* regions();
-    RefPtr<VTTRegionList> protectedRegions();
 
     void cueWillChange(TextTrackCue&);
     void cueDidChange(TextTrackCue&, bool);
@@ -145,7 +142,6 @@ public:
     virtual void removeCuesNotInTimeRanges(const PlatformTimeRanges&);
 
     ScriptExecutionContext* scriptExecutionContext() const final;
-    RefPtr<ScriptExecutionContext> protectedScriptExecutionContext() const;
 
 protected:
     TextTrack(ScriptExecutionContext*, const AtomString& kind, TrackID, const AtomString& label, const AtomString& language, TextTrackType);

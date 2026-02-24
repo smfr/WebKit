@@ -75,7 +75,6 @@ private:
 
     bool supportsPlaceholder() const final { return true; }
     HTMLElement* placeholderElement() const final { return m_placeholder.get(); }
-    RefPtr<HTMLElement> NODELETE protectedPlaceholderElement() const;
     void updatePlaceholderText() final;
     bool isEmptyValue() const final { return value()->isEmpty(); }
 

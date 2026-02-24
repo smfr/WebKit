@@ -212,9 +212,6 @@ private:
     void mergeAttributesFromTokenIntoElement(AtomHTMLToken&&, Element&);
     void dispatchDocumentElementAvailableIfNeeded();
 
-    Ref<Document> NODELETE protectedDocument() const;
-    Ref<ContainerNode> NODELETE protectedAttachmentRoot() const;
-
     // m_head has to be destroyed after destroying CheckedRef of m_document and m_attachmentRoot
     HTMLStackItem m_head;
 

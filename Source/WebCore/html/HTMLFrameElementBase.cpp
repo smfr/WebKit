@@ -132,7 +132,7 @@ void HTMLFrameElementBase::attributeChanged(const QualifiedName& name, const Ato
     } else if (name == srcAttr && !hasAttributeWithoutSynchronization(srcdocAttr))
         setLocation(newValue.string().trim(isASCIIWhitespace));
     else if (name == scrollingAttr && contentFrame())
-        protectedContentFrame()->updateScrollingMode();
+        protect(contentFrame())->updateScrollingMode();
     else
         HTMLFrameOwnerElement::attributeChanged(name, oldValue, newValue, attributeModificationReason);
 }

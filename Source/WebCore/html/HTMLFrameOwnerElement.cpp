@@ -96,11 +96,6 @@ HTMLFrameOwnerElement::~HTMLFrameOwnerElement()
         contentFrame->disconnectOwnerElement();
 }
 
-RefPtr<Frame> HTMLFrameOwnerElement::protectedContentFrame() const
-{
-    return m_contentFrame.get();
-}
-
 Document* HTMLFrameOwnerElement::contentDocument() const
 {
     if (auto* localFrame = dynamicDowncast<LocalFrame>(m_contentFrame.get()))

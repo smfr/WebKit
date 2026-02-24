@@ -101,8 +101,6 @@ private:
     ASCIILiteral logClassName() const final { return "VideoTrack"_s; }
 #endif
 
-    Ref<VideoTrackPrivate> NODELETE protectedPrivate() const;
-
     WeakPtr<VideoTrackList> m_videoTrackList;
     WeakHashSet<VideoTrackClient> m_clients;
     Ref<VideoTrackPrivate> m_private;

@@ -95,7 +95,6 @@ protected:
     inline const CollectionNamedElementCache& namedItemCaches() const;
 
     inline Document& document() const;
-    inline Ref<Document> protectedDocument() const;
 
     void invalidateNamedElementCache(Document&) const;
 

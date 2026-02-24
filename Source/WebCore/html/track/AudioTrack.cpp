@@ -79,12 +79,7 @@ AudioTrack::AudioTrack(ScriptExecutionContext* context, AudioTrackPrivate& track
 
 AudioTrack::~AudioTrack()
 {
-    removeClientFromTrackPrivateBase(protectedPrivate());
-}
-
-Ref<AudioTrackPrivate> AudioTrack::protectedPrivate() const
-{
-    return m_private;
+    removeClientFromTrackPrivateBase(protect(m_private));
 }
 
 void AudioTrack::setPrivate(AudioTrackPrivate& trackPrivate)
@@ -92,7 +87,7 @@ void AudioTrack::setPrivate(AudioTrackPrivate& trackPrivate)
     if (m_private.ptr() == &trackPrivate)
         return;
 
-    removeClientFromTrackPrivateBase(protectedPrivate());
+    removeClientFromTrackPrivateBase(protect(m_private));
     m_private = trackPrivate;
     trackPrivate.setEnabled(m_enabled);
     addClientToTrackPrivateBase(*this, trackPrivate);
@@ -130,7 +125,7 @@ void AudioTrack::setEnabled(bool enabled)
     if (m_enabled == enabled)
         return;
 
-    protectedPrivate()->setEnabled(enabled);
+    protect(m_private)->setEnabled(enabled);
     m_clients.forEach([this] (auto& client) {
         client.audioTrackEnabledChanged(*this);
     });
@@ -150,7 +145,7 @@ void AudioTrack::clearClient(AudioTrackClient& client)
 
 size_t AudioTrack::inbandTrackIndex() const
 {
-    return protectedPrivate()->trackIndex();
+    return protect(m_private)->trackIndex();
 }
 
 void AudioTrack::enabledChanged(bool enabled)
@@ -203,7 +198,7 @@ void AudioTrack::willRemove()
 
 void AudioTrack::updateKindFromPrivate()
 {
-    switch (protectedPrivate()->kind()) {
+    switch (protect(m_private)->kind()) {
     case AudioTrackPrivate::Kind::Alternative:
         setKind("alternative"_s);
         break;
@@ -240,7 +235,7 @@ void AudioTrack::updateConfigurationFromPrivate()
 void AudioTrack::setLogger(const Logger& logger, uint64_t logIdentifier)
 {
     TrackBase::setLogger(logger, logIdentifier);
-    protectedPrivate()->setLogger(logger, this->logIdentifier());
+    protect(m_private)->setLogger(logger, this->logIdentifier());
 }
 #endif
 

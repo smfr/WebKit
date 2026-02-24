@@ -166,7 +166,7 @@ void RangeInputType::handleTouchEvent(TouchEvent& event)
         return;
 
 #if ENABLE(IOS_TOUCH_EVENTS)
-    protectedTypedSliderThumbElement()->handleTouchEvent(event);
+    protect(typedSliderThumbElement())->handleTouchEvent(event);
 #else
 
     if (element()->isDisabledFormControl())
@@ -180,7 +180,7 @@ void RangeInputType::handleTouchEvent(TouchEvent& event)
     RefPtr<TouchList> touches = event.targetTouches();
     if (touches->length() == 1) {
         auto touchPoint = touches->item(0)->absoluteLocation();
-        protectedTypedSliderThumbElement()->setPositionFromPoint(LayoutPoint(touchPoint));
+        protect(typedSliderThumbElement())->setPositionFromPoint(LayoutPoint(touchPoint));
         event.setDefaultHandled();
     }
 #endif // ENABLE(IOS_TOUCH_EVENTS)
@@ -191,7 +191,7 @@ void RangeInputType::disabledStateChanged()
 {
     if (!hasCreatedShadowSubtree())
         return;
-    protectedTypedSliderThumbElement()->hostDisabledStateChanged();
+    protect(typedSliderThumbElement())->hostDisabledStateChanged();
 }
 
 auto RangeInputType::handleKeydownEvent(KeyboardEvent& event) -> ShouldCallBaseEventHandler
@@ -303,11 +303,6 @@ SliderThumbElement& RangeInputType::typedSliderThumbElement() const
     return downcast<SliderThumbElement>(*sliderTrackElement()->firstChild());
 }
 
-Ref<SliderThumbElement> RangeInputType::protectedTypedSliderThumbElement() const
-{
-    return typedSliderThumbElement();
-}
-
 HTMLElement* RangeInputType::sliderThumbElement() const
 {
     return &typedSliderThumbElement();
@@ -351,7 +346,7 @@ void RangeInputType::attributeChanged(const QualifiedName& name)
                 element->setValue(element->value());
         }
         if (hasCreatedShadowSubtree())
-            protectedTypedSliderThumbElement()->setPositionFromValue();
+            protect(typedSliderThumbElement())->setPositionFromValue();
         break;
     default:
         break;
@@ -372,7 +367,7 @@ void RangeInputType::setValue(const String& value, bool valueChanged, TextFieldE
     }
 
     if (hasCreatedShadowSubtree())
-        protectedTypedSliderThumbElement()->setPositionFromValue();
+        protect(typedSliderThumbElement())->setPositionFromValue();
 }
 
 ValueOrReference<String> RangeInputType::fallbackValue() const

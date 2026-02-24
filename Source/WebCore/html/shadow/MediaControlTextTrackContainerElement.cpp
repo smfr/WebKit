@@ -187,7 +187,7 @@ void MediaControlTextTrackContainerElement::updateDisplay()
         for (auto& interval : activeCues) {
             Ref cue = *interval.data();
 
-            if (cue->protectedTrack()->isSpoken())
+            if (protect(cue->track())->isSpoken())
                 continue;
 
             if (RefPtr vttCue = dynamicDowncast<VTTCue>(cue))
@@ -229,7 +229,7 @@ void MediaControlTextTrackContainerElement::processActiveVTTCue(VTTCue& cue)
 {
     DEBUG_LOG(LOGIDENTIFIER, "adding and positioning cue: \"", cue.text(), "\", start=", cue.startTime(), ", end=", cue.endTime());
 
-    if (RefPtr region = cue.track()->protectedRegions()->getRegionById(cue.regionId())) {
+    if (RefPtr region = protect(cue.track()->regions())->getRegionById(cue.regionId())) {
         // Let region be the WebVTT region whose region identifier
         // matches the text track cue region identifier of cue.
         Ref regionNode = region->getDisplayTree();

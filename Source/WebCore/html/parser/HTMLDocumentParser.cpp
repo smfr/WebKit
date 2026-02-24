@@ -277,7 +277,7 @@ bool HTMLDocumentParser::pumpTokenizerLoop(SynchronousMode mode, bool parsingFra
     RefPtr parserScheduler = m_parserScheduler;
     do {
         if (isWaitingForScripts()) [[unlikely]] {
-            if (mode == SynchronousMode::AllowYield && parserScheduler->shouldYieldBeforeExecutingScript(m_treeBuilder->protectedScriptToProcess().get(), session))
+            if (mode == SynchronousMode::AllowYield && parserScheduler->shouldYieldBeforeExecutingScript(protect(m_treeBuilder->scriptToProcess()).get(), session))
                 return true;
             
             runScriptsForPausedTreeBuilder();
