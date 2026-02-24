@@ -123,7 +123,7 @@ private:
     void createShadowSubtree() final;
     void removeShadowSubtree() final;
     void updateInnerTextValue() final;
-    bool hasCustomFocusLogic() const final;
+    bool NODELETE hasCustomFocusLogic() const final;
     void attributeChanged(const QualifiedName&) final;
     bool isPresentingAttachedView() const final;
     void elementDidBlur() final;

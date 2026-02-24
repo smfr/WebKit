@@ -104,7 +104,7 @@ private:
     RenderPtr<RenderElement> createElementRenderer(RenderStyle&&, const RenderTreePosition&) final;
     bool appendFormData(DOMFormData&) final;
     void reset() final;
-    bool hasCustomFocusLogic() const final { return true; }
+    bool NODELETE hasCustomFocusLogic() const final { return true; }
     int defaultTabIndex() const final { return 0; }
     bool isMouseFocusable() const final { return isFocusable(); }
     bool isKeyboardFocusable(const FocusEventData&) const final { return isFocusable(); }
