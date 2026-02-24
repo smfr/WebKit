@@ -34,11 +34,13 @@ namespace Style {
 enum class GridTrackSizingDirection : bool;
 class GridTrackBreadth;
 struct GridTrackFitContentLength;
+struct GridTrackSize;
 }
 
 class GridSpan;
 class RenderElement;
 class RenderGrid;
+class RenderStyle;
 
 enum class ItemPosition : uint8_t;
 
@@ -95,6 +97,8 @@ void updateAutoMarginsInColumnAxisIfNeeded(RenderBox&, WritingMode);
 
 bool NODELETE isRelativeGridTrackBreadthAsAuto(const Style::GridTrackFitContentLength&, std::optional<LayoutUnit> availableSpace);
 bool isRelativeGridTrackBreadthAsAuto(const Style::GridTrackBreadth&, std::optional<LayoutUnit> availableSpace);
+
+const Style::GridTrackSize& rawGridTrackSize(const RenderStyle&, Style::GridTrackSizingDirection, unsigned translatedIndex, unsigned autoRepeatTracksCount, unsigned explicitGridStart);
 
 } // namespace GridLayoutFunctions
 

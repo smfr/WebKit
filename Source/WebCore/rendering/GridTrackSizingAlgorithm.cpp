@@ -190,45 +190,6 @@ void GridTrackSizingAlgorithm::setAvailableSpace(Style::GridTrackSizingDirection
         m_availableSpaceRows = availableSpace;
 }
 
-const Style::GridTrackSize& GridTrackSizingAlgorithm::rawGridTrackSize(Style::GridTrackSizingDirection direction, unsigned translatedIndex) const
-{
-    auto& renderStyle = m_renderGrid->style();
-    auto& autoTrackStyles = renderStyle.gridAutoList(direction);
-    auto& tracks = renderStyle.gridTemplateList(direction);
-    auto& trackStyles = tracks.sizes;
-    auto& autoRepeatTrackStyles = tracks.autoRepeatSizes;
-    unsigned insertionPoint = tracks.autoRepeatInsertionPoint;
-    unsigned autoRepeatTracksCount = m_grid.autoRepeatTracks(direction);
-
-    // We should not use Style::GridPositionsResolver::explicitGridXXXCount() for this because the
-    // explicit grid might be larger than the number of tracks in grid-template-rows|columns (if
-    // grid-template-areas is specified for example).
-    unsigned explicitTracksCount = trackStyles.size() + autoRepeatTracksCount;
-
-    int untranslatedIndexAsInt = translatedIndex - m_grid.explicitGridStart(direction);
-    unsigned autoTrackStylesSize = autoTrackStyles.size();
-    if (untranslatedIndexAsInt < 0) {
-        int index = untranslatedIndexAsInt % static_cast<int>(autoTrackStylesSize);
-        // We need to transpose the index because the first negative implicit line will get the last defined auto track and so on.
-        index += index ? autoTrackStylesSize : 0;
-        ASSERT(index >= 0);
-        return autoTrackStyles[index];
-    }
-
-    unsigned untranslatedIndex = static_cast<unsigned>(untranslatedIndexAsInt);
-    if (untranslatedIndex >= explicitTracksCount)
-        return autoTrackStyles[(untranslatedIndex - explicitTracksCount) % autoTrackStylesSize];
-
-    if (!autoRepeatTracksCount || untranslatedIndex < insertionPoint)
-        return trackStyles[untranslatedIndex];
-
-    if (untranslatedIndex < (insertionPoint + autoRepeatTracksCount)) {
-        unsigned autoRepeatLocalIndex = untranslatedIndexAsInt - insertionPoint;
-        return autoRepeatTrackStyles[autoRepeatLocalIndex % autoRepeatTrackStyles.size()];
-    }
-
-    return trackStyles[untranslatedIndex - autoRepeatTracksCount];
-}
 
 LayoutUnit GridTrackSizingAlgorithm::computeTrackBasedSize() const
 {
@@ -822,7 +783,7 @@ std::optional<LayoutUnit> GridTrackSizingAlgorithm::estimatedGridAreaBreadthForG
         // We may need to estimate the grid area size before running the track sizing algorithm in order to perform the pre-layout of orthogonal items.
         // We cannot use tracks(direction)[trackPosition].cachedTrackSize() because tracks(direction) is empty, since we are either performing pre-layout
         // or are running the track sizing algorithm in the opposite direction and haven't run it in the desired direction yet.
-        const auto& trackSize = wasSetup() ? calculateGridTrackSize(direction, trackPosition) : rawGridTrackSize(direction, trackPosition);
+        const auto& trackSize = wasSetup() ? calculateGridTrackSize(direction, trackPosition) : GridLayoutFunctions::rawGridTrackSize(m_renderGrid->style(), direction, trackPosition, m_grid.autoRepeatTracks(direction), m_grid.explicitGridStart(direction));
         auto& maxTrackSize = trackSize.maxTrackBreadth();
         if (maxTrackSize.isContentSized() || maxTrackSize.isFlex() || GridLayoutFunctions::isRelativeGridTrackBreadthAsAuto(maxTrackSize, availableSpace(direction)))
             gridAreaIsIndefinite = true;
@@ -885,7 +846,7 @@ bool GridTrackSizingAlgorithm::isIntrinsicSizedGridArea(const RenderBox& gridIte
     ASSERT(wasSetup());
     const GridSpan& span = m_renderGrid->gridSpanForGridItem(gridItem, gridAreaDirection);
     for (auto trackPosition : span) {
-        const auto& trackSize = rawGridTrackSize(gridAreaDirection, trackPosition);
+        const auto& trackSize = GridLayoutFunctions::rawGridTrackSize(m_renderGrid->style(), gridAreaDirection, trackPosition, m_grid.autoRepeatTracks(gridAreaDirection), m_grid.explicitGridStart(gridAreaDirection));
         // We consider fr units as 'auto' for the min sizing function.
         // FIXME(jfernandez): https://github.com/w3c/csswg-drafts/issues/2611
         //
@@ -907,7 +868,7 @@ Style::GridTrackSize GridTrackSizingAlgorithm::calculateGridTrackSize(Style::Gri
     if (m_grid.hasAutoRepeatEmptyTracks(direction) && m_grid.isEmptyAutoRepeatTrack(direction, translatedIndex))
         return 0_css_px;
 
-    auto& trackSize = rawGridTrackSize(direction, translatedIndex);
+    auto& trackSize = GridLayoutFunctions::rawGridTrackSize(m_renderGrid->style(), direction, translatedIndex, m_grid.autoRepeatTracks(direction), m_grid.explicitGridStart(direction));
     if (trackSize.isFitContent()) {
         if (GridLayoutFunctions::isRelativeGridTrackBreadthAsAuto(trackSize.fitContentTrackLength(), availableSpace(direction)))
             return Style::GridTrackSize::MinMax { CSS::Keyword::Auto { }, CSS::Keyword::MaxContent { } };
@@ -1645,7 +1606,7 @@ void GridTrackSizingAlgorithm::initializeTrackSizes()
             m_autoSizedTracksForStretchIndex.append(i);
 
         if (indefiniteHeight) {
-            auto& rawTrackSize = rawGridTrackSize(m_direction, i);
+            auto& rawTrackSize = GridLayoutFunctions::rawGridTrackSize(m_renderGrid->style(), m_direction, i, m_grid.autoRepeatTracks(m_direction), m_grid.explicitGridStart(m_direction));
             // Set the flag for repeating the track sizing algorithm. For flexible tracks, as per spec https://drafts.csswg.org/css-grid/#algo-flex-tracks,
             // in clause "if the free space is an indefinite length:", it states that "If using this flex fraction would cause the grid to be smaller than
             // the grid container’s min-width/height (or larger than the grid container’s max-width/height), then redo this step".
@@ -2244,7 +2205,7 @@ bool GridTrackSizingAlgorithm::isDirectionInMasonryDirection() const
 bool GridTrackSizingAlgorithm::hasAllLengthRowSizes() const
 {
     for (size_t rowIndex = 0; rowIndex < m_renderGrid->numTracks(Style::GridTrackSizingDirection::Rows); ++rowIndex) {
-        auto trackSize = rawGridTrackSize(Style::GridTrackSizingDirection::Rows, rowIndex);
+        auto trackSize = GridLayoutFunctions::rawGridTrackSize(m_renderGrid->style(), Style::GridTrackSizingDirection::Rows, rowIndex, m_grid.autoRepeatTracks(Style::GridTrackSizingDirection::Rows), m_grid.explicitGridStart(Style::GridTrackSizingDirection::Rows));
         if (!trackSize.isBreadth() && !trackSize.minTrackBreadth().isLength())
             return false;
     }

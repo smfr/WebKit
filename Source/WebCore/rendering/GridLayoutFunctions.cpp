@@ -375,6 +375,44 @@ bool isRelativeGridTrackBreadthAsAuto(const Style::GridTrackBreadth& length, std
     return length.isPercentOrCalculated() && !availableSpace;
 }
 
+const Style::GridTrackSize& rawGridTrackSize(const RenderStyle& renderStyle, Style::GridTrackSizingDirection direction, unsigned translatedIndex, unsigned autoRepeatTracksCount, unsigned explicitGridStart)
+{
+    auto& autoTrackStyles = renderStyle.gridAutoList(direction);
+    auto& tracks = renderStyle.gridTemplateList(direction);
+    auto& trackStyles = tracks.sizes;
+    auto& autoRepeatTrackStyles = tracks.autoRepeatSizes;
+    unsigned insertionPoint = tracks.autoRepeatInsertionPoint;
+
+    // We should not use Style::GridPositionsResolver::explicitGridXXXCount() for this because the
+    // explicit grid might be larger than the number of tracks in grid-template-rows|columns (if
+    // grid-template-areas is specified for example).
+    unsigned explicitTracksCount = trackStyles.size() + autoRepeatTracksCount;
+
+    int untranslatedIndexAsInt = translatedIndex - explicitGridStart;
+    unsigned autoTrackStylesSize = autoTrackStyles.size();
+    if (untranslatedIndexAsInt < 0) {
+        int index = untranslatedIndexAsInt % static_cast<int>(autoTrackStylesSize);
+        // We need to transpose the index because the first negative implicit line will get the last defined auto track and so on.
+        index += index ? autoTrackStylesSize : 0;
+        ASSERT(index >= 0);
+        return autoTrackStyles[index];
+    }
+
+    unsigned untranslatedIndex = static_cast<unsigned>(untranslatedIndexAsInt);
+    if (untranslatedIndex >= explicitTracksCount)
+        return autoTrackStyles[(untranslatedIndex - explicitTracksCount) % autoTrackStylesSize];
+
+    if (!autoRepeatTracksCount || untranslatedIndex < insertionPoint)
+        return trackStyles[untranslatedIndex];
+
+    if (untranslatedIndex < (insertionPoint + autoRepeatTracksCount)) {
+        unsigned autoRepeatLocalIndex = untranslatedIndexAsInt - insertionPoint;
+        return autoRepeatTrackStyles[autoRepeatLocalIndex % autoRepeatTrackStyles.size()];
+    }
+
+    return trackStyles[untranslatedIndex - autoRepeatTracksCount];
+}
+
 } // namespace GridLayoutFunctions
 
 } // namespace WebCore
