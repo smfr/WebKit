@@ -427,17 +427,22 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
     tracePoint(ProgrammaticScroll, scrollPosition.y(), frameView->frame().isMainFrame());
 
     auto requestedScrollData = RequestedScrollData {
-        .requestType = ScrollRequestType::PositionUpdate,
+        .requestType = (options.animated == ScrollIsAnimated::Yes) ? ScrollRequestType::AnimatedPositionUpdate : ScrollRequestType::PositionUpdate,
         .scrollPositionOrDelta = scrollPosition,
         .identifier = { },
         .scrollType = options.type,
         .clamping = options.clamping,
-        .animated = options.animated,
         .scrollbarRevealBehavior = scrollableArea.scrollbarRevealBehavior(),
     };
 
     if (options.originalScrollDelta) {
-        requestedScrollData.requestType = ScrollRequestType::DeltaUpdate;
+        if (options.animated == ScrollIsAnimated::Yes)
+            requestedScrollData.requestType = ScrollRequestType::AnimatedDeltaUpdate;
+        else if (options.interruptsAnimation == ScrollInterruptsAnimation::No)
+            requestedScrollData.requestType = ScrollRequestType::ImplicitDeltaUpdate;
+        else
+            requestedScrollData.requestType = ScrollRequestType::DeltaUpdate;
+
         requestedScrollData.scrollPositionOrDelta = *options.originalScrollDelta;
     }
 

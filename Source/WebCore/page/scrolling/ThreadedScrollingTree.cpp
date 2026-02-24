@@ -187,7 +187,7 @@ void ThreadedScrollingTree::didCommitTreeOnScrollingThread()
 
 bool ThreadedScrollingTree::scrollingTreeNodeRequestsScroll(ScrollingNodeID nodeID, const RequestedScrollData& request)
 {
-    if (request.animated == ScrollIsAnimated::Yes) {
+    if (isAnimatedUpdate(request.requestType)) {
         m_nodesWithPendingScrollAnimations.set(nodeID, request);
         return true;
     }

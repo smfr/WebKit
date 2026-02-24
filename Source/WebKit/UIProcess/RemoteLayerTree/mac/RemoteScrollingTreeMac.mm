@@ -172,22 +172,6 @@ void RemoteScrollingTreeMac::startPendingScrollAnimations()
 
         LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingTreeMac::startPendingScrollAnimations() for node " << nodeID << " with data " << data);
 
-        if (auto previousData = std::exchange(data.requestedDataBeforeAnimatedScroll, std::nullopt)) {
-            auto& [requestType, positionOrDeltaBeforeAnimatedScroll, scrollType, clamping] = *previousData;
-
-            switch (requestType) {
-            case ScrollRequestType::PositionUpdate:
-            case ScrollRequestType::DeltaUpdate: {
-                auto intermediatePosition = RequestedScrollData::computeDestinationPosition(targetNode->currentScrollPosition(), requestType, positionOrDeltaBeforeAnimatedScroll);
-                targetNode->scrollTo(intermediatePosition, scrollType, clamping);
-                break;
-            }
-            case ScrollRequestType::CancelAnimatedScroll:
-                targetNode->stopAnimatedScroll();
-                break;
-            }
-        }
-
         auto finalPosition = data.destinationPosition(targetNode->currentScrollPosition());
         targetNode->startAnimatedScrollToPosition(finalPosition);
     }
@@ -298,7 +282,7 @@ void RemoteScrollingTreeMac::didAddPendingScrollUpdate()
 
 bool RemoteScrollingTreeMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID nodeID, const RequestedScrollData& request)
 {
-    if (request.animated == ScrollIsAnimated::Yes) {
+    if (isAnimatedUpdate(request.requestType)) {
         ASSERT(m_treeLock.isLocked());
         m_nodesWithPendingScrollAnimations.set(nodeID, request);
         return true;

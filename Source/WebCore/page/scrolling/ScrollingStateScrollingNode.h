@@ -108,10 +108,9 @@ public:
     const RequestedKeyboardScrollData& keyboardScrollData() const { return m_keyboardScrollData; }
     WEBCORE_EXPORT void setKeyboardScrollData(const RequestedKeyboardScrollData&);
 
-    const RequestedScrollData& requestedScrollData() const { return m_requestedScrollData; }
+    const ScrollRequestData& requestedScrollData() const { return m_requestedScrollData; }
 
-    enum class CanMergeScrollData : bool { No, Yes };
-    WEBCORE_EXPORT void setRequestedScrollData(RequestedScrollData&&, CanMergeScrollData = CanMergeScrollData::Yes);
+    WEBCORE_EXPORT void setRequestedScrollData(RequestedScrollData&&);
 
     WEBCORE_EXPORT bool NODELETE hasScrollPositionRequest() const;
 
@@ -185,7 +184,7 @@ protected:
 #if ENABLE(SCROLLING_THREAD)
         OptionSet<SynchronousScrollingReason>,
 #endif
-        RequestedScrollData&&,
+        ScrollRequestData&&,
         FloatScrollSnapOffsetsInfo&&,
         std::optional<unsigned> currentHorizontalSnapPointIndex,
         std::optional<unsigned> currentVerticalSnapPointIndex,
@@ -211,6 +210,8 @@ protected:
     void dumpProperties(WTF::TextStream&, OptionSet<ScrollingStateTreeAsTextBehavior>) const override;
 
 private:
+    void mergeOrAppendScrollRequest(RequestedScrollData&&);
+
     FloatSize m_scrollableAreaSize;
     FloatSize m_totalContentsSize;
     FloatSize m_reachableContentsSize;
@@ -240,7 +241,7 @@ private:
 
     std::optional<ScrollbarColor> m_scrollbarColor;
     ScrollableAreaParameters m_scrollableAreaParameters;
-    RequestedScrollData m_requestedScrollData;
+    ScrollRequestData m_requestedScrollData;
     RequestedKeyboardScrollData m_keyboardScrollData;
 #if ENABLE(SCROLLING_THREAD)
     OptionSet<SynchronousScrollingReason> m_synchronousScrollingReasons;

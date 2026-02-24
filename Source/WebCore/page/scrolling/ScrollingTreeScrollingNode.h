@@ -102,7 +102,7 @@ public:
     void scrollTo(const FloatPoint&, ScrollType = ScrollType::User, ScrollClamping = ScrollClamping::Clamped);
     void scrollBy(const FloatSize&, ScrollClamping = ScrollClamping::Clamped);
 
-    void handleScrollPositionRequest(const RequestedScrollData&);
+    void handleScrollPositionRequests(const ScrollRequestData&);
 
     void handleKeyboardScrollRequest(const RequestedKeyboardScrollData&);
     void requestKeyboardScroll(const RequestedKeyboardScrollData&);
@@ -208,6 +208,8 @@ protected:
 
     bool shouldRubberBand(const PlatformWheelEvent&, EventTargeting) const;
     bool shouldRubberBandOnSide(BoxSide, RectEdges<bool> pinnedEdges) const;
+
+    void handleScrollPositionRequest(const RequestedScrollData&);
 
     void dumpProperties(WTF::TextStream&, OptionSet<ScrollingStateTreeAsTextBehavior>) const override;
 

@@ -1097,7 +1097,8 @@ public:
 
     void setViewNeedsDisplay(const WebCore::Region&);
     void requestScroll(const WebCore::FloatPoint& scrollPosition, const WebCore::IntPoint& scrollOrigin, WebCore::ScrollIsAnimated, WebCore::InterruptScrollAnimation);
-    
+
+    // FIXME: This is a scroll offset, unadjusted for content insets.
     WebCore::FloatPoint viewScrollPosition() const;
 
     void setNeedsScrollGeometryUpdates(bool);

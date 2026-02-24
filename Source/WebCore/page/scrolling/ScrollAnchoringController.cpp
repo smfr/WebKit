@@ -617,12 +617,14 @@ void ScrollAnchoringController::adjustScrollPositionForAnchoring()
 
     auto options = ScrollPositionChangeOptions::createProgrammatic();
     options.originalScrollDelta = adjustment;
+    options.interruptsAnimation = ScrollInterruptsAnimation::No;
 
     auto revealScope = ScrollbarRevealBehaviorScope(m_owningScrollableArea.get(), ScrollbarRevealBehavior::DontReveal);
 
     auto oldScrollType = m_owningScrollableArea->currentScrollType();
     m_owningScrollableArea->setCurrentScrollType(ScrollType::Programmatic);
 
+    // FIXME: This has to explicitly not stop animated scrolls (use ImplicitDeltaUpdate).
     if (!m_owningScrollableArea->requestScrollToPosition(newScrollPosition, options))
         m_owningScrollableArea->scrollToPositionWithoutAnimation(newScrollPosition);
 

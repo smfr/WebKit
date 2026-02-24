@@ -103,9 +103,17 @@ enum class ViewportRectStability {
 
 enum class ScrollRequestType : uint8_t {
     PositionUpdate,
+    AnimatedPositionUpdate,
     DeltaUpdate,
+    AnimatedDeltaUpdate,
+    ImplicitDeltaUpdate, // Allows animated scrolls to continue
     CancelAnimatedScroll
 };
+
+constexpr inline bool isAnimatedUpdate(ScrollRequestType type)
+{
+    return type == ScrollRequestType::AnimatedPositionUpdate || type == ScrollRequestType::AnimatedDeltaUpdate;
+}
 
 struct ScrollRequestIdentifierType;
 using ScrollRequestIdentifier = ObjectIdentifier<ScrollRequestIdentifierType>;
@@ -116,11 +124,7 @@ struct RequestedScrollData {
     Markable<ScrollRequestIdentifier> identifier { };
     ScrollType scrollType { ScrollType::User };
     ScrollClamping clamping { ScrollClamping::Clamped };
-    ScrollIsAnimated animated { ScrollIsAnimated::No };
     ScrollbarRevealBehavior scrollbarRevealBehavior { ScrollbarRevealBehavior::Default };
-    std::optional<std::tuple<ScrollRequestType, Variant<FloatPoint, FloatSize>, ScrollType, ScrollClamping>> requestedDataBeforeAnimatedScroll { };
-
-    void merge(RequestedScrollData&&);
 
     WEBCORE_EXPORT FloatPoint destinationPosition(FloatPoint currentScrollPosition) const;
     WEBCORE_EXPORT static FloatPoint computeDestinationPosition(FloatPoint currentScrollPosition, ScrollRequestType, const Variant<FloatPoint, FloatSize>& scrollPositionOrDelta);
@@ -129,7 +133,7 @@ struct RequestedScrollData {
     {
         if (requestType == ScrollRequestType::PositionUpdate)
             return std::get<FloatPoint>(scrollPositionOrDelta) == std::get<FloatPoint>(other.scrollPositionOrDelta);
-        if (requestType == ScrollRequestType::DeltaUpdate)
+        if (requestType == ScrollRequestType::DeltaUpdate || requestType == ScrollRequestType::ImplicitDeltaUpdate)
             return std::get<FloatSize>(scrollPositionOrDelta) == std::get<FloatSize>(other.scrollPositionOrDelta);
         return true;
     }
@@ -141,11 +145,11 @@ struct RequestedScrollData {
             && comparePositionOrDelta(other)
             && scrollType == other.scrollType
             && clamping == other.clamping
-            && animated == other.animated
-            && scrollbarRevealBehavior == other.scrollbarRevealBehavior
-            && requestedDataBeforeAnimatedScroll == other.requestedDataBeforeAnimatedScroll;
+            && scrollbarRevealBehavior == other.scrollbarRevealBehavior;
     }
 };
+
+using ScrollRequestData = Vector<RequestedScrollData, 2>;
 
 enum class KeyboardScrollAction : uint8_t {
     StartAnimation,

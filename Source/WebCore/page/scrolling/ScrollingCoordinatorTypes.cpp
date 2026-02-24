@@ -28,44 +28,6 @@
 
 namespace WebCore {
 
-void RequestedScrollData::merge(RequestedScrollData&& other)
-{
-    if (other.requestType == ScrollRequestType::CancelAnimatedScroll && animated == ScrollIsAnimated::No) {
-        // Carry over the previously requested scroll position so that we can set `requestedDataBeforeAnimatedScroll`
-        // below in the case where the cancelled animated scroll is immediately followed by another animated scroll.
-        other.scrollPositionOrDelta = scrollPositionOrDelta;
-    } else if ((other.requestType == ScrollRequestType::PositionUpdate || other.requestType == ScrollRequestType::DeltaUpdate) && other.animated == ScrollIsAnimated::Yes) {
-        switch (animated) {
-        case ScrollIsAnimated::No:
-            other.requestedDataBeforeAnimatedScroll = { requestType, scrollPositionOrDelta, scrollType, clamping };
-            break;
-        case ScrollIsAnimated::Yes:
-            other.requestedDataBeforeAnimatedScroll = requestedDataBeforeAnimatedScroll;
-            break;
-        }
-    } else if (other.requestType == ScrollRequestType::DeltaUpdate && animated == ScrollIsAnimated::No) {
-        switch (requestType) {
-        case ScrollRequestType::PositionUpdate: {
-            other.requestType = ScrollRequestType::PositionUpdate;
-            other.scrollPositionOrDelta = std::get<FloatPoint>(scrollPositionOrDelta) + std::get<FloatSize>(other.scrollPositionOrDelta);
-            break;
-        }
-        case ScrollRequestType::DeltaUpdate:
-            std::get<FloatSize>(other.scrollPositionOrDelta) += std::get<FloatSize>(scrollPositionOrDelta);
-            break;
-        default:
-            break;
-        }
-    }
-
-    // Don't let `DontReveal` clobber `Default`.
-    if (scrollbarRevealBehavior == ScrollbarRevealBehavior::Default)
-        other.scrollbarRevealBehavior = ScrollbarRevealBehavior::Default;
-
-    other.identifier = std::max(*identifier, *other.identifier);
-    *this = WTF::move(other);
-}
-
 FloatPoint RequestedScrollData::destinationPosition(FloatPoint currentScrollPosition) const
 {
     return computeDestinationPosition(currentScrollPosition, requestType, scrollPositionOrDelta);
@@ -73,7 +35,7 @@ FloatPoint RequestedScrollData::destinationPosition(FloatPoint currentScrollPosi
 
 FloatPoint RequestedScrollData::computeDestinationPosition(FloatPoint currentScrollPosition, ScrollRequestType requestType, const Variant<FloatPoint, FloatSize>& scrollPositionOrDelta)
 {
-    if (requestType == ScrollRequestType::DeltaUpdate)
+    if (requestType == ScrollRequestType::DeltaUpdate || requestType == ScrollRequestType::AnimatedDeltaUpdate || requestType == ScrollRequestType::ImplicitDeltaUpdate)
         return currentScrollPosition + std::get<FloatSize>(scrollPositionOrDelta);
 
     return std::get<FloatPoint>(scrollPositionOrDelta);
@@ -215,9 +177,12 @@ TextStream& operator<<(TextStream& ts, ScrollUpdateType type)
 TextStream& operator<<(WTF::TextStream& ts, ScrollRequestType type)
 {
     switch (type) {
-    case ScrollRequestType::CancelAnimatedScroll: ts << "cancel animated scroll"_s; break;
     case ScrollRequestType::PositionUpdate: ts << "position update"_s; break;
+    case ScrollRequestType::AnimatedPositionUpdate: ts << "animated position update"_s; break;
     case ScrollRequestType::DeltaUpdate: ts << "delta update"_s; break;
+    case ScrollRequestType::AnimatedDeltaUpdate: ts << "animated delta update"_s; break;
+    case ScrollRequestType::ImplicitDeltaUpdate: ts << "implicit delta update"_s; break;
+    case ScrollRequestType::CancelAnimatedScroll: ts << "cancel animated scroll"_s; break;
     }
     return ts;
 }
@@ -229,7 +194,7 @@ TextStream& operator<<(TextStream& ts, const RequestedScrollData& requestedScrol
     if (requestedScrollData.requestType == ScrollRequestType::CancelAnimatedScroll)
         return ts;
 
-    if (requestedScrollData.requestType == ScrollRequestType::DeltaUpdate)
+    if (requestedScrollData.requestType == ScrollRequestType::DeltaUpdate || requestedScrollData.requestType == ScrollRequestType::AnimatedDeltaUpdate || requestedScrollData.requestType == ScrollRequestType::ImplicitDeltaUpdate)
         ts.dumpProperty("scroll delta"_s, std::get<FloatSize>(requestedScrollData.scrollPositionOrDelta));
     else
         ts.dumpProperty("position"_s, std::get<FloatPoint>(requestedScrollData.scrollPositionOrDelta));
@@ -240,24 +205,11 @@ TextStream& operator<<(TextStream& ts, const RequestedScrollData& requestedScrol
     if (requestedScrollData.clamping == ScrollClamping::Clamped)
         ts.dumpProperty("clamping"_s, requestedScrollData.clamping);
 
-    if (requestedScrollData.animated == ScrollIsAnimated::Yes)
-        ts.dumpProperty("animated"_s, requestedScrollData.animated == ScrollIsAnimated::Yes);
-
     if (requestedScrollData.scrollbarRevealBehavior == ScrollbarRevealBehavior::DontReveal)
         ts.dumpProperty("scrollbar-reveal"_s, requestedScrollData.scrollbarRevealBehavior);
 
-    if (requestedScrollData.requestedDataBeforeAnimatedScroll) {
-        auto oldType = std::get<0>(*requestedScrollData.requestedDataBeforeAnimatedScroll);
-        ts.dumpProperty("before-animated scroll type"_s, oldType);
-
-        if (oldType == ScrollRequestType::DeltaUpdate)
-            ts.dumpProperty("before-animated scroll delta"_s, std::get<FloatSize>(std::get<1>(*requestedScrollData.requestedDataBeforeAnimatedScroll)));
-        else
-            ts.dumpProperty("before-animated scroll position"_s, std::get<FloatPoint>(std::get<1>(*requestedScrollData.requestedDataBeforeAnimatedScroll)));
-
-        ts.dumpProperty("before-animated scroll programatic"_s, std::get<2>(*requestedScrollData.requestedDataBeforeAnimatedScroll));
-        ts.dumpProperty("before-animated scroll animated"_s, std::get<3>(*requestedScrollData.requestedDataBeforeAnimatedScroll));
-    }
+    if (requestedScrollData.identifier)
+        ts.dumpProperty("identifier"_s, *requestedScrollData.identifier);
 
     return ts;
 }

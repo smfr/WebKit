@@ -83,9 +83,9 @@ const RemoteLayerTreeHost* RemoteScrollingCoordinatorProxy::layerTreeHost() cons
     return remoteDrawingArea ? &remoteDrawingArea->remoteLayerTreeHost() : nullptr;
 }
 
-std::optional<RequestedScrollData> RemoteScrollingCoordinatorProxy::commitScrollingTreeState(IPC::Connection& connection, const RemoteScrollingCoordinatorTransaction& transaction, std::optional<LayerHostingContextIdentifier> identifier)
+ScrollRequestData RemoteScrollingCoordinatorProxy::commitScrollingTreeState(IPC::Connection& connection, const RemoteScrollingCoordinatorTransaction& transaction, std::optional<LayerHostingContextIdentifier> identifier)
 {
-    m_requestedScroll = { };
+    m_scrollRequestData.clear();
 
     auto stateTree = WTF::move(const_cast<RemoteScrollingCoordinatorTransaction&>(transaction).scrollingStateTree());
 
@@ -101,31 +101,42 @@ std::optional<RequestedScrollData> RemoteScrollingCoordinatorProxy::commitScroll
     connectStateNodeLayers(*stateTree, *layerTreeHost);
     bool succeeded = m_scrollingTree->commitTreeState(WTF::move(stateTree), identifier);
 
-    MESSAGE_CHECK_WITH_RETURN_VALUE(succeeded, std::nullopt);
+    MESSAGE_CHECK_WITH_RETURN_VALUE(succeeded, ScrollRequestData());
 
     establishLayerTreeScrollingRelations(*layerTreeHost);
     
     if (transaction.clearScrollLatching())
         m_scrollingTree->clearLatchedNode();
 
-    return std::exchange(m_requestedScroll, { });
+    return std::exchange(m_scrollRequestData, { });
 }
 
-void RemoteScrollingCoordinatorProxy::adjustMainFrameDelegatedScrollPosition(RequestedScrollData&& requestedScroll)
+void RemoteScrollingCoordinatorProxy::adjustMainFrameDelegatedScrollPosition(ScrollRequestData&& requestData)
 {
-    auto currentScrollPosition = currentMainFrameScrollPosition();
-    if (auto previousData = std::exchange(requestedScroll.requestedDataBeforeAnimatedScroll, std::nullopt)) {
-        auto& [requestType, positionOrDeltaBeforeAnimatedScroll, scrollType, clamping] = *previousData;
-        if (requestType != ScrollRequestType::CancelAnimatedScroll)
-            currentScrollPosition = RequestedScrollData::computeDestinationPosition(currentScrollPosition, requestType, positionOrDeltaBeforeAnimatedScroll);
-    }
+    // Note that this comes from the scrolling tree, and is not updated live when -requestScroll is called below.
+    auto scrollPosition = currentMainFrameScrollPosition();
 
-    // FIXME: Maybe we should avoid interrupting animations in more cases?
-    auto interruptScrollAnimation = requestedScroll.requestType == ScrollRequestType::DeltaUpdate ? InterruptScrollAnimation::No : InterruptScrollAnimation::Yes;
-    auto targetScrollPosition = requestedScroll.destinationPosition(currentScrollPosition);
-    LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::adjustViewScrollPosition requesting scroll to " << targetScrollPosition);
+    auto handleOneRequest = [&](const RequestedScrollData& request) {
+        switch (request.requestType) {
+        case ScrollRequestType::PositionUpdate:
+        case ScrollRequestType::AnimatedPositionUpdate:
+        case ScrollRequestType::DeltaUpdate:
+        case ScrollRequestType::AnimatedDeltaUpdate:
+        case ScrollRequestType::ImplicitDeltaUpdate: {
+            auto interruptScrollAnimation = request.requestType == ScrollRequestType::ImplicitDeltaUpdate ? InterruptScrollAnimation::No : InterruptScrollAnimation::Yes;
+            scrollPosition = request.destinationPosition(scrollPosition);
+            LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::adjustViewScrollPosition requesting scroll to " << scrollPosition << " interrupting " << (interruptScrollAnimation == InterruptScrollAnimation::Yes));
+            protect(webPageProxy())->requestScroll(scrollPosition, scrollOrigin(), isAnimatedUpdate(request.requestType) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No, interruptScrollAnimation);
+            break;
+        }
+        case ScrollRequestType::CancelAnimatedScroll:
+            protect(webPageProxy())->requestScroll(scrollPosition, scrollOrigin(), ScrollIsAnimated::No, InterruptScrollAnimation::Yes);
+            break;
+        }
+    };
 
-    protect(webPageProxy())->requestScroll(targetScrollPosition, scrollOrigin(), requestedScroll.animated, interruptScrollAnimation);
+    for (auto& request : requestData)
+        handleOneRequest(request);
 }
 
 void RemoteScrollingCoordinatorProxy::stickyScrollingTreeNodeBeganSticking(ScrollingNodeID)
@@ -248,7 +259,7 @@ void RemoteScrollingCoordinatorProxy::receivedLastScrollingTreeNodeUpdateReply()
 bool RemoteScrollingCoordinatorProxy::scrollingTreeNodeRequestsScroll(ScrollingNodeID scrolledNodeID, const RequestedScrollData& request)
 {
     if (scrolledNodeID == rootScrollingNodeID()) {
-        m_requestedScroll = request;
+        m_scrollRequestData.append(request);
         return true;
     }
 

@@ -4368,10 +4368,10 @@ enum class WebCore::ScrollType : bool;
     Markable<WebCore::ScrollRequestIdentifier> identifier;
     WebCore::ScrollType scrollType;
     WebCore::ScrollClamping clamping;
-    WebCore::ScrollIsAnimated animated;
     WebCore::ScrollbarRevealBehavior scrollbarRevealBehavior;
-    std::optional<std::tuple<WebCore::ScrollRequestType, Variant<WebCore::FloatPoint, WebCore::FloatSize>, WebCore::ScrollType, WebCore::ScrollClamping>> requestedDataBeforeAnimatedScroll;
 }
+
+using WebCore::ScrollRequestData = Vector<WebCore::RequestedScrollData, 2>;
 
 [Alias=struct ScrollSnapOffsetsInfo<float,WebCore::FloatRect>, CustomHeader] alias WebCore::FloatScrollSnapOffsetsInfo {
     std::optional<WebCore::ScrollSnapStrictness> strictness;
@@ -8068,7 +8068,10 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
 header: <WebCore/ScrollingCoordinatorTypes.h>
 [Nested] enum class WebCore::ScrollRequestType : uint8_t {
     PositionUpdate,
+    AnimatedPositionUpdate,
     DeltaUpdate,
+    AnimatedDeltaUpdate,
+    ImplicitDeltaUpdate,
     CancelAnimatedScroll
 };
 
