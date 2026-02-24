@@ -19,15 +19,17 @@ editing/execCommand/ios [ Pass ]
 editing/deleting/ios [ Pass ]
 editing/input/cocoa [ Pass ]
 editing/selection/ios [ Pass ]
+fast/page-color-sampling [ Pass ]
+http/tests/pdf [ Pass ]
 http/tests/quicklook [ Pass ]
+http/tests/swipe [ Pass ]
 media/ios [ Pass ]
 media/audioSession/ios [ Pass ]
+pdf [ Pass ]
 quicklook [ Pass ]
 system-preview [ Pass ]
 remote-layer-tree [ Pass ]
 swipe [ Pass ]
-http/tests/swipe [ Pass ]
-fast/page-color-sampling [ Pass ]
 webanimations/threaded-animations [ Pass ]
 
 webkit.org/b/271780 fast/dom/Orientation/no-orientation-change-event-when-unparenting-view.html [ Pass Timeout ] # change back to pass when bug resolved
@@ -8486,3 +8488,7 @@ webkit.org/b/308084 [ Release ] imported/w3c/web-platform-tests/css/filter-effec
 webkit.org/b/308243 [ Release ] http/tests/site-isolation/mixedContent/redirect-https-to-http-iframe-in-main-frame.html [ Pass Failure ]
 
 imported/w3c/web-platform-tests/css/css-highlight-api/highlight-text-across-elements.html [ ImageOnlyFailure ]
+
+# webkit.org/b/308506 UnifiedPDFPlugin on iOS should receive full annotations support
+pdf/annotations [ Skip ]
+pdf/pdf-in-iframe-with-text-annotation.html [ Skip ]
