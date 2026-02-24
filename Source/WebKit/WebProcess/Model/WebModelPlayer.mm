@@ -253,7 +253,7 @@ void WebModelPlayer::load(WebCore::Model& modelSource, WebCore::LayoutSize size)
     if (!window)
         return;
 
-    RefPtr gpu = window->protectedNavigator()->gpu();
+    RefPtr gpu = protect(window->navigator())->gpu();
     if (!gpu)
         return;
 

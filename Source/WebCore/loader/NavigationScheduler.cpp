@@ -355,7 +355,7 @@ public:
 
     std::optional<Ref<HistoryItem>> findBackForwardItemByKey(const LocalFrame& localFrame) const
     {
-        RefPtr entry = localFrame.window()->protectedNavigation()->findEntryByKey(m_key);
+        RefPtr entry = protect(localFrame.window()->navigation())->findEntryByKey(m_key);
         if (!entry)
             return std::nullopt;
 

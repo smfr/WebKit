@@ -612,7 +612,7 @@ std::optional<NowPlayingInfo> AudioContext::nowPlayingInfo() const
         return nowPlayingInfo;
 
 #if ENABLE(MEDIA_SESSION)
-    if (RefPtr mediaSession = NavigatorMediaSession::mediaSessionIfExists(window->protectedNavigator()))
+    if (RefPtr mediaSession = NavigatorMediaSession::mediaSessionIfExists(protect(window->navigator())))
         mediaSession->updateNowPlayingInfo(nowPlayingInfo);
 #endif
 

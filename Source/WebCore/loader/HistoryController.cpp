@@ -63,7 +63,7 @@ namespace WebCore {
 
 static inline void addVisitedLink(Page& page, const URL& url)
 {
-    page.protectedVisitedLinkStore()->addVisitedLink(page, computeSharedStringHash(url.string()));
+    protect(page.visitedLinkStore())->addVisitedLink(page, computeSharedStringHash(url.string()));
 }
 
 static inline bool canRecordHistoryForFrame(const LocalFrame& frame)

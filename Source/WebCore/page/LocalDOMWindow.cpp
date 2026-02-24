@@ -726,11 +726,6 @@ Navigation& LocalDOMWindow::navigation()
     return *m_navigation;
 }
 
-Ref<Navigation> LocalDOMWindow::protectedNavigation()
-{
-    return navigation();
-}
-
 Crypto& LocalDOMWindow::crypto() const
 {
     if (!m_crypto)
@@ -788,11 +783,6 @@ Navigator& LocalDOMWindow::navigator()
     ASSERT(m_navigator->scriptExecutionContext() == document());
 
     return *m_navigator;
-}
-
-Ref<Navigator> LocalDOMWindow::protectedNavigator()
-{
-    return navigator();
 }
 
 Performance& LocalDOMWindow::performance() const

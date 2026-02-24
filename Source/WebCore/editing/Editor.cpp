@@ -4309,7 +4309,7 @@ void Editor::scanSelectionForTelephoneNumbers()
     
     auto notifyController = makeScopeExit([&] {
         if (RefPtr page = document().page())
-            page->protectedServicesOverlayController()->selectedTelephoneNumberRangesChanged();
+            protect(page->servicesOverlayController())->selectedTelephoneNumberRangesChanged();
     });
 
     auto selection = document().selection().selection();

@@ -254,7 +254,7 @@ static std::optional<PermissionState> determineGeolocationPermissionState(Permis
     if (!window)
         return std::nullopt;
 
-    RefPtr geolocation = NavigatorGeolocation::optionalGeolocation(window->protectedNavigator());
+    RefPtr geolocation = NavigatorGeolocation::optionalGeolocation(protect(window->navigator()));
 
     switch (permissionState) {
     case PermissionState::Granted:

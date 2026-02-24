@@ -163,7 +163,7 @@ void UserMediaRequest::allow(CaptureDevice&& audioDevice, CaptureDevice&& videoD
 
     Ref document = downcast<Document>(*scriptExecutionContext());
     RefPtr localWindow = document->window();
-    RefPtr mediaDevices = localWindow ? NavigatorMediaDevices::mediaDevices(localWindow->protectedNavigator()) : nullptr;
+    RefPtr mediaDevices = localWindow ? NavigatorMediaDevices::mediaDevices(protect(localWindow->navigator())) : nullptr;
     if (mediaDevices)
         mediaDevices->willStartMediaCapture(!!audioDevice, !!videoDevice);
 

@@ -651,7 +651,7 @@ void Navigation::updateNavigationEntry(Ref<HistoryItem>&& item, ShouldCopyStateO
             if (!window)
                 continue;
 
-            window->protectedNavigation()->updateNavigationEntry(childItem.releaseNonNull(), shouldCopyStateObjectFromCurrentEntry);
+            protect(window->navigation())->updateNavigationEntry(childItem.releaseNonNull(), shouldCopyStateObjectFromCurrentEntry);
         }
     }
 }
@@ -666,7 +666,7 @@ void Navigation::disposeOfForwardEntriesInParents(BackForwardItemIdentifier item
     if (!localMainFrameWindow)
         return;
 
-    localMainFrameWindow->protectedNavigation()->recursivelyDisposeOfForwardEntriesInParents(itemID, protect(frame()).get());
+    protect(localMainFrameWindow->navigation())->recursivelyDisposeOfForwardEntriesInParents(itemID, protect(frame()).get());
 }
 
 void Navigation::recursivelyDisposeOfForwardEntriesInParents(BackForwardItemIdentifier itemID, LocalFrame* navigatedFrame)
@@ -700,7 +700,7 @@ void Navigation::recursivelyDisposeOfForwardEntriesInParents(BackForwardItemIden
         if (!window)
             continue;
 
-        window->protectedNavigation()->recursivelyDisposeOfForwardEntriesInParents(itemID, navigatedFrame);
+        protect(window->navigation())->recursivelyDisposeOfForwardEntriesInParents(itemID, navigatedFrame);
     }
 }
 

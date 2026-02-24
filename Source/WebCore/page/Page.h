@@ -410,7 +410,6 @@ public:
 
     static void refreshPlugins(bool reload);
     WEBCORE_EXPORT PluginData& pluginData();
-    WEBCORE_EXPORT Ref<PluginData> protectedPluginData();
     void clearPluginData();
 
     OpportunisticTaskScheduler& opportunisticTaskScheduler() const { return m_opportunisticTaskScheduler.get(); }
@@ -500,7 +499,6 @@ public:
     const ContextMenuController& contextMenuController() const { return m_contextMenuController.get(); }
 #endif
     PageInspectorController& inspectorController() { return m_inspectorController.get(); }
-    WEBCORE_EXPORT Ref<PageInspectorController> NODELETE protectedInspectorController();
     PointerCaptureController& pointerCaptureController() { return m_pointerCaptureController.get(); }
 #if ENABLE(POINTER_LOCK)
     PointerLockController& pointerLockController() { return m_pointerLockController.get(); }
@@ -733,21 +731,17 @@ public:
 
 #if PLATFORM(MAC) && (ENABLE(SERVICE_CONTROLS) || ENABLE(TELEPHONE_NUMBER_DETECTION))
     ServicesOverlayController& servicesOverlayController() { return m_servicesOverlayController.get(); }
-    Ref<ServicesOverlayController> NODELETE protectedServicesOverlayController();
 #endif
     ImageOverlayController& imageOverlayController();
-    Ref<ImageOverlayController> protectedImageOverlayController();
     ImageOverlayController* imageOverlayControllerIfExists() { return m_imageOverlayController.get(); }
 
 #if ENABLE(IMAGE_ANALYSIS)
     WEBCORE_EXPORT ImageAnalysisQueue& imageAnalysisQueue();
-    WEBCORE_EXPORT Ref<ImageAnalysisQueue> protectedImageAnalysisQueue();
     ImageAnalysisQueue* imageAnalysisQueueIfExists() { return m_imageAnalysisQueue.get(); }
 #endif
 
 #if ENABLE(WHEEL_EVENT_LATCHING)
     ScrollLatchingController& scrollLatchingController();
-    Ref<ScrollLatchingController> protectedScrollLatchingController();
     ScrollLatchingController* scrollLatchingControllerIfExists() { return m_scrollLatchingController.get(); }
 #endif // ENABLE(WHEEL_EVENT_LATCHING)
 
@@ -991,13 +985,11 @@ public:
     PluginInfoProvider& NODELETE pluginInfoProvider();
 
     UserContentProvider& userContentProviderForFrame() { return m_userContentProvider; }
-    WEBCORE_EXPORT Ref<UserContentProvider> NODELETE protectedUserContentProviderForFrame();
     WEBCORE_EXPORT void setUserContentProviderForWebKitLegacy(Ref<UserContentProvider>&&);
 
     ScreenOrientationManager* NODELETE screenOrientationManager() const;
 
     VisitedLinkStore& NODELETE visitedLinkStore();
-    Ref<VisitedLinkStore> NODELETE protectedVisitedLinkStore();
     WEBCORE_EXPORT void setVisitedLinkStore(Ref<VisitedLinkStore>&&);
 
     std::optional<uint64_t> noiseInjectionHashSaltForDomain(const RegistrableDomain&);
@@ -1409,8 +1401,6 @@ private:
     void setIsVisuallyIdleInternal(bool);
 
     void stopKeyboardScrollAnimation();
-
-    Ref<DocumentSyncData> NODELETE protectedTopDocumentSyncData() const;
 
     enum ShouldHighlightMatches { DoNotHighlightMatches, HighlightMatches };
     enum ShouldMarkMatches { DoNotMarkMatches, MarkMatches };

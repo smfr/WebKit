@@ -6154,7 +6154,7 @@ void Document::processCaptureStateDidChange(Function<bool(const Page&)>&& isPage
         return;
 
     RefPtr window = this->window();
-    RefPtr mediaSession = window ? NavigatorMediaSession::mediaSessionIfExists(window->protectedNavigator()) : nullptr;
+    RefPtr mediaSession = window ? NavigatorMediaSession::mediaSessionIfExists(protect(window->navigator())) : nullptr;
     if (!mediaSession)
         return;
 
@@ -6228,7 +6228,7 @@ void Document::voiceActivityDetected()
         return;
 
     RefPtr window = this->window();
-    RefPtr mediaSession = window ? NavigatorMediaSession::mediaSessionIfExists(window->protectedNavigator()) : nullptr;
+    RefPtr mediaSession = window ? NavigatorMediaSession::mediaSessionIfExists(protect(window->navigator())) : nullptr;
     if (!mediaSession)
         return;
 

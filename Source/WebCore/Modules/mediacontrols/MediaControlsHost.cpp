@@ -992,7 +992,7 @@ RefPtr<MediaSession> MediaControlsHost::mediaSession() const
     if (!window)
         return { };
 
-    return NavigatorMediaSession::mediaSessionIfExists(window->protectedNavigator());
+    return NavigatorMediaSession::mediaSessionIfExists(protect(window->navigator()));
 }
 
 void MediaControlsHost::ensureMediaSessionObserver()

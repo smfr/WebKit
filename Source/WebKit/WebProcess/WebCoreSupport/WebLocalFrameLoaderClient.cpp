@@ -1702,7 +1702,7 @@ ObjectContentType WebLocalFrameLoaderClient::objectContentType(const URL& url, c
         if (mimeType.isEmpty()) {
             // Check if there's a plug-in around that can handle the extension.
             if (RefPtr webPage = m_frame->page()) {
-                if (pluginSupportsExtension(protect(webPage->corePage())->protectedPluginData(), extension))
+                if (pluginSupportsExtension(protect(protect(webPage->corePage())->pluginData()), extension))
                     return ObjectContentType::PlugIn;
             }
             return ObjectContentType::Frame;
@@ -1719,7 +1719,7 @@ ObjectContentType WebLocalFrameLoaderClient::objectContentType(const URL& url, c
 
     if (RefPtr webPage = m_frame->page()) {
         auto allowedPluginTypes = PluginData::OnlyApplicationPlugins;
-        if (protect(webPage->corePage())->protectedPluginData()->supportsMimeType(mimeType, allowedPluginTypes))
+        if (protect(protect(webPage->corePage())->pluginData())->supportsMimeType(mimeType, allowedPluginTypes))
             return ObjectContentType::PlugIn;
     }
 

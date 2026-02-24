@@ -1650,7 +1650,7 @@ MediaSession* MediaElementSession::mediaSession() const
     RefPtr window = element->document().window();
     if (!window)
         return nullptr;
-    return &NavigatorMediaSession::mediaSession(window->protectedNavigator());
+    return &NavigatorMediaSession::mediaSession(protect(window->navigator()));
 #else
     return nullptr;
 #endif

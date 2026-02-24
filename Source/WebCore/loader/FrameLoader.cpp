@@ -606,7 +606,7 @@ void FrameLoader::stopLoading(UnloadEventPolicy unloadEventPolicy)
 
         if (document->settings().navigationAPIEnabled() && !m_doNotAbortNavigationAPI && unloadEventPolicy != UnloadEventPolicy::UnloadAndPageHide) {
             RefPtr window = frame->document()->window();
-            window->protectedNavigation()->abortOngoingNavigationIfNeeded();
+            protect(window->navigation())->abortOngoingNavigationIfNeeded();
         }
     }
 
@@ -2193,7 +2193,7 @@ void FrameLoader::stopForUserCancel(bool deferCheckLoadComplete)
 
     if (m_frame->document()->settings().navigationAPIEnabled()) {
         RefPtr window = m_frame->document()->window();
-        window->protectedNavigation()->abortOngoingNavigationIfNeeded();
+        protect(window->navigation())->abortOngoingNavigationIfNeeded();
     }
 
 #if PLATFORM(IOS_FAMILY)
@@ -2363,7 +2363,7 @@ void FrameLoader::commitProvisionalLoad()
                 if (RefPtr page = frame->page(); page && *navigationAPIType != NavigationNavigationType::Reload)
                     newItem = history().createItemWithLoader(page->historyItemClient(), pdl.get());
 
-                activation = window->protectedNavigation()->createForPageswapEvent(newItem.get(), pdl.get(), !!cachedPage);
+                activation = protect(window->navigation())->createForPageswapEvent(newItem.get(), pdl.get(), !!cachedPage);
             }
         }
         document->dispatchPageswapEvent(canTriggerCrossDocumentViewTransition, WTF::move(activation));
@@ -4426,7 +4426,7 @@ bool FrameLoader::dispatchNavigateEvent(FrameLoadType loadType, const FrameLoadR
 
     RefPtr sourceElement = event ? dynamicDowncast<Element>(event->target()) : nullptr;
 
-    return window->protectedNavigation()->dispatchPushReplaceReloadNavigateEvent(newURL, navigationType, isSameDocument, formState, classicHistoryAPIState, sourceElement.get());
+    return protect(window->navigation())->dispatchPushReplaceReloadNavigateEvent(newURL, navigationType, isSameDocument, formState, classicHistoryAPIState, sourceElement.get());
 }
 
 void FrameLoader::loadSameDocumentItem(HistoryItem& item)

@@ -136,7 +136,6 @@ public:
     BarProp& statusbar();
     BarProp& toolbar();
     WEBCORE_EXPORT Navigator& navigator();
-    WEBCORE_EXPORT Ref<Navigator> protectedNavigator();
     Navigator* optionalNavigator() const { return m_navigator.get(); }
 
     WEBCORE_EXPORT static void NODELETE overrideTransientActivationDurationForTesting(std::optional<Seconds>&&);
@@ -351,7 +350,6 @@ public:
 
     // Navigation API
     WEBCORE_EXPORT Navigation& navigation();
-    Ref<Navigation> protectedNavigation();
 
     void willDetachDocumentFromFrame();
     void willDestroyCachedFrame();

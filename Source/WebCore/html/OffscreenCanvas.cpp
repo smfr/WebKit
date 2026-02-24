@@ -250,7 +250,7 @@ ExceptionOr<std::optional<OffscreenRenderingContext>> OffscreenCanvas::getContex
                     m_context = GPUCanvasContext::create(*this, *gpu, nullptr);
             } else if (RefPtr document = dynamicDowncast<Document>(scriptExecutionContext)) {
                 if (RefPtr window = document->window()) {
-                    if (RefPtr gpu = window->protectedNavigator()->gpu())
+                    if (RefPtr gpu = protect(window->navigator())->gpu())
                         m_context = GPUCanvasContext::create(*this, *gpu, document.get());
                 }
             }

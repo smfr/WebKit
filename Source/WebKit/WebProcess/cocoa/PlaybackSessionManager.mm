@@ -586,7 +586,7 @@ void PlaybackSessionManager::setMediaSessionAndRegisterAsObserver()
         return;
     }
 
-    auto mediaSession = NavigatorMediaSession::mediaSessionIfExists(window->protectedNavigator().get());
+    auto mediaSession = NavigatorMediaSession::mediaSessionIfExists(protect(window->navigator()).get());
     if (!mediaSession) {
         m_mediaSession = nullptr;
         return;
