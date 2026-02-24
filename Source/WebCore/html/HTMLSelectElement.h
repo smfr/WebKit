@@ -244,8 +244,8 @@ private:
     void typeAheadFind(KeyboardEvent&);
     void saveLastSelection();
 
-    bool isOptionalFormControl() const final { return !isRequiredFormControl(); }
-    bool isRequiredFormControl() const final;
+    bool NODELETE isOptionalFormControl() const final { return !isRequiredFormControl(); }
+    bool NODELETE isRequiredFormControl() const final;
 
     bool hasPlaceholderLabelOption() const;
 

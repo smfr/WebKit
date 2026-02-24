@@ -394,7 +394,7 @@ StyleAppearance RenderTheme::autoAppearanceForElement(RenderStyle& style, const 
     Ref element = *elementPtr;
 
     if (RefPtr input = dynamicDowncast<HTMLInputElement>(element)) {
-        if (input->isTextButton() || input->isUploadButton())
+        if (input->isTextButton())
             return StyleAppearance::Button;
 
         if (input->isSwitch())

@@ -84,7 +84,7 @@ private:
 
     bool canStartSelection() const final { return false; }
 
-    bool isOptionalFormControl() const final { return true; }
+    bool NODELETE isOptionalFormControl() const final { return true; }
     bool computeWillValidate() const final;
 
     bool isSubmitButton() const final;

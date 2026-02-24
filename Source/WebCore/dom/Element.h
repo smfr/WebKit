@@ -664,18 +664,18 @@ public:
     virtual bool NODELETE isFormListedElement() const { return false; }
     virtual bool NODELETE isValidatedFormListedElement() const { return false; }
     virtual bool NODELETE isMaybeFormAssociatedCustomElement() const { return false; }
-    virtual bool isSpinButtonElement() const { return false; }
-    virtual bool isTextFormControlElement() const { return false; }
-    virtual bool isTextField() const { return false; }
-    virtual bool isTextPlaceholderElement() const { return false; }
-    virtual bool isOptionalFormControl() const { return false; }
-    virtual bool isRequiredFormControl() const { return false; }
+    virtual bool NODELETE isSpinButtonElement() const { return false; }
+    virtual bool NODELETE isTextFormControlElement() const { return false; }
+    virtual bool NODELETE isTextField() const { return false; }
+    virtual bool NODELETE isTextPlaceholderElement() const { return false; }
+    virtual bool NODELETE isOptionalFormControl() const { return false; }
+    virtual bool NODELETE isRequiredFormControl() const { return false; }
+    virtual bool NODELETE isSliderContainerElement() const { return false; }
+    virtual bool NODELETE isSliderThumbElement() const { return false; }
+    virtual bool NODELETE isHTMLTablePartElement() const { return false; }
+
     virtual bool isInRange() const { return false; }
     virtual bool isOutOfRange() const { return false; }
-    virtual bool isUploadButton() const { return false; }
-    virtual bool isSliderContainerElement() const { return false; }
-    virtual bool isSliderThumbElement() const { return false; }
-    virtual bool isHTMLTablePartElement() const { return false; }
 
     virtual bool isDevolvableWidget() const { return false; }
 
