@@ -6938,7 +6938,7 @@ void Document::adjustFocusNavigationNodeOnNodeRemoval(Node& node, NodeRemoval no
         return;
 
     if (isNodeInSubtree(*m_focusNavigationStartingNode, node, nodeRemoval)) {
-        auto* newNode = (nodeRemoval == NodeRemoval::ChildrenOfNode) ? &node : fallbackFocusNavigationStartingNodeAfterRemoval(node);
+        RefPtr newNode = nodeRemoval == NodeRemoval::ChildrenOfNode ? &node : fallbackFocusNavigationStartingNodeAfterRemoval(node);
         m_focusNavigationStartingNode = (newNode != this) ? newNode : nullptr;
         m_focusNavigationStartingNodeIsRemoved = true;
     }
