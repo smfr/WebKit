@@ -888,18 +888,12 @@ TEST(ResourceLoadStatistics, GetResourceLoadStatisticsDataSummary)
     TestWebKitAPI::Util::run(&doneFlag);
 }
 
-// rdar://134535336
-#if PLATFORM(IOS) || PLATFORM(MAC)
-TEST(ResourceLoadStatistics, DISABLED_MigrateDataFromIncorrectCreateTableSchema)
-#else
 TEST(ResourceLoadStatistics, MigrateDataFromIncorrectCreateTableSchema)
-#endif
 {
     auto *sharedProcessPool = [WKProcessPool _sharedProcessPool];
 
     auto defaultFileManager = [NSFileManager defaultManager];
-    auto *dataStore = [WKWebsiteDataStore defaultDataStore];
-    NSURL *itpRootURL = [[dataStore _configuration] _resourceLoadStatisticsDirectory];
+    NSURL *itpRootURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"MigrateDataFromIncorrectCreateTableSchemaTest"] isDirectory:YES];
     NSURL *fileURL = [itpRootURL URLByAppendingPathComponent:@"observations.db"];
     [defaultFileManager removeItemAtPath:itpRootURL.path error:nil];
     EXPECT_FALSE([defaultFileManager fileExistsAtPath:itpRootURL.path]);
@@ -912,17 +906,28 @@ TEST(ResourceLoadStatistics, MigrateDataFromIncorrectCreateTableSchema)
     [defaultFileManager copyItemAtPath:newFileURL.path toPath:fileURL.path error:nil];
     EXPECT_TRUE([defaultFileManager fileExistsAtPath:fileURL.path]);
 
+    auto dataStoreConfiguration = adoptNS([_WKWebsiteDataStoreConfiguration new]);
+    dataStoreConfiguration.get()._resourceLoadStatisticsDirectory = itpRootURL;
+    auto dataStore = adoptNS([[WKWebsiteDataStore alloc] _initWithConfiguration:dataStoreConfiguration.get()]);
+
     auto configuration = adoptNS([[WKWebViewConfiguration alloc] init]);
     [configuration setProcessPool: sharedProcessPool];
-    configuration.get().websiteDataStore = dataStore;
+    configuration.get().websiteDataStore = dataStore.get();
 
     // We need an active NetworkProcess to perform ResourceLoadStatistics operations.
     auto webView = adoptNS([[WKWebView alloc] initWithFrame:NSMakeRect(0, 0, 800, 600) configuration:configuration.get()]);
     [dataStore _setResourceLoadStatisticsEnabled:YES];
-    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"about:blank"]]];
+    [webView loadHTMLString:@"" baseURL:[NSURL URLWithString:@"http://webkit.org"]];
+    [webView _test_waitForDidFinishNavigation];
 
     __block bool doneFlag = false;
+    [dataStore _setThirdPartyCookieBlockingMode:YES onlyOnSitesWithoutUserInteraction:NO completionHandler:^{
+        doneFlag = true;
+    }];
+    TestWebKitAPI::Util::run(&doneFlag);
+
     // Check that the pre-seeded data is in the new database after migrating.
+    doneFlag = false;
     [dataStore _isRegisteredAsSubresourceUnderFirstParty:[NSURL URLWithString:@"http://apple.com"] thirdParty:[NSURL URLWithString:@"http://webkit.org"] completionHandler: ^(BOOL isRegistered) {
         EXPECT_TRUE(isRegistered);
         doneFlag = true;
