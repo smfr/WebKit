@@ -99,7 +99,7 @@ using namespace Inspector;
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(InspectorPageAgent);
 
-Ref<InspectorOverlay> InspectorPageAgent::protectedOverlay() const
+InspectorOverlay& InspectorPageAgent::overlay() const
 {
     return m_overlay.get();
 }
@@ -645,7 +645,7 @@ Inspector::Protocol::ErrorStringOr<Ref<JSON::ArrayOf<Inspector::Protocol::Page::
 #if !PLATFORM(IOS_FAMILY)
 Inspector::Protocol::ErrorStringOr<void> InspectorPageAgent::setShowRulers(bool showRulers)
 {
-    protectedOverlay()->setShowRulers(showRulers);
+    protect(overlay())->setShowRulers(showRulers);
 
     return { };
 }
@@ -659,7 +659,7 @@ Inspector::Protocol::ErrorStringOr<void> InspectorPageAgent::setShowPaintRects(b
     if (m_client->overridesShowPaintRects())
         return { };
 
-    protectedOverlay()->setShowPaintRects(show);
+    protect(overlay())->setShowPaintRects(show);
 
     return { };
 }
@@ -804,7 +804,7 @@ void InspectorPageAgent::didPaint(RenderObject& renderer, const LayoutRect& rect
         return;
     }
 
-    protectedOverlay()->showPaintRect(rootRect);
+    protect(overlay())->showPaintRect(rootRect);
 }
 
 void InspectorPageAgent::didLayout()
@@ -813,7 +813,7 @@ void InspectorPageAgent::didLayout()
     if (isFirstLayout)
         m_isFirstLayoutAfterOnLoad = false;
 
-    protectedOverlay()->update();
+    protect(overlay())->update();
 }
 
 void InspectorPageAgent::didScroll()
@@ -823,7 +823,7 @@ void InspectorPageAgent::didScroll()
 
 void InspectorPageAgent::didRecalculateStyle()
 {
-    protectedOverlay()->update();
+    protect(overlay())->update();
 }
 
 Ref<Inspector::Protocol::Page::Frame> InspectorPageAgent::buildObjectForFrame(LocalFrame* frame)

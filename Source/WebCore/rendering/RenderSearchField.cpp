@@ -123,7 +123,7 @@ void RenderSearchField::showPopup()
     FloatPoint absTopLeft = localToAbsolute(FloatPoint(), UseTransforms);
     IntRect absBounds = absoluteBoundingBoxRectIgnoringTransforms();
     absBounds.setLocation(roundedIntPoint(absTopLeft));
-    protect(protectedSearchPopup()->popupMenu())->show(absBounds, view().frameView(), -1);
+    protect(protect(m_searchPopup)->popupMenu())->show(absBounds, view().frameView(), -1);
 }
 
 void RenderSearchField::hidePopup()
@@ -158,7 +158,7 @@ std::span<const RecentSearch> RenderSearchField::recentSearches()
     auto& recentSearches = downcast<SearchInputType>(*protect(inputElement())->inputType()).recentSearches();
 
     const AtomString& name = autosaveName();
-    protectedSearchPopup()->loadRecentSearches(name, recentSearches);
+    protect(m_searchPopup)->loadRecentSearches(name, recentSearches);
 
     return recentSearches.span();
 }
@@ -171,7 +171,7 @@ void RenderSearchField::updateFromElement()
         updateCancelButtonVisibility();
 
     if (m_searchPopupIsVisible)
-        protect(protectedSearchPopup()->popupMenu())->updateFromElement();
+        protect(protect(m_searchPopup)->popupMenu())->updateFromElement();
 }
 
 void RenderSearchField::updateCancelButtonVisibility() const
@@ -204,7 +204,7 @@ void RenderSearchField::updatePopup(const AtomString& name, const Vector<RecentS
 {
     if (!m_searchPopup)
         m_searchPopup = page().chrome().createSearchPopupMenu(downcast<SearchInputType>(*protect(inputElement())->inputType()));
-    protectedSearchPopup()->saveRecentSearches(name, searchItems);
+    protect(m_searchPopup)->saveRecentSearches(name, searchItems);
 }
 
 void RenderSearchField::popupDidHide()

@@ -446,7 +446,7 @@ void CSSFontFace::timeoutFired()
     fontLoadEventOccurred();
 }
 
-RefPtr<Document> CSSFontFace::protectedDocument()
+Document* CSSFontFace::document() const
 {
     if (m_wrapper)
         return dynamicDowncast<Document>(m_wrapper->scriptExecutionContext());
@@ -649,7 +649,7 @@ size_t CSSFontFace::pump(ExternalResourceDownloadPolicy policy)
             if (policy == ExternalResourceDownloadPolicy::Allow || !source->requiresExternalResource()) {
                 if (policy == ExternalResourceDownloadPolicy::Allow && m_status == Status::Pending)
                     setStatus(Status::Loading);
-                source->load(m_trustedType, protectedDocument().get());
+                source->load(m_trustedType, protect(document()).get());
             }
         }
 
@@ -721,7 +721,7 @@ RefPtr<Font> CSSFontFace::font(const FontDescription& fontDescription, bool synt
     for (size_t i = startIndex; i < m_sources.size(); ++i) {
         auto& source = m_sources[i];
         if (source->status() == CSSFontFaceSource::Status::Pending && (policy == ExternalResourceDownloadPolicy::Allow || !source->requiresExternalResource()))
-            source->load(m_trustedType, protectedDocument().get());
+            source->load(m_trustedType, protect(document()).get());
 
         switch (source->status()) {
         case CSSFontFaceSource::Status::Pending:

@@ -129,7 +129,7 @@ private:
     void handleClientUnload();
     void softUpdate();
 
-    RefPtr<SWServer> protectedServer() const { return m_server; }
+    SWServer* server() const { return m_server.get(); }
 
     ServiceWorkerRegistrationKey m_registrationKey;
     ServiceWorkerUpdateViaCache m_updateViaCache;

@@ -596,11 +596,6 @@ void CSSStyleSheet::removeAdoptingTreeScope(ContainerNode& treeScope)
     styleScopeFor(treeScope).didChangeStyleSheetContents();
 }
 
-Ref<StyleSheetContents> CSSStyleSheet::protectedContents()
-{
-    return m_contents;
-}
-
 void CSSStyleSheet::getChildStyleSheets(HashSet<Ref<CSSStyleSheet>>& childStyleSheets)
 {
     RefPtr ruleList = cssRules();

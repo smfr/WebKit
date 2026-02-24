@@ -214,7 +214,7 @@ void AnimationTimelinesController::updateAnimationsAndSendEvents(ReducedResoluti
     }
 
     // 3. Perform a microtask checkpoint.
-    protect(protectedDocument()->eventLoop())->performMicrotaskCheckpoint();
+    protect(protect(document())->eventLoop())->performMicrotaskCheckpoint();
 
     if (RefPtr documentTimeline = m_document->existingTimeline()) {
         // FIXME: pending animation events should be owned by this controller rather
@@ -315,7 +315,7 @@ void AnimationTimelinesController::resumeAnimations()
 
 ReducedResolutionSeconds AnimationTimelinesController::liveCurrentTime() const
 {
-    return protect(protectedDocument()->window())->nowTimestamp();
+    return protect(protect(document())->window())->nowTimestamp();
 }
 
 std::optional<Seconds> AnimationTimelinesController::currentTime(UseCachedCurrentTime useCachedCurrentTime)
@@ -355,7 +355,7 @@ void AnimationTimelinesController::cacheCurrentTime(ReducedResolutionSeconds new
     // start time.
     if (!m_pendingAnimationsProcessingTaskCancellationGroup.hasPendingTask()) {
         CancellableTask task(m_pendingAnimationsProcessingTaskCancellationGroup, std::bind(&AnimationTimelinesController::processPendingAnimations, this));
-        protect(protectedDocument()->eventLoop())->queueTask(TaskSource::InternalAsyncTask, WTF::move(task));
+        protect(protect(document())->eventLoop())->queueTask(TaskSource::InternalAsyncTask, WTF::move(task));
     }
 
     if (!m_isSuspended) {
@@ -389,7 +389,7 @@ void AnimationTimelinesController::processPendingAnimations()
 
 bool AnimationTimelinesController::isPendingTimelineAttachment(const WebAnimation& animation) const
 {
-    CheckedPtr styleOriginatedTimelinesController = protectedDocument()->styleOriginatedTimelinesController();
+    CheckedPtr styleOriginatedTimelinesController = protect(document())->styleOriginatedTimelinesController();
     return styleOriginatedTimelinesController && styleOriginatedTimelinesController->isPendingTimelineAttachment(animation);
 }
 

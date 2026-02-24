@@ -89,7 +89,7 @@ private:
     void processPendingAnimations();
     bool isPendingTimelineAttachment(const WebAnimation&) const;
 
-    Ref<Document> protectedDocument() const { return m_document.get(); }
+    Document& document() const { return m_document; }
 
 #if ENABLE(THREADED_ANIMATIONS)
     std::unique_ptr<AcceleratedEffectStackUpdater> m_acceleratedEffectStackUpdater;

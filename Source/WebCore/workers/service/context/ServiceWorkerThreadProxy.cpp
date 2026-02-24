@@ -62,11 +62,6 @@ static inline IDBClient::IDBConnectionProxy* idbConnectionProxy(Document& docume
     return document.idbConnectionProxy();
 }
 
-static inline RefPtr<IDBClient::IDBConnectionProxy> protectedIDBConnectionProxy(Document& document)
-{
-    return idbConnectionProxy(document);
-}
-
 static ThreadSafeWeakHashSet<ServiceWorkerThreadProxy>& allServiceWorkerThreadProxies()
 {
     static MainThreadNeverDestroyed<ThreadSafeWeakHashSet<ServiceWorkerThreadProxy>> set;
@@ -79,7 +74,7 @@ ServiceWorkerThreadProxy::ServiceWorkerThreadProxy(Ref<Page>&& page, ServiceWork
 #if ENABLE(REMOTE_INSPECTOR)
     , m_remoteDebuggable(ServiceWorkerDebuggable::create(*this, contextData))
 #endif
-    , m_serviceWorkerThread(ServiceWorkerThread::create(WTF::move(contextData), WTF::move(workerData), WTF::move(userAgent), workerThreadMode, m_document->settingsValues(), *this, *this, *this, protectedIDBConnectionProxy(m_document).get(), protect(m_document->socketProvider()).get(), WTF::move(notificationClient), m_page->sessionID(), m_document->noiseInjectionHashSalt(), m_document->advancedPrivacyProtections()))
+    , m_serviceWorkerThread(ServiceWorkerThread::create(WTF::move(contextData), WTF::move(workerData), WTF::move(userAgent), workerThreadMode, m_document->settingsValues(), *this, *this, *this, protect(idbConnectionProxy(m_document)).get(), protect(m_document->socketProvider()).get(), WTF::move(notificationClient), m_page->sessionID(), m_document->noiseInjectionHashSalt(), m_document->advancedPrivacyProtections()))
     , m_cacheStorageProvider(cacheStorageProvider)
     , m_inspectorProxy(*this)
 {

@@ -437,9 +437,9 @@ RefPtr<AXCoreObject> AccessibilityScrollView::accessibilityHitTest(const IntPoin
     if (!webArea)
         return nullptr;
 
-    if (m_horizontalScrollbar && protectedHorizontalScrollbar()->elementRect().contains(point))
+    if (m_horizontalScrollbar && protect(m_horizontalScrollbar)->elementRect().contains(point))
         return m_horizontalScrollbar.get();
-    if (m_verticalScrollbar && protectedVerticalScrollbar()->elementRect().contains(point))
+    if (m_verticalScrollbar && protect(m_verticalScrollbar)->elementRect().contains(point))
         return m_verticalScrollbar.get();
 
     return webArea->accessibilityHitTest(point);

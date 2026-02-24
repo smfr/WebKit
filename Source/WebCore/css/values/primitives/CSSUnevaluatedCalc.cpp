@@ -63,11 +63,6 @@ UnevaluatedCalcBase& UnevaluatedCalcBase::operator=(UnevaluatedCalcBase&&) = def
 
 UnevaluatedCalcBase::~UnevaluatedCalcBase() = default;
 
-Ref<CSSCalc::Value> UnevaluatedCalcBase::protectedCalc() const
-{
-    return calc;
-}
-
 CSSCalc::Value& UnevaluatedCalcBase::leakRef()
 {
     return calc.leakRef();
@@ -75,27 +70,27 @@ CSSCalc::Value& UnevaluatedCalcBase::leakRef()
 
 bool UnevaluatedCalcBase::equal(const UnevaluatedCalcBase& other) const
 {
-    return protectedCalc()->equals(other.calc.get());
+    return protect(calcValue())->equals(other.calc.get());
 }
 
 bool UnevaluatedCalcBase::requiresConversionData() const
 {
-    return protectedCalc()->requiresConversionData();
+    return protect(calcValue())->requiresConversionData();
 }
 
 void UnevaluatedCalcBase::serializationForCSS(StringBuilder& builder, const CSS::SerializationContext& context) const
 {
-    builder.append(protectedCalc()->cssText(context));
+    builder.append(protect(calcValue())->cssText(context));
 }
 
 void UnevaluatedCalcBase::collectComputedStyleDependencies(ComputedStyleDependencies& dependencies) const
 {
-    protectedCalc()->collectComputedStyleDependencies(dependencies);
+    protect(calcValue())->collectComputedStyleDependencies(dependencies);
 }
 
 UnevaluatedCalcBase UnevaluatedCalcBase::simplifyBase(const CSSToLengthConversionData& conversionData, const CSSCalcSymbolTable& symbolTable) const
 {
-    return UnevaluatedCalcBase { protectedCalc()->copySimplified(conversionData, symbolTable) };
+    return UnevaluatedCalcBase { protect(calcValue())->copySimplified(conversionData, symbolTable) };
 }
 
 double UnevaluatedCalcBase::evaluate(CSS::Category category, const Style::BuilderState& state) const
@@ -115,8 +110,8 @@ double UnevaluatedCalcBase::evaluate(CSS::Category category, const CSSToLengthCo
 
 double UnevaluatedCalcBase::evaluate(CSS::Category category, const CSSToLengthConversionData& conversionData, const CSSCalcSymbolTable& symbolTable) const
 {
-    ASSERT_UNUSED(category, protectedCalc()->category() == category);
-    return protectedCalc()->doubleValue(conversionData, symbolTable);
+    ASSERT_UNUSED(category, protect(calcValue())->category() == category);
+    return protect(calcValue())->doubleValue(conversionData, symbolTable);
 }
 
 double UnevaluatedCalcBase::evaluate(CSS::Category category, NoConversionDataRequiredToken token) const
@@ -126,8 +121,8 @@ double UnevaluatedCalcBase::evaluate(CSS::Category category, NoConversionDataReq
 
 double UnevaluatedCalcBase::evaluate(CSS::Category category, NoConversionDataRequiredToken token, const CSSCalcSymbolTable& symbolTable) const
 {
-    ASSERT_UNUSED(category, protectedCalc()->category() == category);
-    return protectedCalc()->doubleValue(token, symbolTable);
+    ASSERT_UNUSED(category, protect(calcValue())->category() == category);
+    return protect(calcValue())->doubleValue(token, symbolTable);
 }
 
 } // namespace CSS

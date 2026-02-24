@@ -234,14 +234,9 @@ bool SizesAttributeParser::mediaConditionMatches(const MQ::MediaQuery& mediaCond
     return MQ::MediaQueryEvaluator { screenAtom(), document, style.ptr() }.evaluate(mediaCondition);
 }
 
-Ref<const Document> SizesAttributeParser::protectedDocument() const
-{
-    return m_document.get();
-}
-
 std::optional<CSSToLengthConversionData> SizesAttributeParser::conversionData() const
 {
-    CheckedPtr renderer = protectedDocument()->renderView();
+    CheckedPtr renderer = protect(document())->renderView();
     if (!renderer)
         return std::nullopt;
     CheckedRef style = renderer->style();

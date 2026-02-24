@@ -80,7 +80,7 @@ private:
     void removeAllJobsMatching(NOESCAPE const Function<bool(ServiceWorkerJobData&)>&);
     void scriptAndImportedScriptsFetchFinished(const ServiceWorkerJobData&, SWServerRegistration&);
 
-    Ref<SWServer> protectedServer() const { return m_server.get(); }
+    SWServer& server() const { return m_server.get(); }
 
     Deque<ServiceWorkerJobData> m_jobQueue;
 

@@ -691,11 +691,6 @@ Ref<StyleRuleBase> CSSParser::createNestedDeclarationsRule()
     return StyleRuleNestedDeclarations::create(WTF::move(properties));
 }
 
-RefPtr<StyleSheetContents> CSSParser::protectedStyleSheet() const
-{
-    return m_styleSheet;
-}
-
 Vector<Ref<StyleRuleBase>> CSSParser::consumeNestedGroupRules(CSSParserTokenRange block)
 {
     NestingLevelIncrementer incrementer { m_ruleListNestingLevel };
@@ -1025,7 +1020,7 @@ RefPtr<StyleRuleKeyframes> CSSParser::consumeKeyframesRule(CSSParserTokenRange p
 
 RefPtr<StyleRulePage> CSSParser::consumePageRule(CSSParserTokenRange prelude, CSSParserTokenRange block)
 {
-    auto selectorList = parsePageSelector(prelude, protectedStyleSheet().get());
+    auto selectorList = parsePageSelector(prelude, protect(styleSheet()).get());
     if (selectorList.isEmpty())
         return nullptr; // Parse error, invalid @page selector
 
@@ -1226,7 +1221,7 @@ RefPtr<StyleRuleScope> CSSParser::consumeScopeRule(CSSParserTokenRange prelude, 
                 auto selectorListRange = selectorListRangeStart.rangeUntil(prelude);
 
                 // Parse the selector list range
-                auto mutableSelectorList = parseMutableCSSSelectorList(selectorListRange, m_context, protectedStyleSheet().get(), ancestorRuleType, CSSParserEnum::IsForgiving::No, CSSSelectorParser::DisallowPseudoElement::Yes);
+                auto mutableSelectorList = parseMutableCSSSelectorList(selectorListRange, m_context, protect(styleSheet()).get(), ancestorRuleType, CSSParserEnum::IsForgiving::No, CSSSelectorParser::DisallowPseudoElement::Yes);
                 if (mutableSelectorList.isEmpty())
                     return false;
 
@@ -1515,7 +1510,7 @@ RefPtr<StyleRuleBase> CSSParser::consumeStyleRule(CSSParserTokenRange prelude, C
         return nullptr;
 
     auto preludeCopyForInspector = prelude;
-    auto mutableSelectorList = parseMutableCSSSelectorList(prelude, m_context, protectedStyleSheet().get(), lastAncestorRuleType(), CSSParserEnum::IsForgiving::No, CSSSelectorParser::DisallowPseudoElement::No);
+    auto mutableSelectorList = parseMutableCSSSelectorList(prelude, m_context, protect(styleSheet()).get(), lastAncestorRuleType(), CSSParserEnum::IsForgiving::No, CSSSelectorParser::DisallowPseudoElement::No);
 
     if (mutableSelectorList.isEmpty())
         return nullptr; // Parse error, invalid selector list

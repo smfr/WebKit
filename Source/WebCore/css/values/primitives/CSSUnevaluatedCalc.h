@@ -70,7 +70,7 @@ struct UnevaluatedCalcBase {
     UnevaluatedCalcBase& operator=(UnevaluatedCalcBase&&);
     ~UnevaluatedCalcBase();
 
-    Ref<CSSCalc::Value> NODELETE protectedCalc() const;
+    CSSCalc::Value& calcValue() const { return calc; }
     [[nodiscard]] CSSCalc::Value& NODELETE leakRef();
 
     bool requiresConversionData() const;

@@ -235,7 +235,7 @@ void WorkerConsoleClient::screenshot(JSC::JSGlobalObject* lexicalGlobalObject, R
 
     if (InspectorInstrumentation::hasFrontends()) [[unlikely]] {
         if (dataURL.isEmpty()) {
-            InspectorInstrumentation::addMessageToConsole(protectedGlobalScope(), makeUnique<Inspector::ConsoleMessage>(MessageSource::ConsoleAPI, MessageType::Image, MessageLevel::Error, "Could not capture screenshot"_s, WTF::move(arguments)));
+            InspectorInstrumentation::addMessageToConsole(protect(globalScope()), makeUnique<Inspector::ConsoleMessage>(MessageSource::ConsoleAPI, MessageType::Image, MessageLevel::Error, "Could not capture screenshot"_s, WTF::move(arguments)));
             return;
         }
     }
@@ -245,12 +245,7 @@ void WorkerConsoleClient::screenshot(JSC::JSGlobalObject* lexicalGlobalObject, R
     adjustedArguments.append({ vm, target ? target : JSC::jsNontrivialString(vm, "Viewport"_s) });
     for (size_t i = (!target ? 0 : 1); i < arguments->argumentCount(); ++i)
         adjustedArguments.append({ vm, arguments->argumentAt(i) });
-    InspectorInstrumentation::addMessageToConsole(protectedGlobalScope(), makeUnique<Inspector::ConsoleMessage>(MessageSource::ConsoleAPI, MessageType::Image, MessageLevel::Log, dataURL, ScriptArguments::create(lexicalGlobalObject, WTF::move(adjustedArguments)), lexicalGlobalObject, /* requestIdentifier */ 0, timestamp));
-}
-
-Ref<WorkerOrWorkletGlobalScope> WorkerConsoleClient::protectedGlobalScope()
-{
-    return m_globalScope.get();
+    InspectorInstrumentation::addMessageToConsole(protect(globalScope()), makeUnique<Inspector::ConsoleMessage>(MessageSource::ConsoleAPI, MessageType::Image, MessageLevel::Log, dataURL, ScriptArguments::create(lexicalGlobalObject, WTF::move(adjustedArguments)), lexicalGlobalObject, /* requestIdentifier */ 0, timestamp));
 }
 
 } // namespace WebCore

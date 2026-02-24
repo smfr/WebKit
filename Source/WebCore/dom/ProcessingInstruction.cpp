@@ -233,7 +233,7 @@ void ProcessingInstruction::parseStyleSheet(const String& sheet)
 {
     Ref styleSheet = *m_sheet;
     if (m_isCSS)
-        downcast<CSSStyleSheet>(styleSheet.get()).protectedContents()->parseString(sheet);
+        protect(downcast<CSSStyleSheet>(styleSheet.get()).contents())->parseString(sheet);
 #if ENABLE(XSLT)
     else if (m_isXSL)
         downcast<XSLStyleSheet>(styleSheet.get()).parseString(sheet);
@@ -245,7 +245,7 @@ void ProcessingInstruction::parseStyleSheet(const String& sheet)
     m_loading = false;
 
     if (m_isCSS)
-        downcast<CSSStyleSheet>(styleSheet.get()).protectedContents()->checkLoaded();
+        protect(downcast<CSSStyleSheet>(styleSheet.get()).contents())->checkLoaded();
 #if ENABLE(XSLT)
     else if (m_isXSL)
         downcast<XSLStyleSheet>(styleSheet.get()).checkLoaded();

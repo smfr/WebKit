@@ -126,7 +126,7 @@ void CSSFontFaceSource::deref() const
 
 bool CSSFontFaceSource::shouldIgnoreFontLoadCompletions() const
 {
-    return protectedCSSFontFace()->shouldIgnoreFontLoadCompletions();
+    return protect(cssFontFace())->shouldIgnoreFontLoadCompletions();
 }
 
 void CSSFontFaceSource::opportunisticallyStartFontDataURLLoading(DownloadableBinaryFontTrustedTypes trustedType)
@@ -156,7 +156,7 @@ void CSSFontFaceSource::fontLoaded(FontLoadRequest& fontRequest)
     else
         setStatus(Status::Success);
 
-    protectedCSSFontFace()->fontLoaded(*this);
+    protect(cssFontFace())->fontLoaded(*this);
 }
 
 RefPtr<FontCustomPlatformData> CSSFontFaceSource::loadCustomFont(SharedBuffer& buffer, DownloadableBinaryFontTrustedTypes trustedTypes)
@@ -201,7 +201,7 @@ void CSSFontFaceSource::load(DownloadableBinaryFontTrustedTypes trustedTypes, Do
             FontCascadeDescription fontDescription;
             fontDescription.setOneFamily(m_fontFaceName);
             fontDescription.setComputedSize(1);
-            fontDescription.setShouldAllowUserInstalledFonts(protectedCSSFontFace()->allowUserInstalledFonts());
+            fontDescription.setShouldAllowUserInstalledFonts(protect(cssFontFace())->allowUserInstalledFonts());
             success = FontCache::forCurrentThread()->fontForFamily(fontDescription, m_fontFaceName, { }, FontLookupOptions::ExactFamilyNameMatch);
             if (document && document->settings().webAPIStatisticsEnabled())
                 ResourceLoadObserver::singleton().logFontLoad(*document, m_fontFaceName.string(), success);
@@ -261,9 +261,4 @@ bool CSSFontFaceSource::isSVGFontFaceSource() const
     return fontRequest && is<CachedSVGFont>(fontRequest->cachedFont());
 }
 
-Ref<CSSFontFace> CSSFontFaceSource::protectedCSSFontFace() const
-{
-    return m_owningCSSFontFace.get();
-}
-
-}
+} // namespace WebCore

@@ -344,7 +344,7 @@ template<auto R, typename V> struct ToStyle<CSS::UnevaluatedCalc<CSS::AnglePerce
         // NOTE: Simplification is needed here for the case of the user using the Typed CSSOM
         // to explicitly specify a CSSMath* value for a specified value.
 
-        Ref simplifiedCalc = value.protectedCalc()->copySimplified(rest...);
+        Ref simplifiedCalc = protect(value.calcValue())->copySimplified(rest...);
 
         // FIXME: This ASSERT and the following extra cases for Category::Angle and Category::Percentage
         // should go away once the typed CSSOM learns to set the correct category when creating internal
@@ -378,7 +378,7 @@ template<auto R, typename V> struct ToStyle<CSS::UnevaluatedCalc<CSS::LengthPerc
         // NOTE: Simplification is needed here for the case of the user using the Typed CSSOM
         // to explicitly specify a CSSMath* value for a specified value.
 
-        Ref simplifiedCalc = value.protectedCalc()->copySimplified(rest...);
+        Ref simplifiedCalc = protect(value.calcValue())->copySimplified(rest...);
 
         // FIXME: This ASSERT and the following extra cases for Category::Length and Category::Percentage
         // should go away once the typed CSSOM learns to set the correct category when creating internal

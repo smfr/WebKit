@@ -177,7 +177,7 @@ void HTMLStyleElement::addSubresourceAttributeURLs(ListHashSet<URL>& urls) const
     HTMLElement::addSubresourceAttributeURLs(urls);
 
     if (RefPtr sheet = this->sheet()) {
-        sheet->protectedContents()->traverseSubresources([&] (auto& resource) {
+        protect(sheet->contents())->traverseSubresources([&] (auto& resource) {
             urls.add(resource.url());
             return false;
         });

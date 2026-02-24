@@ -278,7 +278,7 @@ private:
 
     void relayoutDocument();
 
-    Ref<InspectorOverlay> protectedOverlay() const;
+    InspectorOverlay& overlay() const { return m_overlay.get(); }
 
     const CheckedRef<Inspector::InjectedScriptManager> m_injectedScriptManager;
     const UniqueRef<Inspector::DOMFrontendDispatcher> m_frontendDispatcher;

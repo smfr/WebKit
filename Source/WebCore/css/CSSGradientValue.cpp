@@ -66,7 +66,7 @@ template<NumericRaw CSSType> struct StyleImageIsUncacheable<CSSType> {
 };
 
 template<Calc CSSType> struct StyleImageIsUncacheable<CSSType> {
-    constexpr bool operator()(const auto& value) { return value.protectedCalc()->requiresConversionData(); }
+    constexpr bool operator()(const auto& value) { return protect(value.calcValue())->requiresConversionData(); }
 };
 
 template<OptionalLike CSSType> struct StyleImageIsUncacheable<CSSType> {

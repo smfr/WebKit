@@ -198,7 +198,7 @@ private:
     void consumeDeclarationValue(CSSParserTokenRange, CSSPropertyID, IsImportant, StyleRuleType);
     void consumeCustomPropertyValue(CSSParserTokenRange, const AtomString& propertyName, IsImportant);
 
-    RefPtr<StyleSheetContents> protectedStyleSheet() const;
+    StyleSheetContents* styleSheet() const { return m_styleSheet.get(); }
 
     Ref<StyleRuleBase> createNestedDeclarationsRule();
     void runInNewNestingContext(auto&& run);

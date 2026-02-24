@@ -108,7 +108,7 @@ void SWServerJobQueue::scriptFetchFinished(const ServiceWorkerJobDataIdentifier&
         auto scriptURLs = newestWorker->importedScriptURLs();
         if (!scriptURLs.isEmpty()) {
             m_workerFetchResult = WTF::move(result);
-            protectedServer()->refreshImportedScripts(job, *registration, scriptURLs, requestingProcessIdentifier);
+            server->refreshImportedScripts(job, *registration, scriptURLs, requestingProcessIdentifier);
             return;
         }
 
@@ -119,7 +119,7 @@ void SWServerJobQueue::scriptFetchFinished(const ServiceWorkerJobDataIdentifier&
         return;
     }
 
-    protectedServer()->updateWorker(job.identifier(), requestingProcessIdentifier, *registration, job.scriptURL, result.script, result.certificateInfo, result.contentSecurityPolicy, result.crossOriginEmbedderPolicy, result.referrerPolicy, job.workerType, { }, job.serviceWorkerPageIdentifier());
+    server->updateWorker(job.identifier(), requestingProcessIdentifier, *registration, job.scriptURL, result.script, result.certificateInfo, result.contentSecurityPolicy, result.crossOriginEmbedderPolicy, result.referrerPolicy, job.workerType, { }, job.serviceWorkerPageIdentifier());
 }
 
 void SWServerJobQueue::importedScriptsFetchFinished(const ServiceWorkerJobDataIdentifier& jobDataIdentifier, const Vector<std::pair<URL, ScriptBuffer>>& importedScripts, const std::optional<ProcessIdentifier>& requestingProcessIdentifier)
@@ -129,7 +129,7 @@ void SWServerJobQueue::importedScriptsFetchFinished(const ServiceWorkerJobDataId
 
     auto& job = firstJob();
 
-    RefPtr registration = protectedServer()->getRegistration(m_registrationKey);
+    RefPtr registration = protect(server())->getRegistration(m_registrationKey);
     if (!registration)
         return;
 
@@ -140,13 +140,13 @@ void SWServerJobQueue::importedScriptsFetchFinished(const ServiceWorkerJobDataId
         return;
     }
 
-    protectedServer()->updateWorker(job.identifier(), requestingProcessIdentifier, *registration, job.scriptURL, m_workerFetchResult.script, m_workerFetchResult.certificateInfo, m_workerFetchResult.contentSecurityPolicy, m_workerFetchResult.crossOriginEmbedderPolicy, m_workerFetchResult.referrerPolicy, job.workerType, { }, job.serviceWorkerPageIdentifier());
+    protect(server())->updateWorker(job.identifier(), requestingProcessIdentifier, *registration, job.scriptURL, m_workerFetchResult.script, m_workerFetchResult.certificateInfo, m_workerFetchResult.contentSecurityPolicy, m_workerFetchResult.crossOriginEmbedderPolicy, m_workerFetchResult.referrerPolicy, job.workerType, { }, job.serviceWorkerPageIdentifier());
 }
 
 void SWServerJobQueue::scriptAndImportedScriptsFetchFinished(const ServiceWorkerJobData& job, SWServerRegistration& registration)
 {
     // Invoke Resolve Job Promise with job and registration.
-    protectedServer()->resolveRegistrationJob(job, registration.data(), ShouldNotifyWhenResolved::No);
+    protect(server())->resolveRegistrationJob(job, registration.data(), ShouldNotifyWhenResolved::No);
 
     // Invoke Finish Job with job and abort these steps.
     finishCurrentJob();
@@ -187,7 +187,7 @@ void SWServerJobQueue::scriptContextStarted(const ServiceWorkerJobDataIdentifier
     if (!isCurrentlyProcessingJob(jobDataIdentifier))
         return;
 
-    RefPtr registration = protectedServer()->getRegistration(m_registrationKey);
+    RefPtr registration = protect(server())->getRegistration(m_registrationKey);
     ASSERT(registration);
     if (!registration) {
         RELEASE_LOG_ERROR(ServiceWorker, "SWServerJobQueue::scriptContextStarted registration is null");
@@ -407,7 +407,7 @@ void SWServerJobQueue::runUpdateJob(const ServiceWorkerJobData& job)
 
 void SWServerJobQueue::rejectCurrentJob(const ExceptionData& exceptionData)
 {
-    protectedServer()->rejectJob(firstJob(), exceptionData);
+    protect(server())->rejectJob(firstJob(), exceptionData);
 
     finishCurrentJob();
 }
