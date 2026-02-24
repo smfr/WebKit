@@ -1,7 +1,2 @@
-[ macOS ] wtf/FilePrintStream.cpp
-[ macOS ] wtf/LockedPrintStream.cpp
-[ macOS ] wtf/ObjectIdentifier.cpp
-[ macOS ] wtf/cocoa/RuntimeApplicationChecksCocoa.mm
 [ macOS ] wtf/text/StringImpl.cpp
 [ macOS ] wtf/text/StringView.cpp
-[ macOS ] wtf/unicode/UTF8Conversion.cpp
