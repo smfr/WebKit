@@ -3830,7 +3830,6 @@ sub GenerateHeader
             push(@headerContent, "    {\n");
             push(@headerContent, "        return static_cast<$interfaceName&>(Base::wrapped());\n");
             push(@headerContent, "    }\n\n");
-            push(@headerContent, "    Ref<$interfaceName> protectedWrapped() const;\n\n");
         }
     }
 
@@ -5395,12 +5394,6 @@ sub GenerateImplementation
         push(@implContent, "}\n\n");
     }
 
-    if (NeedsImplementationClass($interface) && $hasParent) {
-        push(@implContent, "Ref<$interfaceName> ${className}::protectedWrapped() const\n");
-        push(@implContent, "{\n");
-        push(@implContent, "    return wrapped();\n");
-        push(@implContent, "}\n\n");
-    }
 
     # Finish Creation
     my @finishCreation = ();
@@ -6065,7 +6058,7 @@ sub GenerateAttributeGetterBodyDefinition
         $implIncludes{"EventNames.h"} = 1;
         my $getter = $attribute->extendedAttributes->{WindowEventHandler} ? "windowEventHandlerAttribute" : "eventHandlerAttribute";
         my $eventName = EventHandlerAttributeEventName($attribute);
-        push(@$outputArray, "    return $getter(protect(thisObject.wrapped()), $eventName, protectedWorldForDOMObject(thisObject));\n");
+        push(@$outputArray, "    return $getter(protect(thisObject.wrapped()), $eventName, protect(worldForDOMObject(thisObject)));\n");
     } elsif ($isConstructor) {
         # FIXME: This should be switched to using an extended attribute rather than infering this information from name.
         my $constructorType = $attribute->type->name;

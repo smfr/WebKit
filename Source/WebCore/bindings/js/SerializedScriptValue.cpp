@@ -3911,7 +3911,7 @@ private:
         if (!m_canCreateDOMObject)
             return true;
 
-        file = File::deserialize(protectedExecutionContext(m_lexicalGlobalObject).get(), filePath, URL { url->string() }, type->string(), name->string(), optionalLastModified);
+        file = File::deserialize(protect(executionContext(m_lexicalGlobalObject)).get(), filePath, URL { url->string() }, type->string(), name->string(), optionalLastModified);
         return true;
     }
 
@@ -4736,7 +4736,7 @@ private:
         }
 
         if (!m_imageBitmaps[index] && m_detachedImageBitmaps.at(index))
-            m_imageBitmaps[index] = ImageBitmap::create(*protectedExecutionContext(m_lexicalGlobalObject).get(), WTF::move(*m_detachedImageBitmaps.at(index)));
+            m_imageBitmaps[index] = ImageBitmap::create(*protect(executionContext(m_lexicalGlobalObject)).get(), WTF::move(*m_detachedImageBitmaps.at(index)));
 
         RefPtr bitmap = m_imageBitmaps[index];
         if (!bitmap)
@@ -4756,7 +4756,7 @@ private:
         }
 
         if (!m_offscreenCanvases[index])
-            m_offscreenCanvases[index] = OffscreenCanvas::create(*protectedExecutionContext(m_lexicalGlobalObject), WTF::move(m_detachedOffscreenCanvases.at(index)));
+            m_offscreenCanvases[index] = OffscreenCanvas::create(*protect(executionContext(m_lexicalGlobalObject)), WTF::move(m_detachedOffscreenCanvases.at(index)));
         return getJSValue(*m_offscreenCanvases[index]);
     }
 
@@ -4839,7 +4839,7 @@ private:
 
         if (!m_rtcDataChannels[index]) {
             auto detachedChannel = WTF::move(m_detachedRTCDataChannels.at(index));
-            m_rtcDataChannels[index] = RTCDataChannel::create(*protectedExecutionContext(m_lexicalGlobalObject), detachedChannel->identifier, WTF::move(detachedChannel->label), WTF::move(detachedChannel->options), detachedChannel->state);
+            m_rtcDataChannels[index] = RTCDataChannel::create(*protect(executionContext(m_lexicalGlobalObject)), detachedChannel->identifier, WTF::move(detachedChannel->label), WTF::move(detachedChannel->options), detachedChannel->state);
         }
         return getJSValue(*m_rtcDataChannels[index]);
     }
@@ -4981,7 +4981,7 @@ private:
         }
 
         if (!m_videoFrames[index])
-            m_videoFrames[index] = WebCodecsVideoFrame::create(*protectedExecutionContext(m_lexicalGlobalObject), WTF::move(m_serializedVideoFrames.at(index)));
+            m_videoFrames[index] = WebCodecsVideoFrame::create(*protect(executionContext(m_lexicalGlobalObject)), WTF::move(m_serializedVideoFrames.at(index)));
         return getJSValue(*m_videoFrames[index]);
     }
     JSValue readWebCodecsEncodedAudioChunk()
@@ -5009,7 +5009,7 @@ private:
         }
 
         if (!m_audioData[index])
-            m_audioData[index] = WebCodecsAudioData::create(*protectedExecutionContext(m_lexicalGlobalObject), WTF::move(m_serializedAudioData.at(index)));
+            m_audioData[index] = WebCodecsAudioData::create(*protect(executionContext(m_lexicalGlobalObject)), WTF::move(m_serializedAudioData.at(index)));
         return getJSValue(*m_audioData[index]);
     }
 #endif
@@ -5025,7 +5025,7 @@ private:
         }
 
         if (!m_mediaStreamTracks[index])
-            m_mediaStreamTracks[index] = MediaStreamTrack::create(*protectedExecutionContext(m_lexicalGlobalObject), makeUniqueRefFromNonNullUniquePtr(std::exchange(m_serializedMediaStreamTracks.at(index), { })));
+            m_mediaStreamTracks[index] = MediaStreamTrack::create(*protect(executionContext(m_lexicalGlobalObject)), makeUniqueRefFromNonNullUniquePtr(std::exchange(m_serializedMediaStreamTracks.at(index), { })));
         return getJSValue(*m_mediaStreamTracks[index]);
     }
     JSValue readMediaStreamTrackHandle()
@@ -5084,7 +5084,7 @@ private:
         auto imageDataSize = logicalSize;
         imageDataSize.scale(resolutionScale);
 
-        auto buffer = ImageBitmap::createImageBuffer(*protectedExecutionContext(m_lexicalGlobalObject), logicalSize, RenderingMode::Unaccelerated, colorSpace, resolutionScale);
+        auto buffer = ImageBitmap::createImageBuffer(*protect(executionContext(m_lexicalGlobalObject)), logicalSize, RenderingMode::Unaccelerated, colorSpace, resolutionScale);
         if (!buffer) {
             SERIALIZE_TRACE("FAIL deserialize");
             fail();
@@ -5368,7 +5368,7 @@ private:
                 return JSValue();
             if (!m_canCreateDOMObject)
                 return jsNull();
-            return getJSValue(Blob::deserialize(protectedExecutionContext(m_lexicalGlobalObject).get(), URL { url->string() }, type->string(), size, memoryCost, blobFilePathForBlobURL(url->string())).get());
+            return getJSValue(Blob::deserialize(protect(executionContext(m_lexicalGlobalObject)).get(), URL { url->string() }, type->string(), size, memoryCost, blobFilePathForBlobURL(url->string())).get());
         }
         case StringTag: {
             CachedStringRef cachedString;
