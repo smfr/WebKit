@@ -30,8 +30,8 @@
 
 #if ENABLE(ENCRYPTED_MEDIA)
 
-#include <WebCore/Event.h>
-#include <WebCore/MediaEncryptedEventInit.h>
+#include "Event.h"
+#include "MediaEncryptedEventInit.h"
 
 namespace JSC {
 class ArrayBuffer;

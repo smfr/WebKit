@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <WebCore/StyleGridPosition.h>
+#include "StyleGridPosition.h"
 
 namespace WebCore {
 namespace Layout {

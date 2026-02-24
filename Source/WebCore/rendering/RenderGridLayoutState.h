@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <WebCore/RenderBox.h>
+#include "RenderBox.h"
 #include <wtf/CheckedPtr.h>
 #include <wtf/TZoneMalloc.h>
 

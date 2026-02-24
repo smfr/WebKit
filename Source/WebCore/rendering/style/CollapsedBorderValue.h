@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <WebCore/BorderValue.h>
-#include <WebCore/LayoutUnit.h>
+#include "BorderValue.h"
+#include "LayoutUnit.h"
 
 namespace WebCore {
 

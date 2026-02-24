@@ -27,9 +27,9 @@
 
 #if ENABLE(VIDEO)
 
-#include <WebCore/Color.h>
-#include <WebCore/EventTargetInterfaces.h>
-#include <WebCore/VTTCue.h>
+#include "Color.h"
+#include "EventTargetInterfaces.h"
+#include "VTTCue.h"
 
 namespace WebCore {
 

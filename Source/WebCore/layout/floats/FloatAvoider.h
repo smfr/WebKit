@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include <WebCore/LayoutBox.h>
-#include <WebCore/LayoutBoxGeometry.h>
-#include <WebCore/LayoutPoint.h>
-#include <WebCore/LayoutUnits.h>
+#include "LayoutBox.h"
+#include "LayoutBoxGeometry.h"
+#include "LayoutPoint.h"
+#include "LayoutUnits.h"
 #include <wtf/TZoneMalloc.h>
 
 namespace WebCore {

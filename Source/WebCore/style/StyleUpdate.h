@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <WebCore/Node.h>
-#include <WebCore/StyleChange.h>
+#include "Node.h"
+#include "StyleChange.h"
 #include <wtf/HashMap.h>
 #include <wtf/ListHashSet.h>
 #include <wtf/TZoneMalloc.h>

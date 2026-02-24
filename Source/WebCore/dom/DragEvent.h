@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <WebCore/MouseEvent.h>
-#include <WebCore/MouseEventInit.h>
+#include "MouseEvent.h"
+#include "MouseEventInit.h"
 
 namespace WebCore {
 

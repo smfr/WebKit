@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include <WebCore/CSSPrimitiveValue.h>
-#include <WebCore/RenderStyleConstants.h>
+#include "CSSPrimitiveValue.h"
+#include "RenderStyleConstants.h"
 
 namespace WebCore {
 

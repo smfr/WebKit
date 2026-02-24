@@ -28,7 +28,7 @@
 #include <wtf/Platform.h>
 #if USE(AUDIO_SESSION) && PLATFORM(IOS_FAMILY)
 
-#include <WebCore/AudioSessionCocoa.h>
+#include "AudioSessionCocoa.h"
 #include <wtf/TZoneMalloc.h>
 
 OBJC_CLASS WebInterruptionObserverHelper;

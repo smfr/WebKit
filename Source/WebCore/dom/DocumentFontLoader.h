@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include <WebCore/CachedResourceHandle.h>
-#include <WebCore/Document.h>
-#include <WebCore/Timer.h>
+#include "CachedResourceHandle.h"
+#include "Document.h"
+#include "Timer.h"
 #include <wtf/CanMakeWeakPtr.h>
 #include <wtf/TZoneMalloc.h>
 #include <wtf/Vector.h>

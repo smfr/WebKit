@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <WebCore/CSSCounterStyle.h>
+#include "CSSCounterStyle.h"
 #include <wtf/Forward.h>
 #include <wtf/HashMap.h>
 #include <wtf/text/AtomStringHash.h>
