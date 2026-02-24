@@ -326,11 +326,10 @@ editing/cocoa/WebContentReaderCocoa.mm
 editing/mac/FrameSelectionMac.mm
 editing/markup.cpp
 [ Mac ] history/CachedFrame.cpp
-[ Mac ] html/BaseDateAndTimeInputType.cpp
 html/CachedHTMLCollection.h
 html/CachedHTMLCollectionInlines.h
 html/CollectionTraversalInlines.h
-html/ColorInputType.cpp
+[ iOS ] html/ColorInputType.cpp
 html/CustomPaintCanvas.cpp
 html/DirectoryFileListCreator.cpp
 html/FTPDirectoryDocument.cpp
@@ -358,7 +357,6 @@ html/MediaElementSession.cpp
 html/ModelDocument.cpp
 html/OffscreenCanvas.cpp
 [ Mac ] html/RangeInputType.cpp
-[ Mac ] html/ResetInputType.cpp
 html/ValidatedFormListedElement.cpp
 html/ValidationMessage.cpp
 html/canvas/CanvasFilterContextSwitcher.cpp

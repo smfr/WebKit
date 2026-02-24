@@ -28,5 +28,4 @@
 [ macOS ] page/scrolling/AsyncScrollingCoordinator.cpp
 [ macOS ] page/scrolling/ScrollingCoordinator.cpp
 [ macOS ] page/scrolling/ThreadedScrollingCoordinator.cpp
-[ macOS ] page/scrolling/mac/ScrollingTreeMac.mm
 [ macOS ] rendering/HitTestResult.cpp
