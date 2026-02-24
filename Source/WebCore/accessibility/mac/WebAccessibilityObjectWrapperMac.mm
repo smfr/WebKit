@@ -3746,8 +3746,10 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
     RetainPtr<NSMutableArray<NSAccessibilityCustomAction *>> actions = adoptNS([[NSMutableArray alloc] init]);
     for (auto& actionData : actionsData) {
+        auto treeID = actionData.treeID;
+        auto targetID = actionData.targetID;
         auto action = adoptNS([[NSAccessibilityCustomAction alloc] initWithName:actionData.name.createNSString().autorelease() handler:^BOOL {
-            return Accessibility::performCustomActionPress(actionData.treeID, actionData.targetID);
+            return Accessibility::performCustomActionPress(treeID, targetID);
         }]);
         [actions addObject:action.get()];
     }
