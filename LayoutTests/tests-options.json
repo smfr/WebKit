@@ -2024,6 +2024,9 @@
     "imported/w3c/web-platform-tests/css/css-writing-modes/forms/select-multiple-options-visual-order.html": [
         "slow"
     ],
+    "imported/w3c/web-platform-tests/css/cssom-view/element-scroll-promises.html": [
+        "slow"
+    ],
     "imported/w3c/web-platform-tests/css/cssom-view/idlharness.html": [
         "slow"
     ],
@@ -2058,6 +2061,9 @@
         "slow"
     ],
     "imported/w3c/web-platform-tests/css/cssom-view/scroll-behavior-subframe-window.html": [
+        "slow"
+    ],
+    "imported/w3c/web-platform-tests/css/cssom-view/window-scroll-promises.html": [
         "slow"
     ],
     "imported/w3c/web-platform-tests/css/cssom/idlharness.html": [

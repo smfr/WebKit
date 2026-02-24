@@ -8485,6 +8485,8 @@ webkit.org/b/307889 http/tests/multipart/multipart-async-image.html [ Pass Failu
 
 webkit.org/b/308084 [ Release ] imported/w3c/web-platform-tests/css/filter-effects/backdrop-filter-boundary.html [  Pass ImageOnlyFailure ]
 
+imported/w3c/web-platform-tests/css/cssom-view/smooth-scrollIntoView-with-unrelated-gesture-scroll.html [ Skip ]
+
 webkit.org/b/308243 [ Release ] http/tests/site-isolation/mixedContent/redirect-https-to-http-iframe-in-main-frame.html [ Pass Failure ]
 
 imported/w3c/web-platform-tests/css/css-highlight-api/highlight-text-across-elements.html [ ImageOnlyFailure ]
