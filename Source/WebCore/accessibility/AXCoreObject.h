@@ -647,6 +647,7 @@ public:
     bool isPopUpButton() const { return role() == AccessibilityRole::PopUpButton; }
     bool isColorWell() const { return role() == AccessibilityRole::ColorWell; }
     bool isSplitter() const { return role() == AccessibilityRole::Splitter; }
+    bool isFocusableSplitter() const { return isSplitter() && canSetFocusAttribute(); }
     bool isToolbar() const { return role() == AccessibilityRole::Toolbar; }
     bool isSummary() const { return role() == AccessibilityRole::Summary; }
     bool isBlockquote() const { return role() == AccessibilityRole::Blockquote; }

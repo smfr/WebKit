@@ -108,13 +108,16 @@ bool AXCoreObject::isControl() const
     case AccessibilityRole::SearchField:
     case AccessibilityRole::Slider:
     case AccessibilityRole::SliderThumb:
+    case AccessibilityRole::SpinButton:
     case AccessibilityRole::Switch:
     case AccessibilityRole::TextArea:
     case AccessibilityRole::TextField:
     case AccessibilityRole::ToggleButton:
         return true;
     default:
-        return isFieldset();
+        // A focusable splitter (separator with tabindex) is considered a control,
+        // since it can be interacted with to adjust the value.
+        return isFieldset() || isFocusableSplitter();
     }
 }
 
@@ -1015,7 +1018,7 @@ bool AXCoreObject::supportsRangeValue() const
         || isSlider()
         || isScrollbar()
         || isSpinButton()
-        || (isSplitter() && canSetFocusAttribute())
+        || isFocusableSplitter()
         || hasAttachmentTag();
 }
 
