@@ -2603,12 +2603,28 @@ unsigned AccessibilityNodeObject::computeCellSlots()
         if (descendantIsRowGroup)
             processRowGroup(*element);
     };
+    // Collect aria-owned children upfront. aria-owned elements are placed after natural DOM
+    // children, so skip them if we encounter them in the DOM traversal.
+    auto ownedChildren = ownedObjects();
+    HashSet<Node*> ownedChildNodes;
+    for (const auto& ownedChild : ownedChildren) {
+        if (SUPPRESS_UNCOUNTED_LOCAL auto* node = ownedChild->node())
+            ownedChildNodes.add(node);
+    }
+
     // Step 7: Let the current element be the first element child of the table element.
     // Use composedTreeChildren to traverse shadow DOM children too.
     for (Ref child : composedTreeChildren<0>(*tableElement)) {
+        // Skip children that are aria-owned; they'll be processed in aria-owns order below.
+        if (ownedChildNodes.contains(&child.get()))
+            continue;
         processTableDescendant(&child.get());
         // Step 17 + 18: Advance the current element to the next child of the table.
     }
+
+    // Process any aria-owned children that may be rows or rowgroups.
+    for (const auto& ownedChild : ownedChildren)
+        processTableDescendant(ownedChild->node());
 
     // Step 19: For each tfoot element in the list of pending tfoot elements, in tree order,
     // run the algorithm for processing row groups.

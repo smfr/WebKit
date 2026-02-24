@@ -1246,6 +1246,15 @@ FloatRect AXIsolatedObject::relativeFrame() const
         // until we cache the necessary information let's go to the main-thread.
     } else if (role() == AccessibilityRole::Column || role() == AccessibilityRole::TableHeaderContainer)
         relativeFrame = exposedTableAncestor() ? relativeFrameFromChildren() : FloatRect();
+    else if (isExposableTable()) {
+        // If we are an exposable-to-accessibility table, we must have at least one valid row, so see if
+        // our row(s) have cached geometry we can use. For tables, this will probably be more accurate
+        // than the ancestor bounding-box fallback below.
+        for (const auto& child : const_cast<AXIsolatedObject*>(this)->unignoredChildren()) {
+            if (std::optional cachedFrame = downcast<AXIsolatedObject>(child)->cachedRelativeFrame())
+                relativeFrame.unite(*cachedFrame);
+        }
+    }
 
     // Mock objects and SVG objects need use the main thread since they do not have render nodes and are not painted with layers, respectively.
     // FIXME: Remove isNonLayerSVGObject when LBSE is enabled & SVG frames are cached.
@@ -1297,8 +1306,15 @@ FloatRect AXIsolatedObject::relativeFrame() const
                 return ancestorRelativeFrame;
             });
 
-            if (ancestorRelativeFrame)
-                relativeFrame.setLocation(ancestorRelativeFrame->location());
+            if (ancestorRelativeFrame) {
+                if (relativeFrame.isEmpty() && !isIgnored()) {
+                    // It's possible our initial frame rect was empty too. For things exposed in the accessibility
+                    // tree (i.e. they aren't ignored), it's important to expose a non-empty frame, as some ATs
+                    // like VoiceOver will ignore elements with empty frames.
+                    relativeFrame = *ancestorRelativeFrame;
+                } else
+                    relativeFrame.setLocation(ancestorRelativeFrame->location());
+            }
         }
 
         // If an assistive technology is requesting the frame for something,
