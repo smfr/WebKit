@@ -657,7 +657,7 @@ struct PerWebProcessState {
 - (NakedPtr<WebKit::WebPageProxy>)_page;
 - (RefPtr<WebKit::WebPageProxy>)_protectedPage;
 #if PLATFORM(MAC)
-- (WebKit::WebViewImpl * _Null_unspecified)_impl;
+- (nullable WebKit::WebViewImpl *)_impl;
 #endif
 #if ENABLE(SCREEN_TIME)
 - (nullable STWebpageController *)_screenTimeWebpageController;

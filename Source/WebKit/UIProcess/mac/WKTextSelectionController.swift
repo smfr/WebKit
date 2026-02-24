@@ -32,7 +32,7 @@ private import CxxStdlib
 @objc
 @implementation
 extension WKTextSelectionController {
-    private weak let view: WKWebView?
+    private unowned let view: WKWebView
 
     @nonobjc
     private var currentRangeSelectionGranularity: NSTextSelection.Granularity? = nil
@@ -43,7 +43,7 @@ extension WKTextSelectionController {
     }
 
     func addTextSelectionManager() {
-        guard let view, let page = view._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
@@ -51,7 +51,7 @@ extension WKTextSelectionController {
             return
         }
 
-        Logger.viewGestures.log("Creating a text selection manager for view \(view)")
+        Logger.viewGestures.log("Creating a text selection manager for view \(self.view)")
 
         let manager = NSTextSelectionManager()
         manager._webkitDelegate = self
@@ -63,27 +63,45 @@ extension WKTextSelectionController {
     }
 
     func selectionDidChange() {
-        guard let view, let page = view._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
         let editorState = unsafe page.editorState
         view.textSelectionManager?.textSelectionMode =
-            editorState.isContentEditable || editorState.isContentRichlyEditable ? .editable : .selectable
+            unsafe editorState.isContentEditable || editorState.isContentRichlyEditable ? .editable : .selectable
     }
 }
 
 @objc(NSTextSelectionManagerDelegate)
 @implementation
 extension WKTextSelectionController {
-    // Chosen to match the rest of the system.
-    private static let nearCaretDistance: Double = 40
+    var insertionCursorRect: NSRect {
+        guard let page = view._protectedPage().get() else {
+            return .zero
+        }
+
+        guard let visualData = unsafe Optional(fromCxx: page.editorState.visualData) else {
+            return .zero
+        }
+
+        return unsafe CGRect(visualData.caretRectAtStart)
+    }
+
+    var selectionIsInsertionPoint: Bool {
+        guard let page = view._protectedPage().get() else {
+            return false
+        }
+
+        let editorState = unsafe page.editorState
+        return unsafe editorState.selectionType == .Caret
+    }
 
     @objc(isTextSelectedAtPoint:)
     func isTextSelected(at point: NSPoint) -> Bool {
         // The `point` location is relative to the view.
 
-        guard let page = view?._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return false
         }
 
@@ -125,118 +143,52 @@ extension WKTextSelectionController {
         return result
     }
 
-    @objc(moveInsertionCursorToPoint:)
-    func moveInsertionCursor(to point: NSPoint) {
-        guard let page = view?._protectedPage().get() else {
-            return
+    @objc(moveInsertionCursorToPoint:placeAtWordBoundary:completionHandler:)
+    func moveInsertionCursor(to point: NSPoint, placeAtWordBoundary: Bool) async -> Bool {
+        // A return value of `true` indicates the selection has changed.
+
+        guard let page = view._protectedPage().get() else {
+            return false
         }
 
         Logger.viewGestures.log("[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point))")
 
-        Task.immediate {
-            await page.selectPosition(
-                at: WebCore.IntPoint(point),
-                isInteractingWithFocusedElement: true // FIXME: Properly handle the case where this isn't actually true.
-            )
-        }
-    }
-
-    @MainActor
-    private func handleDoubleClick(at point: NSPoint) async {
-        guard let view, let page = view._protectedPage().get() else {
-            return
-        }
-
-        // Select the nearest word and then open a context menu.
-
-        await page.selectWithGesture(
-            at: WebCore.IntPoint(point),
-            type: .OneFingerDoubleTap,
-            state: .Ended,
-            isInteractingWithFocusedElement: true, // FIXME: Properly handle the case where this isn't actually true.
-        )
-
-        let pointInGlobalCoordinateSpace = view.convert(point, to: nil)
-        showContextMenu(at: pointInGlobalCoordinateSpace)
-    }
-
-    @MainActor
-    private func handleSingleClick(at point: NSPoint) async {
-        guard let view, let page = view._protectedPage().get() else {
-            return
-        }
-
         let previousState = unsafe page.editorState
         let previousVisualData = unsafe Optional(fromCxx: previousState.visualData)
 
-        // Move the insertion point to the nearest word granularity boundary.
+        // FIXME: Properly handle the case where this isn't actually true.
+        let isInteractingWithFocusedElement = true
 
-        await page.selectWithGesture(
-            at: WebCore.IntPoint(point),
-            type: .OneFingerTap,
-            state: .Ended,
-            isInteractingWithFocusedElement: true, // FIXME: Properly handle the case where this isn't actually true.
-        )
-
-        // If the click was near where the caret selection was, or the selection did not change, show context menu.
+        if placeAtWordBoundary {
+            await page.selectWithGesture(
+                at: WebCore.IntPoint(point),
+                type: .OneFingerTap,
+                state: .Ended,
+                isInteractingWithFocusedElement: isInteractingWithFocusedElement,
+            )
+        } else {
+            await page.selectPosition(
+                at: WebCore.IntPoint(point),
+                isInteractingWithFocusedElement: isInteractingWithFocusedElement,
+            )
+        }
 
         let newState = unsafe page.editorState
         let newVisualData = unsafe Optional(fromCxx: newState.visualData)
 
         guard let previousVisualData = unsafe previousVisualData, let newVisualData = unsafe newVisualData else {
-            return
+            return false
         }
 
-        // FIXME: Reduce duplication of this logic.
-
-        let distance = unsafe CGRect(previousVisualData.caretRectAtStart).distance(to: point)
-        let clickLocationIsNearCaret = unsafe previousState.selectionType != .Range && distance < Self.nearCaretDistance
-        let caretLocationIsSame = unsafe previousVisualData.caretRectAtStart == newVisualData.caretRectAtStart
-
-        Logger.viewGestures.log(
-            "[pageProxyID=\(page.logIdentifier())] Click near insertion point: \(clickLocationIsNearCaret); Caret location is same: \(caretLocationIsSame)"
-        )
-
-        if clickLocationIsNearCaret || caretLocationIsSame {
-            let pointInGlobalCoordinateSpace = view.convert(point, to: nil)
-            showContextMenu(at: pointInGlobalCoordinateSpace)
-        }
-    }
-
-    @objc(handleClickAtPoint:)
-    func handleClick(at point: NSPoint) {
-        handleClick(at: point, clickCount: 1)
-    }
-
-    @objc(handleClickAtPoint:clickCount:)
-    func handleClick(at point: NSPoint, clickCount: Int) {
-        // The `point` location is relative to the view.
-
-        guard let view, let page = view._protectedPage().get() else {
-            return
-        }
-
-        Logger.viewGestures.log(
-            "[pageProxyID=\(page.logIdentifier())] \(#function) point: \(String(reflecting: point)) clickCount: \(clickCount)"
-        )
-
-        Task.immediate {
-            switch clickCount {
-            case 1:
-                await handleSingleClick(at: point)
-            case 2:
-                await handleDoubleClick(at: point)
-            default:
-                break
-            }
-        }
+        // FIXME: (rdar://170847912) Use the `!=` operator instead when possible.
+        return unsafe !(previousVisualData.caretRectAtStart == newVisualData.caretRectAtStart)
     }
 
     @objc(showContextMenuAtPoint:)
     func showContextMenu(at point: NSPoint) {
         // The `point` location is relative to the window.
 
-        guard let page = view?._protectedPage().get(), let impl = unsafe view?._impl() else {
+        guard let page = view._protectedPage().get(), let impl = unsafe view._impl() else {
             return
         }
 
@@ -274,7 +226,7 @@ extension WKTextSelectionController {
 
     @objc(dragSelectionWithGesture:completionHandler:)
     func dragSelection(withGesture gesture: NSGestureRecognizer, completionHandler: @escaping @Sendable (NSDraggingSession) -> Void) {
-        guard let page = view?._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
@@ -283,7 +235,7 @@ extension WKTextSelectionController {
 
     @objc(beginRangeSelectionAtPoint:withGranularity:)
     func beginRangeSelection(at point: NSPoint, with granularity: NSTextSelection.Granularity) {
-        guard let page = view?._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
@@ -304,7 +256,7 @@ extension WKTextSelectionController {
 
     @objc(continueRangeSelectionAtPoint:)
     func continueRangeSelection(at point: NSPoint) {
-        guard let page = view?._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
@@ -327,7 +279,7 @@ extension WKTextSelectionController {
 
     @objc(endRangeSelectionAtPoint:)
     func endRangeSelection(at point: NSPoint) {
-        guard let page = view?._protectedPage().get() else {
+        guard let page = view._protectedPage().get() else {
             return
         }
 
