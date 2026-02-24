@@ -450,6 +450,8 @@ auto TreeResolver::resolveElement(Element& element, const RenderStyle* existingS
 
 std::optional<ElementUpdate> TreeResolver::resolvePseudoElement(Element& element, const PseudoElementIdentifier& pseudoElementIdentifier, const ElementUpdate& elementUpdate, IsInDisplayNoneTree isInDisplayNoneTree, const RenderStyle* existingStyle)
 {
+    ASSERT(pseudoElementIdentifier.type != PseudoElementType::UserAgentPartFallback);
+
     if (elementUpdate.style->display() == DisplayType::None)
         return { };
 
@@ -715,7 +717,7 @@ ResolutionContext TreeResolver::makeResolutionContextForPseudoElement(const Elem
 {
     auto parentStyle = [&]() -> const RenderStyle* {
         if (auto parentPseudoId = parentPseudoElement(pseudoElementIdentifier.type)) {
-            if (auto* parentPseudoStyle = elementUpdate.style->getCachedPseudoStyle({ *parentPseudoId, (*parentPseudoId == PseudoElementType::ViewTransitionGroup || *parentPseudoId == PseudoElementType::ViewTransitionImagePair) ? pseudoElementIdentifier.nameArgument : nullAtom() }))
+            if (auto* parentPseudoStyle = elementUpdate.style->getCachedPseudoStyle({ *parentPseudoId, (*parentPseudoId == PseudoElementType::ViewTransitionGroup || *parentPseudoId == PseudoElementType::ViewTransitionImagePair) ? pseudoElementIdentifier.nameOrPart : nullAtom() }))
                 return parentPseudoStyle;
         }
         return elementUpdate.style.get();

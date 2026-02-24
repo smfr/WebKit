@@ -3118,6 +3118,7 @@ style/PageRuleCollector.cpp
 style/PropertyAllowlist.cpp
 style/PropertyCascade.cpp
 style/PseudoClassChangeInvalidation.cpp
+style/PseudoElementUtilities.cpp
 style/ResolvedScopedName.cpp
 style/RuleData.cpp
 style/RuleFeature.cpp

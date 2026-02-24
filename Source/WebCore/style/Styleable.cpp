@@ -170,7 +170,7 @@ RenderElement* Styleable::renderer() const
             return nullptr;
 
         // Find the right ::view-transition-group().
-        WeakPtr correctGroup = element.renderer()->view().viewTransitionGroupForName(pseudoElementIdentifier->nameArgument);
+        WeakPtr correctGroup = element.renderer()->view().viewTransitionGroupForName(pseudoElementIdentifier->nameOrPart);
         if (!correctGroup)
             return nullptr;
 

@@ -35,6 +35,7 @@
 #include <WebCore/CSSSelectorList.h>
 #include <WebCore/CSSSelectorParserContext.h>
 #include <WebCore/MutableCSSSelector.h>
+#include <WebCore/PseudoElementIdentifier.h>
 #include <WebCore/StyleSheetContents.h>
 
 namespace WebCore {
@@ -43,10 +44,6 @@ class CSSParserTokenRange;
 class CSSSelectorList;
 class StyleSheetContents;
 class StyleRule;
-
-namespace Style {
-struct PseudoElementIdentifier;
-}
 
 class CSSSelectorParser {
 public:
@@ -62,7 +59,7 @@ public:
 
     static bool supportsComplexSelector(CSSParserTokenRange, const CSSSelectorParserContext&);
     static CSSSelectorList resolveNestingParent(const CSSSelectorList& nestedSelectorList, const CSSSelectorList* parentResolvedSelectorList, bool parentRuleIsScope = false);
-    static std::pair<bool, std::optional<Style::PseudoElementIdentifier>> parsePseudoElement(const String&, const CSSSelectorParserContext&);
+    static std::optional<Style::PseudoElementIdentifier> parsePseudoElement(const String&, const CSSSelectorParserContext&);
 
 private:
     template<typename ConsumeSelector> MutableCSSSelectorList consumeSelectorList(CSSParserTokenRange&, ConsumeSelector&&);

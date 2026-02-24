@@ -71,6 +71,11 @@ enum class PseudoElementType : uint8_t {
     ViewTransitionOld,
     ViewTransitionNew,
 
+    // Special: This is only used for getComputedStyle(), and primarily in the event there's no
+    // concrete backing element and we have to look up the matching style rules. It is also limited
+    // to non-prefixed parts.
+    UserAgentPartFallback,
+
     // Internal:
     WebKitScrollbarThumb,
     WebKitScrollbarButton,

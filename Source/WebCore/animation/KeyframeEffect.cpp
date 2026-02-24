@@ -832,6 +832,7 @@ KeyframeEffect::KeyframeEffect(Element* target, const std::optional<Style::Pseud
     : m_target(target)
     , m_pseudoElementIdentifier(pseudoElementIdentifier)
 {
+    ASSERT(!pseudoElementIdentifier || pseudoElementIdentifier->type != PseudoElementType::UserAgentPartFallback);
     if (m_target)
         m_document = m_target->document();
 }

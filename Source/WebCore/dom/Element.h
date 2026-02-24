@@ -1019,7 +1019,7 @@ private:
 
     enum class ResolveComputedStyleMode : uint8_t { Normal, RenderedOnly, Editability };
     const RenderStyle* resolveComputedStyle(ResolveComputedStyleMode = ResolveComputedStyleMode::Normal);
-    const RenderStyle& resolvePseudoElementStyle(const Style::PseudoElementIdentifier&);
+    const RenderStyle* resolvePseudoElementStyle(const Style::PseudoElementIdentifier&);
 
     unsigned NODELETE rareDataChildIndex() const;
 

@@ -248,8 +248,12 @@ void ElementRuleCollector::collectMatchingRules(const MatchRequest& matchRequest
             collectMatchingRulesForList(rules, matchRequest);
     }
 
-    if (m_pseudoElementRequest && m_pseudoElementRequest->nameArgument() != nullAtom())
-        collectMatchingRulesForList(ruleSet.namedPseudoElementRules(m_pseudoElementRequest->nameArgument()), matchRequest);
+    if (m_pseudoElementRequest) {
+        if (m_pseudoElementRequest->type() == PseudoElementType::UserAgentPartFallback)
+            collectMatchingRulesForList(ruleSet.userAgentPartRules(m_pseudoElementRequest->nameOrPart()), matchRequest);
+        else if (!m_pseudoElementRequest->nameOrPart().isNull())
+            collectMatchingRulesForList(ruleSet.namedPseudoElementRules(m_pseudoElementRequest->nameOrPart()), matchRequest);
+    }
 
     if (element.isLink())
         collectMatchingRulesForList(ruleSet.linkPseudoClassRules(), matchRequest);
@@ -601,7 +605,7 @@ inline bool ElementRuleCollector::ruleMatches(const RuleData& ruleData, unsigned
         context.setRequestedPseudoElement(pseudoElementIdentifier);
         context.scrollbarState = m_pseudoElementRequest->scrollbarState();
         if (isNamedViewTransitionPseudoElement(pseudoElementIdentifier))
-            context.classList = classListForNamedViewTransitionPseudoElement(element().document(), pseudoElementIdentifier.nameArgument);
+            context.classList = classListForNamedViewTransitionPseudoElement(element().document(), pseudoElementIdentifier.nameOrPart);
     }
     context.styleScopeOrdinal = styleScopeOrdinal;
     context.selectorMatchingState = m_selectorMatchingState;

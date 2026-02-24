@@ -218,6 +218,7 @@ std::optional<Style::PseudoElementIdentifier> HitTestResult::pseudoElementIdenti
 
 void HitTestResult::setPseudoElementIdentifier(std::optional<Style::PseudoElementIdentifier> pseudoElementIdentifier)
 {
+    ASSERT(!pseudoElementIdentifier || pseudoElementIdentifier->type != PseudoElementType::UserAgentPartFallback);
     m_pseudoElementIdentifier = pseudoElementIdentifier;
 }
 
