@@ -8419,6 +8419,7 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
     NUM_TO_DISPLAY = 10
     UPDATE_COMMAND = 'Tools/Scripts/update-safer-cpp-expectations -p {project}'
     CHECKER_ARGS = '--{checker} {files}'
+    PLATFORM_ARGS = '--platform {platform}'
 
     def __init___(self, **kwargs):
         super().__init__(logEnviron=False, **kwargs)
@@ -8460,6 +8461,8 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
                     file_str = '\n'.join((sorted(files)))
                     log_content += f'=> {checker}\n\n{file_str}\n\n'
                     command += ' ' + self.CHECKER_ARGS.format(checker=checker, files=' '.join(files))
+            if self.formattedPlatform:
+                command += ' ' + self.PLATFORM_ARGS.format(platform=self.formattedPlatform)
             if log_content:
                 yield self._addToLog(f'{project}-unexpected-{type}', log_content)
                 is_log += 1
@@ -8480,7 +8483,7 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
         results_link = self.resultDirectoryURL() + SCAN_BUILD_OUTPUT_DIR + "/new-results.html"
         build_link = f'{self.master.config.buildbotURL}#/builders/{self.build._builderid}/builds/{self.build.number}'
         formatted_build_link = f'[#{self.getProperty("buildnumber", "")}]({build_link})'
-        comment = f'### Safer C++ Build {formatted_build_link} ({commit_url})\n'
+        comment = f'### {self.formattedPlatform} Safer C++ Build {formatted_build_link} ({commit_url})\n'
 
         if num_failures:
             issue_comment = f" with {num_issues} issue{'s' if num_issues > 1 else ''}" if num_issues else ''
@@ -8492,10 +8495,20 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
             pluralCommand = 's' if len(commands_for_comment) > 1 else ''
             comment += f'\n:warning: Found {num_passes} fixed file{pluralSuffix}! Please update expectations in `Source/[Project]/SaferCPPExpectations` by running the following command{pluralCommand} and update your {self.change_type}:\n'
             comment += '\n'.join([f"- `{c}`" for c in commands_for_comment])
+        if not self.formattedPlatform:
+            comment += '\nUnable to find associated platform. See build for details.'
 
         self.setProperty('comment_text', comment)
         # FIXME: Add merging blocked upon failure after initial deployment period
         self.build.addStepsAfterCurrentStep([LeaveComment(), SetBuildSummary()])
+
+    @property
+    def formattedPlatform(self):
+        if self.getProperty('platform', '').lower() == 'ios':
+            return 'iOS'
+        elif self.getProperty('platform', '').lower() == 'mac':
+            return 'macOS'
+        return ''
 
     @property
     def change_type(self):
