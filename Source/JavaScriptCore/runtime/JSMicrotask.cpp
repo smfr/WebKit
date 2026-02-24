@@ -112,7 +112,7 @@ static JSValue callMicrotask(JSGlobalObject* globalObject, JSValue functionObjec
         }
 #if CPU(ARM64) && CPU(ADDRESS64) && !ENABLE(C_LOOP)
         if ((sizeof...(args) + 1) >= newCodeBlock->numParameters()) [[likely]] {
-            auto* entry = functionExecutable->generatedJITCodeForCall()->addressForCall();
+            auto* entry = functionExecutable->generatedJITCodeAddressForCall();
             auto* callee = asObject(functionObject.asCell());
             if constexpr (!sizeof...(args))
                 return JSValue::decode(vmEntryToJavaScriptWith0Arguments(entry, &vm, newCodeBlock, callee, thisValue, context));

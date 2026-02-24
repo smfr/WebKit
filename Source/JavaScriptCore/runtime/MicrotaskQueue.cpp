@@ -48,10 +48,9 @@ WTF_MAKE_COMPACT_TZONE_ALLOCATED_IMPL(DebuggableMicrotaskDispatcher);
 
 bool QueuedTask::isRunnable() const
 {
-    auto* dispatcher = this->dispatcher();
-    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]]
-        return jsCast<JSMicrotaskDispatcher*>(dispatcher)->dispatcher()->isRunnable();
-    return jsCast<JSGlobalObject*>(dispatcher)->microtaskRunnability() == QueuedTaskResult::Executed;
+    if (isJSMicrotaskDispatcher()) [[unlikely]]
+        return jsCast<JSMicrotaskDispatcher*>(dispatcher())->dispatcher()->isRunnable();
+    return jsCast<JSGlobalObject*>(dispatcher())->microtaskRunnability() == QueuedTaskResult::Executed;
 }
 
 QueuedTaskResult DebuggableMicrotaskDispatcher::run(QueuedTask& task)
@@ -106,7 +105,7 @@ void MicrotaskQueue::visitAggregateImpl(Visitor& visitor)
 }
 DEFINE_VISIT_AGGREGATE(MicrotaskQueue);
 
-void MicrotaskQueue::enqueue(QueuedTask&& task)
+void MicrotaskQueue::enqueueSlow(QueuedTask&& task)
 {
     auto* globalObject = task.globalObject();
     auto identifier = task.identifier();

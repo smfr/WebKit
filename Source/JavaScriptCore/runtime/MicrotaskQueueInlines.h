@@ -35,22 +35,20 @@ namespace JSC {
 
 inline JSCell* QueuedTask::dispatcher() const
 {
-    return m_dispatcher.pointer();
+    return std::bit_cast<JSCell*>(std::bit_cast<uintptr_t>(m_dispatcher.pointer()) & ~isJSMicrotaskDispatcherFlag);
 }
 
 inline JSGlobalObject* QueuedTask::globalObject() const
 {
-    auto* dispatcher = this->dispatcher();
-    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]]
-        return jsCast<JSMicrotaskDispatcher*>(dispatcher)->globalObject();
-    return jsCast<JSGlobalObject*>(dispatcher);
+    if (isJSMicrotaskDispatcher()) [[unlikely]]
+        return jsCast<JSMicrotaskDispatcher*>(dispatcher())->globalObject();
+    return jsCast<JSGlobalObject*>(dispatcher());
 }
 
 inline JSMicrotaskDispatcher* QueuedTask::jsMicrotaskDispatcher() const
 {
-    auto* dispatcher = this->dispatcher();
-    if (dispatcher->type() == JSMicrotaskDispatcherType) [[unlikely]]
-        return jsCast<JSMicrotaskDispatcher*>(dispatcher);
+    if (isJSMicrotaskDispatcher()) [[unlikely]]
+        return jsCast<JSMicrotaskDispatcher*>(dispatcher());
     return nullptr;
 }
 
@@ -60,6 +58,15 @@ inline std::optional<MicrotaskIdentifier> QueuedTask::identifier() const
     if (!dispatcher)
         return std::nullopt;
     return MicrotaskIdentifier { std::bit_cast<uintptr_t>(dispatcher) };
+}
+
+inline void MicrotaskQueue::enqueue(QueuedTask&& task)
+{
+    if (task.isJSMicrotaskDispatcher()) [[unlikely]] {
+        enqueueSlow(WTF::move(task));
+        return;
+    }
+    m_queue.enqueue(WTF::move(task));
 }
 
 template<bool useCallOnEachMicrotask>

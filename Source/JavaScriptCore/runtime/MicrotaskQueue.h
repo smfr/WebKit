@@ -104,21 +104,23 @@ public:
     using Result = QueuedTaskResult;
 
     QueuedTask(JSMicrotaskDispatcher* dispatcher)
-        : m_dispatcher(std::bit_cast<JSCell*>(dispatcher), static_cast<uint16_t>(InternalMicrotask::Opaque))
+        : m_dispatcher(std::bit_cast<JSCell*>(std::bit_cast<uintptr_t>(dispatcher) | isJSMicrotaskDispatcherFlag), static_cast<uint16_t>(InternalMicrotask::Opaque))
     {
     }
 
     template<typename... Args>
     requires (sizeof...(Args) <= maxArguments) && (std::is_convertible_v<Args, JSValue> && ...)
     QueuedTask(JSMicrotaskDispatcher* dispatcher, InternalMicrotask job, uint8_t payload, JSGlobalObject* globalObject, Args&&...args)
-        : m_dispatcher(dispatcher ? std::bit_cast<JSCell*>(dispatcher) : std::bit_cast<JSCell*>(globalObject), static_cast<uint16_t>(job) | (static_cast<uint16_t>(payload) << 8))
+        : m_dispatcher(
+            dispatcher ? std::bit_cast<JSCell*>(std::bit_cast<uintptr_t>(dispatcher) | isJSMicrotaskDispatcherFlag) : std::bit_cast<JSCell*>(globalObject),
+            static_cast<uint16_t>(job) | (static_cast<uint16_t>(payload) << 8))
         , m_arguments { std::forward<Args>(args)... }
     {
     }
 
     void setDispatcher(JSMicrotaskDispatcher* dispatcher)
     {
-        m_dispatcher.setPointer(std::bit_cast<JSCell*>(dispatcher));
+        m_dispatcher.setPointer(std::bit_cast<JSCell*>(std::bit_cast<uintptr_t>(dispatcher) | isJSMicrotaskDispatcherFlag));
     }
 
     bool isRunnable() const;
@@ -135,6 +137,12 @@ public:
     std::span<const JSValue, maxArguments> arguments() const { return std::span<const JSValue, maxArguments> { m_arguments, maxArguments }; }
 
 private:
+    bool isJSMicrotaskDispatcher() const
+    {
+        return std::bit_cast<uintptr_t>(m_dispatcher.pointer()) & isJSMicrotaskDispatcherFlag;
+    }
+
+    static constexpr uintptr_t isJSMicrotaskDispatcherFlag = 0x1;
     CompactPointerTuple<JSCell*, uint16_t> m_dispatcher;
     JSValue m_arguments[maxArguments] { };
 };
@@ -199,7 +207,8 @@ public:
     JS_EXPORT_PRIVATE MicrotaskQueue(VM&);
     JS_EXPORT_PRIVATE ~MicrotaskQueue();
 
-    JS_EXPORT_PRIVATE void enqueue(QueuedTask&&);
+    inline void enqueue(QueuedTask&&);
+    JS_EXPORT_PRIVATE void enqueueSlow(QueuedTask&&);
 
     bool isEmpty() const
     {
