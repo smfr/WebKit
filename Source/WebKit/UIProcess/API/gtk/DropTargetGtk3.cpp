@@ -117,16 +117,16 @@ void DropTarget::accept(GdkDragContext* drop, std::optional<WebCore::IntPoint> p
     // data of targets we support. Once all data requests are done we start
     // notifying the web process about the DND events.
     auto* list = gdk_drag_context_list_targets(m_drop.get());
-    static const char* const supportedTargets[] = {
-        "text/plain;charset=utf-8",
-        "text/html",
-        "_NETSCAPE_URL",
-        "text/uri-list",
-        "application/vnd.webkitgtk.smartpaste",
-        "org.webkitgtk.WebKit.custom-pasteboard-data"
+    static const std::array<ASCIILiteral, 6> supportedTargets = {
+        "text/plain;charset=utf-8"_s,
+        "text/html"_s,
+        "_NETSCAPE_URL"_s,
+        "text/uri-list"_s,
+        "application/vnd.webkitgtk.smartpaste"_s,
+        "org.webkitgtk.WebKit.custom-pasteboard-data"_s
     };
     Vector<GdkAtom, 4> targets;
-    for (unsigned i = 0; i < G_N_ELEMENTS(supportedTargets); ++i) {
+    for (unsigned i = 0; i < supportedTargets.size(); ++i) {
         GdkAtom atom = gdk_atom_intern_static_string(supportedTargets[i]);
         if (g_list_find(list, atom))
             targets.append(atom);
@@ -186,9 +186,9 @@ void DropTarget::dataReceived(IntPoint&& position, GtkSelectionData* data, unsig
         if (length > 0) {
             // If data starts with UTF-16 BOM assume it's UTF-16, otherwise assume UTF-8.
             if (length >= 2 && reinterpret_cast<const char16_t*>(markupData)[0] == 0xFEFF)
-                m_selectionData->setMarkup(String({ reinterpret_cast<const char16_t*>(markupData) + 1, static_cast<size_t>((length / 2) - 1) }));
+                m_selectionData->setMarkup(String(unsafeMakeSpan(reinterpret_cast<const char16_t*>(markupData),  (length / 2) - 1).subspan(1)));
             else
-                m_selectionData->setMarkup(String::fromUTF8(std::span(markupData, length)));
+                m_selectionData->setMarkup(String(unsafeMakeSpan(markupData, length)));
         }
         break;
     }
