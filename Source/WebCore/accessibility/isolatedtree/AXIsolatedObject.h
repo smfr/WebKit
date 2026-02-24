@@ -528,7 +528,7 @@ private:
     bool hasUnderline() const final { return colorAttributeValue(AXProperty::UnderlineColor) != Accessibility::defaultColor(); }
     AXTextMarkerRange textInputMarkedTextMarkerRange() const final;
     Element* element() const final;
-    Node* node() const final;
+    Node* NODELETE node() const final;
     RenderObject* renderer() const final;
 
     AccessibilityChildrenVector relatedObjects(AXRelation) const final;

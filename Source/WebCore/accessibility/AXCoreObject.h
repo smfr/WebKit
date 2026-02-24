@@ -717,7 +717,7 @@ public:
     bool canSetExpandedAttribute() const;
 
     virtual Element* element() const = 0;
-    virtual Node* node() const = 0;
+    virtual Node* NODELETE node() const = 0;
     virtual RenderObject* renderer() const = 0;
 
     virtual bool isIgnored() const = 0;

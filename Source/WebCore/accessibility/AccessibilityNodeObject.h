@@ -80,7 +80,7 @@ public:
 
     bool canSetSelectedAttribute() const override;
 
-    Node* node() const final { return m_node.get(); }
+    Node* NODELETE node() const final { return m_node.get(); }
     Document* document() const override;
     LocalFrameView* documentFrameView() const override;
 

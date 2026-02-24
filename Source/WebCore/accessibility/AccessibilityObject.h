@@ -271,7 +271,7 @@ public:
     bool canSetSelectedAttribute() const override { return false; }
 
     Element* element() const final;
-    Node* node() const override { return nullptr; }
+    Node* NODELETE node() const override { return nullptr; }
     RenderObject* renderer() const override { return nullptr; }
     CheckedPtr<RenderObject> rendererOrNearestAncestor() const;
     // Resolves the computed style if necessary (and safe to do so).
