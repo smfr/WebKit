@@ -26,23 +26,33 @@
 #pragma once
 
 #if USE(SKIA)
-#include "GraphicsContextSkia.h"
+#include "GLFence.h"
+#include "IntRect.h"
+#include "RenderingMode.h"
+#include "SkiaImageAtlasLayout.h"
 
 WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
+#include <skia/core/SkImage.h>
 #include <skia/core/SkPicture.h>
 WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_END
 
+#include <wtf/HashMap.h>
 #include <wtf/Lock.h>
 #include <wtf/ThreadSafeRefCounted.h>
 
-class SkImage;
-
 namespace WebCore {
+
+using SkiaImageToFenceMap = HashMap<const SkImage*, std::unique_ptr<GLFence>>;
+
+struct SkiaRecordingData {
+    SkiaImageToFenceMap imageToFenceMap;
+    Vector<Ref<SkiaImageAtlasLayout>> atlasLayouts;
+};
 
 class SkiaRecordingResult final : public ThreadSafeRefCounted<SkiaRecordingResult, WTF::DestructionThread::Main> {
 public:
     ~SkiaRecordingResult();
-    static Ref<SkiaRecordingResult> create(sk_sp<SkPicture>&&, SkiaImageToFenceMap&&, const IntRect& recordRect, RenderingMode, bool contentsOpaque, float contentsScale);
+    static Ref<SkiaRecordingResult> create(sk_sp<SkPicture>&&, SkiaRecordingData&&, const IntRect& recordRect, RenderingMode, bool contentsOpaque, float contentsScale);
 
     void waitForFenceIfNeeded(const SkImage&);
     bool hasFences();
@@ -53,12 +63,17 @@ public:
     bool contentsOpaque() const { return m_contentsOpaque; }
     float contentsScale() const { return m_contentsScale; }
 
+    // Atlas layouts for batched raster image uploads.
+    bool hasAtlasLayouts() const { return !m_atlasLayouts.isEmpty(); }
+    const Vector<Ref<SkiaImageAtlasLayout>>& atlasLayouts() const { return m_atlasLayouts; }
+
 private:
-    SkiaRecordingResult(sk_sp<SkPicture>&&, SkiaImageToFenceMap&&, const IntRect& recordRect, RenderingMode, bool contentsOpaque, float contentsScale);
+    SkiaRecordingResult(sk_sp<SkPicture>&&, SkiaRecordingData&&, const IntRect& recordRect, RenderingMode, bool contentsOpaque, float contentsScale);
 
     sk_sp<SkPicture> m_picture;
     SkiaImageToFenceMap m_imageToFenceMap WTF_GUARDED_BY_LOCK(m_imageToFenceMapLock);
     Lock m_imageToFenceMapLock;
+    Vector<Ref<SkiaImageAtlasLayout>> m_atlasLayouts;
     IntRect m_recordRect;
     RenderingMode m_renderingMode { RenderingMode::Unaccelerated };
     bool m_contentsOpaque : 1 { true };

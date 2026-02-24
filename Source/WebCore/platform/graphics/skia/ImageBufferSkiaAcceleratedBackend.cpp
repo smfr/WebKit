@@ -193,10 +193,10 @@ std::unique_ptr<GLFence> ImageBufferSkiaAcceleratedBackend::flushCanvasRecording
         return nullptr;
 
     IntRect recordRect(IntPoint(), size());
-    auto imageToFenceMap = m_canvasRecordingContext->endRecording();
+    auto recordingData = m_canvasRecordingContext->endRecording();
     auto picture = m_pictureRecorder.finishRecordingAsPicture();
 
-    RefPtr<SkiaRecordingResult> recording = SkiaRecordingResult::create(WTF::move(picture), WTF::move(imageToFenceMap), recordRect, RenderingMode::Accelerated, false, 1.0);
+    RefPtr<SkiaRecordingResult> recording = SkiaRecordingResult::create(WTF::move(picture), WTF::move(recordingData), recordRect, RenderingMode::Accelerated, false, 1.0);
 
     // Save the surface canvas save count before playback so we can undo any
     // unbalanced saves that the picture introduces.

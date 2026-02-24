@@ -32,6 +32,7 @@
 #include "CoordinatedPlatformLayer.h"
 #include "CoordinatedTileBuffer.h"
 #include "GLContext.h"
+#include "GraphicsContextSkia.h"
 #include "GraphicsLayerCoordinated.h"
 #include "PlatformDisplay.h"
 #include "ProcessCapabilities.h"
@@ -164,11 +165,11 @@ Ref<SkiaRecordingResult> SkiaPaintingEngine::record(const GraphicsLayerCoordinat
     GraphicsContextSkia recordingContext(*recordingCanvas, renderingMode, RenderingPurpose::LayerBacking);
     recordingContext.beginRecording();
     paintIntoGraphicsContext(layer, recordingContext, recordRect, contentsOpaque, contentsScale);
-    auto imageToFenceMap = recordingContext.endRecording();
+    auto recordingData = recordingContext.endRecording();
     auto picture = pictureRecorder.finishRecordingAsPicture();
     WTFEndSignpost(this, RecordTile);
 
-    return SkiaRecordingResult::create(WTF::move(picture), WTF::move(imageToFenceMap), recordRect, renderingMode, contentsOpaque, contentsScale);
+    return SkiaRecordingResult::create(WTF::move(picture), WTF::move(recordingData), recordRect, renderingMode, contentsOpaque, contentsScale);
 }
 
 Ref<CoordinatedTileBuffer> SkiaPaintingEngine::replay(const GraphicsLayerCoordinated& layer, const RefPtr<SkiaRecordingResult>& recording, const IntRect& dirtyRect)

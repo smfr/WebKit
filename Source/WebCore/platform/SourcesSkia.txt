@@ -60,6 +60,8 @@ platform/graphics/skia/PlatformDisplaySkia.cpp
 platform/graphics/skia/ShareableBitmapSkia.cpp
 platform/graphics/skia/SkiaHarfBuzzFont.cpp
 platform/graphics/skia/SkiaHarfBuzzFontCache.cpp
+platform/graphics/skia/SkiaImageAtlasLayout.cpp
+platform/graphics/skia/SkiaImageAtlasLayoutBuilder.cpp
 platform/graphics/skia/SkiaPaintingEngine.cpp
 platform/graphics/skia/SkiaRecordingResult.cpp
 platform/graphics/skia/SkiaReplayCanvas.cpp

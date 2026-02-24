@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Igalia S.L.
+ * Copyright (C) 2025, 2026 Igalia S.L.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,43 +23,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "SkiaRecordingResult.h"
+#pragma once
 
 #if USE(SKIA)
 
+#include "IntRect.h"
+#include "IntSize.h"
+#include <optional>
+
+WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
+#include <skia/core/SkImage.h>
+WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_END
+
+#include <wtf/HashMap.h>
+#include <wtf/ThreadSafeRefCounted.h>
+#include <wtf/Vector.h>
+
 namespace WebCore {
 
-SkiaRecordingResult::SkiaRecordingResult(sk_sp<SkPicture>&& picture, SkiaRecordingData&& recordingData, const IntRect& recordRect, RenderingMode renderingMode, bool contentsOpaque, float contentsScale)
-    : m_picture(WTF::move(picture))
-    , m_imageToFenceMap(WTF::move(recordingData.imageToFenceMap))
-    , m_atlasLayouts(WTF::move(recordingData.atlasLayouts))
-    , m_recordRect(recordRect)
-    , m_renderingMode(renderingMode)
-    , m_contentsOpaque(contentsOpaque)
-    , m_contentsScale(contentsScale)
-{
-}
+// Stores atlas layout computed during recording.
+// Shared (read-only) across all worker threads during replay.
+// Does NOT hold GPU textures - those are created per-worker in SkiaReplayAtlas.
+class SkiaImageAtlasLayout final : public ThreadSafeRefCounted<SkiaImageAtlasLayout> {
+public:
+    struct Entry {
+        sk_sp<SkImage> rasterImage;
+        IntRect atlasRect;
+    };
 
-SkiaRecordingResult::~SkiaRecordingResult() = default;
+    static Ref<SkiaImageAtlasLayout> create(const IntSize& atlasSize, Vector<Entry>&& entries);
 
-Ref<SkiaRecordingResult> SkiaRecordingResult::create(sk_sp<SkPicture>&& picture, SkiaRecordingData&& recordingData, const IntRect& recordRect, RenderingMode renderingMode, bool contentsOpaque, float contentsScale)
-{
-    return adoptRef(*new SkiaRecordingResult(WTF::move(picture), WTF::move(recordingData), recordRect, renderingMode, contentsOpaque, contentsScale));
-}
+    const IntSize& atlasSize() const { return m_atlasSize; }
+    const Vector<Entry>& entries() const { return m_entries; }
 
-bool SkiaRecordingResult::hasFences()
-{
-    Locker locker { m_imageToFenceMapLock };
-    return !m_imageToFenceMap.isEmpty();
-}
+private:
+    SkiaImageAtlasLayout(const IntSize& atlasSize, Vector<Entry>&& entries);
 
-void SkiaRecordingResult::waitForFenceIfNeeded(const SkImage& image)
-{
-    Locker locker { m_imageToFenceMapLock };
-    if (auto fence = m_imageToFenceMap.get(&image))
-        fence->serverWait();
-}
+    IntSize m_atlasSize;
+    Vector<Entry> m_entries;
+};
 
 } // namespace WebCore
 

@@ -29,6 +29,7 @@
 
 #include "GLFence.h"
 #include "GraphicsContext.h"
+#include "SkiaRecordingResult.h"
 WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
 #include <skia/core/SkCanvas.h>
 #include <skia/core/SkImage.h>
@@ -43,8 +44,8 @@ class SkSurface;
 namespace WebCore {
 
 class Pattern;
-
-using SkiaImageToFenceMap = HashMap<const SkImage*, std::unique_ptr<GLFence>>;
+class SkiaImageAtlasLayoutBuilder;
+struct SkiaRecordingData;
 
 class WEBCORE_EXPORT GraphicsContextSkia final : public GraphicsContext {
     friend class ImageBufferSkiaAcceleratedBackend;
@@ -58,7 +59,7 @@ public:
     const DestinationColorSpace& colorSpace() const final;
 
     void beginRecording();
-    SkiaImageToFenceMap endRecording();
+    SkiaRecordingData endRecording();
 
     void enableStateReplayTracking();
     void replayStateOnCanvas(SkCanvas&) const;
@@ -201,7 +202,7 @@ private:
     Vector<SkiaState, 1> m_skiaStateStack;
     SkiaImageToFenceMap m_imageToFenceMap;
     bool m_enableStateReplayTracking : 1 { false };
-
+    std::unique_ptr<SkiaImageAtlasLayoutBuilder> m_atlasLayoutBuilder;
     const DestinationColorSpace m_colorSpace;
 };
 

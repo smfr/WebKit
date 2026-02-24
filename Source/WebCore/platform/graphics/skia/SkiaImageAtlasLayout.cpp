@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Igalia S.L.
+ * Copyright (C) 2025, 2026 Igalia S.L.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,41 +24,21 @@
  */
 
 #include "config.h"
-#include "SkiaRecordingResult.h"
+#include "SkiaImageAtlasLayout.h"
 
 #if USE(SKIA)
 
 namespace WebCore {
 
-SkiaRecordingResult::SkiaRecordingResult(sk_sp<SkPicture>&& picture, SkiaRecordingData&& recordingData, const IntRect& recordRect, RenderingMode renderingMode, bool contentsOpaque, float contentsScale)
-    : m_picture(WTF::move(picture))
-    , m_imageToFenceMap(WTF::move(recordingData.imageToFenceMap))
-    , m_atlasLayouts(WTF::move(recordingData.atlasLayouts))
-    , m_recordRect(recordRect)
-    , m_renderingMode(renderingMode)
-    , m_contentsOpaque(contentsOpaque)
-    , m_contentsScale(contentsScale)
+SkiaImageAtlasLayout::SkiaImageAtlasLayout(const IntSize& atlasSize, Vector<Entry>&& entries)
+    : m_atlasSize(atlasSize)
+    , m_entries(WTF::move(entries))
 {
 }
 
-SkiaRecordingResult::~SkiaRecordingResult() = default;
-
-Ref<SkiaRecordingResult> SkiaRecordingResult::create(sk_sp<SkPicture>&& picture, SkiaRecordingData&& recordingData, const IntRect& recordRect, RenderingMode renderingMode, bool contentsOpaque, float contentsScale)
+Ref<SkiaImageAtlasLayout> SkiaImageAtlasLayout::create(const IntSize& atlasSize, Vector<Entry>&& entries)
 {
-    return adoptRef(*new SkiaRecordingResult(WTF::move(picture), WTF::move(recordingData), recordRect, renderingMode, contentsOpaque, contentsScale));
-}
-
-bool SkiaRecordingResult::hasFences()
-{
-    Locker locker { m_imageToFenceMapLock };
-    return !m_imageToFenceMap.isEmpty();
-}
-
-void SkiaRecordingResult::waitForFenceIfNeeded(const SkImage& image)
-{
-    Locker locker { m_imageToFenceMapLock };
-    if (auto fence = m_imageToFenceMap.get(&image))
-        fence->serverWait();
+    return adoptRef(*new SkiaImageAtlasLayout(atlasSize, WTF::move(entries)));
 }
 
 } // namespace WebCore

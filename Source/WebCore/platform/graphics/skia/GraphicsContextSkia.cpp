@@ -40,7 +40,9 @@
 #include "Pattern.h"
 #include "PlatformDisplay.h"
 #include "ProcessCapabilities.h"
+#include "SkiaImageAtlasLayoutBuilder.h"
 #include "SkiaPaintingEngine.h"
+#include "SkiaRecordingResult.h"
 #include <cmath>
 #include <ranges>
 WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
@@ -279,6 +281,12 @@ void GraphicsContextSkia::drawNativeImage(NativeImage& nativeImage, const FloatR
     auto image = nativeImage.platformImage();
     if (!image)
         return;
+
+    // Collect raster images for atlas batching during recording.
+    if (m_contextMode == ContextMode::RecordingMode && !image->isTextureBacked() && m_atlasLayoutBuilder) {
+        // FIXME: Remove m_atlasLayoutBuilder check and turn into ASSERT(m_atlasLayoutBuilder), once atlas mode is activated.
+        m_atlasLayoutBuilder->collectRasterImage(image);
+    }
 
     auto imageSize = nativeImage.size();
     if (options.orientation().usesWidthAsHeight())
@@ -1228,13 +1236,23 @@ void GraphicsContextSkia::beginRecording()
 {
     ASSERT(m_contextMode == ContextMode::PaintingMode);
     m_contextMode = ContextMode::RecordingMode;
+    // FIXME: Enable atlas mode, once upstreaming completed.
+    // m_atlasLayoutBuilder = makeUnique<SkiaImageAtlasLayoutBuilder>();
 }
 
-SkiaImageToFenceMap GraphicsContextSkia::endRecording()
+SkiaRecordingData GraphicsContextSkia::endRecording()
 {
     ASSERT(m_contextMode == ContextMode::RecordingMode);
     m_contextMode = ContextMode::PaintingMode;
-    return WTF::move(m_imageToFenceMap);
+
+    // FIXME: Remove m_atlasLayoutBuilder check and turn into ASSERT(m_atlasLayoutBuilder), once atlas mode is activated.
+    Vector<Ref<SkiaImageAtlasLayout>> atlasLayouts;
+    if (m_atlasLayoutBuilder) {
+        atlasLayouts = m_atlasLayoutBuilder->finalize();
+        m_atlasLayoutBuilder = nullptr;
+    }
+
+    return { WTF::move(m_imageToFenceMap), WTF::move(atlasLayouts) };
 }
 
 void GraphicsContextSkia::enableStateReplayTracking()
