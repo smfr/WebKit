@@ -51,13 +51,7 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
             this._tryEnableCustomRequestContentViews();
         }
 
-        // FIXME: Since a custom response content view may only become available after a response is received
-        // we need to figure out a way to restore / prefer the custom content view. For example if users
-        // always want to prefer the JSON view to the normal Response text view.
-
-        this._currentContentViewSetting = new WI.Setting("resource-current-view-" + this._resource.url.hash, ResourceClusterContentView.Identifier.Response);
-
-        this._tryEnableCustomResponseContentViews();
+        this._enableCustomResponseContentViewsPromise = this._tryEnableCustomResponseContentViews();
     }
 
     // Public
@@ -85,7 +79,14 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         if (this._shownInitialContent)
             return;
 
-        this._showContentViewForIdentifier(this._currentContentViewSetting.value);
+        this._enableCustomResponseContentViewsPromise
+        .then(() => {
+            let identifier = this._getPreferredContentViewIdentifier();
+            this._showContentViewForIdentifier(identifier);
+        })
+        .catch((error) => {
+            WI.reportInternalError(error);
+        });
     }
 
     closed()
@@ -97,39 +98,39 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
 
     restoreFromCookie(cookie)
     {
-        let contentView = this._showContentViewForIdentifier(cookie[WI.ResourceClusterContentView.ContentViewIdentifierCookieKey]);
+        let contentViewIdentifier = cookie[WI.ResourceClusterContentView.ContentViewIdentifierCookieKey] || this._getPreferredContentViewIdentifier();
 
-        if (contentView.revealPosition) {
-            let textRangeToSelect = null;
-            if (!isNaN(cookie.startLine) && !isNaN(cookie.startColumn) && !isNaN(cookie.endLine) && !isNaN(cookie.endColumn))
-                textRangeToSelect = new WI.TextRange(cookie.startLine, cookie.startColumn, cookie.endLine, cookie.endColumn);
+        this._enableCustomResponseContentViewsPromise.then(() => {
+            let contentView = this._showContentViewForIdentifier(contentViewIdentifier);
 
-            let position = null;
-            if (!isNaN(cookie.lineNumber) && !isNaN(cookie.columnNumber))
-                position = new WI.SourceCodePosition(cookie.lineNumber, cookie.columnNumber);
-            else if (textRangeToSelect)
-                position = textRangeToSelect.startPosition();
+            if (contentView.revealPosition) {
+                let textRangeToSelect = null;
+                if (!isNaN(cookie.startLine) && !isNaN(cookie.startColumn) && !isNaN(cookie.endLine) && !isNaN(cookie.endColumn))
+                    textRangeToSelect = new WI.TextRange(cookie.startLine, cookie.startColumn, cookie.endLine, cookie.endColumn);
 
-            let scrollOffset = null;
-            if (!isNaN(cookie.scrollOffsetX) && !isNaN(cookie.scrollOffsetY))
-                scrollOffset = new WI.Point(cookie.scrollOffsetX, cookie.scrollOffsetY);
+                let position = null;
+                if (!isNaN(cookie.lineNumber) && !isNaN(cookie.columnNumber))
+                    position = new WI.SourceCodePosition(cookie.lineNumber, cookie.columnNumber);
+                else if (textRangeToSelect)
+                    position = textRangeToSelect.startPosition();
 
-            if (position)
-                contentView.revealPosition(position, {...cookie, textRangeToSelect, scrollOffset});
-        }
+                let scrollOffset = null;
+                if (!isNaN(cookie.scrollOffsetX) && !isNaN(cookie.scrollOffsetY))
+                    scrollOffset = new WI.Point(cookie.scrollOffsetX, cookie.scrollOffsetY);
+
+                if (position)
+                    contentView.revealPosition(position, {...cookie, textRangeToSelect, scrollOffset});
+            }
+        });
     }
 
     showRequest()
     {
-        this._shownInitialContent = true;
-
         return this._showContentViewForIdentifier(ResourceClusterContentView.Identifier.Request);
     }
 
     showResponse()
     {
-        this._shownInitialContent = true;
-
         return this._showContentViewForIdentifier(ResourceClusterContentView.Identifier.Response);
     }
 
@@ -337,7 +338,7 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         return null;
     }
 
-    _showContentViewForIdentifier(identifier)
+    _showContentViewForIdentifier(identifier, saveAsPreference)
     {
         let contentViewToShow = null;
 
@@ -381,14 +382,18 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
 
         console.assert(contentViewToShow);
 
-        this._currentContentViewSetting.value = this._identifierForContentView(contentViewToShow);
+        if (saveAsPreference)
+            this._setPreferredContentViewIdentifier(identifier);
+
+        this._shownInitialContent = true;
 
         return this.contentViewContainer.showContentView(contentViewToShow);
     }
 
     _pathComponentSelected(event)
     {
-        this._showContentViewForIdentifier(event.data.pathComponent.representedObject);
+        const saveAsPreference = true;
+        this._showContentViewForIdentifier(event.data.pathComponent.representedObject, saveAsPreference);
     }
 
     _resourceTypeDidChange(event)
@@ -408,7 +413,7 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
 
     _resourceLoadingDidFinish(event)
     {
-        this._tryEnableCustomResponseContentViews();
+        this._enableCustomResponseContentViewsPromise = this._tryEnableCustomResponseContentViews();
     }
 
     _canUseJSONContentViewForContent(content)
@@ -463,6 +468,41 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         return mimeType;
     }
 
+    _getMIMETypeForPreferences()
+    {
+        if (!this._resource.mimeType)
+            return null;
+
+        return parseMIMEType(this._resource.mimeType).type;
+    }
+
+    _getPreferredContentViewIdentifier()
+    {
+        let mimeType = this._getMIMETypeForPreferences();
+        if (!mimeType)
+            return null;
+
+        let preferences = WI.settings.resourceContentViewIdentifierForMIMEType.value;
+        return preferences[mimeType] || null;
+    }
+
+    _setPreferredContentViewIdentifier(identifier)
+    {
+        let mimeType = this._getMIMETypeForPreferences();
+        if (!mimeType)
+            return;
+
+        let preferences = WI.settings.resourceContentViewIdentifierForMIMEType.value;
+
+        if (identifier === ResourceClusterContentView.Identifier.Response)
+            delete preferences[mimeType];
+        else
+            preferences[mimeType] = identifier;
+
+        // `preferences` is a referenced object. Changing its contents and simply setting it as a new value won't qualify as value change so it won't be persisted.
+        WI.settings.resourceContentViewIdentifierForMIMEType.value = structuredClone(preferences);
+    }
+
     _tryEnableCustomRequestContentViews()
     {
         let content = this._resource.requestData;
@@ -503,13 +543,13 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
     _tryEnableCustomResponseContentViews()
     {
         if (!this._resource.hasResponse())
-            return;
+            return Promise.resolve();
 
         // WebSocket resources already use a "custom" response content view.
         if (this._resource instanceof WI.WebSocketResource)
-            return;
+            return Promise.resolve();
 
-        this._resource.requestContent()
+        return this._resource.requestContent()
         .then(({error, content}) => {
             if (error || typeof content !== "string")
                 return;

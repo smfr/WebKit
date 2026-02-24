@@ -216,6 +216,7 @@ WI.settings = {
     searchFromSelection: new WI.Setting("search-from-selection", false),
     searchRegularExpression: new WI.Setting("search-regular-expression", false),
     selectedNetworkDetailContentViewIdentifier: new WI.Setting("network-detail-content-view-identifier", "preview"),
+    resourceContentViewIdentifierForMIMEType: new WI.Setting("resource-content-view-identifier-for-mime-type", {}),
     sourceMapsEnabled: new WI.Setting("source-maps-enabled", true),
     showConsoleMessageTimestamps: new WI.Setting("show-console-message-timestamps", false),
     showCSSPropertySyntaxInDocumentationPopover: new WI.Setting("show-css-property-syntax-in-documentation-popover", false),
