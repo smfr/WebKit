@@ -5278,6 +5278,8 @@ webkit.org/b/307586 imported/w3c/web-platform-tests/css/css-view-transitions/no-
 webkit.org/b/308480 http/wpt/service-workers/navigation-preload-without-worker-connection.https.html [ Failure Pass ]
 webkit.org/b/308481 fast/speechsynthesis/speech-synthesis-speak-empty-string.html [ Failure Pass ]
 
+webkit.org/b/308538 resize-observer/resize-observer-keeps-js-wrapper-of-target-alive.html [ Pass Failure ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////
