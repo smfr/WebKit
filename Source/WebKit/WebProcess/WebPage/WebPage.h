@@ -2178,6 +2178,8 @@ public:
 
     RefPtr<WebCore::Element> focusedElement() const { return m_focusedElement; }
 
+    void updateRemoteIntersectionObservers();
+
 private:
     WebPage(WebCore::PageIdentifier, WebPageCreationParameters&&);
 

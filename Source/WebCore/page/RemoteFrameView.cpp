@@ -61,7 +61,7 @@ LayoutRect RemoteFrameView::layoutViewportRect() const
 
 std::optional<LayoutRect> RemoteFrameView::visibleRectOfChild(const Frame&) const
 {
-    ASSERT_NOT_REACHED();
+    // FIXME: implement this.
     return { };
 }
 

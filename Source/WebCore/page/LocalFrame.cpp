@@ -95,6 +95,7 @@
 #include "ProcessWarming.h"
 #include "RemoteFrame.h"
 #include "RenderLayerCompositor.h"
+#include "RenderObjectInlines.h"
 #include "RenderStyle+GettersInlines.h"
 #include "RenderTableCell.h"
 #include "RenderText.h"
