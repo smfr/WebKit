@@ -359,7 +359,6 @@ html/ModelDocument.cpp
 html/OffscreenCanvas.cpp
 [ Mac ] html/RangeInputType.cpp
 [ Mac ] html/ResetInputType.cpp
-html/TextFieldInputType.cpp
 html/ValidatedFormListedElement.cpp
 html/ValidationMessage.cpp
 html/canvas/CanvasFilterContextSwitcher.cpp

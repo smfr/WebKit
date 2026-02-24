@@ -190,7 +190,6 @@ html/MediaElementSession.cpp
 html/ModelDocument.cpp
 [ Mac ] html/RangeInputType.cpp
 [ Mac ] html/ResetInputType.cpp
-[ Mac ] html/TextFieldInputType.cpp
 html/ValidatedFormListedElement.cpp
 html/ValidationMessage.cpp
 html/canvas/CanvasRenderingContext2D.cpp

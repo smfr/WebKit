@@ -600,6 +600,8 @@ ALWAYS_INLINE bool matchesOpenPseudoClass(const Element& element)
         return details->isOpen();
     if (auto* select = dynamicDowncast<HTMLSelectElement>(element))
         return select->isOpen();
+    if (auto* input = dynamicDowncast<HTMLInputElement>(element))
+        return input->isPresentingAttachedView();
 
     return false;
 }
