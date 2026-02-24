@@ -503,6 +503,7 @@ public:
     bool isLink() const { return role() == AccessibilityRole::Link; };
     bool isCode() const { return role() == AccessibilityRole::Code; }
     bool isImage() const { return role() == AccessibilityRole::Image; }
+    bool isInImage() const;
     bool isImageMap() const { return role() == AccessibilityRole::ImageMap; }
     bool isVideo() const { return role() == AccessibilityRole::Video; }
     virtual bool isSecureField() const = 0;
@@ -1919,6 +1920,13 @@ inline AXCoreObject* AXCoreObject::exposedTableAncestor(bool includeSelf) const
 {
     return Accessibility::findAncestor(*this, includeSelf, [] (const auto& object) {
         return object.isExposableTable();
+    });
+}
+
+inline bool AXCoreObject::isInImage() const
+{
+    return Accessibility::findAncestor<AXCoreObject>(*this, /* includeSelf */ false, [] (const AXCoreObject& ancestor) {
+        return ancestor.role() == AccessibilityRole::Image;
     });
 }
 

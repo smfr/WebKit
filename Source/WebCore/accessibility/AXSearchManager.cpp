@@ -92,7 +92,7 @@ bool AXSearchManager::matchForSearchKeyAtIndex(Ref<AXCoreObject> axObject, const
     case AccessibilitySearchKey::Frame:
         return axObject->isWebArea();
     case AccessibilitySearchKey::Graphic:
-        return axObject->isImage();
+        return axObject->isImage() && !axObject->isInImage();
     case AccessibilitySearchKey::HeadingLevel1:
         return axObject->headingLevel() == 1;
     case AccessibilitySearchKey::HeadingLevel2:
