@@ -2657,7 +2657,7 @@ void HTMLMediaElement::videoTrackSelectedChanged(VideoTrack& track)
 void HTMLMediaElement::videoTrackConfigurationChanged(VideoTrack& track)
 {
     UNUSED_PARAM(track);
-    ALWAYS_LOG(LOGIDENTIFIER, ", "_s, MediaElementSession::descriptionForTrack(track));
+    ALWAYS_LOG(LOGIDENTIFIER, MediaElementSession::descriptionForTrack(track));
 }
 
 void HTMLMediaElement::videoTrackKindChanged(VideoTrack& track)

@@ -162,7 +162,8 @@ void AudioTrack::enabledChanged(bool enabled)
 
 void AudioTrack::configurationChanged(const PlatformAudioTrackConfiguration& configuration)
 {
-    m_configuration->setState(configuration);
+    if (m_configuration->updateState(configuration) == AudioTrackConfiguration::StateChanged::No)
+        return;
     m_clients.forEach([this] (auto& client) {
         client.audioTrackConfigurationChanged(*this);
     });
@@ -228,7 +229,7 @@ void AudioTrack::updateKindFromPrivate()
 
 void AudioTrack::updateConfigurationFromPrivate()
 {
-    m_configuration->setState(m_private->configuration());
+    configurationChanged(m_private->configuration());
 }
 
 #if !RELEASE_LOG_DISABLED

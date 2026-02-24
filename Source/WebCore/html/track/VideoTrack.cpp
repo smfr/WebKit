@@ -141,7 +141,8 @@ void VideoTrack::selectedChanged(bool selected)
 
 void VideoTrack::configurationChanged(const PlatformVideoTrackConfiguration& configuration)
 {
-    m_configuration->setState(configuration);
+    if (m_configuration->updateState(configuration) == VideoTrackConfiguration::StateChanged::No)
+        return;
     m_clients.forEach([this] (auto& client) {
         client.videoTrackConfigurationChanged(*this);
     });
@@ -245,7 +246,7 @@ void VideoTrack::updateKindFromPrivate()
 
 void VideoTrack::updateConfigurationFromPrivate()
 {
-    m_configuration->setState(m_private->configuration());
+    configurationChanged(m_private->configuration());
 }
 
 #if !RELEASE_LOG_DISABLED
