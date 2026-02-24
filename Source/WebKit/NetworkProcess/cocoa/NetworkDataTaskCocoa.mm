@@ -603,7 +603,11 @@ void NetworkDataTaskCocoa::resume()
     if (m_failureScheduled)
         return;
 
-    if (CheckedPtr session = m_session.get()) {
+    if (!m_session || m_session->isInvalidated())
+        return;
+
+    {
+        CheckedRef session = *m_session;
         CheckedPtr storageSession = session->networkStorageSession();
         if (storageSession && storageSession->cookiesVersion() < m_requiredCookiesVersion) {
             RELEASE_LOG(Loading, "%p - NetworkDataTaskCocoa::resume: task is delayed because cookies version (%" PRIu64 ") of session (%" PRIu64 ") is lower than required (%" PRIu64 ")", this, storageSession->cookiesVersion(), storageSession->sessionID().toUInt64(), m_requiredCookiesVersion);

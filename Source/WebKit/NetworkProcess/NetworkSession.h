@@ -114,6 +114,7 @@ public:
     virtual ~NetworkSession();
 
     virtual void invalidateAndCancel();
+    bool isInvalidated() const { return m_isInvalidated; }
     virtual bool shouldLogCookieInformation() const { return false; }
     virtual Vector<WebCore::SecurityOriginData> hostNamesWithAlternativeServices() const { return { }; }
     virtual void deleteAlternativeServicesForHostNames(const Vector<String>&) { }
@@ -374,9 +375,7 @@ protected:
 
     const UniqueRef<PrefetchCache> m_prefetchCache;
 
-#if ASSERT_ENABLED
     bool m_isInvalidated { false };
-#endif
     RefPtr<NetworkCache::Cache> m_cache;
     const RefPtr<NetworkLoadScheduler> m_networkLoadScheduler;
     WebCore::BlobRegistryImpl m_blobRegistry;

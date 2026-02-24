@@ -254,9 +254,7 @@ void NetworkSession::invalidateAndCancel()
     });
     if (RefPtr resourceLoadStatistics = m_resourceLoadStatistics)
         resourceLoadStatistics->invalidateAndCancel();
-#if ASSERT_ENABLED
     m_isInvalidated = true;
-#endif
 
     if (m_cache) {
         auto networkCacheDirectory = m_cache->storageDirectory();
