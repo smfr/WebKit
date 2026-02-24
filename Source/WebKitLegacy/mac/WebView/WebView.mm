@@ -9357,10 +9357,10 @@ static NSTextAlignment nsTextAlignmentFromRenderStyle(const WebCore::RenderStyle
         textAlignment = NSTextAlignmentJustified;
         break;
     case WebCore::Style::TextAlign::Start:
-        textAlignment = style->isLeftToRightDirection() ? NSTextAlignmentLeft : NSTextAlignmentRight;
+        textAlignment = style->writingMode().deprecatedIsLeftToRightDirection() ? NSTextAlignmentLeft : NSTextAlignmentRight;
         break;
     case WebCore::Style::TextAlign::End:
-        textAlignment = style->isLeftToRightDirection() ? NSTextAlignmentRight : NSTextAlignmentLeft;
+        textAlignment = style->writingMode().deprecatedIsLeftToRightDirection() ? NSTextAlignmentRight : NSTextAlignmentLeft;
         break;
     default:
         ASSERT_NOT_REACHED();

@@ -45,7 +45,7 @@ inline static float endPaddingQuirkValue(const RenderBlockFlow& flow)
     auto endPadding = flow.hasNonVisibleOverflow() ? flow.paddingEnd() : 0_lu;
     if (!endPadding)
         endPadding = flow.endPaddingWidthForCaret();
-    if (flow.hasNonVisibleOverflow() && !endPadding && flow.element() && flow.element()->isRootEditableElement() && flow.style().isLeftToRightDirection())
+    if (flow.hasNonVisibleOverflow() && !endPadding && flow.element() && flow.element()->isRootEditableElement() && flow.style().writingMode().deprecatedIsLeftToRightDirection())
         endPadding = 1;
     return endPadding;
 }
@@ -134,7 +134,7 @@ void InlineContentBuilder::adjustDisplayLines(InlineContent& inlineContent, size
 
     size_t boxIndex = !startIndex ? 0 : lines[startIndex - 1].lastBoxIndex() + 1;
     CheckedRef rootBoxStyle = m_blockFlow.style();
-    auto isLeftToRightInlineDirection = rootBoxStyle->isLeftToRightDirection();
+    auto isLeftToRightInlineDirection = rootBoxStyle->writingMode().deprecatedIsLeftToRightDirection();
     auto isHorizontalWritingMode = rootBoxStyle->writingMode().isHorizontal();
 
     auto blockScrollableOverflowRect = FloatRect { };

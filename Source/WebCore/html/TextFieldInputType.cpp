@@ -266,7 +266,7 @@ void TextFieldInputType::elementDidBlur()
 
     CheckedPtr innerLayerScrollable = innerLayer->ensureLayerScrollableArea();
 
-    bool isLeftToRightDirection = downcast<RenderTextControlSingleLine>(*renderer).style().isLeftToRightDirection();
+    bool isLeftToRightDirection = downcast<RenderTextControlSingleLine>(*renderer).style().writingMode().deprecatedIsLeftToRightDirection();
     ScrollOffset scrollOffset(isLeftToRightDirection ? 0 : innerLayerScrollable->scrollWidth(), 0);
     innerLayerScrollable->scrollToOffset(scrollOffset);
 

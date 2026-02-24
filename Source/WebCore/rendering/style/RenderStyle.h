@@ -286,9 +286,6 @@ public:
     // Aggregates `writing-mode`, `direction` and `text-orientation`.
     WritingMode writingMode() const { return m_computedStyle.writingMode(); }
 
-    // FIXME: *Deprecated* Deprecated due to confusion between physical inline directions and bidi / line-relative directions.
-    bool isLeftToRightDirection() const { return writingMode().isBidiLTR(); }
-
     // MARK: - Aggregates
 
     inline Style::Animations& ensureAnimations();

@@ -389,10 +389,10 @@ static void updateAttributes(const Node* node, const RenderStyle& style, OptionS
         break;
     case Style::TextAlign::Start:
         if (style.hasExplicitlySetDirection())
-            textAlignment = style.isLeftToRightDirection() ? NSTextAlignmentLeft : NSTextAlignmentRight;
+            textAlignment = style.writingMode().deprecatedIsLeftToRightDirection() ? NSTextAlignmentLeft : NSTextAlignmentRight;
         break;
     case Style::TextAlign::End:
-        textAlignment = style.isLeftToRightDirection() ? NSTextAlignmentRight : NSTextAlignmentLeft;
+        textAlignment = style.writingMode().deprecatedIsLeftToRightDirection() ? NSTextAlignmentRight : NSTextAlignmentLeft;
         break;
     default:
         ASSERT_NOT_REACHED();

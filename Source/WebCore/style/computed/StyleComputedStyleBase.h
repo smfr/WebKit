@@ -668,12 +668,6 @@ public:
         return m_inheritedFlags.writingMode;
     }
 
-    // FIXME: *Deprecated* Deprecated due to confusion between physical inline directions and bidi / line-relative directions.
-    bool isLeftToRightDirection() const
-    {
-        return writingMode().isBidiLTR();
-    }
-
     // MARK: - Aggregates
 
     inline Animations& ensureAnimations();

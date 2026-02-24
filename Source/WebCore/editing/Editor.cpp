@@ -867,7 +867,7 @@ bool Editor::hasBidiSelection() const
     ScriptDisallowedScope::InMainThread scriptDisallowedScope;
 
     if (CheckedPtr renderBlockFlow = ancestorsOfType<RenderBlockFlow>(*startNode->renderer()).first())
-        return !renderBlockFlow->style().isLeftToRightDirection() || renderBlockFlow->containsNonZeroBidiLevel();
+        return !renderBlockFlow->style().writingMode().deprecatedIsLeftToRightDirection() || renderBlockFlow->containsNonZeroBidiLevel();
     return false;
 }
 
@@ -4719,12 +4719,12 @@ FontAttributes Editor::fontAttributesAtSelectionStart()
         break;
     case Style::TextAlign::Start:
         if (style->hasExplicitlySetDirection())
-            attributes.horizontalAlignment = style->isLeftToRightDirection() ? FontAttributes::HorizontalAlignment::Left : FontAttributes::HorizontalAlignment::Right;
+            attributes.horizontalAlignment = style->writingMode().deprecatedIsLeftToRightDirection() ? FontAttributes::HorizontalAlignment::Left : FontAttributes::HorizontalAlignment::Right;
         else
             attributes.horizontalAlignment = FontAttributes::HorizontalAlignment::Natural;
         break;
     case Style::TextAlign::End:
-        attributes.horizontalAlignment = style->isLeftToRightDirection() ? FontAttributes::HorizontalAlignment::Right : FontAttributes::HorizontalAlignment::Left;
+        attributes.horizontalAlignment = style->writingMode().deprecatedIsLeftToRightDirection() ? FontAttributes::HorizontalAlignment::Right : FontAttributes::HorizontalAlignment::Left;
         break;
     }
 
