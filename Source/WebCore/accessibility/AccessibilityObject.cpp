@@ -2912,20 +2912,12 @@ String AccessibilityObject::computedRoleString() const
         return reverseAriaRoleMap().get(std::to_underlying(AccessibilityRole::Presentational));
 
     // We do compute a role string for block elements with author-provided roles.
-    if (ariaRoleAttribute() == AccessibilityRole::TextGroup
-        || role == AccessibilityRole::Footnote
-        || role == AccessibilityRole::GraphicsObject)
+    if (ariaRoleAttribute() == AccessibilityRole::TextGroup || role == AccessibilityRole::Footnote)
         return reverseAriaRoleMap().get(std::to_underlying(AccessibilityRole::Group));
 
     // We do not compute a role string for generic block elements with user-agent assigned roles.
     if (role == AccessibilityRole::TextGroup)
         return emptyString();
-
-    if (role == AccessibilityRole::GraphicsDocument)
-        return reverseAriaRoleMap().get(std::to_underlying(AccessibilityRole::Document));
-
-    if (role == AccessibilityRole::GraphicsSymbol)
-        return reverseAriaRoleMap().get(std::to_underlying(AccessibilityRole::Image));
 
     if (role == AccessibilityRole::HorizontalRule)
         return reverseAriaRoleMap().get(std::to_underlying(AccessibilityRole::Splitter));
