@@ -56,8 +56,9 @@ class ModelProcess final : public AuxiliaryProcess, public ThreadSafeRefCounted<
     WTF_MAKE_TZONE_ALLOCATED(ModelProcess);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(ModelProcess);
 public:
-    explicit ModelProcess(AuxiliaryProcessInitializationParameters&&);
+    static Ref<ModelProcess> create(AuxiliaryProcessInitializationParameters&&);
     ~ModelProcess();
+
     static constexpr WTF::AuxiliaryProcessType processType = WTF::AuxiliaryProcessType::Model;
 
     void ref() const final { ThreadSafeRefCounted::ref(); }
@@ -86,6 +87,8 @@ public:
     void modelPlayerCountForTesting(CompletionHandler<void(uint64_t)>&&);
 
 private:
+    explicit ModelProcess(AuxiliaryProcessInitializationParameters&&);
+
     void lowMemoryHandler(Critical, Synchronous);
 
     // AuxiliaryProcess

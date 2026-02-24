@@ -157,7 +157,7 @@ public:
     using DomainInNeedOfStorageAccess = WebCore::RegistrableDomain;
     using OpenerDomain = WebCore::RegistrableDomain;
 
-    NetworkProcess(AuxiliaryProcessInitializationParameters&&);
+    static Ref<NetworkProcess> create(AuxiliaryProcessInitializationParameters&&);
     ~NetworkProcess();
     static constexpr WTF::AuxiliaryProcessType processType = WTF::AuxiliaryProcessType::Network;
 
@@ -491,6 +491,8 @@ public:
 #endif
 
 private:
+    explicit NetworkProcess(AuxiliaryProcessInitializationParameters&&);
+
     void platformInitializeNetworkProcess(const NetworkProcessCreationParameters&);
 
     void didReceiveNetworkProcessMessage(IPC::Connection&, IPC::Decoder&);

@@ -51,8 +51,6 @@ public:
         return adoptRef(*new WebExtensionSQLiteStatement(std::forward<Args>(args)...));
     }
 
-    explicit WebExtensionSQLiteStatement(Ref<WebExtensionSQLiteDatabase>, const String& query, RefPtr<API::Error>&);
-
     ~WebExtensionSQLiteStatement();
 
     void bind(const String&, int parameterIndex);
@@ -77,7 +75,10 @@ public:
 
     Vector<String> columnNames();
     HashMap<String, int> columnNamesToIndicies();
+
 private:
+    explicit WebExtensionSQLiteStatement(Ref<WebExtensionSQLiteDatabase>, const String& query, RefPtr<API::Error>&);
+
     sqlite3_stmt* m_handle;
     const Ref<WebExtensionSQLiteDatabase> m_db;
 

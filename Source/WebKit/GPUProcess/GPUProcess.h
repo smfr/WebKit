@@ -96,7 +96,6 @@ class GPUProcess final : public AuxiliaryProcess, public ThreadSafeRefCounted<GP
     WTF_DEPRECATED_MAKE_FAST_ALLOCATED(GPUProcess);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(GPUProcess);
 public:
-    GPUProcess();
     ~GPUProcess();
 
     static GPUProcess& singleton();
@@ -178,7 +177,10 @@ public:
 #endif
 
     void terminateWebProcess(WebCore::ProcessIdentifier);
+
 private:
+    GPUProcess();
+
     void lowMemoryHandler(Critical, Synchronous);
 
     // AuxiliaryProcess

@@ -55,7 +55,6 @@ public:
         return adoptRef(*new WebExtensionSQLiteDatabase(std::forward<Args>(args)...));
     }
 
-    explicit WebExtensionSQLiteDatabase(const URL&, Ref<WorkQueue>&&);
     ~WebExtensionSQLiteDatabase()
     {
         ASSERT(!m_db);
@@ -91,6 +90,8 @@ public:
     WorkQueue& queue() const { return m_queue; };
 
 private:
+    WebExtensionSQLiteDatabase(const URL&, Ref<WorkQueue>&&);
+
     RefPtr<API::Error> errorWithSQLiteErrorCode(int errorCode);
     URL privateOnDiskDatabaseURL();
 

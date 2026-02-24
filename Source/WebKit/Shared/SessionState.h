@@ -74,8 +74,7 @@ public:
         return adoptRef(*new FrameState(std::forward<Args>(args)...));
     }
 
-    // These are used to help debug <rdar://problem/48634553>.
-    FrameState() { RELEASE_ASSERT(RunLoop::isMain()); }
+    // This is used to help debug <rdar://problem/48634553>.
     ~FrameState() { RELEASE_ASSERT(RunLoop::isMain()); }
 
     Ref<FrameState> copy();
@@ -128,6 +127,9 @@ public:
     bool isEqualForTesting(const FrameState&) const;
 
 private:
+    // This is used to help debug <rdar://problem/48634553>.
+    FrameState() { RELEASE_ASSERT(RunLoop::isMain()); }
+
     FrameState(String&& urlString, String&& originalURLString, String&& referrer, AtomString&& target, std::optional<WebCore::FrameIdentifier>, std::optional<Vector<uint8_t>>&& stateObjectData, int64_t documentSequenceNumber, int64_t itemSequenceNumber, WebCore::IntPoint scrollPosition, bool shouldRestoreScrollPosition, float pageScaleFactor, std::optional<HTTPBody>&&, std::optional<WebCore::BackForwardItemIdentifier>, std::optional<WebCore::BackForwardFrameItemIdentifier>, bool hasCachedPage, String&& title, WebCore::ShouldOpenExternalURLsPolicy, RefPtr<WebCore::SerializedScriptValue>&& sessionStateObject, bool wasCreatedByJSWithoutUserInteraction, bool wasRestoredFromSession,  std::optional<WebCore::PolicyContainer>&&,
 #if PLATFORM(IOS_FAMILY)
         WebCore::FloatRect exposedContentRect, WebCore::IntRect unobscuredContentRect, WebCore::FloatSize minimumLayoutSizeInScrollViewCoordinates, WebCore::IntSize contentSize, bool scaleIsInitial, WebCore::FloatBoxExtent obscuredInsets,

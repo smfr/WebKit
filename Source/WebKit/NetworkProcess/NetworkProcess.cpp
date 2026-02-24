@@ -167,6 +167,11 @@ static void callExitSoon(IPC::Connection*)
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(NetworkProcess);
 
+Ref<NetworkProcess> NetworkProcess::create(AuxiliaryProcessInitializationParameters&& parameters)
+{
+    return adoptRef(*new NetworkProcess(WTF::move(parameters)));
+}
+
 NetworkProcess::NetworkProcess(AuxiliaryProcessInitializationParameters&& parameters)
     : m_downloadManager(*this)
 #if ENABLE(CONTENT_EXTENSIONS)

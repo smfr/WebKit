@@ -96,9 +96,10 @@ public:
         return adoptRef(*new WebExtensionDataRecordHolder(std::forward<Args>(args)...));
     }
 
-    WebExtensionDataRecordHolder() { };
-
     HashMap<String, Ref<WebExtensionDataRecord>> recordsMap;
+
+private:
+    WebExtensionDataRecordHolder() = default;
 };
 
 } // namespace WebKit
