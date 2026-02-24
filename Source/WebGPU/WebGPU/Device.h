@@ -226,7 +226,7 @@ public:
     bool enableEncoderTimestamps() const;
     id<MTLCounterSampleBuffer> timestampsBuffer(id<MTLCommandBuffer>, size_t);
     void resolveTimestampsForBuffer(id<MTLCommandBuffer>);
-    id<MTLSharedEvent> resolveTimestampsSharedEvent();
+    id<MTLSharedEvent> _Nonnull resolveTimestampsSharedEvent();
     uint32_t maxVerticesPerDrawCall() const { return m_maxVerticesPerDrawCall; }
     void trackTimestampsBuffer(id<MTLCommandBuffer>, id<MTLCounterSampleBuffer>);
 

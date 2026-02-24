@@ -47,7 +47,7 @@ IGNORE_CLANG_WARNINGS_BEGIN("nullability-completeness")
 @interface TextureAndClearColor : NSObject
 - (instancetype)initWithTexture:(id<MTLTexture> _Nonnull)texture NS_DESIGNATED_INITIALIZER;
 - (instancetype)init NS_UNAVAILABLE;
-@property (nonatomic) id<MTLTexture> texture;
+@property (nonatomic, nonnull) id<MTLTexture> texture;
 @property (nonatomic) MTLClearColor clearColor;
 @property (nonatomic) NSUInteger depthPlane;
 @end
