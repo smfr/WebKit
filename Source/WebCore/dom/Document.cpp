@@ -4394,7 +4394,7 @@ void Document::setParsing(bool b)
     m_bParsing = b;
 
     if (m_bParsing && !m_sharedObjectPool)
-        m_sharedObjectPool = makeUnique<DocumentSharedObjectPool>(RegistrableDomain { securityOrigin().data() });
+        m_sharedObjectPool = makeUnique<DocumentSharedObjectPool>(securityOrigin());
 
     if (!m_bParsing && view() && !view()->needsLayout())
         protect(view())->fireLayoutRelatedMilestonesIfNeeded();

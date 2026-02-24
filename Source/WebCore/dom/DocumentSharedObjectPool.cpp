@@ -29,6 +29,7 @@
 
 #include "Element.h"
 #include "ElementData.h"
+#include "SecurityOrigin.h"
 #include <wtf/StdLibExtras.h>
 #include <wtf/TZoneMallocInlines.h>
 
@@ -36,14 +37,14 @@ namespace WebCore {
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(DocumentSharedObjectPool);
 
-static HashMap<RegistrableDomain, size_t>& NODELETE peakSizeInPast()
+static HashMap<SecurityOriginData, size_t>& NODELETE peakSizeInPast()
 {
-    static MainThreadNeverDestroyed<HashMap<RegistrableDomain, size_t>> map;
+    static MainThreadNeverDestroyed<HashMap<SecurityOriginData, size_t>> map;
     return map;
 }
 
-DocumentSharedObjectPool::DocumentSharedObjectPool(RegistrableDomain&& domain)
-    : m_domain(WTF::move(domain))
+DocumentSharedObjectPool::DocumentSharedObjectPool(const SecurityOrigin& origin)
+    : m_domain(origin.data())
 {
     m_shareableElementDataCache.reserveInitialCapacity(peakSizeInPast().get(m_domain));
 }
