@@ -6132,8 +6132,8 @@ void Document::visibilityAdjustmentStateDidChange()
 #if PLATFORM(IOS_FAMILY)
 void Document::sceneIdentifierDidChange()
 {
-    for (auto& audioProducer : m_audioProducers)
-        audioProducer.sceneIdentifierDidChange();
+    for (Ref audioProducer : m_audioProducers)
+        audioProducer->sceneIdentifierDidChange();
 }
 #endif
 
