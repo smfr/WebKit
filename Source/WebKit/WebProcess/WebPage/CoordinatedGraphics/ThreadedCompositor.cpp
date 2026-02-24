@@ -419,6 +419,7 @@ void ThreadedCompositor::renderLayerTree()
     m_context->swapBuffers();
 
     m_surface->didRenderFrame();
+    m_surface->sendFrame();
 
     RunLoop::mainSingleton().dispatch([this, protectedThis = Ref { *this }] {
         if (m_layerTreeHost)

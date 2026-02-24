@@ -196,7 +196,7 @@ AcceleratedSurface::RenderTargetShareableBuffer::~RenderTargetShareableBuffer()
     WebProcess::singleton().parentProcessConnection()->send(Messages::AcceleratedBackingStore::DidDestroyBuffer(m_id), m_surfaceID);
 }
 
-void AcceleratedSurface::RenderTargetShareableBuffer::didRenderFrame(Vector<IntRect, 1>&& damageRects)
+void AcceleratedSurface::RenderTargetShareableBuffer::sendFrame(Vector<WebCore::IntRect, 1>&& damageRects)
 {
     WebProcess::singleton().parentProcessConnection()->send(Messages::AcceleratedBackingStore::Frame(m_id, WTF::move(damageRects), WTF::move(m_renderingFenceFD)), m_surfaceID);
 }
@@ -508,10 +508,9 @@ AcceleratedSurface::RenderTargetSHMImage::~RenderTargetSHMImage()
         glDeleteRenderbuffers(1, &m_colorBuffer);
 }
 
-void AcceleratedSurface::RenderTargetSHMImage::didRenderFrame(Vector<IntRect, 1>&& damageRects)
+void AcceleratedSurface::RenderTargetSHMImage::didRenderFrame()
 {
     glReadPixels(0, 0, m_bitmap->size().width(), m_bitmap->size().height(), GL_BGRA, GL_UNSIGNED_BYTE, m_bitmap->mutableSpan().data());
-    RenderTargetShareableBuffer::didRenderFrame(WTF::move(damageRects));
 }
 
 std::unique_ptr<AcceleratedSurface::RenderTarget> AcceleratedSurface::RenderTargetSHMImageWithoutGL::create(uint64_t surfaceID, const IntSize& size)
@@ -553,7 +552,7 @@ SkSurface* AcceleratedSurface::RenderTargetSHMImageWithoutGL::skiaSurface()
 }
 #endif
 
-void AcceleratedSurface::RenderTargetSHMImageWithoutGL::didRenderFrame(Vector<IntRect, 1>&& damageRects)
+void AcceleratedSurface::RenderTargetSHMImageWithoutGL::sendFrame(Vector<IntRect, 1>&& damageRects)
 {
     WebProcess::singleton().parentProcessConnection()->send(Messages::AcceleratedBackingStore::Frame(m_id, WTF::move(damageRects), UnixFileDescriptor()), m_surfaceID);
 }
@@ -686,7 +685,7 @@ void AcceleratedSurface::RenderTargetWPEBackend::willRenderFrame()
     wpe_renderer_backend_egl_target_frame_will_render(m_backend);
 }
 
-void AcceleratedSurface::RenderTargetWPEBackend::didRenderFrame(Vector<IntRect, 1>&&)
+void AcceleratedSurface::RenderTargetWPEBackend::didRenderFrame()
 {
     wpe_renderer_backend_egl_target_frame_rendered(m_backend);
 }
@@ -828,6 +827,21 @@ bool AcceleratedSurface::SwapChain::resize(const IntSize& size)
     return true;
 }
 
+bool AcceleratedSurface::SwapChain::handleBufferFormatChangeIfNeeded()
+{
+#if (PLATFORM(GTK) || ENABLE(WPE_PLATFORM)) && (USE(GBM) || OS(ANDROID))
+    if (m_type == Type::EGLImage) {
+        Locker locker { m_bufferFormatLock };
+        if (m_bufferFormatChanged) {
+            reset();
+            m_bufferFormatChanged = false;
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
 std::unique_ptr<AcceleratedSurface::RenderTarget> AcceleratedSurface::SwapChain::createTarget() const
 {
     switch (m_type) {
@@ -862,16 +876,6 @@ AcceleratedSurface::RenderTarget* AcceleratedSurface::SwapChain::nextTarget()
 #if USE(WPE_RENDERER)
     if (m_type == Type::WPEBackend)
         return m_lockedTargets[0].get();
-#endif
-
-#if (PLATFORM(GTK) || ENABLE(WPE_PLATFORM)) && (USE(GBM) || OS(ANDROID))
-    if (m_type == Type::EGLImage) {
-        Locker locker { m_bufferFormatLock };
-        if (m_bufferFormatChanged) {
-            reset();
-            m_bufferFormatChanged = false;
-        }
-    }
 #endif
 
     if (m_freeTargets.isEmpty()) {
@@ -1051,6 +1055,8 @@ void AcceleratedSurface::willDestroyCompositingRunLoop()
 
 void AcceleratedSurface::willDestroyGLContext()
 {
+    m_pendingFrameNotifyTargets.clear();
+    m_target = nullptr;
     m_swapChain.reset();
 }
 
@@ -1080,6 +1086,13 @@ SkCanvas* AcceleratedSurface::canvas()
 void AcceleratedSurface::willRenderFrame(const IntSize& size)
 {
     bool sizeDidChange = m_swapChain.resize(size);
+    bool bufferFormatChanged = m_swapChain.handleBufferFormatChangeIfNeeded();
+    if (sizeDidChange || bufferFormatChanged) {
+        m_pendingFrameNotifyTargets.clear();
+#if ENABLE(DAMAGE_TRACKING)
+        m_frameDamage = std::nullopt;
+#endif
+    }
 
     m_target = m_swapChain.nextTarget();
     if (m_target)
@@ -1126,7 +1139,18 @@ void AcceleratedSurface::didRenderFrame()
     }
 #endif
 
-    m_target->didRenderFrame(WTF::move(damageRects));
+    m_target->didRenderFrame();
+    m_pendingFrameNotifyTargets.insert(0, { m_target, WTF::move(damageRects) });
+    m_target = nullptr;
+}
+
+void AcceleratedSurface::sendFrame()
+{
+    auto [target, damageRects] = m_pendingFrameNotifyTargets.takeLast();
+    if (!target)
+        return;
+
+    target->sendFrame(WTF::move(damageRects));
 }
 
 #if ENABLE(DAMAGE_TRACKING)
@@ -1160,7 +1184,6 @@ void AcceleratedSurface::frameDone()
 {
     if (m_frameCompleteHandler)
         m_frameCompleteHandler();
-    m_target = nullptr;
 }
 
 } // namespace WebKit

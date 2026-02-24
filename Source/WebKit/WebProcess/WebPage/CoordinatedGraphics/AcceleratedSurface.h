@@ -130,6 +130,7 @@ public:
     void willDestroyGLContext();
     void willRenderFrame(const WebCore::IntSize&);
     void didRenderFrame();
+    void sendFrame();
     void clear(const OptionSet<WebCore::CompositionReason>&);
 
 #if ENABLE(DAMAGE_TRACKING)
@@ -172,7 +173,8 @@ private:
 #endif
 
         virtual void willRenderFrame() { }
-        virtual void didRenderFrame(Vector<WebCore::IntRect, 1>&&) { }
+        virtual void didRenderFrame() { }
+        virtual void sendFrame(Vector<WebCore::IntRect, 1>&&) { };
 
         virtual void sync(bool) { }
         virtual void setReleaseFenceFD(UnixFileDescriptor&&) { }
@@ -213,7 +215,7 @@ private:
 #endif
 
         void willRenderFrame() override;
-        void didRenderFrame(Vector<WebCore::IntRect, 1>&&) override;
+        void sendFrame(Vector<WebCore::IntRect, 1>&&) override;
 
         virtual bool supportsExplicitSync() const = 0;
         void sync(bool) override;
@@ -293,7 +295,7 @@ private:
 
     private:
         bool supportsExplicitSync() const override { return false; }
-        void didRenderFrame(Vector<WebCore::IntRect, 1>&&) override;
+        void didRenderFrame() override;
 
         unsigned m_colorBuffer { 0 };
         const Ref<WebCore::ShareableBitmap> m_bitmap;
@@ -310,7 +312,7 @@ private:
 #endif
 
     private:
-        void didRenderFrame(Vector<WebCore::IntRect, 1>&&) override;
+        void sendFrame(Vector<WebCore::IntRect, 1>&&) override;
 
         WebCore::IntSize m_initialSize;
         const Ref<WebCore::ShareableBitmap> m_bitmap;
@@ -341,7 +343,7 @@ private:
 
     private:
         void willRenderFrame() override;
-        void didRenderFrame(Vector<WebCore::IntRect, 1>&&) override;
+        void didRenderFrame() override;
 
         struct wpe_renderer_backend_egl_target* m_backend { nullptr };
     };
@@ -369,6 +371,7 @@ private:
 
         Type type() const { return m_type; }
         bool resize(const WebCore::IntSize&);
+        bool handleBufferFormatChangeIfNeeded();
         const WebCore::IntSize& size() const { return m_size; }
         RenderTarget* nextTarget();
         void releaseTarget(uint64_t, UnixFileDescriptor&& releaseFence);
@@ -419,6 +422,7 @@ private:
     WebCore::IntSize m_size;
     SwapChain m_swapChain;
     RenderTarget* m_target { nullptr };
+    Vector<std::pair<RenderTarget*, Vector<WebCore::IntRect, 1>>, 1> m_pendingFrameNotifyTargets;
     bool m_isVisible { false };
     bool m_useExplicitSync { false };
     std::atomic<ColorComponents> m_backgroundColor { white };
