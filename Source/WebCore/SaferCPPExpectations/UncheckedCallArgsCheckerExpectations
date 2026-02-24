@@ -102,7 +102,7 @@ dom/ElementInternals.cpp
 [ Mac ] dom/ElementIteratorInlines.h
 [ Mac ] dom/ElementTraversal.h
 dom/EventLoop.cpp
-dom/FragmentDirectiveRangeFinder.cpp
+[ iOS ] dom/FragmentDirectiveRangeFinder.cpp
 dom/IdTargetObserver.cpp
 dom/IdleCallbackController.cpp
 dom/ImageOverlay.cpp
@@ -115,12 +115,12 @@ dom/NamedNodeMap.cpp
 dom/Node.cpp
 dom/NodeIterator.cpp
 dom/NodeRareData.h
-dom/NodeWithIndex.h
+[ iOS ] dom/NodeWithIndex.h
 dom/PendingScript.cpp
 dom/Position.cpp
 dom/PositionIterator.cpp
 dom/Range.cpp
-dom/RangeBoundaryPoint.h
+[ iOS ] dom/RangeBoundaryPoint.h
 dom/ScriptElement.cpp
 dom/SelectorQuery.cpp
 dom/ShadowRoot.cpp
@@ -199,7 +199,7 @@ html/canvas/CanvasRenderingContext2DBase.cpp
 html/canvas/EXTDisjointTimerQuery.cpp
 html/canvas/OffscreenCanvasRenderingContext2D.cpp
 html/parser/HTMLConstructionSite.cpp
-html/parser/HTMLConstructionSite.h
+[ iOS ] html/parser/HTMLConstructionSite.h
 html/parser/HTMLDocumentParser.cpp
 html/parser/HTMLParserScheduler.cpp
 html/parser/HTMLScriptRunner.cpp
@@ -240,13 +240,11 @@ layout/floats/FloatingContext.cpp
 layout/floats/PlacedFloats.cpp
 layout/formattingContexts/FormattingGeometry.cpp
 layout/formattingContexts/block/BlockFormattingContext.cpp
-[ Mac ] layout/formattingContexts/block/BlockFormattingGeometry.cpp
 layout/formattingContexts/block/BlockFormattingQuirks.cpp
 layout/formattingContexts/block/BlockMarginCollapse.cpp
 layout/formattingContexts/block/PrecomputedBlockMarginCollapse.cpp
 layout/formattingContexts/block/tablewrapper/TableWrapperBlockFormattingContext.cpp
 layout/formattingContexts/flex/FlexLayout.cpp
-[ Mac ] layout/formattingContexts/grid/GridFormattingContext.h
 layout/formattingContexts/inline/AbstractLineBuilder.cpp
 layout/formattingContexts/inline/InlineContentAligner.cpp
 layout/formattingContexts/inline/InlineContentBreaker.cpp
@@ -277,7 +275,6 @@ layout/formattingContexts/inline/ruby/RubyFormattingContext.cpp
 layout/formattingContexts/inline/text/TextUtil.cpp
 layout/formattingContexts/table/TableFormattingContext.cpp
 layout/formattingContexts/table/TableFormattingGeometry.cpp
-[ Mac ] layout/formattingContexts/table/TableFormattingQuirks.cpp
 layout/formattingContexts/table/TableGrid.cpp
 layout/formattingContexts/table/TableLayout.cpp
 layout/integration/LayoutIntegrationBoxGeometryUpdater.cpp
@@ -302,7 +299,6 @@ layout/integration/inline/LineSelection.h
 layout/layouttree/FormattingContextBoxIterator.h
 layout/layouttree/LayoutBox.cpp
 layout/layouttree/LayoutContainingBlockChainIterator.h
-[ Mac ] layout/layouttree/LayoutElementBox.cpp
 layout/layouttree/LayoutTreeBuilder.cpp
 loader/ApplicationManifestLoader.cpp
 loader/CrossOriginPreflightChecker.cpp
@@ -414,9 +410,6 @@ rendering/CounterNode.cpp
 rendering/EllipsisBoxPainter.cpp
 rendering/FixedTableLayout.cpp
 rendering/FloatingObjects.cpp
-[ Mac ] rendering/GlyphDisplayListCache.cpp
-[ Mac ] rendering/GlyphDisplayListCache.h
-[ Mac ] rendering/GridMasonryLayout.cpp
 rendering/GridTrackSizingAlgorithm.cpp
 rendering/HitTestResult.cpp
 rendering/ImageQualityController.cpp
@@ -437,13 +430,12 @@ rendering/MarkedText.cpp
 rendering/MotionPath.cpp
 rendering/OrderIterator.cpp
 rendering/PositionedLayoutConstraints.cpp
-[ Mac ] rendering/PositionedLayoutConstraints.h
 rendering/RegionContext.h
 rendering/RenderAttachment.cpp
 rendering/RenderBlock.cpp
 rendering/RenderBlockFlow.cpp
 rendering/RenderBox.cpp
-rendering/RenderBoxInlines.h
+[ iOS ] rendering/RenderBoxInlines.h
 rendering/RenderBoxModelObject.cpp
 rendering/RenderBoxModelObjectInlines.h
 rendering/RenderButton.cpp
@@ -488,9 +480,7 @@ rendering/RenderObjectNode.h
 rendering/RenderQuote.cpp
 rendering/RenderReplaced.cpp
 rendering/RenderReplica.cpp
-[ Mac ] rendering/RenderScrollbarPart.cpp
 rendering/RenderSelectionGeometry.cpp
-[ Mac ] rendering/RenderSlider.cpp
 rendering/RenderTable.cpp
 rendering/RenderTableCaption.cpp
 rendering/RenderTableCell.cpp
@@ -504,7 +494,6 @@ rendering/RenderTextControlMultiLine.cpp
 rendering/RenderTextControlSingleLine.cpp
 rendering/RenderTextControlSingleLine.h
 rendering/RenderTextFragment.cpp
-[ Mac ] rendering/RenderTextInlines.h
 rendering/RenderTextLineBoxes.cpp
 rendering/RenderTreeAsText.cpp
 rendering/RenderVTTCue.cpp
@@ -635,21 +624,19 @@ style/StyleTreeResolver.cpp
 style/StyleUpdate.cpp
 style/Styleable.cpp
 style/Styleable.h
-[ Mac ] style/calc/StyleCalculationTree+Conversion.cpp
 style/computed/StyleComputedStyleBase.cpp
 style/values/color/StyleColor.cpp
 style/values/content/StyleContent.cpp
 style/values/fonts/StyleFontWeight.cpp
 style/values/grid/StyleGridPositionsResolver.cpp
-style/values/images/kinds/StyleCachedImage.cpp
+[ iOS ] style/values/images/kinds/StyleCachedImage.cpp
 style/values/images/kinds/StyleCanvasImage.cpp
-style/values/images/kinds/StyleGeneratedImage.cpp
+[ iOS ] style/values/images/kinds/StyleGeneratedImage.cpp
 style/values/images/kinds/StyleGradientImage.cpp
 style/values/images/kinds/StyleMultiImage.cpp
 style/values/images/kinds/StylePaintImage.cpp
 style/values/inline/StyleLineHeight.cpp
 style/values/primitives/StyleLengthResolution.cpp
-[ Mac ] style/values/viewport/StyleZoomPrimitivesInlines.h
 svg/SVGAElement.cpp
 svg/SVGClipPathElement.cpp
 svg/SVGCursorElement.cpp

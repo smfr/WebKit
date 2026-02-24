@@ -1,6 +1,5 @@
 accessibility/AXObjectCache.cpp
 [ Mac ] accessibility/AccessibilityNodeObject.cpp
-[ iOS ] accessibility/AccessibilityNodeObject.cpp
 [ Mac ] accessibility/AccessibilityRenderObject.cpp
 [ iOS ] accessibility/cocoa/AXTextMarkerCocoa.mm
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
@@ -20,7 +19,6 @@ editing/Editing.cpp
 [ Mac ] html/HTMLOptionElement.cpp
 [ iOS ] html/HTMLPictureElement.cpp
 [ Mac ] html/HTMLSelectElement.cpp
-[ Mac ] html/HTMLTableRowElement.cpp
 [ Mac ] html/OffscreenCanvas.cpp
 html/canvas/CanvasRenderingContext2DBase.cpp
 [ Mac ] inspector/InspectorNodeFinder.cpp
@@ -81,10 +79,8 @@ rendering/RenderFileUploadControl.cpp
 rendering/RenderFlexibleBox.cpp
 rendering/RenderFragmentedFlow.cpp
 rendering/RenderFrameSet.cpp
-[ Mac ] rendering/RenderGeometryMap.cpp
 rendering/RenderGrid.cpp
 rendering/RenderImage.cpp
-[ Mac ] rendering/RenderImageResource.cpp
 rendering/RenderInline.cpp
 rendering/RenderIterator.h
 rendering/RenderLayer.cpp
@@ -110,7 +106,6 @@ rendering/RenderText.cpp
 rendering/RenderText.h
 rendering/RenderTextControl.cpp
 rendering/RenderTextControlSingleLine.cpp
-[ Mac ] rendering/RenderTheme.cpp
 rendering/RenderTreeAsText.cpp
 rendering/RenderVTTCue.cpp
 rendering/RenderView.cpp
