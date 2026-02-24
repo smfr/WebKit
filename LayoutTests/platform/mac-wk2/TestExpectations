@@ -2497,3 +2497,5 @@ webkit.org/b/308430 webanimations/threaded-animations/accelerated-timeline-prese
 webkit.org/b/308334 [ Tahoe Debug ] http/tests/webgpu/webgpu/api/validation/gpu_external_texture_expiration.html [ Skip ]
 
 webkit.org/b/308494 media/remote-control-command-is-user-gesture.html [ Timeout Pass ]
+
+webkit.org/b/308586 imported/w3c/web-platform-tests/fullscreen/rendering/fullscreen-pseudo-class.html [ Pass Failure ]
