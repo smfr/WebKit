@@ -749,7 +749,6 @@ public:
 
     const MediaPlayerPrivateInterface* NODELETE playerPrivate() const;
     MediaPlayerPrivateInterface* NODELETE playerPrivate();
-    RefPtr<MediaPlayerPrivateInterface> protectedPlayerPrivate();
 
     DynamicRangeMode preferredDynamicRangeMode() const { return m_preferredDynamicRangeMode; }
     void setPreferredDynamicRangeMode(DynamicRangeMode);
@@ -824,7 +823,6 @@ private:
 
     MediaPlayerClient& client() const { return *m_client; }
 
-    RefPtr<MediaPlayerPrivateInterface> protectedPrivate() const;
 
     CheckedPtr<const MediaPlayerFactory> nextBestMediaEngine(const MediaPlayerFactory*);
     void loadWithNextMediaEngine(const MediaPlayerFactory*);

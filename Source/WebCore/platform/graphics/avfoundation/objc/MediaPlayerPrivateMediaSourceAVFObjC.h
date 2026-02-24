@@ -247,7 +247,6 @@ private:
 
     Ref<AudioVideoRenderer> audioVideoRenderer() const;
 
-    RefPtr<MediaSourcePrivateAVFObjC> protectedMediaSourcePrivate() const;
 
     // NOTE: Because the only way for MSE to recieve data is through an ArrayBuffer provided by
     // javascript running in the page, the video will, by necessity, always be CORS correct and

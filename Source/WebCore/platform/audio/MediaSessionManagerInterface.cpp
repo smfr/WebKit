@@ -644,7 +644,7 @@ void MediaSessionManagerInterface::processSystemDidWake()
 void MediaSessionManagerInterface::addSession(PlatformMediaSessionInterface& session)
 {
 #if !RELEASE_LOG_DISABLED && (ENABLE(VIDEO) || ENABLE(WEB_AUDIO))
-    m_logger->addLogger(session.protectedLogger());
+    m_logger->addLogger(protect(session.logger()));
     MEDIASESSIONMANAGERINTERFACE_RELEASE_LOG(ADDSESSION, session.logIdentifier());
 #endif
 
@@ -668,7 +668,7 @@ void MediaSessionManagerInterface::removeSession(PlatformMediaSessionInterface& 
         maybeDeactivateAudioSession();
 
 #if !RELEASE_LOG_DISABLED && (ENABLE(VIDEO) || ENABLE(WEB_AUDIO))
-    m_logger->removeLogger(session.protectedLogger());
+    m_logger->removeLogger(protect(session.logger()));
 #endif
 
     scheduleUpdateSessionState();

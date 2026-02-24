@@ -1344,7 +1344,7 @@ void MediaPlayerPrivateWebM::addTrackBuffer(TrackID trackId, RefPtr<MediaDescrip
     setHasVideo(m_hasVideo || description->isVideo());
 
     auto trackBuffer = TrackBuffer::create(WTF::move(description), discontinuityTolerance);
-    trackBuffer->setLogger(protectedLogger(), logIdentifier());
+    trackBuffer->setLogger(protect(logger()), logIdentifier());
     m_trackBufferMap.try_emplace(trackId, WTF::move(trackBuffer));
     m_requestReadyForMoreSamplesSetMap[trackId] = false;
 }

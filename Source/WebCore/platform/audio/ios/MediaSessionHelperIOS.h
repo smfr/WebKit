@@ -77,7 +77,6 @@ class WEBCORE_EXPORT MediaSessionHelper
 {
 public:
     static MediaSessionHelper& sharedHelper();
-    static Ref<MediaSessionHelper> protectedSharedHelper();
     static void setSharedHelper(Ref<MediaSessionHelper>&&);
     static void resetSharedHelper();
 

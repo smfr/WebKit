@@ -661,19 +661,15 @@ const PlatformTimeRanges& MediaPlayerPrivateMediaSourceAVFObjC::buffered() const
     return PlatformTimeRanges::emptyRanges();
 }
 
-RefPtr<MediaSourcePrivateAVFObjC> MediaPlayerPrivateMediaSourceAVFObjC::protectedMediaSourcePrivate() const
-{
-    return m_mediaSourcePrivate;
-}
 
 void MediaPlayerPrivateMediaSourceAVFObjC::bufferedChanged()
 {
     assertIsMainThread();
     m_renderer->cancelTimeReachedAction();
 
-    auto ranges = protectedMediaSourcePrivate()->buffered();
+    auto ranges = protect(m_mediaSourcePrivate)->buffered();
     auto currentTime = this->currentTime();
-    if (!protectedMediaSourcePrivate()->hasFutureTime(currentTime) && shouldBePlaying()) {
+    if (!protect(m_mediaSourcePrivate)->hasFutureTime(currentTime) && shouldBePlaying()) {
         ALWAYS_LOG(LOGIDENTIFIER, "Not having data to play at currentTime: ", currentTime, " stalling");
         stall();
     }
@@ -699,7 +695,7 @@ void MediaPlayerPrivateMediaSourceAVFObjC::bufferedChanged()
             RefPtr protectedThis = weakThis.get();
             if (!protectedThis)
                 return;
-            if (protectedThis->protectedMediaSourcePrivate()->hasFutureTime(stallTime) && protectedThis->shouldBePlaying()) {
+            if (protect(protectedThis->m_mediaSourcePrivate)->hasFutureTime(stallTime) && protectedThis->shouldBePlaying()) {
                 ALWAYS_LOG_WITH_THIS(protectedThis, logSiteIdentifier, "Data now available at ", stallTime, " resuming");
                 protectedThis->m_renderer->play(); // New data was added, resume. Can't happen in practice, action would have been cancelled once buffered changed.
                 return;

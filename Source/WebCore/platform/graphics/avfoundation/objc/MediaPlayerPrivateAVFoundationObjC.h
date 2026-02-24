@@ -393,11 +393,6 @@ private:
     bool supportsLinearMediaPlayer() const final { return true; }
 #endif
 
-    RefPtr<SharedBuffer> protectedKeyID() const { return m_keyID; }
-
-#if ENABLE(ENCRYPTED_MEDIA) && HAVE(AVCONTENTKEYSESSION)
-    RefPtr<CDMInstanceFairPlayStreamingAVFObjC> protectedCDMInstance() const;
-#endif
 
     void forEachResourceLoader(Function<void(WebCoreAVFResourceLoader&)>&&) const;
     void addResourceLoader(AVAssetResourceLoadingRequest *, Ref<WebCoreAVFResourceLoader>&&);

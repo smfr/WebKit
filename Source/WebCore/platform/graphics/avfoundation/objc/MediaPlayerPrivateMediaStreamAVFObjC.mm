@@ -499,10 +499,6 @@ void MediaPlayerPrivateMediaStreamAVFObjC::load(const URL&, const LoadOptions&, 
 }
 #endif
 
-RefPtr<MediaStreamPrivate> MediaPlayerPrivateMediaStreamAVFObjC::protectedMediaStreamPrivate() const
-{
-    return m_mediaStreamPrivate;
-}
 
 void MediaPlayerPrivateMediaStreamAVFObjC::load(MediaStreamPrivate& stream)
 {
@@ -572,7 +568,7 @@ MediaPlayerPrivateMediaStreamAVFObjC::DisplayMode MediaPlayerPrivateMediaStreamA
         return WaitingForFirstImage;
 
     if (playing() && !m_ended) {
-        if (!protectedMediaStreamPrivate()->isProducingData())
+        if (!protect(m_mediaStreamPrivate)->isProducingData())
             return PausedImage;
         return LivePreview;
     }
@@ -812,7 +808,7 @@ void MediaPlayerPrivateMediaStreamAVFObjC::characteristicsChanged()
 {
     SizeChanged sizeChanged = SizeChanged::No;
 
-    IntSize intrinsicSize = protectedMediaStreamPrivate()->intrinsicSize();
+    IntSize intrinsicSize = protect(m_mediaStreamPrivate)->intrinsicSize();
     if (intrinsicSize.isEmpty() || m_intrinsicSize.isEmpty()) {
         if (intrinsicSize.height() != m_intrinsicSize.height() || intrinsicSize.width() != m_intrinsicSize.width()) {
             m_intrinsicSize = intrinsicSize;
@@ -991,7 +987,7 @@ void MediaPlayerPrivateMediaStreamAVFObjC::checkSelectedVideoTrack()
 
 void MediaPlayerPrivateMediaStreamAVFObjC::updateTracks()
 {
-    auto currentTracks = protectedMediaStreamPrivate()->tracks();
+    auto currentTracks = protect(m_mediaStreamPrivate)->tracks();
 
     auto player = m_player.get();
     if (!player)

@@ -194,7 +194,6 @@ private:
 #if !RELEASE_LOG_DISABLED
     // Logger
     const Logger& logger() const final { return m_logger.get(); }
-    Ref<const Logger> protectedLogger() const { return logger(); }
     ASCIILiteral logClassName() const final { return "VideoMediaSampleRenderer"_s; }
     uint64_t logIdentifier() const final { return m_logIdentifier; }
     WTFLogChannel& logChannel() const final;

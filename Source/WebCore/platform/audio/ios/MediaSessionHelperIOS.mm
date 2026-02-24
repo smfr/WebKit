@@ -139,10 +139,6 @@ MediaSessionHelper& MediaSessionHelper::sharedHelper()
     return *helper;
 }
 
-Ref<MediaSessionHelper> MediaSessionHelper::protectedSharedHelper()
-{
-    return sharedHelper();
-}
 
 void MediaSessionHelper::resetSharedHelper()
 {

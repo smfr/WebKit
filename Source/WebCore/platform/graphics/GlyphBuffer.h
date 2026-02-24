@@ -78,7 +78,6 @@ public:
         return *m_fonts[index];
     }
 
-    Ref<const Font> protectedFontAt(size_t index) const { return fontAt(index); }
 
     GlyphBufferGlyph glyphAt(size_t index) const { return m_glyphs[index]; }
     GlyphBufferAdvance& advanceAt(size_t index) LIFETIME_BOUND { return m_advances[index]; }

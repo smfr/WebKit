@@ -662,7 +662,7 @@ void GPUConnectionToWebProcess::providePresentingApplicationPID(WebCore::PageIde
 
     ProcessID processID = presentingApplicationPID(pageIdentifier);
     ASSERT(processID);
-    MediaSessionHelper::protectedSharedHelper()->providePresentingApplicationPID(processID);
+    protect(MediaSessionHelper::sharedHelper())->providePresentingApplicationPID(processID);
 }
 #endif
 

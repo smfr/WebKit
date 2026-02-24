@@ -68,7 +68,7 @@ private:
     bool enabled() const;
 
 #if HAVE(WEBCONTENTRESTRICTIONS)
-    Ref<ParentalControlsURLFilter> protectedImpl() const;
+    Ref<ParentalControlsURLFilter> urlFilter() const;
     void updateFilterStateOnMain();
 #elif HAVE(WEBCONTENTANALYSIS_FRAMEWORK)
     void updateFilterState();

@@ -512,7 +512,7 @@ std::optional<PlatformLayerIdentifier> GraphicsLayerCA::primaryLayerID() const
 
 std::optional<PlatformLayerIdentifier> GraphicsLayerCA::layerIDIgnoringStructuralLayer() const
 {
-    return protectedLayer()->layerID();
+    return protect(m_layer)->layerID();
 }
 
 PlatformLayer* GraphicsLayerCA::platformLayer() const
@@ -777,7 +777,7 @@ void GraphicsLayerCA::setTonemappingEnabled(bool tonemappingEnabled)
 
 void GraphicsLayerCA::setNeedsDisplayIfEDRHeadroomExceeds(float headroom)
 {
-    if (protectedLayer()->setNeedsDisplayIfEDRHeadroomExceeds(headroom)) {
+    if (protect(m_layer)->setNeedsDisplayIfEDRHeadroomExceeds(headroom)) {
         if (!!m_uncommittedChanges)
             client().notifyFlushRequired(this);
     }
@@ -991,7 +991,7 @@ void GraphicsLayerCA::setBlendMode(BlendMode blendMode)
 
 bool GraphicsLayerCA::backingStoreAttached() const
 {
-    return protectedLayer()->backingStoreAttached();
+    return protect(m_layer)->backingStoreAttached();
 }
 
 bool GraphicsLayerCA::backingStoreAttachedForTesting() const
@@ -1685,7 +1685,7 @@ bool GraphicsLayerCA::visibleRectChangeRequiresFlush(const FloatRect& clipRect) 
 
 TiledBacking* GraphicsLayerCA::tiledBacking() const
 {
-    return protectedLayer()->tiledBacking();
+    return protect(m_layer)->tiledBacking();
 }
 
 TransformationMatrix GraphicsLayerCA::layerTransform(const FloatPoint& position, const TransformationMatrix* customTransform) const
@@ -2383,23 +2383,23 @@ void GraphicsLayerCA::updateNames()
     auto name = debugName();
     switch (structuralLayerPurpose()) {
     case StructuralLayerForPreserves3D:
-        protectedStructuralLayer()->setName(makeString("preserve-3d: "_s, name));
+        protect(m_structuralLayer)->setName(makeString("preserve-3d: "_s, name));
         break;
     case StructuralLayerForReplicaFlattening:
-        protectedStructuralLayer()->setName(makeString("replica flattening: "_s, name));
+        protect(m_structuralLayer)->setName(makeString("replica flattening: "_s, name));
         break;
     case StructuralLayerForBackdrop:
-        protectedStructuralLayer()->setName(makeString("backdrop hosting: "_s, name));
+        protect(m_structuralLayer)->setName(makeString("backdrop hosting: "_s, name));
         break;
 #if HAVE(MATERIAL_HOSTING)
     case StructuralLayerForMaterial:
-        protectedStructuralLayer()->setName(makeString("material hosting: "_s, name));
+        protect(m_structuralLayer)->setName(makeString("material hosting: "_s, name));
         break;
 #endif
     case NoStructuralLayer:
         break;
     }
-    protectedLayer()->setName(name);
+    protect(m_layer)->setName(name);
 }
 
 void GraphicsLayerCA::updateSublayerList(bool maxLayerDepthReached)
@@ -2589,7 +2589,7 @@ void GraphicsLayerCA::updateChildrenTransform()
 
 void GraphicsLayerCA::updateMasksToBounds()
 {
-    protectedLayer()->setMasksToBounds(m_masksToBounds);
+    protect(m_layer)->setMasksToBounds(m_masksToBounds);
 
     if (m_layerClones) {
         for (auto& layer : m_layerClones->primaryLayerClones.values())
@@ -2624,7 +2624,7 @@ void GraphicsLayerCA::updateContentsVisibility()
 
 void GraphicsLayerCA::updateUserInteractionEnabled()
 {
-    protectedLayer()->setUserInteractionEnabled(m_userInteractionEnabled);
+    protect(m_layer)->setUserInteractionEnabled(m_userInteractionEnabled);
 }
 
 void GraphicsLayerCA::updateContentsOpaque(float pageScaleFactor)
@@ -2636,7 +2636,7 @@ void GraphicsLayerCA::updateContentsOpaque(float pageScaleFactor)
             contentsOpaque = false;
     }
     
-    protectedLayer()->setOpaque(contentsOpaque);
+    protect(m_layer)->setOpaque(contentsOpaque);
 
     if (m_layerClones) {
         for (auto& layer : m_layerClones->primaryLayerClones.values())
@@ -2655,7 +2655,7 @@ void GraphicsLayerCA::updateBackfaceVisibility()
         }
     }
 
-    protectedLayer()->setDoubleSided(m_backfaceVisibility);
+    protect(m_layer)->setDoubleSided(m_backfaceVisibility);
 
     if (m_layerClones) {
         for (auto& layer : m_layerClones->primaryLayerClones.values())
@@ -2795,7 +2795,7 @@ void GraphicsLayerCA::updateBackdropFiltersRect()
 
 void GraphicsLayerCA::updateBackdropRoot()
 {
-    protectedLayer()->setIsBackdropRoot(isBackdropRoot());
+    protect(m_layer)->setIsBackdropRoot(isBackdropRoot());
 }
 
 void GraphicsLayerCA::updateBlendMode()
@@ -2819,7 +2819,7 @@ void GraphicsLayerCA::updateVideoGravity()
 
 void GraphicsLayerCA::updateShape()
 {
-    protectedLayer()->setShapePath(m_shapeLayerPath);
+    protect(m_layer)->setShapePath(m_shapeLayerPath);
 
     if (LayerMap* layerCloneMap = primaryLayerClones()) {
         for (auto& layer : layerCloneMap->values())
@@ -2829,7 +2829,7 @@ void GraphicsLayerCA::updateShape()
 
 void GraphicsLayerCA::updateWindRule()
 {
-    protectedLayer()->setShapeWindRule(m_shapeLayerWindRule);
+    protect(m_layer)->setShapeWindRule(m_shapeLayerWindRule);
 }
 
 #if HAVE(CORE_ANIMATION_SEPARATED_LAYERS)
@@ -2858,9 +2858,9 @@ void GraphicsLayerCA::updateAppleVisualEffectData()
         backdropLayer->setAppleVisualEffectData(m_appleVisualEffectData);
 
     if (appleVisualEffectAppliesFilter(m_appleVisualEffectData.effect))
-        protectedLayer()->setAppleVisualEffectData(m_appleVisualEffectData);
+        protect(m_layer)->setAppleVisualEffectData(m_appleVisualEffectData);
     else
-        protectedLayer()->setAppleVisualEffectData({ });
+        protect(m_layer)->setAppleVisualEffectData({ });
 
 #if HAVE(MATERIAL_HOSTING)
     if (RefPtr structuralLayer = m_structuralLayer; structuralLayer && appleVisualEffectIsHostedMaterial(m_appleVisualEffectData.effect))
@@ -3066,7 +3066,7 @@ void GraphicsLayerCA::updateCoverage(const CommitState& commitState)
 
 void GraphicsLayerCA::updateAcceleratesDrawing()
 {
-    protectedLayer()->setAcceleratesDrawing(m_acceleratesDrawing);
+    protect(m_layer)->setAcceleratesDrawing(m_acceleratesDrawing);
 }
 
 static void setLayerDebugBorder(PlatformCALayer& layer, Color borderColor, float borderWidth)
@@ -3128,7 +3128,7 @@ void GraphicsLayerCA::updateTiles()
 
 void GraphicsLayerCA::updateBackgroundColor()
 {
-    protectedLayer()->setBackgroundColor(m_backgroundColor);
+    protect(m_layer)->setBackgroundColor(m_backgroundColor);
 }
 
 void GraphicsLayerCA::updateContentsImage()
@@ -3357,7 +3357,7 @@ void GraphicsLayerCA::updateMaskLayer()
         structuralLayer->setMaskLayer(WTF::move(maskCALayer));
         layerCloneMap = m_layerClones ? &m_layerClones->structuralLayerClones : nullptr;
     } else {
-        protectedLayer()->setMaskLayer(WTF::move(maskCALayer));
+        protect(m_layer)->setMaskLayer(WTF::move(maskCALayer));
         layerCloneMap = m_layerClones ? &m_layerClones->primaryLayerClones : nullptr;
     }
 
@@ -3382,19 +3382,19 @@ void GraphicsLayerCA::updateReplicatedLayers()
     if (RefPtr structuralLayer = m_structuralLayer)
         structuralLayer->insertSublayer(*replicaRoot, 0);
     else
-        protectedLayer()->insertSublayer(*replicaRoot, 0);
+        protect(m_layer)->insertSublayer(*replicaRoot, 0);
 }
 
 #if HAVE(SUPPORT_HDR_DISPLAY)
 void GraphicsLayerCA::updateDrawsHDRContent()
 {
     auto contentsFormat = PlatformCALayer::contentsFormatForLayer(this);
-    protectedLayer()->setContentsFormat(contentsFormat);
+    protect(m_layer)->setContentsFormat(contentsFormat);
 }
 
 void GraphicsLayerCA::updateTonemappingEnabled()
 {
-    protectedLayer()->setTonemappingEnabled(m_tonemappingEnabled);
+    protect(m_layer)->setTonemappingEnabled(m_tonemappingEnabled);
 }
 #endif
 
@@ -4438,7 +4438,7 @@ void GraphicsLayerCA::updateContentsScale(float pageScaleFactor)
 
 void GraphicsLayerCA::updateCustomAppearance()
 {
-    protectedLayer()->updateCustomAppearance(m_customAppearance);
+    protect(m_layer)->updateCustomAppearance(m_customAppearance);
 }
 
 void GraphicsLayerCA::setShowDebugBorder(bool showBorder)
@@ -4514,9 +4514,9 @@ String GraphicsLayerCA::replayDisplayListAsText(OptionSet<DisplayList::AsTextFla
 void GraphicsLayerCA::setDebugBackgroundColor(const Color& color)
 {    
     if (color.isValid())
-        protectedLayer()->setBackgroundColor(color);
+        protect(m_layer)->setBackgroundColor(color);
     else
-        protectedLayer()->setBackgroundColor(Color::transparentBlack);
+        protect(m_layer)->setBackgroundColor(Color::transparentBlack);
 }
 
 Color GraphicsLayerCA::pageTiledBackingBorderColor() const
@@ -4571,7 +4571,7 @@ ASCIILiteral GraphicsLayerCA::purposeNameForInnerLayer(PlatformCALayer& layer) c
         return "contents shape mask layer"_s;
     if (&layer == m_backdropLayer.get()) {
 #if HAVE(CORE_MATERIAL)
-        if (protectedBackdropLayer()->appleVisualEffectData().effect != AppleVisualEffect::None)
+        if (protect(m_backdropLayer)->appleVisualEffectData().effect != AppleVisualEffect::None)
             return "backdrop layer (material)"_s;
 #endif
         return "backdrop layer"_s;
@@ -4826,7 +4826,7 @@ String GraphicsLayerCA::platformLayerTreeAsText(OptionSet<PlatformLayerTreeAsTex
 
 void GraphicsLayerCA::setDebugBorder(const Color& color, float borderWidth)
 {
-    setLayerDebugBorder(*protectedLayer(), color, borderWidth);
+    setLayerDebugBorder(*protect(m_layer), color, borderWidth);
 }
 
 void GraphicsLayerCA::setCustomAppearance(CustomAppearance customAppearance)
@@ -5321,7 +5321,7 @@ Vector<GraphicsLayer::AcceleratedAnimationForTesting> GraphicsLayerCA::accelerat
     for (auto& animation : m_animations) {
         if (animation.m_pendingRemoval)
             continue;
-        if (auto caAnimation = protectedAnimatedLayer(animation.m_property)->animationForKey(animation.animationIdentifier())) {
+        if (auto caAnimation = protect(animatedLayer(animation.m_property))->animationForKey(animation.animationIdentifier())) {
             animations.append({
                 .property = animatedPropertyIDAsString(animation.m_property),
                 .speed = caAnimation->speed(),

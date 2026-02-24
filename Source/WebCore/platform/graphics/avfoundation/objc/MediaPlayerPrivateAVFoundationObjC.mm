@@ -423,7 +423,7 @@ void MediaPlayerPrivateAVFoundationObjC::clearMediaCacheForOrigins(const String&
 
 MediaPlayerPrivateAVFoundationObjC::MediaPlayerPrivateAVFoundationObjC(MediaPlayer& player)
     : MediaPlayerPrivateAVFoundation(player)
-    , m_videoLayerManager(makeUniqueRef<VideoLayerManagerObjC>(protectedLogger(), logIdentifier()))
+    , m_videoLayerManager(makeUniqueRef<VideoLayerManagerObjC>(protect(logger()), logIdentifier()))
     , m_objcObserver(adoptNS([[WebCoreAVFMovieObserver alloc] initWithPlayer:*this]))
     , m_loaderDelegate(adoptNS([[WebCoreAVFLoaderDelegate alloc] initWithPlayer:*this]))
     , m_cachedItemStatus(MediaPlayerAVPlayerItemStatusDoesNotExist)
@@ -1232,12 +1232,6 @@ ALLOW_NEW_API_WITHOUT_GUARDS_END
     [m_avPlayerItem addOutput:m_metadataOutput];
 }
 
-#if ENABLE(ENCRYPTED_MEDIA) && HAVE(AVCONTENTKEYSESSION)
-RefPtr<CDMInstanceFairPlayStreamingAVFObjC> MediaPlayerPrivateAVFoundationObjC::protectedCDMInstance() const
-{
-    return m_cdmInstance;
-}
-#endif
 
 void MediaPlayerPrivateAVFoundationObjC::checkPlayability()
 {
@@ -2187,7 +2181,7 @@ bool MediaPlayerPrivateAVFoundationObjC::shouldWaitForLoadingOfResource(AVAssetR
 
         RetainPtr keyURIData = [keyURI.createNSString() dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
         m_keyID = SharedBuffer::create(keyURIData.get());
-        player->initializationDataEncountered("skd"_s, protectedKeyID()->tryCreateArrayBuffer());
+        player->initializationDataEncountered("skd"_s, protect(m_keyID)->tryCreateArrayBuffer());
         setWaitingForKey(true);
 #endif
 
@@ -3014,7 +3008,7 @@ void MediaPlayerPrivateAVFoundationObjC::cdmInstanceAttached(CDMInstance& instan
         return;
 
     if (m_cdmInstance)
-        cdmInstanceDetached(*protectedCDMInstance());
+        cdmInstanceDetached(*protect(m_cdmInstance));
 
     m_cdmInstance = fpsInstance;
 #else
@@ -3038,7 +3032,7 @@ void MediaPlayerPrivateAVFoundationObjC::attemptToDecryptWithInstance(CDMInstanc
     if (!m_keyID || !m_cdmInstance)
         return;
 
-    RefPtr instanceSession = protectedCDMInstance()->sessionForKeyIDs(Vector<Ref<SharedBuffer>>::from(*protectedKeyID()));
+    RefPtr instanceSession = protect(m_cdmInstance)->sessionForKeyIDs(Vector<Ref<SharedBuffer>>::from(*protect(m_keyID)));
     if (!instanceSession)
         return;
 

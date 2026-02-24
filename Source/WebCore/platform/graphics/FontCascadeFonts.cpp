@@ -385,7 +385,7 @@ GlyphData FontCascadeFonts::glyphDataForSystemFallback(char32_t character, const
     if (variant == NormalVariant)
         fallbackGlyphData = systemFallbackFont->glyphDataForCharacter(character);
     else
-        fallbackGlyphData = systemFallbackFont->protectedVariantFont(description, variant)->glyphDataForCharacter(character);
+        fallbackGlyphData = protect(systemFallbackFont->variantFont(description, variant))->glyphDataForCharacter(character);
 
     if (fallbackGlyphData.font && fallbackGlyphData.font->platformData().orientation() == FontOrientation::Vertical && !fallbackGlyphData.font->isTextOrientationFallback()) {
         if (variant == NormalVariant && !FontCascade::isCJKIdeographOrSymbol(character))

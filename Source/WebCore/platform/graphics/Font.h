@@ -153,11 +153,6 @@ public:
         return const_cast<Font*>(this);
     }
 
-    RefPtr<const Font> protectedVariantFont(const FontDescription& description, FontVariant variant) const
-    {
-        return variantFont(description, variant);
-    }
-
     bool variantCapsSupportedForSynthesis(FontVariantCaps) const;
 
     const Font& verticalRightOrientationFont() const;

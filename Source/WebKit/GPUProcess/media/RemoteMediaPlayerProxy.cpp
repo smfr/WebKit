@@ -226,7 +226,7 @@ void RemoteMediaPlayerProxy::loadMediaSource(URL&& url, const MediaPlayer::LoadO
     player->load(url, options, *protect(m_mediaSourceProxy));
 
     if (reattached)
-        protect(m_mediaSourceProxy)->setMediaPlayers(*this, player->protectedPlayerPrivate().get());
+        protect(m_mediaSourceProxy)->setMediaPlayers(*this, protect(player->playerPrivate()));
     getConfiguration(configuration);
     completionHandler(WTF::move(configuration));
 }
@@ -865,7 +865,7 @@ void RemoteMediaPlayerProxy::setWirelessPlaybackTarget(MediaPlaybackTargetContex
 MediaPlaybackTargetType RemoteMediaPlayerProxy::playbackTargetType() const
 {
 #if PLATFORM(IOS_FAMILY)
-    if (RefPtr playbackTarget = MediaSessionHelper::protectedSharedHelper()->playbackTarget())
+    if (RefPtr playbackTarget = protect(MediaSessionHelper::sharedHelper())->playbackTarget())
         return playbackTarget->type();
 #endif
     return MediaPlaybackTargetType::None;
