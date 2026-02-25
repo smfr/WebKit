@@ -26,9 +26,7 @@
 #include "config.h"
 #include "StyleOriginatedAnimationEvent.h"
 
-#include "Node.h"
-#include "NodeDocument.h"
-#include "NodeInlines.h"
+#include "CSSSelectorParserContext.h"
 #include "WebAnimationUtilities.h"
 
 #include <wtf/TZoneMallocInlines.h>
@@ -44,13 +42,13 @@ StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(enum EventInterface
 {
 }
 
-StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(enum EventInterfaceType eventInterface, const AtomString& type, EventInit&& init, IsTrusted isTrusted, double elapsedTime, String&& pseudoElement)
+StyleOriginatedAnimationEvent::StyleOriginatedAnimationEvent(enum EventInterfaceType eventInterface, const AtomString& type, EventInit&& init, IsTrusted isTrusted, double elapsedTime, String&& pseudoElement, Document& document)
     : AnimationEventBase(eventInterface, type, WTF::move(init), isTrusted)
     , m_elapsedTime(elapsedTime)
     , m_pseudoElement(WTF::move(pseudoElement))
 {
     RefPtr node = dynamicDowncast<Node>(target());
-    auto [parsed, pseudoElementIdentifier] = pseudoElementIdentifierFromString(m_pseudoElement, node ? protect(node->document()).ptr() : nullptr);
+    auto [parsed, pseudoElementIdentifier] = pseudoElementIdentifierFromString(m_pseudoElement, CSSSelectorParserContext { node ? protect(node->document()).get() : document });
     m_pseudoElementIdentifier = parsed ? pseudoElementIdentifier : std::nullopt;
 }
 

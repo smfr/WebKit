@@ -238,8 +238,7 @@ AcceleratedEffect::AcceleratedEffect(const KeyframeEffect& effect, const IntRect
         }
     }
 
-    ASSERT(effect.document());
-    auto& settings = effect.document()->settings();
+    auto& settings = effect.document().settings();
     CheckedPtr renderLayerModelObject = dynamicDowncast<RenderLayerModelObject>(effect.renderer());
 
     OptionSet<AcceleratedEffectProperty> propertiesReplacedByZeroKeyframe;

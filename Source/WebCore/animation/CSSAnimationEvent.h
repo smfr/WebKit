@@ -29,6 +29,8 @@
 
 namespace WebCore {
 
+class Document;
+
 class CSSAnimationEvent final : public StyleOriginatedAnimationEvent {
     WTF_MAKE_TZONE_ALLOCATED(CSSAnimationEvent);
 public:
@@ -43,9 +45,9 @@ public:
         String pseudoElement { emptyString() };
     };
 
-    static Ref<CSSAnimationEvent> create(const AtomString& type, Init&& initializer, IsTrusted isTrusted = IsTrusted::No)
+    static Ref<CSSAnimationEvent> create(Document& document, const AtomString& type, Init&& initializer, IsTrusted isTrusted = IsTrusted::No)
     {
-        return adoptRef(*new CSSAnimationEvent(type, WTF::move(initializer), isTrusted));
+        return adoptRef(*new CSSAnimationEvent(document, type, WTF::move(initializer), isTrusted));
     }
 
     virtual ~CSSAnimationEvent();
@@ -54,7 +56,7 @@ public:
 
 private:
     CSSAnimationEvent(const AtomString& type, WebAnimation*, std::optional<Seconds> scheduledTime, double elapsedTime, const std::optional<Style::PseudoElementIdentifier>&, const String& animationName);
-    CSSAnimationEvent(const AtomString&, Init&&, IsTrusted);
+    CSSAnimationEvent(Document&, const AtomString&, Init&&, IsTrusted);
 
     String m_animationName;
 };

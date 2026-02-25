@@ -380,15 +380,13 @@ String pseudoElementIdentifierAsString(const std::optional<Style::PseudoElementI
 }
 
 // bool represents whether parsing was successful, std::optional<Style::PseudoElementIdentifier> is the result of the parsing when successful.
-std::pair<bool, std::optional<Style::PseudoElementIdentifier>> pseudoElementIdentifierFromString(const String& pseudoElement, Document* document)
+std::pair<bool, std::optional<Style::PseudoElementIdentifier>> pseudoElementIdentifierFromString(const String& pseudoElement, const CSSSelectorParserContext& context)
 {
     // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
     if (pseudoElement.isNull())
         return { true, { } };
 
-    // FIXME: We should always have a document for accurate settings.
-    auto parserContext = document ? CSSSelectorParserContext { *document } : CSSSelectorParserContext { CSSParserContext { HTMLStandardMode } };
-    auto identifier = CSSSelectorParser::parsePseudoElement(pseudoElement, parserContext);
+    auto identifier = CSSSelectorParser::parsePseudoElement(pseudoElement, context);
     // FIXME: Add API support for UserAgentPartFallback pseudo-elements like ::picker(select).
     if (identifier && identifier->type == PseudoElementType::UserAgentPartFallback)
         return { true, std::nullopt };

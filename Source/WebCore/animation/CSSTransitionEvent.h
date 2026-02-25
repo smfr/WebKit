@@ -30,6 +30,8 @@
 
 namespace WebCore {
 
+class Document;
+
 class CSSTransitionEvent final : public StyleOriginatedAnimationEvent {
     WTF_MAKE_TZONE_ALLOCATED(CSSTransitionEvent);
 public:
@@ -44,9 +46,9 @@ public:
         String pseudoElement { emptyString() };
     };
 
-    static Ref<CSSTransitionEvent> create(const AtomString& type, Init&& initializer, IsTrusted isTrusted = IsTrusted::No)
+    static Ref<CSSTransitionEvent> create(Document& document, const AtomString& type, Init&& initializer, IsTrusted isTrusted = IsTrusted::No)
     {
-        return adoptRef(*new CSSTransitionEvent(type, WTF::move(initializer), isTrusted));
+        return adoptRef(*new CSSTransitionEvent(document, type, WTF::move(initializer), isTrusted));
     }
 
     virtual ~CSSTransitionEvent();
@@ -55,7 +57,7 @@ public:
 
 private:
     CSSTransitionEvent(const AtomString& type, WebAnimation*, std::optional<Seconds> scheduledTime, double elapsedTime, const std::optional<Style::PseudoElementIdentifier>&, const String propertyName);
-    CSSTransitionEvent(const AtomString& type, Init&&, IsTrusted);
+    CSSTransitionEvent(Document&, const AtomString& type, Init&&, IsTrusted);
 
     String m_propertyName;
 };

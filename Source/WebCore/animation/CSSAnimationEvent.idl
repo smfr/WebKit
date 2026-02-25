@@ -28,7 +28,7 @@
     Exposed=Window,
     InterfaceName=AnimationEvent
 ] interface CSSAnimationEvent : Event {
-    constructor([AtomString] DOMString type, optional AnimationEventInit animationEventInitDict = {});
+    [CallWith=CurrentDocument] constructor([AtomString] DOMString type, optional AnimationEventInit animationEventInitDict = {});
 
     readonly attribute DOMString animationName;
     readonly attribute double elapsedTime;
