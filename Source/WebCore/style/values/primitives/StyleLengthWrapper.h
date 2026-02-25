@@ -72,7 +72,10 @@ template<typename Numeric, CSS::PrimitiveKeyword... Ks> struct LengthWrapperBase
     LengthWrapperBase(Fixed fixed) : m_value(indexForFixed, fixed.unresolvedValue()) { }
     LengthWrapperBase(Fixed fixed, bool hasQuirk) : m_value(indexForFixed, fixed.unresolvedValue(), hasQuirk) { }
     LengthWrapperBase(Percentage percent) : m_value(indexForPercentage, percent.value) { }
-    LengthWrapperBase(Calc&& calc) : m_value(indexForCalc, calc.protectedCalculation()) { }
+    LengthWrapperBase(Calc&& calc)
+        : m_value(indexForCalc, protect(calc.calculation()))
+    {
+    }
     LengthWrapperBase(Specified&& specified) : m_value(toData(specified)) { }
     LengthWrapperBase(const Specified& specified) : m_value(toData(specified)) { }
 
@@ -169,7 +172,7 @@ private:
                 return LengthWrapperData { indexForPercentage, percentage.value };
             },
             [](const Calc& calc) {
-                return LengthWrapperData { indexForCalc, calc.protectedCalculation() };
+                return LengthWrapperData { indexForCalc, protect(calc.calculation()) };
             }
         );
     }

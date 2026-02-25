@@ -47,12 +47,12 @@ void unevaluatedCalcDeref(CSSCalc::Value* calc)
 }
 
 UnevaluatedCalcBase::UnevaluatedCalcBase(CSSCalc::Value& value)
-    : calc { value }
+    : m_calc { value }
 {
 }
 
 UnevaluatedCalcBase::UnevaluatedCalcBase(Ref<CSSCalc::Value>&& value)
-    : calc { WTF::move(value) }
+    : m_calc { WTF::move(value) }
 {
 }
 
@@ -65,12 +65,12 @@ UnevaluatedCalcBase::~UnevaluatedCalcBase() = default;
 
 CSSCalc::Value& UnevaluatedCalcBase::leakRef()
 {
-    return calc.leakRef();
+    return m_calc.leakRef();
 }
 
 bool UnevaluatedCalcBase::equal(const UnevaluatedCalcBase& other) const
 {
-    return protect(calcValue())->equals(other.calc.get());
+    return protect(calcValue())->equals(other.m_calc.get());
 }
 
 bool UnevaluatedCalcBase::requiresConversionData() const

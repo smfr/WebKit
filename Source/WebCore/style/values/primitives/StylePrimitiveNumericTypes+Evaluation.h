@@ -110,14 +110,14 @@ template<Calc Calculation, typename Result> struct Evaluation<Calculation, Resul
     template<typename... Rest> auto operator()(const Calculation& calculation, Result referenceLength, ZoomNeeded token, Rest&&... rest) -> Result
         requires (Calculation::range.zoomOptions == CSS::RangeZoomOptions::Default)
     {
-        return evaluate<Result>(calculation.protectedCalculation(), referenceLength, token, std::forward<Rest>(rest)...);
+        return evaluate<Result>(protect(calculation.calculation()), referenceLength, token, std::forward<Rest>(rest)...);
     }
 
 
     template<typename... Rest> auto operator()(const Calculation& calculation, Result referenceLength, ZoomFactor usedZoom, Rest&&... rest) -> Result
         requires (Calculation::range.zoomOptions == CSS::RangeZoomOptions::Unzoomed)
     {
-        return evaluate<Result>(calculation.protectedCalculation(), referenceLength, usedZoom, std::forward<Rest>(rest)...);
+        return evaluate<Result>(protect(calculation.calculation()), referenceLength, usedZoom, std::forward<Rest>(rest)...);
     }
 };
 

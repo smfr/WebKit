@@ -265,14 +265,14 @@ template<auto R, typename V> struct ToCSS<Length<R, V>> {
 template<auto R, typename V> struct ToCSS<UnevaluatedCalculation<CSS::AnglePercentage<R, V>>> {
     auto operator()(const UnevaluatedCalculation<CSS::AnglePercentage<R, V>>& value, const RenderStyle& style) -> typename CSS::AnglePercentage<R, V>::Calc
     {
-        return typename CSS::AnglePercentage<R, V>::Calc { CSSCalc::Value::create(value.protectedCalculation(), style) };
+        return typename CSS::AnglePercentage<R, V>::Calc { CSSCalc::Value::create(protect(value.calculation()), style) };
     }
 };
 
 template<auto R, typename V> struct ToCSS<UnevaluatedCalculation<CSS::LengthPercentage<R, V>>> {
     auto operator()(const UnevaluatedCalculation<CSS::LengthPercentage<R, V>>& value, const RenderStyle& style) -> typename CSS::LengthPercentage<R, V>::Calc
     {
-        return typename CSS::LengthPercentage<R, V>::Calc { CSSCalc::Value::create(value.protectedCalculation(), style) };
+        return typename CSS::LengthPercentage<R, V>::Calc { CSSCalc::Value::create(protect(value.calculation()), style) };
     }
 };
 
@@ -288,7 +288,7 @@ template<auto R, typename V> struct ToCSS<AnglePercentage<R, V>> {
                 return typename CSS::AnglePercentage<R, V>::Raw { percentage.unit, percentage.value };
             },
             [&](const typename AnglePercentage<R, V>::Calc& calculation) -> CSS::AnglePercentage<R> {
-                return typename CSS::AnglePercentage<R, V>::Calc { CSSCalc::Value::create(calculation.protectedCalculation(), style) };
+                return typename CSS::AnglePercentage<R, V>::Calc { CSSCalc::Value::create(protect(calculation.calculation()), style) };
             }
         );
     }
@@ -309,7 +309,7 @@ template<auto R, typename V> struct ToCSS<LengthPercentage<R, V>> {
                 return typename CSS::LengthPercentage<R, V>::Raw { percentage.unit, percentage.value };
             },
             [&](const typename LengthPercentage<R, V>::Calc& calculation) -> CSS::LengthPercentage<R> {
-                return typename CSS::LengthPercentage<R, V>::Calc { CSSCalc::Value::create(calculation.protectedCalculation(), style) };
+                return typename CSS::LengthPercentage<R, V>::Calc { CSSCalc::Value::create(protect(calculation.calculation()), style) };
             }
         );
     }
