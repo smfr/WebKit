@@ -185,7 +185,7 @@ public:
     void setSafeBrowsingCheckOngoing(size_t, bool);
     bool safeBrowsingCheckOngoing(size_t);
     bool safeBrowsingCheckOngoing();
-    void NODELETE setSafeBrowsingWarning(RefPtr<WebKit::BrowsingWarning>&&);
+    void setSafeBrowsingWarning(RefPtr<WebKit::BrowsingWarning>&&);
     RefPtr<WebKit::BrowsingWarning> NODELETE safeBrowsingWarning();
     void setSafeBrowsingCheckTimedOut() { m_safeBrowsingCheckTimedOut = true; }
     bool safeBrowsingCheckTimedOut() { return m_safeBrowsingCheckTimedOut; }

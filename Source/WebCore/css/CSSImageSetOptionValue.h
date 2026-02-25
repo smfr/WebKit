@@ -44,7 +44,7 @@ public:
     CSSValue& image() const { return m_image; }
 
     CSSPrimitiveValue& resolution() const { return m_resolution; }
-    void NODELETE setResolution(Ref<CSSPrimitiveValue>&&);
+    void setResolution(Ref<CSSPrimitiveValue>&&);
 
     String type() const { return m_mimeType; }
     void setType(String);
