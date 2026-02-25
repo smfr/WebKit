@@ -915,6 +915,9 @@ accessibility/mixed-contenteditable-double-br-visible-character-range-hang.html 
 accessibility/aria-braillelabel.html [ Failure ]
 accessibility/aria-brailleroledescription.html [ Failure ]
 
+# May need some hierarchy-specific tweaks for glib platforms (or maybe the test can be written in a more platform-agnostic way).
+accessibility/loading-iframe-updates-axtree.html [ Skip ]
+
 # Need to implement AccessibilityUIElement::domIdentifier() for this test to pass after webkit.org/b/234198.
 accessibility/focusable-div.html [ Skip ]
 
