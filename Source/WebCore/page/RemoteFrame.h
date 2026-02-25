@@ -53,8 +53,7 @@ class RemoteFrame final : public Frame {
 public:
     using ClientCreator = CompletionHandler<UniqueRef<RemoteFrameClient>(RemoteFrame&)>;
     WEBCORE_EXPORT static Ref<RemoteFrame> createMainFrame(Page&, ClientCreator&&, FrameIdentifier, Frame* opener, Ref<FrameTreeSyncData>&&);
-    WEBCORE_EXPORT static Ref<RemoteFrame> createSubframe(Page&, ClientCreator&&, FrameIdentifier, Frame& parent, Frame* opener, Ref<FrameTreeSyncData>&&, AddToFrameTree);
-    WEBCORE_EXPORT static Ref<RemoteFrame> createSubframeWithContentsInAnotherProcess(Page&, ClientCreator&&, FrameIdentifier, HTMLFrameOwnerElement&, std::optional<LayerHostingContextIdentifier>, Ref<FrameTreeSyncData>&&);
+    WEBCORE_EXPORT static Ref<RemoteFrame> createSubframe(Page&, ClientCreator&&, FrameIdentifier, Frame& parent, Frame* opener, std::optional<LayerHostingContextIdentifier>, Ref<FrameTreeSyncData>&&, AddToFrameTree);
     ~RemoteFrame();
 
     RemoteDOMWindow& NODELETE window() const;

@@ -1,0 +1,22 @@
+<!-- webkit-test-runner [ SiteIsolationEnabled=true ] -->
+<!-- This test is adapted from LayoutTests/imported/w3c/web-platform-tests/html/browsers/browsing-the-web/history-traversal/pageswap/pageswap-cross-origin.sub.html -->
+
+<!DOCTYPE html>
+<title>Tests that pagehide is fired when site isolation is enabled.</title>
+
+<script src="/js-test-resources/js-test.js"></script>
+<script>
+description("Tests that pagehide is fired when site isolation is enabled.");
+jsTestIsAsync = true;
+
+var popup;
+
+const chan = new BroadcastChannel("pagehide-chan");
+chan.addEventListener("message", (event) => {
+  shouldBeEqualToString("event.data", "pagehide");
+  popup.close();
+  finishJSTest();
+});
+
+popup = window.open("/site-isolation/resources/pagehide-event-subpage.html");
+</script>
