@@ -166,36 +166,33 @@ struct RequestedKeyboardScrollData {
 
 enum class ScrollUpdateType : uint8_t {
     PositionUpdate,
-    ScrollRequestResponse,
     AnimatedScrollWillStart,
     AnimatedScrollDidEnd,
     WheelEventScrollWillStart,
     WheelEventScrollDidEnd,
-    ProgrammaticScrollDidEnd,
+};
+
+enum class ShouldFireScrollEnd : bool { No, Yes };
+
+struct ScrollUpdateData {
+    ScrollUpdateType updateType { ScrollUpdateType::PositionUpdate };
+    ScrollingLayerPositionAction updateLayerPositionAction { ScrollingLayerPositionAction::Sync };
+    std::optional<FloatPoint> layoutViewportOrigin { };
+};
+
+struct ScrollRequestResponseData {
+    ScrollRequestType requestType { ScrollRequestType::PositionUpdate };
+    Markable<ScrollRequestIdentifier> responseIdentifier { };
 };
 
 struct ScrollUpdate {
     ScrollingNodeID nodeID;
     FloatPoint scrollPosition;
-    std::optional<FloatPoint> layoutViewportOrigin;
-    ScrollUpdateType updateType { ScrollUpdateType::PositionUpdate };
-    ScrollingLayerPositionAction updateLayerPositionAction { ScrollingLayerPositionAction::Sync };
-    Markable<ScrollRequestIdentifier> responseIdentifier { }; // Only set for ScrollRequestResponse types.
-    // maybe add a bit to say to fire scrollEnd
-    
-    bool canMerge(const ScrollUpdate& other) const
-    {
-        return nodeID == other.nodeID && updateLayerPositionAction == other.updateLayerPositionAction && updateType == other.updateType
-            && (updateType == ScrollUpdateType::PositionUpdate || updateType == ScrollUpdateType::ScrollRequestResponse);
-    }
-    
-    void merge(ScrollUpdate&& other)
-    {
-        scrollPosition = other.scrollPosition;
-        layoutViewportOrigin = other.layoutViewportOrigin;
-        if (updateType == ScrollUpdateType::ScrollRequestResponse)
-            responseIdentifier = std::max(*responseIdentifier, *other.responseIdentifier);
-    }
+    ShouldFireScrollEnd shouldFireScrollEnd { ShouldFireScrollEnd::No };
+    Variant<ScrollUpdateData, ScrollRequestResponseData> data;
+
+    bool canMerge(const ScrollUpdate&) const;
+    void merge(ScrollUpdate&&);
 };
 
 enum class WheelEventProcessingSteps : uint8_t {

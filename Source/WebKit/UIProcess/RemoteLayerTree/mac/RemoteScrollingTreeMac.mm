@@ -224,9 +224,11 @@ void RemoteScrollingTreeMac::scrollingTreeNodeDidScroll(ScrollingTreeScrollingNo
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
         .scrollPosition = node.currentScrollPosition(),
-        .layoutViewportOrigin = layoutViewportOrigin,
-        .updateType = ScrollUpdateType::PositionUpdate,
-        .updateLayerPositionAction = action,
+        .data = ScrollUpdateData {
+            .updateType = ScrollUpdateType::PositionUpdate,
+            .updateLayerPositionAction = action,
+            .layoutViewportOrigin = layoutViewportOrigin,
+        }
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 }
@@ -236,8 +238,9 @@ void RemoteScrollingTreeMac::scrollingTreeNodeDidStopAnimatedScroll(ScrollingTre
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
         .scrollPosition = { },
-        .layoutViewportOrigin = { },
-        .updateType = ScrollUpdateType::AnimatedScrollDidEnd,
+        .data = ScrollUpdateData {
+            .updateType = ScrollUpdateType::AnimatedScrollDidEnd,
+        }
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 }
@@ -249,19 +252,9 @@ void RemoteScrollingTreeMac::scrollingTreeNodeDidStopWheelEventScroll(WebCore::S
     auto scrollUpdate = ScrollUpdate {
         .nodeID = node.scrollingNodeID(),
         .scrollPosition = { },
-        .layoutViewportOrigin = { },
-        .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
-    };
-    addPendingScrollUpdate(WTF::move(scrollUpdate));
-}
-
-void RemoteScrollingTreeMac::scrollingTreeNodeDidStopProgrammaticScroll(WebCore::ScrollingTreeScrollingNode& node)
-{
-    auto scrollUpdate = ScrollUpdate {
-        .nodeID = node.scrollingNodeID(),
-        .scrollPosition = { },
-        .layoutViewportOrigin = { },
-        .updateType = ScrollUpdateType::ProgrammaticScrollDidEnd,
+        .data = ScrollUpdateData {
+            .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
+        }
     };
     addPendingScrollUpdate(WTF::move(scrollUpdate));
 }
@@ -280,14 +273,14 @@ void RemoteScrollingTreeMac::didAddPendingScrollUpdate()
     });
 }
 
-bool RemoteScrollingTreeMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID nodeID, const RequestedScrollData& request)
+RequestsScrollHandling RemoteScrollingTreeMac::scrollingTreeNodeRequestsScroll(ScrollingNodeID nodeID, const RequestedScrollData& request)
 {
     if (isAnimatedUpdate(request.requestType)) {
         ASSERT(m_treeLock.isLocked());
         m_nodesWithPendingScrollAnimations.set(nodeID, request);
-        return true;
+        return RequestsScrollHandling::Handled;
     }
-    return false;
+    return RequestsScrollHandling::Unhandled;
 }
 
 bool RemoteScrollingTreeMac::scrollingTreeNodeRequestsKeyboardScroll(ScrollingNodeID nodeID, const RequestedKeyboardScrollData& request)

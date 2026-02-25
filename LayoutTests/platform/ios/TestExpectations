@@ -3674,7 +3674,6 @@ webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrolle
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-after-snap.html [ Skip ]
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-scrollIntoView.html?include=subframe-inline-end-block-end-behavior-auto [ Skip ]
 webkit.org/b/296195 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-scrollIntoView.html?include=subframe-inline-start-block-start-behavior-smooth [ Skip ]
-webkit.org/b/307555 imported/w3c/web-platform-tests/dom/events/scrolling/scrollend-event-fired-for-programmatic-scroll.html?include=root-scrollBy-smooth [ Failure ]
 
 webkit.org/b/231337 imported/w3c/web-platform-tests/xhr/send-timeout-events.htm [ Pass Failure ]
 
@@ -4640,9 +4639,6 @@ fast/forms/ios/show-file-upload-context-menu-above-keyboard.html [ Pass ]
 # rdar://110034620 (REGRESSION ( iOS17 ): [ iOS17 ] compositing/clipping/nested-overflow-with-border-radius.html is a consistent image failure)
 compositing/clipping/nested-overflow-with-border-radius.html [ ImageOnlyFailure ]
 
-# rdar://104451028 (REGRESSION (iOS17 ): [ iOS17 ] fast/scrolling/keyboard-scrolling-distance-pageDown.html is a consistent timeout)
-fast/scrolling/keyboard-scrolling-distance-pageDown.html [ Timeout ]
-
 # rdar://104460194 (REGRESSION (iOS17 Sonoma23A177 ): [ iOS17 Sonoma ] fast/box-shadow/inset-box-shadow-fractional-radius.html is a consistent image failure)
 fast/box-shadow/inset-box-shadow-fractional-radius.html [ ImageOnlyFailure ]
 
@@ -4699,7 +4695,6 @@ fast/borders/hidpi-border-painting-groove.html [ ImageOnlyFailure ]
 fast/borders/hidpi-border-painting-ridge.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/white-space/textarea-pre-wrap-013.html [ ImageOnlyFailure ]
 editing/spelling/editing-word-with-marker-1.html [ Failure ]
-fast/scrolling/ios/body-overflow-hidden-height-100-percent-keyboard.html [ Failure ]
 http/wpt/webcodecs/videoFrame-colorSpace.html [ Failure ]
 http/wpt/webcodecs/webcodecs-gc.html [ Failure ]
 http/wpt/webrtc/video-script-transform-keyframe-only.html [ Failure ]

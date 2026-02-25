@@ -2800,12 +2800,10 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
 header: <WebCore/ScrollingCoordinatorTypes.h>
 [CustomHeader] enum class WebCore::ScrollUpdateType : uint8_t {
     PositionUpdate,
-    ScrollRequestResponse,
     AnimatedScrollWillStart,
     AnimatedScrollDidEnd,
     WheelEventScrollWillStart,
     WheelEventScrollDidEnd,
-    ProgrammaticScrollDidEnd,
 };
 
 header: <WebCore/ScrollingCoordinatorTypes.h>
@@ -2816,13 +2814,27 @@ header: <WebCore/ScrollingCoordinatorTypes.h>
 };
 
 header: <WebCore/ScrollingCoordinatorTypes.h>
+[CustomHeader] enum class WebCore::ShouldFireScrollEnd : bool;
+
+header: <WebCore/ScrollingCoordinatorTypes.h>
+[CustomHeader] struct WebCore::ScrollUpdateData {
+    WebCore::ScrollUpdateType updateType;
+    WebCore::ScrollingLayerPositionAction updateLayerPositionAction;
+    std::optional<WebCore::FloatPoint> layoutViewportOrigin;
+};
+
+header: <WebCore/ScrollingCoordinatorTypes.h>
+[CustomHeader] struct WebCore::ScrollRequestResponseData {
+    WebCore::ScrollRequestType requestType;
+    Markable<WebCore::ScrollRequestIdentifier> responseIdentifier;
+};
+
+header: <WebCore/ScrollingCoordinatorTypes.h>
 [CustomHeader] struct WebCore::ScrollUpdate {
     WebCore::ScrollingNodeID nodeID;
     WebCore::FloatPoint scrollPosition;
-    std::optional<WebCore::FloatPoint> layoutViewportOrigin;
-    WebCore::ScrollUpdateType updateType;
-    WebCore::ScrollingLayerPositionAction updateLayerPositionAction;
-    Markable<WebCore::ScrollRequestIdentifier> responseIdentifier;
+    WebCore::ShouldFireScrollEnd shouldFireScrollEnd;
+    Variant<WebCore::ScrollUpdateData, WebCore::ScrollRequestResponseData> data;
 };
 
 header: <WebCore/ScrollingCoordinatorTypes.h>

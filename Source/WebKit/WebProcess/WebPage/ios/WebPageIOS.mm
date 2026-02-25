@@ -3788,8 +3788,11 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
         auto scrollUpdate = ScrollUpdate {
             .nodeID = *mainFrameScrollingNodeID,
             .scrollPosition = scrollPosition,
-            .layoutViewportOrigin = visibleContentRectUpdateInfo.layoutViewportRect().location(),
-            .updateLayerPositionAction = layerAction,
+            .data = ScrollUpdateData {
+                .updateType = ScrollUpdateType::PositionUpdate,
+                .updateLayerPositionAction = layerAction,
+                .layoutViewportOrigin = visibleContentRectUpdateInfo.layoutViewportRect().location()
+            }
         };
 
         // We don't actually know that these are user scrolls; we get here for all kinds of state changes.
@@ -3799,8 +3802,9 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
             auto scrollUpdate = ScrollUpdate {
                 .nodeID = *frameView->scrollingNodeID(),
                 .scrollPosition = { },
-                .layoutViewportOrigin = { },
-                .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
+                .data = ScrollUpdateData {
+                    .updateType = ScrollUpdateType::WheelEventScrollDidEnd,
+                }
             };
             scrollingCoordinator->applyScrollUpdate(WTF::move(scrollUpdate), ScrollType::User);
         }

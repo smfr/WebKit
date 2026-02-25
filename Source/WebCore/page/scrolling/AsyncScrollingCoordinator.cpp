@@ -406,9 +406,10 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
         auto scrollUpdate = ScrollUpdate {
             .nodeID = *scrollingNodeID,
             .scrollPosition = scrollPosition,
-            .layoutViewportOrigin = { },
-            .updateType = ScrollUpdateType::PositionUpdate,
-            .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
+            .data = ScrollUpdateData {
+                .updateType = ScrollUpdateType::PositionUpdate,
+                .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
+            },
         };
         applyScrollUpdate(WTF::move(scrollUpdate), ScrollType::Programmatic);
     }
@@ -618,13 +619,7 @@ void AsyncScrollingCoordinator::synchronizeStateFromScrollingTree()
     m_scrollingTree->traverseScrollingTree([&](ScrollingNodeID nodeID, ScrollingNodeType, std::optional<FloatPoint> scrollPosition, std::optional<FloatPoint> layoutViewportOrigin, bool scrolledSinceLastCommit) {
         if (scrollPosition && scrolledSinceLastCommit) {
             LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::synchronizeStateFromScrollingTree - node " << nodeID << " scroll position " << scrollPosition);
-            auto scrollUpdate = ScrollUpdate {
-                .nodeID = nodeID,
-                .scrollPosition = *scrollPosition,
-                .layoutViewportOrigin = layoutViewportOrigin,
-                .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
-            };
-            updateScrollPositionAfterAsyncScroll(WTF::move(scrollUpdate), ScrollType::User, ViewportRectStability::Stable);
+            updateScrollPositionAfterAsyncScroll(nodeID, *scrollPosition, layoutViewportOrigin, ScrollingLayerPositionAction::Set, ScrollType::User, ViewportRectStability::Stable);
         }
     });
 }
@@ -705,36 +700,34 @@ void AsyncScrollingCoordinator::applyScrollUpdate(ScrollUpdate&& update, ScrollT
 void AsyncScrollingCoordinator::applyScrollPositionUpdate(ScrollUpdate&& update, ScrollType scrollType, ViewportRectStability viewportStability)
 {
     LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::applyScrollPositionUpdate " << update);
-    switch (update.updateType) {
 
-    case ScrollUpdateType::PositionUpdate:
-        updateScrollPositionAfterAsyncScroll(WTF::move(update), scrollType, viewportStability);
-        return;
+    if (std::holds_alternative<ScrollUpdateData>(update.data)) {
+        auto& data = std::get<ScrollUpdateData>(update.data);
+        switch (data.updateType) {
+        case ScrollUpdateType::PositionUpdate:
+            updateScrollPositionAfterAsyncScroll(update.nodeID, update.scrollPosition, data.layoutViewportOrigin, data.updateLayerPositionAction, scrollType, viewportStability);
+            break;
 
-    case ScrollUpdateType::ScrollRequestResponse:
-        // FIXME: Handle.
-        return;
+        case ScrollUpdateType::AnimatedScrollWillStart:
+            animatedScrollWillStartForNode(update.nodeID);
+            break;
 
-    case ScrollUpdateType::AnimatedScrollWillStart:
-        animatedScrollWillStartForNode(update.nodeID);
-        return;
+        case ScrollUpdateType::AnimatedScrollDidEnd:
+            animatedScrollDidEndForNode(update.nodeID);
+            break;
 
-    case ScrollUpdateType::AnimatedScrollDidEnd:
-        animatedScrollDidEndForNode(update.nodeID);
-        return;
+        case ScrollUpdateType::WheelEventScrollWillStart:
+            wheelEventScrollWillStartForNode(update.nodeID);
+            break;
 
-    case ScrollUpdateType::WheelEventScrollWillStart:
-        wheelEventScrollWillStartForNode(update.nodeID);
-        return;
-
-    case ScrollUpdateType::WheelEventScrollDidEnd:
-        wheelEventScrollDidEndForNode(update.nodeID);
-        return;
-
-    case ScrollUpdateType::ProgrammaticScrollDidEnd:
-        notifyScrollableAreasForScrollEnd(update.nodeID);
-        return;
+        case ScrollUpdateType::WheelEventScrollDidEnd:
+            wheelEventScrollDidEndForNode(update.nodeID);
+            break;
+        }
     }
+
+    if (update.shouldFireScrollEnd == ShouldFireScrollEnd::Yes)
+        notifyScrollableAreasForScrollEnd(update.nodeID);
 }
 
 void AsyncScrollingCoordinator::animatedScrollWillStartForNode(ScrollingNodeID scrollingNodeID)
@@ -827,7 +820,7 @@ void AsyncScrollingCoordinator::notifyScrollableAreasForScrollEnd(ScrollingNodeI
         scrollableArea->scrollDidEnd();
 }
 
-void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollUpdate&& update, ScrollType scrollType, ViewportRectStability viewportStability)
+void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollingNodeID nodeID, FloatPoint scrollPosition, std::optional<FloatPoint> layoutViewportOrigin, ScrollingLayerPositionAction updateLayerPositionAction, ScrollType scrollType, ViewportRectStability viewportRectStability)
 {
     ASSERT(isMainThread());
 
@@ -835,30 +828,30 @@ void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollUpdat
     if (!page)
         return;
 
-    RefPtr frameView = frameViewForScrollingNode(update.nodeID);
+    RefPtr frameView = frameViewForScrollingNode(nodeID);
     if (!frameView)
         return;
 
-    LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll node " << update.nodeID << " " << scrollType << " scrollPosition " << update.scrollPosition << " action " << update.updateLayerPositionAction);
+    LOG_WITH_STREAM(Scrolling, stream << "AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll node " << nodeID << " " << scrollType << " scrollPosition " << scrollPosition << " action " << updateLayerPositionAction);
 
     if (!frameView->frame().isMainFrame()) {
-        if (update.updateLayerPositionAction == ScrollingLayerPositionAction::Set)
+        if (updateLayerPositionAction == ScrollingLayerPositionAction::Set)
             page->editorClient().subFrameScrollPositionChanged();
     }
 
-    if (update.nodeID == frameView->scrollingNodeID()) {
-        reconcileScrollingState(*frameView, update.scrollPosition, update.layoutViewportOrigin, scrollType, viewportStability, update.updateLayerPositionAction);
+    if (nodeID == frameView->scrollingNodeID()) {
+        reconcileScrollingState(*frameView, scrollPosition, layoutViewportOrigin, scrollType, viewportRectStability, updateLayerPositionAction);
         return;
     }
 
     // Overflow-scroll area.
-    if (CheckedPtr scrollableArea = frameView->scrollableAreaForScrollingNodeID(update.nodeID)) {
+    if (CheckedPtr scrollableArea = frameView->scrollableAreaForScrollingNodeID(nodeID)) {
         auto previousScrollType = scrollableArea->currentScrollType();
         scrollableArea->setCurrentScrollType(scrollType);
-        scrollableArea->notifyScrollPositionChanged(roundedIntPoint(update.scrollPosition));
+        scrollableArea->notifyScrollPositionChanged(roundedIntPoint(scrollPosition));
         scrollableArea->setCurrentScrollType(previousScrollType);
 
-        if (update.updateLayerPositionAction == ScrollingLayerPositionAction::Set)
+        if (updateLayerPositionAction == ScrollingLayerPositionAction::Set)
             page->editorClient().overflowScrollPositionChanged();
     }
 }

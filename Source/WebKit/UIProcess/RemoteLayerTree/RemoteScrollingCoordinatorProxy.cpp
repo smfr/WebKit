@@ -125,13 +125,31 @@ void RemoteScrollingCoordinatorProxy::adjustMainFrameDelegatedScrollPosition(Scr
         case ScrollRequestType::ImplicitDeltaUpdate: {
             auto interruptScrollAnimation = request.requestType == ScrollRequestType::ImplicitDeltaUpdate ? InterruptScrollAnimation::No : InterruptScrollAnimation::Yes;
             scrollPosition = request.destinationPosition(scrollPosition);
-            LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::adjustViewScrollPosition requesting scroll to " << scrollPosition << " interrupting " << (interruptScrollAnimation == InterruptScrollAnimation::Yes));
+            LOG_WITH_STREAM(Scrolling, stream << "RemoteScrollingCoordinatorProxy::adjustViewScrollPosition requesting scroll to " << scrollPosition << " animated " << isAnimatedUpdate(request.requestType) << " interrupting " << (interruptScrollAnimation == InterruptScrollAnimation::Yes));
             protect(webPageProxy())->requestScroll(scrollPosition, scrollOrigin(), isAnimatedUpdate(request.requestType) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No, interruptScrollAnimation);
             break;
         }
         case ScrollRequestType::CancelAnimatedScroll:
             protect(webPageProxy())->requestScroll(scrollPosition, scrollOrigin(), ScrollIsAnimated::No, InterruptScrollAnimation::Yes);
             break;
+        }
+
+        if (auto rootNodeID = rootScrollingNodeID()) {
+            auto shouldFireScrollEnd = ShouldFireScrollEnd::No;
+
+            switch (request.requestType) {
+            case ScrollRequestType::PositionUpdate:
+            case ScrollRequestType::DeltaUpdate:
+            case ScrollRequestType::ImplicitDeltaUpdate:
+                shouldFireScrollEnd = ShouldFireScrollEnd::Yes;
+                break;
+            case ScrollRequestType::AnimatedPositionUpdate:
+            case ScrollRequestType::AnimatedDeltaUpdate:
+            case ScrollRequestType::CancelAnimatedScroll:
+                break;
+            }
+
+            m_scrollingTree->didHandleScrollRequestForNode(*rootNodeID, request.requestType, scrollPosition, shouldFireScrollEnd, *request.identifier);
         }
     };
 
@@ -218,14 +236,17 @@ void RemoteScrollingCoordinatorProxy::sendScrollingTreeNodeUpdate()
         const auto& update = scrollUpdates[i];
         bool isLastUpdate = i == scrollUpdates.size() - 1;
 
-        if (update.updateType == ScrollUpdateType::PositionUpdate) {
-            webPageProxy->scrollingNodeScrollViewDidScroll(update.nodeID);
-            auto* scrollPerfData = webPageProxy->scrollingPerformanceData();
-            // update.layoutViewportOrigin is set for frame scrolls.
-            if (scrollPerfData && update.layoutViewportOrigin) {
-                auto layoutViewport = m_scrollingTree->layoutViewport();
-                layoutViewport.setLocation(*update.layoutViewportOrigin);
-                scrollPerfData->didScroll(layoutViewport);
+        if (std::holds_alternative<ScrollUpdateData>(update.data)) {
+            const auto& updateData = std::get<ScrollUpdateData>(update.data);
+            if (updateData.updateType == ScrollUpdateType::PositionUpdate) {
+                webPageProxy->scrollingNodeScrollViewDidScroll(update.nodeID);
+                auto* scrollPerfData = webPageProxy->scrollingPerformanceData();
+                // update.layoutViewportOrigin is set for frame scrolls.
+                if (scrollPerfData && updateData.layoutViewportOrigin) {
+                    auto layoutViewport = m_scrollingTree->layoutViewport();
+                    layoutViewport.setLocation(*updateData.layoutViewportOrigin);
+                    scrollPerfData->didScroll(layoutViewport);
+                }
             }
         }
 
@@ -261,14 +282,14 @@ void RemoteScrollingCoordinatorProxy::receivedLastScrollingTreeNodeUpdateReply()
     });
 }
 
-bool RemoteScrollingCoordinatorProxy::scrollingTreeNodeRequestsScroll(ScrollingNodeID scrolledNodeID, const RequestedScrollData& request)
+RequestsScrollHandling RemoteScrollingCoordinatorProxy::scrollingTreeNodeRequestsScroll(ScrollingNodeID scrolledNodeID, const RequestedScrollData& request)
 {
     if (scrolledNodeID == rootScrollingNodeID()) {
         m_scrollRequestData.append(request);
-        return true;
+        return RequestsScrollHandling::Delayed;
     }
 
-    return false;
+    return RequestsScrollHandling::Unhandled;
 }
 
 bool RemoteScrollingCoordinatorProxy::scrollingTreeNodeRequestsKeyboardScroll(ScrollingNodeID scrolledNodeID, const RequestedKeyboardScrollData&)

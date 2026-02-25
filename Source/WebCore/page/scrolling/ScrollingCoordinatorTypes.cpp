@@ -41,6 +41,52 @@ FloatPoint RequestedScrollData::computeDestinationPosition(FloatPoint currentScr
     return std::get<FloatPoint>(scrollPositionOrDelta);
 }
 
+bool ScrollUpdate::canMerge(const ScrollUpdate& other) const
+{
+    if (nodeID != other.nodeID)
+        return false;
+
+    if (data.index() != other.data.index())
+        return false;
+
+    auto canMergeScrollUpdateData = [](const ScrollUpdateData& a, const ScrollUpdateData& b) {
+        if (a.updateType != b.updateType)
+            return false;
+
+        if (a.updateType != ScrollUpdateType::PositionUpdate)
+            return false;
+
+        if (a.updateLayerPositionAction != b.updateLayerPositionAction)
+            return false;
+
+        return true;
+    };
+
+    if (std::holds_alternative<ScrollUpdateData>(data))
+        return canMergeScrollUpdateData(std::get<ScrollUpdateData>(data), std::get<ScrollUpdateData>(other.data));
+
+    return std::get<ScrollRequestResponseData>(data).requestType == std::get<ScrollRequestResponseData>(other.data).requestType;
+}
+
+void ScrollUpdate::merge(ScrollUpdate&& other)
+{
+    scrollPosition = other.scrollPosition;
+
+    if (other.shouldFireScrollEnd == ShouldFireScrollEnd::Yes)
+        shouldFireScrollEnd = ShouldFireScrollEnd::Yes;
+
+    if (std::holds_alternative<ScrollUpdateData>(data)) {
+        std::get<ScrollUpdateData>(data).layoutViewportOrigin = std::get<ScrollUpdateData>(other.data).layoutViewportOrigin;
+        return;
+    }
+
+    auto& requestResponseData = std::get<ScrollRequestResponseData>(data);
+    const auto& otherRequestResponseData = std::get<ScrollRequestResponseData>(other.data);
+
+    if (requestResponseData.responseIdentifier && otherRequestResponseData.responseIdentifier)
+        requestResponseData.responseIdentifier = std::max(*requestResponseData.responseIdentifier, *otherRequestResponseData.responseIdentifier);
+}
+
 TextStream& operator<<(TextStream& ts, SynchronousScrollingReason reason)
 {
     switch (reason) {
@@ -164,12 +210,10 @@ TextStream& operator<<(TextStream& ts, ScrollUpdateType type)
 {
     switch (type) {
     case ScrollUpdateType::PositionUpdate: ts << "position update"_s; break;
-    case ScrollUpdateType::ScrollRequestResponse: ts << "scroll request response"_s; break;
     case ScrollUpdateType::AnimatedScrollWillStart: ts << "animated scroll will start"_s; break;
     case ScrollUpdateType::AnimatedScrollDidEnd: ts << "animated scroll did end"_s; break;
     case ScrollUpdateType::WheelEventScrollWillStart: ts << "wheel event scroll will start"_s; break;
     case ScrollUpdateType::WheelEventScrollDidEnd: ts << "wheel event scroll did end"_s; break;
-    case ScrollUpdateType::ProgrammaticScrollDidEnd: ts << "programmatic scroll did end"_s; break;
     }
     return ts;
 }
@@ -216,12 +260,17 @@ TextStream& operator<<(TextStream& ts, const RequestedScrollData& requestedScrol
 
 TextStream& operator<<(TextStream& ts, const ScrollUpdate& update)
 {
-    if (update.updateType == ScrollUpdateType::PositionUpdate)
-        ts << "updateType: " << update.updateType << " nodeID: " << update.nodeID << " scrollPosition: " << update.scrollPosition << " layoutViewportOrigin: " << update.layoutViewportOrigin << " updateLayerPositionAction: " << update.updateLayerPositionAction;
-    else if (update.updateType == ScrollUpdateType::ScrollRequestResponse)
-        ts << "updateType: " << update.updateType << " nodeID: " << update.nodeID << " scrollPosition: " << update.scrollPosition << " identifier: " << update.responseIdentifier;
-    else
-        ts << "updateType: " << update.updateType << " nodeID: " << update.nodeID;
+    if (std::holds_alternative<ScrollUpdateData>(update.data)) {
+        auto updateData = std::get<ScrollUpdateData>(update.data);
+        ts << "updateType: " << updateData.updateType << " nodeID: " << update.nodeID;
+        if (updateData.updateType == ScrollUpdateType::PositionUpdate)
+            ts << " scrollPosition: " << update.scrollPosition << " layoutViewportOrigin: " << updateData.layoutViewportOrigin << " updateLayerPositionAction: " << updateData.updateLayerPositionAction;
+        return ts;
+    }
+
+    auto updateData = std::get<ScrollRequestResponseData>(update.data);
+    ts << "requestUpdate for node: " << update.nodeID << " request type " << updateData.requestType << " scrollPosition: " << update.scrollPosition << " shouldFireScrollEnd "
+        << (update.shouldFireScrollEnd == ShouldFireScrollEnd::Yes) << " identifier " << updateData.responseIdentifier;
 
     return ts;
 }
