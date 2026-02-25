@@ -242,7 +242,6 @@ TestWebKitAPI.CSSParser
 TestWebKitAPI.CSSParserFastPaths
 TestWebKitAPI.CSSPropertyParser
 TestWebKitAPI.CSSTokenizerTest
-TestWebKitAPI.CSSViewportUnits
 TestWebKitAPI.CTAPRequestTest
 TestWebKitAPI.CTAPResponseTest
 TestWebKitAPI.CancelLoading
