@@ -933,6 +933,7 @@ webkit.org/b/280603 webgl/2.0.0/conformance2/textures/video/tex-2d-rgb8ui-rgb_in
 webkit.org/b/251554 imported/w3c/web-platform-tests/html/user-activation/consumption-crossorigin.sub.html [ Skip ]
 webkit.org/b/251554 imported/w3c/web-platform-tests/html/user-activation/consumption-sameorigin.html [ Skip ]
 
+webkit.org/b/308629 imported/w3c/web-platform-tests/svg/pservers/reftests/pattern-opacity-01.svg [ ImageOnlyFailure ]
 ######################################################
 # Test failures from turning GPU Process on by default
 
@@ -1092,7 +1093,6 @@ webkit.org/b/279179 [ Debug ] imported/w3c/web-platform-tests/eventsource/events
 
 fast/hidpi/filters-drop-shadow.html [ ImageOnlyFailure ]
 fast/multicol/layers-split-across-columns.html [ ImageOnlyFailure ]
-fast/scrolling/scroll-corner-update-on-direction-change.html [ ImageOnlyFailure Pass ]
 imported/w3c/web-platform-tests/mathml/relations/css-styling/color-003.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/mathml/relations/css-styling/color-004.tentative.html [ ImageOnlyFailure ]
 

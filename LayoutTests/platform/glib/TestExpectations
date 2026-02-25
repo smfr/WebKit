@@ -5291,6 +5291,8 @@ webkit.org/b/308481 fast/speechsynthesis/speech-synthesis-speak-empty-string.htm
 
 webkit.org/b/308538 resize-observer/resize-observer-keeps-js-wrapper-of-target-alive.html [ Pass Failure ]
 
+webkit.org/b/308633 fast/scrolling/scroll-corner-update-on-direction-change.html [ ImageOnlyFailure Pass ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////

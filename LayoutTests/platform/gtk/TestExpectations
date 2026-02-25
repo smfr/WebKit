@@ -832,6 +832,8 @@ webkit.org/b/308032 fast/events/popup-allowed-from-gesture-initiated-event.html 
 
 webkit.org/b/308100 fast/dom/Window/window-property-invalid-characters-ignored.html [ Failure Pass ]
 
+webkit.org/b/308632 svg/repaint/non-scaling-stroke-transform-animation.html [ Failure Pass ]
+
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of Flaky tests
 #////////////////////////////////////////////////////////////////////////////////////////
@@ -1274,6 +1276,8 @@ webkit.org/b/273396 platform/gtk/fonts/webkit-font-smoothing.html [ ImageOnlyFai
 # Bidi content-aware paste not yet supported
 editing/pasteboard/paste-rtl-paragraph-with-leading-ltr-text.html [ ImageOnlyFailure ]
 
+webkit.org/b/308631 fast/flexbox/001.html [ Failure Pass ]
+webkit.org/b/308630 fast/css/sticky/sticky-left-percentage.html [ ImageOnlyFailure Pass ]
 #////////////////////////////////////////////////////////////////////////////////////////
 # End of non-crashing, non-flaky tests failing
 #////////////////////////////////////////////////////////////////////////////////////////
