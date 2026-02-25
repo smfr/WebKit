@@ -200,6 +200,11 @@ void WebPageProxy::updateVisibleContentRects(const VisibleContentRectUpdateInfo&
     protect(m_legacyMainFrameProcess)->send(Messages::ViewUpdateDispatcher::VisibleContentRectUpdate(webPageIDInMainFrameProcess(), visibleContentRectUpdate), 0);
 }
 
+void WebPageProxy::updateVisibleContentRectsLocally(const VisibleContentRectUpdateInfo& visibleContentRectUpdate)
+{
+    internals().lastVisibleContentRectUpdate = visibleContentRectUpdate;
+}
+
 void WebPageProxy::resendLastVisibleContentRects()
 {
     if (internals().lastVisibleContentRectUpdate)

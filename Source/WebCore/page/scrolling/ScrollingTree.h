@@ -196,7 +196,7 @@ public:
 
     bool isHandlingProgrammaticScroll() const { return m_isHandlingProgrammaticScroll; }
     void setIsHandlingProgrammaticScroll(bool isHandlingProgrammaticScroll) { m_isHandlingProgrammaticScroll = isHandlingProgrammaticScroll; }
-    
+
     void setScrollPinningBehavior(ScrollPinningBehavior);
     WEBCORE_EXPORT ScrollPinningBehavior scrollPinningBehavior();
 
