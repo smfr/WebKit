@@ -52,7 +52,7 @@ static bool isListOrIndentBlockquote(const Node& node)
     return node.hasTagName(ulTag) || node.hasTagName(olTag) || node.hasTagName(blockquoteTag);
 }
 
-IndentOutdentCommand::IndentOutdentCommand(Ref<Document>&& document, EIndentType typeOfAction)
+IndentOutdentCommand::IndentOutdentCommand(Ref<Document>&& document, IndentType typeOfAction)
     : ApplyBlockElementCommand(WTF::move(document), blockquoteTag, "margin: 0 0 0 40px; border: none; padding: 0px;"_s)
     , m_typeOfAction(typeOfAction)
 {
@@ -257,7 +257,7 @@ void IndentOutdentCommand::outdentRegion(const VisiblePosition& startOfSelection
 
 void IndentOutdentCommand::formatSelection(const VisiblePosition& startOfSelection, const VisiblePosition& endOfSelection)
 {
-    if (m_typeOfAction == Indent)
+    if (m_typeOfAction == IndentType::Indent)
         ApplyBlockElementCommand::formatSelection(startOfSelection, endOfSelection);
     else
         outdentRegion(startOfSelection, endOfSelection);

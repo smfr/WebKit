@@ -456,7 +456,7 @@ static bool executeIgnoreSpelling(LocalFrame& frame, Event*, EditorCommandSource
 static bool executeIndent(LocalFrame& frame, Event*, EditorCommandSource, const String&)
 {
     ASSERT(frame.document());
-    IndentOutdentCommand::create(*frame.document(), IndentOutdentCommand::Indent)->apply();
+    IndentOutdentCommand::create(*frame.document(), IndentOutdentCommand::IndentType::Indent)->apply();
     return true;
 }
 
@@ -894,7 +894,7 @@ static bool executeMoveToRightEndOfLineAndModifySelection(LocalFrame& frame, Eve
 static bool executeOutdent(LocalFrame& frame, Event*, EditorCommandSource, const String&)
 {
     ASSERT(frame.document());
-    IndentOutdentCommand::create(*frame.document(), IndentOutdentCommand::Outdent)->apply();
+    IndentOutdentCommand::create(*frame.document(), IndentOutdentCommand::IndentType::Outdent)->apply();
     return true;
 }
 
