@@ -226,28 +226,10 @@ PlacedGridItems GridFormattingContext::constructPlacedGridItems(const GridAreas&
     placedGridItems.reserveInitialCapacity(gridAreas.size());
     CheckedRef formattingContextStyle = root().style();
     for (auto [ unplacedGridItem, gridAreaLines ] : gridAreas) {
-
-        CheckedRef gridItemStyle = unplacedGridItem.m_layoutBox->style();
-
-        ComputedSizes inlineAxisSizes {
-            gridItemStyle->width(),
-            gridItemStyle->minWidth(),
-            gridItemStyle->maxWidth(),
-            gridItemStyle->marginLeft(),
-            gridItemStyle->marginRight()
-        };
-
-        ComputedSizes blockAxisSizes {
-            gridItemStyle->height(),
-            gridItemStyle->minHeight(),
-            gridItemStyle->maxHeight(),
-            gridItemStyle->marginTop(),
-            gridItemStyle->marginBottom()
-        };
-
-        auto& boxGeometry = geometryForGridItem(unplacedGridItem.m_layoutBox);
-        placedGridItems.constructAndAppend(unplacedGridItem, gridAreaLines, inlineAxisSizes, blockAxisSizes, boxGeometry.horizontalBorderAndPadding(), boxGeometry.verticalBorderAndPadding(),
-            gridItemStyle->justifySelf().resolve(formattingContextStyle.ptr()), gridItemStyle->alignSelf().resolve(formattingContextStyle.ptr()), gridItemStyle->writingMode(), gridItemStyle->usedZoomForLength());
+        CheckedRef gridItem = unplacedGridItem.m_layoutBox;
+        CheckedRef gridContainerStyle = this->gridContainerStyle();
+        auto& boxGeometry = geometryForGridItem(gridItem);
+        placedGridItems.constructAndAppend(gridItem, gridAreaLines, boxGeometry, gridContainerStyle);
     }
     return placedGridItems;
 }

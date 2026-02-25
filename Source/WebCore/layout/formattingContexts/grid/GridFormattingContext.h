@@ -156,6 +156,8 @@ private:
     BoxGeometry& geometryForGridItem(const ElementBox&);
     void setGridItemGeometries(const GridItemRects&);
 
+    const RenderStyle& gridContainerStyle() const { return m_gridBox->style(); }
+
     const CheckedRef<const ElementBox> m_gridBox;
     const CheckedRef<LayoutState> m_globalLayoutState;
     const IntegrationUtils m_integrationUtils;
