@@ -328,8 +328,10 @@ void ImplicitGrid::placeAutoPositionedItemWithAutoColumnAndRow(const UnplacedGri
             // Advance to next row, reset column to 0.
             ++m_autoPlacementCursorRow;
             m_autoPlacementCursorColumn = 0;
-            growRowsToFit(m_autoPlacementCursorRow + rowSpan - 1);
         }
+
+        // Ensure the grid has enough rows before checking if the range is empty.
+        growRowsToFit(m_autoPlacementCursorRow + rowSpan - 1);
 
         // Try to place at current cursor position.
         if (isCellRangeEmpty(m_autoPlacementCursorColumn, m_autoPlacementCursorColumn + columnSpan, m_autoPlacementCursorRow, m_autoPlacementCursorRow + rowSpan)) {
