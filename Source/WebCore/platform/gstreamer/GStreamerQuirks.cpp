@@ -250,7 +250,8 @@ std::optional<bool> GStreamerQuirksManager::isHardwareAccelerated(GstElementFact
         return *result;
     }
 
-    return std::nullopt;
+    auto klassStr = CStringView::unsafeFromUTF8(gst_element_factory_get_klass(factory));
+    return contains(klassStr.span(), "Hardware"_s);
 }
 
 bool GStreamerQuirksManager::supportsVideoHolePunchRendering() const

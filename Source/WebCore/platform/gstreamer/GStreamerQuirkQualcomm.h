@@ -34,6 +34,8 @@ public:
     [[nodiscard]] GRefPtr<GstCaps> videoSinkGLCapsFormat() const final { return m_glCaps; }
     bool isVideoCapsGLCompatible(const GRefPtr<GstCaps>&) const final;
 
+    std::optional<bool> isHardwareAccelerated(GstElementFactory*) final;
+
 private:
     mutable GRefPtr<GstCaps> m_glCaps;
 };
