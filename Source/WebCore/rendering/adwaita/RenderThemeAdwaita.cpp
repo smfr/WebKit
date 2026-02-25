@@ -399,10 +399,7 @@ void RenderThemeAdwaita::adjustListButtonStyle(RenderStyle& style, const Element
 {
     style.setLogicalWidth(16_css_px);
     // Add a margin to place the button at end of the input field.
-    if (style.writingMode().deprecatedIsLeftToRightDirection())
-        style.setMarginRight(-2_css_px);
-    else
-        style.setMarginLeft(-2_css_px);
+    style.setMarginEnd(-2_css_px);
 }
 
 Style::PreferredSizePair RenderThemeAdwaita::controlSize(StyleAppearance appearance, const FontCascade& fontCascade, const Style::PreferredSizePair& zoomedSize, float zoomFactor) const
