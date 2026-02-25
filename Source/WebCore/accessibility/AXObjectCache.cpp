@@ -1048,9 +1048,6 @@ AccessibilityObject* AXObjectCache::create(AccessibilityRole role)
     case AccessibilityRole::MenuListPopup:
         object = AccessibilityMenuListPopup::create(AXID::generate(), *this);
         break;
-    case AccessibilityRole::SpinButton:
-        object = AccessibilitySpinButton::create(AXID::generate(), *this);
-        break;
     case AccessibilityRole::SpinButtonPart:
         object = AccessibilitySpinButtonPart::create(AXID::generate(), *this);
         break;
@@ -1063,6 +1060,13 @@ AccessibilityObject* AXObjectCache::create(AccessibilityRole role)
 
     cacheAndInitializeWrapper(*object);
     return object.unsafeGet();
+}
+
+Ref<AccessibilitySpinButton> AXObjectCache::createSpinButton(SpinButtonElement& spinButtonElement)
+{
+    Ref spinButton = AccessibilitySpinButton::create(AXID::generate(), spinButtonElement, *this);
+    cacheAndInitializeWrapper(spinButton.get());
+    return spinButton;
 }
 
 void AXObjectCache::remove(AXID axID)

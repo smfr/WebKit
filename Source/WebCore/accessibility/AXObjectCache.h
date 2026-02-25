@@ -66,6 +66,7 @@ class AXRemoteFrame;
 class AccessibilityNodeObject;
 class AccessibilityObject;
 class AccessibilityRenderObject;
+class AccessibilitySpinButton;
 class Document;
 class HTMLAreaElement;
 class HTMLDetailsElement;
@@ -84,6 +85,7 @@ class RenderText;
 class RenderWidget;
 class Scrollbar;
 class ScrollView;
+class SpinButtonElement;
 class VisiblePosition;
 class Widget;
 
@@ -375,6 +377,7 @@ public:
 
     // used for objects without backing elements
     AccessibilityObject* create(AccessibilityRole);
+    Ref<AccessibilitySpinButton> createSpinButton(SpinButtonElement&);
 
     // Will only return the AccessibilityObject if it already exists.
     inline AccessibilityObject* get(RenderObject* renderer) const

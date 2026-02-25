@@ -2687,8 +2687,7 @@ void AccessibilityRenderObject::addTextFieldChildren()
     if (!spinButtonElement)
         return;
 
-    Ref axSpinButton = uncheckedDowncast<AccessibilitySpinButton>(*axObjectCache()->create(AccessibilityRole::SpinButton));
-    axSpinButton->setSpinButtonElement(spinButtonElement.get());
+    Ref axSpinButton = axObjectCache()->createSpinButton(*spinButtonElement);
     axSpinButton->setParent(this);
     addChild(WTF::move(axSpinButton));
 }
