@@ -1333,7 +1333,12 @@ CONSTANT_FUNCTION(Normalize)
     return constantDivide(resultType, { arg, length });
 }
 
-BINARY_OPERATION(Pow, Float, WRAP_STD(pow))
+BINARY_OPERATION(Pow, Float, [&]<typename T>(T base, T exp) -> ConstantResult {
+    if (base < 0)
+        return makeUnexpected(makeString("pow called with negative base ("_s, String::number(base), ")"_s));
+    auto result = std::pow(base, exp);
+    return { { T(result) } };
+});
 
 UNARY_OPERATION(QuantizeToF16, F32, [&](float arg) -> ConstantResult {
     UNUSED_PARAM(resultType);
