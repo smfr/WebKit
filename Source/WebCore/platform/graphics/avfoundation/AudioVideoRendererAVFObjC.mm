@@ -155,7 +155,7 @@ void AudioVideoRendererAVFObjC::setHasProtectedVideoContent(bool protectedConten
         updateDisplayLayerIfNeeded();
 }
 
-TracksRendererManager::TrackIdentifier AudioVideoRendererAVFObjC::addTrack(TrackType type)
+std::optional<TracksRendererManager::TrackIdentifier> AudioVideoRendererAVFObjC::addTrack(TrackType type)
 {
     auto identifier = TrackIdentifier::generate();
     m_trackTypes.add(identifier, type);
@@ -174,8 +174,7 @@ TracksRendererManager::TrackIdentifier AudioVideoRendererAVFObjC::addTrack(Track
         addAudioRenderer(identifier);
         break;
     default:
-        ASSERT_NOT_REACHED();
-        break;
+        return std::nullopt;
     }
     return identifier;
 }
