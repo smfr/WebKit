@@ -63,6 +63,9 @@ RenderImage* toSimpleImage(RenderObject&);
 // Returns true if the element has an attribute that will result in an accname being computed.
 // https://www.w3.org/TR/accname-1.2/
 bool hasAccNameAttribute(Element&);
+// Like hasAccNameAttribute, but only checks ARIA attributes (aria-label, aria-labelledby,
+// aria-describedby, aria-description), not the HTML title attribute.
+bool hasARIAAccNameAttribute(Element&);
 
 bool isNodeFocused(Node&);
 
