@@ -568,7 +568,7 @@ unsigned FrameTree::depth() const
 
 AtomString FrameTree::uniqueName() const
 {
-    if (!parent())
+    if (m_thisFrame->isMainFrame() || !m_specifiedName.isEmpty())
         return m_specifiedName;
 
     auto frameIndex { 0u };

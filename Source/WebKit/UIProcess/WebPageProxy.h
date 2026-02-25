@@ -3643,6 +3643,8 @@ private:
     void beginSiteHasStorageCheck(const URL&, API::Navigation&, WebFramePolicyListenerProxy&);
     void beginEnhancedSecurityLinkCheck(const URL&, API::Navigation&, WebFramePolicyListenerProxy&);
 
+    Ref<BrowsingContextGroup> browsingContextGroupForNavigation(WebFrameProxy&, API::Navigation&, WebsiteDataStore&, ProcessSwapRequestedByClient);
+
     const UniqueRef<Internals> m_internals;
     Identifier m_identifier;
     WebCore::PageIdentifier m_webPageID;

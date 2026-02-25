@@ -641,7 +641,6 @@ void WebBackForwardList::backForwardAddItemShared(IPC::Connection& connection, R
         return;
 
     if (RefPtr webPageProxy = m_page.get()) {
-
         auto navigatedFrameID = navigatedFrameState->frameID;
         Ref item = WebBackForwardListItem::create(completeFrameStateForNavigation(WTF::move(navigatedFrameState)), webPageProxy->identifier(), navigatedFrameID, protect(webPageProxy->browsingContextGroup()).ptr());
         item->setResourceDirectoryURL(webPageProxy->currentResourceDirectoryURL());

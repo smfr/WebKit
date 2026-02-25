@@ -5097,6 +5097,23 @@ Expected<WebPageProxy::DataStoreUpdateResult, WebCore::ResourceError> WebPagePro
 }
 #endif
 
+Ref<BrowsingContextGroup> WebPageProxy::browsingContextGroupForNavigation(WebFrameProxy& frame, API::Navigation& navigation, WebsiteDataStore& websiteDataStore, ProcessSwapRequestedByClient processSwapRequestedByClient)
+{
+    // Browsing context group can only be changed for main frame navigation.
+    if (!frame.isMainFrame())
+        return m_browsingContextGroup;
+
+    bool usesSameWebsiteDataStore = &websiteDataStore == &this->websiteDataStore();
+    bool mainFrameSiteChanges = !m_mainFrame || Site { m_mainFrame->url() } != Site { navigation.currentRequest().url() };
+    if (RefPtr targetBackForwardItem = navigation.targetItem(); targetBackForwardItem && targetBackForwardItem->browsingContextGroup() && usesSameWebsiteDataStore)
+        return *targetBackForwardItem->browsingContextGroup();
+
+    if (processSwapRequestedByClient == ProcessSwapRequestedByClient::Yes || !usesSameWebsiteDataStore || (navigation.isRequestFromClientOrUserInput() && !navigation.isFromLoadData() && mainFrameSiteChanges))
+        return BrowsingContextGroup::create();
+
+    return m_browsingContextGroup;
+}
+
 void WebPageProxy::receivedNavigationActionPolicyDecision(WebProcessProxy& processInitiatingNavigation, PolicyAction policyAction, API::Navigation& navigation, Ref<API::NavigationAction>&& navigationAction, ProcessSwapRequestedByClient processSwapRequestedByClient, WebFrameProxy& frame, const FrameInfoData& frameInfo, WasNavigationIntercepted wasNavigationIntercepted, std::optional<PolicyDecisionConsoleMessage>&& message, CompletionHandler<void(PolicyDecision&&)>&& completionHandler)
 {
     WEBPAGEPROXY_RELEASE_LOG(Loading, "receivedNavigationActionPolicyDecision: frameID=%" PRIu64 ", isMainFrame=%d, navigationID=%" PRIu64 ", policyAction=%" PUBLIC_LOG_STRING, frame.frameID().toUInt64(), frame.isMainFrame(), navigation.navigationID().toUInt64(), toString(policyAction).characters());
@@ -5199,14 +5216,7 @@ void WebPageProxy::receivedNavigationActionPolicyDecision(WebProcessProxy& proce
     m_isLockdownModeExplicitlySet = (websitePolicies && websitePolicies->isLockdownModeExplicitlySet()) || m_configuration->isLockdownModeExplicitlySet();
     auto lockdownMode = (websitePolicies ? websitePolicies->lockdownModeEnabled() : shouldEnableLockdownMode()) ? WebProcessProxy::LockdownMode::Enabled : WebProcessProxy::LockdownMode::Disabled;
 
-    Ref browsingContextGroup = m_browsingContextGroup;
-    bool usesSameWebsiteDataStore = websiteDataStore.ptr() == &this->websiteDataStore();
-    bool mainFrameSiteChanges = !m_mainFrame || Site { m_mainFrame->url() } != Site { navigation.currentRequest().url() };
-    if (RefPtr targetBackForwardItem = navigation.targetItem(); targetBackForwardItem && targetBackForwardItem->browsingContextGroup() && usesSameWebsiteDataStore)
-        browsingContextGroup = *targetBackForwardItem->browsingContextGroup();
-    else if (processSwapRequestedByClient == ProcessSwapRequestedByClient::Yes || !usesSameWebsiteDataStore || (navigation.isRequestFromClientOrUserInput() && !navigation.isFromLoadData() && mainFrameSiteChanges))
-        browsingContextGroup = BrowsingContextGroup::create();
-
+    Ref browsingContextGroup = browsingContextGroupForNavigation(frame, navigation, websiteDataStore, processSwapRequestedByClient);
     if (frame.isMainFrame() && preferences->enhancedSecurityHeuristicsEnabled())
         internals().enhancedSecurityTracker.trackNavigation(navigation, hasOpenedPage());
 

@@ -1045,3 +1045,93 @@ TEST(WKBackForwardList, NoPageCacheGoBackAfterNavigatingSameSiteIframe)
 {
     runGoBackAfterNavigatingSameSiteIframe(ShouldEnablePageCache::No);
 }
+
+static void runGoBackAfterNavigatingSameSiteIframe2(ShouldEnablePageCache shouldEnablePageCache)
+{
+    TestWebKitAPI::HTTPServer server({
+        { "/main"_s, { "<iframe id='iframe' src='/frame'></iframe>"_s } },
+        { "/frame"_s, { "hi"_s } },
+    }, TestWebKitAPI::HTTPServer::Protocol::HttpsProxy);
+
+    RetainPtr configuration = server.httpsProxyConfiguration();
+    RetainPtr processPoolConfiguration = adoptNS([[_WKProcessPoolConfiguration alloc] init]);
+    processPoolConfiguration.get().pageCacheEnabled = shouldEnablePageCache == ShouldEnablePageCache::Yes;
+    RetainPtr processPool = adoptNS([[WKProcessPool alloc] _initWithConfiguration:processPoolConfiguration.get()]);
+    [configuration setProcessPool:processPool.get()];
+    RetainPtr navigationDelegate = adoptNS([TestNavigationDelegate new]);
+    [navigationDelegate allowAnyTLSCertificate];
+    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:NSMakeRect(0, 0, 800, 600) configuration:configuration.get()]);
+    webView.get().navigationDelegate = navigationDelegate.get();
+    static bool didCommitLoadForAllFrames = false;
+    static unsigned expectedCommittedFrameSize = 2;
+    static Vector<RetainPtr<WKFrameInfo>> committedFrames;
+    navigationDelegate.get().didCommitLoadWithRequestInFrame = makeBlockPtr([&](WKWebView *, NSURLRequest *, WKFrameInfo *frameInfo) {
+        committedFrames.append(frameInfo);
+        if (committedFrames.size() == expectedCommittedFrameSize)
+            didCommitLoadForAllFrames = true;
+    }).get();
+
+    // After initial loading, page has a main frame and a same-site iframe.
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://example.com/main"]]];
+    TestWebKitAPI::Util::run(&didCommitLoadForAllFrames);
+    EXPECT_TRUE([committedFrames[0] isMainFrame]);
+    EXPECT_WK_STREQ([committedFrames[0] request].URL.absoluteString, "https://example.com/main");
+    EXPECT_FALSE([committedFrames[1] isMainFrame]);
+    EXPECT_WK_STREQ([committedFrames[1] request].URL.absoluteString, "https://example.com/frame");
+    committedFrames.clear();
+    didCommitLoadForAllFrames = false;
+
+    // Navigate iframe cross-site.
+    expectedCommittedFrameSize = 1;
+    [webView evaluateJavaScript:@"document.getElementById('iframe').src = 'https://frame.com/frame'" completionHandler:nil];
+    TestWebKitAPI::Util::run(&didCommitLoadForAllFrames);
+    EXPECT_FALSE([committedFrames[0] isMainFrame]);
+    EXPECT_WK_STREQ([committedFrames[0] request].URL.absoluteString, "https://frame.com/frame");
+    committedFrames.clear();
+    didCommitLoadForAllFrames = false;
+
+    // Navigate main frame same-site.
+    expectedCommittedFrameSize = 1;
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://example.com/frame"]]];
+    TestWebKitAPI::Util::run(&didCommitLoadForAllFrames);
+    EXPECT_TRUE([committedFrames[0] isMainFrame]);
+    EXPECT_WK_STREQ([committedFrames[0] request].URL.absoluteString, "https://example.com/frame");
+    committedFrames.clear();
+    didCommitLoadForAllFrames = false;
+
+    EXPECT_EQ(YES, [webView canGoBack]);
+    EXPECT_EQ([webView backForwardList].backList.count, 2U);
+    EXPECT_EQ([webView backForwardList].forwardList.count, 0U);
+
+    // Navigate main frame back.
+    // For page cache case, iframe is not reloaded, so there is only one commit.
+    expectedCommittedFrameSize = shouldEnablePageCache == ShouldEnablePageCache::Yes ? 1 : 2;
+    [webView goBack];
+
+    TestWebKitAPI::Util::run(&didCommitLoadForAllFrames);
+    EXPECT_WK_STREQ([webView URL].absoluteString, @"https://example.com/main");
+    EXPECT_TRUE([committedFrames[0] isMainFrame]);
+    EXPECT_WK_STREQ([committedFrames[0] request].URL.absoluteString, "https://example.com/main");
+    if (expectedCommittedFrameSize == 1) {
+        EXPECT_FALSE([[webView firstChildFrame] isMainFrame]);
+        EXPECT_WK_STREQ([[webView firstChildFrame] request].URL.absoluteString, "https://frame.com/frame");
+    } else {
+        EXPECT_FALSE([committedFrames[1] isMainFrame]);
+        EXPECT_WK_STREQ([committedFrames[1] request].URL.absoluteString, "https://frame.com/frame");
+    }
+}
+
+TEST(WKBackForwardList, PageCacheGoBackAfterNavigatingSameSiteIframe2)
+{
+    // FIXME: Page cache is currently disabled under site isolation; see rdar://161762363.
+    RetainPtr webView = adoptNS([[WKWebView alloc] init]);
+    if (isSiteIsolationEnabled(webView.get()))
+        return;
+
+    runGoBackAfterNavigatingSameSiteIframe2(ShouldEnablePageCache::Yes);
+}
+
+TEST(WKBackForwardList, NoPageCacheGoBackAfterNavigatingSameSiteIframe2)
+{
+    runGoBackAfterNavigatingSameSiteIframe2(ShouldEnablePageCache::No);
+}
