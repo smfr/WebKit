@@ -149,7 +149,7 @@ bool ColorInputType::isKeyboardFocusable(const FocusEventData&) const
 {
     ASSERT(element());
 #if PLATFORM(IOS_FAMILY)
-    return element()->isTextFormControlFocusable();
+    return protect(element())->isTextFormControlFocusable();
 #else
     return false;
 #endif

@@ -170,7 +170,6 @@ editing/markup.cpp
 html/CachedHTMLCollection.h
 html/CachedHTMLCollectionInlines.h
 html/CollectionTraversalInlines.h
-[ iOS ] html/ColorInputType.cpp
 html/FTPDirectoryDocument.cpp
 [ Mac ] html/FormAssociatedCustomElement.cpp
 html/FormAssociatedElement.cpp
@@ -187,7 +186,6 @@ html/LazyLoadFrameObserver.cpp
 html/LazyLoadImageObserver.cpp
 html/MediaElementSession.cpp
 html/ModelDocument.cpp
-[ Mac ] html/RangeInputType.cpp
 html/ValidatedFormListedElement.cpp
 html/ValidationMessage.cpp
 html/canvas/CanvasRenderingContext2D.cpp

@@ -361,10 +361,8 @@ void RangeInputType::setValue(const String& value, bool valueChanged, TextFieldE
     if (!valueChanged)
         return;
 
-    if (eventBehavior == DispatchNoEvent) {
-        ASSERT(element());
-        element()->setTextAsOfLastFormControlChangeEvent(String(value));
-    }
+    if (eventBehavior == DispatchNoEvent)
+        protect(element())->setTextAsOfLastFormControlChangeEvent(String(value));
 
     if (hasCreatedShadowSubtree())
         protect(typedSliderThumbElement())->setPositionFromValue();
