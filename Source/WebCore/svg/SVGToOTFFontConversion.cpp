@@ -245,8 +245,6 @@ private:
         return value * s_outputUnitsPerEm / m_inputUnitsPerEm;
     }
 
-    Ref<const SVGFontElement> protectedFontElement() const { return m_fontElement.get(); }
-
     Vector<GlyphData> m_glyphs;
     HashMap<String, Glyph> m_glyphNameToIndexMap; // SVG 1.1: "It is recommended that glyph names be unique within a font."
     HashMap<String, Vector<Glyph, 1>> m_codepointsToIndicesMap;
@@ -1061,7 +1059,7 @@ void SVGToOTFFontConverter::addKerningPair(Vector<KerningData>& data, SVGKerning
 template<typename T> inline size_t SVGToOTFFontConverter::appendKERNSubtable(std::optional<SVGKerningPair> (T::*buildKerningPair)() const, uint16_t coverage)
 {
     Vector<KerningData> kerningData;
-    for (Ref element : childrenOfType<T>(protectedFontElement())) {
+    for (Ref element : childrenOfType<T>(protect(m_fontElement))) {
         if (auto kerningPair = (element.get().*buildKerningPair)())
             addKerningPair(kerningData, WTF::move(*kerningPair));
     }
@@ -1414,7 +1412,7 @@ SVGToOTFFontConverter::SVGToOTFFontConverter(const SVGFontElement& fontElement)
         boundingBox = FloatRect(0, 0, s_outputUnitsPerEm, s_outputUnitsPerEm);
     }
 
-    for (Ref glyphElement : childrenOfType<SVGGlyphElement>(protectedFontElement())) {
+    for (Ref glyphElement : childrenOfType<SVGGlyphElement>(protect(m_fontElement))) {
         auto& unicodeAttribute = glyphElement->attributeWithoutSynchronization(SVGNames::unicodeAttr);
         if (!unicodeAttribute.isEmpty()) // If we can never actually trigger this glyph, ignore it completely
             processGlyphElement(glyphElement.get(), glyphElement.ptr(), defaultHorizontalAdvance, defaultVerticalAdvance, unicodeAttribute, boundingBox);

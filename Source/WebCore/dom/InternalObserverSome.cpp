@@ -67,14 +67,14 @@ private:
             // abort signal and promise rejection.
             auto scope = DECLARE_TOP_EXCEPTION_SCOPE(vm);
 
-            auto result = protectedCallback()->invokeRethrowingException(value, m_idx++);
+            auto result = protect(m_callback)->invokeRethrowingException(value, m_idx++);
 
             JSC::Exception* exception = scope.exception();
             if (exception) [[unlikely]] {
                 scope.clearException();
                 auto value = exception->value();
-                protectedPromise()->reject<IDLAny>(value);
-                protectedSignal()->signalAbort(value);
+                protect(m_promise)->reject<IDLAny>(value);
+                protect(m_signal)->signalAbort(value);
                 return;
             }
 
@@ -83,30 +83,26 @@ private:
         }
 
         if (hasPassed) {
-            protectedPromise()->resolve<IDLBoolean>(true);
-            protectedSignal()->signalAbort(JSC::jsUndefined());
+            protect(m_promise)->resolve<IDLBoolean>(true);
+            protect(m_signal)->signalAbort(JSC::jsUndefined());
         }
     }
 
     void error(JSC::JSValue value) final
     {
-        protectedPromise()->reject<IDLAny>(value);
+        protect(m_promise)->reject<IDLAny>(value);
     }
 
     void complete() final
     {
         InternalObserver::complete();
-        protectedPromise()->resolve<IDLBoolean>(false);
+        protect(m_promise)->resolve<IDLBoolean>(false);
     }
 
     void visitAdditionalChildren(JSC::AbstractSlotVisitor& visitor) const final
     {
         m_callback->visitJSFunction(visitor);
     }
-
-    Ref<DeferredPromise> NODELETE protectedPromise() const { return m_promise; }
-    Ref<PredicateCallback> NODELETE protectedCallback() const { return m_callback; }
-    Ref<AbortSignal> NODELETE protectedSignal() const { return m_signal; }
 
     InternalObserverSome(ScriptExecutionContext& context, Ref<PredicateCallback>&& callback, Ref<AbortSignal>&& signal, Ref<DeferredPromise>&& promise)
         : InternalObserver(context)

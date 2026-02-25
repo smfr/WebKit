@@ -151,7 +151,7 @@ void XMLDocumentParser::createLeafTextNode()
     ASSERT(!m_leafTextNode);
     m_leafTextNode = Text::create(protect(m_currentNode->document()), String { emptyString() });
     if (RefPtr currentNode = m_currentNode.get())
-        currentNode->parserAppendChild(*protectedLeafTextNode());
+        currentNode->parserAppendChild(*protect(m_leafTextNode));
 }
 
 bool XMLDocumentParser::updateLeafTextNode()
@@ -163,10 +163,10 @@ bool XMLDocumentParser::updateLeafTextNode()
         return true;
 
     if (isXHTMLDocument())
-        protectedLeafTextNode()->parserAppendData(String::fromUTF8(m_bufferedText.span()));
+        protect(m_leafTextNode)->parserAppendData(String::fromUTF8(m_bufferedText.span()));
     else {
         // This operation might fire mutation event, see below.
-        protectedLeafTextNode()->appendData(String::fromUTF8(m_bufferedText.span()));
+        protect(m_leafTextNode)->appendData(String::fromUTF8(m_bufferedText.span()));
     }
     m_bufferedText = { };
 

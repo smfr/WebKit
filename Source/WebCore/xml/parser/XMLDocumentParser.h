@@ -154,8 +154,6 @@ private:
     void doWrite(const String&);
     void doEnd();
 
-    RefPtr<Text> protectedLeafTextNode() const { return m_leafTextNode; }
-
     xmlParserCtxtPtr context() const { return m_context ? m_context->context() : nullptr; };
 
     IsInFrameView m_isInFrameView { IsInFrameView::No };

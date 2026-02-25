@@ -2536,7 +2536,7 @@ void Document::setTitle(String&& title)
             m_titleElement = titleElement.copyRef();
             headElement->appendChild(titleElement);
         } else
-            oldTitle = protectedTitleElement()->textContent();
+            oldTitle = protect(m_titleElement)->textContent();
 
         // appendChild above may have run scripts which removed m_titleElement.
         if (!m_titleElement)
@@ -2587,18 +2587,13 @@ template<typename TitleElement> Element* selectNewTitleElement(Document& documen
     return newTitleElement.unsafeGet();
 }
 
-inline RefPtr<Element> Document::protectedTitleElement() const
-{
-    return m_titleElement;
-}
-
 void Document::updateTitleElement(Element& changingTitleElement)
 {
     // Most documents use HTML title rules.
     // Documents with SVG document elements use SVG title rules.
     auto selectTitleElement = is<SVGSVGElement>(documentElement())
         ? selectNewTitleElement<SVGTitleElement> : selectNewTitleElement<HTMLTitleElement>;
-    RefPtr newTitleElement = selectTitleElement(*this, protectedTitleElement().get(), changingTitleElement);
+    RefPtr newTitleElement = selectTitleElement(*this, protect(m_titleElement).get(), changingTitleElement);
     if (m_titleElement == newTitleElement)
         return;
     m_titleElement = WTF::move(newTitleElement);

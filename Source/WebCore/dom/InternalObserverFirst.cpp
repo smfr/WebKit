@@ -52,26 +52,24 @@ public:
 private:
     void next(JSC::JSValue value) final
     {
-        protectedPromise()->resolve<IDLAny>(value);
+        protect(m_promise)->resolve<IDLAny>(value);
         Ref { m_signal }->signalAbort(JSC::jsUndefined());
     }
 
     void error(JSC::JSValue value) final
     {
-        protectedPromise()->reject<IDLAny>(value);
+        protect(m_promise)->reject<IDLAny>(value);
     }
 
     void complete() final
     {
         InternalObserver::complete();
-        protectedPromise()->reject(Exception { ExceptionCode::RangeError, "No values in Observable"_s });
+        protect(m_promise)->reject(Exception { ExceptionCode::RangeError, "No values in Observable"_s });
     }
 
     void visitAdditionalChildren(JSC::AbstractSlotVisitor&) const final
     {
     }
-
-    Ref<DeferredPromise> NODELETE protectedPromise() const { return m_promise; }
 
     InternalObserverFirst(ScriptExecutionContext& context, Ref<AbortSignal>&& signal, Ref<DeferredPromise>&& promise)
         : InternalObserver(context)

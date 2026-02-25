@@ -75,8 +75,6 @@ protected:
     SVGTests(SVGElement* contextElement);
 
 private:
-    Ref<SVGElement> protectedContextElement() const;
-
     WeakRef<SVGElement, WeakPtrImplWithEventTargetData> m_contextElement;
 };
 

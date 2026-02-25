@@ -2101,7 +2101,6 @@ private:
     friend class UnloadCountIncrementer;
 
     void updateTitleElement(Element& changingTitleElement);
-    RefPtr<Element> NODELETE protectedTitleElement() const;
     void willDetachPage() final;
     void frameDestroyed() final;
 

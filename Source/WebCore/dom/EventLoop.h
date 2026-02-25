@@ -204,7 +204,7 @@ public:
     // https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-microtask
     WEBCORE_EXPORT void queueMicrotask(EventLoop::TaskFunction&&);
     WEBCORE_EXPORT void queueMicrotask(JSC::QueuedTask&&);
-    MicrotaskQueue& microtaskQueue() { return protectedEventLoop()->microtaskQueue(); }
+    MicrotaskQueue& microtaskQueue() { return protect(m_eventLoop)->microtaskQueue(); }
 
     // https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint
     void performMicrotaskCheckpoint();
@@ -235,7 +235,6 @@ public:
 private:
     enum class State : uint8_t { Running, Suspended, ReadyToStop, Stopped };
 
-    RefPtr<EventLoop> NODELETE protectedEventLoop() const;
 
     WeakPtr<EventLoop> m_eventLoop;
     WeakHashSet<EventLoopTimer> m_timers;

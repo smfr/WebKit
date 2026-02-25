@@ -95,15 +95,10 @@ void SVGDocumentExtensions::pauseAnimations()
     m_areAnimationsPaused = true;
 }
 
-Ref<Document> SVGDocumentExtensions::protectedDocument() const
-{
-    return m_document.get();
-}
-
 void SVGDocumentExtensions::unpauseAnimations()
 {
     // If animations are paused at the document level, don't allow `this` to be unpaused.
-    if (animationsPausedForDocument(protectedDocument()))
+    if (animationsPausedForDocument(protect(m_document)))
         return;
 
     for (Ref container : m_timeContainers)
@@ -129,12 +124,12 @@ static void reportMessage(Document& document, MessageLevel level, const String& 
 
 void SVGDocumentExtensions::reportWarning(const String& message)
 {
-    reportMessage(protectedDocument(), MessageLevel::Warning, makeString("Warning: "_s, message));
+    reportMessage(protect(m_document), MessageLevel::Warning, makeString("Warning: "_s, message));
 }
 
 void SVGDocumentExtensions::reportError(const String& message)
 {
-    reportMessage(protectedDocument(), MessageLevel::Error, makeString("Error: "_s, message));
+    reportMessage(protect(m_document), MessageLevel::Error, makeString("Error: "_s, message));
 }
 
 void SVGDocumentExtensions::addElementToRebuild(SVGElement& element)

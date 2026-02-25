@@ -296,10 +296,6 @@ void DocumentStorageAccess::deref() const
     m_document->deref();
 }
 
-Ref<Document> DocumentStorageAccess::protectedDocument() const
-{
-    return m_document.get();
-}
 
 void DocumentStorageAccess::requestStorageAccessForDocumentQuirk(Document& document, CompletionHandler<void(StorageAccessWasGranted)>&& completionHandler)
 {
@@ -318,7 +314,7 @@ void DocumentStorageAccess::requestStorageAccessForDocumentQuirk(CompletionHandl
         *quickCheckResult == StorageAccessQuickResult::Grant ? completionHandler(StorageAccessWasGranted::Yes) : completionHandler(StorageAccessWasGranted::No);
         return;
     }
-    requestStorageAccessQuirk(RegistrableDomain::uncheckedCreateFromHost(protect(protectedDocument()->securityOrigin())->host()), WTF::move(completionHandler));
+    requestStorageAccessQuirk(RegistrableDomain::uncheckedCreateFromHost(protect(protect(m_document)->securityOrigin())->host()), WTF::move(completionHandler));
 }
 
 void DocumentStorageAccess::requestStorageAccessForNonDocumentQuirk(Document& hostingDocument, RegistrableDomain&& requestingDomain, CompletionHandler<void(StorageAccessWasGranted)>&& completionHandler)
@@ -358,7 +354,7 @@ void DocumentStorageAccess::requestStorageAccessQuirk(RegistrableDomain&& reques
         bool shouldPreserveUserGesture = result.wasGranted == StorageAccessWasGranted::Yes || result.promptWasShown == StorageAccessPromptWasShown::No;
 
         if (shouldPreserveUserGesture) {
-            protect(protectedThis->protectedDocument()->eventLoop())->queueMicrotask([weakThis] {
+            protect(protect(protectedThis->m_document)->eventLoop())->queueMicrotask([weakThis] {
                 if (RefPtr protectedThis = weakThis.get())
                     protectedThis->enableTemporaryTimeUserGesture();
             });
@@ -376,7 +372,7 @@ void DocumentStorageAccess::requestStorageAccessQuirk(RegistrableDomain&& reques
         }
 
         if (shouldPreserveUserGesture) {
-            protect(protectedThis->protectedDocument()->eventLoop())->queueMicrotask([weakThis] {
+            protect(protect(protectedThis->m_document)->eventLoop())->queueMicrotask([weakThis] {
                 if (RefPtr protectedThis = weakThis.get())
                     protectedThis->consumeTemporaryTimeUserGesture();
             });
@@ -386,7 +382,7 @@ void DocumentStorageAccess::requestStorageAccessQuirk(RegistrableDomain&& reques
 
 void DocumentStorageAccess::enableTemporaryTimeUserGesture()
 {
-    m_temporaryUserGesture = makeUnique<UserGestureIndicator>(IsProcessingUserGesture::Yes, protectedDocument().ptr());
+    m_temporaryUserGesture = makeUnique<UserGestureIndicator>(IsProcessingUserGesture::Yes, protect(m_document).ptr());
 }
 
 void DocumentStorageAccess::consumeTemporaryTimeUserGesture()

@@ -193,10 +193,6 @@ static void updateMainFrameLayoutIfNeeded(Document& document)
         mainFrameView->updateLayoutAndStyleIfNeededRecursive();
 }
 
-Ref<Document> DocumentMarkerController::protectedDocument() const
-{
-    return m_document.get();
-}
 
 void DocumentMarkerController::updateRectsForInvalidatedMarkersOfType(DocumentMarkerType type)
 {
@@ -210,7 +206,7 @@ void DocumentMarkerController::updateRectsForInvalidatedMarkersOfType(DocumentMa
             if (marker.type() != type || marker.isValid())
                 continue;
             if (!updatedLayout) {
-                updateMainFrameLayoutIfNeeded(protectedDocument());
+                updateMainFrameLayoutIfNeeded(protect(m_document));
                 updatedLayout = true;
             }
             updateRenderedRectsForMarker(marker, nodeMarkers.key);

@@ -58,7 +58,6 @@ public:
 
 private:
     void fontLoadingTimerFired();
-    Ref<Document> protectedDocument() const { return m_document.get(); }
 
     WeakRef<Document, WeakPtrImplWithEventTargetData> m_document;
     Timer m_fontLoadingTimer;

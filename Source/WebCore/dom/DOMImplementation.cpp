@@ -71,11 +71,6 @@ using namespace HTMLNames;
 
 WTF_MAKE_TZONE_ALLOCATED_IMPL(DOMImplementation);
 
-Ref<Document> DOMImplementation::protectedDocument()
-{
-    return m_document.get();
-}
-
 DOMImplementation::DOMImplementation(Document& document)
     : m_document(document)
 {
@@ -86,7 +81,7 @@ ExceptionOr<Ref<DocumentType>> DOMImplementation::createDocumentType(const AtomS
     auto parseResult = Document::parseQualifiedName(qualifiedName);
     if (parseResult.hasException())
         return parseResult.releaseException();
-    return DocumentType::create(protectedDocument(), qualifiedName, publicId, systemId);
+    return DocumentType::create(protect(document()), qualifiedName, publicId, systemId);
 }
 
 static inline Ref<XMLDocument> createXMLDocument(const String& namespaceURI, const Settings& settings)
