@@ -910,7 +910,7 @@ void WebLocalFrameLoaderClient::dispatchDidLayout()
     }
 }
 
-LocalFrame* WebLocalFrameLoaderClient::dispatchCreatePage(const NavigationAction& navigationAction, NewFrameOpenerPolicy newFrameOpenerPolicy)
+LocalFrame* WebLocalFrameLoaderClient::dispatchCreatePage(const NavigationAction& navigationAction, NewFrameOpenerPolicy newFrameOpenerPolicy, const String& openedMainFrameName)
 {
     RefPtr webPage = m_frame->page();
     if (!webPage)
@@ -919,7 +919,8 @@ LocalFrame* WebLocalFrameLoaderClient::dispatchCreatePage(const NavigationAction
     // Just call through to the chrome client.
     WindowFeatures windowFeatures;
     windowFeatures.noopener = newFrameOpenerPolicy == NewFrameOpenerPolicy::Suppress;
-    RefPtr newPage = webPage->corePage()->chrome().createWindow(protect(m_localFrame), { }, windowFeatures, navigationAction);
+
+    RefPtr newPage = webPage->corePage()->chrome().createWindow(protect(m_localFrame), openedMainFrameName, windowFeatures, navigationAction);
     if (!newPage)
         return nullptr;
     

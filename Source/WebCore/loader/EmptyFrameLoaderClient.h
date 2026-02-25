@@ -97,7 +97,7 @@ private:
     void NODELETE dispatchDidReachLayoutMilestone(OptionSet<LayoutMilestone>) final;
     void NODELETE dispatchDidReachVisuallyNonEmptyState() final;
 
-    LocalFrame* NODELETE dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy) final;
+    LocalFrame* NODELETE dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy, const String&) final;
     void NODELETE dispatchShow() final;
 
     void NODELETE dispatchDecidePolicyForResponse(const ResourceResponse&, const ResourceRequest&, const String&, FramePolicyFunction&&) final;

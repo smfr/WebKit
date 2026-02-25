@@ -890,7 +890,7 @@ void EmptyFrameLoaderClient::dispatchDidReachVisuallyNonEmptyState()
 {
 }
 
-LocalFrame* EmptyFrameLoaderClient::dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy)
+LocalFrame* EmptyFrameLoaderClient::dispatchCreatePage(const NavigationAction&, NewFrameOpenerPolicy, const String&)
 {
     return nullptr;
 }

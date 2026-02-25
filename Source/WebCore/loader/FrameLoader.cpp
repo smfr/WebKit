@@ -4207,16 +4207,15 @@ void FrameLoader::continueLoadAfterNewWindowPolicy(ResourceRequest&& request,
     if (request.url().protocolIsJavaScript() && !protect(protect(frame->document())->contentSecurityPolicy())->allowJavaScriptURLs(frame->document()->url().string(), { }, request.url().string(), nullptr))
         return;
 
-    RefPtr mainFrame = m_client->dispatchCreatePage(action, openerPolicy);
+    auto name = isBlankTargetFrameName(frameName) ? emptyAtom() : frameName;
+    RefPtr mainFrame = m_client->dispatchCreatePage(action, openerPolicy, name);
     if (!mainFrame)
         return;
 
     Ref mainFrameLoader = mainFrame->loader();
 
-    if (!isBlankTargetFrameName(frameName)) {
+    if (!isBlankTargetFrameName(frameName))
         mainFrame->tree().setSpecifiedName(frameName);
-        mainFrameLoader->client().frameNameChanged(frameName);
-    }
 
     protect(mainFrame->page())->setOpenedByDOM();
     mainFrameLoader->m_client->dispatchShow();
