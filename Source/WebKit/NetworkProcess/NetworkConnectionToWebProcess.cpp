@@ -157,6 +157,8 @@ NetworkConnectionToWebProcess::NetworkConnectionToWebProcess(NetworkProcess& net
 {
     RELEASE_ASSERT(RunLoop::isMain());
 
+    RELEASE_LOG(Process, "%p - NetworkConnectionToWebProcess::NetworkConnectionToWebProcess: Create connection for web process core identifier %" PRIu64, this, webProcessIdentifier.toUInt64());
+
     // Use this flag to force synchronous messages to be treated as asynchronous messages in the WebProcess.
     // Otherwise, the WebProcess would process incoming synchronous IPC while waiting for a synchronous IPC
     // reply from the Network process, which would be unsafe.
@@ -173,7 +175,12 @@ NetworkConnectionToWebProcess::NetworkConnectionToWebProcess(NetworkProcess& net
 #endif
 
     establishSWServerConnection();
+
+    RELEASE_LOG(Process, "%p - NetworkConnectionToWebProcess::NetworkConnectionToWebProcess: Connection for web process core identifier %" PRIu64 " established service worker server connection", this, webProcessIdentifier.toUInt64());
+
     establishSharedWorkerServerConnection();
+
+    RELEASE_LOG(Process, "%p - NetworkConnectionToWebProcess::NetworkConnectionToWebProcess: Connection for web process core identifier %" PRIu64 " established shared worker connection", this, webProcessIdentifier.toUInt64());
 
 #if !PLATFORM(WATCHOS)
     if (!m_sharedPreferencesForWebProcess.webSocketEnabled)

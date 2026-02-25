@@ -406,7 +406,12 @@ void NetworkProcess::createNetworkConnectionToWebProcess(ProcessIdentifier ident
     m_webProcessConnections.add(identifier, WTF::move(newConnection));
 
     CheckedPtr storage = storageSession(sessionID);
+
+    RELEASE_LOG(Process, "%p - NetworkProcess::createNetworkConnectionToWebProcess: Finished creating connection for web process core identifier %" PRIu64 ", notifying the UI process", this, identifier.toUInt64());
+
     completionHandler(WTF::move(connectionIdentifiers->client), storage ? storage->cookieAcceptPolicy() : HTTPCookieAcceptPolicy::Never);
+
+    RELEASE_LOG(Process, "%p - NetworkProcess::createNetworkConnectionToWebProcess: Handed off connect for web process core identifier %" PRIu64 " to the UI process", this, identifier.toUInt64());
 
     connection->setOnLineState(NetworkStateNotifier::singleton().onLine());
 
