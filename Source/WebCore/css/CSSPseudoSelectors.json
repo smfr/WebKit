@@ -517,7 +517,7 @@
             "supports-single-colon-for-compatibility": true
         },
         "checkmark": {
-            "settings-flag": "cssAppearanceBaseEnabled"
+            "settings-flag": "htmlEnhancedSelectEnabled"
         },
         "cue": {
             "argument": "optional",
