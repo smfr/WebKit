@@ -526,8 +526,17 @@ void RenderReplaced::computeIntrinsicSizesConstrainedByTransferredMinMaxSizes(Re
         auto [minLogicalHeight, maxLogicalHeight] = computeMinMaxLogicalHeightFromAspectRatio();
         removeBorderAndPaddingFromMinMaxSizes(minLogicalHeight, maxLogicalHeight, borderAndPaddingLogicalHeight());
 
-        intrinsicSize.setWidth(std::clamp(LayoutUnit { intrinsicSize.width() }, minLogicalWidth, maxLogicalWidth));
-        intrinsicSize.setHeight(std::clamp(LayoutUnit { intrinsicSize.height() }, minLogicalHeight, maxLogicalHeight));
+        // Only apply min-constraints upward when the dimension is actually intrinsic (non-zero).
+        // Max-constraints can always be applied since they only shrink values.
+        LayoutUnit width { intrinsicSize.width() };
+        if (width > 0)
+            width = std::max(width, minLogicalWidth);
+        intrinsicSize.setWidth(std::min(width, maxLogicalWidth));
+
+        LayoutUnit height { intrinsicSize.height() };
+        if (height > 0)
+            height = std::max(height, minLogicalHeight);
+        intrinsicSize.setHeight(std::min(height, maxLogicalHeight));
     }
 }
 
