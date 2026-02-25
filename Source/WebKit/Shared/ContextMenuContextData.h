@@ -44,6 +44,8 @@ class Encoder;
 
 namespace WebKit {
 
+enum class WebMouseEventInputSource : uint8_t;
+
 class ContextMenuContextData {
 public:
     using Type = WebCore::ContextMenuContext::Type;
@@ -76,6 +78,7 @@ public:
 #if ENABLE(MEDIA_CONTROLS_CONTEXT_MENUS)
         , std::optional<WebCore::HTMLMediaElementIdentifier> mediaElementIdentifier
 #endif
+        , std::optional<WebMouseEventInputSource> inputSource
     );
 
     Type type() const { return m_type; }
@@ -143,6 +146,8 @@ public:
     std::optional<WebCore::HTMLMediaElementIdentifier> mediaElementIdentifier() const { return m_mediaElementIdentifier; }
 #endif
 
+    std::optional<WebMouseEventInputSource> inputSource() const { return m_inputSource; }
+
 private:
     Type m_type;
 
@@ -181,6 +186,8 @@ private:
 #if ENABLE(MEDIA_CONTROLS_CONTEXT_MENUS)
     Markable<WebCore::HTMLMediaElementIdentifier> m_mediaElementIdentifier;
 #endif
+
+    std::optional<WebMouseEventInputSource> m_inputSource;
 };
 
 } // namespace WebKit

@@ -92,7 +92,8 @@ Ref<MouseEvent> MouseEvent::create(
         event.force(),
         event.syntheticClickType(),
         coalescedEvents,
-        predictedEvents
+        predictedEvents,
+        event.inputSource()
     );
 }
 
@@ -116,6 +117,7 @@ Ref<MouseEvent> MouseEvent::create(
     SyntheticClickType syntheticClickType,
     const Vector<Ref<MouseEvent>>& coalescedEvents,
     const Vector<Ref<MouseEvent>>& predictedEvents,
+    const std::optional<MouseEventInputSource>& inputSource,
     IsSimulated isSimulated,
     IsTrusted isTrusted
 )
@@ -142,6 +144,7 @@ Ref<MouseEvent> MouseEvent::create(
             syntheticClickType,
             coalescedEvents,
             predictedEvents,
+            inputSource,
             isSimulated,
             isTrusted
         )
@@ -230,6 +233,7 @@ MouseEvent::MouseEvent(
     SyntheticClickType syntheticClickType,
     const Vector<Ref<MouseEvent>>& coalescedEvents,
     const Vector<Ref<MouseEvent>>& predictedEvents,
+    const std::optional<MouseEventInputSource>& inputSource,
     IsSimulated isSimulated,
     IsTrusted isTrusted
 )
@@ -258,6 +262,7 @@ MouseEvent::MouseEvent(
     , m_force(force)
     , m_coalescedEvents(coalescedEvents)
     , m_predictedEvents(predictedEvents)
+    , m_inputSource(inputSource)
 {
 }
 

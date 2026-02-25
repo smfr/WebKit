@@ -228,6 +228,7 @@ PointerEvent::PointerEvent(
         mouseEvent.syntheticClickType(),
         { },
         { },
+        mouseEvent.inputSource(),
         mouseEvent.isSimulated() ? IsSimulated::Yes : IsSimulated::No,
         mouseEvent.isTrusted() ? IsTrusted::Yes : IsTrusted::No
     )

@@ -484,6 +484,7 @@ static const float PAGE_HEIGHT_INSET = 4.0f * 2.0f;
         SyntheticClickType::NoTap,
         { },
         { },
+        std::nullopt,
         MouseEvent::IsSimulated::Yes
     );
 

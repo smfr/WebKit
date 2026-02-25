@@ -78,6 +78,7 @@ private:
             SyntheticClickType::NoTap,
             { },
             { },
+            std::nullopt,
             IsSimulated::Yes,
             source == SimulatedClickSource::UserAgent ? IsTrusted::Yes : IsTrusted::No
         )

@@ -142,6 +142,7 @@ DragEvent::DragEvent(
         syntheticClickType,
         { },
         { },
+        std::nullopt,
         isSimulated,
         isTrusted
     )

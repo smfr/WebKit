@@ -981,6 +981,7 @@ static BOOL _PDFSelectionsAreEqual(PDFSelection *selectionA, PDFSelection *selec
             WebCore::SyntheticClickType::NoTap,
             { },
             { },
+            std::nullopt,
             WebCore::MouseEvent::IsSimulated::Yes
         );
     }

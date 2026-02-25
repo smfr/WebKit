@@ -72,6 +72,7 @@ Ref<MouseEvent> MouseEvent::create(const PlatformTouchEvent& event, unsigned ind
             SyntheticClickType::NoTap,
             { },
             { },
+            std::nullopt,
             IsSimulated::No,
             IsTrusted::Yes
         )

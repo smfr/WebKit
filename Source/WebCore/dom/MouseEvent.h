@@ -28,6 +28,7 @@
 #include <WebCore/MouseEventInit.h>
 #include <WebCore/MouseEventTypes.h>
 #include <WebCore/MouseRelatedEvent.h>
+#include <WebCore/PlatformMouseEvent.h>
 
 #include <wtf/Platform.h>
 #if ENABLE(TOUCH_EVENTS) && PLATFORM(IOS_FAMILY)
@@ -46,7 +47,6 @@ class JSValue;
 namespace WebCore {
 
 class Node;
-class PlatformMouseEvent;
 
 enum class SyntheticClickType : uint8_t;
 
@@ -76,6 +76,7 @@ public:
         SyntheticClickType,
         const Vector<Ref<MouseEvent>>& coalescedEvents,
         const Vector<Ref<MouseEvent>>& predictedEvents,
+        const std::optional<MouseEventInputSource>& inputSource = { },
         IsSimulated = IsSimulated::No,
         IsTrusted = IsTrusted::Yes
     );
@@ -137,6 +138,8 @@ public:
         EventTarget* relatedTarget
     );
 
+    const std::optional<MouseEventInputSource>& inputSource() const { return m_inputSource; }
+
     MouseButton button() const;
     int16_t buttonAsShort() const { return m_button; }
     unsigned short buttons() const { return m_buttons; }
@@ -179,6 +182,7 @@ protected:
         SyntheticClickType,
         const Vector<Ref<MouseEvent>>& coalescedEvents,
         const Vector<Ref<MouseEvent>>& predictedEvents,
+        const std::optional<MouseEventInputSource>& inputSource,
         IsSimulated,
         IsTrusted
     );
@@ -220,6 +224,7 @@ private:
     double m_force { 0 };
     Vector<Ref<MouseEvent>> m_coalescedEvents;
     Vector<Ref<MouseEvent>> m_predictedEvents;
+    std::optional<MouseEventInputSource> m_inputSource;
 };
 
 } // namespace WebCore

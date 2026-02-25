@@ -106,6 +106,7 @@ PointerEvent::PointerEvent(
         SyntheticClickType::NoTap,
         { },
         { },
+        std::nullopt,
         IsSimulated::No,
         IsTrusted::Yes
     )

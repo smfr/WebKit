@@ -86,6 +86,7 @@ inline WheelEvent::WheelEvent(const PlatformWheelEvent& event, RefPtr<WindowProx
         SyntheticClickType::NoTap,
         { },
         { },
+        std::nullopt,
         IsSimulated::No,
         IsTrusted::Yes
     )
