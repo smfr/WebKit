@@ -174,6 +174,11 @@ void FontCascade::update(RefPtr<FontSelector>&& fontSelector) const
 
 TextShapingResult FontCascade::layoutText(CodePath codePathToUse, const TextRun& run, unsigned from, unsigned to, ForTextEmphasis forTextEmphasis) const
 {
+    if (RefPtr fonts = this->fonts()) {
+        if (auto* cached = fonts->getOrCreateCachedShapedText(run, *this, from, to, forTextEmphasis))
+            return *cached;
+    }
+
     if (shouldUseComplexTextController(codePathToUse))
         return layoutComplexText(run, from, to, forTextEmphasis);
 

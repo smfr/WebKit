@@ -2881,7 +2881,7 @@ void CanvasRenderingContext2DBase::drawTextUnchecked(const TextRun& textRun, dou
     if (canUseCachedShapedText(textRun)) {
         RefPtr fonts = fontCascade.fonts();
         ASSERT(fonts);
-        cachedShapedText = fonts->getOrCreateCachedShapedText(textRun, fontCascade);
+        cachedShapedText = fonts->getOrCreateCachedShapedText(textRun, fontCascade, 0, std::nullopt, ForTextEmphasis::No);
     }
 
     float fontWidth = cachedShapedText ? cachedShapedText->width : fontCascade.width(textRun);

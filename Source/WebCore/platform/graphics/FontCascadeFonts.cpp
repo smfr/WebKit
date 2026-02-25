@@ -570,8 +570,24 @@ void FontCascadeFonts::pruneSystemFallbacks()
     m_systemFallbackFontSet.clear();
 }
 
-const TextShapingResult* FontCascadeFonts::getOrCreateCachedShapedText(const TextRun& run, const FontCascade& fontCascade)
+const TextShapingResult* FontCascadeFonts::getOrCreateCachedShapedText(const TextRun& run, const FontCascade& fontCascade, unsigned from, std::optional<unsigned> to, ForTextEmphasis forTextEmphasis)
 {
+    auto isCacheable = [&] {
+        unsigned destination = to.value_or(run.length());
+        if (from || destination != run.length() || forTextEmphasis == ForTextEmphasis::Yes)
+            return false;
+        // These properties are not keyed in the cache. We could add it directly to TextMeasurementCache but this is not relevant for width
+        if (run.rtl() || run.directionalOverride())
+            return false;
+        // Expansion distributes extra space across glyphs in the presence of expansion
+        if (run.expansion())
+            return false;
+        return true;
+    };
+
+    if (!isCacheable())
+        return nullptr;
+
     // FIXME: TextMeasurementCache callers use the pattern of "adding" an empty entry as a way to perform a search with the same constraints that ::add enforces (no letter-spacing, no word-spacing, etc). We should properly encapsulate these requirements in both the ::add method and a dedicated ::find method.
     CachedTextShapingResult* cacheEntry = m_shapedTextCache.add(run, nullptr, TextShapingContext { fontCascade });
 
@@ -582,7 +598,11 @@ const TextShapingResult* FontCascadeFonts::getOrCreateCachedShapedText(const Tex
         return cacheEntry->get();
 
     auto codePath = fontCascade.codePath(run);
-    auto result = fontCascade.layoutText(codePath, run, 0, run.length(), FontCascade::ForTextEmphasis::No);
+    TextShapingResult result;
+    if (fontCascade.shouldUseComplexTextController(codePath))
+        result = fontCascade.layoutComplexText(run, 0, run.length(), ForTextEmphasis::No);
+    else
+        result = fontCascade.layoutSimpleText(run, 0, run.length(), ForTextEmphasis::No);
     result.glyphBuffer.flatten();
 
     *cacheEntry = WTF::makeUnique<TextShapingResult>(WTF::move(result));

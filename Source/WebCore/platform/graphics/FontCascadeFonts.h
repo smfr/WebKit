@@ -47,6 +47,8 @@ class TextStream;
 
 namespace WebCore {
 
+enum class ForTextEmphasis : bool;
+
 class FontPlatformData;
 class FontSelector;
 class GraphicsContext;
@@ -138,7 +140,7 @@ public:
     ShapedTextCache& shapedTextCache() { return m_shapedTextCache; }
     const ShapedTextCache& shapedTextCache() const { return m_shapedTextCache; }
 
-    const TextShapingResult* getOrCreateCachedShapedText(const TextRun&, const FontCascade&);
+    const TextShapingResult* getOrCreateCachedShapedText(const TextRun&, const FontCascade&, unsigned from, std::optional<unsigned> to, ForTextEmphasis);
 
     const Font& primaryFont(const FontCascadeDescription&, FontSelector*);
     WEBCORE_EXPORT const FontRanges& realizeFallbackRangesAt(const FontCascadeDescription&, FontSelector*, unsigned fallbackIndex);

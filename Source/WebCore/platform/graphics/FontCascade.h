@@ -88,6 +88,8 @@ public:
     GlyphBuffer glyphBuffer;
 };
 
+enum class ForTextEmphasis : bool { No, Yes };
+
 class FontCascade final : public CanMakeWeakPtr<FontCascade>, public CanMakeCheckedPtr<FontCascade, WTF::DefaultedOperatorEqual::No, WTF::CheckedPtrDeleteCheckException::Yes> {
     WTF_MAKE_TZONE_ALLOCATED(FontCascade);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(FontCascade);
@@ -114,7 +116,6 @@ public:
     unsigned fontSelectorVersion() const;
 
     enum class CustomFontNotReadyAction : bool { DoNotPaintIfFontNotReady, UseFallbackIfFontNotReady };
-    enum class ForTextEmphasis : bool { No, Yes };
     WEBCORE_EXPORT FloatSize drawText(GraphicsContext&, const TextRun&, const FloatPoint&, unsigned from = 0, std::optional<unsigned> to = std::nullopt, CustomFontNotReadyAction = CustomFontNotReadyAction::DoNotPaintIfFontNotReady) const;
     static void drawGlyphs(GraphicsContext&, const Font&, std::span<const GlyphBufferGlyph>, std::span<const GlyphBufferAdvance>, const FloatPoint&, FontSmoothingMode);
     void drawEmphasisMarks(GraphicsContext&, const TextRun&, const AtomString& mark, const FloatPoint&, unsigned from = 0, std::optional<unsigned> to = std::nullopt) const;
@@ -242,6 +243,7 @@ private:
 
     friend struct WidthIterator;
     friend class ComplexTextController;
+    friend class FontCascadeFonts;
 
 public:
 #if ENABLE(TEXT_AUTOSIZING)
