@@ -1195,6 +1195,7 @@ select option:not(:checked)::checkmark {
 }
 
 select optgroup {
+    display: block;
     font-weight: bolder;
 }
 

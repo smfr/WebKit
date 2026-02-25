@@ -6,7 +6,7 @@ FAIL UA styles of base appearance select::picker-icon. assert_equals: content ex
 FAIL UA styles of base appearance ::picker(select) assert_equals: position-try-fallbacks expected "start span-end, end span-start, start span-start" but got "block-start span-inline-end, block-end span-inline-start, block-start span-inline-start"
 PASS UA styles of base appearance <option>.
 PASS UA styles of base appearance option::checkmark.
-FAIL UA styles of base appearance <optgroup>. assert_equals: display expected "block" but got "inline"
+PASS UA styles of base appearance <optgroup>.
 PASS UA styles of base appearance <legend>.
 FAIL UA styles of base appearance select <button>. assert_equals: display expected "contents" but got "block"
 PASS UA styles of base appearance <option> in <optgroup>.
