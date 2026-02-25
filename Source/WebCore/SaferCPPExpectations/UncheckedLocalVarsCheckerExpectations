@@ -1,5 +1,5 @@
 accessibility/AXObjectCache.cpp
-accessibility/AccessibilityNodeObject.cpp
+[ iOS ] accessibility/AccessibilityNodeObject.cpp
 [ Mac ] accessibility/AccessibilityRenderObject.cpp
 [ iOS ] accessibility/cocoa/AXTextMarkerCocoa.mm
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
