@@ -41,7 +41,7 @@ class InlineFormattingUtils {
 public:
     InlineFormattingUtils(const InlineFormattingContext&);
 
-    InlineLayoutUnit logicalTopForNextLine(const LineLayoutResult&, const InlineRect& lineLogicalRect, const FloatingContext&, const BlockLayoutState::MarginState&) const;
+    InlineLayoutUnit logicalTopForNextLine(const LineLayoutResult&, const InlineRect& lineLogicalRect, const FloatingContext&) const;
 
     enum class IsIntrinsicWidthMode : bool { No, Yes };
     enum class LineEndsWithLineBreak : bool { No, Yes };

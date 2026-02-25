@@ -370,8 +370,7 @@ UniqueRef<InlineLayoutResult> InlineFormattingContext::lineLayout(AbstractLineBu
 
         previousLine = PreviousLine { lineIndex, lineLayoutResult.contentGeometry.trailingOverflowingContentWidth, lineLayoutResult.endsWithLineBreak(), lineLayoutResult.directionality.inlineBaseDirection, WTF::move(lineLayoutResult.floatContent.suspendedFloats) };
         previousLineEnd = lineContentEnd;
-        lineLogicalTop = formattingUtils().logicalTopForNextLine(lineLayoutResult, lineLogicalRect, floatingContext, marginState);
-        marginState.contentOffsetAfterSelfCollapsingBlock = { };
+        lineLogicalTop = formattingUtils().logicalTopForNextLine(lineLayoutResult, lineLogicalRect, floatingContext);
     }
     InlineDisplayLineBuilder::addLegacyLineClampTrailingLinkBoxIfApplicable(*this, inlineLayoutState, layoutResult->displayContent);
     handleAfterSideMargin(marginState, layoutResult->displayContent);
@@ -418,7 +417,7 @@ void InlineFormattingContext::updateLayoutStateWithLineLayoutResult(const LineLa
     }
 
     if (lineLayoutResult.isFirstLast.isLastLineWithInlineContent) {
-        auto logicalTopCandidate = formattingUtils().logicalTopForNextLine(lineLayoutResult, lineLogicalRect, floatingContext, layoutState.parentBlockLayoutState().marginState());
+        auto logicalTopCandidate = formattingUtils().logicalTopForNextLine(lineLayoutResult, lineLogicalRect, floatingContext);
         layoutState.setClearGapAfterLastLine(std::max(0.f, logicalTopCandidate - lineLogicalRect.bottom()));
     }
 

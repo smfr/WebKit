@@ -49,7 +49,7 @@ InlineFormattingUtils::InlineFormattingUtils(const InlineFormattingContext& inli
 {
 }
 
-InlineLayoutUnit InlineFormattingUtils::logicalTopForNextLine(const LineLayoutResult& lineLayoutResult, const InlineRect& lineLogicalRect, const FloatingContext& floatingContext, const BlockLayoutState::MarginState& marginState) const
+InlineLayoutUnit InlineFormattingUtils::logicalTopForNextLine(const LineLayoutResult& lineLayoutResult, const InlineRect& lineLogicalRect, const FloatingContext& floatingContext) const
 {
     auto didManageToPlaceInlineContentOrFloat = !lineLayoutResult.inlineItemRange.isEmpty();
     if (didManageToPlaceInlineContentOrFloat) {
@@ -71,7 +71,7 @@ InlineLayoutUnit InlineFormattingUtils::logicalTopForNextLine(const LineLayoutRe
                 return lineLogicalRect.bottom();
             return std::max(lineLogicalRect.bottom(), InlineLayoutUnit(blockAxisPositionWithClearance->position));
         };
-        return logicalTopCandidateByContent() + marginState.contentOffsetAfterSelfCollapsingBlock;
+        return logicalTopCandidateByContent();
     }
 
     auto intrusiveFloatBottom = [&]() -> std::optional<InlineLayoutUnit> {

@@ -184,16 +184,10 @@ static const InlineDisplay::Line& lastLineWithInflowContent(const InlineDisplay:
 {
     // Out-of-flow/float content only don't produce lines with inline content. They should not be taken into
     // account when computing content box height/baselines.
-    for (auto index = lines.size(); index--;) {
-        auto& line = lines[index];
+    for (auto& line : lines | std::views::reverse) {
         ASSERT(line.boxCount());
         if (line.hasContentfulInFlowBox())
             return line;
-        // FIXME: This should be merged with margin collapsing.
-        if (line.hasInflowBox() && index && lines[index - 1].lineBoxLogicalRect().maxY() > line.lineBoxLogicalRect().y()) {
-            ASSERT(lines[index - 1].hasBlockLevelBox());
-            return line;
-        }
     }
     return lines.first();
 }
@@ -494,7 +488,7 @@ std::optional<LayoutRect> LineLayout::layout(RenderBlockFlow::MarginInfo& margin
 
     auto parentBlockLayoutState = Layout::BlockLayoutState {
         m_blockFormattingState.placedFloats(),
-        Layout::IntegrationUtils::toMarginState(marginInfo, { }),
+        Layout::IntegrationUtils::toMarginState(marginInfo),
         lineClamp(flow()),
         textBoxTrim(flow()),
         flow().style().textBoxEdge(),

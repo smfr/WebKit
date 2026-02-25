@@ -1423,12 +1423,6 @@ LineBuilder::Result LineBuilder::handleInlineContent(const InlineItemRange& layo
 {
     auto result = tryPlacingCandidateInlineContentOnLine(layoutRange, lineCandidate);
     if (!m_line.hasContentOrDecoration(Line::IncludeInsideListMarker::Yes)) {
-        if (m_line.hasLineSpanningInlineBoxOnly()) {
-            // FIXME: We should always move these empty lines after the margin,
-            // and then move them back retroactively once the block-end side margin collapsing is complete.
-            // At this stage, we don't yet know whether this margin will collapse into the root container's margin.
-            return result;
-        }
         applyMarginInBlockDirectionIfNeeded(ShouldResetMarginValues::No);
         return result;
     }
