@@ -318,7 +318,6 @@ mathml/MathMLMathElement.cpp
 mathml/MathMLPresentationElement.cpp
 mathml/MathMLSelectElement.cpp
 page/AutoscrollController.cpp
-[ Mac ] page/ContextMenuController.cpp
 [ iOS ] page/DOMTimer.cpp
 [ Mac ] page/DOMWindow.cpp
 page/DragController.cpp
