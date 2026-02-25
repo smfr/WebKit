@@ -1525,7 +1525,7 @@ static WKMediaPlaybackState NODELETE toWKMediaPlaybackState(WebKit::MediaPlaybac
     auto removeTransientActivation = !_dontResetTransientActivationAfterRunJavaScript && WebKit::shouldEvaluateJavaScriptWithoutTransientActivation() ? WebCore::RemoveTransientActivation::Yes : WebCore::RemoveTransientActivation::No;
 
     std::optional<IPC::TransferString> scriptString;
-    if (world->_contentWorld->allowAutofill())
+    if (world->_contentWorld->allowAutofill() || world->_contentWorld->allowNodeSerialization())
         scriptString = IPC::TransferString::createCached(javaScriptString);
     else
         scriptString = IPC::TransferString::create(javaScriptString);
