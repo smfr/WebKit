@@ -7123,6 +7123,7 @@
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/gradients/reference/shape-outside-linear-gradient-001-ref.html",
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/gradients/reference/shape-outside-linear-gradient-002-ref.html",
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/gradients/reference/shape-outside-linear-gradient-004-ref.html",
+        "web-platform-tests/css/css-shapes/shape-outside/shape-image/gradients/reference/shape-outside-linear-gradient-horizontal-rtl-ref.html",
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/reference/shape-image-000-ref.html",
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/reference/shape-image-001-ref.html",
         "web-platform-tests/css/css-shapes/shape-outside/shape-image/reference/shape-image-002-ref.html",
