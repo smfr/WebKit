@@ -426,7 +426,7 @@ public:
     WEBCORE_EXPORT void setMainFrame(Ref<Frame>&&);
     WEBCORE_EXPORT const URL& NODELETE mainFrameURL() const;
     SecurityOrigin& mainFrameOrigin() const;
-    WEBCORE_EXPORT RefPtr<Frame> NODELETE findFrameByPath(const Vector<uint64_t>& path) const;
+    WEBCORE_EXPORT RefPtr<Frame> findFrameByPath(const Vector<uint64_t>& path) const;
 
     WEBCORE_EXPORT void setMainFrameURLAndOrigin(const URL&, RefPtr<SecurityOrigin>&&);
 #if ENABLE(DOM_AUDIO_SESSION)
@@ -442,8 +442,8 @@ public:
     bool NODELETE hasInjectedUserScript();
     WEBCORE_EXPORT void setHasInjectedUserScript();
 
-    WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(const DocumentSyncSerializationData&);
-    WEBCORE_EXPORT void NODELETE updateTopDocumentSyncData(Ref<DocumentSyncData>&&);
+    WEBCORE_EXPORT void updateTopDocumentSyncData(const DocumentSyncSerializationData&);
+    WEBCORE_EXPORT void updateTopDocumentSyncData(Ref<DocumentSyncData>&&);
 
     WEBCORE_EXPORT void setMainFrameURLFragment(String&&);
     String mainFrameURLFragment() const { return m_mainFrameURLFragment; }
@@ -700,7 +700,7 @@ public:
     WEBCORE_EXPORT void setVerticalScrollElasticity(ScrollElasticity);
     ScrollElasticity verticalScrollElasticity() const { return static_cast<ScrollElasticity>(m_verticalScrollElasticity); }
 
-    WEBCORE_EXPORT void NODELETE setHorizontalScrollElasticity(ScrollElasticity);
+    WEBCORE_EXPORT void setHorizontalScrollElasticity(ScrollElasticity);
     ScrollElasticity horizontalScrollElasticity() const { return static_cast<ScrollElasticity>(m_horizontalScrollElasticity); }
 
     WEBCORE_EXPORT void accessibilitySettingsDidChange();
@@ -747,7 +747,7 @@ public:
 
 #if ENABLE(APPLE_PAY)
     PaymentCoordinator& paymentCoordinator() const { return *m_paymentCoordinator; }
-    WEBCORE_EXPORT void NODELETE setPaymentCoordinator(Ref<PaymentCoordinator>&&);
+    WEBCORE_EXPORT void setPaymentCoordinator(Ref<PaymentCoordinator>&&);
 #endif
 
 #if ENABLE(APPLE_PAY_AMS_UI)
@@ -1371,7 +1371,7 @@ public:
 #endif
 
 #if ENABLE(VIDEO)
-    WEBCORE_EXPORT void NODELETE setCaptionDisplaySettingsClientForTesting(Ref<CaptionDisplaySettingsClient>&&);
+    WEBCORE_EXPORT void setCaptionDisplaySettingsClientForTesting(Ref<CaptionDisplaySettingsClient>&&);
     WEBCORE_EXPORT void clearCaptionDisplaySettingsClientForTesting();
     void showCaptionDisplaySettings(HTMLMediaElement&, const ResolvedCaptionDisplaySettingsOptions&, CompletionHandler<void(ExceptionOr<void>)>&&);
 #endif

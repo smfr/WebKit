@@ -154,8 +154,8 @@ public:
     long long documentSequenceNumber() const { return m_documentSequenceNumber; }
 
     void setFormInfoFromRequest(const ResourceRequest&);
-    WEBCORE_EXPORT void NODELETE setFormData(RefPtr<FormData>&&);
-    WEBCORE_EXPORT void NODELETE setFormContentType(const String&);
+    WEBCORE_EXPORT void setFormData(RefPtr<FormData>&&);
+    WEBCORE_EXPORT void setFormContentType(const String&);
 
     void setLastVisitWasFailure(bool wasFailure) { m_lastVisitWasFailure = wasFailure; }
 

@@ -133,8 +133,8 @@ public:
     WEBCORE_EXPORT static RefPtr<UserGestureToken> NODELETE currentUserGesture();
     static RefPtr<UserGestureToken> NODELETE currentUserGestureForMainThread();
 
-    WEBCORE_EXPORT static bool NODELETE processingUserGesture(const Document* = nullptr);
-    WEBCORE_EXPORT static bool NODELETE processingUserGestureForMedia();
+    WEBCORE_EXPORT static bool processingUserGesture(const Document* = nullptr);
+    WEBCORE_EXPORT static bool processingUserGestureForMedia();
 
     // If a document is provided, its last known user gesture timestamp is updated.
     enum class ProcessInteractionStyle { Immediate, Delayed, Never };
@@ -142,7 +142,7 @@ public:
     WEBCORE_EXPORT explicit UserGestureIndicator(RefPtr<UserGestureToken>, UserGestureToken::GestureScope = UserGestureToken::GestureScope::All, UserGestureToken::ShouldPropagateToMicroTask = UserGestureToken::ShouldPropagateToMicroTask::No);
     WEBCORE_EXPORT ~UserGestureIndicator();
 
-    WEBCORE_EXPORT std::optional<WTF::UUID> NODELETE authorizationToken() const;
+    WEBCORE_EXPORT std::optional<WTF::UUID> authorizationToken() const;
 
 private:
     RefPtr<UserGestureToken> m_previousToken;

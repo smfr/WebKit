@@ -60,7 +60,7 @@ public:
 
     WEBCORE_EXPORT HitTestResult& operator=(const HitTestResult&);
 
-    WEBCORE_EXPORT void NODELETE setInnerNode(Node*);
+    WEBCORE_EXPORT void setInnerNode(Node*);
     Node* innerNode() const { return m_innerNode.get(); }
 
     void setInnerNonSharedNode(Node*);
@@ -99,7 +99,7 @@ public:
     const LayoutPoint& localPoint() const { return m_localPoint; }
     void NODELETE setLocalPoint(const LayoutPoint&);
 
-    WEBCORE_EXPORT void NODELETE setToNonUserAgentShadowAncestor();
+    WEBCORE_EXPORT void setToNonUserAgentShadowAncestor();
 
     const HitTestLocation& hitTestLocation() const { return m_hitTestLocation; }
 
@@ -142,7 +142,7 @@ public:
     void toggleMediaPlayState() const;
     WEBCORE_EXPORT bool NODELETE hasMediaElement() const;
     WEBCORE_EXPORT bool mediaHasAudio() const;
-    WEBCORE_EXPORT bool NODELETE mediaIsVideo() const;
+    WEBCORE_EXPORT bool mediaIsVideo() const;
     bool mediaMuted() const;
     void toggleMediaMuteState() const;
     bool mediaSupportsPictureInPicture() const;

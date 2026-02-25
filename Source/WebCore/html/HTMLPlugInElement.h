@@ -73,7 +73,7 @@ public:
 #endif
     bool willRespondToMouseClickEventsWithEditability(Editability) const final;
 
-    WEBCORE_EXPORT void NODELETE pluginDestroyedWithPendingPDFTestCallback(RefPtr<VoidCallback>&&);
+    WEBCORE_EXPORT void pluginDestroyedWithPendingPDFTestCallback(RefPtr<VoidCallback>&&);
     WEBCORE_EXPORT RefPtr<VoidCallback> NODELETE takePendingPDFTestCallback();
 
     RenderEmbeddedObject* NODELETE renderEmbeddedObject() const;

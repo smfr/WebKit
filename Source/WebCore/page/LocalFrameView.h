@@ -341,7 +341,7 @@ public:
 #endif
 
     AtomString mediaType() const;
-    WEBCORE_EXPORT void NODELETE setMediaType(const AtomString&);
+    WEBCORE_EXPORT void setMediaType(const AtomString&);
     void adjustMediaTypeForPrinting(bool printing);
 
     void setCannotBlitToWindow();
@@ -442,7 +442,7 @@ public:
     bool NODELETE isPainting() const;
     bool hasEverPainted() const { return !!m_lastPaintTime; }
     void setLastPaintTime(MonotonicTime lastPaintTime) { m_lastPaintTime = lastPaintTime; }
-    WEBCORE_EXPORT void NODELETE setNodeToDraw(Node*);
+    WEBCORE_EXPORT void setNodeToDraw(Node*);
 
     enum SelectionInSnapshot { IncludeSelection, ExcludeSelection };
     enum CoordinateSpaceForSnapshot { DocumentCoordinates, ViewCoordinates };
@@ -535,7 +535,7 @@ public:
     float absoluteToDocumentScaleFactor(std::optional<float> usedZoom = { }) const;
 
     WEBCORE_EXPORT FloatRect absoluteToDocumentRect(FloatRect, std::optional<float> usedZoom = { }) const;
-    WEBCORE_EXPORT FloatPoint NODELETE absoluteToDocumentPoint(FloatPoint, std::optional<float> usedZoom = { }) const;
+    WEBCORE_EXPORT FloatPoint absoluteToDocumentPoint(FloatPoint, std::optional<float> usedZoom = { }) const;
     WEBCORE_EXPORT DoublePoint absoluteToDocumentPoint(DoublePoint, std::optional<float> usedZoom = { }) const;
 
     FloatRect absoluteToClientRect(FloatRect, std::optional<float> usedZoom = { }) const;

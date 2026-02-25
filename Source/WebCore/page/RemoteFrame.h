@@ -62,7 +62,7 @@ public:
     RemoteFrameClient& client() { return m_client.get(); }
 
     RemoteFrameView* view() const { return m_view.get(); }
-    WEBCORE_EXPORT void NODELETE setView(RefPtr<RemoteFrameView>&&);
+    WEBCORE_EXPORT void setView(RefPtr<RemoteFrameView>&&);
 
     Markable<LayerHostingContextIdentifier> layerHostingContextIdentifier() const { return m_layerHostingContextIdentifier; }
 

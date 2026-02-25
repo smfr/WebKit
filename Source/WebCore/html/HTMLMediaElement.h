@@ -247,7 +247,7 @@ public:
 
     std::optional<MediaSessionGroupIdentifier> mediaSessionGroupIdentifier() const final;
 
-    WEBCORE_EXPORT bool NODELETE isActiveNowPlayingSession() const;
+    WEBCORE_EXPORT bool isActiveNowPlayingSession() const;
 
 // DOM API
 // error state
@@ -539,7 +539,7 @@ public:
     void sourceWasAdded(HTMLSourceElement&);
 
     // Media cache management.
-    WEBCORE_EXPORT static void NODELETE setMediaCacheDirectory(const String&);
+    WEBCORE_EXPORT static void setMediaCacheDirectory(const String&);
     WEBCORE_EXPORT static const String& NODELETE mediaCacheDirectory();
     WEBCORE_EXPORT static HashSet<SecurityOriginData> originsInMediaCache(const String&);
     WEBCORE_EXPORT static void clearMediaCache(const String&, WallTime modifiedSince = { });

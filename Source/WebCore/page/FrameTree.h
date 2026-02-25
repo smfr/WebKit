@@ -44,8 +44,8 @@ public:
 
     const AtomString& specifiedName() const { return m_specifiedName; }
     WEBCORE_EXPORT AtomString uniqueName() const;
-    WEBCORE_EXPORT void NODELETE setSpecifiedName(const AtomString&);
-    WEBCORE_EXPORT void NODELETE clearName();
+    WEBCORE_EXPORT void setSpecifiedName(const AtomString&);
+    WEBCORE_EXPORT void clearName();
     WEBCORE_EXPORT Frame* NODELETE parent() const;
 
     Frame* nextSibling() const { return m_nextSibling.get(); }

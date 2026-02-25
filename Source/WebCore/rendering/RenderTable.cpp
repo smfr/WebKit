@@ -953,7 +953,7 @@ void RenderTable::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& p
         // beginning the layer).
         stateSaver.save();
         auto borderShape = BorderShape::shapeForBorderRect(style(), rect);
-        borderShape.clipToOuterShape(paintInfo.context(), document().deviceScaleFactor());
+        borderShape.clipToOuterShape(paintInfo.context(), protect(document())->deviceScaleFactor());
         paintInfo.context().beginTransparencyLayer(1);
     }
 
@@ -1354,7 +1354,7 @@ LayoutUnit RenderTable::calcBorderStart() const
                 borderWidth = std::max(borderWidth, Style::evaluate<float>(firstRowAdjoiningBorder.width, Style::ZoomNeeded { }));
         }
     }
-    return CollapsedBorderValue::adjustedCollapsedBorderWidth(borderWidth, document().deviceScaleFactor(), writingMode().isInlineFlipped());
+    return CollapsedBorderValue::adjustedCollapsedBorderWidth(borderWidth, protect(document())->deviceScaleFactor(), writingMode().isInlineFlipped());
 }
 
 LayoutUnit RenderTable::calcBorderEnd() const
@@ -1409,7 +1409,7 @@ LayoutUnit RenderTable::calcBorderEnd() const
                 borderWidth = std::max(borderWidth, Style::evaluate<float>(firstRowAdjoiningBorder.width, Style::ZoomNeeded { }));
         }
     }
-    return CollapsedBorderValue::adjustedCollapsedBorderWidth(borderWidth, document().deviceScaleFactor(), !writingMode().isInlineFlipped());
+    return CollapsedBorderValue::adjustedCollapsedBorderWidth(borderWidth, protect(document())->deviceScaleFactor(), !writingMode().isInlineFlipped());
 }
 
 void RenderTable::recalcBordersInRowDirection()
@@ -1452,7 +1452,7 @@ LayoutUnit RenderTable::outerBorderBefore() const
         return 0;
     if (tb.hasVisibleStyle()) {
         LayoutUnit collapsedBorderWidth = std::max(borderWidth, LayoutUnit(Style::evaluate<float>(tb.width, Style::ZoomNeeded { }) / 2));
-        borderWidth = floorToDevicePixel(collapsedBorderWidth, document().deviceScaleFactor());
+        borderWidth = floorToDevicePixel(collapsedBorderWidth, protect(document())->deviceScaleFactor());
     }
     return borderWidth;
 }
@@ -1472,7 +1472,7 @@ LayoutUnit RenderTable::outerBorderAfter() const
     if (tb.hasHiddenStyle())
         return 0;
     if (tb.hasVisibleStyle()) {
-        float deviceScaleFactor = document().deviceScaleFactor();
+        float deviceScaleFactor = protect(document())->deviceScaleFactor();
         LayoutUnit collapsedBorderWidth = std::max(borderWidth, LayoutUnit((Style::evaluate<float>(tb.width, Style::ZoomNeeded { }) + (1 / deviceScaleFactor)) / 2));
         borderWidth = floorToDevicePixel(collapsedBorderWidth, deviceScaleFactor);
     }
@@ -1490,7 +1490,7 @@ LayoutUnit RenderTable::outerBorderStart() const
     if (tb.hasHiddenStyle())
         return 0;
     if (tb.hasVisibleStyle())
-        return CollapsedBorderValue::adjustedCollapsedBorderWidth(Style::evaluate<float>(tb.width, Style::ZoomNeeded { }), document().deviceScaleFactor(), writingMode().isInlineFlipped());
+        return CollapsedBorderValue::adjustedCollapsedBorderWidth(Style::evaluate<float>(tb.width, Style::ZoomNeeded { }), protect(document())->deviceScaleFactor(), writingMode().isInlineFlipped());
 
     bool allHidden = true;
     for (RenderTableSection* section = topSection(); section; section = sectionBelow(section)) {
@@ -1517,7 +1517,7 @@ LayoutUnit RenderTable::outerBorderEnd() const
     if (tb.hasHiddenStyle())
         return 0;
     if (tb.hasVisibleStyle())
-        return CollapsedBorderValue::adjustedCollapsedBorderWidth(Style::evaluate<float>(tb.width, Style::ZoomNeeded { }), document().deviceScaleFactor(), !writingMode().isInlineFlipped());
+        return CollapsedBorderValue::adjustedCollapsedBorderWidth(Style::evaluate<float>(tb.width, Style::ZoomNeeded { }), protect(document())->deviceScaleFactor(), !writingMode().isInlineFlipped());
 
     bool allHidden = true;
     for (RenderTableSection* section = topSection(); section; section = sectionBelow(section)) {

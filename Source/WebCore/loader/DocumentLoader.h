@@ -425,7 +425,7 @@ public:
         String overrideReferrerForAllRequests;
     };
     const WebpagePreferences& preferences() const { return m_preferences; }
-    WEBCORE_EXPORT void NODELETE setPreferences(WebpagePreferences&&);
+    WEBCORE_EXPORT void setPreferences(WebpagePreferences&&);
 
     void addSubresourceLoader(SubresourceLoader&);
     void removeSubresourceLoader(LoadCompletionType, SubresourceLoader&);

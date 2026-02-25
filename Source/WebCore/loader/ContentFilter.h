@@ -58,7 +58,7 @@ public:
 
     static constexpr ASCIILiteral urlScheme() { return "x-apple-content-filter"_s; }
 
-    WEBCORE_EXPORT void NODELETE startFilteringMainResource(const URL&);
+    WEBCORE_EXPORT void startFilteringMainResource(const URL&);
     void startFilteringMainResource(CachedRawResource&);
     WEBCORE_EXPORT void stopFilteringMainResource();
 

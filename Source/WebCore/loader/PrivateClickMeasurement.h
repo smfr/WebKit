@@ -91,7 +91,7 @@ public:
     const std::optional<PCM::AttributionTriggerData>& attributionTriggerData() const { return m_attributionTriggerData; }
     void setAttribution(PCM::AttributionTriggerData&& attributionTriggerData) { m_attributionTriggerData = WTF::move(attributionTriggerData); }
     const String& sourceApplicationBundleID() const { return m_sourceApplicationBundleID; }
-    WEBCORE_EXPORT void NODELETE setSourceApplicationBundleIDForTesting(const String&);
+    WEBCORE_EXPORT void setSourceApplicationBundleIDForTesting(const String&);
 
     PCM::AttributionEphemeral isEphemeral() const { return m_isEphemeral; }
     void setEphemeral(PCM::AttributionEphemeral isEphemeral) { m_isEphemeral = isEphemeral; }
@@ -118,8 +118,8 @@ public:
     PCM::SourceUnlinkableToken& sourceUnlinkableToken() { return m_sourceUnlinkableToken; }
     void setSourceUnlinkableTokenValue(const String& value) { m_sourceUnlinkableToken.valueBase64URL = value; }
     const std::optional<PCM::SourceSecretToken>& sourceSecretToken() const { return m_sourceSecretToken; }
-    WEBCORE_EXPORT void NODELETE setSourceSecretToken(PCM::SourceSecretToken&&);
-    WEBCORE_EXPORT void NODELETE setDestinationSecretToken(PCM::DestinationSecretToken&&);
+    WEBCORE_EXPORT void setSourceSecretToken(PCM::SourceSecretToken&&);
+    WEBCORE_EXPORT void setDestinationSecretToken(PCM::DestinationSecretToken&&);
 
     static std::optional<uint64_t> appStoreURLAdamID(const URL&);
     bool isSKAdNetworkAttribution() const { return !!m_adamID; }

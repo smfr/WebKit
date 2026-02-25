@@ -604,7 +604,6 @@ rendering/AttachmentLayout.mm
 rendering/BackgroundPainter.cpp
 rendering/BorderPainter.cpp
 rendering/CaretRectComputation.cpp
-[ iOS ] rendering/EllipsisBoxPainter.cpp
 rendering/HitTestResult.cpp
 [ iOS ] rendering/ImageQualityController.cpp
 rendering/InlineBoxPainter.cpp
@@ -612,7 +611,6 @@ rendering/LayerAncestorClippingStack.cpp
 rendering/LegacyInlineFlowBox.cpp
 rendering/LegacyLineLayout.cpp
 rendering/MarkedText.cpp
-[ iOS ] rendering/MotionPath.cpp
 rendering/RenderAttachment.cpp
 rendering/RenderBlock.cpp
 rendering/RenderBox.cpp
@@ -648,7 +646,6 @@ rendering/RenderQuote.cpp
 rendering/RenderReplaced.cpp
 rendering/RenderReplica.cpp
 rendering/RenderScrollbarPart.cpp
-[ iOS ] rendering/RenderTable.cpp
 rendering/RenderTableCell.cpp
 rendering/RenderTableSection.cpp
 rendering/RenderText.cpp
@@ -688,13 +685,10 @@ rendering/svg/RenderSVGResourcePattern.cpp
 rendering/svg/RenderSVGRoot.cpp
 rendering/svg/RenderSVGText.cpp
 rendering/svg/RenderSVGTextPath.cpp
-[ iOS ] rendering/svg/SVGLayerTransformComputation.h
 rendering/svg/SVGRenderTreeAsText.cpp
-[ iOS ] rendering/svg/SVGRenderingContext.cpp
 rendering/svg/SVGTextBoxPainter.cpp
 rendering/svg/legacy/LegacyRenderSVGForeignObject.cpp
 rendering/svg/legacy/LegacyRenderSVGImage.cpp
-[ iOS ] rendering/svg/legacy/LegacyRenderSVGModelObject.cpp
 rendering/svg/legacy/LegacyRenderSVGPath.cpp
 rendering/svg/legacy/LegacyRenderSVGResourceClipper.cpp
 rendering/svg/legacy/LegacyRenderSVGResourceContainer.cpp
@@ -737,7 +731,6 @@ style/StyleExtractor.cpp
 style/StyleExtractorCustom.h
 style/StyleInvalidator.cpp
 style/StylePendingResources.cpp
-[ iOS ] style/StyleResolveForDocument.cpp
 style/StyleResolver.cpp
 style/StyleScope.cpp
 style/StyleScopeRuleSets.cpp

@@ -552,7 +552,7 @@ public:
     ExceptionOr<SelectorQuery&> selectorQueryForString(const String&);
 
     void setViewportArguments(const ViewportArguments& viewportArguments) { m_viewportArguments = viewportArguments; }
-    WEBCORE_EXPORT ViewportArguments NODELETE viewportArguments() const;
+    WEBCORE_EXPORT ViewportArguments viewportArguments() const;
 
     OptionSet<DisabledAdaptations> disabledAdaptations() const { return m_disabledAdaptations; }
 
@@ -744,16 +744,16 @@ public:
 
     inline LocalFrameView* view() const; // Defined in DocumentView.h.
     inline Page* page() const; // Defined in DocumentPage.h.
-    WEBCORE_EXPORT RefPtr<LocalFrame> NODELETE localMainFrame() const;
+    WEBCORE_EXPORT RefPtr<LocalFrame> localMainFrame() const;
     const Settings& settings() const { return m_settings.get(); }
     EditingBehavior NODELETE editingBehavior() const;
 
     inline Quirks& quirks(); // Defined in DocumentQuirks.h
     inline const Quirks& quirks() const; // Defined in DocumentQuirks.h
 
-    WEBCORE_EXPORT float NODELETE deviceScaleFactor() const;
+    WEBCORE_EXPORT float deviceScaleFactor() const;
 
-    WEBCORE_EXPORT bool NODELETE useElevatedUserInterfaceLevel() const;
+    WEBCORE_EXPORT bool useElevatedUserInterfaceLevel() const;
     WEBCORE_EXPORT bool useDarkAppearance(const RenderStyle*) const;
     WEBCORE_EXPORT bool useDarkAppearance(const Style::ComputedStyle*) const;
 #if ENABLE(DARK_MODE_CSS)
@@ -924,7 +924,7 @@ public:
 
 #if ENABLE(WEB_RTC)
     RTCNetworkManager* rtcNetworkManager() { return m_rtcNetworkManager.get(); }
-    WEBCORE_EXPORT void NODELETE setRTCNetworkManager(Ref<RTCNetworkManager>&&);
+    WEBCORE_EXPORT void setRTCNetworkManager(Ref<RTCNetworkManager>&&);
     void startGatheringRTCLogs(Function<void(String&& logType, String&& logMessage, String&& logLevel, RefPtr<RTCPeerConnection>&&)>&&);
     void stopGatheringRTCLogs();
 #endif
@@ -1915,7 +1915,7 @@ public:
 #endif
 
     WEBCORE_EXPORT bool hasRequestedPageSpecificStorageAccessWithUserInteraction(const RegistrableDomain&);
-    WEBCORE_EXPORT void NODELETE setHasRequestedPageSpecificStorageAccessWithUserInteraction(const RegistrableDomain&);
+    WEBCORE_EXPORT void setHasRequestedPageSpecificStorageAccessWithUserInteraction(const RegistrableDomain&);
     WEBCORE_EXPORT void wasLoadedWithDataTransferFromPrevalentResource();
     void downgradeReferrerToRegistrableDomain();
 
