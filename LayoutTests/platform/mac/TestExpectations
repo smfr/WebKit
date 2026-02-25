@@ -2028,9 +2028,6 @@ imported/w3c/web-platform-tests/css/css-text/line-break/line-break-anywhere-over
 # rdar://106116937 ([UI-side compositing] fast/scrolling/mac/scrollbars/very-wide-overlay-scrollbar.html times out)
 fast/scrolling/mac/scrollbars/very-wide-overlay-scrollbar.html [ ImageOnlyFailure Timeout ]
 
-# Failing after OS migration rdar://112624778 (Migrate macOS Sonoma test expectations to OpenSource, add expectation files to Down-Levels (259373))
-fast/css/caret-color-auto.html [ Pass ImageOnlyFailure ]
-
 webkit.org/b/260912 [ Debug ] imported/w3c/web-platform-tests/dom/nodes/NodeList-static-length-getter-tampered-indexOf-1.html [ Timeout ]
 webkit.org/b/260912 [ Debug ] imported/w3c/web-platform-tests/dom/nodes/NodeList-static-length-getter-tampered-indexOf-2.html [ Timeout ]
 webkit.org/b/260912 [ Debug ] imported/w3c/web-platform-tests/dom/nodes/NodeList-static-length-getter-tampered-indexOf-3.html [ Timeout ]
