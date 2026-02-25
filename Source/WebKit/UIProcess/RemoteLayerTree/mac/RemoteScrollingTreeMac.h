@@ -52,6 +52,7 @@ public:
     void scrollingTreeNodeScrollbarMinimumThumbLengthDidChange(WebCore::ScrollingNodeID, WebCore::ScrollbarOrientation, int) override;
 
     void triggerMainFrameRubberBandSnapBack() override;
+    void mainFrameRubberBandTargetOffsetDidChange() override;
 
 private:
     void handleWheelEventPhase(WebCore::ScrollingNodeID, WebCore::PlatformWheelEventPhase) override;

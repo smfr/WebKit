@@ -259,6 +259,7 @@ public:
 #endif
 
     virtual void triggerMainFrameRubberBandSnapBack() { }
+    virtual void mainFrameRubberBandTargetOffsetDidChange() { }
 
     WEBCORE_EXPORT FloatPoint mainFrameScrollPosition() const;
 

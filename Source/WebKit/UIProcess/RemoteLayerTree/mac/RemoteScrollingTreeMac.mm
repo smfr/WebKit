@@ -573,6 +573,15 @@ void RemoteScrollingTreeMac::triggerMainFrameRubberBandSnapBack()
     rootScrollingNode->startRubberBandSnapBack();
 }
 
+void RemoteScrollingTreeMac::mainFrameRubberBandTargetOffsetDidChange()
+{
+    RefPtr rootScrollingNode = dynamicDowncast<ScrollingTreeFrameScrollingNodeMac>(rootNode());
+    if (!rootScrollingNode)
+        return;
+
+    rootScrollingNode->rubberBandTargetOffsetDidChange();
+}
+
 } // namespace WebKit
 
 #endif // PLATFORM(MAC) && ENABLE(UI_SIDE_COMPOSITING)

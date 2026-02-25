@@ -199,6 +199,7 @@ public:
 
     void stopRubberBanding();
     void startRubberBandSnapBack();
+    void rubberBandTargetOffsetDidChange();
     bool isRubberBandInProgress() const;
     RectEdges<bool> rubberBandingEdges() const { return m_rubberBandingEdges; }
 
@@ -231,7 +232,7 @@ private:
     void startRubberBandAnimationIfNecessary();
 
     bool startRubberBandAnimation(const FloatSize& initialVelocity, const FloatSize& initialOverscroll);
-    bool startRubberBandAnimationWithElapsedTime(const FloatSize& initialVelocity, const FloatSize& initialOverscroll, Seconds alreadyElapsed);
+    bool startRubberBandAnimationWithElapsedTime(const FloatSize& initialVelocity, const FloatSize& initialOverscroll, Seconds alreadyElapsed, std::optional<FloatSize> targetOverscroll = std::nullopt);
     void stopRubberBandAnimation();
 
     void willStartRubberBandAnimation();
