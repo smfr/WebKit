@@ -3448,6 +3448,7 @@ class CompileWebKit(shell.Compile, AddToLogMixin, ShellMixin):
                             RevertAppliedChanges(),
                             ValidateChange(verifyBugClosed=False, addURLs=False),
                             CompileWebKitWithoutChange(),
+                            ArchiveBuiltProduct(),
                             GenerateS3URL(f"{self.getProperty('fullPlatform')}-{self.getProperty('archForUpload')}-{self.getProperty('configuration')}{SUFFIX_WITHOUT_CHANGE}"),
                             UploadFileToS3(f"WebKitBuild/{self.getProperty('configuration')}.zip", links={self.name: 'Archive without change'}),
                         ])
