@@ -313,7 +313,6 @@ TestWebKitAPI.GridPositionTest
 TestWebKitAPI.HTTPHeaderField
 TestWebKitAPI.HTTPHeaderMap
 TestWebKitAPI.HTTPParsers
-TestWebKitAPI.HistoryDelegate
 TestWebKitAPI.HysteresisActivity
 TestWebKitAPI.IOSurfacePoolTest
 TestWebKitAPI.IOSurfaceTest
