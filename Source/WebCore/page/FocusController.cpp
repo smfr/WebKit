@@ -425,6 +425,11 @@ static inline void dispatchEventsOnWindowAndFocusedElement(Document* document, b
             return;
         }
 
+        if (RefPtr formControlElement = dynamicDowncast<HTMLFormControlElement>(*document->focusedElement())) {
+            if (formControlElement->wasChangedSinceLastFormControlChangeEvent())
+                formControlElement->dispatchFormControlChangeEvent();
+        }
+
         document->focusedElement()->dispatchBlurEvent(nullptr);
     }
 

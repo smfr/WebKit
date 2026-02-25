@@ -404,6 +404,7 @@ Tests/WebKitCocoa/WebSocket.mm @nonARC
 Tests/WebKitCocoa/WebTransport.mm @nonARC
 Tests/WebKitCocoa/WebsiteDataStoreCustomPaths.mm @nonARC
 Tests/WebKitCocoa/WebsitePolicies.mm @nonARC
+Tests/WebKitCocoa/WindowBlurInputChangeEvent.mm @nonARC 
 Tests/WebKitCocoa/WritingSuggestions.mm @nonARC
 Tests/WebKitCocoa/YoutubeReplacementPlugin.mm @nonARC
 Tests/WebKitCocoa/_WKInputDelegate.mm @nonARC
