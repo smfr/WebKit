@@ -34,6 +34,10 @@
 #include <limits.h>
 #include <wtf/text/StringImpl.h>
 
+namespace JSC {
+class FunctionAllowlist;
+}
+
 namespace JSC { namespace DFG {
 
 struct Node;
@@ -291,6 +295,14 @@ struct NodeAndIndex {
 // A less-than operator for strings that is useful for generating string switches. Sorts by <
 // relation on characters. Ensures that if a is a prefix of b, then a < b.
 bool stringLessThan(StringImpl& a, StringImpl& b);
+
+// Get the global DFG allowlist for filtering which functions can be DFG-compiled
+JSC::FunctionAllowlist& ensureGlobalDFGAllowlist();
+
+#if ENABLE(FTL_JIT)
+// Get the global FTL allowlist for filtering which functions can be FTL-compiled
+JSC::FunctionAllowlist& ensureGlobalFTLAllowlist();
+#endif
 
 } } // namespace JSC::DFG
 
