@@ -7,9 +7,9 @@
 }
 
 .customizable-select-in-page.disabled {
-  color: color-mix(in lab, currentColor 50%, transparent);
+  color: color-mix(currentColor 50%, transparent);
 }
 
 .customizable-select-in-page:not(.disabled) .customizable-select-legend.disabled {
-  color: color-mix(in lab, currentColor 50%, transparent);
+  color: color-mix(currentColor 50%, transparent);
 }
