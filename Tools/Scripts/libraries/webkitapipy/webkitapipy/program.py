@@ -72,6 +72,8 @@ ALLOWED_SYMBOL_GLOBS = (
     '_$s*7SwiftUI*',
     # rdar://79109142
     '__swift_FORCE_LOAD_$_*',
+    # Swift stdlib emits calls to this libSystem symbol in OS version checks.
+    '__availability_version_check',
 )
 
 # TBDs from the active SDK whose symbols are treated as implicitly available.
