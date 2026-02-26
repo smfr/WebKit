@@ -344,7 +344,7 @@ SUPPRESS_ASAN void JSDOMGlobalObject::addBuiltinGlobals(VM& vm)
         JSDOMGlobalObject::GlobalPropertyInfo(builtinNames.getGlobalObjectPrivateName(), JSFunction::create(vm, this, 1, String(), getGlobalObject, ImplementationVisibility::Public), PropertyAttribute::DontDelete | PropertyAttribute::ReadOnly),
         JSDOMGlobalObject::GlobalPropertyInfo(builtinNames.createWritableStreamFromInternalPrivateName(), JSFunction::create(vm, this, 1, String(), createWritableStreamFromInternal, ImplementationVisibility::Public), PropertyAttribute::DontDelete | PropertyAttribute::ReadOnly),
     };
-    addStaticGlobals(staticGlobals, std::size(staticGlobals));
+    addStaticGlobals(staticGlobals);
 }
 
 void JSDOMGlobalObject::finishCreation(VM& vm)

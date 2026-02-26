@@ -139,7 +139,7 @@ SUPPRESS_ASAN inline void JSDOMWindowBase::initStaticGlobals(JSC::VM& vm)
         GlobalPropertyInfo(builtinNames.windowPublicName(), m_proxy.get(), PropertyAttribute::DontDelete | PropertyAttribute::ReadOnly),
     };
 
-    addStaticGlobals(staticGlobals, std::size(staticGlobals));
+    addStaticGlobals(staticGlobals);
 }
 
 void JSDOMWindowBase::finishCreation(VM& vm, JSWindowProxy* proxy)

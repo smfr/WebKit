@@ -1033,7 +1033,7 @@ SUPPRESS_ASAN inline void JSGlobalObject::initStaticGlobals(VM& vm)
         GlobalPropertyInfo(vm.propertyNames->builtinNames().assertPrivateName(), JSFunction::create(vm, this, 1, String(), assertCall, ImplementationVisibility::Public), PropertyAttribute::DontEnum | PropertyAttribute::DontDelete | PropertyAttribute::ReadOnly),
 #endif
     };
-    addStaticGlobals(staticGlobals, std::size(staticGlobals));
+    addStaticGlobals(staticGlobals);
 }
 
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
@@ -3096,19 +3096,16 @@ SUPPRESS_ASAN void JSGlobalObject::exposeDollarVM(VM& vm)
     GlobalPropertyInfo extraStaticGlobals[] = {
         GlobalPropertyInfo(vm.propertyNames->builtinNames().dollarVMPrivateName(), dollarVM, PropertyAttribute::DontEnum | PropertyAttribute::DontDelete | PropertyAttribute::ReadOnly),
     };
-    addStaticGlobals(extraStaticGlobals, std::size(extraStaticGlobals));
+    addStaticGlobals(extraStaticGlobals);
 
     putDirect(vm, Identifier::fromString(vm, "$vm"_s), dollarVM, static_cast<unsigned>(PropertyAttribute::DontEnum));
 }
 
-WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
-
-void JSGlobalObject::addStaticGlobals(GlobalPropertyInfo* globals, int count)
+void JSGlobalObject::addStaticGlobals(std::span<GlobalPropertyInfo> globals)
 {
-    ScopeOffset startOffset = addVariables(count, jsUndefined());
+    ScopeOffset startOffset = addVariables(globals.size(), jsUndefined());
 
-    for (int i = 0; i < count; ++i) {
-        GlobalPropertyInfo& global = globals[i];
+    for (auto [i, global] : indexedRange(globals)) {
         // This `configurable = false` is necessary condition for static globals,
         // otherwise lexical bindings can change the result of GlobalVar queries too.
         // We won't be able to declare a global lexical variable with the sanem name to
@@ -3130,8 +3127,6 @@ void JSGlobalObject::addStaticGlobals(GlobalPropertyInfo* globals, int count)
         symbolTablePutTouchWatchpointSet(vm(), this, global.identifier, global.value, variable, watchpointSet);
     }
 }
-
-WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
 
 bool JSGlobalObject::getOwnPropertySlot(JSObject* object, JSGlobalObject* globalObject, PropertyName propertyName, PropertySlot& slot)
 {
