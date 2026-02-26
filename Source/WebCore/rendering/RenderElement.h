@@ -293,6 +293,9 @@ public:
     SingleThreadWeakPtr<RenderBlockFlow> backdropRenderer() const;
     void setBackdropRenderer(RenderBlockFlow&);
 
+    SingleThreadWeakPtr<RenderBlockFlow> pickerIconRenderer() const;
+    void setPickerIconRenderer(RenderBlockFlow&);
+
     ReferencedSVGResources& ensureReferencedSVGResources();
 
     Overflow NODELETE effectiveOverflowX() const;

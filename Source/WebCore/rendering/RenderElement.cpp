@@ -2595,6 +2595,16 @@ void RenderElement::setBackdropRenderer(RenderBlockFlow& renderer)
     ensureRareData().backdropRenderer = renderer;
 }
 
+SingleThreadWeakPtr<RenderBlockFlow> RenderElement::pickerIconRenderer() const
+{
+    return hasRareData() ? rareData().pickerIconRenderer : nullptr;
+}
+
+void RenderElement::setPickerIconRenderer(RenderBlockFlow& renderer)
+{
+    ensureRareData().pickerIconRenderer = renderer;
+}
+
 Overflow RenderElement::effectiveOverflowX() const
 {
     auto overflowX = style().overflowX();

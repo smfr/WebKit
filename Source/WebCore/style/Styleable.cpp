@@ -91,10 +91,9 @@ const std::optional<const Styleable> Styleable::fromRenderer(const RenderElement
         break;
     }
     case PseudoElementType::PickerIcon: {
-        /* FIXME: Optimize this to avoid the full ancestor walk. */
         auto* ancestor = renderer.parent();
         while (ancestor) {
-            if (ancestor->element())
+            if (ancestor->element() && ancestor->pickerIconRenderer() == &renderer)
                 return Styleable(*ancestor->element(), Style::PseudoElementIdentifier { PseudoElementType::PickerIcon });
             ancestor = ancestor->parent();
         }
