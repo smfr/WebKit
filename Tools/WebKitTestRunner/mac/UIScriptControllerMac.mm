@@ -178,6 +178,12 @@ void UIScriptControllerMac::activateDataListSuggestion(unsigned index, JSValueRe
     });
 }
 
+void UIScriptControllerMac::setSelectedColorForColorPicker(double red, double green, double blue)
+{
+    RetainPtr color = [NSColor colorWithSRGBRed:red green:green blue:blue alpha:1.0];
+    [webView() _setSelectedColorForColorPicker:color.get()];
+}
+
 NSTableView *UIScriptControllerMac::dataListSuggestionsTableView() const
 {
     for (NSWindow *childWindow in webView().window.childWindows) {
