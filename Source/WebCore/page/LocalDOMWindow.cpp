@@ -456,10 +456,17 @@ void LocalDOMWindow::didSecureTransitionTo(Document& document)
     observeContext(&document);
 
     if (auto* eventTargetData = this->eventTargetData()) {
-        eventTargetData->eventListenerMap.enumerateEventListenerTypes([&](auto& eventType, unsigned count) {
-            if (oldDocument)
-                oldDocument->didRemoveEventListenersOfType(eventType, count);
-            document.didAddEventListenersOfType(eventType, count);
+        eventTargetData->eventListenerMap.enumerateEventListenerTypes([&](auto& eventType, uint16_t capturingCount, uint16_t bubblingCount) {
+            if (capturingCount) {
+                if (oldDocument)
+                    oldDocument->didRemoveEventListenersOfType(eventType, Document::IsCapture::Yes, capturingCount);
+                document.didAddEventListenersOfType(eventType, Document::IsCapture::Yes, capturingCount);
+            }
+            if (bubblingCount) {
+                if (oldDocument)
+                    oldDocument->didRemoveEventListenersOfType(eventType, Document::IsCapture::No, bubblingCount);
+                document.didAddEventListenersOfType(eventType, Document::IsCapture::No, bubblingCount);
+            }
         });
     }
 
@@ -2022,7 +2029,7 @@ bool LocalDOMWindow::addEventListener(const AtomString& eventType, Ref<EventList
     auto& eventNames = WebCore::eventNames();
     auto typeInfo = eventNames.typeInfoForEvent(eventType);
     if (document) {
-        document->didAddEventListenersOfType(eventType);
+        document->didAddEventListenersOfType(eventType, options.capture ? Document::IsCapture::Yes : Document::IsCapture::No);
         if (typeInfo.isInCategory(EventCategory::Wheel)) {
             document->didAddWheelEventHandler(*document);
             document->invalidateEventListenerRegions();
@@ -2289,7 +2296,7 @@ bool LocalDOMWindow::removeEventListener(const AtomString& eventType, EventListe
     auto& eventNames = WebCore::eventNames();
     auto typeInfo = eventNames.typeInfoForEvent(eventType);
     if (document) {
-        document->didRemoveEventListenersOfType(eventType);
+        document->didRemoveEventListenersOfType(eventType, options.capture ? Document::IsCapture::Yes : Document::IsCapture::No);
         if (typeInfo.isInCategory(EventCategory::Wheel)) {
             document->didRemoveWheelEventHandler(*document);
             document->invalidateEventListenerRegions();

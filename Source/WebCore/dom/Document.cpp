@@ -7228,21 +7228,25 @@ void Document::addListenerTypeIfNeeded(const AtomString& eventType)
     }
 }
 
-void Document::didAddEventListenersOfType(const AtomString& eventType, unsigned count)
+void Document::didAddEventListenersOfType(const AtomString& eventType, IsCapture isCapture, uint16_t count)
 {
     ASSERT(count);
     addListenerTypeIfNeeded(eventType);
-    auto result = m_eventListenerCounts.fastAdd(eventType, 0);
-    result.iterator->value += count;
+    auto& counts = m_eventListenerCounts.ensure(eventType, [] { return EventListenerCounts { }; }).iterator->value;
+    auto& field = isCapture == IsCapture::Yes ? counts.capturing : counts.bubbling;
+    field = std::min<uint32_t>(field + count, std::numeric_limits<uint16_t>::max());
 }
 
-void Document::didRemoveEventListenersOfType(const AtomString& eventType, unsigned count)
+void Document::didRemoveEventListenersOfType(const AtomString& eventType, IsCapture isCapture, uint16_t count)
 {
     ASSERT(count);
     ASSERT(m_eventListenerCounts.contains(eventType));
     auto it = m_eventListenerCounts.find(eventType);
-    ASSERT(it->value >= count);
-    it->value -= count;
+    auto& field = isCapture == IsCapture::Yes ? it->value.capturing : it->value.bubbling;
+    if (field != std::numeric_limits<uint16_t>::max()) [[likely]] {
+        ASSERT(field >= count);
+        field -= count;
+    }
 }
 
 HTMLFrameOwnerElement* Document::ownerElement() const
@@ -10066,7 +10070,7 @@ void Document::didAssociateFormControl(Element& element)
     if (!page)
         return;
     if (!page->chrome().client().shouldNotifyOnFormChanges()
-        && !hasEventListenersOfType(eventNames().webkitassociateformcontrolsEvent))
+        && !eventListenerCountsOfType(eventNames().webkitassociateformcontrolsEvent).hasAny())
         return;
 
     auto isNewEntry = m_associatedFormControls.add(element).isNewEntry;

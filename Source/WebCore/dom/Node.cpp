@@ -2335,10 +2335,17 @@ void Node::moveNodeToNewDocumentSlowCase(Document& oldDocument, Document& newDoc
 #endif
 
         auto& eventNames = WebCore::eventNames();
-        enumerateEventListenerTypes([&](auto& eventType, unsigned count) {
-            oldDocument.didRemoveEventListenersOfType(eventType, count);
-            newDocument.didAddEventListenersOfType(eventType, count);
+        enumerateEventListenerTypes([&](auto& eventType, uint16_t capturingCount, uint16_t bubblingCount) {
+            if (capturingCount) {
+                oldDocument.didRemoveEventListenersOfType(eventType, Document::IsCapture::Yes, capturingCount);
+                newDocument.didAddEventListenersOfType(eventType, Document::IsCapture::Yes, capturingCount);
+            }
+            if (bubblingCount) {
+                oldDocument.didRemoveEventListenersOfType(eventType, Document::IsCapture::No, bubblingCount);
+                newDocument.didAddEventListenersOfType(eventType, Document::IsCapture::No, bubblingCount);
+            }
 
+            unsigned count = capturingCount + bubblingCount;
             auto typeInfo = eventNames.typeInfoForEvent(eventType);
             if (typeInfo.isInCategory(EventCategory::Wheel))
                 numWheelEventHandlers += count;
@@ -2403,7 +2410,7 @@ static inline bool tryAddEventListener(Node* targetNode, const AtomString& event
         return false;
 
     Ref document = targetNode->document();
-    document->didAddEventListenersOfType(eventType);
+    document->didAddEventListenersOfType(eventType, options.capture ? Document::IsCapture::Yes : Document::IsCapture::No);
 
     auto& eventNames = WebCore::eventNames();
     auto typeInfo = eventNames.typeInfoForEvent(eventType);
@@ -2459,10 +2466,10 @@ bool Node::addEventListener(const AtomString& eventType, Ref<EventListener>&& li
     return tryAddEventListener(this, eventType, WTF::move(listener), options);
 }
 
-static inline bool didRemoveEventListenerOfType(Node& targetNode, const AtomString& eventType)
+static inline bool didRemoveEventListenerOfType(Node& targetNode, const AtomString& eventType, Document::IsCapture isCapture)
 {
     Ref document = targetNode.document();
-    document->didRemoveEventListenersOfType(eventType);
+    document->didRemoveEventListenersOfType(eventType, isCapture);
 
     // FIXME: Notify Document that the listener has vanished. We need to keep track of a number of
     // listeners for each type, not just a bool - see https://bugs.webkit.org/show_bug.cgi?id=33861
@@ -2512,16 +2519,18 @@ bool Node::removeEventListener(const AtomString& eventType, EventListener& liste
 {
     if (!EventTarget::removeEventListener(eventType, listener, options))
         return false;
-    didRemoveEventListenerOfType(*this, eventType);
+    didRemoveEventListenerOfType(*this, eventType, options.capture ? Document::IsCapture::Yes : Document::IsCapture::No);
     return true;
 }
 
 void Node::removeAllEventListeners()
 {
     EventTarget::removeAllEventListeners();
-    enumerateEventListenerTypes([&](const AtomString& type, unsigned count) {
-        for (unsigned i = 0; i < count; ++i)
-            didRemoveEventListenerOfType(*this, type);
+    enumerateEventListenerTypes([&](const AtomString& type, uint16_t capturingCount, uint16_t bubblingCount) {
+        for (uint16_t i = 0; i < capturingCount; ++i)
+            didRemoveEventListenerOfType(*this, type, Document::IsCapture::Yes);
+        for (uint16_t i = 0; i < bubblingCount; ++i)
+            didRemoveEventListenerOfType(*this, type, Document::IsCapture::No);
     });
 }
 

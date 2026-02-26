@@ -1117,10 +1117,20 @@ public:
     bool NODELETE hasListenerTypeForEventType(PlatformEventType) const;
     void addListenerTypeIfNeeded(const AtomString& eventType);
 
-    void didAddEventListenersOfType(const AtomString&, unsigned = 1);
-    void NODELETE didRemoveEventListenersOfType(const AtomString&, unsigned = 1);
+    enum class IsCapture : bool { No, Yes };
+
+    struct EventListenerCounts {
+        uint16_t capturing { 0 };
+        uint16_t bubbling { 0 };
+
+        bool hasAny() const { return capturing || bubbling; }
+        bool hasCapturing() const { return capturing; }
+    };
+
+    void didAddEventListenersOfType(const AtomString&, IsCapture, uint16_t count = 1);
+    void NODELETE didRemoveEventListenersOfType(const AtomString&, IsCapture, uint16_t count = 1);
     bool hasNodeWithEventListeners() const { return !m_eventListenerCounts.isEmpty(); }
-    bool hasEventListenersOfType(const AtomString& type) const { return m_eventListenerCounts.inlineGet(type); }
+    EventListenerCounts eventListenerCountsOfType(const AtomString& type) const { return m_eventListenerCounts.inlineGet(type); }
 
     bool hasConnectedPluginElements() { return m_connectedPluginElementCount; }
     void didConnectPluginElement() { ++m_connectedPluginElementCount; }
@@ -2654,7 +2664,7 @@ private:
     unsigned m_dataListElementCount { 0 };
 
     OptionSet<ListenerType> m_listenerTypes;
-    MemoryCompactRobinHoodHashMap<AtomString, unsigned> m_eventListenerCounts;
+    MemoryCompactRobinHoodHashMap<AtomString, EventListenerCounts> m_eventListenerCounts;
     unsigned m_connectedPluginElementCount { 0 };
 
     unsigned m_referencingNodeCount { 0 };

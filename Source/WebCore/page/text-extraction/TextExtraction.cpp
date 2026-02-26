@@ -806,7 +806,7 @@ static inline void extractRecursive(Node& node, Item& parentItem, TraversalConte
 
     OptionSet<EventListenerCategory> eventListeners;
     if (auto requestedCategories = context.originalRequest.eventListenerCategories) {
-        node.enumerateEventListenerTypes([&](auto& type, unsigned) {
+        node.enumerateEventListenerTypes([&](auto& type, uint16_t, uint16_t) {
             auto typeInfo = eventNames().typeInfoForEvent(type);
             if (typeInfo.isInCategory(EventCategory::Wheel) && requestedCategories.contains(EventListenerCategory::Wheel))
                 eventListeners.add(EventListenerCategory::Wheel);
