@@ -8723,6 +8723,7 @@
 		EB0D312D275AE13300863D8F /* com.apple.webkit.webpushd.mac.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = com.apple.webkit.webpushd.mac.plist; sourceTree = "<group>"; };
 		EB0D312E275AE13300863D8F /* com.apple.webkit.webpushd.ios.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = com.apple.webkit.webpushd.ios.plist; sourceTree = "<group>"; };
 		EB0FBFA62B66C61E00269CC1 /* WKMarketplaceKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WKMarketplaceKit.swift; sourceTree = "<group>"; };
+		EB29BD7A2F3FB15C004F44F6 /* RelocatableFrameworksLinkerFlags.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = RelocatableFrameworksLinkerFlags.xcconfig; sourceTree = "<group>"; };
 		EB355D9F2B636559008DEAA1 /* RestrictedOpenerType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RestrictedOpenerType.h; sourceTree = "<group>"; };
 		EB36B16627A7B4500050E00D /* PushService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushService.h; sourceTree = "<group>"; };
 		EB36B16727A7B4500050E00D /* PushService.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PushService.mm; sourceTree = "<group>"; };
@@ -10047,6 +10048,7 @@
 				2D56C1D428A369510081BD25 /* ModelService.xcconfig */,
 				5C400E6E29DB8D7000446F6F /* NetworkingExtension.xcconfig */,
 				BC8283AB16B4BEAD00A278FE /* NetworkService.xcconfig */,
+				EB29BD7A2F3FB15C004F44F6 /* RelocatableFrameworksLinkerFlags.xcconfig */,
 				37E83D401B37D27B002079EE /* SandboxProfiles.xcconfig */,
 				5C400E7029DB8D7100446F6F /* WebContentCaptivePortalExtension.xcconfig */,
 				58E7CD792E785B8900338ED0 /* WebContentEnhancedSecurityExtension.xcconfig */,

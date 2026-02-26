@@ -751,7 +751,7 @@ then
     elif [[ "${PRODUCT_NAME}" == com.apple.WebKit.WebContent.EnhancedSecurity ]]; then mac_process_webcontent_enhancedsecurity_entitlements
     elif [[ "${PRODUCT_NAME}" == com.apple.WebKit.Networking ]]; then mac_process_network_entitlements
     elif [[ "${PRODUCT_NAME}" == com.apple.WebKit.GPU ]]; then mac_process_gpu_entitlements
-    elif [[ "${PRODUCT_NAME}" == webpushd ]]; then mac_process_webpushd_entitlements
+    elif [[ "${PRODUCT_NAME}" == webpushd* ]]; then mac_process_webpushd_entitlements
     elif [[ "${PRODUCT_NAME}" != adattributiond ]]; then echo "Unsupported/unknown product: ${PRODUCT_NAME}"
     fi
 elif [[ "${WK_PLATFORM_NAME}" == maccatalyst || "${WK_PLATFORM_NAME}" == iosmac ]]
@@ -785,7 +785,7 @@ then
     elif [[ "${PRODUCT_NAME}" == GPUExtension ]]; then ios_family_process_gpu_entitlements
     elif [[ "${PRODUCT_NAME}" == adattributiond ]]; then
         ios_family_process_adattributiond_entitlements
-    elif [[ "${PRODUCT_NAME}" == webpushd ]]; then
+    elif [[ "${PRODUCT_NAME}" == webpushd* ]]; then
         ios_family_process_webpushd_entitlements
     else echo "Unsupported/unknown product: ${PRODUCT_NAME}"
     fi
