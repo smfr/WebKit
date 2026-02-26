@@ -568,9 +568,15 @@ void InlineDisplayContentBuilder::processNonBidiContent(const LineLayoutResult& 
                 appendHardLineBreakDisplayBox(lineRun, visualRectRelativeToRoot, boxes);
             else if (lineRun.isAtomicInlineBox() || lineRun.isListMarker())
                 appendAtomicInlineLevelDisplayBox(lineRun, visualRectRelativeToRoot, boxes);
-            else if (lineRun.isInlineBoxStart() || lineRun.isLineSpanningInlineBoxStart())
+            else if (lineRun.isInlineBoxStart())
                 appendInlineBoxDisplayBox(lineRun, lineBox.inlineLevelBoxFor(lineRun), visualRectRelativeToRoot, boxes);
-            else if (lineRun.isBlock()) {
+            else if (lineRun.isLineSpanningInlineBoxStart()) {
+                // Line-spanning inline boxes show up as DOMRects via getClientRects().
+                // Empty rects are generally fine (e.g. <span><div></div></span>), but not when caused by intrusive floats preventing content from fitting on the line.
+                auto canHaveDisplayBoxEvenWhenEmpty = lineLayoutResult.hasContentfulInFlowContent() || !lineLayoutResult.floatContent.hasIntrusiveFloat;
+                if (canHaveDisplayBoxEvenWhenEmpty)
+                    appendInlineBoxDisplayBox(lineRun, lineBox.inlineLevelBoxFor(lineRun), visualRectRelativeToRoot, boxes);
+            } else if (lineRun.isBlock()) {
                 // Block content should always be placed at the start of the content box even when floats shrink the line.
                 auto adjustedVisualRect = [&] {
                     auto lineOffset = lineBoxLogicalRect.left() - lineLayoutResult.lineGeometry.initialLogicalTopLeft.x();
