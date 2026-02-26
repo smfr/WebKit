@@ -70,6 +70,7 @@ template<typename IDLType> class DOMPromiseProxy;
 template<typename IDLType> class DOMPromiseProxyWithResolveCallback;
 template<typename> class ExceptionOr;
 
+class HTMLModelElementEventListener;
 class HTMLModelElement final : public HTMLElement, private CachedRawResourceClient, public ModelPlayerClient, public ActiveDOMObject, public VisibilityChangeClient {
     WTF_MAKE_TZONE_ALLOCATED(HTMLModelElement);
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLModelElement);
@@ -323,6 +324,9 @@ private:
     WeakPtr<ModelPlayerProvider> m_modelPlayerProvider;
     RefPtr<Model> m_model;
     UniqueRef<ReadyPromise> m_readyPromise;
+#if ENABLE(TOUCH_EVENTS)
+    RefPtr<HTMLModelElementEventListener> m_eventListener;
+#endif
     bool m_dataComplete { false };
     bool m_isDragging { false };
     bool m_shouldCreateModelPlayerUponRendererAttachment { false };
