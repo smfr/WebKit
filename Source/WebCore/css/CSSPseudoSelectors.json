@@ -119,6 +119,9 @@
             "comment": "For scrollbar styling.",
             "status": "non-standard"
         },
+        "even-less-good": {
+            "settings-flag": "cssAppearanceBaseEnabled"
+        },
         "first-child": {},
         "first-of-type": {},
         "focus": {},
@@ -197,6 +200,9 @@
         "open": {
             "settings-flag": "openPseudoClassEnabled"
         },
+        "optimum": {
+            "settings-flag": "cssAppearanceBaseEnabled"
+        },
         "optional": {},
         "out-of-range": {},
         "past": {
@@ -236,6 +242,9 @@
         "start": {
             "comment": "For scrollbar styling.",
             "status": "non-standard"
+        },
+        "suboptimum": {
+            "settings-flag": "cssAppearanceBaseEnabled"
         },
         "target": {},
         "user-invalid": {},
