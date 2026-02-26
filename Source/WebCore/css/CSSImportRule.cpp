@@ -44,9 +44,9 @@ CSSImportRule::CSSImportRule(StyleRuleImport& importRule, CSSStyleSheet* parent)
 CSSImportRule::~CSSImportRule()
 {
     if (m_styleSheetCSSOMWrapper)
-        m_styleSheetCSSOMWrapper->clearOwnerRule();
+        protect(m_styleSheetCSSOMWrapper)->clearOwnerRule();
     if (m_mediaCSSOMWrapper)
-        m_mediaCSSOMWrapper->detachFromParent();
+        protect(m_mediaCSSOMWrapper)->detachFromParent();
 }
 
 String CSSImportRule::href() const

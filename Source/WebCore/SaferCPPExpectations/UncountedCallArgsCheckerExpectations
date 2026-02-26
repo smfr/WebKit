@@ -170,7 +170,6 @@ contentextensions/ContentExtension.cpp
 contentextensions/ContentExtensionStyleSheet.cpp
 contentextensions/ContentExtensionsBackend.cpp
 crypto/parameters/CryptoAlgorithmRsaKeyGenParams.h
-css/CSSCounterStyle.cpp
 css/CSSCounterStyleDescriptors.cpp
 css/CSSCounterStyleRule.h
 css/CSSCounterValue.cpp
@@ -181,10 +180,7 @@ css/CSSFontValue.cpp
 css/CSSGridLineValue.cpp
 css/CSSGroupingRule.cpp
 css/CSSImageSetOptionValue.cpp
-css/CSSImageSetValue.cpp
-css/CSSImageValue.cpp
 css/CSSImageValue.h
-css/CSSImportRule.cpp
 css/CSSKeyframeRule.cpp
 css/CSSKeyframesRule.cpp
 css/CSSNestedDeclarations.cpp

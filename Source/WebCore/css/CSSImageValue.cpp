@@ -133,7 +133,7 @@ CachedImage* CSSImageValue::loadImage(CachedResourceLoader& loader, const Resour
         else
             request.setInitiatorType(m_initiatorType);
         if (options.mode == FetchOptions::Mode::Cors)
-            request.updateForAccessControl(*loader.document());
+            request.updateForAccessControl(*protect(loader.document()));
         m_cachedImage = loader.requestImage(WTF::move(request)).value_or(nullptr);
         for (RefPtr<CSSImageValue> imageValue = this; (imageValue = imageValue->m_unresolvedValue.get()); )
             imageValue->m_cachedImage = m_cachedImage;
