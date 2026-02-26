@@ -186,26 +186,26 @@ void PluginView::Stream::didFail(NetscapePlugInStreamLoader&, const ResourceErro
 {
     // Calling streamDidFail could cause us to be deleted, so we hold on to a reference here.
     Ref protectedThis { *this };
+    RefPtr pluginView = std::exchange(m_pluginView, nullptr);
 
     // We only want to call streamDidFail if the stream was not explicitly cancelled by the plug-in.
     if (!m_streamWasCancelled)
-        m_pluginView->m_plugin->streamDidFail();
+        pluginView->m_plugin->streamDidFail();
 
-    ASSERT(m_pluginView->m_stream == this);
-    m_pluginView->m_stream = nullptr;
-    m_pluginView = nullptr;
+    ASSERT(pluginView->m_stream == this);
+    pluginView->m_stream = nullptr;
 }
 
 void PluginView::Stream::didFinishLoading(NetscapePlugInStreamLoader&)
 {
     // Calling streamDidFinishLoading could cause us to be deleted, so we hold on to a reference here.
     Ref protectedThis { *this };
+    RefPtr pluginView = std::exchange(m_pluginView, nullptr);
 
-    m_pluginView->m_plugin->streamDidFinishLoading();
+    pluginView->m_plugin->streamDidFinishLoading();
 
-    ASSERT(m_pluginView->m_stream == this);
-    m_pluginView->m_stream = nullptr;
-    m_pluginView = nullptr;
+    ASSERT(pluginView->m_stream == this);
+    pluginView->m_stream = nullptr;
 }
 
 RefPtr<PluginView> PluginView::create(HTMLPlugInElement& element, const URL& mainResourceURL, const String& contentType, bool shouldUseManualLoader)
