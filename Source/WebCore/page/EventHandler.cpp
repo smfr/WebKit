@@ -4649,8 +4649,11 @@ bool EventHandler::shouldDispatchEventsToDragSourceElement()
 
 void EventHandler::dispatchEventToDragSourceElement(const AtomString& eventType, const PlatformMouseEvent& event)
 {
-    if (shouldDispatchEventsToDragSourceElement())
-        dispatchDragEvent(eventType, *protect(draggedElement()), event, *dragState().dataTransfer);
+    if (!shouldDispatchEventsToDragSourceElement())
+        return;
+
+    if (RefPtr frame = draggedElement()->document().frame())
+        frame->eventHandler().dispatchDragEvent(eventType, *protect(draggedElement()), event, *dragState().dataTransfer);
 }
 
 bool EventHandler::dispatchDragStartEventOnSourceElement(DataTransfer& dataTransfer)

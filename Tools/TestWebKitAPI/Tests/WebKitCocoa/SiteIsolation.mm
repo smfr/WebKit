@@ -7169,25 +7169,25 @@ TEST(SiteIsolation, DragSourceEndedAtCoordinateTransformation)
 
     RetainPtr navigationDelegate = adoptNS([TestNavigationDelegate new]);
     [navigationDelegate allowAnyTLSCertificate];
-    auto configuration = server.httpsProxyConfiguration();
+    RetainPtr configuration = server.httpsProxyConfiguration();
     enableSiteIsolation(configuration);
-    RetainPtr simulator = adoptNS([[DragAndDropSimulator alloc] initWithWebViewFrame:NSMakeRect(0, 0, 600, 600) configuration:configuration]);
+    RetainPtr simulator = adoptNS([[DragAndDropSimulator alloc] initWithWebViewFrame:NSMakeRect(0, 0, 600, 600) configuration:configuration.get()]);
     RetainPtr webView = [simulator webView];
-    webView.get().navigationDelegate = navigationDelegate.get();
+    [webView setNavigationDelegate:navigationDelegate.get()];
 
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://domain1.com/mainframe"]]];
     [navigationDelegate waitForDidFinishNavigation];
     [webView waitForNextPresentationUpdate];
     [simulator runFrom:CGPointMake(300, 300) to:CGPointMake(350, 350)];
 
-    NSArray<NSString *> *events = [webView objectByEvaluatingJavaScript:@"window.events"];
-    EXPECT_GT(events.count, 0U);
+    RetainPtr<NSArray<NSString *>> events = [webView objectByEvaluatingJavaScript:@"window.events"];
+    EXPECT_GT([events count], 0U);
 
     bool foundDragStart = false;
     bool foundDragEnd = false;
     NSString *dragEndEvent = nil;
 
-    for (NSString *event in events) {
+    for (NSString *event in events.get()) {
         if ([event hasPrefix:@"dragstart:"]) {
             foundDragStart = true;
         } else if ([event hasPrefix:@"dragend:"]) {
@@ -7200,13 +7200,13 @@ TEST(SiteIsolation, DragSourceEndedAtCoordinateTransformation)
     EXPECT_TRUE(foundDragEnd) << "Should have received dragend event in remote frame";
 
     if (dragEndEvent) {
-        NSString *coords = [dragEndEvent substringFromIndex:[@"dragend:" length]];
-        NSArray *components = [coords componentsSeparatedByString:@","];
-        if (components.count == 2) {
+        RetainPtr coords = [dragEndEvent substringFromIndex:[@"dragend:" length]];
+        RetainPtr components = [coords componentsSeparatedByString:@","];
+        if ([components count] == 2) {
             int x = [components[0] intValue];
             int y = [components[1] intValue];
-            EXPECT_TRUE(x >= 190 && x <= 200) << "Expected dragend x coordinate around 196, got " << x;
-            EXPECT_TRUE(y >= 95 && y <= 105) << "Expected dragend y coordinate around 100, got " << y;
+            EXPECT_TRUE(x >= 144 && x <= 154) << "Expected dragend x coordinate around 148, got " << x;
+            EXPECT_TRUE(y >= 144 && y <= 154) << "Expected dragend y coordinate around 148, got " << y;
         }
     }
 }
