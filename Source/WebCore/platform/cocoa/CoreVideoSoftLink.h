@@ -54,6 +54,8 @@ SOFT_LINK_FUNCTION_FOR_HEADER(WebCore, CoreVideo, CVBufferSetAttachment, void, (
 #define CVBufferGetAttachments softLink_CoreVideo_CVBufferGetAttachments
 SOFT_LINK_FUNCTION_FOR_HEADER(WebCore, CoreVideo, CVPixelBufferGetTypeID, CFTypeID, (), ())
 #define CVPixelBufferGetTypeID softLink_CoreVideo_CVPixelBufferGetTypeID
+SOFT_LINK_FUNCTION_FOR_HEADER(WebCore, CoreVideo, CVPixelBufferGetDataSize, size_t, (CVPixelBufferRef pixelBuffer), (pixelBuffer))
+#define CVPixelBufferGetDataSize softLink_CoreVideo_CVPixelBufferGetDataSize
 SOFT_LINK_FUNCTION_FOR_HEADER(WebCore, CoreVideo, CVPixelBufferGetWidth, size_t, (CVPixelBufferRef pixelBuffer), (pixelBuffer))
 #define CVPixelBufferGetWidth softLink_CoreVideo_CVPixelBufferGetWidth
 SOFT_LINK_FUNCTION_FOR_HEADER(WebCore, CoreVideo, CVPixelBufferGetWidthOfPlane, size_t, (CVPixelBufferRef pixelBuffer, size_t planeIndex), (pixelBuffer, planeIndex))

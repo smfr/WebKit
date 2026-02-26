@@ -484,8 +484,12 @@ void VideoFrame::copyTo(std::span<uint8_t> span, VideoPixelFormat format, Vector
 
 RefPtr<NativeImage> VideoFrame::copyNativeImage() const
 {
-    auto conformer = makeUnique<PixelBufferConformerCV>(kCVPixelFormatType_32BGRA);
-    return NativeImage::create(conformer->createImageFromPixelBuffer(protect(pixelBuffer()).get()));
+    RetainPtr source = pixelBuffer();
+    RetainPtr bgraSource = ImageTransferSessionVT::convertPixelBuffer(source.get(), kCVPixelFormatType_32BGRA);
+    if (!bgraSource)
+        return nullptr;
+    RetainPtr colorSpace = createCGColorSpaceForCVPixelBuffer(source.get());
+    return NativeImage::create(createImageFrom32BGRAPixelBuffer(WTF::move(bgraSource), colorSpace.get()));
 }
 
 Ref<VideoFrameCV> VideoFrameCV::create(CMSampleBufferRef sampleBuffer, bool isMirrored, Rotation rotation)
