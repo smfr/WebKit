@@ -1625,6 +1625,7 @@ void FrameLoader::loadURL(FrameLoadRequest&& frameLoadRequest, const String& ref
         if (protect(frameLoadRequest.requester())->shouldForceNoOpenerBasedOnCOOP()) {
             effectiveFrameName = blankTargetFrameName();
             openerPolicy = NewFrameOpenerPolicy::Suppress;
+            action.setNewFrameOpenerPolicy(NewFrameOpenerPolicy::Suppress);
         }
 
         if (frameLoadRequest.resourceRequest().url().protocolIsBlob() && !protect(document->securityOrigin())->isSameOriginAs(protect(document->topOrigin()))) {
