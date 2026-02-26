@@ -113,7 +113,7 @@ RemoteScrollingCoordinatorTransaction RemoteScrollingCoordinator::buildTransacti
     willCommitTree(rootFrameID);
 
     return {
-        ensureCheckedScrollingStateTreeForRootFrameID(rootFrameID)->commit(LayerRepresentation::PlatformLayerIDRepresentation),
+        protect(ensureScrollingStateTreeForRootFrameID(rootFrameID))->commit(LayerRepresentation::PlatformLayerIDRepresentation),
         std::exchange(m_clearScrollLatchingInNextTransaction, false),
         { },
         RemoteScrollingCoordinatorTransaction::FromDeserialization::No

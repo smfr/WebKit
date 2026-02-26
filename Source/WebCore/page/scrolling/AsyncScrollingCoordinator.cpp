@@ -147,11 +147,6 @@ ScrollingStateTree& AsyncScrollingCoordinator::ensureScrollingStateTreeForRootFr
     });
 }
 
-CheckedRef<ScrollingStateTree> AsyncScrollingCoordinator::ensureCheckedScrollingStateTreeForRootFrameID(FrameIdentifier rootFrameID)
-{
-    return ensureScrollingStateTreeForRootFrameID(rootFrameID);
-}
-
 const ScrollingStateTree* AsyncScrollingCoordinator::existingScrollingStateTreeForRootFrameID(std::optional<FrameIdentifier> rootFrameID) const
 {
     auto* result = rootFrameID ? m_scrollingStateTrees.get(*rootFrameID) : nullptr;

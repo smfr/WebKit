@@ -70,7 +70,7 @@ DocumentTimeline::DocumentTimeline(Document& document, Seconds originTime)
     , m_document(document)
     , m_originTime(originTime)
 {
-    document.ensureCheckedTimelinesController()->addTimeline(*this);
+    protect(document.ensureTimelinesController())->addTimeline(*this);
 }
 
 DocumentTimeline::~DocumentTimeline() = default;

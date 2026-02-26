@@ -10918,11 +10918,6 @@ AnimationTimelinesController& Document::ensureTimelinesController()
     return *m_timelinesController.get();
 }
 
-CheckedRef<AnimationTimelinesController> Document::ensureCheckedTimelinesController()
-{
-    return ensureTimelinesController();
-}
-
 StyleOriginatedTimelinesController& Document::ensureStyleOriginatedTimelinesController()
 {
     if (!m_styleOriginatedTimelinesController)
