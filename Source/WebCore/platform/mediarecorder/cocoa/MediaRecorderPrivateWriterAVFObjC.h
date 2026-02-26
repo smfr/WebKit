@@ -46,6 +46,7 @@ public:
 private:
     MediaRecorderPrivateWriterAVFObjC(RetainPtr<AVAssetWriter>&&, MediaRecorderPrivateWriterListener&);
 
+    bool segmentsMustStartWithKeyframe() const final { return true; }
     std::optional<uint8_t> addAudioTrack(const AudioInfo&) final;
     std::optional<uint8_t> addVideoTrack(const VideoInfo&, const std::optional<CGAffineTransform>&) final;
     bool allTracksAdded() final;

@@ -53,7 +53,7 @@
     }
 
     function maybeStartPlayback() {
-        if (canPlayReceived && player.duration > 1 && !playbackStarted) {
+        if (canPlayReceived && player.duration > 0.6 && !playbackStarted) {
             playbackStarted = true;
             player.play();
         }
@@ -83,14 +83,19 @@
             assert_true(blobEvent.data.size > 0, 'the blob should contain some buffers');
             blobData = new Blob([blobData, blobEvent.data]);
 
-            if (blobEvent.timecode == 0)
+            if (blobEvent.timecode < 0.5)
                 return;
-            if (blobEvent.timecode >= 0.2 && paintingState == 0) {
+
+            if (blobEvent.timecode >= 0.5 && paintingState == 0) {
                 paintingState = 1;
                 doGreenImageDraw();
                 return;
             }
-            assert_greater_than(blobEvent.timecode, .4, "more than .4s recorded");
+
+            if (blobEvent.timecode < 1)
+                return;
+
+            assert_greater_than(blobEvent.timecode, 1, "more than 1s recorded");
             if (++paintingState == 2) {
                 recorder.stop();
                 ac.close();
@@ -110,7 +115,7 @@
             });
             player.onplay = () => {
                 player.pause();
-                assert_greater_than(player.duration, .4, 'the duration should be greater than .4s')
+                assert_greater_than(player.duration, 1, 'the duration should be greater than .6s')
                 player.currentTime = player.duration - 0.05;
             };
             player.onseeked = t.step_func(() => {
