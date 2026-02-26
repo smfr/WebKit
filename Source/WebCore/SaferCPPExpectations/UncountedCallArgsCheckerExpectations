@@ -438,6 +438,7 @@ loader/cache/CachedSVGFont.cpp
 mathml/MathMLElement.cpp
 mathml/MathMLSelectElement.cpp
 page/AutoscrollController.cpp
+[ macOS ] page/ContextMenuController.cpp
 [ iOS ] page/DOMTimer.cpp
 [ Mac ] page/DOMWindow.cpp
 page/DragController.cpp
