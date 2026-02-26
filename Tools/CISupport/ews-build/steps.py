@@ -8500,8 +8500,7 @@ class DisplaySaferCPPResults(buildstep.BuildStep, AddToLogMixin):
             comment += '\nUnable to find associated platform. See build for details.'
 
         self.setProperty('comment_text', comment)
-        # FIXME: Add merging blocked upon failure after initial deployment period
-        self.build.addStepsAfterCurrentStep([LeaveComment(), SetBuildSummary()])
+        self.build.addStepsAfterCurrentStep([LeaveComment(), BlockPullRequest(), SetBuildSummary()])
 
     @property
     def formattedPlatform(self):
