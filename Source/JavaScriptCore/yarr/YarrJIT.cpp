@@ -2239,6 +2239,12 @@ class YarrGenerator final : public YarrJITInfo {
             MacroAssembler::JumpList incompleteMatches;
             MacroAssembler::JumpList zeroLengthMatches;
 
+            // Save the initial index before matching so we can restore it
+            // if backtracking fails completely. We reuse the backReferenceSize
+            // frame slot, which is only used by Greedy for storing match size.
+            // beginIndex cannot be used here because it is overwritten on
+            // each reentry iteration for partial match recovery.
+            storeToFrame(m_regs.index, parenthesesFrameLocation + BackTrackInfoBackReference::backReferenceSizeIndex());
             matches.append(m_jit.jump());
 
             defineReentryLabel(op);
@@ -2320,22 +2326,27 @@ class YarrGenerator final : public YarrJITInfo {
             const MacroAssembler::RegisterID matchAmount = m_regs.regT0;
             const MacroAssembler::RegisterID beginIndex = m_regs.regT1;
 
-            failures.append(atEndOfInput());
+            MacroAssembler::JumpList nonGreedyFailures;
+            nonGreedyFailures.append(atEndOfInput());
             loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex(), matchAmount);
             if (term->quantityMaxCount != quantifyInfinite)
-                failures.append(m_jit.branch32(MacroAssembler::AboveOrEqual, matchAmount, MacroAssembler::Imm32(term->quantityMaxCount)));
+                nonGreedyFailures.append(m_jit.branch32(MacroAssembler::AboveOrEqual, matchAmount, MacroAssembler::Imm32(term->quantityMaxCount)));
 
             // If the index hasn't advanced past beginIndex and matchAmount > 0,
             // the backreference matched zero-width (undefined or empty capture).
             // Repeating zero-width matches cannot make progress, so fail.
             loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::beginIndex(), beginIndex);
             MacroAssembler::Jump indexAdvanced = m_jit.branch32(MacroAssembler::NotEqual, m_regs.index, beginIndex);
-            failures.append(m_jit.branchTest32(MacroAssembler::NonZero, matchAmount));
+            nonGreedyFailures.append(m_jit.branchTest32(MacroAssembler::NonZero, matchAmount));
             indexAdvanced.link(&m_jit);
 
             m_jit.add32(MacroAssembler::TrustedImm32(1), matchAmount);
             storeToFrame(matchAmount, parenthesesFrameLocation + BackTrackInfoBackReference::matchAmountIndex());
             m_jit.jump(op.m_reentry);
+
+            nonGreedyFailures.link(&m_jit);
+            // Restore the initial index saved before any NonGreedy matching.
+            loadFromFrame(parenthesesFrameLocation + BackTrackInfoBackReference::backReferenceSizeIndex(), m_regs.index);
             break;
         }
         }
