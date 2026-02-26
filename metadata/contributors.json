@@ -1935,13 +1935,13 @@
       "emails" : [
          "csaavedra@igalia.com"
       ],
-      "expertise" : "WebKitGTK port, Epiphany developer, HTML Editing",
+      "expertise" : "WebKitGTK, WPE, security",
       "github" : "csaavedra",
       "name" : "Claudio Saavedra",
       "nicks" : [
-         "claudio___"
+         "claudio"
       ],
-      "status" : "committer"
+      "status" : "reviewer"
    },
    {
       "emails" : [
