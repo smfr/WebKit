@@ -198,10 +198,6 @@ html/parser/HTMLDocumentParser.cpp
 html/parser/HTMLParserScheduler.cpp
 html/parser/HTMLScriptRunner.cpp
 html/parser/HTMLTreeBuilder.cpp
-html/shadow/DateTimeNumericFieldElement.cpp
-html/shadow/DateTimeSymbolicFieldElement.cpp
-html/shadow/SliderThumbElement.cpp
-[ Mac ] html/shadow/TextControlInnerElements.cpp
 inspector/DOMEditor.cpp
 inspector/InspectorAuditAccessibilityObject.cpp
 inspector/InspectorCanvas.cpp

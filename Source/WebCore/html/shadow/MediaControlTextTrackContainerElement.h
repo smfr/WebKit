@@ -122,8 +122,8 @@ private:
     bool m_needsToGenerateTextTrackRepresentation { false };
     bool m_shouldShowCaptionPreviewCue { false };
 
-    mutable RefPtr<TextTrack> m_previewTrack;
-    mutable RefPtr<VTTCue> m_previewCue;
+    const RefPtr<TextTrack> m_previewTrack;
+    const RefPtr<VTTCue> m_previewCue;
 };
 
 } // namespace WebCore

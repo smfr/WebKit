@@ -47,8 +47,10 @@
 #include <hb.h>
 #endif
 
-
 namespace WebCore {
+
+WTF_MAKE_TZONE_ALLOCATED_IMPL(LocaleICU);
+
 using namespace icu;
 
 std::unique_ptr<Locale> Locale::create(const AtomString& locale)

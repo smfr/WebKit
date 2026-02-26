@@ -29,6 +29,7 @@
 #include "DateComponents.h"
 #include "DateTimeFieldElement.h"
 
+#include <wtf/CheckedRef.h>
 #include <wtf/WeakPtr.h>
 
 namespace WebCore {
@@ -65,13 +66,11 @@ public:
     struct LayoutParameters {
         String dateTimeFormat;
         String fallbackDateTimeFormat;
-        Locale& locale;
+        const CheckedRef<Locale> locale;
         bool shouldHaveMillisecondField { false };
 
-        LayoutParameters(Locale& locale)
-            : locale(locale)
-        {
-        }
+        explicit LayoutParameters(Locale&);
+        ~LayoutParameters();
     };
 
     static Ref<DateTimeEditElement> create(Document&, DateTimeEditElementEditControlOwner&);

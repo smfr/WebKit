@@ -254,7 +254,7 @@ String BaseDateAndTimeInputType::localizeValue(const String& proposedValue) cons
         return proposedValue;
 
     ASSERT(element());
-    String localized = protect(element())->locale().formatDateTime(*date);
+    String localized = protect(protect(element())->locale())->formatDateTime(*date);
     return localized.isEmpty() ? proposedValue : localized;
 }
 

@@ -399,7 +399,7 @@ void NumberInputType::handleBeforeTextInsertedEvent(BeforeTextInsertedEvent& eve
     auto normalizedText = normalizeFullWidthNumberChars(event.text()).get();
     LOG(Editing, "normalizeFullWidthNumberChars() -> [%s]", normalizedText.utf8().data());
 
-    auto localizedText = protect(element())->locale().convertFromLocalizedNumber(normalizedText);
+    auto localizedText = protect(protect(element())->locale())->convertFromLocalizedNumber(normalizedText);
 
     // If the cleaned up text doesn't match input text, don't insert partial input
     // since it could be an incorrect paste.
@@ -541,7 +541,7 @@ String NumberInputType::localizeValue(const String& proposedValue) const
     if (proposedValue.find(isE) != notFound)
         return proposedValue;
     ASSERT(element());
-    return protect(element())->locale().convertToLocalizedNumber(proposedValue);
+    return protect(protect(element())->locale())->convertToLocalizedNumber(proposedValue);
 }
 
 String NumberInputType::visibleValue() const
@@ -558,7 +558,7 @@ String NumberInputType::convertFromVisibleValue(const String& visibleValue) cons
     if (visibleValue.find(isE) != notFound)
         return visibleValue;
     ASSERT(element());
-    return protect(element())->locale().convertFromLocalizedNumber(visibleValue);
+    return protect(protect(element())->locale())->convertFromLocalizedNumber(visibleValue);
 }
 
 ValueOrReference<String> NumberInputType::sanitizeValue(const String& proposedValue LIFETIME_BOUND) const

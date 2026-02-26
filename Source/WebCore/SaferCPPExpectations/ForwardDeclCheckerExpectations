@@ -38,7 +38,6 @@ dom/Node.h
 editing/Editor.h
 html/HTMLMediaElement.cpp
 html/canvas/PlaceholderRenderingContext.cpp
-html/shadow/DateTimeEditElement.h
 inspector/InspectorStyleSheet.h
 inspector/InstrumentingAgents.h
 inspector/PageInspectorController.h

@@ -580,10 +580,10 @@ std::optional<Style::UnadjustedStyle> SliderThumbElement::resolveCustomStyle(con
     auto elementStyle = resolveStyle(resolutionContext);
     switch (hostStyle->usedAppearance()) {
     case StyleAppearance::SliderVertical:
-        elementStyle.style->setUsedAppearance(StyleAppearance::SliderThumbVertical);
+        protect(elementStyle.style)->setUsedAppearance(StyleAppearance::SliderThumbVertical);
         break;
     case StyleAppearance::SliderHorizontal:
-        elementStyle.style->setUsedAppearance(StyleAppearance::SliderThumbHorizontal);
+        protect(elementStyle.style)->setUsedAppearance(StyleAppearance::SliderThumbHorizontal);
         break;
     default:
         break;
