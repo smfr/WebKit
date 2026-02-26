@@ -663,14 +663,6 @@ struct PerWebProcessState {
 #if PLATFORM(MAC)
 - (nullable WebKit::WebViewImpl *)_impl;
 #endif
-#if ENABLE(SCREEN_TIME)
-- (nullable STWebpageController *)_screenTimeWebpageController;
-#if PLATFORM(MAC)
-- (nullable NSVisualEffectView *)_screenTimeBlurredSnapshot;
-#else
-- (nullable UIVisualEffectView *)_screenTimeBlurredSnapshot;
-#endif
-#endif
 
 #if ENABLE(PDF_PAGE_NUMBER_INDICATOR)
 

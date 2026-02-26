@@ -1512,10 +1512,10 @@
 		F6B7BE9517469212008A3445 /* DidAssociateFormControls_Bundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F6B7BE92174691EF008A3445 /* DidAssociateFormControls_Bundle.cpp */; };
 		F6D67D3826F90206006E0349 /* Int128.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F6D67D3626F90206006E0349 /* Int128.cpp */; };
 		F6F49C6B15545CA70007F39D /* DOMWindowExtensionNoCache_Bundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F6F49C6615545C8D0007F39D /* DOMWindowExtensionNoCache_Bundle.cpp */; };
-		FC0A4AEE2F0E76EE0053173D /* MessageLogTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC0A4AED2F0E76EE0053173D /* MessageLogTests.cpp */; };
-		FC0A4AEF2F0E76EE0053173D /* MessageLogEndToEndTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC0A4AF02F0E76EE0053173D /* MessageLogEndToEndTests.cpp */; };
 		FAC1FE462F19C3EB0030C30E /* open-in-new-tab.html in Copy Resources */ = {isa = PBXBuildFile; fileRef = FAC1FE452F19C3EB0030C30E /* open-in-new-tab.html */; };
 		FAC1FE572F21AD890030C30E /* JSHandlePlugIn.mm in Sources */ = {isa = PBXBuildFile; fileRef = FAC1FE4F2F2152270030C30E /* JSHandlePlugIn.mm */; };
+		FC0A4AEE2F0E76EE0053173D /* MessageLogTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC0A4AED2F0E76EE0053173D /* MessageLogTests.cpp */; };
+		FC0A4AEF2F0E76EE0053173D /* MessageLogEndToEndTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC0A4AF02F0E76EE0053173D /* MessageLogEndToEndTests.cpp */; };
 		FE2BCDC72470FDA300DEC33B /* StdLibExtrasTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FE2BCDC62470FC7000DEC33B /* StdLibExtrasTests.cpp */; };
 		FE2D9474245EB2F400E48135 /* BitSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FE2D9473245EB2DF00E48135 /* BitSet.cpp */; };
 		FE9CD7E42D10CE7500266FDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 574F55D0204D471C002948C6 /* Security.framework */; };
@@ -4402,6 +4402,8 @@
 		F4C3F29A2C447EB50029A47D /* SimulateClickOverText.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SimulateClickOverText.mm; sourceTree = "<group>"; };
 		F4C3F2A32C44832B0029A47D /* click-targets.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "click-targets.html"; sourceTree = "<group>"; };
 		F4C8797E2059D8D3009CD00B /* ScrollViewInsetTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ScrollViewInsetTests.mm; sourceTree = "<group>"; };
+		F4CA0F032F4E700500081F3D /* SafeBrowsingTestUtilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SafeBrowsingTestUtilities.h; path = cocoa/SafeBrowsingTestUtilities.h; sourceTree = "<group>"; };
+		F4CA0F042F4E700500081F3D /* SafeBrowsingTestUtilities.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SafeBrowsingTestUtilities.mm; path = cocoa/SafeBrowsingTestUtilities.mm; sourceTree = "<group>"; };
 		F4CC8F452C0A74BA00D7E76E /* element-targeting-9.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "element-targeting-9.html"; sourceTree = "<group>"; };
 		F4CD74C520FDACF500DE3794 /* text-with-async-script.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "text-with-async-script.html"; sourceTree = "<group>"; };
 		F4CD74C720FDB49600DE3794 /* TestURLSchemeHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestURLSchemeHandler.h; sourceTree = "<group>"; };
@@ -4728,6 +4730,8 @@
 				0F139E721A423A2B00F590F5 /* PlatformUtilitiesCocoa.mm */,
 				F4010B8224DA267F00A876E2 /* PoseAsClass.h */,
 				F4010B8124DA267F00A876E2 /* PoseAsClass.mm */,
+				F4CA0F032F4E700500081F3D /* SafeBrowsingTestUtilities.h */,
+				F4CA0F042F4E700500081F3D /* SafeBrowsingTestUtilities.mm */,
 				A17C58432C9BE200009DD0B5 /* TestBundleLoader.h */,
 				CE640CA52370A4F300C5CAA4 /* TestCocoa.h */,
 				CE640CA62370A4F300C5CAA4 /* TestCocoa.mm */,

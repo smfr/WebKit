@@ -2271,22 +2271,6 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
 }
 #endif // PLATFORM(MAC)
 
-#if ENABLE(SCREEN_TIME)
-- (STWebpageController *)_screenTimeWebpageController
-{
-    return _screenTimeWebpageController.get();
-}
-
-#if PLATFORM(MAC)
-- (NSVisualEffectView *) _screenTimeBlurredSnapshot
-#else
-- (UIVisualEffectView *) _screenTimeBlurredSnapshot
-#endif
-{
-    return _screenTimeBlurredSnapshot.get();
-}
-#endif
-
 - (std::optional<BOOL>)_resolutionForShareSheetImmediateCompletionForTesting
 {
     return _resolutionForShareSheetImmediateCompletionForTesting;
@@ -6836,6 +6820,32 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
 
 - (void)_extractDebugTextWithConfiguration:(_WKTextExtractionConfiguration *)configuration completionHandler:(void(^)(_WKTextExtractionResult *))completionHandler
 {
+    bool shouldAvoidExtractingText = [&] {
+#if HAVE(SAFE_BROWSING)
+        if (_page->pageLoadState().committedHadSafeBrowsingWarning())
+            return YES;
+
+        if (_page->hasShownSafeBrowsingWarningAfterLastLoadCommit())
+            return YES;
+#endif
+#if HAVE(SAFE_BROWSING) && PLATFORM(IOS_FAMILY)
+        if (_warningView)
+            return YES;
+#endif
+#if HAVE(SAFE_BROWSING) && PLATFORM(MAC)
+        if (_impl->warningView())
+            return YES;
+#endif
+#if ENABLE(SCREEN_TIME)
+        if (_isBlockedByScreenTime)
+            return YES;
+#endif
+        return NO;
+    }();
+
+    if (shouldAvoidExtractingText)
+        return completionHandler(createEmptyTextExtractionResult().get());
+
     UniqueRef assertionScope = _page->createTextExtractionAssertionScope();
 #if USE(APPLE_INTERNAL_SDK) || (!PLATFORM(WATCHOS) && !PLATFORM(APPLETV))
     if (protect(_page->preferences())->textExtractionFilterEnabled() && (configuration.filterOptions & _WKTextExtractionFilterRules)) {

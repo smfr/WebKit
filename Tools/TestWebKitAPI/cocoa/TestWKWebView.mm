@@ -841,6 +841,11 @@ static IterationStatus forEachCALayer(CALayer *layer, IterationStatus(^visitor)(
     return dynamic_objc_cast<_WKJSHandle>([self objectByEvaluatingJavaScript:script.get() inFrame:frame inContentWorld:world]);
 }
 
+- (void)visitUnsafeSite
+{
+    [[self _safeBrowsingWarning] performSelector:NSSelectorFromString(@"clickedOnLink:") withObject:[NSURL URLWithString:@"WKVisitUnsafeWebsiteSentinel"]];
+}
+
 @end
 
 #endif // __cplusplus

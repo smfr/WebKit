@@ -7728,6 +7728,12 @@ void WebPageProxy::didCommitLoadForFrame(IPC::Connection& connection, FrameIdent
 
         m_pageLoadTiming = std::exchange(m_pageLoadTimingPendingCommit, nullptr);
         m_framesWithSubresourceLoadingForPageLoadTiming.clear();
+
+#if HAVE(SAFE_BROWSING)
+        if (navigation && navigation->hadSafeBrowsingWarning())
+            protectedPageLoadState->setHadSafeBrowsingWarning(transaction);
+        m_hasShownSafeBrowsingWarningAfterLastLoadCommit = false;
+#endif
     }
 
 #if USE(APPKIT)
@@ -8682,6 +8688,7 @@ void WebPageProxy::decidePolicyForNavigationAction(Ref<WebProcessProxy>&& proces
             if (frame->isMainFrame() && safeBrowsingWarning->url().isValid()) {
                 Ref protectedPageLoadState = pageLoadState();
                 auto transaction = protectedPageLoadState->transaction();
+                protectedPageLoadState->setHadSafeBrowsingWarning(transaction);
                 protectedPageLoadState->setPendingAPIRequest(transaction, { navigation->navigationID(), safeBrowsingWarning->url().string() });
                 protectedPageLoadState->commitChanges();
             }
@@ -8998,6 +9005,7 @@ void WebPageProxy::decidePolicyForResponseShared(Ref<WebProcessProxy>&& process,
             if (frame->isMainFrame() && safeBrowsingWarning->url().isValid()) {
                 Ref protectedPageLoadState = pageLoadState();
                 auto transaction = protectedPageLoadState->transaction();
+                protectedPageLoadState->setHadSafeBrowsingWarning(transaction);
                 protectedPageLoadState->setPendingAPIRequest(transaction, { navigation->navigationID(), safeBrowsingWarning->url().string() });
                 protectedPageLoadState->commitChanges();
             }
@@ -12314,6 +12322,10 @@ void WebPageProxy::resetState(ResetStateReason resetStateReason)
 #if PLATFORM(IOS_FAMILY) && ENABLE(MODEL_PROCESS)
     if (auto modelPresentationManager = modelPresentationManagerProxy())
         modelPresentationManager->invalidateAllModels();
+#endif
+
+#if HAVE(SAFE_BROWSING)
+    m_hasShownSafeBrowsingWarningAfterLastLoadCommit = false;
 #endif
 }
 

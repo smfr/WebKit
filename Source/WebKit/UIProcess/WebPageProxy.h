@@ -2957,6 +2957,11 @@ public:
 
     void updateRemoteIntersectionObserversInOtherWebProcesses(IPC::Connection&);
 
+#if HAVE(SAFE_BROWSING)
+    void setHasShownSafeBrowsingWarningAfterLastLoadCommit() { m_hasShownSafeBrowsingWarningAfterLastLoadCommit = true; }
+    bool hasShownSafeBrowsingWarningAfterLastLoadCommit() const { return m_hasShownSafeBrowsingWarningAfterLastLoadCommit; }
+#endif
+
 private:
     WebPageProxy(PageClient&, WebProcessProxy&, Ref<API::PageConfiguration>&&);
     void platformInitialize();
@@ -4130,6 +4135,7 @@ private:
 #if HAVE(SAFE_BROWSING)
     Vector<CompletionHandler<void(bool)>> m_deferredModalHandlers;
     bool m_isSafeBrowsingCheckInProgress { false };
+    bool m_hasShownSafeBrowsingWarningAfterLastLoadCommit { false };
 #endif
     bool m_isLockdownModeExplicitlySet { false };
 

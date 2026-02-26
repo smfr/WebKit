@@ -325,9 +325,10 @@ void WebPageProxy::beginSafeBrowsingCheck(const URL& url, API::Navigation& navig
                 }
             }
 
-            if (!navigation->safeBrowsingCheckOngoing() && navigation->safeBrowsingWarning() && navigation->safeBrowsingCheckTimedOut())
+            if (!navigation->safeBrowsingCheckOngoing() && navigation->safeBrowsingWarning() && navigation->safeBrowsingCheckTimedOut()) {
+                protectedThis->setHasShownSafeBrowsingWarningAfterLastLoadCommit();
                 protectedThis->showBrowsingWarning(navigation->safeBrowsingWarning());
-            else if (!navigation->safeBrowsingWarning())
+            } else if (!navigation->safeBrowsingWarning())
                 protectedThis->completeSafeBrowsingCheckForModals(true);
         });
     };

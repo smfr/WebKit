@@ -157,6 +157,7 @@ class Color;
 - (CGRect)elementRectFromSelector:(NSString *)selector;
 - (CGPoint)elementMidpointFromSelector:(NSString *)selector;
 - (_WKJSHandle *)querySelector:(NSString *)selector frame:(WKFrameInfo *)frame world:(WKContentWorld *)world;
+- (void)visitUnsafeSite;
 @end
 
 #endif // __cplusplus

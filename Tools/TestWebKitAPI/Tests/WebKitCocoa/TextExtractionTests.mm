@@ -25,11 +25,13 @@
 
 #import "config.h"
 
+#import "ClassMethodSwizzler.h"
 #import "HTTPServer.h"
 #import "InstanceMethodSwizzler.h"
 #import "JSHandlePlugInProtocol.h"
 #import "PlatformUtilities.h"
 #import "SafeBrowsingSPI.h"
+#import "SafeBrowsingTestUtilities.h"
 #import "Test.h"
 #import "TestNavigationDelegate.h"
 #import "TestWKWebView.h"
@@ -40,12 +42,15 @@
 #import <WebKit/WKPreferencesPrivate.h>
 #import <WebKit/WKWebViewConfigurationPrivate.h>
 #import <WebKit/WKWebViewPrivate.h>
+#import <WebKit/WKWebViewPrivateForTesting.h>
 #import <WebKit/_WKContentWorldConfiguration.h>
+#import <WebKit/_WKFeature.h>
 #import <WebKit/_WKFrameTreeNode.h>
 #import <WebKit/_WKJSHandle.h>
 #import <WebKit/_WKRemoteObjectInterface.h>
 #import <WebKit/_WKRemoteObjectRegistry.h>
 #import <WebKit/_WKTextExtraction.h>
+#import <pal/cocoa/ScreenTimeSoftLink.h>
 #import <pal/spi/cocoa/NSKeyedUnarchiverSPI.h>
 #import <wtf/SoftLinking.h>
 #import <wtf/WorkQueue.h>
@@ -54,6 +59,14 @@
 
 SOFT_LINK_PRIVATE_FRAMEWORK(SafariSafeBrowsing);
 SOFT_LINK_CLASS(SafariSafeBrowsing, SSBLookupContext);
+
+#if ENABLE(SCREEN_TIME)
+
+@interface STWebpageController ()
+@property (setter=setURLIsBlocked:) BOOL URLIsBlocked;
+@end
+
+#endif
 
 @interface WKWebView (TextExtractionTests)
 - (NSString *)synchronouslyGetDebugText:(_WKTextExtractionConfiguration *)configuration;
@@ -870,5 +883,123 @@ TEST(TextExtractionTests, ClickInteractionWhileInBackground)
         return [[webView stringByEvaluatingJavaScript:@"document.getElementById('result').textContent"] isEqualToString:@"completed"];
     }, 5, @"Expected result text to become 'completed'.");
 }
+
+#if ENABLE(SCREEN_TIME)
+
+TEST(TextExtractionTests, ScreenTimeBlocksTextExtraction)
+{
+    __block bool doneCheckingScreenTime = false;
+
+    InstanceMethodSwizzler swizzler {
+        PAL::getSTScreenTimeConfigurationClassSingleton(),
+        @selector(enforcesChildRestrictions),
+        imp_implementationWithBlock(^BOOL {
+            doneCheckingScreenTime = true;
+            return YES;
+        })
+    };
+
+    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 400, 300) configuration:^{
+        RetainPtr configuration = adoptNS([WKWebViewConfiguration new]);
+        RetainPtr preferences = [configuration preferences];
+        [preferences _setTextExtractionEnabled:YES];
+        for (_WKFeature *feature in [WKPreferences _features]) {
+            if ([feature.key isEqualToString:@"ScreenTimeEnabled"])
+                [preferences _setEnabled:YES forFeature:feature];
+        }
+        return configuration.autorelease();
+    }()]);
+
+    RetainPtr request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://webkit.org"]];
+    [webView synchronouslyLoadSimulatedRequest:request.get() responseHTMLString:@"<body>Hello world. This is a test</body>"];
+    [webView waitForNextPresentationUpdate];
+    Util::run(&doneCheckingScreenTime);
+
+    RetainPtr controller = [webView _screenTimeWebpageController];
+    [controller setURLIsBlocked:YES];
+
+    RetainPtr debugTextWhenBlocked = [webView synchronouslyGetDebugText:nil];
+    EXPECT_FALSE([debugTextWhenBlocked containsString:@"Hello world"]);
+
+    [controller setURLIsBlocked:NO];
+
+    RetainPtr debugTextWhenUnblocked = [webView synchronouslyGetDebugText:nil];
+    EXPECT_TRUE([debugTextWhenUnblocked containsString:@"Hello world"]);
+}
+
+#endif // ENABLE(SCREEN_TIME)
+
+#if HAVE(SAFE_BROWSING)
+
+TEST(TextExtractionTests, SafeBrowsingWarningBlocksTextExtraction)
+{
+    ClassMethodSwizzler swizzler {
+        getSSBLookupContextClassSingleton(),
+        @selector(sharedLookupContext),
+        [TestLookupContext methodForSelector:@selector(sharedLookupContext)]
+    };
+
+    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 400, 400) configuration:^{
+        RetainPtr configuration = adoptNS([WKWebViewConfiguration new]);
+        RetainPtr preferences = [configuration preferences];
+        [preferences setFraudulentWebsiteWarningEnabled:YES];
+        [preferences _setTextExtractionEnabled:YES];
+        return configuration.autorelease();
+    }()]);
+
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSBundle.test_resourcesBundle URLForResource:@"debug-text-extraction" withExtension:@"html"]]];
+
+    Util::waitForConditionWithLogging([&] -> bool {
+        return [webView _safeBrowsingWarning];
+    }, 3, @"Timed out waiting for safe browsing warning");
+
+    RetainPtr debugTextWithWarning = [webView synchronouslyGetDebugText:nil];
+    EXPECT_FALSE([debugTextWithWarning containsString:@"Test"]);
+
+    [webView visitUnsafeSite];
+    [webView _test_waitForDidFinishNavigation];
+
+    RetainPtr debugTextAfterWarning = [webView synchronouslyGetDebugText:nil];
+    EXPECT_FALSE([debugTextAfterWarning containsString:@"Test"]);
+}
+
+TEST(TextExtractionTests, DelayedSafeBrowsingWarningBlocksTextExtraction)
+{
+    DelayedLookupContext.delayDuration = 1_s;
+
+    TestWebKitAPI::HTTPServer server({
+        { "/test"_s, { "test"_s } },
+    }, TestWebKitAPI::HTTPServer::Protocol::HttpsProxy);
+
+    ClassMethodSwizzler swizzler {
+        getSSBLookupContextClassSingleton(),
+        @selector(sharedLookupContext),
+        [DelayedLookupContext methodForSelector:@selector(sharedLookupContext)]
+    };
+
+    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:NSMakeRect(0, 0, 800, 600) configuration:^{
+        RetainPtr configuration = server.httpsProxyConfiguration();
+        RetainPtr preferences = [configuration preferences];
+        [preferences setFraudulentWebsiteWarningEnabled:YES];
+        [preferences _setTextExtractionEnabled:YES];
+        return configuration.autorelease();
+    }()]);
+
+    RetainPtr delegate = adoptNS([TestNavigationDelegate new]);
+    [delegate allowAnyTLSCertificate];
+    [webView setNavigationDelegate:delegate.get()];
+    [webView evaluateJavaScript:@"window.location = 'https://example2.com/test'" completionHandler:nil];
+
+    Util::waitForConditionWithLogging([&] -> bool {
+        return [webView _safeBrowsingWarning];
+    }, 5, @"Timed out waiting for delayed safe browsing warning");
+
+    [webView visitUnsafeSite];
+
+    RetainPtr debugTextAfterWarning = [webView synchronouslyGetDebugText:nil];
+    EXPECT_FALSE([debugTextAfterWarning containsString:@"test"]);
+}
+
+#endif // HAVE(SAFE_BROWSING)
 
 } // namespace TestWebKitAPI

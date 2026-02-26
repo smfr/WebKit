@@ -35,6 +35,7 @@ cocoa/ImageAnalysisTestingUtilities.mm @nonARC
 cocoa/ModelLoadingMessageHandler.mm @nonARC
 cocoa/NSItemProviderAdditions.mm @nonARC
 cocoa/PlatformUtilitiesCocoa.mm @nonARC
+cocoa/SafeBrowsingTestUtilities.mm @nonARC
 cocoa/TestCocoa.mm @nonARC
 cocoa/TestDownloadDelegate.mm @nonARC
 cocoa/TestInspectorURLSchemeHandler.mm @nonARC

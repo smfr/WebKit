@@ -1270,6 +1270,24 @@ static void dumpCALayer(TextStream& ts, CALayer *layer, bool traverse)
     return downcast<WebKit::RemoteLayerTreeDrawingAreaProxy>(protect(_page->drawingArea()))->displayLinkWantsHighFrameRateForTesting();
 }
 
+- (STWebpageController *)_screenTimeWebpageController
+{
+#if ENABLE(SCREEN_TIME)
+    return _screenTimeWebpageController.get();
+#else
+    return nil;
+#endif
+}
+
+- (_WKPlatformVisualEffectView *)_screenTimeBlurredSnapshot
+{
+#if ENABLE(SCREEN_TIME)
+    return _screenTimeBlurredSnapshot.get();
+#else
+    return nil;
+#endif
+}
+
 @end
 
 #if ENABLE(MEDIA_SESSION_COORDINATOR)
