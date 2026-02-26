@@ -63,7 +63,7 @@ public:
 #endif
     );
 #if USE(CG)
-    ShareableBitmapConfiguration(NativeImage&);
+    ShareableBitmapConfiguration(const NativeImage&);
 #endif
 
     IntSize size() const { return m_size; }
@@ -148,11 +148,11 @@ public:
 
     // Create a shareable bitmap from a NativeImage.
 #if USE(CG)
-    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImagePixels(NativeImage&);
+    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImagePixels(const NativeImage&);
 #endif
-    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(NativeImage&, const DestinationColorSpace&);
-    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(NativeImage&, const DestinationColorSpace&, const IntSize&);
-    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(NativeImage&, const DestinationColorSpace&, const IntSize& destinationSize, const IntSize& sourceSize);
+    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(const NativeImage&, const DestinationColorSpace&);
+    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(const NativeImage&, const DestinationColorSpace&, const IntSize&);
+    WEBCORE_EXPORT static RefPtr<ShareableBitmap> createFromImageDraw(const NativeImage&, const DestinationColorSpace&, const IntSize& destinationSize, const IntSize& sourceSize);
 
     // Create a shareable bitmap from a handle.
     WEBCORE_EXPORT static RefPtr<ShareableBitmap> create(Handle&&, SharedMemory::Protection = SharedMemory::Protection::ReadWrite, SharedMemory::CopyOnWrite = defaultCopyOnWrite);

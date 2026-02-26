@@ -655,7 +655,7 @@ void RemoteGraphicsContextProxy::setURLForRect(const URL& link, const FloatRect&
     send(Messages::RemoteGraphicsContext::SetURLForRect(link, destRect));
 }
 
-bool RemoteGraphicsContextProxy::recordResourceUse(NativeImage& image)
+bool RemoteGraphicsContextProxy::recordResourceUse(const NativeImage& image)
 {
     RefPtr renderingBackend = m_renderingBackend.get();
     if (!renderingBackend) [[unlikely]] {

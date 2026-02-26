@@ -41,7 +41,7 @@
 
 namespace WebCore {
 
-ShareableBitmapConfiguration::ShareableBitmapConfiguration(NativeImage& image)
+ShareableBitmapConfiguration::ShareableBitmapConfiguration(const NativeImage& image)
     : m_size(image.size())
     , m_colorSpace(image.colorSpace())
     , m_headroom(image.headroom())
@@ -108,7 +108,7 @@ CGBitmapInfo ShareableBitmapConfiguration::calculateBitmapInfo(const Destination
     return info;
 }
 
-RefPtr<ShareableBitmap> ShareableBitmap::createFromImagePixels(NativeImage& image)
+RefPtr<ShareableBitmap> ShareableBitmap::createFromImagePixels(const NativeImage& image)
 {
     auto colorSpace = image.colorSpace();
     if (CGColorSpaceGetModel(protect(colorSpace.platformColorSpace()).get()) != kCGColorSpaceModelRGB)
