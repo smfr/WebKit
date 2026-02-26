@@ -37,9 +37,6 @@ objc_fully_qualified_method = re.compile(r'[-+]\[(?P<class>\S+) (?P<selector>[^\
 class APIReport:
     file: Path
     arch: str
-    platform: str
-    min_os: str
-    sdk: str
 
     exports: set[str] = field(default_factory=set)
     methods: set[APIReport.Selector] = field(default_factory=set)
@@ -53,7 +50,7 @@ class APIReport:
     @classmethod
     def from_binary(cls, binary_path: Path, *, arch: str,
                     exports_only: bool = False) -> APIReport:
-        dyld_args = ['-arch', arch, '-platform', '-exports', '-objc']
+        dyld_args = ['-arch', arch, '-exports', '-objc']
         if not exports_only:
             dyld_args.extend(('-imports',
                               # WebKit binaries typically use __DATA_CONST, but
@@ -65,26 +62,16 @@ class APIReport:
         dyld = subprocess.run(('xcrun', 'dyld_info', *dyld_args, binary_path),
                               check=True, stdout=subprocess.PIPE, text=True)
 
-        return cls._from_dyld_info(binary_path, arch, dyld.stdout)
+        report = cls(file=binary_path, arch=arch)
+        report._populate_from_dyld_info(dyld.stdout)
+        return report
 
-    @classmethod
-    def _from_dyld_info(cls, binary_path: Path, arch: str,
-                        dyld_output: str) -> APIReport:
-        Sect = Enum('Sect', 'PLATFORM EXPORTS IMPORTS OBJC SELREFS DLSYM '
-                    'GETCLASS')
+    def _populate_from_dyld_info(self, dyld_output: str):
+        Sect = Enum('Sect', 'EXPORTS IMPORTS OBJC SELREFS DLSYM GETCLASS')
         in_section = None
         next_cstr = bytearray()
-        seen_platform = False
 
-        platform: str
-        min_os: str
-        sdk: str
-        exports: set[str] = set()
-        methods: set[APIReport.Selector] = set()
-        imports: set[str] = set()
-        selrefs: set[str] = set()
-
-        header_line = f'{binary_path} [{arch}]:'
+        header_line = f'{self.file} [{self.arch}]:'
         for line in dyld_output.splitlines():
             # Each of dyld_info's flags prints its own section of the output.
             # In this line-based parser, keep track of which section we are in,
@@ -95,9 +82,7 @@ class APIReport:
                 continue
 
             # Detect changes to the section of output.
-            if line == '-platform:':
-                in_section = Sect.PLATFORM
-            elif line == '-exports:':
+            if line == '-exports:':
                 in_section = Sect.EXPORTS
             elif line == '-imports:':
                 in_section = Sect.IMPORTS
@@ -112,17 +97,6 @@ class APIReport:
                 in_section = Sect.GETCLASS
 
             # Parse symbol information based on the current section.
-            elif in_section == Sect.PLATFORM:
-                # ```
-                # platform     minOS      sdk
-                #      iOS     26.0      26.0
-                # ```
-                if not seen_platform:
-                    assert line.split() == ['platform', 'minOS', 'sdk'], \
-                        'dyld_info -platform info in unexpected format'
-                    seen_platform = True
-                    continue
-                platform, min_os, sdk = line.split()
             elif in_section == Sect.EXPORTS:
                 # Address in binary and symbol name:
                 # ```
@@ -131,7 +105,7 @@ class APIReport:
                 offset, symbol = line.split(maxsplit=1)
                 # skip the header line
                 if offset != 'offset':
-                    exports.add(symbol)
+                    self.exports.add(symbol)
             elif in_section == Sect.IMPORTS:
                 # Hexadecimal index, symbol name, optional linkage tag, and
                 # containing dylib as recorded in the two-level namespace:
@@ -141,7 +115,7 @@ class APIReport:
                 idx, symbol, metadata = line.split(maxsplit=2)
                 dylib = metadata[metadata.index('(from ') + 6:-1]
                 if dylib != '<this-image>':
-                    imports.add(symbol)
+                    self.imports.add(symbol)
             elif in_section == Sect.OBJC:
                 # ObjC-like declaration for classes and protocols with method
                 # names and method addresses for classes:
@@ -164,11 +138,11 @@ class APIReport:
                 # ```
                 m = objc_fully_qualified_method.search(line)
                 if m:
-                    sel = cls.Selector._make(m.group('selector', 'class'))
-                    methods.add(sel)
+                    sel = self.Selector._make(m.group('selector', 'class'))
+                    self.methods.add(sel)
                 elif '@interface' not in line and \
                         '@protocol' not in line and '@end' not in line:
-                    print(f'warning:{binary_path} unrecognized '
+                    print(f'warning:{self.file} unrecognized '
                           f'dyld_info -objc line: "{line}"', file=sys.stderr)
             elif in_section == Sect.SELREFS:
                 # Address in binary of selref data, followed by selector
@@ -177,7 +151,7 @@ class APIReport:
                 # 0x0A8043D8  "interruption:"
                 # ```
                 address, quoted_name = line.split(maxsplit=1)
-                selrefs.add(quoted_name.strip('"'))
+                self.selrefs.add(quoted_name.strip('"'))
             elif in_section in (Sect.DLSYM, Sect.GETCLASS):
                 # hexdump-style output, separated by lines containing symbol
                 # names:
@@ -195,14 +169,10 @@ class APIReport:
                         continue
                     name = next_cstr.decode()
                     if in_section == Sect.GETCLASS:
-                        imports.add(f'_OBJC_CLASS_$_{name}')
+                        self.imports.add(f'_OBJC_CLASS_$_{name}')
                     else:
-                        imports.add(f'_{name}')
+                        self.imports.add(f'_{name}')
                     del next_cstr[:]
             else:
-                print(f'warning:{binary_path}: unrecognized '
+                print(f'warning:{self.file}: unrecognized '
                       f'dyld_info line: "{line}"', file=sys.stderr)
-
-        return cls(file=binary_path, arch=arch, platform=platform,
-                   min_os=min_os, sdk=sdk, exports=exports, methods=methods,
-                   imports=imports, selrefs=selrefs)

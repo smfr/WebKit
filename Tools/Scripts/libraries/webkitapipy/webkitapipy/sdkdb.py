@@ -26,10 +26,9 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-import sys
 from enum import Enum
 from fnmatch import fnmatch
-from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional, Union
+from typing import Any, Callable, Iterable, NamedTuple, Optional, Union
 from pathlib import Path
 
 from .macho import APIReport, objc_fully_qualified_method
@@ -38,7 +37,7 @@ from .allow import AllowList
 
 # Increment this number to force clients to rebuild from scratch, to
 # accomodate schema changes or fix caching bugs.
-VERSION = 9
+VERSION = 8
 
 
 class DeclarationKind(Enum):
@@ -65,36 +64,6 @@ class DeclarationKind(Enum):
 sqlite3.register_adapter(DeclarationKind, DeclarationKind.to_sql)
 sqlite3.register_converter("DeclarationKind", DeclarationKind.from_sql)
 
-PLATFORM = '__PLATFORM'
-OS_VERSION = '__OS_VERSION'
-SDK_VERSION = '__SDK_VERSION'
-
-
-def apply_operator_sql(op: str, value: str, operand: str) -> str:
-    return (
-        f"(CASE ({op})"
-        f" WHEN '==' THEN ({value}) IS ({operand})"
-        f" WHEN '!=' THEN ({value}) IS NOT ({operand})"
-        f" WHEN '<'  THEN ({value}) < ({operand})"
-        f" WHEN '<=' THEN ({value}) <= ({operand})"
-        f" WHEN '>'  THEN ({value}) > ({operand})"
-        f" WHEN '>=' THEN ({value}) >= ({operand})"
-        f" END)"
-    )
-
-
-def semver_to_int(semver: str) -> int:
-    version = tuple(map(int, semver.split('.')))
-    if len(version) > 3 or any(x > 99 for x in version):
-        raise ValueError(f'Semantic version "{semver}" must be no more than '
-                         '3 components, with each component below 99')
-    elif len(version) == 3:
-        return version[0] * 10000 + version[1] * 100 + version[2]
-    elif len(version) == 2:
-        return version[0] * 10000 + version[1] * 100
-    else:
-        return version[0] * 10000
-
 
 class MissingName(NamedTuple):
     name: str
@@ -117,7 +86,6 @@ class UnnecessaryAllowedName(NamedTuple):
 
 
 Diagnostic = Union[MissingName, UnusedAllowedName, UnnecessaryAllowedName]
-ConditionVariable = Union[bool, str, int, float]
 
 SYMBOL = DeclarationKind.SYMBOL
 OBJC_CLS = DeclarationKind.OBJC_CLS
@@ -191,9 +159,7 @@ class SDKDB:
                     '   cond_id, input_file REFERENCES input_file(path) '
                     '                       ON DELETE CASCADE)')
         cur.execute('CREATE INDEX allow_names ON allow (name, kind)')
-        cur.execute('CREATE TABLE condition_chain(name, '
-                    "   op CHECK (op IN ('==', '!=', '<', '<=', '>', '>=')), "
-                    '   operand, nextid, '
+        cur.execute('CREATE TABLE condition_chain(name, invert, nextid, '
                     '   input_file REFERENCES input_file(path) '
                     '              ON DELETE CASCADE)')
         cur.execute(f'PRAGMA user_version = {VERSION}')
@@ -206,7 +172,7 @@ class SDKDB:
         cur.execute('CREATE TEMPORARY TABLE imports(name, '
                     '   kind DeclarationKind, input_file, arch)')
         cur.execute('CREATE INDEX import_names ON imports(name, kind)')
-        cur.execute('CREATE TEMPORARY TABLE condition(name UNIQUE, value)')
+        cur.execute('CREATE TEMPORARY TABLE condition(name UNIQUE)')
         self.con.commit()
 
     def __del__(self):
@@ -372,7 +338,6 @@ class SDKDB:
     def _add_allowlist(self, config: AllowList, allowlist: Path):
         for entry in config.allowed_spi:
             cond_id = None
-            cur = self.con.cursor()
             if entry.requires:
                 # Convert a requirements list like ["A", "B", "!C"] into a
                 # graph data structure e.g. (A) -> (B) -> (!C). The head node
@@ -383,24 +348,12 @@ class SDKDB:
                 # FIXME: No effort is made to reuse nodes in the graph between
                 # allowlist entries, so we store more than we have to.
                 # (https://bugs.webkit.org/show_bug.cgi?id=295819)
-                for name in reversed(entry.requires):
-                    cur.execute('INSERT INTO condition_chain VALUES (?,?,?,?,?)',
-                                (name.removeprefix('!'),
-                                 '!=' if name.startswith('!') else '==', 1,
+                cur = self.con.cursor()
+                for req in reversed(entry.requires):
+                    cur.execute('INSERT INTO condition_chain VALUES (?,?,?,?)',
+                                (req.removeprefix('!'), req.startswith('!'),
                                  cond_id, str(allowlist.resolve())))
                     cond_id = cur.lastrowid
-            for req in entry.requires_os:
-                cur.execute('INSERT INTO condition_chain VALUES (?,?,?,?,?)',
-                            (f'{OS_VERSION}_{req.platform}', req.operator,
-                             semver_to_int(req.version), cond_id,
-                             str(allowlist.resolve())))
-                cond_id = cur.lastrowid
-            for req in entry.requires_sdk:
-                cur.execute('INSERT INTO condition_chain VALUES (?,?,?,?,?)',
-                            (f'{SDK_VERSION}_{req.platform}', req.operator,
-                             semver_to_int(req.version), cond_id,
-                             str(allowlist.resolve())))
-                cond_id = cur.lastrowid
             for symbol in entry.symbols:
                 self._add_symbol(symbol, allowlist,
                                  dest=self.InsertionKind.ALLOW,
@@ -417,23 +370,15 @@ class SDKDB:
                                         cond_id=cond_id,
                                         allow_unused=entry.allow_unused)
 
-    def add_conditions(self, conditions: Mapping[str, ConditionVariable]):
+    def add_defines(self, defines: list[str]):
         cur = self.con.cursor()
-        cur.executemany('INSERT INTO condition VALUES (?,?) '
-                        'ON CONFLICT DO UPDATE SET value = (?)',
-                        ((k, v, v) for k, v in conditions.items()))
+        cur.executemany('INSERT INTO condition VALUES (?)',
+                        ((d,) for d in defines))
 
     def _add_imports(self, report: APIReport):
         cur = self.con.cursor()
         path = str(report.file.resolve())
         arch = report.arch
-
-        # FIXME: It doesn't really make sense to add these per-report; they should be set once per run.
-        self.add_conditions({
-            f'{OS_VERSION}_{report.platform}': semver_to_int(report.min_os),
-            f'{SDK_VERSION}_{report.platform}': semver_to_int(report.sdk)
-        })
-
         # Don't use _cache_hit_preparing_to_insert to update the window. The
         # imports table is not persisted, and we don't want to prevent a
         # different invocation that reads exports from this binary from
@@ -460,13 +405,16 @@ class SDKDB:
         cur.execute('WITH RECURSIVE active_cond AS ('
                     '   SELECT cc.rowid AS nextid, name '
                     '   FROM condition_chain AS cc NATURAL LEFT JOIN condition '
-                    '   WHERE nextid IS NULL AND '
-                    f'        {apply_operator_sql("cc.op", "condition.value", "cc.operand")}'
+                    '   WHERE nextid IS NULL AND iif(cc.invert, '
+                    '                                condition.name IS NULL, '
+                    '                                condition.name IS NOT NULL) '
                     '   UNION ALL '
                     '   SELECT cc.rowid AS nextid, cc.name '
                     '   FROM condition_chain AS cc JOIN active_cond USING (nextid) '
                     '   NATURAL LEFT JOIN condition '
-                    f'  WHERE {apply_operator_sql("cc.op", "condition.value", "cc.operand")}'
+                    '   WHERE iif(cc.invert, '
+                    '             condition.name IS NULL, '
+                    '             condition.name IS NOT NULL)'
                     ') '
                     # Then cross-check imports and allowed declarations against
                     # exports.
