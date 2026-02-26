@@ -166,9 +166,6 @@ bridge/objc/objc_runtime.mm
 bridge/runtime_method.cpp
 bridge/runtime_object.cpp
 bridge/runtime_root.cpp
-contentextensions/ContentExtension.cpp
-contentextensions/ContentExtensionStyleSheet.cpp
-contentextensions/ContentExtensionsBackend.cpp
 crypto/parameters/CryptoAlgorithmRsaKeyGenParams.h
 css/CSSCounterStyleDescriptors.cpp
 css/CSSCounterStyleRule.h
