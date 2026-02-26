@@ -106,11 +106,6 @@ PlatformSpeechSynthesizer& SpeechSynthesis::ensurePlatformSpeechSynthesizer()
     return *m_platformSpeechSynthesizer;
 }
 
-Ref<PlatformSpeechSynthesizer> SpeechSynthesis::ensureProtectedPlatformSpeechSynthesizer()
-{
-    return ensurePlatformSpeechSynthesizer();
-}
-
 const Vector<Ref<SpeechSynthesisVoice>>& SpeechSynthesis::getVoices()
 {
     if (RefPtr context = scriptExecutionContext()) {
@@ -125,7 +120,7 @@ const Vector<Ref<SpeechSynthesisVoice>>& SpeechSynthesis::getVoices()
 
     // If the voiceList is empty, that's the cue to get the voices from the platform again.
     RefPtr speechSynthesisClient = m_speechSynthesisClient.get();
-    auto& voiceList = speechSynthesisClient ? speechSynthesisClient->voiceList() : ensureProtectedPlatformSpeechSynthesizer()->voiceList();
+    auto& voiceList = speechSynthesisClient ? speechSynthesisClient->voiceList() : protect(ensurePlatformSpeechSynthesizer())->voiceList();
     m_voiceList = voiceList.map([](auto& voice) {
         return SpeechSynthesisVoice::create(Ref { voice });
     });
@@ -161,7 +156,7 @@ void SpeechSynthesis::startSpeakingImmediately(SpeechSynthesisUtterance& utteran
     if (RefPtr speechSynthesisClient = m_speechSynthesisClient.get())
         speechSynthesisClient->speak(&utterance.platformUtterance());
     else
-        ensureProtectedPlatformSpeechSynthesizer()->speak(&utterance.platformUtterance());
+        protect(ensurePlatformSpeechSynthesizer())->speak(&utterance.platformUtterance());
 }
 
 void SpeechSynthesis::speak(SpeechSynthesisUtterance& utterance)

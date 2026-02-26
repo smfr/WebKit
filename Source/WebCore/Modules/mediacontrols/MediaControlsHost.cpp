@@ -156,7 +156,7 @@ Vector<Ref<TextTrack>> MediaControlsHost::sortedTrackListForMenu(TextTrackList& 
     if (!page)
         return { };
 
-    return protect(page->group())->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList, { TextTrack::Kind::Subtitles, TextTrack::Kind::Captions, TextTrack::Kind::Descriptions });
+    return protect(protect(page->group())->ensureCaptionPreferences())->sortedTrackListForMenu(&trackList, { TextTrack::Kind::Subtitles, TextTrack::Kind::Captions, TextTrack::Kind::Descriptions });
 }
 
 Vector<Ref<AudioTrack>> MediaControlsHost::sortedTrackListForMenu(AudioTrackList& trackList)
@@ -165,7 +165,7 @@ Vector<Ref<AudioTrack>> MediaControlsHost::sortedTrackListForMenu(AudioTrackList
     if (!page)
         return { };
 
-    return protect(page->group())->ensureProtectedCaptionPreferences()->sortedTrackListForMenu(&trackList);
+    return protect(protect(page->group())->ensureCaptionPreferences())->sortedTrackListForMenu(&trackList);
 }
 
 String MediaControlsHost::displayNameForTrack(const std::optional<TextOrAudioTrack>& track)
@@ -203,7 +203,7 @@ AtomString MediaControlsHost::captionDisplayMode() const
     if (!page)
         return emptyAtom();
 
-    switch (protect(page->group())->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
+    switch (protect(protect(page->group())->ensureCaptionPreferences())->captionDisplayMode()) {
     case CaptionUserPreferences::CaptionDisplayMode::Automatic:
         return automaticKeyword();
     case CaptionUserPreferences::CaptionDisplayMode::ForcedOnly:
@@ -950,7 +950,7 @@ void MediaControlsHost::savePreviouslySelectedTextTrackIfNecessary()
         }
     }
 
-    switch (protect(page->group())->ensureProtectedCaptionPreferences()->captionDisplayMode()) {
+    switch (protect(protect(page->group())->ensureCaptionPreferences())->captionDisplayMode()) {
     case CaptionUserPreferences::CaptionDisplayMode::Automatic:
         m_previouslySelectedTextTrack = TextTrack::captionMenuAutomaticItemSingleton();
         return;

@@ -113,8 +113,7 @@ private:
     void eventListenersDidChange() final;
     
     PlatformSpeechSynthesizer& ensurePlatformSpeechSynthesizer();
-    Ref<PlatformSpeechSynthesizer> ensureProtectedPlatformSpeechSynthesizer();
-    
+
     SpeechSynthesisUtterance* currentSpeechUtterance();
 
     RefPtr<PlatformSpeechSynthesizer> m_platformSpeechSynthesizer;

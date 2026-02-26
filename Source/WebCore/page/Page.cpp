@@ -4095,7 +4095,7 @@ bool NODELETE Page::isMonitoringWheelEvents() const
 
 void Page::startMonitoringWheelEvents(bool clearLatchingState)
 {
-    ensureProtectedWheelEventTestMonitor()->clearAllTestDeferrals();
+    protect(ensureWheelEventTestMonitor())->clearAllTestDeferrals();
 
 #if ENABLE(WHEEL_EVENT_LATCHING)
     if (clearLatchingState)
@@ -4117,11 +4117,6 @@ WheelEventTestMonitor& Page::ensureWheelEventTestMonitor()
         m_wheelEventTestMonitor = adoptRef(new WheelEventTestMonitor(*this));
 
     return *m_wheelEventTestMonitor;
-}
-
-Ref<WheelEventTestMonitor> Page::ensureProtectedWheelEventTestMonitor()
-{
-    return ensureWheelEventTestMonitor();
 }
 
 #if ENABLE(VIDEO)

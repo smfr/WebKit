@@ -260,7 +260,7 @@ void MediaControlTextTrackContainerElement::updateActiveCuesFontSize()
     if (!mediaElement)
         return;
 
-    float fontScale = protect(page->group())->ensureProtectedCaptionPreferences()->captionFontSizeScaleAndImportance(m_fontSizeIsImportant);
+    float fontScale = protect(protect(page->group())->ensureCaptionPreferences())->captionFontSizeScaleAndImportance(m_fontSizeIsImportant);
 
     // Caption fonts are defined as |size vh| units, so there's no need to
     // scale by display size. Since |vh| is a decimal percentage, multiply
@@ -297,7 +297,7 @@ void MediaControlTextTrackContainerElement::updateTextStrokeStyle()
     bool important;
 
     // FIXME: find a way to set this property in the stylesheet like the other user style preferences, see <https://bugs.webkit.org/show_bug.cgi?id=169874>.
-    if (protect(page->group())->ensureProtectedCaptionPreferences()->captionStrokeWidthForFont(m_fontSize, language, strokeWidth, important))
+    if (protect(protect(page->group())->ensureCaptionPreferences())->captionStrokeWidthForFont(m_fontSize, language, strokeWidth, important))
         setInlineStyleProperty(CSSPropertyStrokeWidth, strokeWidth, CSSUnitType::CSS_PX, important ? IsImportant::Yes : IsImportant::No);
 }
 
@@ -436,7 +436,7 @@ void MediaControlTextTrackContainerElement::captionPreferencesChanged()
 {
     if (RefPtr page = document().page()) {
         if (RefPtr previewCue = m_previewCue) {
-            previewCue->setText(protect(page->group())->ensureProtectedCaptionPreferences()->captionPreviewTitle());
+            previewCue->setText(protect(protect(page->group())->ensureCaptionPreferences())->captionPreviewTitle());
             previewCue->updateDisplayTree(MediaTime::zeroTime());
         }
     }
@@ -563,7 +563,7 @@ VTTCue& MediaControlTextTrackContainerElement::ensurePreviewCue() const
         m_previewCue->setIsActive(true);
 
         if (RefPtr page = document().page())
-            m_previewCue->setText(protect(page->group())->ensureProtectedCaptionPreferences()->captionPreviewTitle());
+            m_previewCue->setText(protect(protect(page->group())->ensureCaptionPreferences())->captionPreviewTitle());
 
         m_previewTrack->addCue(*m_previewCue);
     }

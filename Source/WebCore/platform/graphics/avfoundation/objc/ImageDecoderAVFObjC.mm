@@ -314,19 +314,13 @@ SPECIALIZE_TYPE_TRAITS_END()
 
 namespace WebCore {
 
-static RefPtr<ImageDecoderAVFObjCSample> toProtectedSample(const PresentationOrderSampleMap::value_type& pair)
+static ImageDecoderAVFObjCSample* toSample(const PresentationOrderSampleMap::value_type& pair)
 {
     return downcast<ImageDecoderAVFObjCSample>(pair.second.ptr());
 }
 
 template <typename Iterator>
 ImageDecoderAVFObjCSample* toSample(Iterator iter)
-{
-    return downcast<ImageDecoderAVFObjCSample>(iter->second.ptr());
-}
-
-template <typename Iterator>
-RefPtr<ImageDecoderAVFObjCSample> toProtectedSample(Iterator iter)
 {
     return downcast<ImageDecoderAVFObjCSample>(iter->second.ptr());
 }
@@ -480,7 +474,7 @@ bool ImageDecoderAVFObjC::storeSampleBuffer(CMSampleBufferRef sampleBuffer)
     // obtain RGBA IOSurface-backed CVPixelBuffer from the decoding session is enough
     // to ensure the pixel buffer is not replaced in VTCreateCGImageFromCVPixelBuffer.
 
-    toProtectedSample(iter)->setImage(adoptCF(rawImage));
+    protect(toSample(iter))->setImage(adoptCF(rawImage));
 
     return true;
 }
@@ -698,7 +692,7 @@ void ImageDecoderAVFObjC::clearFrameBufferCache(size_t index)
 {
     size_t i = 0;
     for (auto& samplePair : m_sampleData.presentationOrder()) {
-        toProtectedSample(samplePair)->setImage(nullptr);
+        protect(toSample(samplePair))->setImage(nullptr);
         if (++i > index)
             break;
     }

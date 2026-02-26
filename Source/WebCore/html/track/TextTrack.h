@@ -173,7 +173,6 @@ private:
     RefPtr<VTTRegionList> m_regions;
 
     TextTrackCueList& ensureTextTrackCueList();
-    Ref<TextTrackCueList> ensureProtectedTextTrackCueList();
     Kind convertKind(const AtomString&);
 
     Mode m_mode { Mode::Disabled };

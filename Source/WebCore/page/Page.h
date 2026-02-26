@@ -1433,7 +1433,6 @@ private:
     RenderingUpdateScheduler* NODELETE existingRenderingUpdateScheduler();
 
     WheelEventTestMonitor& ensureWheelEventTestMonitor();
-    Ref<WheelEventTestMonitor> ensureProtectedWheelEventTestMonitor();
 
 #if ENABLE(IMAGE_ANALYSIS)
     void resetTextRecognitionResults();

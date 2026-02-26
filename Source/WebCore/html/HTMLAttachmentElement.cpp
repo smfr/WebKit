@@ -858,7 +858,7 @@ void HTMLAttachmentElement::updateAttributes(std::optional<uint64_t>&& newFileSi
 {
     RefPtr<HTMLImageElement> enclosingImage;
     if (RefPtr associatedElement = this->associatedElement())
-        enclosingImage = dynamicDowncast<HTMLImageElement>(associatedElement->asProtectedHTMLElement());
+        enclosingImage = dynamicDowncast<HTMLImageElement>(protect(associatedElement->asHTMLElement()));
 
     if (!newFilename.isNull()) {
         if (enclosingImage)
@@ -909,7 +909,7 @@ void HTMLAttachmentElement::updateAssociatedElementWithData(const String& conten
 
     auto associatedElementType = associatedElement->attachmentAssociatedElementType();
     Ref document = this->document();
-    associatedElement->asProtectedHTMLElement()->setAttributeWithoutSynchronization((associatedElementType == AttachmentAssociatedElementType::Source) ? HTMLNames::srcsetAttr : HTMLNames::srcAttr, AtomString { DOMURL::createObjectURL(document, Blob::create(document.ptr(), buffer->extractData(), mimeType)) });
+    protect(associatedElement->asHTMLElement())->setAttributeWithoutSynchronization((associatedElementType == AttachmentAssociatedElementType::Source) ? HTMLNames::srcsetAttr : HTMLNames::srcAttr, AtomString { DOMURL::createObjectURL(document, Blob::create(document.ptr(), buffer->extractData(), mimeType)) });
 }
 
 void HTMLAttachmentElement::updateImage()

@@ -8060,7 +8060,7 @@ CaptionUserPreferences::CaptionDisplayMode HTMLMediaElement::captionDisplayMode(
 {
     if (!m_captionDisplayMode) {
         if (RefPtr page = document().page())
-            m_captionDisplayMode = protect(page->group())->ensureProtectedCaptionPreferences()->captionDisplayMode();
+            m_captionDisplayMode = protect(protect(page->group())->ensureCaptionPreferences())->captionDisplayMode();
         else
             m_captionDisplayMode = CaptionUserPreferences::CaptionDisplayMode::Automatic;
     }
@@ -8637,7 +8637,7 @@ void HTMLMediaElement::shouldSuppressHDRDidChange()
 Vector<String> HTMLMediaElement::mediaPlayerPreferredAudioCharacteristics() const
 {
     if (RefPtr page = document().page())
-        return protect(page->group())->ensureProtectedCaptionPreferences()->preferredAudioCharacteristics();
+        return protect(protect(page->group())->ensureCaptionPreferences())->preferredAudioCharacteristics();
     return { };
 }
 

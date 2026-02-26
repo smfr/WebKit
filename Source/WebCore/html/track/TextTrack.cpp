@@ -373,7 +373,7 @@ ExceptionOr<void> TextTrack::addCue(Ref<TextTrackCue>&& cue)
 
     // 2. Add cue to the method's TextTrack object's text track's text track list of cues.
     cue->setTrack(this);
-    ensureProtectedTextTrackCueList()->add(cue.copyRef());
+    protect(ensureTextTrackCueList())->add(cue.copyRef());
 
     m_clients.forEach([this, cue](auto& client) {
         client.textTrackAddCue(*this, cue);
@@ -469,7 +469,7 @@ void TextTrack::cueDidChange(TextTrackCue& cue, bool updateCueOrder)
 {
     // Make sure the TextTrackCueList order is up-to-date.
     if (updateCueOrder)
-        ensureProtectedTextTrackCueList()->updateCueIndex(cue);
+        protect(ensureTextTrackCueList())->updateCueIndex(cue);
 
     // ... and add it back again.
     m_clients.forEach([&](auto& client) {
@@ -505,11 +505,6 @@ TextTrackCueList& TextTrack::ensureTextTrackCueList()
     if (!m_cues)
         lazyInitialize(m_cues, TextTrackCueList::create());
     return *m_cues;
-}
-
-Ref<TextTrackCueList> TextTrack::ensureProtectedTextTrackCueList()
-{
-    return ensureTextTrackCueList();
 }
 
 int TextTrack::trackIndexRelativeToRenderedTracks()

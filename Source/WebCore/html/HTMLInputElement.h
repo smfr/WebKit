@@ -338,7 +338,6 @@ public:
 
     HTMLImageLoader* imageLoader() { return m_imageLoader.get(); }
     HTMLImageLoader& ensureImageLoader();
-    Ref<HTMLImageLoader> ensureProtectedImageLoader();
 
     void capsLockStateMayHaveChanged();
 

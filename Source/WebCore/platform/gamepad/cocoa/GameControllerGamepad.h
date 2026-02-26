@@ -62,7 +62,6 @@ private:
 
 #if HAVE(WIDE_GAMECONTROLLER_SUPPORT)
     GameControllerHapticEngines& ensureHapticEngines();
-    Ref<GameControllerHapticEngines> ensureProtectedHapticEngines() { return ensureHapticEngines(); }
 #endif
 
     const RetainPtr<GCController> m_gcController;

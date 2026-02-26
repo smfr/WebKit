@@ -125,7 +125,7 @@ void ImageInputType::attributeChanged(const QualifiedName& name)
     } else if (name == srcAttr) {
         if (RefPtr element = this->element()) {
             if (element->renderer())
-                element->ensureProtectedImageLoader()->updateFromElementIgnoringPreviousError();
+                protect(element->ensureImageLoader())->updateFromElementIgnoringPreviousError();
         }
     }
     BaseButtonInputType::attributeChanged(name);

@@ -146,11 +146,6 @@ HTMLImageLoader& HTMLInputElement::ensureImageLoader()
     return *m_imageLoader;
 }
 
-Ref<HTMLImageLoader> HTMLInputElement::ensureProtectedImageLoader()
-{
-    return ensureImageLoader();
-}
-
 HTMLInputElement::~HTMLInputElement()
 {
     // Need to remove form association while this is still an HTMLInputElement
