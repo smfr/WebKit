@@ -47,7 +47,7 @@ class Factory(factory.BuildFactory):
         if self.shouldInstallDependencies:
             if platform.startswith("gtk"):
                 self.addStep(InstallGtkDependencies())
-            if platform == "wpe":
+            if platform.startswith("wpe"):
                 self.addStep(InstallWpeDependencies())
 
 
@@ -306,9 +306,9 @@ class DownloadAndPerfTestFactory(Factory):
             self.addStep(CheckIfNeededUpdateRunningCrossTargetImage())
         self.addStep(DownloadBuiltProduct())
         self.addStep(ExtractBuiltProduct())
-        if platform != "wpe":
+        if not platform.startswith("wpe"):
             self.addStep(RunAndUploadPerfTests())
-        if platform in ["gtk", "wpe"]:
+        if any(platform.startswith(p) for p in ["gtk", "wpe"]):
             self.addStep(RunBenchmarkTests(timeout=2000))
 
 

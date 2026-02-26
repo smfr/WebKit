@@ -1900,7 +1900,7 @@ class TestCheckIfNeededUpdateCrossTargetImageSteps(BuildStepMixinAdditions, unit
         return self.tear_down_test_build_step()
 
     def setUpPropertiesForTest(self):
-        self.setProperty('fullPlatform', 'wpe')
+        self.setProperty('fullPlatform', 'wpe-rpi4-64bits-mesa')
         self.setProperty('configuration', 'release')
         self.setProperty('buildername', 'WPE-Linux-RPi4-64bits-Mesa-Release-Perf-Build')
         self.setProperty('archive_revision', '265300@main')
