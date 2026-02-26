@@ -95,8 +95,6 @@ RemotePageProxy::RemotePageProxy(WebPageProxy& page, WebProcessProxy& process, c
     else
         m_messageReceiverRegistration.startReceivingMessages(m_process, m_webPageID, *this, page.backForwardListMessageReceiver());
 
-    m_process->addRemotePageProxy(*this);
-
     RefPtr protectedPage = m_page.get();
     if (!protectedPage)
         return;
@@ -107,6 +105,8 @@ RemotePageProxy::RemotePageProxy(WebPageProxy& page, WebProcessProxy& process, c
     if (protectedPage->preferences().backgroundWebContentRunningBoardThrottlingEnabled())
         m_process->setRunningBoardThrottlingEnabled();
 #endif
+
+    m_process->addRemotePageProxy(*this);
 }
 
 void RemotePageProxy::disconnect()
