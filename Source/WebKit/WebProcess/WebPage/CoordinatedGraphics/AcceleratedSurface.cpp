@@ -29,6 +29,7 @@
 #if USE(COORDINATED_GRAPHICS)
 #include "WebPage.h"
 #include "WebProcess.h"
+#include <WebCore/FontRenderOptions.h>
 #include <WebCore/GLContext.h>
 #include <WebCore/GLFence.h>
 #include <WebCore/Page.h>
@@ -205,34 +206,35 @@ void AcceleratedSurface::RenderTargetShareableBuffer::sendFrame(Vector<WebCore::
 SkSurface* AcceleratedSurface::RenderTargetShareableBuffer::skiaSurface()
 {
     if (!m_skiaSurface) {
-        auto* skiaGLContext = PlatformDisplay::sharedDisplay().skiaGLContext();
+        auto& display = PlatformDisplay::sharedDisplay();
+        auto* skiaGLContext = display.skiaGLContext();
         if (!skiaGLContext)
             return nullptr;
 
         int stencilBits;
         glGetIntegerv(GL_STENCIL_BITS, &stencilBits);
 
-        const int sampleCount = 0; // 0 == no MSAA.
         GrGLFramebufferInfo fbInfo;
         fbInfo.fFBOID = m_fbo;
         fbInfo.fFormat = GL_RGBA8;
         GrBackendRenderTarget renderTargetSkia = GrBackendRenderTargets::MakeGL(
             m_initialSize.width(),
             m_initialSize.height(),
-            sampleCount,
+            display.msaaSampleCount(),
             stencilBits,
             fbInfo
         );
         if (!skiaGLContext->makeContextCurrent())
             return nullptr;
 
+        SkSurfaceProps properties { 0, FontRenderOptions::singleton().subpixelOrder() };
         auto skiaSurface = SkSurfaces::WrapBackendRenderTarget(
-            PlatformDisplay::sharedDisplay().skiaGrContext(),
+            display.skiaGrContext(),
             renderTargetSkia,
             GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
             SkColorType::kRGBA_8888_SkColorType,
             nullptr,
-            nullptr
+            &properties
         );
         if (!skiaSurface)
             return nullptr;
