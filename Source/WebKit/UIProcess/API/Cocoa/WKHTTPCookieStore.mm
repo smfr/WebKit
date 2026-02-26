@@ -95,11 +95,6 @@ private:
     HashMap<CFTypeRef, RefPtr<WKHTTPCookieStoreObserver>> _observers;
 }
 
-- (Ref<API::HTTPCookieStore>)_protectedCookieStore
-{
-    return *_cookieStore;
-}
-
 WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (void)dealloc
@@ -108,7 +103,7 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
         return;
 
     for (RefPtr observer : _observers.values())
-        self._protectedCookieStore->unregisterObserver(*observer);
+        protect(*_cookieStore)->unregisterObserver(*observer);
 
     SUPPRESS_UNCOUNTED_ARG _cookieStore->API::HTTPCookieStore::~HTTPCookieStore();
 
@@ -117,8 +112,8 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (void)getAllCookies:(void (^)(NSArray<NSHTTPCookie *> *))completionHandler
 {
-    bool isOptInCookiePartitioningEnabled = self._protectedCookieStore->isOptInCookiePartitioningEnabled();
-    self._protectedCookieStore->cookies([isOptInCookiePartitioningEnabled, handler = adoptNS([completionHandler copy])](const Vector<WebCore::Cookie>& cookies) {
+    bool isOptInCookiePartitioningEnabled = protect(*_cookieStore)->isOptInCookiePartitioningEnabled();
+    protect(*_cookieStore)->cookies([isOptInCookiePartitioningEnabled, handler = adoptNS([completionHandler copy])](const Vector<WebCore::Cookie>& cookies) {
         auto rawHandler = (void (^)(NSArray<NSHTTPCookie *> *))handler.get();
         rawHandler(coreCookiesToNSCookies(cookies, isOptInCookiePartitioningEnabled));
     });
@@ -126,7 +121,7 @@ WK_OBJECT_DISABLE_DISABLE_KVC_IVAR_ACCESS;
 
 - (void)setCookie:(NSHTTPCookie *)cookie completionHandler:(void (^)(void))completionHandler
 {
-    self._protectedCookieStore->setCookies({ cookie }, [handler = adoptNS([completionHandler copy])]() {
+    protect(*_cookieStore)->setCookies({ cookie }, [handler = adoptNS([completionHandler copy])]() {
         auto rawHandler = (void (^)())handler.get();
         if (rawHandler)
             rawHandler();
@@ -144,14 +139,14 @@ static std::optional<WebCore::Cookie> makeVectorElement(const WebCore::Cookie*, 
 
 - (void)setCookies:(NSArray<NSHTTPCookie *> *)cookies completionHandler:(void (^)(void))completionHandler
 {
-    self._protectedCookieStore->setCookies(makeVector<WebCore::Cookie>(cookies), [completionHandler = makeBlockPtr(completionHandler)]() {
+    protect(*_cookieStore)->setCookies(makeVector<WebCore::Cookie>(cookies), [completionHandler = makeBlockPtr(completionHandler)]() {
         completionHandler();
     });
 }
 
 - (void)deleteCookie:(NSHTTPCookie *)cookie completionHandler:(void (^)(void))completionHandler
 {
-    self._protectedCookieStore->deleteCookie(cookie, [handler = adoptNS([completionHandler copy])]() {
+    protect(*_cookieStore)->deleteCookie(cookie, [handler = adoptNS([completionHandler copy])]() {
         auto rawHandler = (void (^)())handler.get();
         if (rawHandler)
             rawHandler();
@@ -165,7 +160,7 @@ static std::optional<WebCore::Cookie> makeVectorElement(const WebCore::Cookie*, 
         return;
 
     result.iterator->value = WKHTTPCookieStoreObserver::create(observer);
-    self._protectedCookieStore->registerObserver(Ref { *result.iterator->value }.get());
+    protect(*_cookieStore)->registerObserver(Ref { *result.iterator->value }.get());
 }
 
 - (void)removeObserver:(id<WKHTTPCookieStoreObserver>)observer
@@ -174,7 +169,7 @@ static std::optional<WebCore::Cookie> makeVectorElement(const WebCore::Cookie*, 
     if (!result)
         return;
 
-    self._protectedCookieStore->unregisterObserver(*result);
+    protect(*_cookieStore)->unregisterObserver(*result);
 }
 
 static WebCore::HTTPCookieAcceptPolicy NODELETE toHTTPCookieAcceptPolicy(WKCookiePolicy wkCookiePolicy)
@@ -203,7 +198,7 @@ static WKCookiePolicy NODELETE toWKCookiePolicy(WebCore::HTTPCookieAcceptPolicy 
 
 - (void)setCookiePolicy:(WKCookiePolicy)policy completionHandler:(void (^)(void))completionHandler
 {
-    self._protectedCookieStore->setHTTPCookieAcceptPolicy(toHTTPCookieAcceptPolicy(policy), [completionHandler = makeBlockPtr(completionHandler)] {
+    protect(*_cookieStore)->setHTTPCookieAcceptPolicy(toHTTPCookieAcceptPolicy(policy), [completionHandler = makeBlockPtr(completionHandler)] {
         if (completionHandler)
             completionHandler.get()();
     });
@@ -211,15 +206,15 @@ static WKCookiePolicy NODELETE toWKCookiePolicy(WebCore::HTTPCookieAcceptPolicy 
 
 - (void)getCookiePolicy:(void (^)(WKCookiePolicy))completionHandler
 {
-    self._protectedCookieStore->getHTTPCookieAcceptPolicy([completionHandler = makeBlockPtr(completionHandler)] (WebCore::HTTPCookieAcceptPolicy policy) {
+    protect(*_cookieStore)->getHTTPCookieAcceptPolicy([completionHandler = makeBlockPtr(completionHandler)] (WebCore::HTTPCookieAcceptPolicy policy) {
         completionHandler(toWKCookiePolicy(policy));
     });
 }
 
 - (void)getCookiesForURL:(NSURL *)url completionHandler:(void (^)(NSArray<NSHTTPCookie *> *))completionHandler
 {
-    bool isOptInCookiePartitioningEnabled = self._protectedCookieStore->isOptInCookiePartitioningEnabled();
-    self._protectedCookieStore->cookiesForURL(url, [isOptInCookiePartitioningEnabled, handler = makeBlockPtr(completionHandler)] (const Vector<WebCore::Cookie>& cookies) {
+    bool isOptInCookiePartitioningEnabled = protect(*_cookieStore)->isOptInCookiePartitioningEnabled();
+    protect(*_cookieStore)->cookiesForURL(url, [isOptInCookiePartitioningEnabled, handler = makeBlockPtr(completionHandler)] (const Vector<WebCore::Cookie>& cookies) {
         handler.get()(coreCookiesToNSCookies(cookies, isOptInCookiePartitioningEnabled));
     });
 }
@@ -241,14 +236,14 @@ static WKCookiePolicy NODELETE toWKCookiePolicy(WebCore::HTTPCookieAcceptPolicy 
 
 - (void)_setCookieAcceptPolicy:(NSHTTPCookieAcceptPolicy)policy completionHandler:(void (^)())completionHandler
 {
-    self._protectedCookieStore->setHTTPCookieAcceptPolicy(WebCore::toHTTPCookieAcceptPolicy(policy), [completionHandler = makeBlockPtr(completionHandler)] {
+    protect(*_cookieStore)->setHTTPCookieAcceptPolicy(WebCore::toHTTPCookieAcceptPolicy(policy), [completionHandler = makeBlockPtr(completionHandler)] {
         completionHandler.get()();
     });
 }
 
 - (void)_flushCookiesToDiskWithCompletionHandler:(void(^)(void))completionHandler
 {
-    self._protectedCookieStore->flushCookies([completionHandler = makeBlockPtr(completionHandler)]() {
+    protect(*_cookieStore)->flushCookies([completionHandler = makeBlockPtr(completionHandler)]() {
         completionHandler();
     });
 }
@@ -257,7 +252,7 @@ static WKCookiePolicy NODELETE toWKCookiePolicy(WebCore::HTTPCookieAcceptPolicy 
 
 - (void)_setCookies:(NSArray<NSHTTPCookie *> *)cookies completionHandler:(void (^)(void))completionHandler
 {
-    self._protectedCookieStore->setCookies(makeVector<WebCore::Cookie>(cookies), [completionHandler = makeBlockPtr(completionHandler)]() {
+    protect(*_cookieStore)->setCookies(makeVector<WebCore::Cookie>(cookies), [completionHandler = makeBlockPtr(completionHandler)]() {
         completionHandler();
     });
 }

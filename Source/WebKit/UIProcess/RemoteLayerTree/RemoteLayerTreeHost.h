@@ -66,7 +66,6 @@ public:
     RemoteLayerTreeNode* rootNode() const { return m_rootNode.get(); }
 
     CALayer *layerForID(std::optional<WebCore::PlatformLayerIdentifier>) const;
-    RetainPtr<CALayer> protectedLayerForID(std::optional<WebCore::PlatformLayerIdentifier>) const;
     CALayer *NODELETE rootLayer() const;
 
     RemoteLayerTreeDrawingAreaProxy& NODELETE drawingArea() const;

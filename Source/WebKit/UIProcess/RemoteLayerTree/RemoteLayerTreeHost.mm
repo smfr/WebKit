@@ -233,7 +233,7 @@ bool RemoteLayerTreeHost::updateLayerTree(const IPC::Connection& connection, con
     }
     
     for (const auto& layerAndClone : clonesToUpdate)
-        protectedLayerForID(layerAndClone.layerID).get().contents = protectedLayerForID(layerAndClone.cloneLayerID).get().contents;
+        protect(layerForID(layerAndClone.layerID)).get().contents = protect(layerForID(layerAndClone.cloneLayerID)).get().contents;
 
     for (auto& destroyedLayer : transaction.destroyedLayers())
         layerWillBeRemoved(processIdentifier, destroyedLayer);
@@ -391,10 +391,6 @@ CALayer *RemoteLayerTreeHost::layerForID(std::optional<WebCore::PlatformLayerIde
     return node->layer();
 }
 
-RetainPtr<CALayer> RemoteLayerTreeHost::protectedLayerForID(std::optional<WebCore::PlatformLayerIdentifier> layerID) const
-{
-    return layerForID(layerID);
-}
 
 CALayer *RemoteLayerTreeHost::rootLayer() const
 {

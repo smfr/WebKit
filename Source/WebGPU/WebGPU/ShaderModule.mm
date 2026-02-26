@@ -104,7 +104,7 @@ static RefPtr<ShaderModule> earlyCompileShaderModule(Device& device, Variant<WGS
     wgslPipelineLayouts.reserveCapacity(suppliedHints.hintCount);
     for (const auto& hint : suppliedHints.hintsSpan()) {
         auto hintKey = fromAPI(hint.entryPoint);
-        Ref layout = WebGPU::protectedFromAPI(hint.layout);
+        Ref layout = WebGPU::fromAPI(hint.layout);
         hints.add(hintKey, layout);
         WGSL::PipelineLayout* convertedPipelineLayout = nullptr;
         if (layout->numberOfBindGroupLayouts()) {
@@ -1088,21 +1088,21 @@ void wgpuShaderModuleRelease(WGPUShaderModule shaderModule)
 
 void wgpuShaderModuleGetCompilationInfo(WGPUShaderModule shaderModule, WGPUCompilationInfoCallback callback, void * userdata)
 {
-    WebGPU::protectedFromAPI(shaderModule)->getCompilationInfo([callback, userdata](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo& compilationInfo) {
+    protect(WebGPU::fromAPI(shaderModule))->getCompilationInfo([callback, userdata](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo& compilationInfo) {
         callback(status, &compilationInfo, userdata);
     });
 }
 
 void wgpuShaderModuleGetCompilationInfoWithBlock(WGPUShaderModule shaderModule, WGPUCompilationInfoBlockCallback callback)
 {
-    WebGPU::protectedFromAPI(shaderModule)->getCompilationInfo([callback = WebGPU::fromAPI(WTF::move(callback))](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo& compilationInfo) {
+    protect(WebGPU::fromAPI(shaderModule))->getCompilationInfo([callback = WebGPU::fromAPI(WTF::move(callback))](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo& compilationInfo) {
         callback(status, &compilationInfo);
     });
 }
 
 void wgpuShaderModuleSetLabel(WGPUShaderModule shaderModule, const char* label)
 {
-    WebGPU::protectedFromAPI(shaderModule)->setLabel(WebGPU::fromAPI(label));
+    protect(WebGPU::fromAPI(shaderModule))->setLabel(WebGPU::fromAPI(label));
 }
 
 String wgpuAdapterFeatureName(WGPUFeatureName feature)

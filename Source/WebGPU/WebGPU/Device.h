@@ -134,8 +134,8 @@ public:
     void destroy();
     size_t enumerateFeatures(WGPUFeatureName* features);
     bool getLimits(WGPUSupportedLimits&);
-    Queue& getQueue() const { return m_defaultQueue; }
-    Ref<Queue> protectedQueue() const { return m_defaultQueue; }
+    Queue& getQueueReference() const { return m_defaultQueue; }
+    Ref<Queue> getQueue() const { return m_defaultQueue; }
     bool hasFeature(WGPUFeatureName) const;
     bool popErrorScope(CompletionHandler<void(WGPUErrorType, String&&)>&& callback);
     void pushErrorScope(WGPUErrorFilter);

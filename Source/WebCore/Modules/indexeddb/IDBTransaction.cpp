@@ -790,7 +790,7 @@ void IDBTransaction::renameIndex(IDBIndex& index, const String& newName)
     ASSERT(m_referencedObjectStores.contains(index.objectStore().info().name()));
     ASSERT(m_referencedObjectStores.get(index.objectStore().info().name()) == &index.objectStore());
 
-    index.protectedObjectStore()->renameReferencedIndex(index, newName);
+    protect(index.objectStore())->renameReferencedIndex(index, newName);
 
     auto objectStoreIdentifier = index.objectStore().info().identifier();
     auto indexIdentifier = index.info().identifier();

@@ -82,12 +82,6 @@ public:
 
     virtual bool hasPlatformContext() const { return false; }
     virtual PlatformGraphicsContext* platformContext() const { return nullptr; }
-#if USE(CG)
-    RetainPtr<CGContextRef> protectedPlatformContext() const { return platformContext(); }
-#else
-    // On other platforms, the PlatformGraphicsContext type is not refcounted.
-    PlatformGraphicsContext* protectedPlatformContext() const { return platformContext(); }
-#endif
 
     virtual const DestinationColorSpace& colorSpace() const { return DestinationColorSpace::SRGB(); }
 

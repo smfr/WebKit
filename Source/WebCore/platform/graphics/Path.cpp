@@ -341,13 +341,6 @@ PlatformPathPtr Path::platformPath() const
 #endif
 }
 
-#if USE(CG)
-RetainPtr<CGPathRef> Path::protectedPlatformPath() const
-{
-    return platformPath();
-}
-#endif
-
 const Vector<PathSegment>* Path::segmentsIfExists() const
 {
     if (RefPtr impl = asImpl())

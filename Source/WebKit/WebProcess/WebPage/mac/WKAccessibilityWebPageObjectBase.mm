@@ -99,7 +99,7 @@ namespace ax = WebCore::Accessibility;
 // Called directly by Accessibility framework.
 - (id)accessibilityRootObjectWrapper
 {
-    return [self accessibilityRootObjectWrapper:[self protectedFocusedLocalFrame].get()];
+    return [self accessibilityRootObjectWrapper:protect([self focusedLocalFrame]).get()];
 }
 
 - (id)accessibilityRootObjectWrapper:(WebCore::LocalFrame*)frame
@@ -275,7 +275,7 @@ namespace ax = WebCore::Accessibility;
 
 - (id)accessibilityFocusedUIElement
 {
-    return [[self accessibilityRootObjectWrapper:[self protectedFocusedLocalFrame].get()] accessibilityFocusedUIElement];
+    return [[self accessibilityRootObjectWrapper:protect([self focusedLocalFrame]).get()] accessibilityFocusedUIElement];
 }
 
 - (WebCore::LocalFrame *)focusedLocalFrame
@@ -303,11 +303,6 @@ namespace ax = WebCore::Accessibility;
     }
 
     return nullptr;
-}
-
-- (RefPtr<WebCore::LocalFrame>)protectedFocusedLocalFrame
-{
-    return [self focusedLocalFrame];
 }
 
 @end

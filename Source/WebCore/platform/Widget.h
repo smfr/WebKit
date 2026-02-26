@@ -93,9 +93,6 @@ public:
     WEBCORE_EXPORT virtual ~Widget();
 
     WEBCORE_EXPORT PlatformWidget platformWidget() const;
-#if PLATFORM(COCOA)
-    WEBCORE_EXPORT RetainPtr<NSView> protectedPlatformWidget() const;
-#endif
     WEBCORE_EXPORT void setPlatformWidget(PlatformWidget);
 
     int x() const { return frameRect().x(); }

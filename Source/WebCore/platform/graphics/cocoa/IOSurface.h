@@ -180,7 +180,6 @@ public:
     WEBCORE_EXPORT RetainPtr<id> asCAIOSurfaceLayerContents() const;
 
     IOSurfaceRef surface() const { return m_surface.get(); }
-    RetainPtr<IOSurfaceRef> protectedSurface() const { return surface(); }
 
     WEBCORE_EXPORT RetainPtr<CGContextRef> createPlatformContext(PlatformDisplayID = 0, std::optional<CGImageAlphaInfo> = std::nullopt);
 

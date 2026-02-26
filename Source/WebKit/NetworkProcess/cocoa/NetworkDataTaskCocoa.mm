@@ -674,7 +674,7 @@ NetworkDataTask::State NetworkDataTaskCocoa::state() const
 
 WebCore::Credential serverTrustCredential(const WebCore::AuthenticationChallenge& challenge)
 {
-    return WebCore::Credential([NSURLCredential credentialForTrust: RetainPtr { challenge.protectedNSURLAuthenticationChallenge().get().protectionSpace.serverTrust }.get()]);
+    return WebCore::Credential([NSURLCredential credentialForTrust: RetainPtr { protect(challenge.nsURLAuthenticationChallenge()).get().protectionSpace.serverTrust }.get()]);
 }
 
 String NetworkDataTaskCocoa::description() const

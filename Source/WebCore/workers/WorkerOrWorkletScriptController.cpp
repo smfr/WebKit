@@ -169,8 +169,8 @@ void WorkerOrWorkletScriptController::addTimerSetNotification(JSC::JSRunLoopTime
         timer->addTimerSetNotification(callback);
     };
 
-    processTimer(m_vm->heap.protectedFullActivityCallback().get());
-    processTimer(m_vm->heap.protectedEdenActivityCallback().get());
+    processTimer(protect(m_vm->heap.fullActivityCallback()).get());
+    processTimer(protect(m_vm->heap.edenActivityCallback()).get());
     processTimer(m_vm->deferredWorkTimer.ptr());
 }
 
@@ -182,8 +182,8 @@ void WorkerOrWorkletScriptController::removeTimerSetNotification(JSC::JSRunLoopT
         timer->removeTimerSetNotification(callback);
     };
 
-    processTimer(m_vm->heap.protectedFullActivityCallback().get());
-    processTimer(m_vm->heap.protectedEdenActivityCallback().get());
+    processTimer(protect(m_vm->heap.fullActivityCallback()).get());
+    processTimer(protect(m_vm->heap.edenActivityCallback()).get());
     processTimer(m_vm->deferredWorkTimer.ptr());
 }
 

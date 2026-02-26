@@ -48,6 +48,7 @@
 
 #import <pal/cf/CoreMediaSoftLink.h>
 #import <pal/cocoa/AVFoundationSoftLink.h>
+#import "CoreVideoSoftLink.h"
 
 using namespace WebCore;
 
@@ -262,12 +263,6 @@ PlatformLayer* LocalSampleBufferDisplayLayer::displayLayer()
 PlatformLayer* LocalSampleBufferDisplayLayer::rootLayer()
 {
     return m_rootLayer.get();
-}
-
-
-RetainPtr<PlatformLayer> LocalSampleBufferDisplayLayer::protectedRootLayer()
-{
-    return rootLayer();
 }
 
 bool LocalSampleBufferDisplayLayer::didFail() const
@@ -515,7 +510,7 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
                     return;
                 }
                 auto videoFrame = protectedThis->m_pendingVideoFrameQueue.takeFirst();
-                protectedThis->enqueueBufferInternal(videoFrame->protectedPixelBuffer().get(), videoFrame->presentationTime());
+                protectedThis->enqueueBufferInternal(protect(videoFrame->pixelBuffer()).get(), videoFrame->presentationTime());
             }
         });
     }];

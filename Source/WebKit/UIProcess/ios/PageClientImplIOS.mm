@@ -386,7 +386,7 @@ void PageClientImpl::didCommitLoadForMainFrame(const String& mimeType, bool useC
 #endif
 
 #if ENABLE(SYSTEM_TEXT_EXTRACTION)
-    if ([webView _protectedPage]->preferences().systemTextExtractionEnabled())
+    if (protect([webView _page])->preferences().systemTextExtractionEnabled())
         [webView _addTextExtractionAnnotation];
 #endif
 }

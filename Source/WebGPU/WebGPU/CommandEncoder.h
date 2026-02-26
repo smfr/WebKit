@@ -106,7 +106,6 @@ public:
     void setLabel(String&&);
 
     Device& device() const { return m_device; }
-    Ref<Device> protectedDevice() const { return m_device; }
 
     bool isValid() const { return m_commandBuffer; }
     void lock(bool);
@@ -177,7 +176,6 @@ private:
     void trackEncoder(TrackedResourceContainer&);
 
     void discardCommandBuffer();
-    RefPtr<CommandBuffer> protectedCachedCommandBuffer() const { return m_cachedCommandBuffer.get(); }
     void retainTimestampsForOneUpdateLoop();
 
     id<MTLCommandBuffer> _Nullable m_commandBuffer { nil };

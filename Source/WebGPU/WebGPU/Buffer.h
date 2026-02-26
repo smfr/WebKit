@@ -102,7 +102,6 @@ public:
     State state() const { return m_state; }
 
     Device& device() const { return m_device; }
-    Ref<Device> protectedDevice() const { return m_device; }
     bool isDestroyed() const { return state() == State::Destroyed; }
 
     void setCommandEncoder(CommandEncoder&, bool mayModifyBuffer = false) const;

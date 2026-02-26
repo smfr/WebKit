@@ -110,7 +110,6 @@ public:
     void applicationDidBecomeActive() { }
 
     WEBCORE_EXPORT WebVideoPresentationInterfaceMacObjC *videoPresentationInterfaceObjC();
-    WEBCORE_EXPORT RetainPtr<WebVideoPresentationInterfaceMacObjC> protectedVideoPresentationInterfaceObjC();
 
     WEBCORE_EXPORT void requestHideAndExitPiP();
 

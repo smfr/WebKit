@@ -72,7 +72,6 @@ public:
     std::optional<TargetID> targetIdentifier() const WTF_REQUIRES_LOCK(m_targetMutex);
 #if PLATFORM(COCOA)
     NSString *connectionIdentifier() const;
-    RetainPtr<NSString> protectedConnectionIdentifier() const;
     NSString *destination() const;
 
     Lock& queueMutex() { return m_queueMutex; }

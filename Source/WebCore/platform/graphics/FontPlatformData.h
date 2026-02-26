@@ -383,7 +383,6 @@ public:
     bool hasCustomTracking() const { return isSystemFont(); }
 
     CTFontRef ctFont() const { return m_font.get(); }
-    RetainPtr<CTFontRef> protectedCTFont() const { return ctFont(); }
 #endif
 
 #if PLATFORM(COCOA)

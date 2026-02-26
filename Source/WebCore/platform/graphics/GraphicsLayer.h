@@ -418,9 +418,6 @@ public:
 
     // For hosting this GraphicsLayer in a native layer hierarchy.
     virtual PlatformLayer* platformLayer() const { return nullptr; }
-#if PLATFORM(COCOA)
-    WEBCORE_EXPORT RetainPtr<CALayer> protectedPlatformLayer() const;
-#endif
 
     // Flippedness of the contents of this layer. Does not affect sublayer geometry.
     virtual void setContentsOrientation(CompositingCoordinatesOrientation orientation) { m_contentsOrientation = orientation; }

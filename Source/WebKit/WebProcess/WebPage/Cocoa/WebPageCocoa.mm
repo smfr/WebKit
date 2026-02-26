@@ -1463,7 +1463,7 @@ void WebPage::drawPagesToPDFFromPDFDocument(GraphicsContext& context, PDFDocumen
             break;
 
         context.beginPage(mediaBox);
-        drawPDFPage(pdfDocument, page, context.protectedPlatformContext().get(), printInfo.pageSetupScaleFactor, CGSizeMake(printInfo.availablePaperWidth, printInfo.availablePaperHeight));
+        drawPDFPage(pdfDocument, page, protect(context.platformContext()).get(), printInfo.pageSetupScaleFactor, CGSizeMake(printInfo.availablePaperWidth, printInfo.availablePaperHeight));
         context.endPage();
     }
 }
@@ -1647,7 +1647,7 @@ void WebPage::drawRectToImage(FrameIdentifier frameID, const PrintInfo& printInf
             ASSERT(!m_printContext);
             graphicsContext.scale(FloatSize(1, -1));
             graphicsContext.translate(0, -rect.height());
-            drawPDFDocument(graphicsContext.protectedPlatformContext().get(), pdfDocument.get(), printInfo, rect);
+            drawPDFDocument(protect(graphicsContext.platformContext()).get(), pdfDocument.get(), printInfo, rect);
         } else
             Ref { *m_printContext }->spoolRect(graphicsContext, rect);
     }

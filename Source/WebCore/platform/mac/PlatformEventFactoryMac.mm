@@ -46,7 +46,7 @@ namespace WebCore {
 
 NSPoint globalPoint(const NSPoint& windowPoint, NSWindow *window)
 {
-    return flipScreenPoint([window convertPointToScreen:windowPoint], protectedScreen(window).get());
+    return flipScreenPoint([window convertPointToScreen:windowPoint], protect(screen(window)).get());
 }
 
 NSPoint globalPointForEvent(NSEvent *event)

@@ -2259,11 +2259,6 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
     return _page.get();
 }
 
-- (RefPtr<WebKit::WebPageProxy>)_protectedPage
-{
-    return _page.get();
-}
-
 #if PLATFORM(MAC)
 - (WebKit::WebViewImpl *)_impl
 {
@@ -3716,7 +3711,7 @@ struct WKWebViewData {
     });
 
     if (dataTypes & WKWebViewDataTypeSessionStorage) {
-        RefPtr page = [self _protectedPage];
+        RefPtr page = _page;
         page->fetchSessionStorage([callbackAggregator, protectedPage = page, data](auto&& sessionStorage) {
             data->sessionStorage = WTF::move(sessionStorage);
         });
@@ -3770,7 +3765,7 @@ struct WKWebViewData {
             }
 
             if (!sessionStorage->isEmpty()) {
-                RefPtr page = [self _protectedPage];
+                RefPtr page = _page;
                 page->restoreSessionStorage(WTF::move(*sessionStorage), [callbackAggregator, error](bool restoreSucceeded) {
                     if (!restoreSucceeded) {
                         NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"Unknown error occurred while restoring data.", };
@@ -3827,7 +3822,7 @@ struct WKWebViewData {
 
 - (void)_scrollToEdge:(_WKRectEdge)edge animated:(BOOL)animated
 {
-    self._protectedPage->scrollToEdge(toRectEdges(edge), animated ? WebCore::ScrollIsAnimated::Yes : WebCore::ScrollIsAnimated::No);
+    protect(_page)->scrollToEdge(toRectEdges(edge), animated ? WebCore::ScrollIsAnimated::Yes : WebCore::ScrollIsAnimated::No);
 }
 
 @end
@@ -6661,12 +6656,12 @@ static Vector<Ref<API::TargetedElementInfo>> elementsFromWKElements(NSArray<_WKT
 
 - (audit_token_t)presentingApplicationAuditToken
 {
-    return self._protectedPage->presentingApplicationAuditToken().value_or(audit_token_t { });
+    return protect(_page)->presentingApplicationAuditToken().value_or(audit_token_t { });
 }
 
 - (void)setPresentingApplicationAuditToken:(audit_token_t)presentingApplicationAuditToken
 {
-    self._protectedPage->setPresentingApplicationAuditToken(presentingApplicationAuditToken);
+    protect(_page)->setPresentingApplicationAuditToken(presentingApplicationAuditToken);
 }
 
 - (BOOL)_useSystemAppearance

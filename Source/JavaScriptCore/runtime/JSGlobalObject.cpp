@@ -3781,11 +3781,6 @@ void JSGlobalObject::cachedFunctionExecutableForFunctionConstructor(FunctionExec
 }
 
 #if ENABLE(REMOTE_INSPECTOR)
-Ref<JSGlobalObjectDebuggable> JSGlobalObject::protectedInspectorDebuggable()
-{
-    return inspectorDebuggable();
-}
-
 Inspector::JSGlobalObjectInspectorController& JSGlobalObject::inspectorController() const
 {
     return *m_inspectorController.get();

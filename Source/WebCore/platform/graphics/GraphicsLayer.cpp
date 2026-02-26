@@ -1166,14 +1166,6 @@ String GraphicsLayer::layerTreeAsText(OptionSet<LayerTreeAsTextOptions> options,
     return ts.release();
 }
 
-#if PLATFORM(COCOA)
-RetainPtr<CALayer> GraphicsLayer::protectedPlatformLayer() const
-{
-    // FIXME: CALayer.h is included but static analysis is still warning.
-    SUPPRESS_FORWARD_DECL_ARG return platformLayer();
-}
-#endif
-
 } // namespace WebCore
 
 #if ENABLE(TREE_DEBUGGING)

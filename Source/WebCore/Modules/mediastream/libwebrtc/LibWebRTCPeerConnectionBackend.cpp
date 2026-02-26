@@ -209,11 +209,6 @@ static inline LibWebRTCRtpSenderBackend& NODELETE backendFromRTPSender(RTCRtpSen
     return downcast<LibWebRTCRtpSenderBackend>(*sender.backend());
 }
 
-static inline Ref<LibWebRTCRtpSenderBackend> NODELETE protectedBackendFromRTPSender(RTCRtpSender& sender)
-{
-    return backendFromRTPSender(sender);
-}
-
 void LibWebRTCPeerConnectionBackend::getStats(RTCRtpSender& sender, Ref<DeferredPromise>&& promise)
 {
     webrtc::RtpSenderInterface* rtcSender = sender.backend() ? backendFromRTPSender(sender).rtcSender() : nullptr;
@@ -327,7 +322,7 @@ ExceptionOr<Ref<RTCRtpSender>> LibWebRTCPeerConnectionBackend::addTrack(MediaStr
 
     Ref peerConnection = m_peerConnection.get();
     if (RefPtr sender = findExistingSender(peerConnection->currentTransceivers(), senderBackend)) {
-        protectedBackendFromRTPSender(*sender)->takeSource(senderBackend);
+        protect(backendFromRTPSender(*sender))->takeSource(senderBackend);
         sender->setTrack(track);
         sender->setMediaStreamIds(mediaStreamIds);
         return sender.releaseNonNull();
@@ -406,14 +401,14 @@ void LibWebRTCPeerConnectionBackend::collectTransceivers()
 void LibWebRTCPeerConnectionBackend::removeTrack(RTCRtpSender& sender)
 {
     ALWAYS_LOG(LOGIDENTIFIER, "Removing "_s, sender.trackKind(), " track with ID "_s, sender.trackId());
-    m_endpoint->removeTrack(protectedBackendFromRTPSender(sender));
+    m_endpoint->removeTrack(protect(backendFromRTPSender(sender)));
 }
 
 void LibWebRTCPeerConnectionBackend::applyRotationForOutgoingVideoSources()
 {
     for (auto& transceiver : protect(m_peerConnection)->currentTransceivers()) {
         if (!transceiver->sender().isStopped()) {
-            if (RefPtr videoSource = protectedBackendFromRTPSender(transceiver->sender())->videoSource())
+            if (RefPtr videoSource = protect(backendFromRTPSender(transceiver->sender()))->videoSource())
                 videoSource->applyRotation();
         }
     }

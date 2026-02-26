@@ -299,7 +299,7 @@ RefPtr<VideoFrame> ImageTransferSessionVT::convertVideoFrame(VideoFrame& videoFr
     if (size == expandedIntSize(videoFrame.presentationSize()))
         return &videoFrame;
 
-    auto resizedBuffer = convertPixelBuffer(videoFrame.protectedPixelBuffer().get(), size);
+    auto resizedBuffer = convertPixelBuffer(protect(videoFrame.pixelBuffer()).get(), size);
     if (!resizedBuffer)
         return nullptr;
 

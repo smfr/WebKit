@@ -172,7 +172,7 @@ RefPtr<NativeImage> RemoteVideoFrameObjectHeapProxyProcessor::getNativeImage(con
     m_conversionSemaphore.wait();
 
     auto pixelBuffer = WTF::move(m_convertedBuffer);
-    return pixelBuffer ? NativeImage::create(PixelBufferConformerCV::imageFrom32BGRAPixelBuffer(WTF::move(pixelBuffer), destinationColorSpace.protectedPlatformColorSpace().get())) : nullptr;
+    return pixelBuffer ? NativeImage::create(PixelBufferConformerCV::imageFrom32BGRAPixelBuffer(WTF::move(pixelBuffer), RetainPtr { destinationColorSpace.platformColorSpace() }.get())) : nullptr;
 }
 
 }

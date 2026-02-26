@@ -362,7 +362,7 @@ ImageDecoderAVFObjC::ImageDecoderAVFObjC(const FragmentedSharedBuffer& data, con
     [retainPtr(m_asset.get().resourceLoader) setDelegate:m_loader.get() queue:globalDispatchQueueSingleton(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
     [m_asset loadValuesAsynchronouslyForKeys:@[@"tracks"] completionHandler:[protectedThis = Ref { *this }] () mutable {
         callOnMainThread([protectedThis = WTF::move(protectedThis)] {
-            protectedThis->setTrack(protectedThis->protectedFirstEnabledTrack().get());
+            protectedThis->setTrack(protect(protectedThis->firstEnabledTrack()).get());
         });
     }];
 }
@@ -399,11 +399,6 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     }
 
     return [videoTracks objectAtIndex:firstEnabledIndex];
-}
-
-RetainPtr<AVAssetTrack> ImageDecoderAVFObjC::protectedFirstEnabledTrack()
-{
-    return firstEnabledTrack();
 }
 
 void ImageDecoderAVFObjC::readSamples()
@@ -689,7 +684,7 @@ void ImageDecoderAVFObjC::setData(const FragmentedSharedBuffer& data, bool allDa
         m_isAllDataReceived = true;
 
         if (!m_track)
-            setTrack(protectedFirstEnabledTrack().get());
+            setTrack(protect(firstEnabledTrack()).get());
 
         if (!m_track)
             return;
@@ -731,7 +726,7 @@ bool ImageDecoderAVFObjC::sampleIsComplete(const ImageDecoderAVFObjCSample& samp
         return byteRangeValue.byteOffset + byteRangeValue.byteLength <= m_loader.get().data.length;
     }
 
-    return PAL::CMSampleBufferDataIsReady(sample.protectedSampleBuffer().get());
+    return PAL::CMSampleBufferDataIsReady(protect(sample.sampleBuffer()).get());
 }
 
 }

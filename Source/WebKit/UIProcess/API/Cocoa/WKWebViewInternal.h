@@ -659,7 +659,6 @@ struct PerWebProcessState {
 
 - (WKPageRef)_pageForTesting;
 - (NakedPtr<WebKit::WebPageProxy>)_page;
-- (RefPtr<WebKit::WebPageProxy>)_protectedPage;
 #if PLATFORM(MAC)
 - (nullable WebKit::WebViewImpl *)_impl;
 #endif

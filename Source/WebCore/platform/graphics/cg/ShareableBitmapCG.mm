@@ -111,7 +111,7 @@ CGBitmapInfo ShareableBitmapConfiguration::calculateBitmapInfo(const Destination
 RefPtr<ShareableBitmap> ShareableBitmap::createFromImagePixels(NativeImage& image)
 {
     auto colorSpace = image.colorSpace();
-    if (CGColorSpaceGetModel(colorSpace.protectedPlatformColorSpace().get()) != kCGColorSpaceModelRGB)
+    if (CGColorSpaceGetModel(protect(colorSpace.platformColorSpace()).get()) != kCGColorSpaceModelRGB)
         return nullptr;
 
     RetainPtr sourceProvider = CGImageGetDataProvider(image.platformImage().get());
@@ -166,7 +166,7 @@ std::unique_ptr<GraphicsContext> ShareableBitmap::createGraphicsContext()
     ref(); // Balanced by deref in releaseBitmapContextData.
 
     m_releaseBitmapContextDataCalled = false;
-    RetainPtr<CGContextRef> bitmapContext = adoptCF(CGBitmapContextCreateWithData(mutableSpan().data(), size().width(), size().height(), bitsPerComponent, bytesPerRow, m_configuration.protectedPlatformColorSpace().get(), m_configuration.bitmapInfo(), releaseBitmapContextData, this));
+    RetainPtr<CGContextRef> bitmapContext = adoptCF(CGBitmapContextCreateWithData(mutableSpan().data(), size().width(), size().height(), bitsPerComponent, bytesPerRow, protect(m_configuration.platformColorSpace()).get(), m_configuration.bitmapInfo(), releaseBitmapContextData, this));
     if (!bitmapContext) {
         // When CGBitmapContextCreateWithData fails and returns null, it will only
         // call the release callback in some circumstances <rdar://82228446>. We
@@ -237,9 +237,9 @@ PlatformImagePtr ShareableBitmap::createPlatformImage(BackingStoreCopy copyBehav
 
 #if HAVE(SUPPORT_HDR_DISPLAY_APIS)
     if (m_configuration.headroom() > Headroom::None)
-        return adoptCF(CGImageCreateWithContentHeadroom(m_configuration.headroom(), size().width(), size().height(), bitsPerComponent, bitsPerPixel, bytesPerRow, m_configuration.protectedPlatformColorSpace().get(), m_configuration.bitmapInfo(), dataProvider.get(), 0, shouldInterpolate == ShouldInterpolate::Yes, kCGRenderingIntentDefault));
+        return adoptCF(CGImageCreateWithContentHeadroom(m_configuration.headroom(), size().width(), size().height(), bitsPerComponent, bitsPerPixel, bytesPerRow, protect(m_configuration.platformColorSpace()).get(), m_configuration.bitmapInfo(), dataProvider.get(), 0, shouldInterpolate == ShouldInterpolate::Yes, kCGRenderingIntentDefault));
 #endif
-    return adoptCF(CGImageCreate(size().width(), size().height(), bitsPerComponent, bitsPerPixel, bytesPerRow, m_configuration.protectedPlatformColorSpace().get(), m_configuration.bitmapInfo(), dataProvider.get(), 0, shouldInterpolate == ShouldInterpolate::Yes, kCGRenderingIntentDefault));
+    return adoptCF(CGImageCreate(size().width(), size().height(), bitsPerComponent, bitsPerPixel, bytesPerRow, protect(m_configuration.platformColorSpace()).get(), m_configuration.bitmapInfo(), dataProvider.get(), 0, shouldInterpolate == ShouldInterpolate::Yes, kCGRenderingIntentDefault));
 
 }
 

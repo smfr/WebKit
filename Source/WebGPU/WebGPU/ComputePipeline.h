@@ -72,7 +72,6 @@ public:
     MTLSize threadsPerThreadgroup() const { return m_threadsPerThreadgroup; }
 
     PipelineLayout& pipelineLayout() const { return m_pipelineLayout; }
-    Ref<PipelineLayout> protectedPipelineLayout() const { return m_pipelineLayout; }
 
     const BufferBindingSizesForBindGroup* minimumBufferSizes(uint32_t) const;
     uint64_t uniqueId() const { return m_uniqueId; }

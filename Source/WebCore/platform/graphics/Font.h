@@ -230,7 +230,6 @@ public:
 #endif
 #if USE(CORE_TEXT)
     CTFontRef ctFont() const { return m_platformData.ctFont(); }
-    RetainPtr<CTFontRef> protectedCTFont() const { return ctFont(); }
     RetainPtr<CFDictionaryRef> getCFStringAttributes(bool enableKerning, FontOrientation, const AtomString& locale) const;
     bool supportsSmallCaps() const;
     bool supportsAllSmallCaps() const;

@@ -99,11 +99,6 @@ NSURLRequest *ResourceRequest::nsURLRequest(HTTPBodyUpdatePolicy bodyPolicy) con
     return m_nsRequest.get();
 }
 
-RetainPtr<NSURLRequest> ResourceRequest::protectedNSURLRequest(HTTPBodyUpdatePolicy bodyPolicy) const
-{
-    return nsURLRequest(bodyPolicy);
-}
-
 ResourceRequestPlatformData ResourceRequest::getResourceRequestPlatformData() const
 {
     RELEASE_ASSERT(m_httpBody || m_nsRequest);
@@ -142,7 +137,7 @@ ResourceRequestPlatformData ResourceRequest::getResourceRequestPlatformData() co
 
 CFURLRequestRef ResourceRequest::cfURLRequest(HTTPBodyUpdatePolicy bodyPolicy) const
 {
-    return [protectedNSURLRequest(bodyPolicy) _CFURLRequest];
+    return [protect(nsURLRequest(bodyPolicy)) _CFURLRequest];
 }
 
 static inline ResourceRequestCachePolicy fromPlatformRequestCachePolicy(NSURLRequestCachePolicy policy)

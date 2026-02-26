@@ -99,7 +99,6 @@ public:
     RepaintRequirements finishAnnotationTracking(PDFAnnotation* annotationUnderMouse, WebEventType, WebMouseEventButton);
 
     PDFAnnotation *trackedAnnotation() const { return m_trackedAnnotation.get(); }
-    RetainPtr<PDFAnnotation> protectedTrackedAnnotation() const { return m_trackedAnnotation; }
     bool NODELETE isBeingHovered() const;
 
 private:
@@ -423,7 +422,6 @@ private:
     void unfreezeCursorAfterSelectionDragIfNeeded();
     void stopTrackingSelection();
     void setCurrentSelection(RetainPtr<PDFSelection>&&);
-    RetainPtr<PDFSelection> protectedCurrentSelection() const;
     void repaintOnSelectionChange(ActiveStateChangeReason, PDFSelection *previousSelection = nil);
     void showOrHideSelectionLayerAsNecessary();
 

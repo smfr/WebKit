@@ -111,7 +111,6 @@ public:
 #endif
 #if PLATFORM(COCOA)
     virtual CVPixelBufferRef pixelBuffer() const { return nullptr; };
-    RetainPtr<CVPixelBufferRef> protectedPixelBuffer() const { return pixelBuffer(); }
 #endif
     WEBCORE_EXPORT virtual void setOwnershipIdentity(const ProcessIdentity&) { }
 

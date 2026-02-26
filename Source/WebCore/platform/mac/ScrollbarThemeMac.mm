@@ -171,11 +171,6 @@ NSScrollerImp *ScrollbarThemeMac::scrollerImpForScrollbar(Scrollbar& scrollbar)
     return nil;
 }
 
-RetainPtr<NSScrollerImp> ScrollbarThemeMac::protectedScrollerImpForScrollbar(Scrollbar& scrollbar)
-{
-    return scrollerImpForScrollbar(scrollbar);
-}
-
 bool ScrollbarThemeMac::isLayoutDirectionRTL(Scrollbar& scrollbar)
 {
 #if PLATFORM(MAC)
@@ -433,7 +428,7 @@ int ScrollbarThemeMac::minimumThumbLength(Scrollbar& scrollbar)
 {
     if (scrollbar.shouldRegisterScrollbar()) {
         BEGIN_BLOCK_OBJC_EXCEPTIONS
-        return [protectedScrollerImpForScrollbar(scrollbar) knobMinLength];
+        return [protect(scrollerImpForScrollbar(scrollbar)) knobMinLength];
         END_BLOCK_OBJC_EXCEPTIONS
     } else
         return scrollbar.minimumThumbLength();
@@ -494,7 +489,7 @@ int ScrollbarThemeMac::scrollbarPartToHIPressedState(ScrollbarPart part)
 void ScrollbarThemeMac::updateEnabledState(Scrollbar& scrollbar)
 {
     BEGIN_BLOCK_OBJC_EXCEPTIONS
-    [protectedScrollerImpForScrollbar(scrollbar) setEnabled:scrollbar.enabled()];
+    [protect(scrollerImpForScrollbar(scrollbar)) setEnabled:scrollbar.enabled()];
     END_BLOCK_OBJC_EXCEPTIONS
 }
 

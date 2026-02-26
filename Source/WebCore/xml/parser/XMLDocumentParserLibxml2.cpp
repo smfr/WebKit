@@ -1130,39 +1130,34 @@ static inline XMLDocumentParser* getParser(void* closure)
     return static_cast<XMLDocumentParser*>(ctxt->_private);
 }
 
-static inline RefPtr<XMLDocumentParser> protectedParser(void* closure)
-{
-    return getParser(closure);
-}
-
 static void startElementNsHandler(void* closure, const xmlChar* localname, const xmlChar* prefix, const xmlChar* uri, int numNamespaces, const xmlChar** namespaces, int numAttributes, int numDefaulted, const xmlChar** libxmlAttributes)
 {
-    protectedParser(closure)->startElementNs(localname, prefix, uri, numNamespaces, namespaces, numAttributes, numDefaulted, libxmlAttributes);
+    protect(getParser(closure))->startElementNs(localname, prefix, uri, numNamespaces, namespaces, numAttributes, numDefaulted, libxmlAttributes);
 }
 
 static void endElementNsHandler(void* closure, const xmlChar*, const xmlChar*, const xmlChar*)
 {
-    protectedParser(closure)->endElementNs();
+    protect(getParser(closure))->endElementNs();
 }
 
 static void charactersHandler(void* closure, const xmlChar* s, int len)
 {
-    protectedParser(closure)->characters(unsafeMakeSpan(s, len));
+    protect(getParser(closure))->characters(unsafeMakeSpan(s, len));
 }
 
 static void processingInstructionHandler(void* closure, const xmlChar* target, const xmlChar* data)
 {
-    protectedParser(closure)->processingInstruction(target, data);
+    protect(getParser(closure))->processingInstruction(target, data);
 }
 
 static void cdataBlockHandler(void* closure, const xmlChar* s, int len)
 {
-    protectedParser(closure)->cdataBlock(unsafeMakeSpan(s, len));
+    protect(getParser(closure))->cdataBlock(unsafeMakeSpan(s, len));
 }
 
 static void commentHandler(void* closure, const xmlChar* comment)
 {
-    protectedParser(closure)->comment(comment);
+    protect(getParser(closure))->comment(comment);
 }
 
 WTF_ATTRIBUTE_PRINTF(2, 3)
@@ -1171,7 +1166,7 @@ static void warningHandler(void* closure, const char* message, ...)
     va_list args;
     va_start(args, message);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
-    protectedParser(closure)->error(XMLErrors::Type::Warning, message, args);
+    protect(getParser(closure))->error(XMLErrors::Type::Warning, message, args);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
     va_end(args);
 }
@@ -1182,7 +1177,7 @@ static void fatalErrorHandler(void* closure, const char* message, ...)
     va_list args;
     va_start(args, message);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
-    protectedParser(closure)->error(XMLErrors::Type::Fatal, message, args);
+    protect(getParser(closure))->error(XMLErrors::Type::Fatal, message, args);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
     va_end(args);
 }
@@ -1193,7 +1188,7 @@ static void normalErrorHandler(void* closure, const char* message, ...)
     va_list args;
     va_start(args, message);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
-    protectedParser(closure)->error(XMLErrors::Type::NonFatal, message, args);
+    protect(getParser(closure))->error(XMLErrors::Type::NonFatal, message, args);
 WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
     va_end(args);
 }
@@ -1301,19 +1296,19 @@ static void startDocumentHandler(void* closure)
 {
     xmlParserCtxt* ctxt = static_cast<xmlParserCtxt*>(closure);
     switchToUTF16(ctxt);
-    protectedParser(closure)->startDocument(ctxt->version, ctxt->encoding, ctxt->standalone);
+    protect(getParser(closure))->startDocument(ctxt->version, ctxt->encoding, ctxt->standalone);
     xmlSAX2StartDocument(closure);
 }
 
 static void endDocumentHandler(void* closure)
 {
-    protectedParser(closure)->endDocument();
+    protect(getParser(closure))->endDocument();
     xmlSAX2EndDocument(closure);
 }
 
 static void internalSubsetHandler(void* closure, const xmlChar* name, const xmlChar* externalID, const xmlChar* systemID)
 {
-    protectedParser(closure)->internalSubset(name, externalID, systemID);
+    protect(getParser(closure))->internalSubset(name, externalID, systemID);
     xmlSAX2InternalSubset(closure, name, externalID, systemID);
 }
 

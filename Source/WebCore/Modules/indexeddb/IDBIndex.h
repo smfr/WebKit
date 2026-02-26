@@ -52,7 +52,6 @@ public:
     const String& NODELETE name() const;
     ExceptionOr<void> setName(const String&);
     IDBObjectStore& NODELETE objectStore();
-    Ref<IDBObjectStore> NODELETE protectedObjectStore();
     const IDBKeyPath& NODELETE keyPath() const;
     bool NODELETE unique() const;
     bool NODELETE multiEntry() const;

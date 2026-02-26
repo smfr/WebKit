@@ -600,7 +600,7 @@ void WebPage::setTopOverhangImage(WebImage* image)
 
     layer->setSize(image->size());
     layer->setPosition(FloatPoint(0, -image->size().height()));
-    layer->protectedPlatformLayer().get().contents = (__bridge id)nativeImage->platformImage().get();
+    protect(layer->platformLayer()).get().contents = (__bridge id)nativeImage->platformImage().get();
 }
 
 void WebPage::setBottomOverhangImage(WebImage* image)
@@ -618,7 +618,7 @@ void WebPage::setBottomOverhangImage(WebImage* image)
         return;
 
     layer->setSize(image->size());
-    layer->protectedPlatformLayer().get().contents = (__bridge id)nativeImage->platformImage().get();
+    protect(layer->platformLayer()).get().contents = (__bridge id)nativeImage->platformImage().get();
 }
 
 void WebPage::setUseFormSemanticContext(bool useFormSemanticContext)

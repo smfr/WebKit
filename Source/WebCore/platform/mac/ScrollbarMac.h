@@ -40,7 +40,6 @@ public:
     ~ScrollbarMac() { }
 
     NSScrollerImp* scrollerImp() const;
-    RetainPtr<NSScrollerImp> protectedScrollerImp() const;
     void createScrollerImp(NSScrollerImp* oldScrollerImp = nullptr);
     bool isMacScrollbar() const override { return true; }
 

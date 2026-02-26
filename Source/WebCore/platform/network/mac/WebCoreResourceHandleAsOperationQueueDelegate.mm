@@ -260,7 +260,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
             adjustMIMETypeIfNecessary([r _CFURLResponse], isMainResourceLoad ? IsMainResourceLoad::Yes : IsMainResourceLoad::No, IsNoSniffSet::No);
         }
 
-        if ([handle->firstRequest().protectedNSURLRequest(HTTPBodyUpdatePolicy::DoNotUpdateHTTPBody) _propertyForKey:@"ForceHTMLMIMEType"])
+        if ([protect(handle->firstRequest().nsURLRequest(HTTPBodyUpdatePolicy::DoNotUpdateHTTPBody)) _propertyForKey:@"ForceHTMLMIMEType"])
             [r _setMIMEType:@"text/html"];
 
         ResourceResponse resourceResponse(r.get());

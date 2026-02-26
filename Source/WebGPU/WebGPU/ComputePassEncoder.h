@@ -92,9 +92,6 @@ private:
     void executePreDispatchCommands(const Buffer* = nullptr);
     id<MTLBuffer> runPredispatchIndirectCallValidation(const Buffer&, uint64_t);
 
-    Ref<CommandEncoder> protectedParentEncoder() { return m_parentEncoder; }
-    Ref<Device> protectedDevice() const { return m_device; }
-
     id<MTLComputeCommandEncoder> m_computeCommandEncoder { nil };
 
     uint64_t m_debugGroupStackSize { 0 };

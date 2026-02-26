@@ -206,5 +206,5 @@ void wgpuTextureViewRelease(WGPUTextureView textureView)
 
 void wgpuTextureViewSetLabel(WGPUTextureView textureView, const char* label)
 {
-    WebGPU::protectedFromAPI(textureView)->setLabel(WebGPU::fromAPI(label));
+    protect(WebGPU::fromAPI(textureView))->setLabel(WebGPU::fromAPI(label));
 }

@@ -913,7 +913,7 @@ void UnifiedPDFPlugin::paintPDFContent(const WebCore::GraphicsLayer* layer, Grap
 
         if (!asyncRenderer) {
             LOG_WITH_STREAM(PDF, stream << "UnifiedPDFPlugin: painting PDF page " << pageInfo.pageIndex << " into rect " << pageDestinationRect << " with clip " << clipRect);
-            [page drawWithBox:kPDFDisplayBoxCropBox toContext:context.protectedPlatformContext().get()];
+            [page drawWithBox:kPDFDisplayBoxCropBox toContext:protect(context.platformContext()).get()];
         }
 
         if constexpr (hasFullAnnotationSupport) {
@@ -987,7 +987,7 @@ void UnifiedPDFPlugin::paintPDFSelection(const GraphicsLayer* layer, GraphicsCon
         context.concatCTM(transformForBox);
 
 #if HAVE(PDFSELECTION_ENUMERATE_RECTS_AND_TRANSFORMS)
-        [protectedCurrentSelection() enumerateRectsAndTransformsForPage:page.get() usingBlock:[&context, &selectionColor](CGRect cgRect, CGAffineTransform cgTransform) mutable {
+        [protect(m_currentSelection) enumerateRectsAndTransformsForPage:page.get() usingBlock:[&context, &selectionColor](CGRect cgRect, CGAffineTransform cgTransform) mutable {
             // FIXME: Perf optimization -- consider coalescing rects by transform.
             GraphicsContextStateSaver individualRectTransformPairStateSaver { context, /* saveAndRestore */ false };
 
@@ -2238,7 +2238,7 @@ void UnifiedPDFPlugin::repaintAnnotationsForFormField(NSString *fieldName)
 void UnifiedPDFPlugin::startTrackingAnnotation(RetainPtr<PDFAnnotation>&& annotation, WebEventType mouseEventType, WebMouseEventButton mouseEventButton)
 {
     auto repaintRequirements = m_annotationTrackingState.startAnnotationTracking(WTF::move(annotation), mouseEventType, mouseEventButton);
-    setNeedsRepaintForAnnotation(m_annotationTrackingState.protectedTrackedAnnotation().get(), repaintRequirements);
+    setNeedsRepaintForAnnotation(protect(m_annotationTrackingState.trackedAnnotation()).get(), repaintRequirements);
 }
 
 void UnifiedPDFPlugin::updateTrackedAnnotation(PDFAnnotation *annotationUnderMouse)
@@ -3105,14 +3105,10 @@ void UnifiedPDFPlugin::repaintOnSelectionChange(ActiveStateChangeReason reason, 
         RELEASE_ASSERT_NOT_REACHED();
     }
 
-    auto repaintCoverage = unite(pageCoverageForSelection(previousSelection), pageCoverageForSelection(protectedCurrentSelection().get()));
+    auto repaintCoverage = unite(pageCoverageForSelection(previousSelection), pageCoverageForSelection(protect(m_currentSelection).get()));
     protect(m_presentationController)->setNeedsRepaintForPageCoverage(RepaintRequirement::Selection, repaintCoverage);
 }
 
-RetainPtr<PDFSelection> UnifiedPDFPlugin::protectedCurrentSelection() const
-{
-    return m_currentSelection;
-}
 
 void UnifiedPDFPlugin::setCurrentSelection(RetainPtr<PDFSelection>&& selection)
 {
@@ -4075,7 +4071,7 @@ void UnifiedPDFPlugin::setActiveAnnotation(SetActiveAnnotationParams&& setActive
             RefPtr newActiveAnnotation = PDFPluginAnnotation::create(annotation.get(), this);
             newActiveAnnotation->attach(m_annotationContainer.get());
             m_activeAnnotation = WTF::move(newActiveAnnotation);
-            revealAnnotation(protect(activeAnnotation())->protectedAnnotation().get());
+            revealAnnotation(protect(protect(activeAnnotation())->annotation()).get());
         } else
             m_activeAnnotation = nullptr;
     });

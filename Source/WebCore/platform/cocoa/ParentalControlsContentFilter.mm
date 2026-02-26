@@ -116,7 +116,7 @@ void ParentalControlsContentFilter::responseReceived(const ResourceResponse& res
     urlFilter()->isURLAllowed(m_mainDocumentURL, *m_evaluatedURL, *this);
 #elif HAVE(WEBCONTENTANALYSIS_FRAMEWORK)
     ASSERT(!m_webFilterEvaluator);
-    m_webFilterEvaluator = adoptNS([allocWebFilterEvaluatorInstance() initWithResponse:response.protectedNSURLResponse().get()]);
+    m_webFilterEvaluator = adoptNS([allocWebFilterEvaluatorInstance() initWithResponse:protect(response.nsURLResponse()).get()]);
 #if HAVE(WEBFILTEREVALUATOR_AUDIT_TOKEN)
     if (m_hostProcessAuditToken)
         m_webFilterEvaluator.get().browserAuditToken = *m_hostProcessAuditToken;

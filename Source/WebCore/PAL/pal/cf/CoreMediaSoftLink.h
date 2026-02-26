@@ -38,6 +38,7 @@
 #include <span>
 #include <wtf/SoftLinking.h>
 #include <wtf/StdLibExtras.h>
+#include <wtf/cf/CFTypeTraits.h>
 
 #if PLATFORM(WATCHOS)
 #define SOFTLINK_AVKIT_FRAMEWORK() SOFT_LINK_PRIVATE_FRAMEWORK_OPTIONAL(AVKit)
@@ -65,6 +66,11 @@ SOFT_LINK_FUNCTION_FOR_HEADER(PAL, CoreMedia, CMFormatDescriptionEqual, Boolean,
 #define CMFormatDescriptionEqual softLink_CoreMedia_CMFormatDescriptionEqual
 SOFT_LINK_FUNCTION_FOR_HEADER(PAL, CoreMedia, CMSampleBufferGetTypeID, CFTypeID, (void), ())
 #define CMSampleBufferGetTypeID softLink_CoreMedia_CMSampleBufferGetTypeID
+// Manual equivalent of WTF_DECLARE_CF_TYPE_TRAIT(CMSampleBuffer) because
+// the soft-linked function lives in the PAL namespace.
+template <> struct WTF::CFTypeTrait<CMSampleBufferRef> {
+    static inline CFTypeID typeID() { return PAL::CMSampleBufferGetTypeID(); }
+};
 SOFT_LINK_FUNCTION_FOR_HEADER(PAL, CoreMedia, CMSampleBufferGetDataBuffer, CMBlockBufferRef, (CMSampleBufferRef sbuf), (sbuf))
 #define CMSampleBufferGetDataBuffer softLink_CoreMedia_CMSampleBufferGetDataBuffer
 SOFT_LINK_FUNCTION_FOR_HEADER(PAL, CoreMedia, CMSampleBufferGetFormatDescription, CMFormatDescriptionRef, (CMSampleBufferRef sbuf), (sbuf))

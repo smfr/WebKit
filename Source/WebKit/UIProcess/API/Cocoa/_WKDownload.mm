@@ -84,7 +84,7 @@ IGNORE_WARNINGS_END
 
 - (NSURLRequest *)request
 {
-    return _download->_download->request().protectedNSURLRequest(WebCore::HTTPBodyUpdatePolicy::DoNotUpdateHTTPBody).autorelease();
+    return protect(_download->_download->request().nsURLRequest(WebCore::HTTPBodyUpdatePolicy::DoNotUpdateHTTPBody)).autorelease();
 }
 
 - (WKWebView *)originatingWebView

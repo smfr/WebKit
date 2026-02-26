@@ -34,6 +34,7 @@
 
 typedef struct __IOSurface* IOSurfaceRef;
 
+WTF_DECLARE_CF_TYPE_TRAIT(CVPixelBuffer);
 WTF_DECLARE_CF_TYPE_TRAIT(CVPixelBufferPool);
 
 SOFT_LINK_FRAMEWORK_FOR_HEADER(WebCore, CoreVideo)

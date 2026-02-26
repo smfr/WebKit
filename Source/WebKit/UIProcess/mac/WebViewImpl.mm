@@ -3137,11 +3137,6 @@ static NSMenuItem *menuItem(id<NSValidatedUserInterfaceItem> item)
     return (NSMenuItem *)item;
 }
 
-static RetainPtr<NSMenuItem> protectedMenuItem(id<NSValidatedUserInterfaceItem> item)
-{
-    return menuItem(item);
-}
-
 static NSToolbarItem *toolbarItem(id<NSValidatedUserInterfaceItem> item)
 {
     if (![(NSObject *)item isKindOfClass:[NSToolbarItem class]])
@@ -3166,19 +3161,19 @@ bool WebViewImpl::validateUserInterfaceItem(id<NSValidatedUserInterfaceItem> ite
     if (action == @selector(toggleContinuousSpellChecking:)) {
         bool enabled = TextChecker::isContinuousSpellCheckingAllowed();
         bool checked = enabled && TextChecker::state().contains(TextCheckerState::ContinuousSpellCheckingEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return enabled;
     }
 
     if (action == @selector(toggleGrammarChecking:)) {
         bool checked = TextChecker::state().contains(TextCheckerState::GrammarCheckingEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return true;
     }
 
     if (action == @selector(toggleAutomaticSpellingCorrection:)) {
         bool enable = m_page->editorState().canEnableAutomaticSpellingCorrection;
-        protectedMenuItem(item).get().state = TextChecker::state().contains(TextCheckerState::AutomaticSpellingCorrectionEnabled) && enable ? NSControlStateValueOn : NSControlStateValueOff;
+        protect(menuItem(item)).get().state = TextChecker::state().contains(TextCheckerState::AutomaticSpellingCorrectionEnabled) && enable ? NSControlStateValueOn : NSControlStateValueOff;
         return enable;
     }
 
@@ -3190,31 +3185,31 @@ bool WebViewImpl::validateUserInterfaceItem(id<NSValidatedUserInterfaceItem> ite
 
     if (action == @selector(toggleSmartInsertDelete:)) {
         bool checked = m_page->isSmartInsertDeleteEnabled();
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return m_page->editorState().isContentEditable;
     }
 
     if (action == @selector(toggleAutomaticQuoteSubstitution:)) {
         bool checked = TextChecker::state().contains(TextCheckerState::AutomaticQuoteSubstitutionEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return m_page->editorState().isContentEditable;
     }
 
     if (action == @selector(toggleAutomaticDashSubstitution:)) {
         bool checked = TextChecker::state().contains(TextCheckerState::AutomaticDashSubstitutionEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return m_page->editorState().isContentEditable;
     }
 
     if (action == @selector(toggleAutomaticLinkDetection:)) {
         bool checked = TextChecker::state().contains(TextCheckerState::AutomaticLinkDetectionEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return m_page->editorState().isContentEditable;
     }
 
     if (action == @selector(toggleAutomaticTextReplacement:)) {
         bool checked = TextChecker::state().contains(TextCheckerState::AutomaticTextReplacementEnabled);
-        [protectedMenuItem(item) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
+        [protect(menuItem(item)) setState:checked ? NSControlStateValueOn : NSControlStateValueOff];
         return m_page->editorState().isContentEditable;
     }
 

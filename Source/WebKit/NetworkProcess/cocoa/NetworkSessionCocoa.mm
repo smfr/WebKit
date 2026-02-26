@@ -523,7 +523,7 @@ static inline void processServerTrustEvaluation(NetworkSessionCocoa& session, Se
 void NetworkSessionCocoa::setClientAuditToken(const WebCore::AuthenticationChallenge& challenge)
 {
     if (auto auditData = networkProcess().sourceApplicationAuditData())
-        SecTrustSetClientAuditToken(RetainPtr { challenge.protectedNSURLAuthenticationChallenge().get().protectionSpace.serverTrust }.get(), auditData.get());
+        SecTrustSetClientAuditToken(RetainPtr { protect(challenge.nsURLAuthenticationChallenge()).get().protectionSpace.serverTrust }.get(), auditData.get());
 
 }
 

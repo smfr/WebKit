@@ -1476,7 +1476,7 @@ std::pair<Ref<RenderPipeline>, NSString*> Device::createRenderPipeline(const WGP
     RefPtr<PipelineLayout> pipelineLayout;
     Vector<Vector<WGPUBindGroupLayoutEntry>> bindGroupEntries;
     if (descriptor.layout) {
-        Ref layout = WebGPU::protectedFromAPI(descriptor.layout);
+        Ref layout = WebGPU::fromAPI(descriptor.layout);
         if (!isValidToUseWithDevice(layout.get(), *this))
             return returnInvalidRenderPipeline(*this, isAsync, "Pipeline layout is not valid or created from different device"_s);
 
@@ -1491,7 +1491,7 @@ std::pair<Ref<RenderPipeline>, NSString*> Device::createRenderPipeline(const WGP
     String vertexShaderSource, fragmentShaderSource;
     ShaderModule::VertexStageIn shaderLocations;
     {
-        Ref vertexModule = WebGPU::protectedFromAPI(descriptor.vertex.module);
+        Ref vertexModule = WebGPU::fromAPI(descriptor.vertex.module);
         if (!vertexModule->isValid() || !vertexModule->ast())
             return returnInvalidRenderPipeline(*this, isAsync, "Vertex module is not valid"_s);
         if (&vertexModule->device() != this)
@@ -1529,7 +1529,7 @@ std::pair<Ref<RenderPipeline>, NSString*> Device::createRenderPipeline(const WGP
     if (descriptor.fragment) {
         const auto& fragmentDescriptor = *descriptor.fragment;
 
-        fragmentModule = WebGPU::protectedFromAPI(fragmentDescriptor.module).ptr();
+        fragmentModule = protect(WebGPU::fromAPI(fragmentDescriptor.module)).ptr();
         if (!fragmentModule->isValid() || !fragmentModule->ast())
             return returnInvalidRenderPipeline(*this, isAsync, "Fragment module is invalid"_s);
 
@@ -2014,10 +2014,10 @@ void wgpuRenderPipelineRelease(WGPURenderPipeline renderPipeline)
 
 WGPUBindGroupLayout wgpuRenderPipelineGetBindGroupLayout(WGPURenderPipeline renderPipeline, uint32_t groupIndex)
 {
-    return WebGPU::releaseToAPI(WebGPU::protectedFromAPI(renderPipeline)->getBindGroupLayout(groupIndex));
+    return WebGPU::releaseToAPI(protect(WebGPU::fromAPI(renderPipeline))->getBindGroupLayout(groupIndex));
 }
 
 void wgpuRenderPipelineSetLabel(WGPURenderPipeline renderPipeline, const char* label)
 {
-    WebGPU::protectedFromAPI(renderPipeline)->setLabel(WebGPU::fromAPI(label));
+    protect(WebGPU::fromAPI(renderPipeline))->setLabel(WebGPU::fromAPI(label));
 }

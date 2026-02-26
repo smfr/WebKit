@@ -91,9 +91,6 @@ public:
     bool isEmpty() const;
     bool definitelySingleLine() const;
     WEBCORE_EXPORT PlatformPathPtr platformPath() const;
-#if USE(CG)
-    WEBCORE_EXPORT RetainPtr<CGPathRef> protectedPlatformPath() const;
-#endif
 
     const PathSegment* singleSegmentIfExists() const { return asSingle(); }
     WEBCORE_EXPORT const Vector<PathSegment>* segmentsIfExists() const;

@@ -40,7 +40,6 @@ public:
     WEBCORE_EXPORT virtual ~VideoPresentationLayerProvider();
 
     CocoaView *layerHostView() const { return m_layerHostView.get(); }
-    RetainPtr<CocoaView> protectedLayerHostView() const { return layerHostView(); }
     void setLayerHostView(RetainPtr<CocoaView>&& layerHostView) { m_layerHostView = WTF::move(layerHostView); }
 
     WebAVPlayerLayer *playerLayer() const { return m_playerLayer.get(); }

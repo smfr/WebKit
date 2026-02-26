@@ -246,7 +246,7 @@ extension WebGPU.CommandEncoder {
         if !isValid() || (m_existingCommandEncoder != nil && m_existingCommandEncoder !== m_blitCommandEncoder) {
             setEncoderState(WebGPU.CommandsMixin.EncoderState.Ended)
             discardCommandBuffer()
-            protectedDevice().ptr()
+            m_device.ptr()
                 .generateAValidationError(m_lastErrorString != nil ? m_lastErrorString! as String : String("Invalid CommandEncoder"))
             return WebGPU.CommandBuffer.createInvalid(m_device.ptr())
         }
@@ -259,7 +259,7 @@ extension WebGPU.CommandEncoder {
         setEncoderState(WebGPU.CommandsMixin.EncoderState.Ended)
         if validationFailedError != nil {
             discardCommandBuffer()
-            protectedDevice().ptr()
+            m_device.ptr()
                 .generateAValidationError(m_lastErrorString != nil ? m_lastErrorString! as String : validationFailedError)
             return WebGPU.CommandBuffer.createInvalid(m_device.ptr())
         }
@@ -585,7 +585,7 @@ extension WebGPU.CommandEncoder {
         }
         clearRenderCommandEncoder?.setCullMode(.none)
         clearRenderCommandEncoder?.drawPrimitives(type: .point, vertexStart: 0, vertexCount: 1, instanceCount: 1, baseInstance: 0)
-        m_device.ptr().protectedQueue().ptr().endEncoding(clearRenderCommandEncoder, m_commandBuffer)
+        m_device.ptr().getQueue().ptr().endEncoding(clearRenderCommandEncoder, m_commandBuffer)
         setExistingEncoder(nil)
     }
 
@@ -980,7 +980,7 @@ extension WebGPU.CommandEncoder {
     }
 
     private func errorValidatingTimestampWrites(timestampWrites: WGPUComputePassTimestampWrites) -> String? {
-        if !protectedDevice().ptr().hasFeature(WGPUFeatureName_TimestampQuery) {
+        if !m_device.ptr().hasFeature(WGPUFeatureName_TimestampQuery) {
             return "device does not have timestamp query feature"
         }
 

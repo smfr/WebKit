@@ -1046,24 +1046,20 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
     return _textFinderClient.get();
 }
 
-- (RetainPtr<WKTextFinderClient>)_protectedTextFinderClient
-{
-    return [self _ensureTextFinderClient];
-}
 
 - (void)findMatchesForString:(NSString *)targetString relativeToMatch:(id <NSTextFinderAsynchronousDocumentFindMatch>)relativeMatch findOptions:(NSTextFinderAsynchronousDocumentFindOptions)findOptions maxResults:(NSUInteger)maxResults resultCollector:(void (^)(NSArray *matches, BOOL didWrap))resultCollector
 {
-    [[self _protectedTextFinderClient] findMatchesForString:targetString relativeToMatch:relativeMatch findOptions:findOptions maxResults:maxResults resultCollector:resultCollector];
+    [protect([self _ensureTextFinderClient]) findMatchesForString:targetString relativeToMatch:relativeMatch findOptions:findOptions maxResults:maxResults resultCollector:resultCollector];
 }
 
 - (void)replaceMatches:(NSArray *)matches withString:(NSString *)replacementString inSelectionOnly:(BOOL)selectionOnly resultCollector:(void (^)(NSUInteger replacementCount))resultCollector
 {
-    [[self _protectedTextFinderClient] replaceMatches:matches withString:replacementString inSelectionOnly:selectionOnly resultCollector:resultCollector];
+    [protect([self _ensureTextFinderClient]) replaceMatches:matches withString:replacementString inSelectionOnly:selectionOnly resultCollector:resultCollector];
 }
 
 - (void)scrollFindMatchToVisible:(id<NSTextFinderAsynchronousDocumentFindMatch>)match
 {
-    [[self _protectedTextFinderClient] scrollFindMatchToVisible:match];
+    [protect([self _ensureTextFinderClient]) scrollFindMatchToVisible:match];
 }
 
 - (NSView *)documentContainerView
@@ -1073,12 +1069,12 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
 - (void)getSelectedText:(void (^)(NSString *selectedTextString))completionHandler
 {
-    [[self _protectedTextFinderClient] getSelectedText:completionHandler];
+    [protect([self _ensureTextFinderClient]) getSelectedText:completionHandler];
 }
 
 - (void)selectFindMatch:(id <NSTextFinderAsynchronousDocumentFindMatch>)findMatch completionHandler:(void (^)(void))completionHandler
 {
-    [[self _protectedTextFinderClient] selectFindMatch:findMatch completionHandler:completionHandler];
+    [protect([self _ensureTextFinderClient]) selectFindMatch:findMatch completionHandler:completionHandler];
 }
 
 #if ENABLE(DRAG_SUPPORT)
