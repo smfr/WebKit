@@ -1407,11 +1407,6 @@ NetworkProcessConnection& WebProcess::ensureNetworkProcessConnection()
     return *m_networkProcessConnection;
 }
 
-Ref<NetworkProcessConnection> WebProcess::ensureProtectedNetworkProcessConnection()
-{
-    return ensureNetworkProcessConnection();
-}
-
 void WebProcess::logDiagnosticMessageForNetworkProcessCrash()
 {
     RefPtr<WebCore::Page> page;
@@ -1539,11 +1534,6 @@ GPUProcessConnection& WebProcess::ensureGPUProcessConnection()
             page->gpuProcessConnectionDidBecomeAvailable(Ref { *m_gpuProcessConnection });
     }
     return *m_gpuProcessConnection;
-}
-
-Ref<GPUProcessConnection> WebProcess::ensureProtectedGPUProcessConnection()
-{
-    return ensureGPUProcessConnection();
 }
 
 Seconds WebProcess::gpuProcessTimeoutDuration() const
@@ -2524,11 +2514,11 @@ void WebProcess::setUseGPUProcessForMedia(bool useGPUProcessForMedia)
 #if PLATFORM(COCOA)
     if (useGPUProcessForMedia) {
         SystemBatteryStatusTestingOverrides::singleton().setConfigurationChangedCallback([this, protectedThis = Ref { *this }] (bool forceUpdate) {
-            ensureProtectedGPUProcessConnection()->updateMediaConfiguration(forceUpdate);
+            protect(ensureGPUProcessConnection())->updateMediaConfiguration(forceUpdate);
         });
 #if ENABLE(VP9)
         VP9TestingOverrides::singleton().setConfigurationChangedCallback([this, protectedThis = Ref { *this }] (bool forceUpdate) {
-            ensureProtectedGPUProcessConnection()->updateMediaConfiguration(forceUpdate);
+            protect(ensureGPUProcessConnection())->updateMediaConfiguration(forceUpdate);
         });
 #endif
     } else {

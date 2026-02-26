@@ -528,11 +528,6 @@ GPUProcessProxy& WebProcessPool::ensureGPUProcess()
     return *m_gpuProcess;
 }
 
-Ref<GPUProcessProxy> WebProcessPool::ensureProtectedGPUProcess()
-{
-    return ensureGPUProcess();
-}
-
 void WebProcessPool::gpuProcessDidFinishLaunching(ProcessID)
 {
     auto processes = m_processes;
@@ -568,26 +563,16 @@ void WebProcessPool::createGPUProcessConnection(WebProcessProxy& webProcessProxy
 #if PLATFORM(COCOA)
     parameters.applicationBundleIdentifier = applicationBundleIdentifier();
 #endif
-    ensureProtectedGPUProcess()->createGPUProcessConnection(webProcessProxy, WTF::move(connectionIdentifier), WTF::move(parameters));
+    protect(ensureGPUProcess())->createGPUProcessConnection(webProcessProxy, WTF::move(connectionIdentifier), WTF::move(parameters));
 }
 #endif // ENABLE(GPU_PROCESS)
 
 #if ENABLE(MODEL_PROCESS)
 ModelProcessProxy& WebProcessPool::ensureModelProcess()
 {
-    if (!m_modelProcess) {
-        Ref modelProcess = ModelProcessProxy::getOrCreate();
-        m_modelProcess = modelProcess.copyRef();
-    }
+    if (!m_modelProcess)
+        m_modelProcess = ModelProcessProxy::getOrCreate();
     return *m_modelProcess;
-}
-
-Ref<ModelProcessProxy> WebProcessPool::ensureProtectedModelProcess(WebProcessProxy& requestingWebProcess)
-{
-    RELEASE_ASSERT(requestingWebProcess.sharedPreferencesForWebProcessValue().modelElementEnabled);
-    RELEASE_ASSERT(requestingWebProcess.sharedPreferencesForWebProcessValue().modelProcessEnabled);
-
-    return ensureModelProcess();
 }
 
 void WebProcessPool::modelProcessDidFinishLaunching(ProcessID)
@@ -631,7 +616,9 @@ void WebProcessPool::createModelProcessConnection(WebProcessProxy& webProcessPro
     parameters.presentingApplicationAuditToken = configuration().presentingApplicationProcessToken();
 #endif
 
-    ensureProtectedModelProcess(webProcessProxy)->createModelProcessConnection(webProcessProxy, WTF::move(connectionIdentifier), WTF::move(parameters));
+    RELEASE_ASSERT(webProcessProxy.sharedPreferencesForWebProcessValue().modelElementEnabled);
+    RELEASE_ASSERT(webProcessProxy.sharedPreferencesForWebProcessValue().modelProcessEnabled);
+    protect(ensureModelProcess())->createModelProcessConnection(webProcessProxy, WTF::move(connectionIdentifier), WTF::move(parameters));
 }
 
 void WebProcessPool::startedPlayingModels(IPC::Connection& connection)
@@ -2440,7 +2427,7 @@ void WebProcessPool::addMockMediaDevice(const MockMediaDevice& device)
     MockRealtimeMediaSourceCenter::addDevice(device);
     sendToAllProcesses(Messages::WebProcess::AddMockMediaDevice { device });
 #if ENABLE(GPU_PROCESS) && !USE(GSTREAMER)
-    ensureProtectedGPUProcess()->addMockMediaDevice(device);
+    protect(ensureGPUProcess())->addMockMediaDevice(device);
 #endif
 #endif
 }
@@ -2451,7 +2438,7 @@ void WebProcessPool::clearMockMediaDevices()
     MockRealtimeMediaSourceCenter::setDevices({ });
     sendToAllProcesses(Messages::WebProcess::ClearMockMediaDevices { });
 #if ENABLE(GPU_PROCESS) && !USE(GSTREAMER)
-    ensureProtectedGPUProcess()->clearMockMediaDevices();
+    protect(ensureGPUProcess())->clearMockMediaDevices();
 #endif
 #endif
 }
@@ -2462,7 +2449,7 @@ void WebProcessPool::removeMockMediaDevice(const String& persistentId)
     MockRealtimeMediaSourceCenter::removeDevice(persistentId);
     sendToAllProcesses(Messages::WebProcess::RemoveMockMediaDevice { persistentId });
 #if ENABLE(GPU_PROCESS) && !USE(GSTREAMER)
-    ensureProtectedGPUProcess()->removeMockMediaDevice(persistentId);
+    protect(ensureGPUProcess())->removeMockMediaDevice(persistentId);
 #endif
 #endif
 }
@@ -2474,7 +2461,7 @@ void WebProcessPool::setMockMediaDeviceIsEphemeral(const String& persistentId, b
     MockRealtimeMediaSourceCenter::setDeviceIsEphemeral(persistentId, isEphemeral);
     sendToAllProcesses(Messages::WebProcess::SetMockMediaDeviceIsEphemeral { persistentId, isEphemeral });
 #if ENABLE(GPU_PROCESS) && !USE(GSTREAMER)
-    ensureProtectedGPUProcess()->setMockMediaDeviceIsEphemeral(persistentId, isEphemeral);
+    protect(ensureGPUProcess())->setMockMediaDeviceIsEphemeral(persistentId, isEphemeral);
 #endif
 #endif
 }
@@ -2485,7 +2472,7 @@ void WebProcessPool::resetMockMediaDevices()
     MockRealtimeMediaSourceCenter::resetDevices();
     sendToAllProcesses(Messages::WebProcess::ResetMockMediaDevices { });
 #if ENABLE(GPU_PROCESS) && !USE(GSTREAMER)
-    ensureProtectedGPUProcess()->resetMockMediaDevices();
+    protect(ensureGPUProcess())->resetMockMediaDevices();
 #endif
 #endif
 }

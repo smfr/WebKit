@@ -305,11 +305,9 @@ public:
     void allowTLSCertificateChainForLocalPCMTesting(const WebCore::CertificateInfo&);
 
     DeviceIdHashSaltStorage& ensureDeviceIdHashSaltStorage();
-    Ref<DeviceIdHashSaltStorage> ensureProtectedDeviceIdHashSaltStorage();
 
 #if ENABLE(ENCRYPTED_MEDIA)
     DeviceIdHashSaltStorage& ensureMediaKeysHashSaltStorage();
-    Ref<DeviceIdHashSaltStorage> ensureProtectedMediaKeysHashSaltStorage();
 #endif
 
     WebsiteDataStoreParameters parameters();

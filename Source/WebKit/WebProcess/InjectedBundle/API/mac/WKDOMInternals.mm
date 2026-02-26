@@ -95,11 +95,6 @@ WebCore::Node* toWebCoreNode(WKDOMNode *wrapper)
     return wrapper ? wrapper->_impl.get() : 0;
 }
 
-RefPtr<WebCore::Node> toProtectedWebCoreNode(WKDOMNode *wrapper)
-{
-    return toWebCoreNode(wrapper);
-}
-
 WKDOMNode *toWKDOMNode(WebCore::Node* impl)
 {
     return toWKDOMType<WebCore::Node*, __unsafe_unretained WKDOMNode *>(impl, WKDOMNodeCache());
@@ -118,11 +113,6 @@ WKDOMElement *toWKDOMElement(WebCore::Element* impl)
 WebCore::Document* toWebCoreDocument(WKDOMDocument *wrapper)
 {
     return wrapper ? downcast<WebCore::Document>(wrapper->_impl.get()) : 0;
-}
-
-RefPtr<WebCore::Document> toProtectedWebCoreDocument(WKDOMDocument *wrapper)
-{
-    return toWebCoreDocument(wrapper);
 }
 
 WKDOMDocument *toWKDOMDocument(WebCore::Document* impl)
@@ -150,11 +140,6 @@ static RetainPtr<WKDOMRange> createWrapper(WebCore::Range* impl)
 WebCore::Range* toWebCoreRange(WKDOMRange *wrapper)
 {
     return wrapper ? wrapper->_impl.get() : 0;
-}
-
-RefPtr<WebCore::Range> toProtectedWebCoreRange(WKDOMRange *wrapper)
-{
-    return toWebCoreRange(wrapper);
 }
 
 WKDOMRange *toWKDOMRange(WebCore::Range* impl)

@@ -773,11 +773,6 @@ SWServer& NetworkSession::ensureSWServer()
     return *m_swServer;
 }
 
-Ref<SWServer> NetworkSession::ensureProtectedSWServer()
-{
-    return ensureSWServer();
-}
-
 bool NetworkSession::hasServiceWorkerDatabasePath() const
 {
     return m_serviceWorkerInfo && !m_serviceWorkerInfo->databasePath.isEmpty();
@@ -900,39 +895,34 @@ BackgroundFetchStoreImpl& NetworkSession::ensureBackgroundFetchStore()
     return *m_backgroundFetchStore;
 }
 
-Ref<BackgroundFetchStoreImpl> NetworkSession::ensureProtectedBackgroundFetchStore()
-{
-    return ensureBackgroundFetchStore();
-}
-
 void NetworkSession::getAllBackgroundFetchIdentifiers(CompletionHandler<void(Vector<String>&&)>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->getAllBackgroundFetchIdentifiers(WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->getAllBackgroundFetchIdentifiers(WTF::move(callback));
 }
 
 void NetworkSession::getBackgroundFetchState(const String& identifier, CompletionHandler<void(std::optional<BackgroundFetchState>&&)>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->getBackgroundFetchState(identifier, WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->getBackgroundFetchState(identifier, WTF::move(callback));
 }
 
 void NetworkSession::abortBackgroundFetch(const String& identifier, CompletionHandler<void()>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->abortBackgroundFetch(identifier, WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->abortBackgroundFetch(identifier, WTF::move(callback));
 }
 
 void NetworkSession::pauseBackgroundFetch(const String& identifier, CompletionHandler<void()>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->pauseBackgroundFetch(identifier, WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->pauseBackgroundFetch(identifier, WTF::move(callback));
 }
 
 void NetworkSession::resumeBackgroundFetch(const String& identifier, CompletionHandler<void()>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->resumeBackgroundFetch(identifier, WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->resumeBackgroundFetch(identifier, WTF::move(callback));
 }
 
 void NetworkSession::clickBackgroundFetch(const String& identifier, CompletionHandler<void()>&& callback)
 {
-    ensureProtectedBackgroundFetchStore()->clickBackgroundFetch(identifier, WTF::move(callback));
+    protect(ensureBackgroundFetchStore())->clickBackgroundFetch(identifier, WTF::move(callback));
 }
 
 void NetworkSession::setInspectionForServiceWorkersAllowed(bool inspectable)

@@ -300,7 +300,7 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
 #endif
 
     // FIXME: Need to supply a real event here.
-    if (viewImpl->allowsBackForwardNavigationGestures() && viewImpl->ensureProtectedGestureController()->handleScrollWheelEvent(nil)) {
+    if (viewImpl->allowsBackForwardNavigationGestures() && protect(viewImpl->ensureGestureController())->handleScrollWheelEvent(nil)) {
         WK_APPKIT_GESTURE_CONTROLLER_RELEASE_LOG(page->logIdentifier(), "View gesture controller handled gesture");
         return;
     }
@@ -367,7 +367,7 @@ static WebCore::FloatSize toRawPlatformDelta(WebCore::FloatSize delta)
     viewImpl->dismissContentRelativeChildWindowsWithAnimation(false);
 
     auto magnificationOrigin = [webView convertPoint:[gesture locationInView:nil] fromView:nil];
-    viewImpl->ensureProtectedGestureController()->handleSmartMagnificationGesture(magnificationOrigin);
+    protect(viewImpl->ensureGestureController())->handleSmartMagnificationGesture(magnificationOrigin);
 }
 
 - (void)secondaryClickGestureRecognized:(NSGestureRecognizer *)gesture

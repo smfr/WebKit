@@ -446,7 +446,7 @@ void ViewGestureController::beginSwipeGesture(WebBackForwardListItem* targetItem
     RetainPtr backgroundColor = CGColorGetConstantColor(kCGColorWhite);
     if (RefPtr snapshot = targetItem->snapshot()) {
         if (shouldUseSnapshotForSize(*snapshot, swipeArea.size(), obscuredContentInsets))
-            [m_swipeSnapshotLayer setContents:snapshot->asProtectedLayerContents().get()];
+            [m_swipeSnapshotLayer setContents:protect(snapshot->asLayerContents()).get()];
 
         Color coreColor = snapshot->backgroundColor();
         if (coreColor.isValid())

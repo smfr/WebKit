@@ -266,9 +266,9 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
     Ref processPool = *_processPool;
     if (copy)
-        [processPool->ensureProtectedBundleParameters() setObject:copy.get() forKey:parameter];
+        [protect(processPool->ensureBundleParameters()) setObject:copy.get() forKey:parameter];
     else
-        [processPool->ensureProtectedBundleParameters() removeObjectForKey:parameter];
+        [protect(processPool->ensureBundleParameters()) removeObjectForKey:parameter];
 
     RetainPtr<NSData> data = keyedArchiver.get().encodedData;
     processPool->sendToAllProcesses(Messages::WebProcess::SetInjectedBundleParameter(parameter, span(data.get())));
@@ -287,7 +287,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
     }
 
     Ref processPool = *_processPool;
-    [processPool->ensureProtectedBundleParameters() setValuesForKeysWithDictionary:copy.get()];
+    [protect(processPool->ensureBundleParameters()) setValuesForKeysWithDictionary:copy.get()];
 
     RetainPtr<NSData> data = keyedArchiver.get().encodedData;
     processPool->sendToAllProcesses(Messages::WebProcess::SetInjectedBundleParameters(span(data.get())));

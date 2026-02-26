@@ -265,11 +265,6 @@ NSMutableDictionary *WebProcessPool::ensureBundleParameters()
     return m_bundleParameters.get();
 }
 
-RetainPtr<NSMutableDictionary> WebProcessPool::ensureProtectedBundleParameters()
-{
-    return ensureBundleParameters();
-}
-
 static AccessibilityPreferences accessibilityPreferences()
 {
     AccessibilityPreferences preferences;

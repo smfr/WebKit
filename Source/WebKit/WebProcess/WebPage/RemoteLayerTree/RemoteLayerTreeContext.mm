@@ -239,11 +239,6 @@ RemoteRenderingBackendProxy& RemoteLayerTreeContext::ensureRemoteRenderingBacken
     return protect(webPage())->ensureRemoteRenderingBackendProxy();
 }
 
-Ref<RemoteRenderingBackendProxy> RemoteLayerTreeContext::ensureProtectedRemoteRenderingBackendProxy()
-{
-    return ensureRemoteRenderingBackendProxy();
-}
-
 void RemoteLayerTreeContext::gpuProcessConnectionWasDestroyed()
 {
     m_backingStoreCollection->gpuProcessConnectionWasDestroyed();
