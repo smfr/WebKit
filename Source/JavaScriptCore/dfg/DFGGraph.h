@@ -38,6 +38,7 @@
 #include "DFGPlan.h"
 #include "DFGPropertyTypeKey.h"
 #include "FullBytecodeLiveness.h"
+#include "FunctionAllowlist.h"
 #include "JITScannable.h"
 #include "MethodOfGettingAValueProfile.h"
 #include <wtf/BitVector.h>
@@ -1519,6 +1520,26 @@ private:
     RefPtr<JSON::Object> m_ionGraphFunction;
     RefPtr<JSON::Array> m_ionGraphPasses;
 };
+
+inline FunctionAllowlist& ensureGlobalDumpAllowlist()
+{
+    static LazyNeverDestroyed<FunctionAllowlist> dumpGraphAllowlist;
+    static std::once_flag initializeAllowlistFlag;
+    std::call_once(initializeAllowlistFlag, [] {
+        const char* allowlistFile = Options::dumpGraphAllowlist();
+        dumpGraphAllowlist.construct(allowlistFile);
+    });
+    return dumpGraphAllowlist;
+}
+
+inline bool shouldDumpGraphAtEachPhase(Graph& graph)
+{
+    JITCompilationMode mode = graph.m_plan.mode();
+    if (!(isFTL(mode) ? (Options::dumpGraphAtEachPhase() || Options::dumpDFGFTLGraphAtEachPhase()) : (Options::dumpGraphAtEachPhase() || Options::dumpDFGGraphAtEachPhase())))
+        return false;
+
+    return ensureGlobalDumpAllowlist().contains(graph.m_codeBlock);
+}
 
 } } // namespace JSC::DFG
 

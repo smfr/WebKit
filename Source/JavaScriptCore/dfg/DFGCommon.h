@@ -40,6 +40,7 @@ class FunctionAllowlist;
 
 namespace JSC { namespace DFG {
 
+class Graph;
 struct Node;
 
 typedef uint32_t BlockIndex;
@@ -81,12 +82,7 @@ inline bool logCompilationChanges(JITCompilationMode mode = JITCompilationMode::
     return verboseCompilationEnabled(mode) || Options::logCompilationChanges();
 }
 
-inline bool shouldDumpGraphAtEachPhase(JITCompilationMode mode = JITCompilationMode::DFG)
-{
-    if (isFTL(mode))
-        return Options::dumpGraphAtEachPhase() || Options::dumpDFGFTLGraphAtEachPhase();
-    return Options::dumpGraphAtEachPhase() || Options::dumpDFGGraphAtEachPhase();
-}
+inline bool shouldDumpGraphAtEachPhase(Graph&);
 
 inline bool validationEnabled()
 {
