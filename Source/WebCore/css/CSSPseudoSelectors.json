@@ -517,7 +517,7 @@
             "supports-single-colon-for-compatibility": true
         },
         "checkmark": {
-            "settings-flag": "htmlEnhancedSelectEnabled"
+            "settings-flag": "htmlEnhancedSelectEnabled || cssAppearanceBaseEnabled"
         },
         "cue": {
             "argument": "optional",
@@ -554,7 +554,7 @@
         },
         "picker": {
             "argument": "required",
-            "settings-flag": ["htmlEnhancedSelectEnabled", "cssPickerPseudoElementEnabled"]
+            "settings-flag": "htmlEnhancedSelectEnabled && cssPickerPseudoElementEnabled"
         },
         "picker-icon": {
             "settings-flag": "htmlEnhancedSelectEnabled"
