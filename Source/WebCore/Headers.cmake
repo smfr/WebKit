@@ -2560,6 +2560,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     platform/graphics/PathImpl.h
     platform/graphics/PathSegment.h
     platform/graphics/PathSegmentData.h
+    platform/graphics/PathStream.h
     platform/graphics/PathUtilities.h
     platform/graphics/Pattern.h
     platform/graphics/PixelBuffer.h
