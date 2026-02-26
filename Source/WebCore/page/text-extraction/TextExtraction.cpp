@@ -1684,9 +1684,9 @@ static void dispatchSimulatedClick(Node& targetNode, const String& searchText, C
 
     // Fall back to dispatching a programmatic click.
     if (element->dispatchSimulatedClick(nullptr, SendMouseUpDownEvents))
-        completion(false, "Failed to click (tried falling back to dispatching programmatic click since target could not be hit-tested)"_s);
-    else
         completion(true, { });
+    else
+        completion(false, "Failed to click (tried falling back to dispatching programmatic click since target could not be hit-tested)"_s);
 }
 
 static void dispatchSimulatedClick(NodeIdentifier identifier, const String& searchText, CompletionHandler<void(bool, String&&)>&& completion)

@@ -6919,6 +6919,7 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
         filterUsingRules,
         includeURLs = configuration.includeURLs,
         includeRects = configuration.includeRects,
+        includeSelectOptions = configuration.includeSelectOptions,
         onlyIncludeText = configuration.onlyIncludeVisibleText,
         applyDiscretionaryWordLimit = configuration.maxWordsPerParagraphPolicy == _WKTextExtractionWordLimitPolicyDiscretionary,
         shortenURLs = configuration.shortenURLs,
@@ -7050,6 +7051,8 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
             optionFlags.add(OnlyIncludeText);
         if (shortenURLs)
             optionFlags.add(ShortenURLs);
+        if (includeSelectOptions)
+            optionFlags.add(IncludeSelectOptions);
         RefPtr urlCache = strongSelf->_textExtractionURLCache;
         WebKit::TextExtractionOptions options {
             WTF::move(mainFrameIdentifier),

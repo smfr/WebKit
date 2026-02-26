@@ -115,6 +115,12 @@ WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
 @property (nonatomic) BOOL includeRects;
 
 /*!
+ Include options for `select` elements in text extraction output.
+ The default value is `YES`.
+ */
+@property (nonatomic) BOOL includeSelectOptions;
+
+/*!
  Policy determining which nodes should be uniquely identified in the output.
  `.none`          	Prevents collection of any identifiers.
  `.editableOnly`    Limits collection of identifiers to editable elements and form controls.

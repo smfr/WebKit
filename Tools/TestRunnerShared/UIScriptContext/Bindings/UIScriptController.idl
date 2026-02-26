@@ -47,6 +47,7 @@ dictionary TextExtractionTestOptions {
     boolean clipToBounds = false;
     boolean includeRects = false;
     boolean includeURLs = false;
+    boolean includeSelectOptions = false;
     boolean shortenURLs = false;
     DOMString nodeIdentifierInclusion = "none";
     object eventListenerCategories;

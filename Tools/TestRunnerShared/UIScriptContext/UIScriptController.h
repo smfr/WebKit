@@ -62,6 +62,7 @@ struct TextExtractionTestOptions {
     bool clipToBounds { false };
     bool includeRects { false };
     bool includeURLs { false };
+    bool includeSelectOptions { false };
     bool shortenURLs { false };
     JSRetainPtr<JSStringRef> nodeIdentifierInclusion;
     JSValueRef eventListenerCategories { nullptr };

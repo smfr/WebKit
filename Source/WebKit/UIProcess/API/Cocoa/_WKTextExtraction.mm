@@ -59,6 +59,7 @@
     _filterOptions = _WKTextExtractionFilterAll;
     _includeURLs = !onlyVisibleText;
     _includeRects = !onlyVisibleText;
+    _includeSelectOptions = !onlyVisibleText;
     _nodeIdentifierInclusion = onlyVisibleText ? _WKTextExtractionNodeIdentifierInclusionNone : _WKTextExtractionNodeIdentifierInclusionInteractive;
     _eventListenerCategories = onlyVisibleText ? _WKTextExtractionEventListenerCategoryNone : _WKTextExtractionEventListenerCategoryAll;
     _includeAccessibilityAttributes = !onlyVisibleText;
@@ -144,6 +145,13 @@
     ENSURE_VALID_TEXT_ONLY_CONFIGURATION(value);
 
     _includeRects = value;
+}
+
+- (void)setIncludeSelectOptions:(BOOL)value
+{
+    ENSURE_VALID_TEXT_ONLY_CONFIGURATION(value);
+
+    _includeSelectOptions = value;
 }
 
 - (void)setNodeIdentifierInclusion:(_WKTextExtractionNodeIdentifierInclusion)value
