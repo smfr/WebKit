@@ -38,6 +38,7 @@
 #include <unicode/uloc.h>
 #include <unicode/uscript.h>
 #include <wtf/DateMath.h>
+#include <wtf/TZoneMallocInlines.h>
 #include <wtf/text/StringBuffer.h>
 #include <wtf/text/StringBuilder.h>
 #include <wtf/unicode/icu/ICUHelpers.h>
