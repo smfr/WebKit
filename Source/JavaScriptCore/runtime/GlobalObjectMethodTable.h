@@ -24,10 +24,6 @@
 #include <JavaScriptCore/Exception.h>
 #include <wtf/Forward.h>
 
-#if ENABLE(WEBASSEMBLY)
-#include <JavaScriptCore/WebAssemblyCompileOptions.h>
-#endif
-
 namespace JSC {
 
 class Identifier;
@@ -75,13 +71,8 @@ struct GlobalObjectMethodTable {
     ScriptExecutionStatus (*scriptExecutionStatus)(JSGlobalObject*, JSObject* scriptExecutionOwner);
     void (*reportViolationForUnsafeEval)(JSGlobalObject*, const String&);
     String (*defaultLanguage)();
-#if ENABLE(WEBASSEMBLY)
-    JSPromise* (*compileStreaming)(JSGlobalObject*, JSValue, std::optional<WebAssemblyCompileOptions>&&);
-    JSPromise* (*instantiateStreaming)(JSGlobalObject*, JSValue, JSObject* importObject, std::optional<WebAssemblyCompileOptions>&&);
-#else
-    void* compileStreamingPlaceholder; // placeholders to make positional initializers consistent
-    void* instantiateStreamingPlaceholder;
-#endif
+    JSPromise* (*compileStreaming)(JSGlobalObject*, JSValue);
+    JSPromise* (*instantiateStreaming)(JSGlobalObject*, JSValue, JSObject*);
     JSGlobalObject* (*deriveShadowRealmGlobalObject)(JSGlobalObject*);
     String (*codeForEval)(JSGlobalObject*, JSValue);
     bool (*canCompileStrings)(JSGlobalObject*, CompilationType, String, const ArgList&);

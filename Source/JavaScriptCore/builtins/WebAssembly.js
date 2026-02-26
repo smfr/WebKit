@@ -26,19 +26,15 @@
 function compileStreaming(source) {
     "use strict";
 
-    var compileOptions = @argument(1);
-    return @promiseResolve(@Promise, source).@then((source) => {
-        return @webAssemblyCompileStreamingInternal(source, compileOptions);
-    });
+    return @promiseResolve(@Promise, source).@then(@webAssemblyCompileStreamingInternal);
 }
 
 function instantiateStreaming(source) {
     "use strict";
 
     var importObject = @argument(1);
-    var compileOptions = @argument(2);
     return @promiseResolve(@Promise, source).@then((source) => {
-        return @webAssemblyInstantiateStreamingInternal(source, importObject, compileOptions);
+        return @webAssemblyInstantiateStreamingInternal(source, importObject);
     });
 }
 

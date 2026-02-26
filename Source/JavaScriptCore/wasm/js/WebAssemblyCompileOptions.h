@@ -27,8 +27,8 @@
 
 #if ENABLE(WEBASSEMBLY)
 
-#include <JavaScriptCore/IteratorOperations.h>
-#include <JavaScriptCore/WasmModule.h>
+#include "IteratorOperations.h"
+#include "WasmModule.h"
 #include <wtf/text/WTFString.h>
 
 namespace JSC {

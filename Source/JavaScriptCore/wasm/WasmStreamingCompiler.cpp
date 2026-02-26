@@ -37,16 +37,14 @@
 #include "WasmIPIntPlan.h"
 #include "WasmStreamingPlan.h"
 #include "WasmWorklist.h"
-#include "WebAssemblyCompileOptions.h"
 
 #if ENABLE(WEBASSEMBLY)
 
 namespace JSC { namespace Wasm {
 
-StreamingCompiler::StreamingCompiler(VM& vm, CompilerMode compilerMode, JSGlobalObject* globalObject, JSPromise* promise, JSObject* importObject, std::optional<WebAssemblyCompileOptions>&& compileOptions, const SourceCode& source)
+StreamingCompiler::StreamingCompiler(VM& vm, CompilerMode compilerMode, JSGlobalObject* globalObject, JSPromise* promise, JSObject* importObject, const SourceCode& source)
     : m_vm(vm)
     , m_compilerMode(compilerMode)
-    , m_compileOptions(WTF::move(compileOptions))
     , m_info(Wasm::ModuleInformation::create())
     , m_parser(m_info.get(), *this)
     , m_source(source)
@@ -69,9 +67,9 @@ StreamingCompiler::~StreamingCompiler()
     }
 }
 
-Ref<StreamingCompiler> StreamingCompiler::create(VM& vm, CompilerMode compilerMode, JSGlobalObject* globalObject, JSPromise* promise, JSObject* importObject, std::optional<WebAssemblyCompileOptions>&& compileOptions, const SourceCode& source)
+Ref<StreamingCompiler> StreamingCompiler::create(VM& vm, CompilerMode compilerMode, JSGlobalObject* globalObject, JSPromise* promise, JSObject* importObject, const SourceCode& source)
 {
-    return adoptRef(*new StreamingCompiler(vm, compilerMode, globalObject, promise, importObject, WTF::move(compileOptions), source));
+    return adoptRef(*new StreamingCompiler(vm, compilerMode, globalObject, promise, importObject, source));
 }
 
 bool StreamingCompiler::didReceiveFunctionData(FunctionCodeIndex functionIndex, const Wasm::FunctionData&)
@@ -145,7 +143,7 @@ void StreamingCompiler::didComplete()
     auto ticket = std::exchange(m_ticket, nullptr);
     switch (m_compilerMode) {
     case CompilerMode::Validation: {
-        m_vm.deferredWorkTimer->scheduleWorkSoon(ticket, [result = WTF::move(result), compileOptions = WTF::move(m_compileOptions)](DeferredWorkTimer::Ticket ticket) mutable {
+        m_vm.deferredWorkTimer->scheduleWorkSoon(ticket, [result = WTF::move(result)](DeferredWorkTimer::Ticket ticket) mutable {
             JSPromise* promise = jsCast<JSPromise*>(ticket->target());
             JSGlobalObject* globalObject = jsCast<JSGlobalObject*>(ticket->dependencies()[0]);
             VM& vm = globalObject->vm();
@@ -155,16 +153,6 @@ void StreamingCompiler::didComplete()
                 throwException(globalObject, scope, createJSWebAssemblyCompileError(globalObject, vm, result.error()));
                 promise->rejectWithCaughtException(globalObject, scope);
                 return;
-            }
-
-            if (compileOptions) {
-                auto errorMessage = compileOptions->validateBuiltinsAndImportedStrings(result.value());
-                if (errorMessage.has_value()) {
-                    throwException(globalObject, scope, createJSWebAssemblyCompileError(globalObject, vm, errorMessage.value()));
-                    promise->rejectWithCaughtException(globalObject, scope);
-                    return;
-                }
-                result.value()->applyCompileOptions(compileOptions.value());
             }
 
             JSWebAssemblyModule* module = JSWebAssemblyModule::create(vm, globalObject->webAssemblyModuleStructure(), WTF::move(result.value()));
@@ -177,7 +165,7 @@ void StreamingCompiler::didComplete()
 
     case CompilerMode::FullCompile: {
         RefPtr<SourceProvider> provider = m_source.provider();
-        m_vm.deferredWorkTimer->scheduleWorkSoon(ticket, [result = WTF::move(result), provider = WTF::move(provider), compileOptions = WTF::move(m_compileOptions)](DeferredWorkTimer::Ticket ticket) mutable {
+        m_vm.deferredWorkTimer->scheduleWorkSoon(ticket, [result = WTF::move(result), provider = WTF::move(provider)](DeferredWorkTimer::Ticket ticket) mutable {
             JSPromise* promise = jsCast<JSPromise*>(ticket->target());
             JSGlobalObject* globalObject = jsCast<JSGlobalObject*>(ticket->dependencies()[0]);
             JSObject* importObject = jsCast<JSObject*>(ticket->dependencies()[1]);
@@ -188,16 +176,6 @@ void StreamingCompiler::didComplete()
                 throwException(globalObject, scope, createJSWebAssemblyCompileError(globalObject, vm, result.error()));
                 promise->rejectWithCaughtException(globalObject, scope);
                 return;
-            }
-
-            if (compileOptions) {
-                auto errorMessage = compileOptions->validateBuiltinsAndImportedStrings(result.value());
-                if (errorMessage.has_value()) {
-                    throwException(globalObject, scope, createJSWebAssemblyCompileError(globalObject, vm, errorMessage.value()));
-                    promise->rejectWithCaughtException(globalObject, scope);
-                    return;
-                }
-                result.value()->applyCompileOptions(compileOptions.value());
             }
 
             JSWebAssemblyModule* module = JSWebAssemblyModule::create(vm, globalObject->webAssemblyModuleStructure(), WTF::move(result.value()));

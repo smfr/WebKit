@@ -28,9 +28,6 @@
 
 #include <JavaScriptCore/JSGlobalObject.h>
 #include <JavaScriptCore/WeakGCMap.h>
-#if ENABLE(WEBASSEMBLY)
-#include <JavaScriptCore/WebAssemblyCompileOptions.h>
-#endif
 #include <wtf/Compiler.h>
 #include <wtf/Forward.h>
 
@@ -129,8 +126,8 @@ protected:
     static void promiseRejectionTracker(JSC::JSGlobalObject*, JSC::JSPromise*, JSC::JSPromiseRejectionOperation);
 
 #if ENABLE(WEBASSEMBLY)
-    static JSC::JSPromise* compileStreaming(JSC::JSGlobalObject*, JSC::JSValue, std::optional<JSC::WebAssemblyCompileOptions>&&);
-    static JSC::JSPromise* instantiateStreaming(JSC::JSGlobalObject*, JSC::JSValue, JSC::JSObject* importObject, std::optional<JSC::WebAssemblyCompileOptions>&&);
+    static JSC::JSPromise* compileStreaming(JSC::JSGlobalObject*, JSC::JSValue);
+    static JSC::JSPromise* instantiateStreaming(JSC::JSGlobalObject*, JSC::JSValue, JSC::JSObject*);
 #endif
 
     static JSC::Identifier moduleLoaderResolve(JSC::JSGlobalObject*, JSC::JSModuleLoader*, JSC::JSValue, JSC::JSValue, JSC::JSValue);
