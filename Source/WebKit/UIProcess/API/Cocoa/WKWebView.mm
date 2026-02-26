@@ -2259,6 +2259,11 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
     return _page.get();
 }
 
+- (RefPtr<WebKit::WebPageProxy>)_protectedPage
+{
+    return _page.get();
+}
+
 #if PLATFORM(MAC)
 - (WebKit::WebViewImpl *)_impl
 {
