@@ -627,7 +627,7 @@ class DrawNativeImage {
 public:
     static constexpr char name[] = "draw-native-image";
 
-    DrawNativeImage(NativeImage& image, const FloatRect& destRect, const FloatRect& srcRect, ImagePaintingOptions options)
+    DrawNativeImage(const NativeImage& image, const FloatRect& destRect, const FloatRect& srcRect, ImagePaintingOptions options)
         : m_image(image)
         , m_destinationRect(destRect)
         , m_srcRect(srcRect)
@@ -635,7 +635,7 @@ public:
     {
     }
 
-    NativeImage& nativeImage() const { return m_image; }
+    const NativeImage& nativeImage() const { return m_image; }
     const FloatRect& destinationRect() const { return m_destinationRect; }
     const FloatRect& source() const { return m_srcRect; }
     ImagePaintingOptions options() const { return m_options; }
@@ -644,7 +644,7 @@ public:
     void dump(TextStream&, OptionSet<AsTextFlag>) const;
 
 private:
-    const Ref<NativeImage> m_image;
+    const Ref<const NativeImage> m_image;
     FloatRect m_destinationRect;
     FloatRect m_srcRect;
     ImagePaintingOptions m_options;
@@ -675,7 +675,7 @@ class DrawPatternNativeImage {
 public:
     static constexpr char name[] = "draw-pattern-nativeimage";
 
-    DrawPatternNativeImage(NativeImage& image, const FloatRect& destRect, const FloatRect& tileRect, const AffineTransform& patternTransform, const FloatPoint& phase, const FloatSize& spacing, ImagePaintingOptions options)
+    DrawPatternNativeImage(const NativeImage& image, const FloatRect& destRect, const FloatRect& tileRect, const AffineTransform& patternTransform, const FloatPoint& phase, const FloatSize& spacing, ImagePaintingOptions options)
         : m_image(image)
         , m_destination(destRect)
         , m_tileRect(tileRect)
@@ -685,7 +685,7 @@ public:
         , m_options(options)
     {
     }
-    NativeImage& nativeImage() const { return m_image; }
+    const NativeImage& nativeImage() const { return m_image; }
     FloatRect destRect() const { return m_destination; }
     FloatRect tileRect() const { return m_tileRect; }
     const AffineTransform& patternTransform() const { return m_patternTransform; }
@@ -697,7 +697,7 @@ public:
     void dump(TextStream&, OptionSet<AsTextFlag>) const;
 
 private:
-    const Ref<NativeImage> m_image;
+    const Ref<const NativeImage> m_image;
     FloatRect m_destination;
     FloatRect m_tileRect;
     AffineTransform m_patternTransform;
