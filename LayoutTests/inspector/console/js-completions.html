@@ -70,12 +70,11 @@ function test()
         description: "Test that the JavaScript completions are ordered correctly.",
         async test() {
             const outputCompletions = async (options) => {
-                InspectorTest.log(`Completions with options=${JSON.stringify(options)} and experimentalShowCaseSensitiveAutocomplete=${WI.settings.experimentalShowCaseSensitiveAutocomplete.value}:`);
+                InspectorTest.log(`Completions with options=${JSON.stringify(options)}:`);
                 InspectorTest.json(await generateJSCompletions(options));
                 InspectorTest.log("");
             };
 
-            WI.settings.experimentalShowCaseSensitiveAutocomplete.value = false;
             WI.javaScriptRuntimeCompletionProvider.clearCachedPropertyNames();
             await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: ""}));
             await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: "a"}));
@@ -86,20 +85,6 @@ function test()
             await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"a"}));
             await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"A"}));
             await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"_"}));
-
-            WI.settings.experimentalShowCaseSensitiveAutocomplete.value = true;
-            WI.javaScriptRuntimeCompletionProvider.clearCachedPropertyNames();
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: ""}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: "a"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: "A"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds.", prefix: "_"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: ""}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "1"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"a"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"A"}));
-            await outputCompletions(({baseString: "objectWithMixedPropertyKinds[", prefix: "\"_"}));
-
-            WI.settings.experimentalShowCaseSensitiveAutocomplete.reset();
         }
     });
 
