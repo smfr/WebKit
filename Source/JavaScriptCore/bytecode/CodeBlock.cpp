@@ -2845,8 +2845,11 @@ void CodeBlock::didDFGJettison(Profiler::JettisonReason reason)
     if (!Profiler::isSpeculationFailure(reason))
         return;
 
-    ASSERT(unlinkedCodeBlock()->hasQuickDFGTierUpUpdated());
-    unlinkedCodeBlock()->setQuickDFGTierUp(TriState::False);
+    // Only mark as failed if code was already installed and ran (flag = True).
+    // If jettison happens during compilation (flag = Indeterminate), leave it
+    // unchanged - this was environmental (OOM, GC pressure), not a code quality issue.
+    if (unlinkedCodeBlock()->hasQuickDFGTierUpUpdated())
+        unlinkedCodeBlock()->setQuickDFGTierUp(TriState::False);
 }
 
 void CodeBlock::didFailDFGCompilation()
