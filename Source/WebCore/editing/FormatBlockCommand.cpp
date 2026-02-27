@@ -26,11 +26,14 @@
 #include "config.h"
 #include "FormatBlockCommand.h"
 
+#include "CSSSerializationContext.h"
 #include "Document.h"
 #include "Editing.h"
+#include "EditingStyle.h"
 #include "Element.h"
 #include "HTMLElement.h"
 #include "HTMLNames.h"
+#include "MutableStyleProperties.h"
 #include "NodeName.h"
 #include "VisibleUnits.h"
 #include <wtf/NeverDestroyed.h>
@@ -93,6 +96,18 @@ void FormatBlockCommand::formatRange(const Position& start, const Position& end,
         // this by splitting all parents of the current paragraph up to that point.
         blockNode = createBlockElement();
         insertNodeBefore(*blockNode, *nodeAfterInsertionPosition);
+        // Preserve the inline style of the element being replaced so that formatting
+        // such as color and font properties are not lost when the block type changes.
+        // See: https://bugs.webkit.org/show_bug.cgi?id=47054
+        if (RefPtr element = dynamicDowncast<HTMLElement>(nodeAfterInsertionPosition)) {
+            if (element->hasAttribute(styleAttr)) {
+                auto style = EditingStyle::create(element->inlineStyle());
+                if (RefPtr styledBlockNode = dynamicDowncast<StyledElement>(blockNode))
+                    style->removeStyleFromRulesAndContext(*styledBlockNode, styledBlockNode->parentNode());
+                if (!style->isEmpty())
+                    blockNode->setAttribute(styleAttr, AtomString { style->style()->asText(CSS::defaultSerializationContext()) });
+            }
+        }
     }
 
     RefPtr lastChild = blockNode->lastChild();
