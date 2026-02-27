@@ -80,7 +80,7 @@ extension WKRKEntity {
             let loadedEntity = try await Entity(from: data, options: loadOptions)
             return WKRKEntity(loadedEntity)
         } catch {
-            Logger.realityKitEntity.error("Failed to load entity from data")
+            Logger.realityKitEntity.error("Failed to load entity from data: \(error)")
             return nil
         }
         #else
