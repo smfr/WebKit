@@ -1462,6 +1462,9 @@ void WebViewImpl::handleProcessSwapOrExit()
 
     notifyInputContextAboutDiscardedComposition();
 
+    if (std::exchange(m_lastEditorStateWasEditableOrRanged, false))
+        [protect(inputContextForSelectionUpdates()) textInputClientDidUpdateSelection];
+
     updateRemoteAccessibilityRegistration(false);
 
     hideDOMPasteMenuWithResult(WebCore::DOMPasteAccessResponse::DeniedForGesture);
@@ -2956,7 +2959,7 @@ void WebViewImpl::selectionDidChange()
 #endif
         if (protect(page->preferences())->textInputClientSelectionUpdatesEnabled()) {
             alreadyNotifiedClient = true;
-            [protect(inputContextIncludingNonEditable()) textInputClientDidUpdateSelection];
+            [protect(inputContextForSelectionUpdates()) textInputClientDidUpdateSelection];
         }
     }
 
@@ -2983,6 +2986,8 @@ void WebViewImpl::selectionDidChange()
     }
 
     [m_view.get() _web_editorStateDidChange];
+
+    m_lastEditorStateWasEditableOrRanged = page->editorState().isEditableOrRanged();
 }
 
 void WebViewImpl::showShareSheet(WebCore::ShareDataWithParsedURL&& data, WTF::CompletionHandler<void(bool)>&& completionHandler, WKWebView *view)
@@ -5640,12 +5645,12 @@ NSTextInputContext *WebViewImpl::inputContext()
     return [protect(m_view) _web_superInputContext];
 }
 
-NSTextInputContext *WebViewImpl::inputContextIncludingNonEditable()
+NSTextInputContext *WebViewImpl::inputContextForSelectionUpdates()
 {
     if (!protect(m_page->preferences())->textInputClientSelectionUpdatesEnabled())
         return inputContext();
 
-    if (!m_page->editorState().isContentEditable && m_page->editorState().selectionType != WebCore::SelectionType::Range)
+    if (!m_page->editorState().isEditableOrRanged() && !m_lastEditorStateWasEditableOrRanged)
         return nil;
 
     return [protect(m_view) _web_superInputContext];

@@ -214,4 +214,9 @@ void EditorState::move(float x, float y)
     clipOwnedRectExtentsToNumericLimits();
 }
 
+bool EditorState::isEditableOrRanged() const
+{
+    return isContentEditable || selectionType == WebCore::SelectionType::Range;
+}
+
 } // namespace WebKit

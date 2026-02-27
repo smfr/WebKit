@@ -138,6 +138,7 @@ struct EditorState {
         bool canPaste { false };
     };
 
+    bool isEditableOrRanged() const;
     bool hasPostLayoutData() const { return !!postLayoutData; }
 
     // Visual data is only updated in sync with rendering updates.
