@@ -856,8 +856,9 @@ extension WKBridgeLiteral {
 
 internal func toData<T>(_ input: [T]) -> Data {
     #if compiler(>=6.2)
+    // FIXME: (rdar://164559261) understand/document/remove unsafety
     unsafe input.withUnsafeBytes { bufferPointer in
-        Data(bufferPointer)
+        unsafe Data(bufferPointer)
     }
     #else
     input.withUnsafeBytes { bufferPointer in

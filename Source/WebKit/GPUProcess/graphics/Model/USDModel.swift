@@ -1216,6 +1216,16 @@ extension WKBridgeReceiver {
 
 extension WKBridgeSkinningData {
     fileprivate func makeDeformerDescription(device: MTLDevice) -> _Proto_LowLevelDeformerDescription_v1 {
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let jointTransformsBuffer = unsafe device.makeBuffer(
+            bytes: self.jointTransforms,
+            length: self.jointTransforms.count * MemoryLayout<simd_float4x4>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let jointTransformsBuffer = device.makeBuffer(
@@ -1223,6 +1233,7 @@ extension WKBridgeSkinningData {
             length: self.jointTransforms.count * MemoryLayout<simd_float4x4>.size,
             options: .storageModeShared
         )!
+        #endif
 
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
@@ -1233,6 +1244,16 @@ extension WKBridgeSkinningData {
             elementType: .float4x4
         )!
 
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let inverseBindPosesBuffer = unsafe device.makeBuffer(
+            bytes: self.inverseBindPoses,
+            length: self.inverseBindPoses.count * MemoryLayout<simd_float4x4>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let inverseBindPosesBuffer = device.makeBuffer(
@@ -1240,6 +1261,7 @@ extension WKBridgeSkinningData {
             length: self.inverseBindPoses.count * MemoryLayout<simd_float4x4>.size,
             options: .storageModeShared
         )!
+        #endif
 
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
@@ -1250,6 +1272,16 @@ extension WKBridgeSkinningData {
             elementType: .float4x4
         )!
 
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let jointIndicesBuffer = unsafe device.makeBuffer(
+            bytes: self.influenceJointIndices,
+            length: self.influenceJointIndices.count * MemoryLayout<UInt32>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let jointIndicesBuffer = device.makeBuffer(
@@ -1257,6 +1289,7 @@ extension WKBridgeSkinningData {
             length: self.influenceJointIndices.count * MemoryLayout<UInt32>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let jointIndicesDescription = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
@@ -1266,6 +1299,16 @@ extension WKBridgeSkinningData {
             elementType: .uint
         )!
 
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let influenceWeightsBuffer = unsafe device.makeBuffer(
+            bytes: self.influenceWeights,
+            length: self.influenceWeights.count * MemoryLayout<Float>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let influenceWeightsBuffer = device.makeBuffer(
@@ -1273,6 +1316,7 @@ extension WKBridgeSkinningData {
             length: self.influenceWeights.count * MemoryLayout<Float>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let influenceWeightsDescription = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
