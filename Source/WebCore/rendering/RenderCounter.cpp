@@ -68,7 +68,9 @@ static Element* ancestorStyleContainmentObject(const Element& element)
     SUPPRESS_UNCOUNTED_LOCAL auto* ancestor = pseudoElement ? pseudoElement->hostElement() : element.parentElement();
     while (ancestor) {
         if (auto* style = ancestor->existingComputedStyle()) {
-            if (style->usedContain().contains(Style::ContainValue::Style))
+            // None principal box shouldn't be regarded as style containment object.
+            // https://drafts.csswg.org/css-contain/#containment-style
+            if (style->usedContain().contains(Style::ContainValue::Style) && ancestor->renderer())
                 break;
         }
         // FIXME: this should use parentInComposedTree but for now matches the rest of RenderCounter.
