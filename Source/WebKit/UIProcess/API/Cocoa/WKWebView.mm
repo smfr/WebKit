@@ -1940,11 +1940,11 @@ inline OptionSet<WebKit::FindOptions> toFindOptions(WKFindConfiguration *configu
     return nil;
 }
 
+#endif // PLATFORM(MAC)
+
 #if USE(APPLE_INTERNAL_SDK)
 #import <WebKitAdditions/WKWebViewAdditions.mm>
 #endif
-
-#endif // PLATFORM(MAC)
 
 #pragma mark - macOS/iOS internal
 
