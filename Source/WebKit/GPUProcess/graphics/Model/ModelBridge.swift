@@ -24,7 +24,7 @@
 internal import Metal
 import WebKit
 
-#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit) && !os(visionOS)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 11)
 @_weakLinked @_spi(UsdLoaderAPI) internal import _USDKit_RealityKit
 @_spi(RealityCoreRendererAPI) import RealityKit
 @_weakLinked internal import USDKit
@@ -156,36 +156,36 @@ extension WKBridgeSkinningData {
 @objc
 @implementation
 extension WKBridgeBlendShapeData {
-    let weights: Data
-    let positionOffsets: [Data]
-    let normalOffsets: [Data]
+    let weightsData: Data
+    let positionOffsetsData: [Data]
+    let normalOffsetsData: [Data]
 
     init(
         weights: Data,
         positionOffsets: [Data],
         normalOffsets: [Data]
     ) {
-        self.weights = weights
-        self.positionOffsets = positionOffsets
-        self.normalOffsets = normalOffsets
+        self.weightsData = weights
+        self.positionOffsetsData = positionOffsets
+        self.normalOffsetsData = normalOffsets
     }
 }
 
 @objc
 @implementation
 extension WKBridgeRenormalizationData {
-    let vertexIndicesPerTriangle: Data
-    let vertexAdjacencies: Data
-    let vertexAdjacencyEndIndices: Data
+    let vertexIndicesPerTriangleData: Data
+    let vertexAdjacenciesData: Data
+    let vertexAdjacencyEndIndicesData: Data
 
     init(
         vertexIndicesPerTriangle: Data,
         vertexAdjacencies: Data,
         vertexAdjacencyEndIndices: Data
     ) {
-        self.vertexIndicesPerTriangle = vertexIndicesPerTriangle
-        self.vertexAdjacencies = vertexAdjacencies
-        self.vertexAdjacencyEndIndices = vertexAdjacencyEndIndices
+        self.vertexIndicesPerTriangleData = vertexIndicesPerTriangle
+        self.vertexAdjacenciesData = vertexAdjacencies
+        self.vertexAdjacencyEndIndicesData = vertexAdjacencyEndIndices
     }
 }
 
@@ -246,43 +246,90 @@ extension WKBridgeUpdateMesh {
     }
 }
 
+func decodeValues<T>(from data: Data) -> [T] {
+    let stride = MemoryLayout<T>.stride
+
+    guard data.count > 0, data.count % stride == 0 else {
+        return []
+    }
+
+    #if compiler(>=6.2)
+    return unsafe data.withUnsafeBytes { rawBufferPointer in
+        guard let baseAddress = rawBufferPointer.baseAddress else {
+            return []
+        }
+
+        let count = rawBufferPointer.count / stride
+        let pointer = unsafe baseAddress.assumingMemoryBound(to: T.self)
+        return (0..<count).map { unsafe pointer[$0] }
+    }
+    #else
+    return data.withUnsafeBytes { rawBufferPointer in
+        guard let baseAddress = rawBufferPointer.baseAddress else {
+            return []
+        }
+
+        let count = rawBufferPointer.count / stride
+        let pointer = baseAddress.assumingMemoryBound(to: T.self)
+        return (0..<count).map { pointer[$0] }
+    }
+    #endif
+}
+
+extension WKBridgeBlendShapeData {
+    var weights: [Float] {
+        decodeValues(from: weightsData)
+    }
+
+    var positionOffsets: [[SIMD3<Float>]] {
+        positionOffsetsData.enumerated()
+            .compactMap { index, data in
+                let values: [SIMD3<Float>] = decodeValues(from: data)
+                if values.isEmpty && data.count > 0 {
+                    assertionFailure(
+                        "positionOffsets[\(index)] data size (\(data.count)) is not a multiple of SIMD3<Float> stride (\(MemoryLayout<SIMD3<Float>>.stride))"
+                    )
+                    return nil
+                }
+                return values
+            }
+    }
+
+    var normalOffsets: [[SIMD3<Float>]] {
+        normalOffsetsData.enumerated()
+            .compactMap { index, data in
+                let values: [SIMD3<Float>] = decodeValues(from: data)
+                if values.isEmpty && data.count > 0 {
+                    assertionFailure(
+                        "normalOffsets[\(index)] data size (\(data.count)) is not a multiple of SIMD3<Float> stride (\(MemoryLayout<SIMD3<Float>>.stride))"
+                    )
+                    return nil
+                }
+                return values
+            }
+    }
+}
+
+extension WKBridgeRenormalizationData {
+    var vertexIndicesPerTriangle: [UInt32] { decodeValues(from: vertexIndicesPerTriangleData) }
+    var vertexAdjacencies: [UInt32] { decodeValues(from: vertexAdjacenciesData) }
+    var vertexAdjacencyEndIndices: [UInt32] { decodeValues(from: vertexAdjacencyEndIndicesData) }
+}
+
 extension WKBridgeUpdateMesh {
     var instanceTransforms: [simd_float4x4] {
-        guard let data = instanceTransformsData else {
+        guard let data = instanceTransformsData, instanceTransformsCount > 0 else {
             return []
         }
 
-        guard instanceTransformsCount > 0 else {
-            return []
-        }
-
-        let matrixSize = MemoryLayout<simd_float4x4>.stride
-        let expectedSize = matrixSize * instanceTransformsCount
+        let expectedSize = MemoryLayout<simd_float4x4>.stride * instanceTransformsCount
 
         guard data.count >= expectedSize else {
             assertionFailure("instanceTransforms data size (\(data.count)) is less than expected (\(expectedSize))")
             return []
         }
 
-        #if compiler(>=6.2)
-        return unsafe data.withUnsafeBytes { rawBufferPointer in
-            guard let baseAddress = rawBufferPointer.baseAddress else {
-                return []
-            }
-
-            let matrices = unsafe baseAddress.assumingMemoryBound(to: simd_float4x4.self)
-            return (0..<instanceTransformsCount).map { unsafe matrices[$0] }
-        }
-        #else
-        return data.withUnsafeBytes { rawBufferPointer in
-            guard let baseAddress = rawBufferPointer.baseAddress else {
-                return []
-            }
-
-            let matrices = baseAddress.assumingMemoryBound(to: simd_float4x4.self)
-            return (0..<instanceTransformsCount).map { matrices[$0] }
-        }
-        #endif
+        return decodeValues(from: data.prefix(expectedSize))
     }
 }
 
@@ -805,7 +852,7 @@ extension WKBridgeLiteral {
     }
 }
 
-#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit) && !os(visionOS)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 11)
 
 internal func toData<T>(_ input: [T]) -> Data {
     #if compiler(>=6.2)

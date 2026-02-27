@@ -91,9 +91,9 @@ private:
     void destruct();
 
     void setLabel(String&&);
-    void update(const WebModel::UpdateMeshDescriptor&);
-    void updateTexture(const WebModel::UpdateTextureDescriptor&);
-    void updateMaterial(const WebModel::UpdateMaterialDescriptor&);
+    void update(const WebModel::UpdateMeshDescriptor&, CompletionHandler<void(bool)>&&);
+    void updateTexture(const WebModel::UpdateTextureDescriptor&, CompletionHandler<void(bool)>&&);
+    void updateMaterial(const WebModel::UpdateMaterialDescriptor&, CompletionHandler<void(bool)>&&);
     void updateTransform(const WebModel::Float4x4& transform);
     void setCameraDistance(float);
     void play(bool);

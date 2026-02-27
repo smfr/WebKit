@@ -155,9 +155,9 @@ static std::optional<WebModel::BlendShapeData> toCpp(WKBridgeBlendShapeData* dat
         return std::nullopt;
 
     return WebModel::BlendShapeData {
-        .weights = toCpp<float>(data.weights),
-        .positionOffsets = toCpp<WebModel::Float3>(data.positionOffsets),
-        .normalOffsets = toCpp<WebModel::Float3>(data.normalOffsets)
+        .weights = toCpp<float>(data.weightsData),
+        .positionOffsets = toCpp<WebModel::Float3>(data.positionOffsetsData),
+        .normalOffsets = toCpp<WebModel::Float3>(data.normalOffsetsData)
     };
 }
 
@@ -167,9 +167,9 @@ static std::optional<WebModel::RenormalizationData> toCpp(WKBridgeRenormalizatio
         return std::nullopt;
 
     return WebModel::RenormalizationData {
-        .vertexIndicesPerTriangle = toCpp<uint32_t>(data.vertexIndicesPerTriangle),
-        .vertexAdjacencies = toCpp<uint32_t>(data.vertexAdjacencies),
-        .vertexAdjacencyEndIndices = toCpp<uint32_t>(data.vertexAdjacencyEndIndices)
+        .vertexIndicesPerTriangle = toCpp<uint32_t>(data.vertexIndicesPerTriangleData),
+        .vertexAdjacencies = toCpp<uint32_t>(data.vertexAdjacenciesData),
+        .vertexAdjacencyEndIndices = toCpp<uint32_t>(data.vertexAdjacencyEndIndicesData)
     };
 }
 

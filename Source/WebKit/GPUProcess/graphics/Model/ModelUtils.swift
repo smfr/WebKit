@@ -21,7 +21,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 
-#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 9) && (os(macOS) || (os(iOS) && canImport(SwiftUI, _version: "8.0.36"))) && canImport(_USDKit_RealityKit) && !os(visionOS)
+#if ENABLE_GPU_PROCESS_MODEL && canImport(RealityCoreRenderer, _version: 11)
 
 @_weakLinked internal import DirectResource
 internal import Metal
@@ -134,6 +134,48 @@ extension _Proto_LowLevelTextureResource_v1.Descriptor {
         descriptor.textureType = texture.textureType
         descriptor.textureUsage = texture.usage
         descriptor.swizzle = swizzle
+
+        return descriptor
+    }
+}
+
+private func mapSemantic(_ semantic: Int) -> _Proto_LowLevelMeshResource_v1.VertexSemantic {
+    switch semantic {
+    case 0: .position
+    case 1: .color
+    case 2: .normal
+    case 3: .tangent
+    case 4: .bitangent
+    case 5: .uv0
+    case 6: .uv1
+    case 7: .uv2
+    case 8: .uv3
+    case 9: .uv4
+    case 10: .uv5
+    case 11: .uv6
+    case 12: .uv7
+    case 13: .unspecified
+    default: .unspecified
+    }
+}
+
+extension _Proto_LowLevelMeshResource_v1.Descriptor {
+    nonisolated static func fromLlmDescriptor(_ llmDescriptor: WKBridgeMeshDescriptor) -> Self {
+        var descriptor = Self.init()
+        descriptor.vertexCapacity = Int(llmDescriptor.vertexCapacity)
+        descriptor.vertexAttributes = llmDescriptor.vertexAttributes.map { attribute in
+            .init(
+                semantic: mapSemantic(attribute.semantic),
+                format: MTLVertexFormat(rawValue: UInt(attribute.format)) ?? .invalid,
+                layoutIndex: attribute.layoutIndex,
+                offset: attribute.offset
+            )
+        }
+        descriptor.vertexLayouts = llmDescriptor.vertexLayouts.map { layout in
+            .init(bufferIndex: layout.bufferIndex, bufferOffset: layout.bufferOffset, bufferStride: layout.bufferStride)
+        }
+        descriptor.indexCapacity = llmDescriptor.indexCapacity
+        descriptor.indexType = llmDescriptor.indexType
 
         return descriptor
     }

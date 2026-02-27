@@ -82,6 +82,11 @@ private:
     {
         return protect(root().streamClientConnection())->send(WTF::move(message), backing());
     }
+    template<typename T, typename C>
+    [[nodiscard]] std::optional<IPC::StreamClientConnection::AsyncReplyID> sendWithAsyncReply(T&& message, C&& completionHandler)
+    {
+        return protect(root().streamClientConnection())->sendWithAsyncReply(WTF::move(message), WTF::move(completionHandler), backing());
+    }
 
     void update(const WebModel::UpdateMeshDescriptor&) final;
     void updateTexture(const WebModel::UpdateTextureDescriptor&) final;

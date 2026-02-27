@@ -121,9 +121,9 @@ typedef NS_ENUM(uint8_t, WKBridgeDataUpdateType) {
 
 @interface WKBridgeBlendShapeData : NSObject
 
-@property (nonatomic, readonly) NSData *weights; // [Float]
-@property (nonatomic, readonly) NSArray<NSData *> *positionOffsets; // [[SIMD3<Float>]]
-@property (nonatomic, readonly) NSArray<NSData *> *normalOffsets; // [[SIMD3<Float>]]
+@property (nonatomic, readonly) NSData *weightsData; // [Float]
+@property (nonatomic, readonly) NSArray<NSData *> *positionOffsetsData; // [[SIMD3<Float>]]
+@property (nonatomic, readonly) NSArray<NSData *> *normalOffsetsData; // [[SIMD3<Float>]]
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithWeights:(NSData *)weights positionOffsets:(NSArray<NSData *> *)positionOffsets normalOffsets:(NSArray<NSData *> *)normalOffsets NS_DESIGNATED_INITIALIZER;
@@ -132,9 +132,9 @@ typedef NS_ENUM(uint8_t, WKBridgeDataUpdateType) {
 
 @interface WKBridgeRenormalizationData : NSObject
 
-@property (nonatomic, readonly) NSData *vertexIndicesPerTriangle; // [UInt32]
-@property (nonatomic, readonly) NSData *vertexAdjacencies; // [UInt32]
-@property (nonatomic, readonly) NSData *vertexAdjacencyEndIndices; // [UInt32]
+@property (nonatomic, readonly) NSData *vertexIndicesPerTriangleData; // [UInt32]
+@property (nonatomic, readonly) NSData *vertexAdjacenciesData; // [UInt32]
+@property (nonatomic, readonly) NSData *vertexAdjacencyEndIndicesData; // [UInt32]
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithVertexIndicesPerTriangle:(NSData *)vertexIndicesPerTriangle vertexAdjacencies:(NSData *)vertexAdjacencies vertexAdjacencyEndIndices:(NSData *)vertexAdjacencyEndIndices NS_DESIGNATED_INITIALIZER;

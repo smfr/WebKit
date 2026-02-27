@@ -31,10 +31,10 @@
 messages -> RemoteMesh Stream {
     void SetLabel(String label)
     void Destruct()
-    void Update(struct WebModel::UpdateMeshDescriptor descriptor)
+    void Update(struct WebModel::UpdateMeshDescriptor descriptor) -> (bool success)
     void Render()
-    void UpdateTexture(struct WebModel::UpdateTextureDescriptor descriptor)
-    void UpdateMaterial(struct WebModel::UpdateMaterialDescriptor descriptor)
+    void UpdateTexture(struct WebModel::UpdateTextureDescriptor descriptor) -> (bool success)
+    void UpdateMaterial(struct WebModel::UpdateMaterialDescriptor descriptor) -> (bool success)
     void UpdateTransform(struct WebModel::Float4x4 transform)
     void SetCameraDistance(float distance)
     void Play(bool playing)
