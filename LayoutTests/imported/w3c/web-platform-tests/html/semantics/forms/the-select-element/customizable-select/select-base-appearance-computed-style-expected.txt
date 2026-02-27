@@ -8,6 +8,6 @@ PASS UA styles of base appearance <option>.
 PASS UA styles of base appearance option::checkmark.
 PASS UA styles of base appearance <optgroup>.
 PASS UA styles of base appearance <legend>.
-FAIL UA styles of base appearance select <button>. assert_equals: display expected "contents" but got "block"
+PASS UA styles of base appearance select <button>.
 PASS UA styles of base appearance <option> in <optgroup>.
 

@@ -1122,7 +1122,7 @@ select:not(:-internal-uses-menulist):enabled {
 
 select:not([multiple]):-internal-uses-menulist > button:first-child {
     all: unset;
-    /* FIXME: add display: contents; once it works as expected */
+    display: contents;
 }
 
 select::picker-icon {

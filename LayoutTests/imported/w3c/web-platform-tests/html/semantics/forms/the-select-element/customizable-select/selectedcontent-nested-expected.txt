@@ -1,6 +1,4 @@
 
-    option
-  option
 
 FAIL Modification behavior when nesting selectedcontent elements. assert_equals: parent selectedcontent should get cleared. expected 0 but got 1
 

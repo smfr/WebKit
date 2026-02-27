@@ -1,4 +1,5 @@
-  Reset option two
+  Reset
+option two
 option one
 option two
 option three
