@@ -26,7 +26,6 @@ bytecompiler/NodesCodegen.cpp
 bytecompiler/StaticPropertyAnalyzer.h
 debugger/Debugger.cpp
 dfg/DFGAbstractInterpreterInlines.h
-[ iOS ] dfg/DFGArrayMode.cpp
 dfg/DFGByteCodeParser.cpp
 dfg/DFGClobberize.h
 dfg/DFGCommonData.cpp
@@ -36,7 +35,6 @@ dfg/DFGDesiredIdentifiers.cpp
 dfg/DFGDesiredWatchpoints.cpp
 dfg/DFGFixupPhase.cpp
 dfg/DFGGraph.cpp
-[ iOS ] dfg/DFGJITCode.cpp
 dfg/DFGLazyJSValue.cpp
 dfg/DFGOSREntry.cpp
 dfg/DFGOSRExit.cpp
@@ -60,7 +58,6 @@ ftl/FTLPatchpointExceptionHandle.cpp
 heap/ConservativeRoots.cpp
 heap/JITStubRoutineSet.cpp
 inspector/AsyncStackTrace.cpp
-[ iOS ] inspector/JSJavaScriptCallFrame.cpp
 inspector/ScriptCallStackFactory.cpp
 inspector/agents/InspectorDebuggerAgent.cpp
 inspector/agents/InspectorScriptProfilerAgent.cpp
@@ -106,7 +103,6 @@ runtime/StructureInlines.h
 runtime/SymbolTable.h
 runtime/TypeSet.cpp
 runtime/VMTraps.cpp
-[ iOS ] runtime/WaiterListManager.h
 tools/JSDollarVM.cpp
 wasm/WasmBBQJIT.cpp
 wasm/WasmBBQJIT64.cpp

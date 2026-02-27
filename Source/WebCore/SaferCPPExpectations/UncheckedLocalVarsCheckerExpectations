@@ -1,27 +1,27 @@
 accessibility/AXObjectCache.cpp
 [ iOS ] accessibility/AccessibilityNodeObject.cpp
-[ Mac ] accessibility/AccessibilityRenderObject.cpp
+accessibility/AccessibilityRenderObject.cpp
 [ iOS ] accessibility/cocoa/AXTextMarkerCocoa.mm
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
-[ Mac ] dom/Document.cpp
+dom/Document.cpp
 dom/Position.cpp
-[ Mac ] dom/Range.cpp
-[ Mac ] editing/DeleteSelectionCommand.cpp
+dom/Range.cpp
+editing/DeleteSelectionCommand.cpp
 editing/Editing.cpp
 [ iOS ] editing/cocoa/EditorCocoa.mm
 [ iOS ] editing/ios/DictationCommandIOS.cpp
 [ iOS ] html/HTMLAnchorElement.cpp
-[ Mac ] html/HTMLEmbedElement.cpp
-[ Mac ] html/HTMLFormElement.cpp
+html/HTMLEmbedElement.cpp
+html/HTMLFormElement.cpp
 [ iOS ] html/HTMLImageElement.cpp
 [ iOS ] html/HTMLImageLoader.cpp
-[ Mac ] html/HTMLOptionElement.cpp
+html/HTMLOptionElement.cpp
 [ iOS ] html/HTMLPictureElement.cpp
-[ Mac ] html/HTMLSelectElement.cpp
-[ Mac ] html/OffscreenCanvas.cpp
+html/HTMLSelectElement.cpp
+html/OffscreenCanvas.cpp
 html/canvas/CanvasRenderingContext2DBase.cpp
-[ Mac ] inspector/InspectorNodeFinder.cpp
+inspector/InspectorNodeFinder.cpp
 inspector/InspectorOverlay.cpp
 inspector/agents/InspectorDOMAgent.cpp
 layout/formattingContexts/FormattingGeometry.cpp
@@ -40,8 +40,8 @@ layout/layouttree/LayoutBox.cpp
 page/ElementTargetingController.cpp
 page/EventHandler.cpp
 [ iOS ] page/FocusController.cpp
-[ Mac ] page/InteractionRegion.cpp
-[ Mac ] page/IntersectionObserver.cpp
+page/InteractionRegion.cpp
+page/IntersectionObserver.cpp
 page/LocalFrameView.cpp
 [ iOS ] page/cocoa/ContentChangeObserver.cpp
 [ iOS ] page/ios/EventHandlerIOS.mm
@@ -149,7 +149,7 @@ rendering/svg/legacy/LegacyRenderSVGResourceClipper.cpp
 rendering/svg/legacy/LegacyRenderSVGResourceContainer.cpp
 rendering/svg/legacy/LegacyRenderSVGResourceGradient.cpp
 rendering/svg/legacy/LegacyRenderSVGRoot.cpp
-[ Mac ] rendering/svg/legacy/LegacyRenderSVGTransformableContainer.cpp
+rendering/svg/legacy/LegacyRenderSVGTransformableContainer.cpp
 rendering/svg/legacy/SVGResources.cpp
 rendering/svg/legacy/SVGResourcesCache.cpp
 rendering/svg/legacy/SVGResourcesCycleSolver.cpp
@@ -188,7 +188,7 @@ style/computed/StyleComputedStyleBase.cpp
 style/values/grid/StyleGridPositionsResolver.cpp
 style/values/images/kinds/StyleCanvasImage.cpp
 style/values/primitives/StyleLengthResolution.cpp
-[ Mac ] style/values/text/StyleTextAlign.cpp
+style/values/text/StyleTextAlign.cpp
 svg/SVGClipPathElement.cpp
 svg/SVGFilterPrimitiveStandardAttributes.cpp
 svg/SVGGeometryElement.cpp
@@ -197,4 +197,4 @@ svg/SVGUseElement.cpp
 testing/Internals.cpp
 workers/WorkerGlobalScope.cpp
 workers/WorkerOrWorkletThread.cpp
-[ Mac ] workers/service/ServiceWorkerContainer.cpp
+workers/service/ServiceWorkerContainer.cpp

@@ -16,7 +16,7 @@ Modules/webaudio/ScriptProcessorNode.cpp
 Modules/webaudio/StereoPannerNode.cpp
 [ iOS ] Modules/webdatabase/DatabaseTracker.cpp
 [ iOS ] accessibility/AccessibilityNodeObject.cpp
-[ Mac ] accessibility/AccessibilityObject.cpp
+accessibility/AccessibilityObject.cpp
 [ iOS ] accessibility/ios/AccessibilityObjectIOS.mm
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
 [ iOS ] bindings/js/CommonVM.cpp
@@ -53,31 +53,31 @@ bindings/js/JSTextTrackCueCustom.cpp
 bindings/js/ScriptCachedFrameData.cpp
 bindings/js/ScriptModuleLoader.cpp
 bindings/js/StructuredClone.cpp
-[ Mac ] css/CSSStyleSheet.cpp
+css/CSSStyleSheet.cpp
 css/SelectorChecker.cpp
 css/ShorthandSerializer.cpp
 dom/Node.cpp
 dom/Position.cpp
-[ Mac ] dom/Range.cpp
+dom/Range.cpp
 dom/SpaceSplitString.cpp
-[ Mac ] editing/DeleteSelectionCommand.cpp
-[ Mac ] editing/TextCheckingHelper.cpp
+editing/DeleteSelectionCommand.cpp
+editing/TextCheckingHelper.cpp
 [ iOS ] editing/ios/DictationCommandIOS.cpp
 [ iOS ] editing/ios/EditorIOS.mm
 [ iOS ] html/HTMLAnchorElement.cpp
-[ Mac ] html/HTMLEmbedElement.cpp
-[ Mac ] html/HTMLFormElement.cpp
+html/HTMLEmbedElement.cpp
+html/HTMLFormElement.cpp
 [ iOS ] html/HTMLImageElement.cpp
 [ iOS ] html/HTMLImageLoader.cpp
-[ Mac ] html/HTMLMediaElement.cpp
-[ Mac ] html/HTMLOptionElement.cpp
+html/HTMLMediaElement.cpp
+html/HTMLOptionElement.cpp
 [ iOS ] html/HTMLPictureElement.cpp
-[ Mac ] html/HTMLSelectElement.cpp
-[ Mac ] html/MediaElementSession.cpp
-[ Mac ] html/OffscreenCanvas.cpp
+html/HTMLSelectElement.cpp
+html/MediaElementSession.cpp
+html/OffscreenCanvas.cpp
 html/canvas/CanvasRenderingContext2DBase.cpp
 inspector/InspectorAuditAccessibilityObject.cpp
-[ Mac ] inspector/InspectorNodeFinder.cpp
+inspector/InspectorNodeFinder.cpp
 inspector/agents/InspectorAnimationAgent.cpp
 inspector/agents/InspectorCSSAgent.cpp
 inspector/agents/InspectorCanvasAgent.cpp
@@ -89,8 +89,8 @@ inspector/agents/page/PageNetworkAgent.cpp
 [ iOS ] loader/cache/CachedRawResource.cpp
 page/EventHandler.cpp
 page/FocusController.cpp
-[ Mac ] page/InteractionRegion.cpp
-[ Mac ] page/IntersectionObserver.cpp
+page/InteractionRegion.cpp
+page/IntersectionObserver.cpp
 [ iOS ] page/LocalDOMWindow.cpp
 [ iOS ] page/LocalFrameView.cpp
 [ iOS ] page/Quirks.cpp
@@ -102,7 +102,7 @@ page/FocusController.cpp
 [ iOS ] platform/PreviewConverter.cpp
 [ iOS ] platform/audio/ios/AudioSessionIOS.mm
 [ iOS ] platform/audio/ios/MediaSessionManagerIOS.mm
-[ Mac ] platform/graphics/avfoundation/objc/CDMInstanceFairPlayStreamingAVFObjC.mm
+platform/graphics/avfoundation/objc/CDMInstanceFairPlayStreamingAVFObjC.mm
 platform/graphics/filters/software/FEMorphologySoftwareApplier.cpp
 [ iOS ] platform/ios/DragImageIOS.mm
 [ iOS ] platform/ios/WebVideoFullscreenControllerAVKit.mm
@@ -114,7 +114,7 @@ rendering/RenderLayer.cpp
 rendering/RenderTreeAsText.cpp
 [ iOS ] rendering/cocoa/RenderThemeCocoa.mm
 [ iOS ] rendering/ios/RenderThemeIOS.mm
-[ Mac ] rendering/svg/legacy/LegacyRenderSVGTransformableContainer.cpp
+rendering/svg/legacy/LegacyRenderSVGTransformableContainer.cpp
 style/ElementRuleCollector.cpp
 style/MatchResultCache.cpp
 style/PageRuleCollector.cpp
@@ -125,7 +125,7 @@ style/StyleDifference.cpp
 style/StyleExtractorCustom.h
 style/StyleInvalidationFunctions.h
 style/StyleRelations.cpp
-[ Mac ] style/StyleScope.cpp
+style/StyleScope.cpp
 [ iOS ] style/StyleScopeRuleSets.cpp
 style/UserAgentStyle.cpp
 style/computed/StyleComputedStyleBase+SettersInlines.h
@@ -134,5 +134,5 @@ svg/SVGClipPathElement.cpp
 svg/SVGUseElement.cpp
 testing/Internals.cpp
 testing/LegacyMockCDM.cpp
-[ Mac ] workers/service/ServiceWorkerContainer.cpp
-[ Mac ] xml/XSLImportRule.cpp
+workers/service/ServiceWorkerContainer.cpp
+xml/XSLImportRule.cpp

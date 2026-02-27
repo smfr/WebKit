@@ -1,2 +1,3 @@
-[ macOS ] wtf/text/StringImpl.cpp
-[ macOS ] wtf/text/StringView.cpp
+[ iOS ] wtf/cocoa/FileSystemCocoa.mm
+wtf/text/StringImpl.cpp
+wtf/text/StringView.cpp
