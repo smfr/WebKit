@@ -312,6 +312,11 @@ ModelProcessModelPlayerProxy::~ModelProcessModelPlayerProxy()
 
     [m_stageModeInteractionDriver removeInteractionContainerFromSceneOrParent];
 
+#if HAVE(RESYNC_MEMORY_PRESSURE)
+    if (auto* syncManager = REServiceLocatorGetNetworkSyncManager(REEngineGetServiceLocator(REEngineGetShared())))
+        RENetworkSyncManagerRelieveMemoryPressure(syncManager, 0);
+#endif
+
     RELEASE_LOG(ModelElement, "%p - ModelProcessModelPlayerProxy deallocated id=%" PRIu64, this, m_id.toUInt64());
 
     ASSERT(gObjectCountForTesting > 0);
