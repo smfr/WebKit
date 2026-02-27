@@ -380,7 +380,7 @@ messages -> WebPage WantsAsyncDispatchMessage {
     PerformDragOperation(std::optional<WebCore::FrameIdentifier> frameID, WebCore::DragData dragData, WebKit::SandboxExtensionHandle sandboxExtensionHandle, Vector<WebKit::SandboxExtensionHandle> sandboxExtensionsForUpload) -> (WebKit::DragOperationResult dragOperationResult)
 #endif
 #if ENABLE(DRAG_SUPPORT)
-    DidStartDrag()
+    DidStartDrag(std::optional<WebCore::FrameIdentifier> frameID)
     DragEnded(std::optional<WebCore::FrameIdentifier> frameID, WebCore::IntPoint clientPosition, WebCore::IntPoint globalPosition, OptionSet<WebCore::DragOperation> dragOperationMask) -> (struct std::optional<WebCore::RemoteUserInputEventData> remoteUserInputEventData)
     DragCancelled()
 #endif

@@ -1444,7 +1444,8 @@ void DragController::doSystemDrag(DragImage image, const IntPoint& dragLoc, cons
 #endif
         nodeID = element->nodeIdentifier();
     }
-    client().startDrag(WTF::move(item), *state.dataTransfer, mainFrame.get(), nodeID);
+    client().startDrag(WTF::move(item), *state.dataTransfer, frame, nodeID);
+
     // DragClient::startDrag can cause our Page to dispear, deallocating |this|.
     if (!mainFrame->page())
         return;

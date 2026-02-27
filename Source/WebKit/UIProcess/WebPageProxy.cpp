@@ -4009,13 +4009,14 @@ void WebPageProxy::dragEnded(const IntPoint& clientPosition, const IntPoint& glo
     setDragCaretRect({ });
 }
 
-void WebPageProxy::didStartDrag()
+void WebPageProxy::didStartDrag(const std::optional<FrameIdentifier>& targetFrameID)
 {
     if (!hasRunningProcess())
         return;
 
     discardQueuedMouseEvents();
-    send(Messages::WebPage::DidStartDrag());
+
+    sendToProcessContainingFrame(targetFrameID, Messages::WebPage::DidStartDrag(targetFrameID));
 }
 
 void WebPageProxy::dragCancelled()

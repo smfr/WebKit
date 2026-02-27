@@ -106,7 +106,7 @@ void WebDragClient::startDrag(DragItem dragItem, DataTransfer&, Frame& frame, co
         return;
 
     m_page->willStartDrag();
-    m_page->send(Messages::WebPageProxy::StartDrag(dragItem, WTF::move(*handle), nodeID));
+    m_page->send(Messages::WebPageProxy::StartDrag(dragItem, WTF::move(*handle), nodeID, frame.frameID()));
 }
 
 void WebDragClient::didConcludeEditDrag()

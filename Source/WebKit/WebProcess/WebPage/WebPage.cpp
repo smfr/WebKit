@@ -5641,11 +5641,14 @@ void WebPage::mayPerformUploadDragDestinationAction()
     m_pendingDropExtensionHandlesForFileUpload = std::nullopt;
 }
 
-void WebPage::didStartDrag()
+void WebPage::didStartDrag(std::optional<FrameIdentifier> frameID)
 {
     m_isStartingDrag = false;
-    if (RefPtr localMainFrame = this->localMainFrame())
-        localMainFrame->eventHandler().didStartDrag();
+
+    if (RefPtr frame = frameID ? WebProcess::singleton().webFrame(*frameID) : &mainWebFrame()) {
+        if (RefPtr localFrame = frame->coreLocalFrame())
+            localFrame->eventHandler().didStartDrag();
+    }
 }
 
 void WebPage::dragCancelled()
