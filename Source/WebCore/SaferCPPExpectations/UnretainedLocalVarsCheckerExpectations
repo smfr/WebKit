@@ -45,7 +45,6 @@ platform/graphics/cg/ImageDecoderCG.cpp
 [ iOS ] platform/graphics/cg/PDFDocumentImage.cpp
 platform/graphics/cg/PathCG.cpp
 platform/graphics/cocoa/CMUtilities.mm
-platform/graphics/cocoa/FontPlatformDataCocoa.mm
 platform/graphics/cocoa/GraphicsContextCocoa.mm
 [ Mac ] platform/graphics/cocoa/ImageAdapterCocoa.mm
 platform/graphics/cocoa/MediaPlayerPrivateWebM.mm

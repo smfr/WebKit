@@ -79,10 +79,8 @@ platform/graphics/cg/ImageBufferIOSurfaceBackend.cpp
 [ iOS ] platform/graphics/cg/PDFDocumentImage.cpp
 platform/graphics/cg/PathCG.cpp
 platform/graphics/cocoa/CMUtilities.mm
-platform/graphics/cocoa/FontCacheCoreText.cpp
 platform/graphics/cocoa/GraphicsContextCocoa.mm
 platform/graphics/cocoa/MediaPlayerPrivateWebM.mm
-platform/graphics/cocoa/SystemFontDatabaseCoreText.cpp
 platform/graphics/cocoa/TextTrackRepresentationCocoa.mm
 platform/graphics/cocoa/VideoMediaSampleRenderer.mm
 platform/graphics/cocoa/WebCoreCALayerExtras.mm

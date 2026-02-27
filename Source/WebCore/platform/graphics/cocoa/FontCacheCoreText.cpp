@@ -181,7 +181,7 @@ void FontCache::platformInit()
     CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenterSingleton(), this, &fontCacheRegisteredFontsChangedNotificationCallback, kCTFontManagerRegisteredFontsChangedNotification, nullptr, CFNotificationSuspensionBehaviorDeliverImmediately);
 
 #if PLATFORM(IOS_FAMILY)
-    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenterSingleton(), this, &fontCacheRegisteredFontsChangedNotificationCallback, getUIContentSizeCategoryDidChangeNotificationName(), nullptr, CFNotificationSuspensionBehaviorDeliverImmediately);
+    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenterSingleton(), this, &fontCacheRegisteredFontsChangedNotificationCallback, protect(getUIContentSizeCategoryDidChangeNotificationName()).get(), nullptr, CFNotificationSuspensionBehaviorDeliverImmediately);
 #endif
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenterSingleton(), this, &fontCacheRegisteredFontsChangedNotificationCallback, kAXSEnhanceTextLegibilityChangedNotification, nullptr, CFNotificationSuspensionBehaviorDeliverImmediately);
@@ -581,7 +581,7 @@ static std::optional<SpecialCaseFontLookupResult> fontDescriptorWithFamilySpecia
     if (family.startsWith("UICTFontTextStyle"_s)) {
         const auto& request = fontDescription.fontSelectionRequest();
         CTFontSymbolicTraits traits = (isFontWeightBold(request.weight) ? kCTFontTraitBold : 0) | (isItalic(request.slope) ? kCTFontTraitItalic : 0);
-        auto descriptor = adoptCF(CTFontDescriptorCreateWithTextStyle(family.string().createCFString().get(), contentSizeCategory(), fontDescription.computedLocale().string().createCFString().get()));
+        auto descriptor = adoptCF(CTFontDescriptorCreateWithTextStyle(family.string().createCFString().get(), protect(contentSizeCategory()).get(), fontDescription.computedLocale().string().createCFString().get()));
         if (traits) {
             // FIXME: rdar://105369379 As far as I can tell, there's no modification to the attributes dictionary that has the same effect as CTFontDescriptorCreateCopyWithSymbolicTraits(),
             // because there doesn't seem to be a place to specify the bitmask. That's the reason we're creating the derived CTFontDescriptor here, rather than in UnrealizedCoreTextFont::realize().
@@ -802,12 +802,13 @@ static RetainPtr<CTFontRef> lookupFallbackFont(CTFontRef font, FontSelectionValu
 RefPtr<Font> FontCache::systemFallbackForCharacterCluster(const FontDescription& description, const Font& originalFontData, IsForPlatformFont isForPlatformFont, PreferColoredFont, StringView characterCluster)
 {
     const FontPlatformData& platformData = originalFontData.platformData();
+    RetainPtr ctFont = platformData.ctFont();
 
-    auto fullName = String(adoptCF(CTFontCopyFullName(platformData.ctFont())).get());
+    auto fullName = String(adoptCF(CTFontCopyFullName(ctFont.get())).get());
     if (!fullName.isEmpty())
         m_fontNamesRequiringSystemFallbackForPrewarming.add(fullName);
 
-    auto result = lookupFallbackFont(platformData.ctFont(), description.weight(), description.computedLocale(), description.shouldAllowUserInstalledFonts(), characterCluster);
+    auto result = lookupFallbackFont(ctFont.get(), description.weight(), description.computedLocale(), description.shouldAllowUserInstalledFonts(), characterCluster);
     result = preparePlatformFont(UnrealizedCoreTextFont { WTF::move(result) }, description, { });
 
     if (!result)
@@ -821,7 +822,7 @@ RefPtr<Font> FontCache::systemFallbackForCharacterCluster(const FontDescription&
     auto [syntheticBold, syntheticOblique] = computeNecessarySynthesis(substituteFont.get(), description, { }, ShouldComputePhysicalTraits::No, isForPlatformFont == IsForPlatformFont::Yes).boldObliquePair();
 
     RefPtr<const FontCustomPlatformData> customPlatformData = nullptr;
-    if (safeCFEqual(platformData.ctFont(), substituteFont.get()))
+    if (safeCFEqual(ctFont.get(), substituteFont.get()))
         customPlatformData = platformData.customPlatformData();
     FontPlatformData alternateFont(substituteFont.get(), platformData.size(), syntheticBold, syntheticOblique, platformData.orientation(), platformData.widthVariant(), platformData.textRenderingMode(), customPlatformData.get());
 
