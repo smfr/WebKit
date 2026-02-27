@@ -24,13 +24,7 @@ x
 x
 x
 x
-x
-x
-x
 
-x
-x
-x
 x
 x
 x
@@ -69,24 +63,14 @@ PASS el-aside-in-section
 PASS el-aside-in-section-aria-label-empty
 PASS el-aside-in-section-aria-label-whitespace
 PASS el-aside-in-section-aria-labelledby-non-existing
-PASS el-aside-in-section-aria-labelledby-empty
-PASS el-aside-in-section-aria-labelledby-whitespace
 PASS el-aside-in-section-title-empty
-PASS el-aside-in-section-title-whitespace
 PASS el-img-empty-alt-aria-label-empty
 PASS el-img-empty-alt-aria-label-whitespace
-PASS el-img-empty-alt-aria-labelledby-non-existing
-PASS el-img-empty-alt-aria-labelledby-empty
-PASS el-img-empty-alt-aria-labelledby-whitespace
 PASS el-img-empty-alt-title
 PASS el-img-empty-alt-title-empty
-PASS el-img-empty-alt-title-whitespace
 PASS el-section-no-name
 PASS el-section-aria-label-empty
 PASS el-section-aria-label-whitespace
 PASS el-section-aria-labelledby-non-existing
-PASS el-section-aria-labelledby-empty
-PASS el-section-aria-labelledby-whitespace
 PASS el-section-title-empty
-PASS el-section-title-whitespace
 
