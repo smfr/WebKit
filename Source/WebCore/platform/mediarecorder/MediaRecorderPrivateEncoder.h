@@ -92,6 +92,7 @@ private:
 
     MediaTime lastEnqueuedAudioTime() const { return MediaTime(m_lastEnqueuedAudioTimeUs.load(), 1000000); }
     MediaTime currentTime() const;
+    MediaTime currentTime(const MediaTime&, const MonotonicTime&) const;
     MediaTime currentEndTime() const;
 
     void flushDataBuffer();

@@ -443,7 +443,7 @@ void MediaRecorderPrivateEncoder::appendVideoFrame(VideoFrame& frame)
         if (RefPtr protectedThis = weakThis.get()) {
             if (m_isPaused)
                 return;
-            auto nextVideoFrameTime = hasAudio() ? audioTime : MediaTime::createWithSeconds((now - m_currentVideoSegmentStartTime.value_or(now)) + Seconds::fromMicroseconds(m_previousSegmentVideoDurationUs));
+            auto nextVideoFrameTime = currentTime(audioTime, now);
             if (!m_currentVideoSegmentStartTime) {
                 m_currentVideoSegmentStartTime = now;
                 // We take the time before m_previousSegmentVideoDurationUs is set so that the first frame will always appear to have a timestamp of 0 but with a longer duration.
@@ -969,8 +969,8 @@ void MediaRecorderPrivateEncoder::fetchData(CompletionHandler<void(Ref<Fragmente
 {
     assertIsMainThread();
 
-    m_currentFlushOperations = Ref { m_currentFlushOperations }->whenSettled(queueSingleton(), [protectedThis = Ref { *this }, this, completionHandler = WTF::move(completionHandler)]() mutable {
-        auto currentTime = this->currentTime();
+    m_currentFlushOperations = Ref { m_currentFlushOperations }->whenSettled(queueSingleton(), [protectedThis = Ref { *this }, this, completionHandler = WTF::move(completionHandler), audioTime = lastEnqueuedAudioTime(), now = MonotonicTime::now()]() mutable {
+        auto currentTime = this->currentTime(audioTime, now);
         return flushPendingData(currentTime)->whenSettled(queueSingleton(), [protectedThis, this, completionHandler = WTF::move(completionHandler), currentTime]() mutable {
             assertIsCurrent(queueSingleton());
             Ref data = takeData();
@@ -1049,16 +1049,23 @@ Ref<GenericPromise> MediaRecorderPrivateEncoder::flushPendingData(const MediaTim
 
 MediaTime MediaRecorderPrivateEncoder::currentTime() const
 {
-    assertIsCurrent(queueSingleton());
-
     if (hasAudio())
         return lastEnqueuedAudioTime();
 
-    auto currentDuration = MediaTime::createWithSeconds(Seconds::fromMicroseconds(m_previousSegmentVideoDurationUs));
+    return currentTime(lastEnqueuedAudioTime(), MonotonicTime::now());
+}
 
+MediaTime MediaRecorderPrivateEncoder::currentTime(const MediaTime& audioTime, const MonotonicTime& now) const
+{
+    if (hasAudio())
+        return audioTime;
+
+    assertIsCurrent(queueSingleton());
+
+    auto currentDuration = MediaTime::createWithSeconds(Seconds::fromMicroseconds(m_previousSegmentVideoDurationUs));
     if (!m_currentVideoSegmentStartTime)
         return currentDuration;
-    return MediaTime::createWithSeconds(MonotonicTime::now() - *m_currentVideoSegmentStartTime) + currentDuration;
+    return MediaTime::createWithSeconds(now - *m_currentVideoSegmentStartTime) + currentDuration;
 }
 
 MediaTime MediaRecorderPrivateEncoder::currentEndTime() const
