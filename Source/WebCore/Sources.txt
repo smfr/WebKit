@@ -584,6 +584,7 @@ Modules/webxr/XRWebGLSubImage.cpp
 accessibility/AXAttributeCacheScope.cpp
 accessibility/AXComputedObjectAttributeCache.cpp
 accessibility/AXCoreObject.cpp
+accessibility/AXCrossProcessSearch.cpp
 accessibility/AXGeometryManager.cpp
 accessibility/AXLiveRegionManager.cpp
 accessibility/AXLocalFrame.cpp

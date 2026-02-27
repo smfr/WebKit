@@ -273,6 +273,7 @@ enum class AXProperty : uint16_t {
     RemoteFrameOffset,
     RemoteFramePlatformElement,
 #if PLATFORM(COCOA)
+    RemoteFrameID,
     RemoteFrameProcessIdentifier,
     RemoteParent,
 #endif

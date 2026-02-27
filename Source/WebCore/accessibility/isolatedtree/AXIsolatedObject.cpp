@@ -33,7 +33,6 @@
 #include "AXLogger.h"
 #include "AXLoggerBase.h"
 #include "AXObjectCacheInlines.h"
-#include "AXSearchManager.h"
 #include "AXTextMarker.h"
 #include "AXTextRun.h"
 #include "AXUtilities.h"
@@ -1138,12 +1137,6 @@ Vector<String> AXIsolatedObject::performTextOperation(const AccessibilityTextOpe
             return object->performTextOperation(textOperation);
         return Vector<String>();
     }, Accessibility::InteractiveTimeout, Vector<String> { });
-}
-
-AXCoreObject::AccessibilityChildrenVector AXIsolatedObject::findMatchingObjects(AccessibilitySearchCriteria&& criteria)
-{
-    criteria.anchorObject = this;
-    return AXSearchManager().findMatchingObjects(WTF::move(criteria));
 }
 
 String AXIsolatedObject::textUnderElement(TextUnderElementMode) const

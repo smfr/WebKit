@@ -79,7 +79,9 @@ void appendPlatformProperties(AXPropertyVector& properties, OptionSet<AXProperty
         setProperty(AXProperty::StringValue, object->stringValue().isolatedCopy());
 
     setProperty(AXProperty::RemoteFramePlatformElement, object->remoteFramePlatformElement());
-    setProperty(AXProperty::RemoteFrameProcessIdentifier, object->remoteFrameProcessIdentifier());
+    setProperty(AXProperty::RemoteFrameProcessIdentifier, object->remoteFramePID());
+    if (std::optional frameID = object->remoteFrameID())
+        setProperty(AXProperty::RemoteFrameID, *frameID);
 
     if (object->isWebArea()) {
         setProperty(AXProperty::PreventKeyboardDOMEventDispatch, object->preventKeyboardDOMEventDispatch());

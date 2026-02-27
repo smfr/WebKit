@@ -34,6 +34,7 @@
 
 #if PLATFORM(MAC)
 
+#import "AXCrossProcessSearch.h"
 #import "AXIsolatedObject.h"
 #import "AXLogger.h"
 #import "AXRemoteFrame.h"
@@ -364,6 +365,48 @@ static std::pair<AXTextMarkerRange, AccessibilitySearchDirection> misspellingSea
         criteria.second = AccessibilitySearchDirection::Next;
 
     return criteria;
+}
+
+#pragma mark Cross-process search helpers
+
+// Creates an NSAccessibilityRemoteUIElement from an AccessibilityRemoteToken.
+// Returns nil if the token is empty or element creation fails.
+static RetainPtr<id> remoteElementFromToken(const AccessibilityRemoteToken& token)
+{
+    if (token.bytes.isEmpty())
+        return nil;
+    RetainPtr<NSData> tokenData = adoptNS([[NSData alloc] initWithBytes:token.bytes.span().data() length:token.bytes.size()]);
+    return adoptNS([[NSAccessibilityRemoteUIElement alloc] initWithRemoteToken:tokenData.get()]);
+}
+
+// Converts AccessibilitySearchResults to NSArray, creating platform elements for both
+// local objects and remote tokens.
+static RetainPtr<NSArray> searchResultsToNSArray(const AccessibilitySearchResults& searchResults, unsigned limit)
+{
+    RetainPtr<NSMutableArray> result = adoptNS([[NSMutableArray alloc] init]);
+    for (const auto& searchResult : searchResults) {
+        if ([result count] >= limit)
+            break;
+
+        if (RefPtr object = searchResult.objectIfLocalResult()) {
+            if (RetainPtr wrapper = object->wrapper())
+                [result addObject:wrapper.get()];
+        } else if (searchResult.isRemote()) {
+            if (RetainPtr remoteElement = remoteElementFromToken(*searchResult.remoteToken()))
+                [result addObject:remoteElement.get()];
+        }
+    }
+    return result;
+}
+
+// Performs a search that may span multiple web content processes.
+// For remote frames encountered during the search, sends IPC to query them and merges results.
+// If we're in a child frame, eagerly dispatches parent search in parallel with local search.
+static RetainPtr<NSArray> performSearchWithRemoteFrames(AXCoreObject& backingObject, AccessibilitySearchCriteria&& criteria)
+{
+    unsigned originalLimit = criteria.resultsLimit;
+    auto searchResults = performSearchWithParentCoordination(backingObject, WTF::move(criteria));
+    return searchResultsToNSArray(searchResults, originalLimit);
 }
 
 #pragma mark Text Marker helpers
@@ -2192,7 +2235,7 @@ id attributeValueForTesting(const RefPtr<AXCoreObject>& backingObject, NSString 
                     callback(nsStringNilIfEmpty(result).get());
                 };
 
-                page->chrome().client().resolveAccessibilityHitTestForTesting(*axRemoteFrame->frameID(), IntPoint(point), WTF::move(clientCallback));
+                page->chrome().client().resolveAccessibilityHitTestForTesting(*axRemoteFrame->remoteFrameID(), IntPoint(point), WTF::move(clientCallback));
             }
         }
     } else {
@@ -3124,10 +3167,10 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_BEGIN
             }
         }
 
-        auto results = backingObject->findMatchingObjects(WTF::move(criteria));
+        RetainPtr<NSArray> results = performSearchWithRemoteFrames(*backingObject, WTF::move(criteria));
         if (widgetChildren)
-            return [widgetChildren arrayByAddingObjectsFromArray:makeNSArray(results)];
-        return makeNSArray(results);
+            return [widgetChildren arrayByAddingObjectsFromArray:results.get()];
+        return results.autorelease();
     }
 
     // TextMarker attributes.

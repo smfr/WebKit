@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "AXRemoteFrame.h"
-#include "AccessibilityObject.h"
-#include "ScrollView.h"
+#include <WebCore/AXRemoteFrame.h>
+#include <WebCore/AccessibilityObject.h>
+#include <WebCore/ScrollView.h>
 
 namespace WebCore {
 

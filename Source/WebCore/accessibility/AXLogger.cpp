@@ -1275,6 +1275,9 @@ TextStream& operator<<(WTF::TextStream& stream, AXProperty property)
     case AXProperty::WebAreaTitle:
         stream << "WebAreaTitle";
         break;
+    case AXProperty::RemoteFrameID:
+        stream << "RemoteFrameID";
+        break;
     }
     return stream;
 }
@@ -1356,7 +1359,7 @@ void streamAXCoreObject(TextStream& stream, const AXCoreObject& object, const Op
 
 #if PLATFORM(COCOA)
     if (object.role() == AccessibilityRole::RemoteFrame) {
-        pid_t pid = object.remoteFrameProcessIdentifier();
+        pid_t pid = object.remoteFramePID();
         stream.dumpProperty("remotePID"_s, pid);
     }
 #endif

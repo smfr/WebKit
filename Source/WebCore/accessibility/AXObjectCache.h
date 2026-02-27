@@ -25,8 +25,10 @@
 
 #pragma once
 
+#include <WebCore/AXAnnouncementTypes.h>
 #include <WebCore/AXTextMarker.h>
 #include <WebCore/AXTreeStore.h>
+#include <WebCore/AccessibilityRemoteToken.h>
 #include <WebCore/Document.h>
 #include <WebCore/RenderView.h>
 #include <WebCore/SimpleRange.h>
@@ -96,7 +98,6 @@ struct TextMarkerData;
 enum class AXNotification : uint8_t;
 enum class AXStreamOptions : uint16_t;
 enum class AXProperty : uint16_t;
-enum class LiveRegionStatus: uint8_t;
 enum class TextMarkerOrigin : uint16_t;
 
 struct CharacterOffset {
@@ -156,12 +157,6 @@ struct AXDebugInfo {
     uint64_t webProcessLocalTokenHash;
 };
 
-enum class NotifyPriority : uint8_t { Normal, High };
-
-enum class InterruptBehavior : uint8_t { None, All, Pending };
-
-enum class LiveRegionStatus : uint8_t { Off, Polite, Assertive };
-
 // When this is updated, WebCoreArgumentCoders.serialization.in must be updated as well.
 struct AriaNotifyData {
     String message;
@@ -193,32 +188,6 @@ struct AriaNotifyData {
         };
         return makeString("AriaNotifyData { message: \""_s, message, "\", priority: "_s, priorityString(), ", interrupt: "_s, interruptString(), ", language: \""_s, language, "\" }"_s);
     }
-};
-
-struct AccessibilityRemoteToken {
-    AccessibilityRemoteToken()
-#if !PLATFORM(MAC)
-        : uuid(WTF::UUID::createVersion4())
-        , pid(0)
-#endif
-    { }
-
-#if PLATFORM(MAC)
-    AccessibilityRemoteToken(Vector<uint8_t> bytes)
-        : bytes(bytes)
-#else
-    AccessibilityRemoteToken(WTF::UUID uuid, ProcessID pid)
-        : uuid(uuid)
-        , pid(pid)
-#endif
-    { }
-
-#if PLATFORM(MAC)
-    Vector<uint8_t> bytes;
-#else
-    WTF::UUID uuid;
-    ProcessID pid;
-#endif
 };
 
 #if PLATFORM(COCOA)

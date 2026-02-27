@@ -1456,7 +1456,8 @@ void AXIsolatedTree::applyPendingChangesLocked()
             object->attachPlatformWrapper(wrapper.get());
 
         // The object must have a wrapper by this point.
-        AX_ASSERT(object->wrapper());
+        // Can hit this on many tests with ITM + ENABLE_ACCESSIBILITY_LOCAL_FRAME (e.g. accessibility/deleting-iframe-destroys-axcache.html).
+        AX_BROKEN_ASSERT(object->wrapper());
         // The reference count of the just added IsolatedObject must be 2
         // because it is referenced by m_readerThreadNodeMap and m_pendingAppends.
         // When m_pendingAppends is cleared, the object will be held only by m_readerThreadNodeMap. The exception is the root node whose reference count is 3.

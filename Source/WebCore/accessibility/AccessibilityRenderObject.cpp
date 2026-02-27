@@ -88,6 +88,7 @@
 #include "LineSelection.h"
 #include "LocalFrame.h"
 #include "LocalizedStrings.h"
+#include "Logging.h"
 #include "NodeList.h"
 #include "Page.h"
 #include "PathUtilities.h"

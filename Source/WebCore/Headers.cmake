@@ -814,9 +814,11 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
 
     Scripts/generate-log-declarations.py
 
+    accessibility/AXAnnouncementTypes.h
     accessibility/AXAttributeCacheScope.h
     accessibility/AXComputedObjectAttributeCache.h
     accessibility/AXCoreObject.h
+    accessibility/AXCrossProcessSearch.h
     accessibility/AXGeometryManager.h
     accessibility/AXID.h
     accessibility/AXListHelpers.h
@@ -826,6 +828,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     accessibility/AXObjectCache.h
     accessibility/AXObjectCacheInlines.h
     accessibility/AXObjectRareData.h
+    accessibility/AXRemoteFrame.h
     accessibility/AXSearchManager.h
     accessibility/AXStitchGroup.h
     accessibility/AXTextMarker.h
@@ -838,9 +841,12 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     accessibility/AccessibilityMockObject.h
     accessibility/AccessibilityNodeObject.h
     accessibility/AccessibilityObject.h
+    accessibility/AccessibilityObjectInlines.h
+    accessibility/AccessibilityRemoteToken.h
     accessibility/AccessibilityRenderObject.h
     accessibility/AccessibilityRole.h
     accessibility/AccessibilityScrollView.h
+    accessibility/AccessibilitySearchCriteriaIPC.h
     accessibility/ForcedAccessibilityValue.h
     accessibility/isolatedtree/AXIsolatedObject.h
     accessibility/isolatedtree/AXIsolatedTree.h

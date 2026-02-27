@@ -1474,6 +1474,11 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElement::uiElementForSearchPredica
     return nullptr;
 }
 
+JSValueRef AccessibilityUIElement::uiElementsForSearchPredicate(OpaqueJSContext const*, WTR::AccessibilityUIElement*, bool, OpaqueJSValue const*, OpaqueJSString*, bool, bool, unsigned)
+{
+    return nullptr;
+}
+
 JSRetainPtr<JSStringRef> AccessibilityUIElement::url()
 {
     return nullptr;

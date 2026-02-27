@@ -893,6 +893,21 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElementIOS::uiElementForSearchPred
     return nullptr;
 }
 
+JSValueRef AccessibilityUIElementIOS::uiElementsForSearchPredicate(JSContextRef context, AccessibilityUIElement* startElement, bool isDirectionNext, JSValueRef searchKey, JSStringRef searchText, bool visibleOnly, bool immediateDescendantsOnly, unsigned resultsLimit)
+{
+    NSDictionary *parameter = searchPredicateForSearchCriteria(context, startElement, nullptr, isDirectionNext, resultsLimit, searchKey, searchText, visibleOnly, immediateDescendantsOnly);
+    id searchResults = [m_element accessibilityFindMatchingObjects:parameter];
+    if (![searchResults isKindOfClass:[NSArray class]])
+        return nullptr;
+
+    Vector<RefPtr<AccessibilityUIElement>> elements;
+    for (id result in searchResults) {
+        if ([result isAccessibilityElement])
+            elements.append(AccessibilityUIElement::create(result));
+    }
+    return makeJSArray(context, elements);
+}
+
 JSRetainPtr<JSStringRef> AccessibilityUIElementIOS::selectTextWithCriteria(JSContextRef, JSStringRef ambiguityResolution, JSValueRef searchStrings, JSStringRef replacementString, JSStringRef activity)
 {
     return nullptr;

@@ -56,8 +56,12 @@
 #import "WebPreferencesKeys.h"
 #import "WebProcess.h"
 #import "WebRemoteObjectRegistry.h"
+#import <WebCore/AXCrossProcessSearch.h>
 #import <WebCore/AXObjectCache.h>
+#import <WebCore/AXRemoteFrame.h>
+#import <WebCore/AXSearchManager.h>
 #import <WebCore/AccessibilityObject.h>
+#import <WebCore/AccessibilityScrollView.h>
 #import <WebCore/AnimationTimelinesController.h>
 #import <WebCore/Chrome.h>
 #import <WebCore/ChromeClient.h>
@@ -135,11 +139,13 @@
 #import <WebCore/UTIRegistry.h>
 #import <WebCore/UTIUtilities.h>
 #import <WebCore/UserTypingGestureIndicator.h>
+#import <WebCore/WebAccessibilityObjectWrapperMac.h>
 #import <WebCore/markup.h>
 #import <pal/spi/cocoa/LaunchServicesSPI.h>
 #import <pal/spi/cocoa/NSAccessibilitySPI.h>
 #import <pal/spi/cocoa/QuartzCoreSPI.h>
 #import <wtf/CoroutineUtilities.h>
+#import <wtf/MonotonicTime.h>
 #import <wtf/TZoneMallocInlines.h>
 #import <wtf/cf/VectorCF.h>
 #import <wtf/cocoa/SpanCocoa.h>
@@ -604,6 +610,100 @@ void WebPage::resolveAccessibilityHitTestForTesting(WebCore::FrameIdentifier fra
     UNUSED_PARAM(point);
     completionHandler("NULL"_s);
 }
+
+#if PLATFORM(MAC)
+// Creates an AccessibilityRemoteToken from an accessibility wrapper.
+// Returns std::nullopt if the wrapper is nil or token creation fails.
+static std::optional<WebCore::AccessibilityRemoteToken> tokenFromWrapper(id wrapper)
+{
+    if (!wrapper)
+        return std::nullopt;
+    if (RetainPtr tokenData = [NSAccessibilityRemoteUIElement remoteTokenForLocalUIElement:wrapper])
+        return WebCore::AccessibilityRemoteToken { makeVector(tokenData.get()) };
+    return std::nullopt;
+}
+
+static Vector<WebCore::AccessibilityRemoteToken> convertSearchResultsToRemoteTokens(WebCore::AccessibilitySearchResults&& searchResults)
+{
+    Vector<WebCore::AccessibilityRemoteToken> results;
+    for (auto& result : searchResults) {
+        if (RefPtr object = result.objectIfLocalResult()) {
+            if (auto token = tokenFromWrapper(protect(object->wrapper())))
+                results.append(WTF::move(*token));
+        } else if (result.isRemote())
+            results.append(*result.remoteToken());
+    }
+    return results;
+}
+
+void WebPage::performAccessibilitySearchInRemoteFrame(WebCore::FrameIdentifier frameID, WebCore::AccessibilitySearchCriteriaIPC criteria, CompletionHandler<void(Vector<WebCore::AccessibilityRemoteToken>&&)>&& completionHandler)
+{
+    AX_ASSERT(isMainRunLoop());
+
+    RefPtr webFrame = WebProcess::singleton().webFrame(frameID);
+    RefPtr coreFrame = webFrame ? webFrame->coreLocalFrame() : nullptr;
+    RefPtr document = coreFrame ? coreFrame->document() : nullptr;
+    CheckedPtr cache = document ? document->axObjectCache() : nullptr;
+    // Get the web area for this frame as the anchor object.
+    RefPtr webArea = cache ? cache->rootObjectForFrame(*coreFrame) : nullptr;
+    if (!webArea) {
+        completionHandler({ });
+        return;
+    }
+
+    // Convert IPC criteria to local criteria with this frame's web area as anchor.
+    auto localCriteria = criteria.toSearchCriteria(webArea.get());
+
+    // Since this frame is being searched by a parent frame (via performAccessibilitySearchInRemoteFrame),
+    // only search this frame and its nested child frames - do NOT coordinate with the parent.
+    // The parent already handles its own elements and will merge our results appropriately.
+    auto searchResults = WebCore::performSearchWithCrossProcessCoordination(*webArea, WTF::move(localCriteria));
+
+    completionHandler(convertSearchResultsToRemoteTokens(WTF::move(searchResults)));
+}
+
+void WebPage::continueAccessibilitySearchInParentFrame(WebCore::FrameIdentifier childFrameID, WebCore::AccessibilitySearchCriteriaIPC criteria, CompletionHandler<void(Vector<WebCore::AccessibilityRemoteToken>&&)>&& completionHandler)
+{
+    // Get the main frame's document and AXObjectCache for this (parent) process.
+    RefPtr coreFrame = m_mainFrame->coreLocalFrame();
+    RefPtr document = coreFrame ? coreFrame->document() : nullptr;
+    CheckedPtr cache = document ? document->axObjectCache() : nullptr;
+    if (!cache) {
+        completionHandler({ });
+        return;
+    }
+
+    // Find the AXRemoteFrame via the frame tree and AccessibilityScrollView.
+    RefPtr remoteFrame = dynamicDowncast<WebCore::RemoteFrame>(coreFrame->tree().descendantByFrameID(childFrameID));
+    RefPtr remoteFrameView = remoteFrame ? remoteFrame->view() : nullptr;
+    RefPtr scrollView = dynamicDowncast<WebCore::AccessibilityScrollView>(cache->get(remoteFrameView.get()));
+    RefPtr childRemoteFrame = scrollView ? scrollView->remoteFrame() : nullptr;
+
+    if (!childRemoteFrame) {
+        completionHandler({ });
+        return;
+    }
+
+    unsigned originalLimit = criteria.resultsLimit;
+    // Get the web area as the anchor and use the child remote frame as the start object.
+    RefPtr webArea = cache->rootObjectForFrame(*coreFrame);
+    if (!webArea) {
+        completionHandler({ });
+        return;
+    }
+
+    // Create local criteria with webArea as anchor and AXRemoteFrame as start object.
+    auto localCriteria = criteria.toSearchCriteria(webArea.get());
+    localCriteria.startObject = childRemoteFrame.get();
+
+    auto stream = WebCore::AXSearchManager().findMatchingObjectsAsStream(WTF::move(localCriteria));
+    // Perform cross-process search coordination if there are nested remote frames in this process.
+    // Pass childFrameID as the excluded frame to prevent re-searching the frame that requested continuation.
+    auto searchResults = WebCore::performCrossProcessSearch(WTF::move(stream), criteria, webArea->treeID(), originalLimit, childFrameID);
+
+    completionHandler(convertSearchResultsToRemoteTokens(WTF::move(searchResults)));
+}
+#endif // PLATFORM(MAC)
 
 #if PLATFORM(MAC)
 void WebPage::getAccessibilityWebProcessDebugInfo(CompletionHandler<void(WebCore::AXDebugInfo)>&& completionHandler)

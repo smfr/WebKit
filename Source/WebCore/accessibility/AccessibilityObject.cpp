@@ -38,7 +38,6 @@
 #include "AXObjectCacheInlines.h"
 #include "AXObjectRareData.h"
 #include "AXRemoteFrame.h"
-#include "AXSearchManager.h"
 #include "AXTextMarker.h"
 #include "AXUtilities.h"
 #include "AccessibilityMockObject.h"
@@ -744,13 +743,12 @@ void AccessibilityObject::resetChildrenIndexInParent() const
     }
 }
 
-AXCoreObject::AccessibilityChildrenVector AccessibilityObject::findMatchingObjects(AccessibilitySearchCriteria&& criteria)
+AXCoreObject::AccessibilityChildrenVector AccessibilityObject::findMatchingObjectsWithin(AccessibilitySearchCriteria&& criteria)
 {
     if (CheckedPtr cache = axObjectCache())
         cache->startCachingComputedObjectAttributesUntilTreeMutates();
 
-    criteria.anchorObject = this;
-    return AXSearchManager().findMatchingObjects(WTF::move(criteria));
+    return AXCoreObject::findMatchingObjectsWithin(WTF::move(criteria));
 }
 
 // Returns the range that is fewer positions away from the reference range.

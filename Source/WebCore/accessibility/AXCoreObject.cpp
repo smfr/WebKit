@@ -31,6 +31,7 @@
 
 #include "AXLoggerBase.h"
 #include "AXObjectCache.h"
+#include "AXSearchManager.h"
 #include "AXTreeStoreInlines.h"
 #include "AXUtilities.h"
 #include "DocumentView.h"
@@ -2001,7 +2002,8 @@ std::partial_ordering AXCoreObject::partialOrder(const AXCoreObject& other)
         }
     }
 
-    AX_ASSERT(failsafeCounter < maxIterations);
+    // Reproducible with ITM + ENABLE_ACCESSIBILITY_LOCAL_FRAME in accessibility/mac/ordered-textmarker-crash.html.
+    AX_BROKEN_ASSERT(failsafeCounter < maxIterations);
     // If we pass the above ASSERT but hit this one, it means we didn't loop infinitely,
     // but also did not find a shared ancestor between the two objects, which shouldn't ever happen.
     AX_ASSERT_NOT_REACHED();
@@ -2043,6 +2045,21 @@ String LineDecorationStyle::debugDescription() const
 String AXCoreObject::infoStringForTesting()
 {
     return makeString("Role: "_s, rolePlatformString(), ", Value: "_s, stringValue());
+}
+
+AXCoreObject::AccessibilityChildrenVector AXCoreObject::findMatchingObjectsWithin(AccessibilitySearchCriteria&& criteria)
+{
+    criteria.anchorObject = this;
+    auto stream = AXSearchManager().findMatchingObjectsAsStream(WTF::move(criteria));
+
+    // Extract local objects from the stream. Remote frame entries are ignored since
+    // callers of this function expect AccessibilityChildrenVector.
+    AccessibilityChildrenVector results;
+    for (const auto& entry : stream.entries()) {
+        if (RefPtr object = entry.objectIfLocalResult())
+            results.append(object.releaseNonNull());
+    }
+    return results;
 }
 
 namespace Accessibility {

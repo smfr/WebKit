@@ -1318,6 +1318,11 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElementAtspi::uiElementForSearchPr
     return nullptr;
 }
 
+JSValueRef AccessibilityUIElementAtspi::uiElementsForSearchPredicate(JSContextRef, AccessibilityUIElement*, bool, JSValueRef, JSStringRef, bool, bool, unsigned)
+{
+    return nullptr;
+}
+
 JSRetainPtr<JSStringRef> AccessibilityUIElementAtspi::selectTextWithCriteria(JSContextRef context, JSStringRef ambiguityResolution, JSValueRef searchStrings, JSStringRef replacementString, JSStringRef activity)
 {
     return nullptr;

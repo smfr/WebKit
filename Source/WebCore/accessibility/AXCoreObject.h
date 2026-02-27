@@ -32,6 +32,7 @@
 #include <WebCore/CharacterRange.h>
 #include <WebCore/Color.h>
 #include <WebCore/ColorConversion.h>
+#include <WebCore/FrameIdentifier.h>
 #include <WebCore/HTMLTextFormControlElement.h>
 #include <WebCore/InputType.h>
 #include <WebCore/LayoutRect.h>
@@ -144,7 +145,7 @@ enum class AccessibilityDetachmentType { CacheDestroyed, ElementDestroyed, Eleme
 enum class AccessibilityConversionSpace { Screen, Page };
 
 // FIXME: This should be replaced by AXDirection (or vice versa).
-enum class AccessibilitySearchDirection {
+enum class AccessibilitySearchDirection : uint8_t {
     Next = 1,
     Previous,
 };
@@ -634,7 +635,8 @@ public:
     bool isFrame() const;
 #if PLATFORM(COCOA)
     virtual RetainPtr<id> remoteFramePlatformElement() const = 0;
-    virtual pid_t remoteFrameProcessIdentifier() const = 0;
+    virtual pid_t remoteFramePID() const = 0;
+    virtual std::optional<FrameIdentifier> remoteFrameID() const = 0;
 #endif
     virtual bool hasRemoteFrameChild() const = 0;
 
@@ -856,7 +858,8 @@ public:
     AXCoreObject* parentObjectIncludingCrossFrame() const;
     AXCoreObject* parentObjectUnignoredIncludingCrossFrame() const;
 
-    virtual AccessibilityChildrenVector findMatchingObjects(AccessibilitySearchCriteria&&) = 0;
+    // Finds objects within |this| object matching the given search criteria.
+    virtual AccessibilityChildrenVector findMatchingObjectsWithin(AccessibilitySearchCriteria&&);
     virtual bool isDescendantOfRole(AccessibilityRole) const = 0;
     AXCoreObject* selfOrFirstTextDescendant();
 

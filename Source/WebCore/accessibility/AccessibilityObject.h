@@ -359,7 +359,7 @@ public:
     AccessibilityObject* displayContentsParent() const;
     AccessibilityObject* parentObjectUnignored() const final { return downcast<AccessibilityObject>(AXCoreObject::parentObjectUnignored()); }
     static AccessibilityObject* firstAccessibleObjectFromNode(const Node*);
-    AccessibilityChildrenVector findMatchingObjects(AccessibilitySearchCriteria&&) final;
+    AccessibilityChildrenVector findMatchingObjectsWithin(AccessibilitySearchCriteria&&) final;
     virtual bool isDescendantOfBarrenParent() const { return false; }
 
 #if ENABLE_ACCESSIBILITY_LOCAL_FRAME
@@ -514,7 +514,8 @@ public:
     RetainPtr<RemoteAXObjectRef> remoteParent() const final;
     FloatRect convertRectToPlatformSpace(const FloatRect&, AccessibilityConversionSpace) const final;
     RetainPtr<id> remoteFramePlatformElement() const override { return nil; }
-    pid_t remoteFrameProcessIdentifier() const override { return 0; }
+    pid_t remoteFramePID() const override { return 0; }
+    std::optional<FrameIdentifier> remoteFrameID() const override { return std::nullopt; }
 #endif
     bool hasRemoteFrameChild() const override { return false; }
 

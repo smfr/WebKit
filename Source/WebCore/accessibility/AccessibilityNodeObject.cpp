@@ -90,6 +90,7 @@
 #include "HTMLTextFormControlElement.h"
 #include "HTMLVideoElement.h"
 #include "HitTestSource.h"
+#include "InlineIteratorBoxInlines.h"
 #include "InlineIteratorLineBoxInlines.h"
 #include "KeyboardEvent.h"
 #include "LayoutIntegrationLineLayout.h"

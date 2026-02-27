@@ -151,6 +151,8 @@ struct GraphicsContextGLAttributes;
 #endif
 
 struct AppHighlight;
+struct AccessibilityRemoteToken;
+struct AccessibilitySearchCriteriaIPC;
 struct ApplePayAMSUIRequest;
 struct AriaNotifyData;
 struct CharacterRange;
@@ -630,6 +632,12 @@ public:
     virtual void isAnyAnimationAllowedToPlayDidChange(bool /* anyAnimationCanPlay */) { };
 #endif
     virtual void resolveAccessibilityHitTestForTesting(WebCore::FrameIdentifier, const IntPoint&, CompletionHandler<void(String)>&& callback) { callback(""_s); };
+#if PLATFORM(MAC)
+    WEBCORE_EXPORT virtual void performAccessibilitySearchInRemoteFrame(FrameIdentifier, const AccessibilitySearchCriteriaIPC&, CompletionHandler<void(Vector<AccessibilityRemoteToken>&&)>&&);
+    // Called by a child frame to continue a search in its parent frame.
+    // The parent searches from the child frame's position in its tree.
+    WEBCORE_EXPORT virtual void continueAccessibilitySearchFromChildFrame(FrameIdentifier childFrameID, const AccessibilitySearchCriteriaIPC&, CompletionHandler<void(Vector<AccessibilityRemoteToken>&&)>&&);
+#endif
 
     virtual void isPlayingMediaDidChange(MediaProducerMediaStateFlags) { }
     virtual void handleAutoplayEvent(AutoplayEvent, OptionSet<AutoplayEventFlags>) { }

@@ -9345,6 +9345,68 @@ header: <WebCore/AXObjectCache.h>
 #endif
 }
 
+header: <WebCore/AXCoreObject.h>
+enum class WebCore::AccessibilitySearchDirection : uint8_t {
+    Next,
+    Previous,
+};
+
+header: <WebCore/AXSearchManager.h>
+enum class WebCore::AccessibilitySearchKey : uint8_t {
+    AnyType,
+    Article,
+    BlockquoteSameLevel,
+    Blockquote,
+    BoldFont,
+    Button,
+    Checkbox,
+    Control,
+    DifferentType,
+    FontChange,
+    FontColorChange,
+    Frame,
+    Graphic,
+    HeadingLevel1,
+    HeadingLevel2,
+    HeadingLevel3,
+    HeadingLevel4,
+    HeadingLevel5,
+    HeadingLevel6,
+    HeadingSameLevel,
+    Heading,
+    Highlighted,
+    ItalicFont,
+    KeyboardFocusable,
+    Landmark,
+    Link,
+    List,
+    LiveRegion,
+    MisspelledWord,
+    Outline,
+    PlainText,
+    RadioGroup,
+    SameType,
+    StaticText,
+    StyleChange,
+    TableSameLevel,
+    Table,
+    TextField,
+    Underline,
+    UnvisitedLink,
+    VisitedLink,
+};
+
+header: <WebCore/AXSearchManager.h>
+[CustomHeader] struct WebCore::AccessibilitySearchCriteriaIPC {
+    WebCore::AccessibilitySearchDirection searchDirection;
+    Vector<WebCore::AccessibilitySearchKey> searchKeys;
+    String searchText;
+    unsigned resultsLimit;
+    bool visibleOnly;
+    bool immediateDescendantsOnly;
+    std::optional<MonotonicTime> deadline;
+};
+
 header: <WebCore/ScriptTrackingPrivacyCategory.h>
 [OptionSet] enum class WebCore::ScriptTrackingPrivacyFlag : uint16_t {
     Audio,

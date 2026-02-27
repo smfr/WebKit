@@ -430,7 +430,7 @@ RetainPtr<id> AccessibilityUIElementMac::attributeValue(NSString *attributeName)
 
     BEGIN_AX_OBJC_EXCEPTIONS
     s_controller->executeOnAXThreadAndWait([this, &attributeName, &value] {
-        value = WTR::attributeValue(m_element.getAutoreleased(), attributeName);
+        value = WTR::attributeValue(m_element.get(), attributeName);
     });
     END_AX_OBJC_EXCEPTIONS
 
@@ -824,7 +824,7 @@ JSRetainPtr<JSStringRef> AccessibilityUIElementMac::attributesOfChildren()
 
 JSRetainPtr<JSStringRef> AccessibilityUIElementMac::allAttributes()
 {
-    auto attributes = supportedAttributes(m_element.getAutoreleased());
+    auto attributes = supportedAttributes(m_element.get());
 
     NSMutableString *values = [NSMutableString string];
     for (NSString *attribute in attributes.get()) {
@@ -950,12 +950,12 @@ void AccessibilityUIElementMac::attributeValueAsync(JSContextRef context, JSStri
 
 void AccessibilityUIElementMac::setBoolAttributeValue(JSStringRef attribute, bool value)
 {
-    setAttributeValue(m_element.getAutoreleased(), [NSString stringWithJSStringRef:attribute], @(value), /* synchronous */ true);
+    setAttributeValue(m_element.get(), [NSString stringWithJSStringRef:attribute], @(value), /* synchronous */ true);
 }
 
 void AccessibilityUIElementMac::setValue(JSStringRef value)
 {
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilityValueAttribute, [NSString stringWithJSStringRef:value]);
+    setAttributeValue(m_element.get(), NSAccessibilityValueAttribute, [NSString stringWithJSStringRef:value]);
 }
 
 bool AccessibilityUIElementMac::isAttributeSettable(JSStringRef attribute)
@@ -980,7 +980,7 @@ bool AccessibilityUIElementMac::isAttributeSupported(JSStringRef attribute)
 {
     BEGIN_AX_OBJC_EXCEPTIONS
     NSString *attributeName = [NSString stringWithJSStringRef:attribute];
-    id element = m_element.getAutoreleased();
+    id element = m_element.get();
     return [supportedAttributes(element) containsObject:attributeName] || [supportedParameterizedAttributes(element) containsObject:attributeName];
     END_AX_OBJC_EXCEPTIONS
 
@@ -1390,7 +1390,7 @@ bool AccessibilityUIElementMac::isIndeterminate() const
 
 bool AccessibilityUIElementMac::isValid() const
 {
-    return m_element.getAutoreleased();
+    return m_element.get();
 }
 
 bool AccessibilityUIElementMac::isExpanded() const
@@ -1630,6 +1630,28 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElementMac::uiElementForSearchPred
         return AccessibilityUIElementMac::create([result objectForKey:@"AXSearchResultElement"]);
     }
     return AccessibilityUIElementMac::create(result);
+    END_AX_OBJC_EXCEPTIONS
+
+    return nullptr;
+}
+
+JSValueRef AccessibilityUIElementMac::uiElementsForSearchPredicate(JSContextRef context, AccessibilityUIElement* startElement, bool isDirectionNext, JSValueRef searchKey, JSStringRef searchText, bool visibleOnly, bool immediateDescendantsOnly, unsigned resultsLimit)
+{
+    BEGIN_AX_OBJC_EXCEPTIONS
+    NSDictionary *parameter = searchPredicateForSearchCriteria(context, startElement, nullptr, isDirectionNext, resultsLimit, searchKey, searchText, visibleOnly, immediateDescendantsOnly);
+    auto searchResults = attributeValueForParameter(@"AXUIElementsForSearchPredicate", parameter);
+    if (![searchResults isKindOfClass:[NSArray class]])
+        return nullptr;
+
+    Vector<RefPtr<AccessibilityUIElement>> elements;
+    for (id result in searchResults.get()) {
+        if ([result isKindOfClass:NSDictionary.class]) {
+            RELEASE_ASSERT([result objectForKey:@"AXSearchResultElement"]);
+            elements.append(AccessibilityUIElementMac::create([result objectForKey:@"AXSearchResultElement"]));
+        } else
+            elements.append(AccessibilityUIElementMac::create(result));
+    }
+    return makeJSArray(context, elements);
     END_AX_OBJC_EXCEPTIONS
 
     return nullptr;
@@ -1905,7 +1927,7 @@ bool AccessibilityUIElementMac::setSelectedTextRange(unsigned location, unsigned
 {
     NSRange textRange = NSMakeRange(location, length);
     NSValue *textRangeValue = [NSValue valueWithRange:textRange];
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedTextRangeAttribute, textRangeValue);
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedTextRangeAttribute, textRangeValue);
 
     return true;
 }
@@ -1927,7 +1949,7 @@ bool AccessibilityUIElementMac::dismiss()
 
 bool AccessibilityUIElementMac::invokeCustomActionAtIndex(unsigned index)
 {
-    NSArray *customActions = [m_element.getAutoreleased() accessibilityCustomActions];
+    NSArray *customActions = [m_element.get() accessibilityCustomActions];
     if (index >= customActions.count)
         return false;
 
@@ -1940,7 +1962,7 @@ bool AccessibilityUIElementMac::setSelectedTextMarkerRange(AccessibilityTextMark
     if (!markerRange)
         return false;
 
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedTextMarkerRangeAttribute, markerRange->platformTextMarkerRange());
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedTextMarkerRangeAttribute, markerRange->platformTextMarkerRange());
 
     return true;
 }
@@ -1983,7 +2005,7 @@ void AccessibilityUIElementMac::syncPress()
 void AccessibilityUIElementMac::setSelectedChild(AccessibilityUIElement* element) const
 {
     NSArray* array = element ? @[static_cast<AccessibilityUIElementMac*>(element)->platformUIElement()] : @[];
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedChildrenAttribute, array);
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedChildrenAttribute, array);
 }
 
 void AccessibilityUIElementMac::setSelectedChildAtIndex(unsigned index) const
@@ -1997,7 +2019,7 @@ void AccessibilityUIElementMac::setSelectedChildAtIndex(unsigned index) const
     if (selectedChildren)
         array = [selectedChildren arrayByAddingObjectsFromArray:array];
 
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedChildrenAttribute, array, /* synchronous */ true);
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedChildrenAttribute, array, /* synchronous */ true);
 }
 
 void AccessibilityUIElementMac::removeSelectionAtIndex(unsigned index) const
@@ -2013,7 +2035,7 @@ void AccessibilityUIElementMac::removeSelectionAtIndex(unsigned index) const
     NSMutableArray *array = [NSMutableArray arrayWithArray:selectedChildren.get()];
     [array removeObject:static_cast<AccessibilityUIElementMac*>(element.get())->platformUIElement()];
 
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedChildrenAttribute, array, /* synchronous */ true);
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedChildrenAttribute, array, /* synchronous */ true);
 }
 
 void AccessibilityUIElementMac::clearSelectedChildren() const
@@ -2211,7 +2233,7 @@ bool AccessibilityUIElementMac::isInTable() const
 
 void AccessibilityUIElementMac::takeFocus()
 {
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilityFocusedAttribute, @YES);
+    setAttributeValue(m_element.get(), NSAccessibilityFocusedAttribute, @YES);
 }
 
 void AccessibilityUIElementMac::takeSelection()
@@ -2497,7 +2519,7 @@ void AccessibilityUIElementMac::resetSelectedTextMarkerRange()
     if (!textMarkerRange)
         return;
 
-    setAttributeValue(m_element.getAutoreleased(), NSAccessibilitySelectedTextMarkerRangeAttribute, textMarkerRange.get(), /* synchronous */ true);
+    setAttributeValue(m_element.get(), NSAccessibilitySelectedTextMarkerRangeAttribute, textMarkerRange.get(), /* synchronous */ true);
 }
 
 RefPtr<AccessibilityTextMarkerRange> AccessibilityUIElementMac::textInputMarkedTextMarkerRange() const

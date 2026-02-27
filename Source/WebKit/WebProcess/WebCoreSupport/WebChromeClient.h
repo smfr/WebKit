@@ -406,6 +406,10 @@ private:
     void isAnyAnimationAllowedToPlayDidChange(bool /* anyAnimationCanPlay */) final;
 #endif
     void resolveAccessibilityHitTestForTesting(WebCore::FrameIdentifier, const WebCore::IntPoint&, CompletionHandler<void(String)>&&) final;
+#if PLATFORM(MAC)
+    void performAccessibilitySearchInRemoteFrame(WebCore::FrameIdentifier, const WebCore::AccessibilitySearchCriteriaIPC&, CompletionHandler<void(Vector<WebCore::AccessibilityRemoteToken>&&)>&&) final;
+    void continueAccessibilitySearchFromChildFrame(WebCore::FrameIdentifier childFrameID, const WebCore::AccessibilitySearchCriteriaIPC&, CompletionHandler<void(Vector<WebCore::AccessibilityRemoteToken>&&)>&&) final;
+#endif
     void isPlayingMediaDidChange(WebCore::MediaProducerMediaStateFlags) final;
     void handleAutoplayEvent(WebCore::AutoplayEvent, OptionSet<WebCore::AutoplayEventFlags>) final;
 

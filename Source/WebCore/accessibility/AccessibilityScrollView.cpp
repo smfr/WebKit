@@ -109,7 +109,7 @@ void AccessibilityScrollView::detachRemoteParts(AccessibilityDetachmentType deta
     if (remoteFrameView && m_remoteFrame && (detachmentType == AccessibilityDetachmentType::ElementDestroyed || detachmentType == AccessibilityDetachmentType::CacheDestroyed)) {
 #if PLATFORM(MAC)
         Ref remoteFrame = remoteFrameView->frame();
-        remoteFrame->unbindRemoteAccessibilityFrames(m_remoteFrame->processIdentifier());
+        remoteFrame->unbindRemoteAccessibilityFrames(protect(m_remoteFrame)->remoteFramePID());
 #endif
         m_remoteFrame = nullptr;
     }

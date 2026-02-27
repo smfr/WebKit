@@ -418,7 +418,6 @@ private:
     // Parameterized attribute retrieval.
     Vector<SimpleRange> findTextRanges(const AccessibilitySearchTextCriteria&) const final;
     Vector<String> performTextOperation(const AccessibilityTextOperation&) final;
-    AccessibilityChildrenVector findMatchingObjects(AccessibilitySearchCriteria&&) final;
 
 #if PLATFORM(COCOA)
     bool preventKeyboardDOMEventDispatch() const final { return boolAttributeValue(AXProperty::PreventKeyboardDOMEventDispatch); }
@@ -587,7 +586,8 @@ private:
 #if PLATFORM(COCOA)
     bool hasApplePDFAnnotationAttribute() const final { return boolAttributeValue(AXProperty::HasApplePDFAnnotationAttribute); }
     RetainPtr<id> remoteFramePlatformElement() const final;
-    pid_t remoteFrameProcessIdentifier() const final { return propertyValue<pid_t>(AXProperty::RemoteFrameProcessIdentifier); }
+    pid_t remoteFramePID() const final { return propertyValue<pid_t>(AXProperty::RemoteFrameProcessIdentifier); }
+    std::optional<FrameIdentifier> remoteFrameID() const final { return optionalAttributeValue<FrameIdentifier>(AXProperty::RemoteFrameID); }
 #endif
     bool hasRemoteFrameChild() const final { return boolAttributeValue(AXProperty::HasRemoteFrameChild); }
 

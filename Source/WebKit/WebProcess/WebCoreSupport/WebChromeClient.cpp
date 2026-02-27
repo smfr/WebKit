@@ -76,6 +76,7 @@
 #include "WebSearchPopupMenu.h"
 #include "WebWorkerClient.h"
 #include <WebCore/AXObjectCache.h>
+#include <WebCore/AXSearchManager.h>
 #include <WebCore/AppHighlight.h>
 #include <WebCore/BarcodeDetectorInterface.h>
 #include <WebCore/ColorChooser.h>
@@ -1809,6 +1810,24 @@ void WebChromeClient::resolveAccessibilityHitTestForTesting(FrameIdentifier fram
     else
         callback({ });
 }
+
+#if PLATFORM(MAC)
+void WebChromeClient::performAccessibilitySearchInRemoteFrame(FrameIdentifier frameID, const AccessibilitySearchCriteriaIPC& criteria, CompletionHandler<void(Vector<AccessibilityRemoteToken>&&)>&& callback)
+{
+    if (RefPtr page = m_page.get())
+        page->sendWithAsyncReply(Messages::WebPageProxy::PerformAccessibilitySearchInRemoteFrame(frameID, criteria), WTF::move(callback));
+    else
+        callback({ });
+}
+
+void WebChromeClient::continueAccessibilitySearchFromChildFrame(FrameIdentifier childFrameID, const AccessibilitySearchCriteriaIPC& criteria, CompletionHandler<void(Vector<AccessibilityRemoteToken>&&)>&& callback)
+{
+    if (RefPtr page = m_page.get())
+        page->sendWithAsyncReply(Messages::WebPageProxy::ContinueAccessibilitySearchFromChildFrame(childFrameID, criteria), WTF::move(callback));
+    else
+        callback({ });
+}
+#endif
 
 void WebChromeClient::isPlayingMediaDidChange(MediaProducerMediaStateFlags state)
 {

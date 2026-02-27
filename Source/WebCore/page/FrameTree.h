@@ -77,7 +77,7 @@ public:
 
     Frame* NODELETE child(unsigned index) const;
     Frame* NODELETE childBySpecifiedName(const AtomString& name) const;
-    Frame* NODELETE descendantByFrameID(FrameIdentifier) const;
+    WEBCORE_EXPORT Frame* NODELETE descendantByFrameID(FrameIdentifier) const;
     WEBCORE_EXPORT RefPtr<Frame> findByUniqueName(const AtomString&, Frame& activeFrame) const;
     WEBCORE_EXPORT RefPtr<Frame> findBySpecifiedName(const AtomString&, Frame& activeFrame) const;
     WEBCORE_EXPORT unsigned NODELETE childCount() const;

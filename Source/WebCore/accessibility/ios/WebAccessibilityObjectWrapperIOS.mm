@@ -2287,7 +2287,7 @@ static RenderObject* rendererForView(WAKView* view)
         return nil;
 
     auto criteria = accessibilitySearchCriteriaForSearchPredicate(*backingObject, parameters);
-    return makeNSArray(backingObject->findMatchingObjects(WTF::move(criteria)));
+    return makeNSArray(backingObject->findMatchingObjectsWithin(WTF::move(criteria)));
 }
 
 - (void)accessibilityModifySelection:(TextGranularity)granularity increase:(BOOL)increase

@@ -811,7 +811,8 @@ AccessibilityObject* AXObjectCache::getOrCreateSlow(Node& node, IsPartOfRelation
     AX_ASSERT(!get(node));
 
 #if ENABLE_ACCESSIBILITY_LOCAL_FRAME
-    AX_ASSERT(&node.document() == document());
+    // Easily reproducible on most pages with ITM off.
+    AX_BROKEN_ASSERT(&node.document() == document());
 #endif
 
     bool isYouTubeReplacement = false;

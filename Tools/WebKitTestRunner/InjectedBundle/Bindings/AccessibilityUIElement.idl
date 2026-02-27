@@ -227,6 +227,7 @@ interface AccessibilityUIElement {
     boolean attributedStringRangeIsMisspelled(unsigned long location, unsigned long length);
     unsigned long uiElementCountForSearchPredicate(AccessibilityUIElement startElement, boolean isDirectionNext, object searchKey, DOMString searchText, boolean visibleOnly, boolean immediateDescendantsOnly);
     AccessibilityUIElement uiElementForSearchPredicate(AccessibilityUIElement startElement, boolean isDirectionNext, object searchKey, DOMString searchText, boolean visibleOnly, boolean immediateDescendantsOnly);
+    object uiElementsForSearchPredicate(AccessibilityUIElement startElement, boolean isDirectionNext, object searchKey, DOMString searchText, boolean visibleOnly, boolean immediateDescendantsOnly, unsigned long resultsLimit);
     DOMString selectTextWithCriteria(DOMString ambiguityResolution, object searchStrings, DOMString replacementString, DOMString activity);
     object searchTextWithCriteria(object searchStrings, DOMString startFrom, DOMString direction);
     object performTextOperation(DOMString operationType, object markerRanges, object replacementStrings, boolean shouldSmartReplace);

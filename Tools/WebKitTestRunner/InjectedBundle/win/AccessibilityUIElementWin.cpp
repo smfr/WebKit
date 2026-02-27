@@ -599,6 +599,12 @@ RefPtr<AccessibilityUIElement> AccessibilityUIElementWin::uiElementForSearchPred
     return nullptr;
 }
 
+JSValueRef AccessibilityUIElementWin::uiElementsForSearchPredicate(JSContextRef, AccessibilityUIElement*, bool, JSValueRef, JSStringRef, bool, bool, unsigned)
+{
+    notImplemented();
+    return nullptr;
+}
+
 JSRetainPtr<JSStringRef> AccessibilityUIElementWin::selectTextWithCriteria(JSContextRef, JSStringRef, JSValueRef, JSStringRef, JSStringRef)
 {
     notImplemented();
