@@ -48,6 +48,8 @@
 #import "WebPageProxy.h"
 #import <WebCore/ImageBufferUtilitiesCG.h>
 #import <wtf/CallbackAggregator.h>
+#import <wtf/NeverDestroyed.h>
+#import <wtf/WorkQueue.h>
 
 namespace WebKit {
 
@@ -443,8 +445,13 @@ void WebExtensionContext::tabsCaptureVisibleTab(WebPageProxyIdentifier webPagePr
                 return;
             }
 
-            // FIXME: This is a static analysis false positive.
-            SUPPRESS_UNRETAINED_ARG completionHandler(URL { WebCore::dataURL(cgImage.get(), toMIMEType(imageFormat), imageQuality) });
+            static NeverDestroyed<Ref<WorkQueue>> queue { WorkQueue::create("org.WebKit.WKWebExtension.tabsCaptureVisibleTab"_s) };
+            queue.get()->dispatch([cgImage = WTF::move(cgImage), imageFormat, imageQuality, completionHandler = WTF::move(completionHandler)]() mutable {
+                URL result { WebCore::dataURL(cgImage.get(), toMIMEType(imageFormat), imageQuality) };
+                WorkQueue::mainSingleton().dispatch([completionHandler = WTF::move(completionHandler), result = crossThreadCopy(WTF::move(result))]() mutable {
+                    completionHandler(WTF::move(result));
+                });
+            });
         });
     });
 }
