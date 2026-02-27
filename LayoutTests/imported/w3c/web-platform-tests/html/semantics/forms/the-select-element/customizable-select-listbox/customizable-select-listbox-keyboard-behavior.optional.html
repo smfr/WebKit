@@ -7,6 +7,9 @@
 <script src="/resources/testdriver-vendor.js"></script>
 <script src="/resources/testdriver-actions.js"></script>
 
+<!-- This test is optional because the HTML spec does not require that specific
+  behaviors are mapped to specific keyboard buttons. -->
+
 <style>
 select {
   appearance: base-select;
@@ -207,7 +210,7 @@ promise_test(async () => {
   const selectSize = document.querySelector('select[size]');
   selectSize.focus();
   assert_not_equals(document.activeElement, selectSize, '<select size=4>');
-}, 'Base appearance in-page selects should not be focusable.');
+}, 'Base appearance listbox selects should not be focusable.');
 
 // TODO(crbug.com/357649033): Test tab key while focused on an option after deciding behavior.
 </script>
