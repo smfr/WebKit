@@ -1338,10 +1338,7 @@ void LocalFrame::frameWasDisconnectedFromOwner() const
     if (!m_doc)
         return;
 
-    if (RefPtr window = m_doc->window())
-        window->willDetachDocumentFromFrame();
-
-    protect(document())->detachFromFrame();
+    protect(document())->willBeRemovedFromFrame();
 }
 
 void LocalFrame::storageAccessExceptionReceivedForDomain(const RegistrableDomain& domain)
