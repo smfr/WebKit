@@ -1580,6 +1580,7 @@ String PDFPluginBase::annotationStyle() const
     ".annotation {"
     "    position: absolute;"
     "    pointer-events: auto;"
+    "    color-scheme: only light;"
     "}"
     ""
     "textarea.annotation { "
