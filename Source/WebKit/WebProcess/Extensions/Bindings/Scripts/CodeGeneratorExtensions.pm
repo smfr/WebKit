@@ -69,7 +69,7 @@ sub _classRefGetter
     my $implementationClassName = _implementationClassName($idlType);
     $implementationClassName =~ s/^WebExtensionAPI//;
 
-    return $$self{codeGenerator}->WK_lcfirst($implementationClassName) . $suffix;
+    return $$self{codeGenerator}->WK_lcfirst($implementationClassName) . $suffix . "Singleton";
 }
 
 sub _parseLicenseBlock
