@@ -497,7 +497,7 @@ void InlineFormattingContext::resetBoxGeometriesForDiscardedContent(const Inline
     auto& inlineItemList = inlineContentCache().inlineItems().content();
     for (auto index = discardedRange.startIndex(); index < discardedRange.endIndex(); ++index) {
         auto& inlineItem = inlineItemList[index];
-        auto hasBoxGeometry = inlineItem.isAtomicInlineBox() || inlineItem.isFloat() || inlineItem.isHardLineBreak() || inlineItem.isInlineBoxStart() || inlineItem.isOpaque();
+        auto hasBoxGeometry = inlineItem.isAtomicInlineBox() || inlineItem.isFloat() || inlineItem.isHardLineBreak() || inlineItem.isInlineBoxStart() || inlineItem.isOutOfFlow();
         if (!hasBoxGeometry)
             continue;
         geometryForBox(inlineItem.layoutBox()).reset();

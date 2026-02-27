@@ -300,7 +300,7 @@ InlineLayoutUnit InlineContentAligner::applyRubyAlign(RubyAlign rubyAlign, Line:
             return false;
         for (auto index = range.begin(); index < range.end(); ++index) {
             auto& run = runs[index];
-            if (!run.isInlineBox() && !run.isOpaque())
+            if (!run.isInlineBox() && !run.isOutOfFlow())
                 return true;
         }
         return false;

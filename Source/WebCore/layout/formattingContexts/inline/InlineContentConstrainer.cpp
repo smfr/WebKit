@@ -138,8 +138,8 @@ static bool containsPreservedTab(const InlineItem& inlineItem)
 
 static bool cannotConstrainInlineItem(const InlineItem& inlineItem)
 {
-    // Opaque items are ignored by inline layout and do not affect constraint calculations.
-    if (inlineItem.isOpaque())
+    // Out-of-flow items are ignored by inline layout and do not affect constraint calculations.
+    if (inlineItem.isOutOfFlow())
         return false;
     if (!inlineItem.isText() && !inlineItem.isSoftLineBreak() && !inlineItem.layoutBox().isInlineLevelBox())
         return true;
@@ -177,8 +177,8 @@ void InlineContentConstrainer::updateCachedWidths()
         auto isWordSeparator = false;
         if (auto* textItem = dynamicDowncast<InlineTextItem>(item))
             isWordSeparator = textItem->isWordSeparator();
-        // Opaque items are ignored by inline layout. Skip over these items.
-        if (!item.isOpaque()) {
+        // Out-of-flow items are ignored by inline layout. Skip over these items.
+        if (!item.isOutOfFlow()) {
             m_inlineItemWidths[i] = m_inlineFormattingContext.formattingUtils().inlineItemWidth(item, 0, false) +  (isWordSeparator ? item.style().usedWordSpacing() : 0.0f);
             m_inlineItemWidthsMax = std::max(m_inlineItemWidthsMax, m_inlineItemWidths[i]);
             m_firstLineStyleInlineItemWidths[i] = m_inlineFormattingContext.formattingUtils().inlineItemWidth(item, 0, true) + (isWordSeparator ? item.firstLineStyle().usedWordSpacing() : 0.0f);
@@ -701,8 +701,8 @@ std::optional<Vector<LayoutUnit>> InlineContentConstrainer::prettifyRange(Inline
 
 InlineLayoutUnit InlineContentConstrainer::inlineItemWidth(size_t inlineItemIndex, bool useFirstLineStyle) const
 {
-    // Opaque items are ignored by inline layout. Skip over this item by setting its width to 0.
-    if (m_inlineItemList[inlineItemIndex].isOpaque())
+    // Out-of-flow items are ignored by inline layout. Skip over this item by setting its width to 0.
+    if (m_inlineItemList[inlineItemIndex].isOutOfFlow())
         return { };
     if (m_hasValidInlineItemWidthCache)
         return useFirstLineStyle ? m_firstLineStyleInlineItemWidths[inlineItemIndex] : m_inlineItemWidths[inlineItemIndex];

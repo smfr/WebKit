@@ -63,7 +63,7 @@ struct LineContent {
 
 static bool isContentfulOrHasDecoration(const InlineItem& inlineItem, const InlineFormattingContext& formattingContext)
 {
-    if (inlineItem.isFloat() || inlineItem.isOpaque())
+    if (inlineItem.isFloat() || inlineItem.isOutOfFlow())
         return false;
     if (auto* inlineTextItem = dynamicDowncast<InlineTextItem>(inlineItem)) {
         auto wouldProduceEmptyRun = inlineTextItem->isFullyTrimmable() || inlineTextItem->isEmpty() || inlineTextItem->isWordSeparator() || inlineTextItem->isZeroWidthSpaceSeparator() || inlineTextItem->isQuirkNonBreakingSpace();
@@ -163,7 +163,7 @@ static bool hasTrailingSoftWrapOpportunity(size_t softWrapOpportunityIndex, size
         // the actual soft wrap position is after the inline box start (<span>) but in terms of line breaking continuity the inline box start (<span>) and the whitespace run belong together.
         RELEASE_ASSERT(layoutRangeEnd <= inlineItemList.size());
         for (auto index = softWrapOpportunityIndex; index < layoutRangeEnd; ++index) {
-            if (inlineItemList[index].isInlineBoxStart() || inlineItemList[index].isInlineBoxEnd() || inlineItemList[index].isOpaque())
+            if (inlineItemList[index].isInlineBoxStart() || inlineItemList[index].isInlineBoxEnd() || inlineItemList[index].isOutOfFlow())
                 continue;
             // FIXME: Check if [non-whitespace][inline-box][no-whitespace] content has rules about it.
             // For now let's say the soft wrap position belongs to the next set of runs when [non-whitespace][inline-box][whitespace], [non-whitespace][inline-box][box] etc.
@@ -176,9 +176,9 @@ static bool hasTrailingSoftWrapOpportunity(size_t softWrapOpportunityIndex, size
         // This is a special case when the inline box's first child is a float box.
         return false;
     }
-    if (trailingInlineItem.isOpaque()) {
+    if (trailingInlineItem.isOutOfFlow()) {
         for (auto index = softWrapOpportunityIndex; index--;) {
-            if (!inlineItemList[index].isOpaque())
+            if (!inlineItemList[index].isOutOfFlow())
                 return hasTrailingSoftWrapOpportunity(index + 1, layoutRangeEnd, inlineItemList);
         }
         ASSERT(inlineItemList[softWrapOpportunityIndex].isFloat() || inlineItemList[softWrapOpportunityIndex].isBlock());
@@ -255,7 +255,7 @@ struct LineCandidate {
 
 inline void LineCandidate::InlineContent::appendInlineItem(const InlineItem& inlineItem, const RenderStyle& style, InlineLayoutUnit logicalWidth, InlineLayoutUnit textSpacingAdjustment)
 {
-    if (inlineItem.isAtomicInlineBox() || inlineItem.isOpaque())
+    if (inlineItem.isAtomicInlineBox() || inlineItem.isOutOfFlow())
         return m_continuousContent.append(inlineItem, style, logicalWidth, textSpacingAdjustment);
 
     if (inlineItem.isInlineBoxStartOrEnd()) {
@@ -797,7 +797,7 @@ Vector<std::pair<size_t, size_t>> LineBuilder::collectShapeRanges(const LineCand
         case InlineItem::Type::SoftLineBreak:
         case InlineItem::Type::WordBreakOpportunity:
         case InlineItem::Type::Float:
-        case InlineItem::Type::Opaque:
+        case InlineItem::Type::OutOfFlow:
         case InlineItem::Type::Block:
             break;
         default:
@@ -1026,7 +1026,7 @@ void LineBuilder::candidateContentForLine(LineCandidate& lineCandidate, std::pai
                 textSpacingAdjustment = inlineBoxBoundaryTextSpacing->value;
         }
 
-        auto needsLayout = inlineItem.isFloat() || inlineItem.isAtomicInlineBox() || (inlineItem.isOpaque() && inlineItem.layoutBox().isRubyAnnotationBox());
+        auto needsLayout = inlineItem.isFloat() || inlineItem.isAtomicInlineBox() || (inlineItem.isOutOfFlow() && inlineItem.layoutBox().isRubyAnnotationBox());
         if (needsLayout) {
             // FIXME: Intrinsic width mode should call into the intrinsic width codepath. Currently we only get here when box has fixed width (meaning no need to run intrinsic width on the box).
             if (!isInIntrinsicWidthMode())
@@ -1084,12 +1084,12 @@ void LineBuilder::candidateContentForLine(LineCandidate& lineCandidate, std::pai
             // Since both <br> and <wbr> are explicit word break opportunities they have to be trailing items in this candidate run list unless they are embedded in inline boxes.
             // e.g. <span><wbr></span>
             for (auto i = index + 1; i < startEndIndex.second; ++i)
-                ASSERT(m_inlineItemList[i].isInlineBoxEnd() || m_inlineItemList[i].isOpaque());
+                ASSERT(m_inlineItemList[i].isInlineBoxEnd() || m_inlineItemList[i].isOutOfFlow());
 #endif
             lineCandidate.inlineContent.appendInlineItem(inlineItem, style, { });
             continue;
         }
-        if (inlineItem.isOpaque()) {
+        if (inlineItem.isOutOfFlow()) {
             lineCandidate.inlineContent.appendInlineItem(inlineItem, style, { });
             continue;
         }
@@ -1711,9 +1711,9 @@ void LineBuilder::commitCandidateContent(LineCandidate& lineCandidate, std::opti
             return;
         }
 
-        if (inlineItem.isOpaque()) {
+        if (inlineItem.isOutOfFlow()) {
             ASSERT(!run.contentWidth());
-            m_line.appendOpaqueBox(inlineItem, run.style);
+            m_line.appendOutOfFlow(inlineItem, run.style);
             return;
         }
 

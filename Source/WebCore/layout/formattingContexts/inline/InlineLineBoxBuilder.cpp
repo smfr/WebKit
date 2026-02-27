@@ -533,7 +533,7 @@ void LineBoxBuilder::constructInlineLevelBoxes(LineBox& lineBox)
             lineBox.addInlineLevelBox(InlineLevelBox::createGenericInlineLevelBox(layoutBox, style, logicalLeft));
             continue;
         }
-        ASSERT(run.isOpaque());
+        ASSERT(run.isOutOfFlow());
     }
 }
 

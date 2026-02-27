@@ -498,7 +498,7 @@ void InlineDisplayContentBuilder::processNonBidiContent(const LineLayoutResult& 
             continue;
         CheckedRef layoutBox = lineRun.layoutBox();
 
-        if (lineRun.isOpaque()) {
+        if (lineRun.isOutOfFlow()) {
             if (layoutBox->style().originalDisplay().isInlineType()) {
                 formattingContext().geometryForBox(layoutBox).setTopLeft({ lineBox.logicalRect().left() + lineBox.logicalRectForRootInlineBox().left() + lineRun.logicalLeft(), lineBox.logicalRect().top() });
                 continue;
@@ -835,7 +835,7 @@ void InlineDisplayContentBuilder::processBidiContent(const LineLayoutResult& lin
             auto parentDisplayBoxNodeIndex = ensureDisplayBoxForContainer(layoutBox->parent(), displayBoxTree, ancestorStack, boxes);
             hasInlineBox = hasInlineBox || (!lineRun.isBlock() && (parentDisplayBoxNodeIndex || lineRun.isInlineBoxStart() || lineRun.isLineSpanningInlineBoxStart()));
 
-            if (lineRun.isOpaque()) {
+            if (lineRun.isOutOfFlow()) {
                 if (layoutBox->style().originalDisplay().isInlineType()) {
                     // Note that out-of-flow handling (render tree integration) really only needs logical coords (not even "content in inline direction visual order").
                     formattingContext().geometryForBox(layoutBox).setTopLeft({ lineBox.logicalRect().left() + lineBox.logicalRectForRootInlineBox().left() + lineRun.logicalLeft(), lineBox.logicalRect().top() });

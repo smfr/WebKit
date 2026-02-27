@@ -179,7 +179,7 @@ const Box* Line::removeOverflowingOutOfFlowContent()
     auto lastTrailingOutOfFlowItemIndex = std::optional<size_t> { };
     for (size_t index = m_runs.size(); index--;) {
         auto& run = m_runs[index];
-        if (run.isOpaque() && run.layoutBox().isOutOfFlowPositioned()) {
+        if (run.isOutOfFlow() && run.layoutBox().isOutOfFlowPositioned()) {
             lastTrailingOutOfFlowItemIndex = index;
             continue;
         }
@@ -189,10 +189,10 @@ const Box* Line::removeOverflowingOutOfFlowContent()
     }
     if (!lastTrailingOutOfFlowItemIndex)
         return { };
-    CheckedPtr lastTrailingOpaqueBox = &m_runs[*lastTrailingOutOfFlowItemIndex].layoutBox();
+    CheckedPtr lastTrailingOutOfFlowBox = &m_runs[*lastTrailingOutOfFlowItemIndex].layoutBox();
     m_runs.removeAt(*lastTrailingOutOfFlowItemIndex, m_runs.size() - *lastTrailingOutOfFlowItemIndex);
     ASSERT(!m_runs.isEmpty());
-    return lastTrailingOpaqueBox.unsafeGet();
+    return lastTrailingOutOfFlowBox.unsafeGet();
 }
 
 void Line::handleTrailingHangingContent(std::optional<IntrinsicWidthMode> intrinsicWidthMode, InlineLayoutUnit horizontalAvailableSpaceForContent, bool isLastFormattedLine)
@@ -355,7 +355,7 @@ void Line::appendText(const InlineTextItem& inlineTextItem, const RenderStyle& s
             // provided both spaces are within the same inline formatting context—is collapsed to have zero advance width.
             if (run.isText())
                 return run.hasCollapsibleTrailingWhitespace();
-            ASSERT(run.isListMarker() || run.isLineSpanningInlineBoxStart() || run.isInlineBoxStart() || run.isInlineBoxEnd() || run.isWordBreakOpportunity() || run.isOpaque());
+            ASSERT(run.isListMarker() || run.isLineSpanningInlineBoxStart() || run.isInlineBoxStart() || run.isInlineBoxEnd() || run.isWordBreakOpportunity() || run.isOutOfFlow());
         }
         // Leading whitespace.
         return true;
@@ -593,7 +593,7 @@ void Line::appendWordBreakOpportunity(const InlineItem& inlineItem, const Render
     m_runs.append({ inlineItem, style, lastRunLogicalRight() });
 }
 
-void Line::appendOpaqueBox(const InlineItem& inlineItem, const RenderStyle& style)
+void Line::appendOutOfFlow(const InlineItem& inlineItem, const RenderStyle& style)
 {
     m_runs.append({ inlineItem, style, lastRunLogicalRight() });
 }
@@ -757,7 +757,7 @@ InlineLayoutUnit Line::TrimmableTrailingContent::remove()
     // not produce a run since in ::appendText() we see it as a fully trimmable run.
     for (auto index = *m_firstTrimmableRunIndex + 1; index < m_runs.size(); ++index) {
         auto& run = m_runs[index];
-        ASSERT(run.isWordBreakOpportunity() || run.isLineSpanningInlineBoxStart() || run.isInlineBoxStart() || run.isInlineBoxEnd() || run.isLineBreak() || run.isOpaque());
+        ASSERT(run.isWordBreakOpportunity() || run.isLineSpanningInlineBoxStart() || run.isInlineBoxStart() || run.isInlineBoxEnd() || run.isLineBreak() || run.isOutOfFlow());
         run.moveHorizontally(-trimmedWidth);
     }
     if (!trimmableRun.textContent().length) {
@@ -792,8 +792,8 @@ inline static Line::Run::Type toLineRunType(const InlineItem& inlineItem)
         return Line::Run::Type::InlineBoxStart;
     case InlineItem::Type::InlineBoxEnd:
         return Line::Run::Type::InlineBoxEnd;
-    case InlineItem::Type::Opaque:
-        return Line::Run::Type::Opaque;
+    case InlineItem::Type::OutOfFlow:
+        return Line::Run::Type::OutOfFlow;
     case InlineItem::Type::Block:
         return Line::Run::Type::Block;
     default:

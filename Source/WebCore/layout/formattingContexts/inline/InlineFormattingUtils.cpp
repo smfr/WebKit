@@ -321,7 +321,7 @@ InlineLayoutUnit InlineFormattingUtils::inlineItemWidth(const InlineItem& inline
     if (inlineItem.isInlineBoxEnd())
         return boxGeometry.marginEnd() + boxGeometry.borderEnd() + boxGeometry.paddingEnd();
 
-    if (inlineItem.isOpaque())
+    if (inlineItem.isOutOfFlow())
         return { };
 
     if (inlineItem.isBlock())
@@ -476,7 +476,7 @@ size_t InlineFormattingUtils::nextWrapOpportunity(size_t startIndex, const Inlin
             // Need to see what comes next to decide.
             continue;
         }
-        if (currentItem.isOpaque()) {
+        if (currentItem.isOutOfFlow()) {
             // This item is invisible to line breaking. Need to pretend it's not here.
             continue;
         }
@@ -528,7 +528,7 @@ size_t InlineFormattingUtils::nextWrapOpportunity(size_t startIndex, const Inlin
             // Soft wrap opportunity is at the first inline box that encloses the trailing content.
             for (auto candidateIndex = start + 1; candidateIndex < end; ++candidateIndex) {
                 auto& inlineItem = inlineItemList[candidateIndex];
-                ASSERT(inlineItem.isInlineBoxStartOrEnd() || inlineItem.isOpaque());
+                ASSERT(inlineItem.isInlineBoxStartOrEnd() || inlineItem.isOutOfFlow());
                 if (inlineItem.isInlineBoxStart())
                     inlineBoxStack.append({ &inlineItem.layoutBox(), candidateIndex });
                 else if (inlineItem.isInlineBoxEnd() && !inlineBoxStack.isEmpty())
@@ -614,7 +614,7 @@ std::optional<LineLayoutResult::InlineContentEnding> InlineFormattingUtils::inli
 
     for (auto& run : lineContent.runs | std::views::reverse) {
         ASSERT(!run.isBlock());
-        if (run.isOpaque())
+        if (run.isOutOfFlow())
             continue;
         if (run.isLineBreak())
             return { LineLayoutResult::InlineContentEnding::LineBreak };

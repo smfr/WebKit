@@ -355,7 +355,7 @@ void InlineItemsBuilder::collectInlineItems(InlineItemList& inlineItemList, Inli
             auto layoutBox = layoutQueue.takeLast();
             m_hasTextAndLineBreakOnlyContent &= (isInlineBoxWithInlineContent(layoutBox) || isTextOrLineBreak(layoutBox));
             if (layoutBox->isOutOfFlowPositioned())
-                inlineItemList.append({ layoutBox, InlineItem::Type::Opaque });
+                inlineItemList.append({ layoutBox, InlineItem::Type::OutOfFlow });
             else if (CheckedPtr inlineTextBox = dynamicDowncast<InlineTextBox>(layoutBox.get()))
                 handleTextContent(*inlineTextBox, inlineItemList, partialContentOffset(*inlineTextBox));
             else if (layoutBox->isAtomicInlineBox() || layoutBox->isLineBreakBox())
@@ -605,13 +605,13 @@ static inline void buildBidiParagraph(const RenderStyle& rootStyle, const Inline
         } else if (inlineItem.isFloat()) {
             // Floats are not part of the inline content which make them opaque to bidi.
             inlineItemOffsetList.append({ });
-        } else if (inlineItem.isOpaque()) {
+        } else if (inlineItem.isOutOfFlow()) {
             if (inlineItem.layoutBox().isOutOfFlowPositioned()) {
                 // Out of flow boxes participate in inflow layout as if they were static positioned.
                 inlineItemOffsetList.append({ paragraphContentBuilder.length() });
                 paragraphContentBuilder.append(objectReplacementCharacter);
             } else {
-                // truly opaque items are also opaque to bidi.
+                // Out-of-flow items are also opaque to bidi.
                 inlineItemOffsetList.append({ });
             }
         } else if (inlineItem.isBlock())
@@ -750,7 +750,7 @@ void InlineItemsBuilder::breakAndComputeBidiLevels(InlineItemList& inlineItemLis
             auto isContentfulInlineItem = [&] {
                 if (auto* inlineTextItem = dynamicDowncast<InlineTextItem>(inlineItem))
                     return !inlineTextItem->isWhitespace() || TextUtil::shouldPreserveSpacesAndTabs(inlineTextItem->layoutBox());
-                return inlineItem.isAtomicInlineBox() || inlineItem.isLineBreak() || (inlineItem.isOpaque() && inlineItem.layoutBox().isOutOfFlowPositioned());
+                return inlineItem.isAtomicInlineBox() || inlineItem.isLineBreak() || (inlineItem.isOutOfFlow() && inlineItem.layoutBox().isOutOfFlowPositioned());
             };
             if (isContentfulInlineItem()) {
                 // Mark the inline box stack with "content yes", when we come across a content type of inline item
@@ -1055,7 +1055,7 @@ void InlineItemsBuilder::handleInlineBoxEnd(const Box& inlineBox, InlineItemList
 void InlineItemsBuilder::handleInlineLevelBox(const Box& layoutBox, InlineItemList& inlineItemList)
 {
     if (layoutBox.isRubyAnnotationBox())
-        return inlineItemList.append({ layoutBox, InlineItem::Type::Opaque });
+        return inlineItemList.append({ layoutBox, InlineItem::Type::OutOfFlow });
 
     if (layoutBox.isAtomicInlineBox())
         return inlineItemList.append({ layoutBox, InlineItem::Type::AtomicInlineBox });

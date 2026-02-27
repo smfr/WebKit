@@ -141,7 +141,7 @@ InlineDisplay::Line InlineDisplayLineBuilder::build(const LineLayoutResult& line
         if (lineLayoutResult.hasContentfulInFlowContent())
             return true;
         for (auto& run : lineLayoutResult.runs) {
-            if (!run.isOpaque())
+            if (!run.isOutOfFlow())
                 return true;
         }
         return false;
