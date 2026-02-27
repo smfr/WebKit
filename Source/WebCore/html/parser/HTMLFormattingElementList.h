@@ -112,7 +112,7 @@ public:
 
     void appendMarker();
     // clearToLastMarker also clears the marker (per the HTML5 spec).
-    void NODELETE clearToLastMarker();
+    void clearToLastMarker();
 
     const Entry& at(size_t i) const { return m_entries[i]; }
     Entry& at(size_t i) { return m_entries[i]; }
