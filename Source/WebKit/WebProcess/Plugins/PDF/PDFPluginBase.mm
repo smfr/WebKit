@@ -1434,7 +1434,7 @@ bool PDFPluginBase::populateEditorStateIfNeeded(EditorState& state) const
     return true;
 }
 
-#if PLATFORM(IOS_FAMILY)
+#if ENABLE(TWO_PHASE_CLICKS)
 
 SelectionWasFlipped PDFPluginBase::moveSelectionEndpoint(FloatPoint, SelectionEndpoint)
 {
@@ -1446,12 +1446,16 @@ SelectionEndpoint PDFPluginBase::extendInitialSelection(FloatPoint pointInRootVi
     return SelectionEndpoint::Start;
 }
 
+#if PLATFORM(IOS_FAMILY)
+
 DocumentEditingContext PDFPluginBase::documentEditingContext(DocumentEditingContextRequest&&) const
 {
     return { };
 }
 
 #endif // PLATFORM(IOS_FAMILY)
+
+#endif // ENABLE(TWO_PHASE_CLICKS)
 
 #if !LOG_DISABLED
 

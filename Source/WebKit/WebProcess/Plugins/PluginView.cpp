@@ -1183,8 +1183,6 @@ void PluginView::handleSyntheticClick(PlatformMouseEvent&& event)
     m_plugin->handleSyntheticClick(WTF::move(event));
 }
 
-#if PLATFORM(IOS_FAMILY)
-
 void PluginView::setSelectionRange(FloatPoint pointInRootView, TextGranularity granularity)
 {
     m_plugin->setSelectionRange(pointInRootView, granularity);
@@ -1199,6 +1197,8 @@ SelectionEndpoint PluginView::extendInitialSelection(FloatPoint pointInRootView,
 {
     return m_plugin->extendInitialSelection(pointInRootView, granularity);
 }
+
+#if PLATFORM(IOS_FAMILY)
 
 DocumentEditingContext PluginView::documentEditingContext(DocumentEditingContextRequest&& request) const
 {

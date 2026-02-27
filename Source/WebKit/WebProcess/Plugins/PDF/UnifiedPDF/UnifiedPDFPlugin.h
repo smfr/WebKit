@@ -631,15 +631,16 @@ private:
     std::tuple<URL, WebCore::FloatRect, RefPtr<WebCore::TextIndicator>> linkDataAtPoint(WebCore::FloatPoint pointInRootView) final;
     std::optional<WebCore::FloatRect> highlightRectForTapAtPoint(WebCore::FloatPoint pointInRootView) const final;
     CursorContext cursorContext(WebCore::FloatPoint pointInRootView) const final;
-#if PLATFORM(IOS_FAMILY)
     void setSelectionRange(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity) final;
     SelectionWasFlipped moveSelectionEndpoint(WebCore::FloatPoint pointInRootView, SelectionEndpoint) final;
     SelectionEndpoint extendInitialSelection(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity) final;
-    bool platformPopulateEditorStateIfNeeded(EditorState&) const final;
+#if PLATFORM(IOS_FAMILY)
     DocumentEditingContext documentEditingContext(DocumentEditingContextRequest&&) const final;
-    void resetInitialSelection();
 #endif
+    void resetInitialSelection();
 #endif // ENABLE(TWO_PHASE_CLICKS)
+
+    bool platformPopulateEditorStateIfNeeded(EditorState&) const final;
 
 #if HAVE(PDFDOCUMENT_SELECTION_WITH_GRANULARITY)
     PDFSelection *selectionAtPoint(WebCore::FloatPoint pointInPage, PDFPage *, WebCore::TextGranularity) const;
@@ -717,10 +718,8 @@ private:
     RefPtr<PDFDataDetectorOverlayController> m_dataDetectorOverlayController;
 #endif
 
-#if PLATFORM(IOS_FAMILY)
     RetainPtr<PDFSelection> m_initialSelection;
     PageAndPoint m_initialSelectionStart;
-#endif
 
     RefPtr<WebCore::ShadowRoot> m_shadowRoot;
 

@@ -2645,13 +2645,12 @@ void WebPage::setSelectionRange(WebCore::IntPoint point, WebCore::TextGranularit
     if (!frame)
         return;
 
-#if ENABLE(PDF_PLUGIN) && PLATFORM(IOS_FAMILY)
-    // FIXME: Support text selection in embedded PDFs.
+#if ENABLE(PDF_PLUGIN) && ENABLE(TWO_PHASE_CLICKS)
     if (RefPtr pluginView = focusedPluginViewForFrame(*frame)) {
         pluginView->setSelectionRange(point, granularity);
         return;
     }
-#endif // ENABLE(PDF_PLUGIN) && PLATFORM(IOS_FAMILY)
+#endif // ENABLE(PDF_PLUGIN) && ENABLE(TWO_PHASE_CLICKS)
 
     auto range = rangeForGranularityAtPoint(*frame, point, granularity, isInteractingWithFocusedElement);
     if (range)
@@ -2666,12 +2665,12 @@ void WebPage::updateSelectionWithExtentPointAndBoundary(WebCore::IntPoint point,
     if (!frame)
         return callback(false);
 
-#if ENABLE(PDF_PLUGIN) && PLATFORM(IOS_FAMILY)
+#if ENABLE(PDF_PLUGIN) && ENABLE(TWO_PHASE_CLICKS)
     if (RefPtr pluginView = focusedPluginViewForFrame(*frame)) {
         auto movedEndpoint = pluginView->extendInitialSelection(point, granularity);
         return callback(movedEndpoint == SelectionEndpoint::End);
     }
-#endif // ENABLE(PDF_PLUGIN) && PLATFORM(IOS_FAMILY)
+#endif // ENABLE(PDF_PLUGIN) && ENABLE(TWO_PHASE_CLICKS)
 
     auto position = visiblePositionInFocusedNodeForPoint(*frame, point, isInteractingWithFocusedElement);
     auto newRange = rangeForGranularityAtPoint(*frame, point, granularity, isInteractingWithFocusedElement);

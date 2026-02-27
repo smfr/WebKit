@@ -106,10 +106,10 @@ public:
     CursorContext cursorContext(WebCore::FloatPoint pointInRootView) const;
     void handleSyntheticClick(WebCore::PlatformMouseEvent&&);
     void clearSelection();
-#if PLATFORM(IOS_FAMILY)
     void setSelectionRange(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity);
     SelectionWasFlipped moveSelectionEndpoint(WebCore::FloatPoint pointInRootView, SelectionEndpoint);
     SelectionEndpoint extendInitialSelection(WebCore::FloatPoint pointInRootView, WebCore::TextGranularity);
+#if PLATFORM(IOS_FAMILY)
     DocumentEditingContext documentEditingContext(DocumentEditingContextRequest&&) const;
 #endif
 #endif
