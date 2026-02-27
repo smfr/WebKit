@@ -280,6 +280,7 @@ void MediaPlayerPrivateMediaSourceAVFObjC::load(const URL&, const LoadOptions& o
     m_renderer->setPreferences(options.videoRendererPreferences);
     if (RefPtr player = m_player.get()) {
         m_renderer->setPresentationSize(player->presentationSize());
+        m_renderer->setVideoLayerSize(player->videoLayerSize());
         m_renderer->renderingCanBeAcceleratedChanged(player->renderingCanBeAccelerated());
         m_renderer->setVolume(player->volume());
         m_renderer->setMuted(player->muted());

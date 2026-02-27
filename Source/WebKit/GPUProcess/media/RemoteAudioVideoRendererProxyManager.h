@@ -180,6 +180,7 @@ private:
     WebCore::MediaSampleConverter& converterFor(RendererContext&, TrackIdentifier);
 
 #if PLATFORM(COCOA)
+    void setVideoLayerSize(RemoteAudioVideoRendererIdentifier, const WebCore::FloatSize&);
     void setVideoLayerSizeFenced(RemoteAudioVideoRendererIdentifier, const WebCore::FloatSize&, WTF::MachSendRightAnnotated&&);
 #endif
 

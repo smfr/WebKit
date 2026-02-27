@@ -186,6 +186,7 @@ private:
     void setLayerHostingContext(WebCore::HostingContext&&);
 #if PLATFORM(COCOA)
     WebCore::FloatSize videoLayerSize() const;
+    void setVideoLayerSize(const WebCore::FloatSize&) final;
     void setVideoLayerSizeFenced(const WebCore::FloatSize&, WTF::MachSendRightAnnotated&&) final;
 #endif
     void notifyVideoLayerSizeChanged(Function<void(const MediaTime&, WebCore::FloatSize)>&& callback) final;

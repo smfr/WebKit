@@ -137,6 +137,7 @@ public:
     Ref<BitmapImagePromise> currentBitmapImage() const final;
     std::optional<VideoPlaybackQualityMetrics> videoPlaybackQualityMetrics() final;
     PlatformLayer* platformVideoLayer() const final;
+    void setVideoLayerSize(const FloatSize&) final;
     void setVideoLayerSizeFenced(const FloatSize&, WTF::MachSendRightAnnotated&&) final;
 
     // VideoFullscreenInterface

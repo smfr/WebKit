@@ -850,6 +850,18 @@ WebCore::FloatSize AudioVideoRendererRemote::videoLayerSize() const
     return m_videoLayerSize;
 }
 
+void AudioVideoRendererRemote::setVideoLayerSize(const WebCore::FloatSize& size)
+{
+    {
+        Locker locker { m_lock };
+        m_videoLayerSize = size;
+    }
+
+    ensureOnDispatcherWithConnection([size](auto& renderer, auto& connection) mutable {
+        connection.send(Messages::RemoteAudioVideoRendererProxyManager::SetVideoLayerSize(renderer.m_identifier, size), 0);
+    });
+}
+
 void AudioVideoRendererRemote::setVideoLayerSizeFenced(const WebCore::FloatSize& size, WTF::MachSendRightAnnotated&& sendRightAnnotated)
 {
     {

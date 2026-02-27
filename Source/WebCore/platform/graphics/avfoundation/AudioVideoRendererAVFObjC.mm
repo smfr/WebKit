@@ -855,10 +855,15 @@ PlatformLayer* AudioVideoRendererAVFObjC::platformVideoLayer() const
     return m_videoLayerManager->videoInlineLayer();
 }
 
-void AudioVideoRendererAVFObjC::setVideoLayerSizeFenced(const FloatSize& newSize, WTF::MachSendRightAnnotated&&)
+void AudioVideoRendererAVFObjC::setVideoLayerSize(const FloatSize& newSize)
 {
     if (!layerOrVideoRenderer() && !newSize.isEmpty())
         updateDisplayLayerIfNeeded();
+}
+
+void AudioVideoRendererAVFObjC::setVideoLayerSizeFenced(const FloatSize& newSize, WTF::MachSendRightAnnotated&&)
+{
+    setVideoLayerSize(newSize);
 }
 
 void AudioVideoRendererAVFObjC::setVideoFullscreenLayer(PlatformLayer *videoFullscreenLayer, WTF::Function<void()>&& completionHandler)
