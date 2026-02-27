@@ -166,10 +166,11 @@ void ScrollAnchoringController::invalidate()
 static FloatRect candidateLocalRectForAnchoring(RenderObject& renderer)
 {
     if (CheckedPtr box = dynamicDowncast<RenderBox>(renderer)) {
-        if (box->hasNonVisibleOverflow())
-            return box->borderBoxRect();
+        auto anchoringBounds = box->borderBoxRect();
+        if (!box->hasNonVisibleOverflow())
+            anchoringBounds.shiftMaxYEdgeTo(box->layoutOverflowRect().maxY());
 
-        return box->layoutOverflowRect();
+        return anchoringBounds;
     }
 
     if (CheckedPtr text = dynamicDowncast<RenderText>(renderer))
@@ -215,7 +216,6 @@ auto ScrollAnchoringController::computeScrollerRelativeRects(RenderObject& candi
 
         scrollViewport.contract(docRenderer->scrollPaddingForViewportRect(scrollViewport));
 
-        // FIXME: Need to clamp negative layout overflow for clamp-negative-overflow.html.
         return {
             // Map to the RenderView to exclude page scale.
             .boundsRelativeToScrolledContent = candidate.localToContainerQuad(localAnchoringRect, dynamicDowncast<RenderView>(*scrollerBox)).boundingBox(),
@@ -230,14 +230,6 @@ auto ScrollAnchoringController::computeScrollerRelativeRects(RenderObject& candi
     // FIXME: This really needs to compute bounds relative to the padding box.
     auto boundsInScrollerContentCoordinates = candidate.localToContainerQuad(localAnchoringRect, scrollerBox.get()).boundingBox();
     boundsInScrollerContentCoordinates.moveBy(m_owningScrollableArea->scrollPosition());
-
-    // Ignore layout overflow on the block and inline start edges, since these do not contribute to scrolling overflow.
-    // FIXME: writing modes.
-    if (boundsInScrollerContentCoordinates.x() < 0)
-        boundsInScrollerContentCoordinates.shiftXEdgeTo(0);
-
-    if (boundsInScrollerContentCoordinates.y() < 0)
-        boundsInScrollerContentCoordinates.shiftYEdgeTo(0);
 
     return {
         .boundsRelativeToScrolledContent = boundsInScrollerContentCoordinates,
@@ -613,7 +605,7 @@ void ScrollAnchoringController::adjustScrollPositionForAnchoring()
     auto currentPosition = m_owningScrollableArea->scrollPosition();
     auto newScrollPosition = currentPosition + roundedIntSize(adjustment);
     RELEASE_LOG(ScrollAnchoring, "ScrollAnchoringController::adjustScrollPositionForAnchoring() is main frame: %d, is main scroller: %d, adjusting from (%d, %d) to (%d, %d)",  frameView().frame().isMainFrame(), !m_owningScrollableArea->isRenderLayer(), currentPosition.x(), currentPosition.y(), newScrollPosition.x(), newScrollPosition.y());
-    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() for scroller element: " << ValueOrNull(scrollableAreaBox()) << " anchor: " << *m_anchorObject << "adjusting from " << currentPosition << " to " << newScrollPosition);
+    LOG_WITH_STREAM(ScrollAnchoring, stream << "ScrollAnchoringController " << this << " adjustScrollPositionForAnchoring() for scroller element: " << ValueOrNull(scrollableAreaBox()) << " anchor: " << *m_anchorObject << " adjusting from " << currentPosition << " to " << newScrollPosition);
 
     auto options = ScrollPositionChangeOptions::createProgrammatic();
     options.originalScrollDelta = adjustment;
