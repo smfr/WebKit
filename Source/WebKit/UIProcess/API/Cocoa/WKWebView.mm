@@ -3814,6 +3814,19 @@ struct WKWebViewData {
     protect(_page)->scrollToEdge(toRectEdges(edge), animated ? WebCore::ScrollIsAnimated::Yes : WebCore::ScrollIsAnimated::No);
 }
 
+#if !ENABLE(WEBVIEW_ADDITIONAL_SETUP) && (PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(VISION))
+
+- (void)_setWebViewInformation:(id)information
+{
+}
+
+- (id)_webViewInformation
+{
+    return nil;
+}
+
+#endif
+
 @end
 
 #pragma mark -

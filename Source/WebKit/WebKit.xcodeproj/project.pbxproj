@@ -670,6 +670,7 @@
 		29AD3093164B4C5D0072DEA9 /* LegacyCustomProtocolManagerProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 29AD3092164B4C5D0072DEA9 /* LegacyCustomProtocolManagerProxy.h */; };
 		29CD55AA128E294F00133C85 /* WKAccessibilityWebPageObjectBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 29CD55A8128E294F00133C85 /* WKAccessibilityWebPageObjectBase.h */; };
 		2ADBEA4C2F358BEF00EDB398 /* WKWebView+WKBannerViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADBEA4B2F358BEF00EDB398 /* WKWebView+WKBannerViewOverlay.swift */; };
+		2AE6D2B72F501404002BE327 /* WebViewRepresentable+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADBEA4B2F358BEF00EDB399 /* WebViewRepresentable+Extras.swift */; };
 		2BBCCE242EB2B3F500FE7E5A /* RemotePageScreenOrientationManagerProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 2BBCCE232EB2B3F500FE7E5A /* RemotePageScreenOrientationManagerProxy.h */; };
 		2D0C56FD229F1DEA00BD33E7 /* DeviceManagementSoftLink.h in Headers */ = {isa = PBXBuildFile; fileRef = 2D0C56FB229F1DEA00BD33E7 /* DeviceManagementSoftLink.h */; };
 		2D0C56FE229F1DEA00BD33E7 /* DeviceManagementSoftLink.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2D0C56FC229F1DEA00BD33E7 /* DeviceManagementSoftLink.mm */; };
@@ -4825,6 +4826,7 @@
 		29D04E2821F7C73D0076741D /* ApplicationServicesSPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationServicesSPI.h; sourceTree = "<group>"; };
 		2A96B7172EB4A74700E2B46F /* AdditionalButtonMasksIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AdditionalButtonMasksIOS.h; path = ios/AdditionalButtonMasksIOS.h; sourceTree = "<group>"; };
 		2ADBEA4B2F358BEF00EDB398 /* WKWebView+WKBannerViewOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WKWebView+WKBannerViewOverlay.swift"; path = "$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WKWebView+WKBannerViewOverlay.swift"; sourceTree = "<group>"; };
+		2ADBEA4B2F358BEF00EDB399 /* WebViewRepresentable+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WebViewRepresentable+Extras.swift"; path = "$(BUILT_PRODUCTS_DIR)/DerivedSources/WebKit/WebViewRepresentable+Extras.swift"; sourceTree = "<group>"; };
 		2B1B1C2E2E3A86F400D7D9ED /* ForwardDeclCheckerExpectations */ = {isa = PBXFileReference; lastKnownFileType = text; path = ForwardDeclCheckerExpectations; sourceTree = "<group>"; };
 		2B1B1C2F2E3A86F400D7D9ED /* MemoryUnsafeCastCheckerExpectations */ = {isa = PBXFileReference; lastKnownFileType = text; path = MemoryUnsafeCastCheckerExpectations; sourceTree = "<group>"; };
 		2B1B1C302E3A86F400D7D9ED /* NoUncheckedPtrMemberCheckerExpectations */ = {isa = PBXFileReference; lastKnownFileType = text; path = NoUncheckedPtrMemberCheckerExpectations; sourceTree = "<group>"; };
@@ -9601,6 +9603,7 @@
 				076867F52D4C26A8004DA801 /* PlatformTextSearching.swift */,
 				07AF79DE2D693BAA004E8D3A /* SwiftUI+Extras.swift */,
 				07A33C9E2D67EEF600F30A05 /* ViewModifierContexts.swift */,
+				2ADBEA4B2F358BEF00EDB399 /* WebViewRepresentable+Extras.swift */,
 				076867F72D4C26A8004DA801 /* WebViewRepresentable.swift */,
 			);
 			path = Implementation;
@@ -21557,6 +21560,7 @@
 				07275C632D00D32D002315A5 /* WebPage+SwiftUI.swift in Sources */,
 				07A4CEC72D0933E700764F5E /* WebPageNavigationAction+SwiftUI.swift in Sources */,
 				076868022D4C285B004DA801 /* WebView.swift in Sources */,
+				2AE6D2B72F501404002BE327 /* WebViewRepresentable+Extras.swift in Sources */,
 				076867FF2D4C283E004DA801 /* WebViewRepresentable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
