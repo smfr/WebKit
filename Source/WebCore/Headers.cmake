@@ -1344,7 +1344,6 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     dom/NamedNodeMap.h
     dom/NativeNodeFilter.h
     dom/Node.h
-    dom/NodeConstants.h
     dom/NodeDocument.h
     dom/NodeFilter.h
     dom/NodeFilterCondition.h
@@ -1354,6 +1353,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
     dom/NodeList.h
     dom/NodeRenderStyle.h
     dom/NodeTraversal.h
+    dom/NodeType.h
     dom/ParserContentPolicy.h
     dom/PointerEvent.h
     dom/PointerEventTypeNames.h

@@ -690,7 +690,7 @@ RefPtr<LegacyWebArchive> LegacyWebArchive::createInternal(Node& node, const Arch
     Vector<Ref<Node>> nodeList;
     String markupString = serializeFragment(node, SerializedNodes::SubtreeIncludingNode, &nodeList, ResolveURLs::No, std::nullopt, SerializeShadowRoots::AllForInterchange, { }, options.markupExclusionRules);
     auto nodeType = node.nodeType();
-    if (nodeType != Node::DOCUMENT_NODE && nodeType != Node::DOCUMENT_TYPE_NODE)
+    if (nodeType != NodeType::Document && nodeType != NodeType::DocumentType)
         markupString = makeString(documentTypeString(node.document()), markupString);
 
     return createInternal(markupString, options, *frame, WTF::move(nodeList), frameFilter);

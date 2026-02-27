@@ -87,5 +87,5 @@ private:
 } // namespace WebCore
 
 SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::Attr)
-    static bool isType(const WebCore::Node& node) { return node.nodeType() == WebCore::Node::ATTRIBUTE_NODE; }
+    static bool isType(const WebCore::Node& node) { return node.nodeType() == WebCore::NodeType::Attribute; }
 SPECIALIZE_TYPE_TRAITS_END()

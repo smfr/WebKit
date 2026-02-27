@@ -551,7 +551,7 @@ Inspector::Protocol::ErrorStringOr<Ref<Inspector::Protocol::DOM::Node>> Inspecto
 void InspectorDOMAgent::pushChildNodesToFrontend(Inspector::Protocol::DOM::NodeId nodeId, int depth)
 {
     RefPtr node = nodeForId(nodeId);
-    if (!node || (node->nodeType() != Node::ELEMENT_NODE && node->nodeType() != Node::DOCUMENT_NODE && node->nodeType() != Node::DOCUMENT_FRAGMENT_NODE))
+    if (!node || (node->nodeType() != NodeType::Element && node->nodeType() != NodeType::Document && node->nodeType() != NodeType::DocumentFragment))
         return;
 
     if (m_childrenRequested.contains(nodeId)) {
@@ -1979,23 +1979,23 @@ Ref<Inspector::Protocol::DOM::Node> InspectorDOMAgent::buildObjectForNode(Node* 
     String nodeValue;
 
     switch (node->nodeType()) {
-    case Node::PROCESSING_INSTRUCTION_NODE:
+    case NodeType::ProcessingInstruction:
         nodeName = node->nodeName();
         localName = node->localName();
         [[fallthrough]];
-    case Node::TEXT_NODE:
-    case Node::COMMENT_NODE:
-    case Node::CDATA_SECTION_NODE:
+    case NodeType::Text:
+    case NodeType::Comment:
+    case NodeType::CDATASection:
         nodeValue = node->nodeValue();
         if (nodeValue.length() > maxTextSize)
             nodeValue = makeString(StringView(nodeValue).left(maxTextSize), horizontalEllipsisUTF16);
         break;
-    case Node::ATTRIBUTE_NODE:
+    case NodeType::Attribute:
         localName = node->localName();
         break;
-    case Node::DOCUMENT_FRAGMENT_NODE:
-    case Node::DOCUMENT_NODE:
-    case Node::ELEMENT_NODE:
+    case NodeType::DocumentFragment:
+    case NodeType::Document:
+    case NodeType::Element:
     default:
         nodeName = node->nodeName();
         localName = node->localName();
@@ -2099,7 +2099,7 @@ Ref<JSON::ArrayOf<Inspector::Protocol::DOM::Node>> InspectorDOMAgent::buildArray
     if (depth == 0) {
         // Special-case the only text child - pretend that container's children have been requested.
         RefPtr firstChild = container->firstChild();
-        if (firstChild && firstChild->nodeType() == Node::TEXT_NODE && !firstChild->nextSibling()) {
+        if (firstChild && firstChild->nodeType() == NodeType::Text && !firstChild->nextSibling()) {
             children->addItem(buildObjectForNode(firstChild.get(), 0));
             m_childrenRequested.add(bind(*container));
         }

@@ -671,7 +671,7 @@ static inline IntDegrees currentOrientation(LocalFrame* frame)
 }
 
 Document::Document(LocalFrame* frame, const Settings& settings, const URL& url, DocumentClasses documentClasses, OptionSet<ConstructionFlag> constructionFlags, std::optional<ScriptExecutionContextIdentifier> identifier)
-    : ContainerNode(*this, DOCUMENT_NODE)
+    : ContainerNode(*this, NodeType::Document)
     , TreeScope(*this)
     , ScriptExecutionContext(Type::Document, identifier)
     , FrameDestructionObserver(frame)
@@ -1689,23 +1689,23 @@ ExceptionOr<Ref<Node>> Document::importNode(Node& nodeToImport, Variant<bool, Im
     if (!registry)
         registry = customElementRegistry();
     switch (nodeToImport.nodeType()) {
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::DocumentFragment:
         if (nodeToImport.isShadowRoot())
             break;
         [[fallthrough]];
-    case Node::ELEMENT_NODE:
-    case Node::TEXT_NODE:
-    case Node::CDATA_SECTION_NODE:
-    case Node::PROCESSING_INSTRUCTION_NODE:
-    case Node::COMMENT_NODE:
+    case NodeType::Element:
+    case NodeType::Text:
+    case NodeType::CDATASection:
+    case NodeType::ProcessingInstruction:
+    case NodeType::Comment:
         return nodeToImport.cloneNodeInternal(*this, subtree ? Node::CloningOperation::Everything : Node::CloningOperation::SelfOnly, registry.get());
 
-    case Node::ATTRIBUTE_NODE: {
+    case NodeType::Attribute: {
         auto& attribute = uncheckedDowncast<Attr>(nodeToImport);
         return Ref<Node> { Attr::create(documentScope(), attribute.qualifiedName(), attribute.value()) };
     }
-    case Node::DOCUMENT_NODE: // Can't import a document into another document.
-    case Node::DOCUMENT_TYPE_NODE: // FIXME: Support cloning a DocumentType node per DOM4.
+    case NodeType::Document: // Can't import a document into another document.
+    case NodeType::DocumentType: // FIXME: Support cloning a DocumentType node per DOM4.
         break;
     }
     return Exception { ExceptionCode::NotSupportedError };
@@ -1716,9 +1716,9 @@ ExceptionOr<Ref<Node>> Document::adoptNode(Node& source)
     EventQueueScope scope;
 
     switch (source.nodeType()) {
-    case DOCUMENT_NODE:
+    case NodeType::Document:
         return Exception { ExceptionCode::NotSupportedError };
-    case ATTRIBUTE_NODE: {
+    case NodeType::Attribute: {
         auto& attr = uncheckedDowncast<Attr>(source);
         if (RefPtr element = attr.ownerElement()) {
             auto result = element->removeAttributeNode(attr);
@@ -5631,17 +5631,17 @@ MouseEventWithHitTestResults Document::prepareMouseEvent(const HitTestRequest& r
 bool Document::childTypeAllowed(NodeType type) const
 {
     switch (type) {
-    case ATTRIBUTE_NODE:
-    case CDATA_SECTION_NODE:
-    case DOCUMENT_FRAGMENT_NODE:
-    case DOCUMENT_NODE:
-    case TEXT_NODE:
+    case NodeType::Attribute:
+    case NodeType::CDATASection:
+    case NodeType::DocumentFragment:
+    case NodeType::Document:
+    case NodeType::Text:
         return false;
-    case COMMENT_NODE:
-    case PROCESSING_INSTRUCTION_NODE:
+    case NodeType::Comment:
+    case NodeType::ProcessingInstruction:
         return true;
-    case DOCUMENT_TYPE_NODE:
-    case ELEMENT_NODE:
+    case NodeType::DocumentType:
+    case NodeType::Element:
         // Documents may contain no more than one of each of these.
         // (One Element and one DocumentType.)
         for (Node* c = firstChild(); c; c = c->nextSibling())
@@ -5658,15 +5658,15 @@ bool Document::canAcceptChild(const Node& newChild, const Node* refChild, Accept
         return true;
 
     switch (newChild.nodeType()) {
-    case ATTRIBUTE_NODE:
-    case CDATA_SECTION_NODE:
-    case DOCUMENT_NODE:
-    case TEXT_NODE:
+    case NodeType::Attribute:
+    case NodeType::CDATASection:
+    case NodeType::Document:
+    case NodeType::Text:
         return false;
-    case COMMENT_NODE:
-    case PROCESSING_INSTRUCTION_NODE:
+    case NodeType::Comment:
+    case NodeType::ProcessingInstruction:
         return true;
-    case DOCUMENT_FRAGMENT_NODE: {
+    case NodeType::DocumentFragment: {
         bool hasSeenElementChild = false;
         for (RefPtr node = uncheckedDowncast<DocumentFragment>(newChild).firstChild(); node; node = node->nextSibling()) {
             if (is<Element>(*node)) {
@@ -5679,7 +5679,7 @@ bool Document::canAcceptChild(const Node& newChild, const Node* refChild, Accept
         }
         break;
     }
-    case DOCUMENT_TYPE_NODE: {
+    case NodeType::DocumentType: {
         RefPtr existingDocType = childrenOfType<DocumentType>(*this).first();
         if (operation == AcceptChildOperation::Replace) {
             //  parent has a doctype child that is not child, or an element is preceding child.
@@ -5696,7 +5696,7 @@ bool Document::canAcceptChild(const Node& newChild, const Node* refChild, Accept
         }
         break;
     }
-    case ELEMENT_NODE: {
+    case NodeType::Element: {
         CheckedPtr existingElementChild = firstElementChild();
         if (operation == AcceptChildOperation::Replace) {
             if (existingElementChild && existingElementChild != refChild)

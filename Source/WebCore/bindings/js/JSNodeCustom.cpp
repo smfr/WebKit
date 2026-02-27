@@ -98,47 +98,47 @@ static ALWAYS_INLINE JSValue createWrapperInline(JSGlobalObject* lexicalGlobalOb
     
     JSDOMObject* wrapper;    
     switch (node->nodeType()) {
-        case Node::ELEMENT_NODE:
-            if (auto* htmlElement = dynamicDowncast<HTMLElement>(node.get()))
-                wrapper = createJSHTMLWrapper(globalObject, *htmlElement);
-            else if (auto* svgElement = dynamicDowncast<SVGElement>(node.get()))
-                wrapper = createJSSVGWrapper(globalObject, *svgElement);
+    case NodeType::Element:
+        if (auto* htmlElement = dynamicDowncast<HTMLElement>(node.get()))
+            wrapper = createJSHTMLWrapper(globalObject, *htmlElement);
+        else if (auto* svgElement = dynamicDowncast<SVGElement>(node.get()))
+            wrapper = createJSSVGWrapper(globalObject, *svgElement);
 #if ENABLE(MATHML)
-            else if (auto* mathmlElement = dynamicDowncast<MathMLElement>(node.get()))
-                wrapper = createJSMathMLWrapper(globalObject, *mathmlElement);
+        else if (auto* mathmlElement = dynamicDowncast<MathMLElement>(node.get()))
+            wrapper = createJSMathMLWrapper(globalObject, *mathmlElement);
 #endif
-            else
-                wrapper = createWrapper<Element>(globalObject, WTF::move(node));
-            break;
-        case Node::ATTRIBUTE_NODE:
-            wrapper = createWrapper<Attr>(globalObject, WTF::move(node));
-            break;
-        case Node::TEXT_NODE:
-            wrapper = createWrapper<Text>(globalObject, WTF::move(node));
-            break;
-        case Node::CDATA_SECTION_NODE:
-            wrapper = createWrapper<CDATASection>(globalObject, WTF::move(node));
-            break;
-        case Node::PROCESSING_INSTRUCTION_NODE:
-            wrapper = createWrapper<ProcessingInstruction>(globalObject, WTF::move(node));
-            break;
-        case Node::COMMENT_NODE:
-            wrapper = createWrapper<Comment>(globalObject, WTF::move(node));
-            break;
-        case Node::DOCUMENT_NODE:
-            // we don't want to cache the document itself in the per-document dictionary
-            return toJS(lexicalGlobalObject, globalObject, uncheckedDowncast<Document>(node.get()));
-        case Node::DOCUMENT_TYPE_NODE:
-            wrapper = createWrapper<DocumentType>(globalObject, WTF::move(node));
-            break;
-        case Node::DOCUMENT_FRAGMENT_NODE:
-            if (node->isShadowRoot())
-                wrapper = createWrapper<ShadowRoot>(globalObject, WTF::move(node));
-            else
-                wrapper = createWrapper<DocumentFragment>(globalObject, WTF::move(node));
-            break;
-        default:
-            wrapper = createWrapper<Node>(globalObject, WTF::move(node));
+        else
+            wrapper = createWrapper<Element>(globalObject, WTF::move(node));
+        break;
+    case NodeType::Attribute:
+        wrapper = createWrapper<Attr>(globalObject, WTF::move(node));
+        break;
+    case NodeType::Text:
+        wrapper = createWrapper<Text>(globalObject, WTF::move(node));
+        break;
+    case NodeType::CDATASection:
+        wrapper = createWrapper<CDATASection>(globalObject, WTF::move(node));
+        break;
+    case NodeType::ProcessingInstruction:
+        wrapper = createWrapper<ProcessingInstruction>(globalObject, WTF::move(node));
+        break;
+    case NodeType::Comment:
+        wrapper = createWrapper<Comment>(globalObject, WTF::move(node));
+        break;
+    case NodeType::Document:
+        // we don't want to cache the document itself in the per-document dictionary
+        return toJS(lexicalGlobalObject, globalObject, uncheckedDowncast<Document>(node.get()));
+    case NodeType::DocumentType:
+        wrapper = createWrapper<DocumentType>(globalObject, WTF::move(node));
+        break;
+    case NodeType::DocumentFragment:
+        if (node->isShadowRoot())
+            wrapper = createWrapper<ShadowRoot>(globalObject, WTF::move(node));
+        else
+            wrapper = createWrapper<DocumentFragment>(globalObject, WTF::move(node));
+        break;
+    default:
+        wrapper = createWrapper<Node>(globalObject, WTF::move(node));
     }
 
     return wrapper;

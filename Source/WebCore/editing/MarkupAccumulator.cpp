@@ -842,38 +842,38 @@ void MarkupAccumulator::appendNonElementNode(StringBuilder& result, const Node& 
         namespaces->checkConsistency();
 
     switch (node.nodeType()) {
-    case Node::TEXT_NODE:
+    case NodeType::Text:
         appendText(result, uncheckedDowncast<Text>(node));
         break;
-    case Node::COMMENT_NODE:
+    case NodeType::Comment:
         // FIXME: Comment content is not escaped, but that may be OK because XMLSerializer (and possibly other callers) should raise an exception if it includes "-->".
         result.append("<!--"_s, uncheckedDowncast<Comment>(node).data(), "-->"_s);
         break;
-    case Node::DOCUMENT_NODE:
+    case NodeType::Document:
         appendXMLDeclaration(result, uncheckedDowncast<Document>(node));
         break;
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::DocumentFragment:
         break;
-    case Node::DOCUMENT_TYPE_NODE:
+    case NodeType::DocumentType:
         appendDocumentType(result, uncheckedDowncast<DocumentType>(node));
         break;
-    case Node::PROCESSING_INSTRUCTION_NODE: {
+    case NodeType::ProcessingInstruction: {
         auto& instruction = uncheckedDowncast<ProcessingInstruction>(node);
         // FIXME: PI data is not escaped, but XMLSerializer (and possibly other callers) this should raise an exception if it includes "?>".
         result.append("<?"_s, instruction.target(), ' ', instruction.data(), "?>"_s);
         break;
     }
-    case Node::ELEMENT_NODE:
+    case NodeType::Element:
         ASSERT_NOT_REACHED();
         break;
-    case Node::CDATA_SECTION_NODE:
+    case NodeType::CDATASection:
         if (inXMLFragmentSerialization()) {
             // FIXME: CDATA content is not escaped, but XMLSerializer (and possibly other callers) should raise an exception if it includes "]]>".
             result.append("<![CDATA["_s, uncheckedDowncast<CDATASection>(node).data(), "]]>"_s);
         } else
             appendText(result, uncheckedDowncast<Text>(node));
         break;
-    case Node::ATTRIBUTE_NODE:
+    case NodeType::Attribute:
         appendAttributeValue(result, uncheckedDowncast<Attr>(node).value());
         break;
     }

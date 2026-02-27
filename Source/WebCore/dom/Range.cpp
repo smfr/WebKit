@@ -463,9 +463,9 @@ static ExceptionOr<RefPtr<Node>> processContentsBetweenOffsets(Range::ActionType
     RefPtr<Node> result;
 
     switch (container->nodeType()) {
-    case Node::TEXT_NODE:
-    case Node::CDATA_SECTION_NODE:
-    case Node::COMMENT_NODE: {
+    case NodeType::Text:
+    case NodeType::CDATASection:
+    case NodeType::Comment: {
         auto& dataNode = uncheckedDowncast<CharacterData>(*container);
         endOffset = std::min(endOffset, dataNode.length());
         startOffset = std::min(startOffset, endOffset);
@@ -489,7 +489,7 @@ static ExceptionOr<RefPtr<Node>> processContentsBetweenOffsets(Range::ActionType
         }
         break;
     }
-    case Node::PROCESSING_INSTRUCTION_NODE: {
+    case NodeType::ProcessingInstruction: {
         auto& instruction = uncheckedDowncast<ProcessingInstruction>(*container);
         endOffset = std::min(endOffset, instruction.data().length());
         startOffset = std::min(startOffset, endOffset);
@@ -510,11 +510,11 @@ static ExceptionOr<RefPtr<Node>> processContentsBetweenOffsets(Range::ActionType
         }
         break;
     }
-    case Node::ELEMENT_NODE:
-    case Node::ATTRIBUTE_NODE:
-    case Node::DOCUMENT_NODE:
-    case Node::DOCUMENT_TYPE_NODE:
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::Element:
+    case NodeType::Attribute:
+    case NodeType::Document:
+    case NodeType::DocumentType:
+    case NodeType::DocumentFragment:
         // FIXME: Should we assert that some nodes never appear here?
         if (action == Range::Extract || action == Range::Clone) {
             if (fragment)
@@ -664,7 +664,7 @@ ExceptionOr<void> Range::insertNode(Ref<Node>&& node)
 {
     auto startContainerNodeType = startContainer().nodeType();
 
-    if (startContainerNodeType == Node::COMMENT_NODE || startContainerNodeType == Node::PROCESSING_INSTRUCTION_NODE)
+    if (startContainerNodeType == NodeType::Comment || startContainerNodeType == NodeType::ProcessingInstruction)
         return Exception { ExceptionCode::HierarchyRequestError };
     RefPtr startContainerText = dynamicDowncast<Text>(startContainer());
     if (startContainerText && !startContainer().parentNode())
@@ -749,19 +749,19 @@ ExceptionOr<Ref<DocumentFragment>> Range::createContextualFragment(Variant<Ref<T
 ExceptionOr<RefPtr<Node>> Range::checkNodeOffsetPair(Node& node, unsigned offset)
 {
     switch (node.nodeType()) {
-    case Node::DOCUMENT_TYPE_NODE:
+    case NodeType::DocumentType:
         return Exception { ExceptionCode::InvalidNodeTypeError };
-    case Node::CDATA_SECTION_NODE:
-    case Node::COMMENT_NODE:
-    case Node::TEXT_NODE:
-    case Node::PROCESSING_INSTRUCTION_NODE:
+    case NodeType::CDATASection:
+    case NodeType::Comment:
+    case NodeType::Text:
+    case NodeType::ProcessingInstruction:
         if (offset > uncheckedDowncast<CharacterData>(node).length())
             return Exception { ExceptionCode::IndexSizeError };
         return nullptr;
-    case Node::ATTRIBUTE_NODE:
-    case Node::DOCUMENT_FRAGMENT_NODE:
-    case Node::DOCUMENT_NODE:
-    case Node::ELEMENT_NODE:
+    case NodeType::Attribute:
+    case NodeType::DocumentFragment:
+    case NodeType::Document:
+    case NodeType::Element:
         if (!offset)
             return nullptr;
         RefPtr childBefore = node.traverseToChildAt(offset - 1);
@@ -845,17 +845,17 @@ ExceptionOr<void> Range::surroundContents(Node& newParent)
 
     // Step 2: If newParent is a Document, DocumentType, or DocumentFragment node, then throw an InvalidNodeTypeError.
     switch (newParent.nodeType()) {
-        case Node::ATTRIBUTE_NODE:
-        case Node::DOCUMENT_FRAGMENT_NODE:
-        case Node::DOCUMENT_NODE:
-        case Node::DOCUMENT_TYPE_NODE:
-            return Exception { ExceptionCode::InvalidNodeTypeError };
-        case Node::CDATA_SECTION_NODE:
-        case Node::COMMENT_NODE:
-        case Node::ELEMENT_NODE:
-        case Node::PROCESSING_INSTRUCTION_NODE:
-        case Node::TEXT_NODE:
-            break;
+    case NodeType::Attribute:
+    case NodeType::DocumentFragment:
+    case NodeType::Document:
+    case NodeType::DocumentType:
+        return Exception { ExceptionCode::InvalidNodeTypeError };
+    case NodeType::CDATASection:
+    case NodeType::Comment:
+    case NodeType::Element:
+    case NodeType::ProcessingInstruction:
+    case NodeType::Text:
+        break;
     }
 
     // Step 3: Let fragment be the result of extracting context object.

@@ -260,62 +260,62 @@ void Node::dumpStatistics()
         }
 
         switch (node.nodeType()) {
-            case ELEMENT_NODE: {
-                ++elementNodes;
+        case NodeType::Element: {
+            ++elementNodes;
 
-                // Tag stats
-                Element& element = uncheckedDowncast<Element>(node);
-                HashMap<String, size_t>::AddResult result = perTagCount.add(element.tagName(), 1);
-                if (!result.isNewEntry)
-                    result.iterator->value++;
+            // Tag stats
+            Element& element = uncheckedDowncast<Element>(node);
+            HashMap<String, size_t>::AddResult result = perTagCount.add(element.tagName(), 1);
+            if (!result.isNewEntry)
+                result.iterator->value++;
 
-                if (const ElementData* elementData = element.elementData()) {
-                    unsigned length = elementData->length();
-                    attributes += length;
-                    ++elementsWithAttributeStorage;
-                    for (unsigned i = 0; i < length; ++i) {
-                        const Attribute& attr = elementData->attributeAt(i);
-                        if (element.attrIfExists(attr.name()))
-                            ++attributesWithAttr;
-                    }
+            if (const ElementData* elementData = element.elementData()) {
+                unsigned length = elementData->length();
+                attributes += length;
+                ++elementsWithAttributeStorage;
+                for (unsigned i = 0; i < length; ++i) {
+                    const Attribute& attr = elementData->attributeAt(i);
+                    if (element.attrIfExists(attr.name()))
+                        ++attributesWithAttr;
                 }
-                break;
             }
-            case ATTRIBUTE_NODE: {
-                ++attrNodes;
-                break;
-            }
-            case TEXT_NODE: {
-                ++textNodes;
-                break;
-            }
-            case CDATA_SECTION_NODE: {
-                ++cdataNodes;
-                break;
-            }
-            case PROCESSING_INSTRUCTION_NODE: {
-                ++piNodes;
-                break;
-            }
-            case COMMENT_NODE: {
-                ++commentNodes;
-                break;
-            }
-            case DOCUMENT_NODE: {
-                ++documentNodes;
-                break;
-            }
-            case DOCUMENT_TYPE_NODE: {
-                ++docTypeNodes;
-                break;
-            }
-            case DOCUMENT_FRAGMENT_NODE: {
-                if (node.isShadowRoot())
-                    ++shadowRootNodes;
-                else
-                    ++fragmentNodes;
-                break;
-            }
+            break;
+        }
+        case NodeType::Attribute: {
+            ++attrNodes;
+            break;
+        }
+        case NodeType::Text: {
+            ++textNodes;
+            break;
+        }
+        case NodeType::CDATASection: {
+            ++cdataNodes;
+            break;
+        }
+        case NodeType::ProcessingInstruction: {
+            ++piNodes;
+            break;
+        }
+        case NodeType::Comment: {
+            ++commentNodes;
+            break;
+        }
+        case NodeType::Document: {
+            ++documentNodes;
+            break;
+        }
+        case NodeType::DocumentType: {
+            ++docTypeNodes;
+            break;
+        }
+        case NodeType::DocumentFragment: {
+            if (node.isShadowRoot())
+                ++shadowRootNodes;
+            else
+                ++fragmentNodes;
+            break;
+        }
         }
     }
 
@@ -735,7 +735,7 @@ ExceptionOr<void> Node::normalize()
         if (node == this)
             break;
 
-        if (node->nodeType() != TEXT_NODE) {
+        if (node->nodeType() != NodeType::Text) {
             node = NodeTraversal::nextPostOrder(*node);
             continue;
         }
@@ -752,7 +752,7 @@ ExceptionOr<void> Node::normalize()
 
         // Merge text nodes.
         while (RefPtr nextSibling = node->nextSibling()) {
-            if (nextSibling->nodeType() != TEXT_NODE)
+            if (nextSibling->nodeType() != NodeType::Text)
                 break;
             Ref nextText = uncheckedDowncast<Text>(nextSibling.releaseNonNull());
 
@@ -1552,7 +1552,7 @@ bool Node::isEqualNode(Node* other) const
         return false;
     
     switch (nodeType) {
-    case Node::DOCUMENT_TYPE_NODE: {
+    case NodeType::DocumentType: {
         auto& thisDocType = uncheckedDowncast<DocumentType>(*this);
         auto& otherDocType = uncheckedDowncast<DocumentType>(*other);
         if (thisDocType.name() != otherDocType.name())
@@ -1563,7 +1563,7 @@ bool Node::isEqualNode(Node* other) const
             return false;
         break;
         }
-    case Node::ELEMENT_NODE: {
+    case NodeType::Element: {
         auto& thisElement = uncheckedDowncast<Element>(*this);
         auto& otherElement = uncheckedDowncast<Element>(*other);
         if (thisElement.tagQName() != otherElement.tagQName())
@@ -1572,7 +1572,7 @@ bool Node::isEqualNode(Node* other) const
             return false;
         break;
         }
-    case Node::PROCESSING_INSTRUCTION_NODE: {
+    case NodeType::ProcessingInstruction: {
         auto& thisProcessingInstruction = uncheckedDowncast<ProcessingInstruction>(*this);
         auto& otherProcessingInstruction = uncheckedDowncast<ProcessingInstruction>(*other);
         if (thisProcessingInstruction.target() != otherProcessingInstruction.target())
@@ -1581,16 +1581,16 @@ bool Node::isEqualNode(Node* other) const
             return false;
         break;
         }
-    case Node::CDATA_SECTION_NODE:
-    case Node::TEXT_NODE:
-    case Node::COMMENT_NODE: {
+    case NodeType::CDATASection:
+    case NodeType::Text:
+    case NodeType::Comment: {
         auto& thisCharacterData = uncheckedDowncast<CharacterData>(*this);
         auto& otherCharacterData = uncheckedDowncast<CharacterData>(*other);
         if (thisCharacterData.data() != otherCharacterData.data())
             return false;
         break;
         }
-    case Node::ATTRIBUTE_NODE: {
+    case NodeType::Attribute: {
         auto& thisAttribute = uncheckedDowncast<Attr>(*this);
         auto& otherAttribute = uncheckedDowncast<Attr>(*other);
         if (thisAttribute.qualifiedName() != otherAttribute.qualifiedName())
@@ -1599,8 +1599,8 @@ bool Node::isEqualNode(Node* other) const
             return false;
         break;
         }
-    case Node::DOCUMENT_NODE:
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::Document:
+    case NodeType::DocumentFragment:
         break;
     }
 
@@ -1625,7 +1625,7 @@ bool Node::isEqualNode(Node* other) const
 static const AtomString& locateDefaultNamespace(const Node& node, const AtomString& prefix)
 {
     switch (node.nodeType()) {
-    case Node::ELEMENT_NODE: {
+    case NodeType::Element: {
         if (prefix == xmlAtom())
             return XMLNames::xmlNamespaceURI.get();
         if (prefix == xmlnsAtom())
@@ -1650,14 +1650,14 @@ static const AtomString& locateDefaultNamespace(const Node& node, const AtomStri
         SUPPRESS_UNCHECKED_LOCAL auto* parent = node.parentElement();
         return parent ? locateDefaultNamespace(*parent, prefix) : nullAtom();
     }
-    case Node::DOCUMENT_NODE:
+    case NodeType::Document:
         if (RefPtr documentElement = uncheckedDowncast<Document>(node).documentElement())
             return locateDefaultNamespace(*documentElement, prefix);
         return nullAtom();
-    case Node::DOCUMENT_TYPE_NODE:
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::DocumentType:
+    case NodeType::DocumentFragment:
         return nullAtom();
-    case Node::ATTRIBUTE_NODE:
+    case NodeType::Attribute:
         if (RefPtr ownerElement = uncheckedDowncast<Attr>(node).ownerElement())
             return locateDefaultNamespace(*ownerElement, prefix);
         return nullAtom();
@@ -1705,16 +1705,16 @@ const AtomString& Node::lookupPrefix(const AtomString& namespaceURI) const
         return nullAtom();
     
     switch (nodeType()) {
-    case ELEMENT_NODE:
+    case NodeType::Element:
         return locateNamespacePrefix(uncheckedDowncast<Element>(*this), namespaceURI);
-    case DOCUMENT_NODE:
+    case NodeType::Document:
         if (RefPtr documentElement = uncheckedDowncast<Document>(*this).documentElement())
             return locateNamespacePrefix(*documentElement, namespaceURI);
         return nullAtom();
-    case DOCUMENT_FRAGMENT_NODE:
-    case DOCUMENT_TYPE_NODE:
+    case NodeType::DocumentFragment:
+    case NodeType::DocumentType:
         return nullAtom();
-    case ATTRIBUTE_NODE:
+    case NodeType::Attribute:
         if (RefPtr ownerElement = uncheckedDowncast<Attr>(*this).ownerElement())
             return locateNamespacePrefix(*ownerElement, namespaceURI);
         return nullAtom();
@@ -1728,41 +1728,41 @@ const AtomString& Node::lookupPrefix(const AtomString& namespaceURI) const
 static void appendTextContent(const Node* node, bool convertBRsToNewlines, bool& isNullString, StringBuilder& content)
 {
     switch (node->nodeType()) {
-    case Node::TEXT_NODE:
-    case Node::CDATA_SECTION_NODE:
-    case Node::COMMENT_NODE:
+    case NodeType::Text:
+    case NodeType::CDATASection:
+    case NodeType::Comment:
         isNullString = false;
         content.append(uncheckedDowncast<CharacterData>(*node).data());
         break;
 
-    case Node::PROCESSING_INSTRUCTION_NODE:
+    case NodeType::ProcessingInstruction:
         isNullString = false;
         content.append(uncheckedDowncast<ProcessingInstruction>(*node).data());
         break;
     
-    case Node::ATTRIBUTE_NODE:
+    case NodeType::Attribute:
         isNullString = false;
         content.append(uncheckedDowncast<Attr>(*node).value());
         break;
 
-    case Node::ELEMENT_NODE:
+    case NodeType::Element:
         if (node->hasTagName(brTag) && convertBRsToNewlines) {
             isNullString = false;
             content.append('\n');
             break;
         }
         [[fallthrough]];
-    case Node::DOCUMENT_FRAGMENT_NODE:
+    case NodeType::DocumentFragment:
         isNullString = false;
         for (RefPtr child = node->firstChild(); child; child = child->nextSibling()) {
-            if (child->nodeType() == Node::COMMENT_NODE || child->nodeType() == Node::PROCESSING_INSTRUCTION_NODE)
+            if (child->nodeType() == NodeType::Comment || child->nodeType() == NodeType::ProcessingInstruction)
                 continue;
             appendTextContent(child.get(), convertBRsToNewlines, isNullString, content);
         }
         break;
 
-    case Node::DOCUMENT_NODE:
-    case Node::DOCUMENT_TYPE_NODE:
+    case NodeType::Document:
+    case NodeType::DocumentType:
         break;
     }
 }
@@ -1778,18 +1778,18 @@ String Node::textContent(bool convertBRsToNewlines) const
 ExceptionOr<void> Node::setTextContent(String&& text)
 {
     switch (nodeType()) {
-    case ATTRIBUTE_NODE:
-    case TEXT_NODE:
-    case CDATA_SECTION_NODE:
-    case COMMENT_NODE:
-    case PROCESSING_INSTRUCTION_NODE:
+    case NodeType::Attribute:
+    case NodeType::Text:
+    case NodeType::CDATASection:
+    case NodeType::Comment:
+    case NodeType::ProcessingInstruction:
         return setNodeValue(WTF::move(text));
-    case ELEMENT_NODE:
-    case DOCUMENT_FRAGMENT_NODE:
+    case NodeType::Element:
+    case NodeType::DocumentFragment:
         uncheckedDowncast<ContainerNode>(*this).stringReplaceAll(WTF::move(text));
         return { };
-    case DOCUMENT_NODE:
-    case DOCUMENT_TYPE_NODE:
+    case NodeType::Document:
+    case NodeType::DocumentType:
         // Do nothing.
         return { };
     }
@@ -1978,7 +1978,7 @@ void Node::showNodePathForThis() const
         }
 
         switch (node->nodeType()) {
-        case ELEMENT_NODE: {
+        case NodeType::Element: {
             SAFE_FPRINTF(stderr, "/%s", node->nodeName().utf8());
 
             const Element& element = uncheckedDowncast<Element>(*node);
@@ -1997,10 +1997,10 @@ void Node::showNodePathForThis() const
                 SAFE_FPRINTF(stderr, "[@id=\"%s\"]", idattr.string().utf8());
             break;
         }
-        case TEXT_NODE:
+        case NodeType::Text:
             fprintf(stderr, "/text()");
             break;
-        case ATTRIBUTE_NODE:
+        case NodeType::Attribute:
             SAFE_FPRINTF(stderr, "/@%s", node->nodeName().utf8());
             break;
         default:

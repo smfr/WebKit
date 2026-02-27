@@ -26,6 +26,7 @@
 
 #include <WebCore/EventTarget.h>
 #include <WebCore/NodeIdentifier.h>
+#include <WebCore/NodeType.h>
 #include <WebCore/PlatformExportMacros.h>
 #include <WebCore/RenderStyleConstants.h>
 #include <WebCore/StyleValidity.h>
@@ -126,22 +127,6 @@ public:
     // This opts the entire Node family tree into being allocated in the BuiltinTypeDescriptor TZone category.
     static constexpr bool usesBuiltinTypeDescriptorTZoneCategory = true;
 
-    enum NodeType {
-        ELEMENT_NODE = 1,
-        ATTRIBUTE_NODE = 2,
-        TEXT_NODE = 3,
-        CDATA_SECTION_NODE = 4,
-        PROCESSING_INSTRUCTION_NODE = 7,
-        COMMENT_NODE = 8,
-        DOCUMENT_NODE = 9,
-        DOCUMENT_TYPE_NODE = 10,
-        DOCUMENT_FRAGMENT_NODE = 11,
-    };
-    enum DeprecatedNodeType {
-        ENTITY_REFERENCE_NODE = 5,
-        ENTITY_NODE = 6,
-        NOTATION_NODE = 12,
-    };
     enum DocumentPosition {
         DOCUMENT_POSITION_EQUIVALENT = 0x00,
         DOCUMENT_POSITION_DISCONNECTED = 0x01,
@@ -264,9 +249,9 @@ public:
     virtual bool isHTMLFrameOwnerElement() const { return false; }
     virtual bool isPluginElement() const { return false; }
 
-    bool isDocumentNode() const { return nodeType() == DOCUMENT_NODE; }
+    bool isDocumentNode() const { return nodeType() == NodeType::Document; }
     bool isTreeScope() const { return isDocumentNode() || isShadowRoot(); }
-    bool isDocumentFragment() const { return nodeType() == DOCUMENT_FRAGMENT_NODE; }
+    bool isDocumentFragment() const { return nodeType() == NodeType::DocumentFragment; }
     bool isShadowRoot() const { return isDocumentFragment() && hasTypeFlag(TypeFlag::IsShadowRootOrFormControlElement); }
     inline bool isUserAgentShadowRoot() const; // Defined in NodeInlines.h
 
@@ -456,7 +441,7 @@ public:
     // https://dom.spec.whatwg.org/#in-a-document-tree
     bool isInDocumentTree() const { return isConnected() && !isInShadowTree(); }
 
-    bool isDocumentTypeNode() const { return nodeType() == DOCUMENT_TYPE_NODE; }
+    bool isDocumentTypeNode() const { return nodeType() == NodeType::DocumentType; }
     virtual bool NODELETE childTypeAllowed(NodeType) const { return false; }
     inline unsigned NODELETE countChildNodes() const;
     inline unsigned NODELETE length() const;
@@ -646,7 +631,7 @@ protected:
     };
     static constexpr auto typeFlagBitCount = 12;
 
-    static uint16_t constructBitFieldsFromNodeTypeAndFlags(NodeType type, OptionSet<TypeFlag> flags) { return (type << typeFlagBitCount) | flags.toRaw(); }
+    static uint16_t constructBitFieldsFromNodeTypeAndFlags(NodeType type, OptionSet<TypeFlag> flags) { return (std::to_underlying(type) << typeFlagBitCount) | flags.toRaw(); }
     static NodeType nodeTypeFromBitFields(uint16_t bitFields) { return static_cast<NodeType>((bitFields >> typeFlagBitCount) & 0xf); }
     // Don't bother masking with (1 << typeFlagBitCount) - 1 since OptionSet tolerates the upper 4-bits being used for other purposes.
     bool hasTypeFlag(TypeFlag flag) const { return OptionSet<TypeFlag>::fromRaw(m_typeBitFields).contains(flag); }

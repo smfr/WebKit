@@ -27,26 +27,18 @@
 
 namespace WebCore {
 
-struct NodeConstants {
-    enum NodeType {
-        ELEMENT_NODE = 1,
-        ATTRIBUTE_NODE = 2,
-        TEXT_NODE = 3,
-        CDATA_SECTION_NODE = 4,
-        PROCESSING_INSTRUCTION_NODE = 7,
-        COMMENT_NODE = 8,
-        DOCUMENT_NODE = 9,
-        DOCUMENT_TYPE_NODE = 10,
-        DOCUMENT_FRAGMENT_NODE = 11,
-    };
-
-    enum DeprecatedNodeType {
-        ENTITY_REFERENCE_NODE = 5,
-        ENTITY_NODE = 6,
-        NOTATION_NODE = 12,
-    };
-
-    static const uint8_t LastNodeType = NOTATION_NODE;
+enum class NodeType : uint8_t {
+    Element = 1,
+    Attribute = 2,
+    Text = 3,
+    CDATASection = 4,
+    ProcessingInstruction = 7,
+    Comment = 8,
+    Document = 9,
+    DocumentType = 10,
+    DocumentFragment = 11,
 };
 
-} // namespace WebCore::NodeType
+static constexpr uint8_t lastNodeType = 12; // Historical NOTATION_NODE.
+
+} // namespace WebCore

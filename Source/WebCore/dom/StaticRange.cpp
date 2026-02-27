@@ -53,8 +53,8 @@ Ref<StaticRange> StaticRange::create(const SimpleRange& range)
 static bool NODELETE isDocumentTypeOrAttr(Node& node)
 {
     switch (node.nodeType()) {
-    case Node::ATTRIBUTE_NODE:
-    case Node::DOCUMENT_TYPE_NODE:
+    case NodeType::Attribute:
+    case NodeType::DocumentType:
         return true;
     default:
         return false;

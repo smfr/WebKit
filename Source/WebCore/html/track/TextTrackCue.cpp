@@ -102,7 +102,7 @@ static inline bool NODELETE isLegalNode(Node& node)
         || node.hasTagName(HTMLNames::rtTag)
         || node.hasTagName(HTMLNames::rubyTag)
         || node.hasTagName(HTMLNames::spanTag)
-        || node.nodeType() == Node::TEXT_NODE;
+        || node.nodeType() == NodeType::Text;
 }
 
 static Exception invalidNodeException(Node& node)
@@ -179,7 +179,7 @@ ExceptionOr<Ref<TextTrackCue>> TextTrackCue::create(Document& document, double s
     if (!cueFragment.firstChild())
         return Exception { ExceptionCode::InvalidNodeTypeError, "Empty cue fragment"_s };
 
-    if (cueFragment.firstChild()->nodeType() == Node::TEXT_NODE)
+    if (cueFragment.firstChild()->nodeType() == NodeType::Text)
         return Exception { ExceptionCode::InvalidNodeTypeError, "Invalid first child"_s };
 
     for (RefPtr node = cueFragment.firstChild(); node; node = node->nextSibling()) {

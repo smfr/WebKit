@@ -303,7 +303,7 @@ Ref<Element> Element::create(const QualifiedName& tagName, Document& document)
 }
 
 Element::Element(const QualifiedName& tagName, Document& document, OptionSet<TypeFlag> typeFlags)
-    : ContainerNode(document, ELEMENT_NODE, typeFlags | TypeFlag::IsElement)
+    : ContainerNode(document, NodeType::Element, typeFlags | TypeFlag::IsElement)
     , m_tagName(tagName)
 {
 }
@@ -3627,11 +3627,11 @@ CustomElementDefaultARIA* Element::customElementDefaultARIAIfExists() const
 bool Element::childTypeAllowed(NodeType type) const
 {
     switch (type) {
-    case ELEMENT_NODE:
-    case TEXT_NODE:
-    case COMMENT_NODE:
-    case PROCESSING_INSTRUCTION_NODE:
-    case CDATA_SECTION_NODE:
+    case NodeType::Element:
+    case NodeType::Text:
+    case NodeType::Comment:
+    case NodeType::ProcessingInstruction:
+    case NodeType::CDATASection:
         return true;
     default:
         break;

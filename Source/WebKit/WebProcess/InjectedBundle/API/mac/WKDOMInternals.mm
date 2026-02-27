@@ -67,18 +67,18 @@ DOMCache<WebCore::Range*, __unsafe_unretained WKDOMRange *>& WKDOMRangeCache()
 static Class WKDOMNodeClassSingleton(WebCore::Node* impl)
 {
     switch (impl->nodeType()) {
-    case WebCore::Node::ELEMENT_NODE:
+    case WebCore::NodeType::Element:
         return [WKDOMElement class];
-    case WebCore::Node::DOCUMENT_NODE:
+    case WebCore::NodeType::Document:
         return [WKDOMDocument class];
-    case WebCore::Node::TEXT_NODE:
+    case WebCore::NodeType::Text:
         return [WKDOMText class];
-    case WebCore::Node::ATTRIBUTE_NODE:
-    case WebCore::Node::CDATA_SECTION_NODE:
-    case WebCore::Node::PROCESSING_INSTRUCTION_NODE:
-    case WebCore::Node::COMMENT_NODE:
-    case WebCore::Node::DOCUMENT_TYPE_NODE:
-    case WebCore::Node::DOCUMENT_FRAGMENT_NODE:
+    case WebCore::NodeType::Attribute:
+    case WebCore::NodeType::CDATASection:
+    case WebCore::NodeType::ProcessingInstruction:
+    case WebCore::NodeType::Comment:
+    case WebCore::NodeType::DocumentType:
+    case WebCore::NodeType::DocumentFragment:
         return [WKDOMNode class];
     }
     ASSERT_NOT_REACHED();

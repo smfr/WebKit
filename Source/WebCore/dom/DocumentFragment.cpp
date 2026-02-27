@@ -40,7 +40,7 @@ namespace WebCore {
 WTF_MAKE_TZONE_ALLOCATED_IMPL(DocumentFragment);
 
 DocumentFragment::DocumentFragment(Document& document, OptionSet<TypeFlag> typeFlags)
-    : ContainerNode(document, DOCUMENT_FRAGMENT_NODE, typeFlags)
+    : ContainerNode(document, NodeType::DocumentFragment, typeFlags)
 {
     if (document.usesNullCustomElementRegistry())
         setUsesNullCustomElementRegistry();
@@ -66,11 +66,11 @@ String DocumentFragment::nodeName() const
 bool DocumentFragment::childTypeAllowed(NodeType type) const
 {
     switch (type) {
-    case ELEMENT_NODE:
-    case PROCESSING_INSTRUCTION_NODE:
-    case COMMENT_NODE:
-    case TEXT_NODE:
-    case CDATA_SECTION_NODE:
+    case NodeType::Element:
+    case NodeType::ProcessingInstruction:
+    case NodeType::Comment:
+    case NodeType::Text:
+    case NodeType::CDATASection:
         return true;
     default:
         return false;
