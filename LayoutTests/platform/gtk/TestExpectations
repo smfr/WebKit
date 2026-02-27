@@ -588,7 +588,6 @@ webkit.org/b/120839 animations/cross-fade-background-image.html [ ImageOnlyFailu
 webkit.org/b/286132 inspector/debugger/breakpoints/resolved-dump-all-inline-script-pause-locations.html [ Crash ]
 webkit.org/b/299482 inspector/dom-debugger/event-animation-frame-breakpoints.html [ Pass Crash ]
 webkit.org/b/304644 inspector/unit-tests/editing-support.html [ Crash ]
-webkit.org/b/308130 platform/glib/non-compositing/simple-dom.html [ Pass Crash ]
 
 imported/w3c/web-platform-tests/selection/shadow-dom/cross-shadow-boundary-6.html [ Skip ]
 imported/w3c/web-platform-tests/selection/shadow-dom/tentative/Range-isPointInRange.html [ Skip ]
@@ -1537,5 +1536,3 @@ webkit.org/b/306384 fast/css/object-position/object-position-img.html [ ImageOnl
 webkit.org/b/306384 fast/table/row-background-image.html [ ImageOnlyFailure ]
 webkit.org/b/306384 imported/w3c/web-platform-tests/quirks/line-height-in-list-item.html [ ImageOnlyFailure ]
 webkit.org/b/306384 scrollbars/corner-resizer-window-inactive.html [ ImageOnlyFailure ]
-
-webkit.org/b/307945 [ Debug ] platform/glib/damage/basic-propagation-002.html [ Pass Crash ]
