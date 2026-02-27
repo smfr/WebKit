@@ -568,6 +568,8 @@ bool HTMLSelectElement::childShouldCreateRenderer(const Node& child) const
         return true;
     if (isFirstElementChildButton(child))
         return true;
+    if (child.isBeforePseudoElement() || child.isAfterPseudoElement())
+        return true;
     if (usesBaseAppearancePicker())
         return true;
     return validationMessageShadowTreeContains(child);
