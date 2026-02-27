@@ -194,7 +194,7 @@ UsedTrackSizes GridFormattingContext::layout(GridLayoutConstraints layoutConstra
     auto usedJustifyContent = gridStyle->justifyContent().resolve();
     auto usedAlignContent = gridStyle->alignContent().resolve();
 
-    GridLayoutState layoutState { layoutConstraints, gridDefinition, usedJustifyContent, usedAlignContent };
+    GridLayoutState layoutState { layoutConstraints, gridDefinition, usedJustifyContent, usedAlignContent, usedGapValue(gridStyle->columnGap()), usedGapValue(gridStyle->rowGap()) };
 
     auto [ usedTrackSizes, gridItemRects ] = GridLayout { *this }.layout(unplacedGridItems, layoutState);
 
@@ -202,15 +202,10 @@ UsedTrackSizes GridFormattingContext::layout(GridLayoutConstraints layoutConstra
     // Here we translate it to the coordinate space of the grid.
     auto mapGridItemLocationsToGrid = [&] {
 
-        // Compute gap values for columns and rows.
-        // For now, we handle fixed gaps only (not percentages or calc).
-        auto columnGap = GridLayoutUtils::computeGapValue(gridStyle->columnGap());
-        auto rowGap = GridLayoutUtils::computeGapValue(gridStyle->rowGap());
-
         for (auto& gridItemRect : gridItemRects) {
             auto& lineNumbersForGridArea = gridItemRect.lineNumbersForGridArea;
-            auto columnPosition = GridLayoutUtils::computeGridLinePosition(lineNumbersForGridArea.columnStartLine, usedTrackSizes.columnSizes, columnGap);
-            auto rowPosition = GridLayoutUtils::computeGridLinePosition(lineNumbersForGridArea.rowStartLine, usedTrackSizes.rowSizes, rowGap);
+            auto columnPosition = GridLayoutUtils::computeGridLinePosition(lineNumbersForGridArea.columnStartLine, usedTrackSizes.columnSizes, layoutState.usedColumnGap);
+            auto rowPosition = GridLayoutUtils::computeGridLinePosition(lineNumbersForGridArea.rowStartLine, usedTrackSizes.rowSizes, layoutState.usedRowGap);
 
             gridItemRect.borderBoxRect.moveBy({ columnPosition, rowPosition });
         }
@@ -294,12 +289,15 @@ GridFormattingContext::IntrinsicWidths GridFormattingContext::computeIntrinsicWi
     auto usedJustifyContent = gridStyle->justifyContent().resolve();
     auto usedAlignContent = gridStyle->alignContent().resolve();
 
+    auto usedColumnGap = usedGapValue(gridStyle->columnGap());
+    auto usedRowGap = usedGapValue(gridStyle->rowGap());
+
     // Compute min-content width by running the full grid sizing algorithm with MinContent scenario
     GridLayoutConstraints minContentConstraints {
         .inlineAxis = AxisConstraint::minContent(),
         .blockAxis = AxisConstraint::minContent()
     };
-    GridLayoutState minContentLayoutState { minContentConstraints, gridDefinition, usedJustifyContent, usedAlignContent };
+    GridLayoutState minContentLayoutState { minContentConstraints, gridDefinition, usedJustifyContent, usedAlignContent, usedColumnGap, usedRowGap };
     auto [minContentTrackSizes, minContentGridItemRects] = GridLayout { *this }.layout(unplacedGridItems, minContentLayoutState);
     UNUSED_PARAM(minContentGridItemRects);
 
@@ -308,18 +306,16 @@ GridFormattingContext::IntrinsicWidths GridFormattingContext::computeIntrinsicWi
         .inlineAxis = AxisConstraint::maxContent(),
         .blockAxis = AxisConstraint::maxContent()
     };
-    GridLayoutState maxContentLayoutState { maxContentConstraints, gridDefinition, usedJustifyContent, usedAlignContent };
+    GridLayoutState maxContentLayoutState { maxContentConstraints, gridDefinition, usedJustifyContent, usedAlignContent, usedColumnGap, usedRowGap };
     auto [maxContentTrackSizes, maxContentGridItemRects] = GridLayout { *this }.layout(unplacedGridItemsForMaxContent, maxContentLayoutState);
     UNUSED_PARAM(maxContentGridItemRects);
 
     // Sum track sizes and add gaps
-    auto columnsGap = GridLayoutUtils::computeGapValue(gridStyle->columnGap());
-
     auto computeIntrinsicWidth = [&](const TrackSizes& trackSizes) -> LayoutUnit {
         auto sumOfTrackSizes = 0_lu;
         for (auto trackSize : trackSizes)
             sumOfTrackSizes += trackSize;
-        auto totalGutters = trackSizes.size() > 1 ? columnsGap * LayoutUnit(trackSizes.size() - 1) : 0_lu;
+        auto totalGutters = trackSizes.size() > 1 ? usedColumnGap * LayoutUnit(trackSizes.size() - 1) : 0_lu;
         return sumOfTrackSizes + totalGutters;
     };
 

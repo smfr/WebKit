@@ -54,7 +54,7 @@ public:
     static TrackSizes sizeTracks(const PlacedGridItems&, const ComputedSizesList&, const UsedBorderAndPaddingList&,
         const PlacedGridItemSpanList&, const TrackSizingFunctionsList&, std::optional<LayoutUnit> availableGridSpace,
         const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions&,
-        const FreeSpaceScenario&, const LayoutUnit& gapSize, const StyleContentAlignmentData& usedContentAlignment);
+        const FreeSpaceScenario&, const LayoutUnit gapSize, const StyleContentAlignmentData& usedContentAlignment);
 
 private:
 

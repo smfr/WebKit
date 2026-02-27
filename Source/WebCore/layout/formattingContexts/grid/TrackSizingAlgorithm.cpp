@@ -417,7 +417,7 @@ static void maximizeTracks(UnsizedTracks& unsizedTracks, std::optional<LayoutUni
 TrackSizes TrackSizingAlgorithm::sizeTracks(const PlacedGridItems& gridItems, const ComputedSizesList& gridItemComputedSizesList,
     const UsedBorderAndPaddingList& borderAndPaddingList, const PlacedGridItemSpanList& gridItemSpanList, const TrackSizingFunctionsList& trackSizingFunctions,
     std::optional<LayoutUnit> availableGridSpace, const TrackSizingGridItemConstraintList& oppositeAxisConstraints, const GridItemSizingFunctions& gridItemSizingFunctions,
-    const FreeSpaceScenario& freeSpaceScenario, const LayoutUnit& gapSize, const StyleContentAlignmentData& usedContentAlignment)
+    const FreeSpaceScenario& freeSpaceScenario, const LayoutUnit gapSize, const StyleContentAlignmentData& usedContentAlignment)
 {
     ASSERT(gridItems.size() == gridItemSpanList.size());
 

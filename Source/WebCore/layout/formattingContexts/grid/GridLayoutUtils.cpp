@@ -30,18 +30,7 @@ namespace WebCore {
 namespace Layout {
 namespace GridLayoutUtils {
 
-LayoutUnit computeGapValue(const Style::GapGutter& gap)
-{
-    if (gap.isNormal())
-        return { };
 
-    // Only handle fixed length gaps for now
-    if (auto fixedGap = gap.tryFixed())
-        return Style::evaluate<LayoutUnit>(*fixedGap, 0_lu, Style::ZoomNeeded { });
-
-    ASSERT_NOT_REACHED();
-    return { };
-}
 
 LayoutUnit totalGuttersSize(size_t tracksCount, LayoutUnit gapsSize)
 {
