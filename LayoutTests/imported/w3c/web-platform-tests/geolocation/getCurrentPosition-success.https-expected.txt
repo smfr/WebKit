@@ -1,5 +1,6 @@
 
 Harness Error (FAIL), message = Error: bidi.permissions.set_permission() is not implemented by testdriver-vendor.js
 
-NOTRUN Tests Geolocation success callback
+NOTRUN getCurrentPosition called with success and error callbacks
+NOTRUN Error callback is nullable for getCurrentPosition().
 

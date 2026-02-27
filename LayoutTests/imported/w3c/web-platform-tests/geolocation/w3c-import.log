@@ -30,6 +30,7 @@ List of files:
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/getCurrentPosition-success.https.html
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/getCurrentPosition_TypeError.https.html
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/getCurrentPosition_permission_deny.https.html
+/LayoutTests/imported/w3c/web-platform-tests/geolocation/heading-stationary.https.html
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/idlharness.https.window.js
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/non-fully-active.https.html
 /LayoutTests/imported/w3c/web-platform-tests/geolocation/non-secure-contexts.http.html

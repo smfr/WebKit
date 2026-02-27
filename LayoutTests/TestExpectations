@@ -6536,6 +6536,7 @@ webkit.org/b/291197 imported/w3c/web-platform-tests/geolocation/getCurrentPositi
 webkit.org/b/291197 imported/w3c/web-platform-tests/geolocation/tojson.https.window.html [ Skip ]
 webkit.org/b/291197 imported/w3c/web-platform-tests/geolocation/non-fully-active.https.html [ Skip ]
 webkit.org/b/291197 imported/w3c/web-platform-tests/geolocation/enabled-by-permission-policy-attribute-redirect-on-load.https.sub.html [ Skip ]
+webkit.org/b/291197 imported/w3c/web-platform-tests/geolocation/heading-stationary.https.html [ Skip ]
 # Bug 253126: Permissions-Policy HTTP header not implemented - tests use header to restrict/allow geolocation
 webkit.org/b/253126 imported/w3c/web-platform-tests/geolocation/disabled-by-permissions-policy.https.sub.html [ Skip ]
 webkit.org/b/253126 imported/w3c/web-platform-tests/geolocation/enabled-by-permissions-policy.https.sub.html [ Skip ]
