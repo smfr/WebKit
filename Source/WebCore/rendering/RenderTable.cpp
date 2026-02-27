@@ -4,7 +4,7 @@
  *           (C) 1998 Waldo Bastian (bastian@kde.org)
  *           (C) 1999 Lars Knoll (knoll@kde.org)
  *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2003-2026 Apple Inc. All rights reserved.
  * Copyright (C) 2014-2019 Google Inc. All rights reserved.
  * Copyright (C) 2006 Alexey Proskuryakov (ap@nypop.com)
  *
@@ -810,7 +810,10 @@ void RenderTable::addOverflowFromInFlowChildren(OptionSet<ComputeOverflowOptions
         LayoutUnit topBorderOverflow = borderTop() - outerBorderTop();
         LayoutRect borderOverflowRect(leftBorderOverflow, topBorderOverflow, rightBorderOverflow - leftBorderOverflow, bottomBorderOverflow - topBorderOverflow);
         if (borderOverflowRect != borderBoxRect()) {
-            addLayoutOverflow(borderOverflowRect);
+            // Do NOT add layout overflow for collapsed borders — they are a
+            // painting artifact and must not inflate the scroll container's
+            // scrollWidth/scrollHeight.
+            // See https://github.com/w3c/csswg-drafts/issues/6230
             addVisualOverflow(borderOverflowRect);
         }
     }
