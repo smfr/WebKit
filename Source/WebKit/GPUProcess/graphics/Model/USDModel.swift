@@ -1352,6 +1352,16 @@ extension WKBridgeBlendShapeData {
             weights += Array(repeating: debugWeights[i], count: positionCount)
         }
 
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let blendWeightsBuffer = unsafe device.makeBuffer(
+            bytes: weights,
+            length: weights.count * MemoryLayout<Float>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let blendWeightsBuffer = device.makeBuffer(
@@ -1359,6 +1369,7 @@ extension WKBridgeBlendShapeData {
             length: weights.count * MemoryLayout<Float>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let blendWeightsDescription = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
@@ -1369,6 +1380,16 @@ extension WKBridgeBlendShapeData {
         )!
 
         let positionOffsets = debugPositionOffsets.flatMap(\.self)
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let positionOffsetsBuffer = unsafe device.makeBuffer(
+            bytes: positionOffsets,
+            length: positionOffsets.count * MemoryLayout<SIMD3<Float>>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let positionOffsetsBuffer = device.makeBuffer(
@@ -1376,6 +1397,7 @@ extension WKBridgeBlendShapeData {
             length: positionOffsets.count * MemoryLayout<SIMD3<Float>>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let positionOffsetsDescription = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
@@ -1401,6 +1423,16 @@ extension WKBridgeBlendShapeData {
 extension WKBridgeRenormalizationData {
     func makeDeformerDescription(device: MTLDevice) throws -> _Proto_LowLevelDeformerDescription_v1 {
         // Create adjacency buffer
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let adjacenciesMetalBuffer = unsafe device.makeBuffer(
+            bytes: vertexAdjacencies,
+            length: vertexAdjacencies.count * MemoryLayout<UInt32>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let adjacenciesMetalBuffer = device.makeBuffer(
@@ -1408,6 +1440,7 @@ extension WKBridgeRenormalizationData {
             length: vertexAdjacencies.count * MemoryLayout<UInt32>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let adjacenciesBuffer = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
@@ -1418,6 +1451,16 @@ extension WKBridgeRenormalizationData {
         )!
 
         // Create adjacency end indices buffer
+        // FIXME: (rdar://164559261) understand/document/remove unsafety
+        #if compiler(>=6.2)
+        // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
+        // swift-format-ignore: NeverForceUnwrap
+        let adjacencyEndIndicesMetalBuffer = unsafe device.makeBuffer(
+            bytes: vertexAdjacencyEndIndices,
+            length: vertexAdjacencyEndIndices.count * MemoryLayout<UInt32>.size,
+            options: .storageModeShared
+        )!
+        #else
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let adjacencyEndIndicesMetalBuffer = device.makeBuffer(
@@ -1425,6 +1468,7 @@ extension WKBridgeRenormalizationData {
             length: vertexAdjacencyEndIndices.count * MemoryLayout<UInt32>.size,
             options: .storageModeShared
         )!
+        #endif
         // FIXME: https://bugs.webkit.org/show_bug.cgi?id=305857
         // swift-format-ignore: NeverForceUnwrap
         let adjacencyEndIndicesBuffer = _Proto_LowLevelDeformationDescription_v1.Buffer.make(
