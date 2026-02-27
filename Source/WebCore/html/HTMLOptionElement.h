@@ -29,6 +29,8 @@
 namespace WebCore {
 
 class HTMLSelectElement;
+class HTMLSlotElement;
+class HTMLSpanElement;
 
 enum class AllowStyleInvalidation : bool { No, Yes };
 
@@ -84,6 +86,8 @@ private:
 
     void attributeChanged(const QualifiedName&, const AtomString& oldValue, const AtomString& newValue, AttributeModificationReason) final;
 
+    void didAddUserAgentShadowRoot(ShadowRoot&) final;
+
     bool accessKeyAction(bool) final;
 
     void defaultEventHandler(Event&) final;
@@ -95,10 +99,14 @@ private:
     String collectOptionInnerText() const;
     String collectOptionInnerTextCollapsingWhitespace() const;
 
+    void updateLabelInShadowTree(const AtomString& labelValue);
+
     bool m_disabled { false };
     bool m_isSelected { false };
     bool m_isDefault { false };
     WeakPtr<HTMLSelectElement, WeakPtrImplWithEventTargetData> m_ownerSelect;
+    WeakPtr<HTMLSlotElement, WeakPtrImplWithEventTargetData> m_slot;
+    WeakPtr<HTMLSpanElement, WeakPtrImplWithEventTargetData> m_label;
 };
 
 } // namespace

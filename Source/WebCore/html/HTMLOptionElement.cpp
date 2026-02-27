@@ -38,6 +38,8 @@
 #include "HTMLOptGroupElement.h"
 #include "HTMLSelectElement.h"
 #include "HTMLSelectedContentElement.h"
+#include "HTMLSlotElement.h"
+#include "HTMLSpanElement.h"
 #include "KeyboardEvent.h"
 #include "MouseEvent.h"
 #include "NodeName.h"
@@ -79,7 +81,7 @@ Ref<HTMLOptionElement> HTMLOptionElement::create(const QualifiedName& tagName, D
 
 ExceptionOr<Ref<HTMLOptionElement>> HTMLOptionElement::createForLegacyFactoryFunction(Document& document, String&& text, const AtomString& value, bool defaultSelected, bool selected)
 {
-    auto element = create(document);
+    Ref element = create(document);
 
     if (!text.isEmpty()) {
         auto appendResult = element->appendChild(Text::create(document, WTF::move(text)));
@@ -94,6 +96,21 @@ ExceptionOr<Ref<HTMLOptionElement>> HTMLOptionElement::createForLegacyFactoryFun
     element->setSelected(selected);
 
     return element;
+}
+
+void HTMLOptionElement::didAddUserAgentShadowRoot(ShadowRoot& root)
+{
+    Ref document = this->document();
+    ScriptDisallowedScope::EventAllowedScope rootScope { root };
+
+    Ref label = HTMLSpanElement::create(document);
+    ScriptDisallowedScope::EventAllowedScope labelScope { label };
+    root.appendChild(label);
+    m_label = WTF::move(label);
+
+    Ref slot = HTMLSlotElement::create(slotTag, document);
+    root.appendChild(slot);
+    m_slot = WTF::move(slot);
 }
 
 auto HTMLOptionElement::insertedIntoAncestor(InsertionType insertionType, ContainerNode& parentOfInsertedTree) -> InsertedIntoAncestorResult
@@ -325,6 +342,9 @@ void HTMLOptionElement::attributeChanged(const QualifiedName& name, const AtomSt
     case AttributeNames::labelAttr: {
         if (RefPtr select = ownerSelectElement())
             select->optionElementChildrenChanged();
+        if (!newValue.isNull() && document().settings().htmlEnhancedSelectEnabled())
+            ensureUserAgentShadowRoot();
+        updateLabelInShadowTree(newValue);
         break;
     }
     case AttributeNames::valueAttr:
@@ -334,6 +354,26 @@ void HTMLOptionElement::attributeChanged(const QualifiedName& name, const AtomSt
     default:
         HTMLElement::attributeChanged(name, oldValue, newValue, attributeModificationReason);
         break;
+    }
+}
+
+void HTMLOptionElement::updateLabelInShadowTree(const AtomString& labelValue)
+{
+    RefPtr label = m_label;
+    if (!label)
+        return;
+
+    ASSERT(document().settings().htmlEnhancedSelectEnabled());
+    Ref slot = *m_slot;
+
+    if (!labelValue.isNull()) {
+        label->setTextContent(String { labelValue });
+        label->setInlineStyleProperty(CSSPropertyDisplay, CSSValueInline);
+        slot->setInlineStyleProperty(CSSPropertyDisplay, CSSValueNone);
+    } else {
+        label->setTextContent({ });
+        label->setInlineStyleProperty(CSSPropertyDisplay, CSSValueNone);
+        slot->setInlineStyleProperty(CSSPropertyDisplay, CSSValueContents);
     }
 }
 
