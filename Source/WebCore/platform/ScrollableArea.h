@@ -276,6 +276,11 @@ public:
     WEBCORE_EXPORT virtual ScrollPosition minimumScrollPosition() const;
     WEBCORE_EXPORT virtual ScrollPosition maximumScrollPosition() const;
 
+    virtual ScrollPosition adjustScrollPositionWithinRange(const ScrollPosition& position) const
+    {
+        return constrainedScrollPosition(position);
+    }
+
     ScrollPosition constrainedScrollPosition(const ScrollPosition& position) const
     {
         return position.constrainedBetween(minimumScrollPosition(), maximumScrollPosition());

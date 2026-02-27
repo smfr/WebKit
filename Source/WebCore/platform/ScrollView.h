@@ -255,7 +255,7 @@ public:
     ScrollPosition maximumScrollPosition() const override; // The maximum position we can be scrolled to.
 
     // Adjust the passed in scroll position to keep it between the minimum and maximum positions.
-    ScrollPosition adjustScrollPositionWithinRange(const ScrollPosition&) const;
+    ScrollPosition adjustScrollPositionWithinRange(const ScrollPosition&) const override;
     int scrollX() const { return scrollPosition().x(); }
     int scrollY() const { return scrollPosition().y(); }
 

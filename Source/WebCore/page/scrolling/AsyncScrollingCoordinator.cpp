@@ -398,9 +398,13 @@ bool AsyncScrollingCoordinator::requestScrollToPosition(ScrollableArea& scrollab
     bool inProgrammaticScroll = scrollableArea.currentScrollType() == ScrollType::Programmatic;
 
     if ((inProgrammaticScroll && options.animated == ScrollIsAnimated::No) || inBackForwardCache) {
+        auto adjustedScrollPosition = scrollPosition;
+        if (options.clamping == ScrollClamping::Clamped)
+            adjustedScrollPosition = scrollableArea.adjustScrollPositionWithinRange(scrollPosition);
+
         auto scrollUpdate = ScrollUpdate {
             .nodeID = *scrollingNodeID,
-            .scrollPosition = scrollPosition,
+            .scrollPosition = adjustedScrollPosition,
             .data = ScrollUpdateData {
                 .updateType = ScrollUpdateType::PositionUpdate,
                 .updateLayerPositionAction = ScrollingLayerPositionAction::Set,
