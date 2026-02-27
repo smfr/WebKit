@@ -409,7 +409,7 @@ WI.ColorSquare = class ColorSquare
 
     _calculateContrastLinePoints(targetRatio, backgroundLuminance)
     {
-        if (backgroundLuminance < 0.5)
+        if (backgroundLuminance >= 0.5)
             targetRatio = 1 / targetRatio;
 
         let targetLuminance = ((backgroundLuminance + 0.05) * targetRatio) - 0.05;
