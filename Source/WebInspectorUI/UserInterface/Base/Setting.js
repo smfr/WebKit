@@ -118,7 +118,7 @@ WI.Setting = class Setting extends WI.Object
         if (!window.InspectorTest && window.localStorage) {
             let key = WI.Setting._localStorageKeyPrefix + this._name;
             try {
-                if (Object.shallowEqual(this._value, this._defaultValue))
+                if (this._value === this._defaultValue || Object.shallowEqual(this._value, this._defaultValue))
                     window.localStorage.removeItem(key);
                 else
                     window.localStorage.setItem(key, JSON.stringify(this._value));

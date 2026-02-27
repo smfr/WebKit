@@ -72,30 +72,6 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         return components.concat(currentContentView.selectionPathComponents);
     }
 
-    attached()
-    {
-        super.attached();
-
-        if (this._shownInitialContent)
-            return;
-
-        this._enableCustomResponseContentViewsPromise
-        .then(() => {
-            let identifier = this._getPreferredContentViewIdentifier();
-            this._showContentViewForIdentifier(identifier);
-        })
-        .catch((error) => {
-            WI.reportInternalError(error);
-        });
-    }
-
-    closed()
-    {
-        super.closed();
-
-        this._shownInitialContent = false;
-    }
-
     restoreFromCookie(cookie)
     {
         let contentViewIdentifier = cookie[WI.ResourceClusterContentView.ContentViewIdentifierCookieKey] || this._getPreferredContentViewIdentifier();
@@ -338,7 +314,7 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         return null;
     }
 
-    _showContentViewForIdentifier(identifier, saveAsPreference)
+    _showContentViewForIdentifier(identifier, {saveAsPreference} = {})
     {
         let contentViewToShow = null;
 
@@ -385,15 +361,12 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         if (saveAsPreference)
             this._setPreferredContentViewIdentifier(identifier);
 
-        this._shownInitialContent = true;
-
         return this.contentViewContainer.showContentView(contentViewToShow);
     }
 
     _pathComponentSelected(event)
     {
-        const saveAsPreference = true;
-        this._showContentViewForIdentifier(event.data.pathComponent.representedObject, saveAsPreference);
+        this._showContentViewForIdentifier(event.data.pathComponent.representedObject, {saveAsPreference: true});
     }
 
     _resourceTypeDidChange(event)
@@ -482,8 +455,15 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         if (!mimeType)
             return null;
 
-        let preferences = WI.settings.resourceContentViewIdentifierForMIMEType.value;
-        return preferences[mimeType] || null;
+        return this._getPreferredContentViewSetting(mimeType).value;
+    }
+
+    _getPreferredContentViewSetting(mimeType)
+    {
+        WI.ResourceClusterContentView._preferredContentViewIdentifierSettingForMIMEType ??= new Map;
+        let setting = WI.ResourceClusterContentView._preferredContentViewIdentifierSettingForMIMEType.getOrInsertComputed(mimeType, () => new WI.Setting("resource-preferred-content-view-" + mimeType, ResourceClusterContentView.Identifier.Response));
+
+        return setting;
     }
 
     _setPreferredContentViewIdentifier(identifier)
@@ -492,15 +472,13 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         if (!mimeType)
             return;
 
-        let preferences = WI.settings.resourceContentViewIdentifierForMIMEType.value;
+        let setting = this._getPreferredContentViewSetting(mimeType);
 
-        if (identifier === ResourceClusterContentView.Identifier.Response)
-            delete preferences[mimeType];
-        else
-            preferences[mimeType] = identifier;
+        if (identifier === setting.defaultValue)
+            WI.ResourceClusterContentView._preferredContentViewIdentifierSettingForMIMEType.delete(mimeType);
 
-        // `preferences` is a referenced object. Changing its contents and simply setting it as a new value won't qualify as value change so it won't be persisted.
-        WI.settings.resourceContentViewIdentifierForMIMEType.value = structuredClone(preferences);
+        // Resetting to the default value automatically removes the setting from persistent storage.
+        setting.value = identifier;
     }
 
     _tryEnableCustomRequestContentViews()
@@ -540,61 +518,59 @@ WI.ResourceClusterContentView = class ResourceClusterContentView extends WI.Clus
         }
     }
 
-    _tryEnableCustomResponseContentViews()
+    async _tryEnableCustomResponseContentViews()
     {
         if (!this._resource.hasResponse())
-            return Promise.resolve();
+            return;
 
         // WebSocket resources already use a "custom" response content view.
         if (this._resource instanceof WI.WebSocketResource)
-            return Promise.resolve();
+            return;
 
-        return this._resource.requestContent()
-        .then(({error, content}) => {
-            if (error || typeof content !== "string")
-                return;
+        let {error, content} = await this._resource.requestContent();
+        if (error || typeof content !== "string")
+            return;
 
-            if (this._canUseJSONContentViewForContent(content)) {
-                this._customResponseJSONContentViewInitializer = () => new WI.LocalJSONContentView(content, this._resource);
+        if (this._canUseJSONContentViewForContent(content)) {
+            this._customResponseJSONContentViewInitializer = () => new WI.LocalJSONContentView(content, this._resource);
 
-                this._customResponseJSONPathComponent = this._createPathComponent({
-                    displayName: WI.UIString("Response (Object Tree)"),
-                    styleClassNames: ["object-icon"],
-                    identifier: ResourceClusterContentView.Identifier.ResponseJSON,
+            this._customResponseJSONPathComponent = this._createPathComponent({
+                displayName: WI.UIString("Response (Object Tree)"),
+                styleClassNames: ["object-icon"],
+                identifier: ResourceClusterContentView.Identifier.ResponseJSON,
+                previousSibling: this._responsePathComponent,
+            });
+
+            this.dispatchEventToListeners(WI.ContentView.Event.SelectionPathComponentsDidChange);
+            return;
+        }
+
+        let mimeType = this._normalizeMIMETypeForDOM(this._resource.mimeType);
+
+        if (this._canUseDOMContentViewForContent(content, mimeType)) {
+            if (mimeType === "image/svg+xml") {
+                this._customResponseTextContentViewInitializer = () => new WI.TextContentView(content, mimeType, this._resource);
+
+                this._customResponseTextPathComponent = this._createPathComponent({
+                    displayName: WI.UIString("Response (Text)"),
+                    styleClassNames: ["source-icon"],
+                    identifier: ResourceClusterContentView.Identifier.ResponseText,
                     previousSibling: this._responsePathComponent,
                 });
-
-                this.dispatchEventToListeners(WI.ContentView.Event.SelectionPathComponentsDidChange);
-                return;
             }
 
-            let mimeType = this._normalizeMIMETypeForDOM(this._resource.mimeType);
+            this._customResponseDOMContentViewInitializer = () => new WI.LocalDOMContentView(content, mimeType, this._resource);
 
-            if (this._canUseDOMContentViewForContent(content, mimeType)) {
-                if (mimeType === "image/svg+xml") {
-                    this._customResponseTextContentViewInitializer = () => new WI.TextContentView(content, mimeType, this._resource);
+            this._customResponseDOMPathComponent = this._createPathComponent({
+                displayName: WI.UIString("Response (DOM Tree)"),
+                styleClassNames: ["dom-document-icon"],
+                identifier: ResourceClusterContentView.Identifier.ResponseDOM,
+                previousSibling: this._customResponseTextPathComponent || this._responsePathComponent,
+            });
 
-                    this._customResponseTextPathComponent = this._createPathComponent({
-                        displayName: WI.UIString("Response (Text)"),
-                        styleClassNames: ["source-icon"],
-                        identifier: ResourceClusterContentView.Identifier.ResponseText,
-                        previousSibling: this._responsePathComponent,
-                    });
-                }
-
-                this._customResponseDOMContentViewInitializer = () => new WI.LocalDOMContentView(content, mimeType, this._resource);
-
-                this._customResponseDOMPathComponent = this._createPathComponent({
-                    displayName: WI.UIString("Response (DOM Tree)"),
-                    styleClassNames: ["dom-document-icon"],
-                    identifier: ResourceClusterContentView.Identifier.ResponseDOM,
-                    previousSibling: this._customResponseTextPathComponent || this._responsePathComponent,
-                });
-
-                this.dispatchEventToListeners(WI.ContentView.Event.SelectionPathComponentsDidChange);
-                return;
-            }
-        });
+            this.dispatchEventToListeners(WI.ContentView.Event.SelectionPathComponentsDidChange);
+            return;
+        }
     }
 };
 
