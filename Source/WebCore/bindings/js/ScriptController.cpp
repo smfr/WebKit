@@ -484,14 +484,13 @@ void ScriptController::setTrustedTypesEnforcement(JSC::TrustedTypesEnforcement e
     proxy->window()->setTrustedTypesEnforcement(enforcement);
 }
 
-bool ScriptController::canAccessFromCurrentOrigin(LocalFrame* frame, Document& accessingDocument)
+bool ScriptController::canAccessFromCurrentOrigin(Frame* frame, Document& accessingDocument)
 {
     auto* lexicalGlobalObject = JSExecState::currentState();
 
     // If the current lexicalGlobalObject is null we should use the accessing document for the security check.
     if (!lexicalGlobalObject) {
-        RefPtr targetDocument = frame ? frame->document() : nullptr;
-        return targetDocument && protect(accessingDocument.securityOrigin())->isSameOriginDomain(protect(targetDocument->securityOrigin()));
+        return frame && frame->frameDocumentSecurityOrigin() && protect(accessingDocument.securityOrigin())->isSameOriginDomain(*protect(frame->frameDocumentSecurityOrigin()));
     }
 
     return BindingSecurity::shouldAllowAccessToFrame(lexicalGlobalObject, frame);

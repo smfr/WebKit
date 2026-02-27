@@ -80,6 +80,8 @@ bool HTMLFrameElementBase::canLoadURL(const URL& completeURL) const
         RefPtr contentDocument = this->contentDocument();
         if (contentDocument && !ScriptController::canAccessFromCurrentOrigin(protect(contentDocument->frame()).get(), protect(document()).get()))
             return false;
+        else if (RefPtr contentFrame = this->contentFrame(); contentFrame && !ScriptController::canAccessFromCurrentOrigin(contentFrame, protect(document()).get()))
+            return false;
     }
 
     return !isProhibitedSelfReference(completeURL);
