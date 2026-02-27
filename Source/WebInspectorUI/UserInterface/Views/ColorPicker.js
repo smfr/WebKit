@@ -25,13 +25,18 @@
 
 WI.ColorPicker = class ColorPicker extends WI.Object
 {
-    constructor({preventChangingColorFormats, colorVariables} = {})
+    constructor({preventChangingColorFormats, colorVariables, contrastInfo} = {})
     {
         super();
 
         this._preventChangingColorFormats = !!preventChangingColorFormats;
+        this._contrastInfo = contrastInfo || null;
 
         this._colorSquare = new WI.ColorSquare(this, 200);
+        if (this._contrastInfo?.backgroundColor) {
+            this._colorSquare.contrastBackgroundColor = this._contrastInfo.backgroundColor;
+            this._colorSquare.isLargeText = !!this._contrastInfo.isLargeText;
+        }
 
         this._hueSlider = new WI.Slider;
         this._hueSlider.delegate = this;
@@ -92,6 +97,10 @@ WI.ColorPicker = class ColorPicker extends WI.Object
             colorInputsWrapperElement.appendChild(pickColorElement);
         }
 
+        this._contrastInfoElement = null;
+        if (this._contrastInfo?.backgroundColor)
+            this._createContrastInfoSection();
+
         this._opacity = 0;
         this._opacityPattern = "url(Images/Checkers.svg)";
 
@@ -103,7 +112,7 @@ WI.ColorPicker = class ColorPicker extends WI.Object
 
             let swatchesTitle = variableColorSwatchesContainer.appendChild(document.createElement("h2"));
             swatchesTitle.textContent = WI.UIString("Variables", "Variables @ Color Picker", "Title of swatches section in Color Picker");
-            
+
             let variableColorSwatchesListElement = variableColorSwatchesContainer.appendChild(document.createElement("ul"));
             let sortedColorVariables = WI.ColorPicker.sortColorVariables(colorVariables);
 
@@ -236,6 +245,7 @@ WI.ColorPicker = class ColorPicker extends WI.Object
             return;
 
         this._opacity = opacity;
+        this._colorSquare.opacity = opacity;
         this._updateColor();
     }
 
@@ -253,6 +263,7 @@ WI.ColorPicker = class ColorPicker extends WI.Object
         this._color = color;
 
         this._colorSquare.tintedColor = this._color;
+        this._colorSquare.opacity = this._color.alpha;
 
         this._hueSlider.value = this._color.hsl[0] / 360;
 
@@ -261,6 +272,7 @@ WI.ColorPicker = class ColorPicker extends WI.Object
 
         this._showColorComponentInputs();
         this._updateColorGamut();
+        this._updateContrastInfo();
 
         this._dontUpdateColor = false;
     }
@@ -318,6 +330,7 @@ WI.ColorPicker = class ColorPicker extends WI.Object
         this.dispatchEventToListeners(WI.ColorPicker.Event.ColorChanged, {color: this._color});
 
         this._updateColorGamut();
+        this._updateContrastInfo();
     }
 
     _updateOpacitySlider()
@@ -492,6 +505,57 @@ WI.ColorPicker = class ColorPicker extends WI.Object
                 this._updateColorGamut();
                 this.dispatchEventToListeners(WI.ColorPicker.Event.ColorChanged, {color: this._color});
             });
+        }
+    }
+
+    _createContrastInfoSection()
+    {
+        this._contrastInfoElement = this._element.appendChild(document.createElement("div"));
+        this._contrastInfoElement.classList.add("contrast-info");
+
+        let labelElement = this._contrastInfoElement.appendChild(document.createElement("span"));
+        labelElement.classList.add("contrast-label");
+        labelElement.textContent = WI.UIString("Contrast", "Contrast @ Color Picker", "Label for contrast ratio section in Color Picker");
+
+        this._contrastRatioElement = this._contrastInfoElement.appendChild(document.createElement("span"));
+        this._contrastRatioElement.classList.add("contrast-ratio");
+
+        this._complianceBadgeElement = this._contrastInfoElement.appendChild(document.createElement("span"));
+        this._complianceBadgeElement.classList.add("compliance-badge");
+
+        let separatorElement = this._contrastInfoElement.appendChild(document.createElement("span"));
+        separatorElement.classList.add("contrast-separator");
+        separatorElement.textContent = WI.UIString("vs", "vs @ Color Picker Contrast", "Separator between foreground and background colors in contrast info");
+
+        let backgroundSwatch = new WI.InlineSwatch(WI.InlineSwatch.Type.Color, this._contrastInfo.backgroundColor, {readOnly: true, tooltip: WI.UIString("Background Color")});
+        this._contrastInfoElement.appendChild(backgroundSwatch.element);
+    }
+
+    _updateContrastInfo()
+    {
+        if (!this._contrastInfo?.backgroundColor || !this._contrastInfoElement)
+            return;
+
+        let effectiveForeground = this._color.blendOverBackground(this._contrastInfo.backgroundColor);
+
+        let ratio = effectiveForeground.contrastRatio(this._contrastInfo.backgroundColor);
+        let isLargeText = !!this._contrastInfo.isLargeText;
+        let compliance = WI.Color.contrastComplianceForRatio(ratio, {isLargeText});
+
+        this._contrastRatioElement.textContent = ratio.toFixed(2) + ":1";
+
+        this._complianceBadgeElement.textContent = compliance;
+        this._complianceBadgeElement.className = "compliance-badge";
+        switch (compliance) {
+        case WI.Color.ContrastCompliance.AAA:
+            this._complianceBadgeElement.classList.add("contrast-aaa");
+            break;
+        case WI.Color.ContrastCompliance.AA:
+            this._complianceBadgeElement.classList.add("contrast-aa");
+            break;
+        case WI.Color.ContrastCompliance.Fail:
+            this._complianceBadgeElement.classList.add("contrast-fail");
+            break;
         }
     }
 };

@@ -490,6 +490,35 @@ WI.SpreadsheetStyleProperty = class SpreadsheetStyleProperty extends WI.Object
         return this._property.ownerStyle.nodeStyles.computedStyle.variablesForType(WI.CSSStyleDeclaration.VariablesGroupType.Colors);
     }
 
+    inlineSwatchGetContrastInfo(inlineSwatch)
+    {
+        let propertyName = this._property.name.toLowerCase();
+        let isTextColorProperty = propertyName === "color" || propertyName === "-webkit-text-fill-color" || propertyName === "-webkit-text-stroke-color";
+
+        if (!isTextColorProperty)
+            return null;
+
+        let computedStyle = this._property.ownerStyle.nodeStyles?.computedStyle;
+        if (!computedStyle)
+            return null;
+
+        let backgroundColor = WI.Color.fromString(computedStyle.propertyForName("background-color")?.value ?? "");
+        if (!backgroundColor)
+            return null;
+
+        if (backgroundColor.alpha < 1)
+            backgroundColor = backgroundColor.blendOverBackground(WI.Color.fromString("white"));
+
+        let fontSizeInPt = parseFloat(computedStyle.propertyForName("font-size")?.value) * 0.75;
+        let isLargeText = fontSizeInPt >= 18;
+        if (!isLargeText && fontSizeInPt >= 14) {
+            let fontWeight = parseInt(computedStyle.propertyForName("font-weight")?.value);
+            isLargeText = fontWeight >= 700;
+        }
+
+        return {backgroundColor, isLargeText};
+    }
+
     // Private
 
     _toggle()
