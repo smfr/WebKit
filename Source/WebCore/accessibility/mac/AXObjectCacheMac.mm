@@ -730,6 +730,8 @@ static bool isTestAXClientType(AXClientType client)
     return client == kAXClientTypeWebKitTesting || client == kAXClientTypeXCTest;
 }
 
+// FIXME: We should inline this function, otherwise we probably aren't
+// benefiting much from the unlikely annotation.
 bool AXObjectCache::clientIsInTestMode()
 {
     if (isTestAXClientType(_AXGetClientForCurrentRequestUntrusted())) [[unlikely]]
