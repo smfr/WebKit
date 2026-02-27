@@ -173,7 +173,7 @@ RefPtr<AudioWorkletProcessor> AudioWorkletGlobalScope::createProcessor(const Str
     if (!jsProcessor)
         return nullptr;
 
-    m_processors.add(protect(jsProcessor->wrapped()).get());
+    m_processors.add(jsProcessor->wrapped());
     return &jsProcessor->wrapped();
 }
 

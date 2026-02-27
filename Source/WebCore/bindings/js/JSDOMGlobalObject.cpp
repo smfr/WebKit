@@ -238,7 +238,7 @@ JSC_DEFINE_HOST_FUNCTION(addAbortAlgorithmToSignal, (JSGlobalObject* globalObjec
     auto* jsDOMGlobalObject = JSC::jsCast<JSDOMGlobalObject*>(globalObject);
     Ref<AbortAlgorithm> abortAlgorithm = JSAbortAlgorithm::create(callFrame->uncheckedArgument(1).getObject(), jsDOMGlobalObject);
 
-    auto algorithmIdentifier = AbortSignal::addAbortAlgorithmToSignal(protect(abortSignal->wrapped()).get(), WTF::move(abortAlgorithm));
+    auto algorithmIdentifier = AbortSignal::addAbortAlgorithmToSignal(abortSignal->wrapped(), WTF::move(abortAlgorithm));
     return JSValue::encode(JSC::jsNumber(algorithmIdentifier));
 }
 
@@ -251,7 +251,7 @@ JSC_DEFINE_HOST_FUNCTION(removeAbortAlgorithmFromSignal, (JSGlobalObject*, CallF
     if (!abortSignal) [[unlikely]]
         return JSValue::encode(JSValue(JSC::JSValue::JSFalse));
 
-    AbortSignal::removeAbortAlgorithmFromSignal(protect(abortSignal->wrapped()).get(), callFrame->uncheckedArgument(1).asUInt32());
+    AbortSignal::removeAbortAlgorithmFromSignal(abortSignal->wrapped(), callFrame->uncheckedArgument(1).asUInt32());
     return JSValue::encode(JSC::jsUndefined());
 }
 
@@ -274,7 +274,7 @@ JSC_DEFINE_HOST_FUNCTION(signalAbort, (JSGlobalObject*, CallFrame* callFrame))
 
     auto* abortSignal = jsDynamicCast<JSAbortSignal*>(callFrame->uncheckedArgument(0));
     if (abortSignal) [[unlikely]]
-        protect(abortSignal->wrapped())->signalAbort(callFrame->uncheckedArgument(1));
+        abortSignal->wrapped().signalAbort(callFrame->uncheckedArgument(1));
     return JSValue::encode(JSC::jsUndefined());
 }
 
@@ -387,16 +387,16 @@ void JSDOMGlobalObject::finishCreation(VM& vm, JSObject* thisValue)
 
 ScriptExecutionContext* JSDOMGlobalObject::scriptExecutionContext() const
 {
-    if (inherits<JSDOMWindowBase>())
-        return jsCast<const JSDOMWindowBase*>(this)->scriptExecutionContext();
-    if (inherits<JSShadowRealmGlobalScopeBase>())
-        return jsCast<const JSShadowRealmGlobalScopeBase*>(this)->scriptExecutionContext();
-    if (inherits<JSWorkerGlobalScopeBase>())
-        return jsCast<const JSWorkerGlobalScopeBase*>(this)->scriptExecutionContext();
-    if (inherits<JSWorkletGlobalScopeBase>())
-        return jsCast<const JSWorkletGlobalScopeBase*>(this)->scriptExecutionContext();
-    if (inherits<JSIDBSerializationGlobalObject>())
-        return jsCast<const JSIDBSerializationGlobalObject*>(this)->scriptExecutionContext();
+    if (auto* window = jsDynamicCast<const JSDOMWindowBase*>(this))
+        return window->scriptExecutionContext();
+    if (auto* worker = jsDynamicCast<const JSWorkerGlobalScopeBase*>(this))
+        return &worker->wrapped();
+    if (auto* worklet = jsDynamicCast<const JSWorkletGlobalScopeBase*>(this))
+        return &worklet->wrapped();
+    if (auto* idb = jsDynamicCast<const JSIDBSerializationGlobalObject*>(this))
+        return &idb->scriptExecutionContext();
+    if (auto* shadowRealm = jsDynamicCast<const JSShadowRealmGlobalScopeBase*>(this))
+        return shadowRealm->scriptExecutionContext();
 
     dataLog("Unexpected global object: ", JSValue(this), "\n");
     RELEASE_ASSERT_NOT_REACHED();

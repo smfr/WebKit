@@ -116,7 +116,7 @@ const GlobalObjectMethodTable* JSDOMWindowBase::globalObjectMethodTable()
     return &table;
 };
 
-JSDOMWindowBase::JSDOMWindowBase(VM& vm, Structure* structure, RefPtr<DOMWindow>&& window, JSWindowProxy* proxy)
+JSDOMWindowBase::JSDOMWindowBase(VM& vm, Structure* structure, Ref<DOMWindow>&& window, JSWindowProxy* proxy)
     : JSDOMGlobalObject(vm, structure, proxy->world(), globalObjectMethodTable())
     , m_wrapped(WTF::move(window))
 {
@@ -124,11 +124,6 @@ JSDOMWindowBase::JSDOMWindowBase(VM& vm, Structure* structure, RefPtr<DOMWindow>
 }
 
 JSDOMWindowBase::~JSDOMWindowBase() = default;
-
-DOMWindow& JSDOMWindowBase::wrapped() const
-{
-    return *m_wrapped;
-}
 
 SUPPRESS_ASAN inline void JSDOMWindowBase::initStaticGlobals(JSC::VM& vm)
 {
@@ -149,10 +144,10 @@ void JSDOMWindowBase::finishCreation(VM& vm, JSWindowProxy* proxy)
 
     initStaticGlobals(vm);
 
-    if (m_wrapped && m_wrapped->frame() && m_wrapped->frame()->settings().needsSiteSpecificQuirks())
+    if (m_wrapped->frame() && m_wrapped->frame()->settings().needsSiteSpecificQuirks())
         setNeedsSiteSpecificQuirks(true);
 
-    if (m_wrapped && ((m_wrapped->frame() && m_wrapped->frame()->settings().showModalDialogEnabled()) || (m_wrapped->documentIfLocal() && m_wrapped->documentIfLocal()->quirks().shouldExposeShowModalDialog())))
+    if ((m_wrapped->frame() && m_wrapped->frame()->settings().showModalDialogEnabled()) || (m_wrapped->documentIfLocal() && m_wrapped->documentIfLocal()->quirks().shouldExposeShowModalDialog()))
         putDirectCustomAccessor(vm, builtinNames(vm).showModalDialogPublicName(), CustomGetterSetter::create(vm, showModalDialogGetter, nullptr), std::to_underlying(PropertyAttribute::CustomValue));
 }
 

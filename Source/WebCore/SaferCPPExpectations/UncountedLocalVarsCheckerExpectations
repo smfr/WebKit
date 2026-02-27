@@ -21,18 +21,14 @@ accessibility/AccessibilityObject.cpp
 [ iOS ] accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
 [ iOS ] bindings/js/CommonVM.cpp
 bindings/js/JSAbortSignalCustom.cpp
-bindings/js/JSAudioWorkletProcessorCustom.cpp
 bindings/js/JSCSSRuleListCustom.cpp
 bindings/js/JSCSSStyleDeclarationCustom.cpp
 bindings/js/JSCustomElementInterface.cpp
 bindings/js/JSCustomElementRegistryCustom.cpp
-bindings/js/JSDOMAbstractOperations.h
 bindings/js/JSDOMBindingSecurity.cpp
 bindings/js/JSDOMGlobalObject.cpp
 bindings/js/JSDOMWindowBase.cpp
-bindings/js/JSDOMWindowProperties.cpp
 bindings/js/JSErrorHandler.cpp
-bindings/js/JSHTMLAllCollectionCustom.cpp
 bindings/js/JSHTMLElementCustom.cpp
 bindings/js/JSHistoryCustom.cpp
 bindings/js/JSIDBCursorCustom.cpp
@@ -47,7 +43,6 @@ bindings/js/JSObservableArray.cpp
 bindings/js/JSPluginElementFunctions.cpp
 bindings/js/JSPopStateEventCustom.cpp
 bindings/js/JSResizeObserverCustom.cpp
-bindings/js/JSStylePropertyMapReadOnlyCustom.cpp
 bindings/js/JSSubscriberCustom.cpp
 bindings/js/JSTextTrackCueCustom.cpp
 bindings/js/ScriptCachedFrameData.cpp

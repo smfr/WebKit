@@ -88,7 +88,7 @@ protected:
         , m_wrapped(WTF::move(impl)) { }
 
 private:
-    Ref<ImplementationClass, PtrTraits> m_wrapped;
+    const Ref<ImplementationClass, PtrTraits> m_wrapped;
 };
 
 template<typename ImplementationClass> struct JSDOMWrapperConverterTraits;

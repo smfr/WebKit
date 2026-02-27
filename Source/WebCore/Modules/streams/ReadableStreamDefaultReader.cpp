@@ -360,7 +360,7 @@ JSC::JSValue JSReadableStreamDefaultReader::read(JSC::JSGlobalObject& globalObje
     RefPtr internalDefaultReader = wrapped().internalDefaultReader();
     if (!internalDefaultReader) {
         return callPromiseFunction(globalObject, callFrame, [this](auto& globalObject, auto&, auto&& promise) {
-            protect(wrapped())->readForBindings(globalObject, WTF::move(promise));
+            wrapped().readForBindings(globalObject, WTF::move(promise));
         });
     }
 
@@ -371,7 +371,7 @@ JSC::JSValue JSReadableStreamDefaultReader::closed(JSC::JSGlobalObject& globalOb
 {
     RefPtr internalDefaultReader = wrapped().internalDefaultReader();
     if (!internalDefaultReader)
-        return protect(wrapped())->closedPromise().promise();
+        return wrapped().closedPromise().promise();
 
     return internalDefaultReader->closedForBindings(globalObject);
 }
@@ -405,7 +405,7 @@ template<typename Visitor>
 void JSReadableStreamDefaultReader::visitAdditionalChildren(Visitor& visitor)
 {
     // Do not ref `wrapped()` here since this function may get called on a GC thread.
-    SUPPRESS_UNCOUNTED_ARG wrapped().visitAdditionalChildren(visitor);
+    wrapped().visitAdditionalChildren(visitor);
 }
 
 DEFINE_VISIT_ADDITIONAL_CHILDREN(JSReadableStreamDefaultReader);

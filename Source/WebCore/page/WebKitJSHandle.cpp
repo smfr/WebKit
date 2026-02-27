@@ -91,7 +91,7 @@ JSC::JSObject* WebKitJSHandle::objectForIdentifier(JSHandleIdentifier identifier
 static Markable<FrameIdentifier> windowFrameIdentifier(JSC::JSObject* object)
 {
     if (auto* window = jsDynamicCast<WebCore::JSWindowProxy*>(object)) {
-        if (RefPtr frame = protect(window->wrapped())->frame())
+        if (RefPtr frame = window->wrapped().frame())
             return frame->frameID();
     }
     return std::nullopt;

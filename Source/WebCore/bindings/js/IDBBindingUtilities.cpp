@@ -84,7 +84,7 @@ static bool get(JSGlobalObject& lexicalGlobalObject, JSValue object, const Strin
     }
     if (obj->inherits<JSBlob>() && (keyPathElement == "size"_s || keyPathElement == "type"_s)) {
         if (keyPathElement == "size"_s) {
-            result = jsNumber(protect(jsCast<JSBlob*>(obj)->wrapped())->size());
+            result = jsNumber(jsCast<JSBlob*>(obj)->wrapped().size());
             return true;
         }
         if (keyPathElement == "type"_s) {

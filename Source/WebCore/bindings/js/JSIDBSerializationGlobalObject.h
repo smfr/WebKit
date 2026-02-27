@@ -51,7 +51,7 @@ public:
     }
     static void destroy(JSC::JSCell*);
 
-    ScriptExecutionContext* scriptExecutionContext() const { return m_scriptExecutionContext.ptr(); }
+    ScriptExecutionContext& scriptExecutionContext() const { return m_scriptExecutionContext; }
 
 private:
     JSIDBSerializationGlobalObject(JSC::VM&, JSC::Structure*, Ref<DOMWrapperWorld>&&);

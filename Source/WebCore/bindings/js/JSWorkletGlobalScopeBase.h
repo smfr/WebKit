@@ -46,8 +46,7 @@ public:
 
     DECLARE_VISIT_CHILDREN;
 
-    WorkletGlobalScope& wrapped() const { return *m_wrapped; }
-    ScriptExecutionContext* NODELETE scriptExecutionContext() const;
+    WorkletGlobalScope& wrapped() const { return m_wrapped; }
 
     static JSC::Structure* createStructure(JSC::VM& vm, JSC::JSGlobalObject* globalObject, JSC::JSValue prototype)
     {
@@ -63,13 +62,13 @@ public:
     static void reportViolationForUnsafeEval(JSC::JSGlobalObject*, const String&);
 
 protected:
-    JSWorkletGlobalScopeBase(JSC::VM&, JSC::Structure*, RefPtr<WorkletGlobalScope>&&);
+    JSWorkletGlobalScopeBase(JSC::VM&, JSC::Structure*, Ref<WorkletGlobalScope>&&);
     void finishCreation(JSC::VM&, JSC::JSGlobalProxy*);
 
     static const JSC::GlobalObjectMethodTable* globalObjectMethodTable();
 
 private:
-    RefPtr<WorkletGlobalScope> m_wrapped;
+    const Ref<WorkletGlobalScope> m_wrapped;
 };
 
 // Returns a JSWorkletGlobalScope or jsNull()

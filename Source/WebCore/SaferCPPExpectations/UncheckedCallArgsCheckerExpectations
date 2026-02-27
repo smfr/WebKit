@@ -54,16 +54,13 @@ bindings/js/JSDocumentCustom.cpp
 bindings/js/JSElementCustom.cpp
 bindings/js/JSExecState.cpp
 bindings/js/JSHTMLElementCustom.cpp
-bindings/js/JSIDBObjectStoreCustom.cpp
 bindings/js/JSIntersectionObserverCustom.cpp
 bindings/js/JSLazyEventListener.cpp
-bindings/js/JSNavigatorCustom.cpp
 bindings/js/JSNodeCustom.cpp
 bindings/js/JSPluginElementFunctions.cpp
 bindings/js/JSSVGViewSpecCustom.cpp
 bindings/js/JSStylePropertyMapReadOnlyCustom.cpp
 bindings/js/JSWorkerGlobalScopeBase.cpp
-bindings/js/JSWorkerNavigatorCustom.cpp
 bindings/js/JSWorkletGlobalScopeBase.cpp
 bindings/js/ScheduledAction.cpp
 bindings/js/ScriptController.cpp
