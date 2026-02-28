@@ -90,7 +90,7 @@ private:
 
     WebCore::ProcessIdentity m_resourceOwner;
 #if HAVE(IOSURFACE)
-    Ref<WebCore::IOSurfacePool> m_ioSurfacePool;
+    const Ref<WebCore::IOSurfacePool> m_ioSurfacePool;
 #endif
     std::atomic<size_t> m_acceleratedImageBufferForCanvasCount;
     std::atomic<size_t> m_imageBufferForCanvasCount;

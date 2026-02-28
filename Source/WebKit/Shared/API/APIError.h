@@ -124,7 +124,7 @@ private:
     }
 
     WebCore::ResourceError m_platformError;
-    RefPtr<Error> m_underlyingError;
+    const RefPtr<Error> m_underlyingError;
 };
 
 } // namespace API

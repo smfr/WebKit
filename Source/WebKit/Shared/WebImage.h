@@ -75,7 +75,7 @@ public:
 private:
     WebImage(RefPtr<WebCore::ImageBuffer>&&);
 
-    RefPtr<WebCore::ImageBuffer> m_buffer;
+    const RefPtr<WebCore::ImageBuffer> m_buffer;
 };
 
 } // namespace WebKit

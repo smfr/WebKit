@@ -60,7 +60,7 @@ public:
 
 private:
     String m_interfaceIdentifier;
-    RefPtr<API::Dictionary> m_encodedInvocation;
+    const RefPtr<API::Dictionary> m_encodedInvocation;
     std::unique_ptr<ReplyInfo> m_replyInfo;
 };
 

@@ -202,7 +202,7 @@ private:
 
     bool m_isInShutDown { false };
 
-    RefPtr<IPC::Connection> m_connection;
+    const RefPtr<IPC::Connection> m_connection;
     IPC::MessageReceiverMap m_messageReceiverMap;
 
     UserActivity m_processSuppressionDisabled;

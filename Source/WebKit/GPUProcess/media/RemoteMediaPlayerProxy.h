@@ -416,7 +416,7 @@ private:
     WebCore::MediaPlayerIdentifier m_id;
     WebCore::MediaPlayerClientIdentifier m_clientIdentifier;
     RefPtr<SandboxExtension> m_sandboxExtension;
-    Ref<IPC::Connection> m_webProcessConnection;
+    const Ref<IPC::Connection> m_webProcessConnection;
     RefPtr<WebCore::MediaPlayer> m_player;
     WeakPtr<RemoteMediaPlayerManagerProxy> m_manager;
     WebCore::MediaPlayerEnums::MediaEngineIdentifier m_engineIdentifier;
@@ -452,7 +452,7 @@ private:
     ScopedRenderingResourcesRequest m_renderingResourcesRequest;
 
     bool m_observingTimeChanges { false };
-    Ref<RemoteVideoFrameObjectHeap> m_videoFrameObjectHeap;
+    const Ref<RemoteVideoFrameObjectHeap> m_videoFrameObjectHeap;
     RefPtr<WebCore::VideoFrame> m_videoFrameForCurrentTime;
     bool m_shouldCheckHardwareSupport { false };
     SoundStageSize m_soundStageSize { SoundStageSize::Auto };
