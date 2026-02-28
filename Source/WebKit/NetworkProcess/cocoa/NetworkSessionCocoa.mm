@@ -1048,28 +1048,6 @@ NSURLCredentialStorage *NetworkSessionCocoa::nsCredentialStorage() const
 {
     return m_defaultSessionSet->sessionWithCredentialStorage->session.get().configuration.URLCredentialStorage;
 }
-    
-const String& NetworkSessionCocoa::boundInterfaceIdentifier() const
-{
-    return m_boundInterfaceIdentifier;
-}
-
-const String& NetworkSessionCocoa::sourceApplicationBundleIdentifier() const
-{
-    return m_sourceApplicationBundleIdentifier;
-}
-
-const String& NetworkSessionCocoa::sourceApplicationSecondaryIdentifier() const
-{
-    return m_sourceApplicationSecondaryIdentifier;
-}
-
-#if PLATFORM(IOS_FAMILY)
-const String& NetworkSessionCocoa::dataConnectionServiceType() const
-{
-    return m_dataConnectionServiceType;
-}
-#endif
 
 std::unique_ptr<NetworkSession> NetworkSessionCocoa::create(NetworkProcess& networkProcess, const NetworkSessionCreationParameters& parameters)
 {

@@ -208,7 +208,7 @@ public:
     virtual void removeWebSocketTask(SessionSet&, WebSocketTask&) { }
     virtual void addWebSocketTask(WebPageProxyIdentifier, WebSocketTask&) { }
 
-    WebCore::BlobRegistryImpl& blobRegistry() { return m_blobRegistry; }
+    WebCore::BlobRegistryImpl& blobRegistry() LIFETIME_BOUND { return m_blobRegistry; }
     NetworkBroadcastChannelRegistry& broadcastChannelRegistry() { return m_broadcastChannelRegistry; }
 
     unsigned testSpeedMultiplier() const { return m_testSpeedMultiplier; }
@@ -257,7 +257,7 @@ public:
 #endif
 
 #if PLATFORM(COCOA)
-    AppPrivacyReportTestingData& appPrivacyReportTestingData() { return m_appPrivacyReportTestingData; }
+    AppPrivacyReportTestingData& appPrivacyReportTestingData() LIFETIME_BOUND { return m_appPrivacyReportTestingData; }
 #endif
 
     virtual void removeNetworkWebsiteData(std::optional<WallTime>, std::optional<HashSet<WebCore::RegistrableDomain>>&&, CompletionHandler<void()>&& completionHandler) { completionHandler(); }
@@ -316,7 +316,7 @@ protected:
     NetworkSession(NetworkProcess&, const NetworkSessionCreationParameters&);
 
     void forwardResourceLoadStatisticsSettings();
-    WebSWOriginStore* NODELETE swOriginStore() const;
+    WebSWOriginStore* NODELETE swOriginStore() const LIFETIME_BOUND;
 
     // SWServerDelegate
     void softUpdate(WebCore::ServiceWorkerJobData&&, bool shouldRefreshCache, WebCore::ResourceRequest&&, CompletionHandler<void(WebCore::WorkerFetchResult&&)>&&) final;

@@ -100,7 +100,7 @@ public:
     }
     virtual ~NetworkResourceLoader();
 
-    const WebCore::ResourceRequest& originalRequest() const { return m_parameters.request; }
+    const WebCore::ResourceRequest& originalRequest() const LIFETIME_BOUND { return m_parameters.request; }
 
     NetworkLoad* networkLoad() const { return m_networkLoad.get(); }
 
@@ -115,7 +115,7 @@ public:
     void continueWillSendRequest(WebCore::ResourceRequest&&, bool isAllowedToAskUserForCredentials, CompletionHandler<void(WebCore::ResourceRequest&&)>&&);
 
     void setResponse(WebCore::ResourceResponse&& response) { m_response = WTF::move(response); }
-    const WebCore::ResourceResponse& response() const { return m_response; }
+    const WebCore::ResourceResponse& response() const LIFETIME_BOUND { return m_response; }
 
     NetworkConnectionToWebProcess& connectionToWebProcess() const { return m_connection; }
     PAL::SessionID sessionID() const { return m_connection->sessionID(); }
@@ -123,9 +123,9 @@ public:
     WebCore::FrameIdentifier frameID() const { return m_parameters.webFrameID; }
     WebCore::PageIdentifier pageID() const { return m_parameters.webPageID; }
     WebPageProxyIdentifier webPageProxyID() const { return m_parameters.webPageProxyID; }
-    const NetworkResourceLoadParameters& parameters() const { return m_parameters; }
+    const NetworkResourceLoadParameters& parameters() const LIFETIME_BOUND { return m_parameters; }
     NetworkResourceLoadIdentifier identifier() const { return m_resourceLoadID; }
-    const URL& firstResponseURL() const { return m_firstResponseURL; }
+    const URL& firstResponseURL() const LIFETIME_BOUND { return m_firstResponseURL; }
 
     NetworkCache::GlobalFrameID globalFrameID() { return { webPageProxyID(), pageID(), frameID() }; }
 

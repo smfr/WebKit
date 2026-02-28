@@ -124,11 +124,11 @@ public:
 
     SessionWrapper& initializeEphemeralStatelessSessionIfNeeded(std::optional<WebPageProxyIdentifier>, NavigatingToAppBoundDomain);
 
-    const String& boundInterfaceIdentifier() const;
-    const String& sourceApplicationBundleIdentifier() const;
-    const String& sourceApplicationSecondaryIdentifier() const;
+    const String& boundInterfaceIdentifier() const LIFETIME_BOUND { return m_boundInterfaceIdentifier; }
+    const String& sourceApplicationBundleIdentifier() const LIFETIME_BOUND { return m_sourceApplicationBundleIdentifier; }
+    const String& sourceApplicationSecondaryIdentifier() const LIFETIME_BOUND { return m_sourceApplicationSecondaryIdentifier; }
 #if PLATFORM(IOS_FAMILY)
-    const String& dataConnectionServiceType() const;
+    const String& dataConnectionServiceType() const LIFETIME_BOUND { return m_dataConnectionServiceType; }
 #endif
 
     void setClientAuditToken(const WebCore::AuthenticationChallenge&);

@@ -107,7 +107,7 @@ public:
 
     NetworkProcess& networkProcess() { return m_networkProcess; }
 
-    const URL& url() const { return m_url; }
+    const URL& url() const LIFETIME_BOUND { return m_url; }
     WebCore::StoredCredentialsPolicy storedCredentialsPolicy() const { return m_storedCredentialsPolicy; }
 
     WebCore::NetworkLoadInformation takeNetworkLoadInformation() { return WTF::move(m_loadInformation); }
@@ -118,7 +118,7 @@ public:
     RefPtr<WebCore::SecurityOrigin> origin() const { return m_origin; }
     RefPtr<WebCore::SecurityOrigin> topOrigin() const { return m_topOrigin; }
 
-    const WebCore::FetchOptions& options() const { return m_options; }
+    const WebCore::FetchOptions& options() const LIFETIME_BOUND { return m_options; }
 
     bool timingAllowFailedFlag() const { return m_timingAllowFailedFlag; }
 

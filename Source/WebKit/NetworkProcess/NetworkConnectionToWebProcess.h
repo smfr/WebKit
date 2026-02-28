@@ -258,7 +258,7 @@ public:
     void broadcastConsoleMessage(JSC::MessageSource, JSC::MessageLevel, const String& message);
     RefPtr<NetworkResourceLoader> takeNetworkResourceLoader(WebCore::ResourceLoaderIdentifier);
 
-    NetworkOriginAccessPatterns& originAccessPatterns() { return m_originAccessPatterns.get(); }
+    NetworkOriginAccessPatterns& originAccessPatterns() LIFETIME_BOUND { return m_originAccessPatterns.get(); }
 
 #if ENABLE(CONTENT_FILTERING)
     void installMockContentFilter(WebCore::MockContentFilterSettings&&);

@@ -67,12 +67,12 @@ public:
 
     bool isAllowedToAskUserForCredentials() const;
 
-    const WebCore::ResourceRequest& currentRequest() const { return m_currentRequest; }
+    const WebCore::ResourceRequest& currentRequest() const LIFETIME_BOUND { return m_currentRequest; }
     void updateRequestAfterRedirection(WebCore::ResourceRequest&) const;
     void reprioritizeRequest(WebCore::ResourceLoadPriority);
 
-    const NetworkLoadParameters& parameters() const { return m_parameters; }
-    const URL& url() const { return parameters().request.url(); }
+    const NetworkLoadParameters& parameters() const LIFETIME_BOUND { return m_parameters; }
+    const URL& url() const LIFETIME_BOUND { return parameters().request.url(); }
     String attributedBundleIdentifier(WebPageProxyIdentifier);
 
     void convertTaskToDownload(PendingDownload&, const WebCore::ResourceRequest&, const WebCore::ResourceResponse&, ResponseCompletionHandler&&);

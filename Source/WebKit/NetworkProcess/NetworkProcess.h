@@ -214,7 +214,7 @@ public:
 
     CacheModel cacheModel() const { return m_cacheModel; }
 
-    const HashSet<String>& localhostAliasesForTesting() const { return m_localhostAliasesForTesting; }
+    const HashSet<String>& localhostAliasesForTesting() const LIFETIME_BOUND { return m_localhostAliasesForTesting; }
 
     // Diagnostic messages logging.
     void logDiagnosticMessage(WebPageProxyIdentifier, const String& message, const String& description, WebCore::ShouldSample);
@@ -342,7 +342,7 @@ public:
     void connectionToWebProcessClosed(IPC::Connection&, PAL::SessionID);
 
 #if ENABLE(CONTENT_EXTENSIONS)
-    NetworkContentRuleListManager& networkContentRuleListManager() { return m_networkContentRuleListManager; }
+    NetworkContentRuleListManager& networkContentRuleListManager() LIFETIME_BOUND { return m_networkContentRuleListManager; }
 #endif
 
     void syncLocalStorage(CompletionHandler<void()>&&);
@@ -367,7 +367,7 @@ public:
     bool parentProcessHasServiceWorkerEntitlement() const { return true; }
 #endif
 
-    const String& uiProcessBundleIdentifier() const;
+    const String& uiProcessBundleIdentifier() const LIFETIME_BOUND;
 
     void ref() const final { ThreadSafeRefCounted<NetworkProcess>::ref(); }
     void deref() const final { ThreadSafeRefCounted<NetworkProcess>::deref(); }
@@ -392,7 +392,7 @@ public:
     void addKeptAliveLoad(Ref<NetworkResourceLoader>&&);
     void removeKeptAliveLoad(NetworkResourceLoader&);
 
-    const OptionSet<NetworkCache::CacheOption>& cacheOptions() const { return m_cacheOptions; }
+    const OptionSet<NetworkCache::CacheOption>& cacheOptions() const LIFETIME_BOUND { return m_cacheOptions; }
 
     NetworkConnectionToWebProcess* webProcessConnection(WebCore::ProcessIdentifier) const;
     NetworkConnectionToWebProcess* webProcessConnection(const IPC::Connection&) const;
