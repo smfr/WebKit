@@ -77,6 +77,7 @@
 #include "HTMLSummaryElement.h"
 #include "HTMLTableElement.h"
 #include "HTMLTextAreaElement.h"
+#include "HTMLVideoElement.h"
 #include "HitTestRequest.h"
 #include "HitTestResult.h"
 #include "Image.h"
@@ -3267,7 +3268,7 @@ bool AccessibilityRenderObject::isAutoplayEnabled() const
 
 void AccessibilityRenderObject::enterFullscreen() const
 {
-    AccessibilityMediaHelpers::enterFullscreen(videoElement());
+    AccessibilityMediaHelpers::enterFullscreen(protect(videoElement()));
 }
 #endif // PLATFORM(IOS_FAMILY)
 
