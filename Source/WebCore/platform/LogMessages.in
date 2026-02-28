@@ -147,7 +147,7 @@ HTMLMEDIAELEMENT_SETAUTOPLAYEVENTPLAYBACKSTATE, "HTMLMediaElement::setAutoplayEv
 HTMLMEDIAELEMENT_SETMUTEDINTERNAL, "HTMLMediaElement::setMutedInternal(%" PRIX64 ") %d", (uint64_t, int), DEFAULT, Media
 HTMLMEDIAELEMENT_SETNETWORKSTATE, "HTMLMediaElement::setNetworkState(%" PRIX64 ") new state = %s, current state = %s", (uint64_t, CString, CString), DEFAULT, Media
 HTMLMEDIAELEMENT_SETPLAYBACKRATE, "HTMLMediaElement::setPlaybackRate(%" PRIX64 ") %f", (uint64_t, double), DEFAULT, Media
-HTMLMEDIAELEMENT_SETREADYSTATE, "HTMLMediaElement::setReadyState(%" PRIX64 ") new state = %s, current state = %s", (uint64_t, CString, CString), DEFAULT, Media
+HTMLMEDIAELEMENT_SETREADYSTATE, "HTMLMediaElement::setReadyState(%" PRIX64 ") new state = %s, current state = %s, tracks ready = %d", (uint64_t, CString, CString, bool), DEFAULT, Media
 HTMLMEDIAELEMENT_SETSHOWPOSTERFLAG, "HTMLMediaElement::setShowPosterFlag(%" PRIX64 ") %d", (uint64_t, int), DEFAULT, Media
 HTMLMEDIAELEMENT_SETVOLUME, "HTMLMediaElement::setVolume(%" PRIX64 ") %f", (uint64_t, double), DEFAULT, Media
 

@@ -1353,6 +1353,8 @@ bool HTMLMediaElement::hasEverNotifiedAboutPlaying() const
 
 void HTMLMediaElement::checkPlaybackTargetCompatibility()
 {
+    ALWAYS_LOG(LOGIDENTIFIER);
+
     Ref player = *m_player;
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET)
@@ -1824,6 +1826,8 @@ void HTMLMediaElement::selectMediaResource()
 
 void HTMLMediaElement::loadNextSourceChild()
 {
+    ALWAYS_LOG(LOGIDENTIFIER);
+
     ContentType contentType;
     auto mediaURL = selectNextSourceChild(&contentType, InvalidURLAction::Complain);
     if (!mediaURL.isValid()) {
@@ -3250,7 +3254,7 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
 
     m_tracksAreReady = tracksAreReady;
 
-    HTMLMEDIAELEMENT_RELEASE_LOG(SETREADYSTATE, convertEnumerationToString(state).utf8(), convertEnumerationToString(m_readyState).utf8());
+    HTMLMEDIAELEMENT_RELEASE_LOG(SETREADYSTATE, convertEnumerationToString(state).utf8(), convertEnumerationToString(m_readyState).utf8(), tracksAreReady);
 
     if (tracksAreReady)
         m_readyState = newState;
@@ -10311,6 +10315,8 @@ static ContentType inferredContentTypeFromURL(const URL& url)
 
 void HTMLMediaElement::rebuildMediaEngineForWirelessPlayback()
 {
+    ALWAYS_LOG(LOGIDENTIFIER);
+
     setReadyState(MediaPlayer::ReadyState::HaveNothing);
 
     switch (m_loadState) {

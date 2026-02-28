@@ -750,7 +750,6 @@ void Internals::resetToConsistentState(Page& page)
 #endif
 
 #if ENABLE(WIRELESS_PLAYBACK_MEDIA_PLAYER)
-    MediaDeviceRouteController::singleton().setClient(nullptr);
     setMockMediaDeviceRouteControllerEnabled(false);
 #endif
 }

@@ -90,7 +90,7 @@ static bool supportsURL(const URL& url)
 
 void MediaPlayerPrivateWirelessPlayback::load(const String& urlString)
 {
-    ALWAYS_LOG(LOGIDENTIFIER, urlString);
+    ALWAYS_LOG(LOGIDENTIFIER);
 
     URL url { urlString };
     if (!supportsURL(url)) {
@@ -150,19 +150,23 @@ bool MediaPlayerPrivateWirelessPlayback::isCurrentPlaybackTargetWireless() const
 
 void MediaPlayerPrivateWirelessPlayback::setWirelessPlaybackTarget(Ref<MediaPlaybackTarget>&& playbackTarget)
 {
+    if (playbackTarget.ptr() == m_playbackTarget.get())
+        return;
+
     ALWAYS_LOG(LOGIDENTIFIER, playbackTarget->type());
 
     m_playbackTarget = WTF::move(playbackTarget);
 
-    RefPtr route = this->route();
-    if (!route) {
-        if (is<MediaPlaybackTargetWirelessPlayback>(m_playbackTarget))
-            setNetworkState(MediaPlayer::NetworkState::FormatError);
+    if (!wirelessPlaybackTarget())
+        return;
+
+    if (RefPtr route = this->route()) {
+        route->setClient(this);
+        updateURLIfNeeded();
         return;
     }
 
-    route->setClient(this);
-    updateURLIfNeeded();
+    setNetworkState(MediaPlayer::NetworkState::FormatError);
 }
 
 void MediaPlayerPrivateWirelessPlayback::setShouldPlayToPlaybackTarget(bool shouldPlayToTarget)
@@ -172,28 +176,34 @@ void MediaPlayerPrivateWirelessPlayback::setShouldPlayToPlaybackTarget(bool shou
 
     ALWAYS_LOG(LOGIDENTIFIER, shouldPlayToTarget);
     m_shouldPlayToTarget = shouldPlayToTarget;
+    updateURLIfNeeded();
 
     if (RefPtr player = m_player.get())
         player->currentPlaybackTargetIsWirelessChanged(isCurrentPlaybackTargetWireless());
 }
 
+MediaPlaybackTargetWirelessPlayback* MediaPlayerPrivateWirelessPlayback::wirelessPlaybackTarget() const
+{
+    return dynamicDowncast<MediaPlaybackTargetWirelessPlayback>(m_playbackTarget.get());
+}
+
 MediaDeviceRoute* MediaPlayerPrivateWirelessPlayback::route() const
 {
-    if (RefPtr playbackTarget = dynamicDowncast<MediaPlaybackTargetWirelessPlayback>(m_playbackTarget))
-        return playbackTarget->route();
+    if (RefPtr wirelessPlaybackTarget = this->wirelessPlaybackTarget())
+        return wirelessPlaybackTarget->route();
     return nullptr;
 }
 
 void MediaPlayerPrivateWirelessPlayback::updateURLIfNeeded()
 {
-    if (!m_playbackTarget)
+    RefPtr route = this->route();
+    if (!route || !m_shouldPlayToTarget || networkState() >= MediaPlayer::NetworkState::Loading)
         return;
 
     ALWAYS_LOG(LOGIDENTIFIER);
 
     setNetworkState(MediaPlayer::NetworkState::Loading);
 
-    RefPtr route = this->route();
     route->loadURL(m_url, [weakThis = ThreadSafeWeakPtr { *this }](const MediaDeviceRouteLoadURLResult& result) {
         RefPtr protectedThis = weakThis.get();
         if (!protectedThis)
@@ -206,6 +216,111 @@ void MediaPlayerPrivateWirelessPlayback::updateURLIfNeeded()
 
         protectedThis->setNetworkState(MediaPlayer::NetworkState::Idle);
     });
+}
+
+void MediaPlayerPrivateWirelessPlayback::play()
+{
+    RefPtr route = this->route();
+    if (!route)
+        return;
+
+    ALWAYS_LOG(LOGIDENTIFIER);
+    route->setPlaying(true);
+}
+
+void MediaPlayerPrivateWirelessPlayback::pause()
+{
+    RefPtr route = this->route();
+    if (!route)
+        return;
+
+    ALWAYS_LOG(LOGIDENTIFIER);
+    route->setPlaying(false);
+}
+
+bool MediaPlayerPrivateWirelessPlayback::hasAudio() const
+{
+    if (RefPtr route = this->route())
+        return route->hasAudio();
+    return false;
+}
+
+void MediaPlayerPrivateWirelessPlayback::seekToTarget(const SeekTarget& seekTarget)
+{
+    RefPtr route = this->route();
+    if (!route)
+        return;
+
+    ALWAYS_LOG(LOGIDENTIFIER, seekTarget);
+    m_pendingSeekTarget = seekTarget;
+    route->setCurrentPlaybackPosition(seekTarget.time);
+}
+
+bool MediaPlayerPrivateWirelessPlayback::paused() const
+{
+    if (RefPtr route = this->route())
+        return !route->playing();
+    return false;
+}
+
+MediaTime MediaPlayerPrivateWirelessPlayback::startTime() const
+{
+    if (RefPtr route = this->route())
+        return route->timeRange().start ?: MediaTime::zeroTime();
+    return MediaTime::zeroTime();
+}
+
+MediaTime MediaPlayerPrivateWirelessPlayback::duration() const
+{
+    RefPtr route = this->route();
+    if (!route)
+        return MediaTime::zeroTime();
+
+    auto endTime = route->timeRange().end;
+    if (!endTime)
+        return MediaTime::zeroTime();
+
+    return std::max(MediaTime::zeroTime(), endTime - startTime());
+}
+
+MediaTime MediaPlayerPrivateWirelessPlayback::currentTime() const
+{
+    if (RefPtr route = this->route())
+        return route->currentPlaybackPosition() ?: MediaTime::zeroTime();
+    return MediaTime::zeroTime();
+}
+
+MediaTime MediaPlayerPrivateWirelessPlayback::maxTimeSeekable() const
+{
+    return startTime() + duration();
+}
+
+MediaTime MediaPlayerPrivateWirelessPlayback::minTimeSeekable() const
+{
+    return startTime();
+}
+
+bool MediaPlayerPrivateWirelessPlayback::setCurrentTimeDidChangeCallback(MediaPlayer::CurrentTimeDidChangeCallback&& currentTimeDidChangeCallback)
+{
+    m_currentTimeDidChangeCallback = WTF::move(currentTimeDidChangeCallback);
+    return true;
+}
+
+void MediaPlayerPrivateWirelessPlayback::setRate(float rate)
+{
+    RefPtr route = this->route();
+    if (!route)
+        return;
+
+    ALWAYS_LOG(LOGIDENTIFIER, rate);
+    route->setPlaybackSpeed(rate);
+}
+
+double MediaPlayerPrivateWirelessPlayback::rate() const
+{
+    if (RefPtr route = this->route())
+        return route->playbackSpeed();
+    return 0;
 }
 
 void MediaPlayerPrivateWirelessPlayback::setNetworkState(MediaPlayer::NetworkState networkState)
@@ -230,6 +345,15 @@ void MediaPlayerPrivateWirelessPlayback::setReadyState(MediaPlayer::ReadyState r
         player->readyStateChanged();
 }
 
+void MediaPlayerPrivateWirelessPlayback::timeRangeDidChange(MediaDeviceRoute& route)
+{
+    ASSERT(&route == this->route());
+    ALWAYS_LOG(LOGIDENTIFIER, route.timeRange());
+
+    if (RefPtr player = m_player.get())
+        player->durationChanged();
+}
+
 void MediaPlayerPrivateWirelessPlayback::readyDidChange(MediaDeviceRoute& route)
 {
     ASSERT(&route == this->route());
@@ -246,6 +370,35 @@ void MediaPlayerPrivateWirelessPlayback::playbackErrorDidChange(MediaDeviceRoute
 
     if (route.playbackError())
         setNetworkState(route.ready() ? MediaPlayer::NetworkState::DecodeError : MediaPlayer::NetworkState::FormatError);
+}
+
+void MediaPlayerPrivateWirelessPlayback::currentPlaybackPositionDidChange(MediaDeviceRoute& route)
+{
+    ASSERT(&route == this->route());
+
+    auto currentPlaybackPosition = route.currentPlaybackPosition();
+    ALWAYS_LOG(LOGIDENTIFIER, currentPlaybackPosition);
+
+    // FIXME (171121901): We don't actually know when the route finishes seeking. For now we
+    // consider the seek to have completed whenever currentPlaybackPosition changes to within
+    // 1 second of the requested playback position.
+    if (m_pendingSeekTarget) {
+        if (std::abs(currentPlaybackPosition.toFloat() - m_pendingSeekTarget->time.toFloat()) > 1)
+            return;
+
+        ALWAYS_LOG(LOGIDENTIFIER, "seek completed");
+
+        if (RefPtr player = m_player.get()) {
+            player->seeked(currentPlaybackPosition);
+            player->timeChanged();
+        }
+
+        m_pendingSeekTarget = std::nullopt;
+        return;
+    }
+
+    if (m_currentTimeDidChangeCallback)
+        m_currentTimeDidChangeCallback(currentPlaybackPosition);
 }
 
 #endif // ENABLE(WIRELESS_PLAYBACK_TARGET)
