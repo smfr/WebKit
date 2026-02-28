@@ -922,7 +922,9 @@ static Vector<String> partsForItem(const TextExtraction::Item& item, const TextE
     return parts;
 }
 
-static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector<String>&& itemParts, std::optional<FrameIdentifier>&& frameIdentifier, std::optional<NodeIdentifier>&& enclosingNode, const TextExtractionLine& line, Ref<TextExtractionAggregator>&& aggregator, const String& closingTag = { })
+enum class HasLineThroughStyle : bool { No, Yes };
+
+static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector<String>&& itemParts, const std::optional<FrameIdentifier>& frameIdentifier, const std::optional<NodeIdentifier>& enclosingNode, const TextExtractionLine& line, Ref<TextExtractionAggregator>&& aggregator, HasLineThroughStyle hasLineThrough = HasLineThroughStyle::No, const String& closingTag = { })
 {
     auto completion = [
         itemParts = WTF::move(itemParts),
@@ -931,7 +933,7 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
         line,
         closingTag,
         urlString = aggregator->currentURLString(),
-        isStrikethrough = aggregator->isInsideStrikethrough()
+        isStrikethrough = aggregator->isInsideStrikethrough() || hasLineThrough == HasLineThroughStyle::Yes
     ](String&& filteredText) mutable {
         Vector<String> textParts;
         auto currentLine = line;
@@ -973,11 +975,12 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
                     textParts.append(escapeStringForHTML(trimmedContent));
                 } else if (aggregator->useMarkdownOutput()) {
                     auto escapedText = escapeStringForMarkdown(trimmedContent);
+                    if (valueOrDefault(urlString).containsIgnoringASCIICase(escapedText))
+                        escapedText = { };
+                    escapedText = urlString ? makeString('[', WTF::move(escapedText), "]("_s, WTF::move(*urlString), ')') : escapedText;
                     if (isStrikethrough)
                         escapedText = makeString("~~"_s, WTF::move(escapedText), "~~"_s);
-                    else if (valueOrDefault(urlString).containsIgnoringASCIICase(escapedText))
-                        escapedText = { };
-                    textParts.append(urlString ? makeString('[', WTF::move(escapedText), "]("_s, WTF::move(*urlString), ')') : escapedText);
+                    textParts.append(WTF::move(escapedText));
                 } else
                     textParts.append(makeString('\'', escapeString(trimmedContent), '\''));
 
@@ -1001,7 +1004,7 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
         aggregator->addResult(currentLine, WTF::move(textParts));
     };
 
-    RefPtr filterPromise = aggregator->filter(textItem.content, WTF::move(frameIdentifier), WTF::move(enclosingNode));
+    RefPtr filterPromise = aggregator->filter(textItem.content, frameIdentifier, enclosingNode);
     if (!filterPromise) {
         completion(String { textItem.content });
         return;
@@ -1050,7 +1053,8 @@ static void addPartsForItem(const TextExtraction::Item& item, std::optional<Node
             aggregator.addResult(line, WTF::move(parts));
         },
         [&](const TextExtraction::TextItemData& textData) {
-            addPartsForText(textData, partsForItem(item, aggregator, includeRectForParentItem), std::optional { item.frameIdentifier }, WTF::move(enclosingNode), line, aggregator);
+            auto hasLineThrough = item.hasLineThrough ? HasLineThroughStyle::Yes : HasLineThroughStyle::No;
+            addPartsForText(textData, partsForItem(item, aggregator, includeRectForParentItem), item.frameIdentifier, enclosingNode, line, aggregator, hasLineThrough);
         },
         [&](const TextExtraction::ContentEditableData& editableData) {
             if (aggregator.useHTMLOutput()) {
@@ -1359,7 +1363,7 @@ static void addTextRepresentationRecursive(const TextExtraction::Item& item, std
 
     if (aggregator.usePlainTextOutput()) {
         if (std::holds_alternative<TextExtraction::TextItemData>(item.data))
-            addPartsForText(std::get<TextExtraction::TextItemData>(item.data), { }, std::optional { item.frameIdentifier }, std::optional { identifier }, { aggregator.advanceToNextLine(), depth }, aggregator);
+            addPartsForText(std::get<TextExtraction::TextItemData>(item.data), { }, item.frameIdentifier, identifier, { aggregator.advanceToNextLine(), depth }, aggregator);
         for (auto& child : item.children)
             addTextRepresentationRecursive(child, std::optional { identifier }, depth + 1, aggregator);
         return;
@@ -1431,7 +1435,8 @@ static void addTextRepresentationRecursive(const TextExtraction::Item& item, std
                 return;
 
             if (aggregator.useHTMLOutput()) {
-                addPartsForText(*text, partsForItem(item.children[0], aggregator, includeRectForParentItem), std::optional { item.frameIdentifier }, std::optional { identifier }, line, aggregator, makeString("</"_s, closingTagName, '>'));
+                auto hasLineThrough = item.children[0].hasLineThrough ? HasLineThroughStyle::Yes : HasLineThroughStyle::No;
+                addPartsForText(*text, partsForItem(item.children[0], aggregator, includeRectForParentItem), item.frameIdentifier, identifier, line, aggregator, hasLineThrough, makeString("</"_s, closingTagName, '>'));
                 return;
             }
 

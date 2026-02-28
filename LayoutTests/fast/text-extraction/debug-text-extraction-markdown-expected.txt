@@ -8,3 +8,7 @@ This is a list:
 - baz
 On [sale](https://webkit.org/) for
 £10.99 This ~~text~~ has a ~~line through it~~. The price ~~was \~\~$50~~
+~~CSS linethrough~~ normal text
+~~Linethrough also linethrough~~
+~~both semantic and CSS~~
+~~[A link](https://www.apple.com/)~~

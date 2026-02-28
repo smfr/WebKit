@@ -86,6 +86,7 @@
 #include "SimpleRange.h"
 #include "StaticRange.h"
 #include "StringEntropyHelpers.h"
+#include "StyleTextDecorationLine.h"
 #include "Text.h"
 #include "TextIterator.h"
 #include "TypedElementDescendantIteratorInlines.h"
@@ -354,6 +355,9 @@ static inline bool canMerge(const TraversalContext& context, const Item& destina
         return false;
 
     if (!std::holds_alternative<TextItemData>(destinationItem.data) || !std::holds_alternative<TextItemData>(sourceItem.data))
+        return false;
+
+    if (destinationItem.hasLineThrough != sourceItem.hasLineThrough)
         return false;
 
     // Don't merge adjacent text runs if they represent two different editable roots.
@@ -972,6 +976,9 @@ static inline void extractRecursive(Node& node, Item& parentItem, TraversalConte
         }
         context.onlyCollectTextAndLinksCount++;
     }
+
+    if (CheckedPtr renderer = node.renderer(); renderer && item)
+        item->hasLineThrough = renderer->style().textDecorationLineInEffect().hasLineThrough();
 
     ASSERT_IMPLIES(isScrollable, item);
 
