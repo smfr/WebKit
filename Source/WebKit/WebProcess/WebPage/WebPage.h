@@ -2123,6 +2123,10 @@ public:
 
     void setObscuredContentInsets(const WebCore::FloatBoxExtent&);
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    void setHasBannerViewOverlay(bool);
+#endif
+
     void updateOpener(WebCore::FrameIdentifier, std::optional<WebCore::FrameIdentifier>);
     void setFramePrinting(WebCore::FrameIdentifier, bool printing, WebCore::FloatSize pageSize, WebCore::FloatSize originalPageSize, float maximumShrinkRatio, WebCore::AdjustViewSize shouldAdjustViewSize);
 

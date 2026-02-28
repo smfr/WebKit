@@ -25,6 +25,7 @@
 #pragma once
 
 #include <WebCore/AdjustViewSize.h>
+#include <WebCore/BoxSides.h>
 #include <WebCore/Color.h>
 #include <WebCore/FrameView.h>
 #include <WebCore/LayoutMilestone.h>
@@ -217,13 +218,7 @@ public:
     WEBCORE_EXPORT void setBaseBackgroundColor(const Color&);
     WEBCORE_EXPORT void updateBackgroundRecursively(const std::optional<Color>& backgroundColor);
 
-    enum ExtendedBackgroundModeFlags {
-        ExtendedBackgroundModeNone          = 0,
-        ExtendedBackgroundModeVertical      = 1 << 0,
-        ExtendedBackgroundModeHorizontal    = 1 << 1,
-        ExtendedBackgroundModeAll           = ExtendedBackgroundModeVertical | ExtendedBackgroundModeHorizontal,
-    };
-    typedef unsigned ExtendedBackgroundMode;
+    using ExtendedBackgroundMode = BoxSideSet;
 
     void updateExtendBackgroundIfNecessary();
     void updateTilesForExtendedBackgroundMode(ExtendedBackgroundMode);

@@ -2912,6 +2912,21 @@ const WebCore::FloatBoxExtent& WebPageProxy::obscuredContentInsets() const
     return m_internals->obscuredContentInsets;
 }
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+void WebPageProxy::setHasBannerViewOverlay(bool hasBannerViewOverlay)
+{
+    if (m_internals->hasBannerViewOverlay == hasBannerViewOverlay)
+        return;
+
+    m_internals->hasBannerViewOverlay = hasBannerViewOverlay;
+
+    if (!hasRunningProcess())
+        return;
+
+    send(Messages::WebPage::SetHasBannerViewOverlay(hasBannerViewOverlay));
+}
+#endif
+
 Color WebPageProxy::underlayColor() const
 {
     return internals().underlayColor;
@@ -12578,6 +12593,9 @@ WebPageCreationParameters WebPageProxy::creationParameters(WebProcessProxy& proc
     parameters.textZoomFactor = m_textZoomFactor;
     parameters.pageZoomFactor = m_pageZoomFactor;
     parameters.obscuredContentInsets = m_internals->obscuredContentInsets;
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    parameters.hasBannerViewOverlay = m_internals->hasBannerViewOverlay;
+#endif
     parameters.mediaVolume = m_mediaVolume;
     parameters.muted = internals().mutedState;
     parameters.openedByDOM = m_openedByDOM;

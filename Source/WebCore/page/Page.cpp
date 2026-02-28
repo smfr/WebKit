@@ -1946,6 +1946,20 @@ void Page::setShouldSuppressScrollbarAnimations(bool suppressAnimations)
     m_suppressScrollbarAnimations = suppressAnimations;
 }
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+void Page::setHasBannerViewOverlay(bool hasBannerViewOverlay)
+{
+    if (m_hasBannerViewOverlay == hasBannerViewOverlay)
+        return;
+
+    m_hasBannerViewOverlay = hasBannerViewOverlay;
+
+    RefPtr localMainFrame = this->localMainFrame();
+    if (RefPtr view = localMainFrame ? localMainFrame->view() : nullptr)
+        view->updateExtendBackgroundIfNecessary();
+}
+#endif
+
 void Page::lockAllOverlayScrollbarsToHidden(bool lockOverlayScrollbars)
 {
     RefPtr view = protect(mainFrame())->virtualView();

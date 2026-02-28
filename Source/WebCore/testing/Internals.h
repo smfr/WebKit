@@ -977,6 +977,10 @@ public:
     float pageMediaVolume();
     void setPageMediaVolume(float);
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    void setPageHasBannerViewOverlayForTesting(bool);
+#endif
+
     String userVisibleString(const DOMURL&);
     void setShowAllPlugins(bool);
 

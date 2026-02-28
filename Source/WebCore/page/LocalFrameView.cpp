@@ -4315,8 +4315,8 @@ bool LocalFrameView::hasExtendedBackgroundRectForPainting() const
 
 void LocalFrameView::updateExtendBackgroundIfNecessary()
 {
-    ExtendedBackgroundMode mode = calculateExtendedBackgroundMode();
-    if (mode == ExtendedBackgroundModeNone)
+    const auto mode = calculateExtendedBackgroundMode();
+    if (mode.isEmpty())
         return;
 
     updateTilesForExtendedBackgroundMode(mode);
@@ -4326,10 +4326,10 @@ LocalFrameView::ExtendedBackgroundMode LocalFrameView::calculateExtendedBackgrou
 {
 #if PLATFORM(IOS_FAMILY)
     // <rdar://problem/16201373>
-    return ExtendedBackgroundModeNone;
+    return { };
 #else
     if (!m_frame->settings().backgroundShouldExtendBeyondPage())
-        return ExtendedBackgroundModeNone;
+        return { };
 
     // Just because Settings::backgroundShouldExtendBeyondPage() is true does not necessarily mean
     // that the background rect needs to be extended for painting. Simple backgrounds can be extended
@@ -4338,29 +4338,40 @@ LocalFrameView::ExtendedBackgroundMode LocalFrameView::calculateExtendedBackgrou
     // region. This function finds out if it is necessary to extend the background rect for painting.
 
     if (!m_frame->isMainFrame())
-        return ExtendedBackgroundModeNone;
+        return { };
 
     RefPtr document = m_frame->document();
     if (!document)
-        return ExtendedBackgroundModeNone;
+        return { };
 
     if (!renderView())
-        return ExtendedBackgroundModeNone;
-    
+        return { };
+
     auto* rootBackgroundRenderer = renderView()->rendererForRootBackground();
     if (!rootBackgroundRenderer)
-        return ExtendedBackgroundModeNone;
+        return { };
 
     auto& backgroundLayers = rootBackgroundRenderer->style().backgroundLayers();
     if (!Style::hasImageInAnyLayer(backgroundLayers))
-        return ExtendedBackgroundModeNone;
+        return { };
 
-    ExtendedBackgroundMode mode = ExtendedBackgroundModeNone;
+    BoxSideSet mode;
     auto backgroundRepeat = backgroundLayers.usedFirst().repeat();
-    if (backgroundRepeat.x() == FillRepeat::Repeat)
-        mode |= ExtendedBackgroundModeHorizontal;
-    if (backgroundRepeat.y() == FillRepeat::Repeat)
-        mode |= ExtendedBackgroundModeVertical;
+    if (backgroundRepeat.x() == FillRepeat::Repeat) {
+        mode.add(BoxSide::Left);
+        mode.add(BoxSide::Right);
+    }
+    if (backgroundRepeat.y() == FillRepeat::Repeat) {
+        mode.add(BoxSide::Top);
+        mode.add(BoxSide::Bottom);
+    }
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    if (mode.contains(BoxSide::Top)) {
+        if (RefPtr page = m_frame->page(); page && page->hasBannerViewOverlay())
+            mode.remove(BoxSide::Top);
+    }
+#endif
 
     return mode;
 #endif
@@ -4380,16 +4391,20 @@ void LocalFrameView::updateTilesForExtendedBackgroundMode(ExtendedBackgroundMode
     if (!tiledBacking)
         return;
 
-    ExtendedBackgroundMode existingMode = ExtendedBackgroundModeNone;
-    if (tiledBacking->hasVerticalMargins())
-        existingMode |= ExtendedBackgroundModeVertical;
-    if (tiledBacking->hasHorizontalMargins())
-        existingMode |= ExtendedBackgroundModeHorizontal;
+    BoxSideSet existingMode;
+    if (tiledBacking->topMarginHeight() > 0)
+        existingMode.add(BoxSide::Top);
+    if (tiledBacking->bottomMarginHeight() > 0)
+        existingMode.add(BoxSide::Bottom);
+    if (tiledBacking->leftMarginWidth() > 0)
+        existingMode.add(BoxSide::Left);
+    if (tiledBacking->rightMarginWidth() > 0)
+        existingMode.add(BoxSide::Right);
 
     if (existingMode == mode)
         return;
 
-    backing->setTiledBackingHasMargins(mode & ExtendedBackgroundModeHorizontal, mode & ExtendedBackgroundModeVertical);
+    backing->setTiledBackingHasMargins(mode);
 }
 
 IntRect LocalFrameView::extendedBackgroundRectForPainting() const

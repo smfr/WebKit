@@ -48,6 +48,10 @@ messages -> WebPage WantsAsyncDispatchMessage {
 
     [DeferSendingIfSuspended] SetShouldSuppressHDR(bool shouldSuppressHDR)
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    SetHasBannerViewOverlay(bool hasBannerViewOverlay)
+#endif
+
     SetUnderlayColor(WebCore::Color color)
     SetUnderPageBackgroundColorOverride(WebCore::Color underPageBackgroundColorOverride)
 

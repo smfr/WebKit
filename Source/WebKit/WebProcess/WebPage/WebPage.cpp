@@ -1115,6 +1115,10 @@ WebPage::WebPage(PageIdentifier pageID, WebPageCreationParameters&& parameters)
 
     setObscuredContentInsets(parameters.obscuredContentInsets);
 
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+    setHasBannerViewOverlay(parameters.hasBannerViewOverlay);
+#endif
+
     m_userAgent = WTF::move(parameters.userAgent);
 
     setMediaVolume(parameters.mediaVolume);
@@ -4241,6 +4245,13 @@ void WebPage::setObscuredContentInsets(const FloatBoxExtent& obscuredContentInse
         pluginView->obscuredContentInsetsDidChange();
 #endif
 }
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+void WebPage::setHasBannerViewOverlay(bool hasBannerViewOverlay)
+{
+    m_page->setHasBannerViewOverlay(hasBannerViewOverlay);
+}
+#endif
 
 void WebPage::viewWillStartLiveResize()
 {

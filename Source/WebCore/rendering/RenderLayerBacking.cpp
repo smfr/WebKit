@@ -530,12 +530,12 @@ void RenderLayerBacking::adjustTiledBackingCoverage()
     }
 }
 
-void RenderLayerBacking::setTiledBackingHasMargins(bool hasExtendedBackgroundOnLeftAndRight, bool hasExtendedBackgroundOnTopAndBottom)
+void RenderLayerBacking::setTiledBackingHasMargins(BoxSideSet margins)
 {
     if (!m_isFrameLayerWithTiledBacking)
         return;
 
-    tiledBacking()->setHasMargins(hasExtendedBackgroundOnTopAndBottom, hasExtendedBackgroundOnTopAndBottom, hasExtendedBackgroundOnLeftAndRight, hasExtendedBackgroundOnLeftAndRight);
+    tiledBacking()->setHasMargins(margins.contains(BoxSide::Top), margins.contains(BoxSide::Bottom), margins.contains(BoxSide::Left), margins.contains(BoxSide::Right));
 }
 
 void RenderLayerBacking::updateDebugIndicators(bool showBorder, bool showRepaintCounter)

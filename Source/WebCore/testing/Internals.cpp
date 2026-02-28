@@ -624,6 +624,9 @@ void Internals::resetToConsistentState(Page& page)
         page.setHeaderHeight(0);
         page.setFooterHeight(0);
         page.setObscuredContentInsets({ });
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+        page.setHasBannerViewOverlay(false);
+#endif
         mainFrameView->setUseFixedLayout(false);
         mainFrameView->setFixedLayoutSize(IntSize());
         mainFrameView->enableFixedWidthAutoSizeMode(false, { });
@@ -6058,6 +6061,21 @@ float Internals::pageMediaVolume()
 
     return page->mediaVolume();
 }
+
+#if ENABLE(BANNER_VIEW_OVERLAYS)
+void Internals::setPageHasBannerViewOverlayForTesting(bool hasBannerViewOverlay)
+{
+    RefPtr document = contextDocument();
+    if (!document)
+        return;
+
+    RefPtr page = document->page();
+    if (!page)
+        return;
+
+    page->setHasBannerViewOverlay(hasBannerViewOverlay);
+}
+#endif
 
 #if !PLATFORM(COCOA)
 

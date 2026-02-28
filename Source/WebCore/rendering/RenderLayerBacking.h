@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <WebCore/BoxSides.h>
 #include <WebCore/FloatPoint.h>
 #include <WebCore/FloatPoint3D.h>
 #include <WebCore/GraphicsLayerClient.h>
@@ -232,7 +233,7 @@ public:
 
     WEBCORE_EXPORT TiledBacking* tiledBacking() const;
     void adjustTiledBackingCoverage();
-    void setTiledBackingHasMargins(bool hasExtendedBackgroundOnLeftAndRight, bool hasExtendedBackgroundOnTopAndBottom);
+    void setTiledBackingHasMargins(BoxSideSet);
     
     void updateDebugIndicators(bool showBorder, bool showRepaintCounter);
 
