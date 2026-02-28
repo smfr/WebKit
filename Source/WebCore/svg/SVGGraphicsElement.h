@@ -92,7 +92,7 @@ private:
     // Used to isolate blend operations caused by masking.
     bool m_shouldIsolateBlending { false };
 
-    Ref<SVGAnimatedTransformList> m_transform;
+    const Ref<SVGAnimatedTransformList> m_transform;
 };
 
 } // namespace WebCore

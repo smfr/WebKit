@@ -73,8 +73,8 @@ protected:
 private:
     template<typename CharacterType> std::optional<FloatRect> parseViewBoxGeneric(StringParsingBuffer<CharacterType>&, bool validate = true);
 
-    Ref<SVGAnimatedRect> m_viewBox;
-    Ref<SVGAnimatedPreserveAspectRatio> m_preserveAspectRatio;
+    const Ref<SVGAnimatedRect> m_viewBox;
+    const Ref<SVGAnimatedPreserveAspectRatio> m_preserveAspectRatio;
     bool m_isViewBoxValid { false };
 };
 

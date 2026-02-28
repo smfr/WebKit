@@ -87,7 +87,7 @@ protected:
 private:
     SVGElement& contextElement() const;
 
-    Ref<SVGAnimatedString> m_href;
+    const Ref<SVGAnimatedString> m_href;
 };
 
 } // namespace WebCore

@@ -114,18 +114,18 @@ private:
     Vector<AtomString> filterEffectInputsNames() const override { return { AtomString { in1() } }; }
     RefPtr<FilterEffect> createFilterEffect(const FilterEffectVector&, const GraphicsContext& destinationContext) const override;
 
-    Ref<SVGAnimatedString> m_in1 { SVGAnimatedString::create(this) };
-    Ref<SVGAnimatedInteger> m_orderX { SVGAnimatedInteger::create(this, initialOrderValue) };
-    Ref<SVGAnimatedInteger> m_orderY { SVGAnimatedInteger::create(this, initialOrderValue) };
-    Ref<SVGAnimatedNumberList> m_kernelMatrix { SVGAnimatedNumberList::create(this) };
-    Ref<SVGAnimatedNumber> m_divisor { SVGAnimatedNumber::create(this, initialDivisorValue) };
-    Ref<SVGAnimatedNumber> m_bias { SVGAnimatedNumber::create(this) };
-    Ref<SVGAnimatedInteger> m_targetX { SVGAnimatedInteger::create(this) };
-    Ref<SVGAnimatedInteger> m_targetY { SVGAnimatedInteger::create(this) };
-    Ref<SVGAnimatedEnumeration> m_edgeMode { SVGAnimatedEnumeration::create(this, EdgeModeType::Duplicate) };
-    Ref<SVGAnimatedNumber> m_kernelUnitLengthX { SVGAnimatedNumber::create(this) };
-    Ref<SVGAnimatedNumber> m_kernelUnitLengthY { SVGAnimatedNumber::create(this) };
-    Ref<SVGAnimatedBoolean> m_preserveAlpha { SVGAnimatedBoolean::create(this) };
+    const Ref<SVGAnimatedString> m_in1 { SVGAnimatedString::create(this) };
+    const Ref<SVGAnimatedInteger> m_orderX { SVGAnimatedInteger::create(this, initialOrderValue) };
+    const Ref<SVGAnimatedInteger> m_orderY { SVGAnimatedInteger::create(this, initialOrderValue) };
+    const Ref<SVGAnimatedNumberList> m_kernelMatrix { SVGAnimatedNumberList::create(this) };
+    const Ref<SVGAnimatedNumber> m_divisor { SVGAnimatedNumber::create(this, initialDivisorValue) };
+    const Ref<SVGAnimatedNumber> m_bias { SVGAnimatedNumber::create(this) };
+    const Ref<SVGAnimatedInteger> m_targetX { SVGAnimatedInteger::create(this) };
+    const Ref<SVGAnimatedInteger> m_targetY { SVGAnimatedInteger::create(this) };
+    const Ref<SVGAnimatedEnumeration> m_edgeMode { SVGAnimatedEnumeration::create(this, EdgeModeType::Duplicate) };
+    const Ref<SVGAnimatedNumber> m_kernelUnitLengthX { SVGAnimatedNumber::create(this) };
+    const Ref<SVGAnimatedNumber> m_kernelUnitLengthY { SVGAnimatedNumber::create(this) };
+    const Ref<SVGAnimatedBoolean> m_preserveAlpha { SVGAnimatedBoolean::create(this) };
 };
 
 } // namespace WebCore

@@ -41,7 +41,7 @@ public:
     ~SVGAElement();
 
     AtomString target() const final { return AtomString { m_target->currentValue() }; }
-    Ref<SVGAnimatedString>& targetAnimated() { return m_target; }
+    SVGAnimatedString& targetAnimated() { return m_target; }
 
     SharedStringHash visitedLinkHash() const;
 
@@ -73,7 +73,7 @@ private:
 
     bool willRespondToMouseClickEventsWithEditability(Editability) const final;
 
-    Ref<SVGAnimatedString> m_target { SVGAnimatedString::create(this) };
+    const Ref<SVGAnimatedString> m_target { SVGAnimatedString::create(this) };
 
     OptionSet<Relation> m_linkRelations;
 

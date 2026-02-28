@@ -239,7 +239,7 @@ private:
     const UniqueRef<SVGPropertyAnimatorFactory> m_propertyAnimatorFactory;
 
     const UniqueRef<SVGPropertyRegistry> m_propertyRegistry;
-    Ref<SVGAnimatedString> m_className;
+    const Ref<SVGAnimatedString> m_className;
 };
 
 class SVGElement::InstanceInvalidationGuard {
