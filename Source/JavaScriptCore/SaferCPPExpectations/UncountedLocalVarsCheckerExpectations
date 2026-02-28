@@ -75,7 +75,7 @@ parser/Parser.h
 parser/SourceProviderCacheItem.h
 parser/SourceTaintedOrigin.cpp
 profiler/ProfilerDatabase.cpp
-runtime/BrandedStructure.h
+[ iOS ] runtime/BrandedStructure.h
 runtime/CachedTypes.cpp
 runtime/DeferredWorkTimer.cpp
 runtime/FileBasedFuzzerAgent.cpp
@@ -103,6 +103,7 @@ runtime/StructureInlines.h
 runtime/SymbolTable.h
 runtime/TypeSet.cpp
 runtime/VMTraps.cpp
+[ macOS ] runtime/WaiterListManager.h
 tools/JSDollarVM.cpp
 wasm/WasmBBQJIT.cpp
 wasm/WasmBBQJIT64.cpp

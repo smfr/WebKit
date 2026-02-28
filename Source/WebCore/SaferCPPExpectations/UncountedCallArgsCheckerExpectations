@@ -178,6 +178,7 @@ css/CSSViewValue.cpp
 css/CSSViewValue.h
 css/DOMMatrixReadOnly.cpp
 css/DeprecatedCSSOMPrimitiveValue.h
+[ macOS ] css/DeprecatedCSSOMRGBColor.h
 css/FontFace.cpp
 css/FontFaceSet.cpp
 css/ImmutableStyleProperties.cpp
