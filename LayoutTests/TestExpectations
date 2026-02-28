@@ -655,16 +655,14 @@ imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customiz
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-writing-mode-vertical-lr.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-writing-mode-vertical-rl.html [ ImageOnlyFailure ]
 
+# Top layer exit animations (remove from implicit anchor/top layer after picker transition finishes).
+imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-popover-exit-animation.html [ ImageOnlyFailure ]
+
 # Untriaged.
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-button-after-text.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-optgroup-rendering.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-appearance-switching-invalidation.html [ ImageOnlyFailure ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-picker-exit-animation.html [ Skip ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-picker-starting-style.html [ Skip ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-popover-exit-animation.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/selectedcontent-restore.html [ Skip ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-synthetic-events.html [ Skip ]
-imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select/select-mouse-behavior.html [ Skip ]
 
 # List boxes/<select multiple>.
 imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/customizable-select-listbox/ [ Skip ]
