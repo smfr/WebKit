@@ -97,16 +97,16 @@ using CodeUnitMatchFunction = bool (*)(char16_t);
 
 template<typename CharacterTypeA, typename CharacterTypeB>
     requires(TriviallyComparableCodeUnits<CharacterTypeA, CharacterTypeB>)
-bool NODELETE equalIgnoringASCIICase(std::span<const CharacterTypeA>, std::span<const CharacterTypeB>);
+bool equalIgnoringASCIICase(std::span<const CharacterTypeA>, std::span<const CharacterTypeB>);
 
-template<typename StringClassA, typename StringClassB> bool NODELETE equalIgnoringASCIICaseCommon(const StringClassA&, const StringClassB&);
+template<typename StringClassA, typename StringClassB> bool equalIgnoringASCIICaseCommon(const StringClassA&, const StringClassB&);
 
-template<typename CharacterType> bool NODELETE equalLettersIgnoringASCIICase(std::span<const CharacterType>, std::span<const Latin1Character> lowercaseLetters);
-template<typename CharacterType> bool NODELETE equalLettersIgnoringASCIICase(std::span<const CharacterType>, ASCIILiteral);
+template<typename CharacterType> bool equalLettersIgnoringASCIICase(std::span<const CharacterType>, std::span<const Latin1Character> lowercaseLetters);
+template<typename CharacterType> bool equalLettersIgnoringASCIICase(std::span<const CharacterType>, ASCIILiteral);
 
-template<typename StringClass> bool NODELETE equalLettersIgnoringASCIICaseCommon(const StringClass&, ASCIILiteral);
+template<typename StringClass> bool equalLettersIgnoringASCIICaseCommon(const StringClass&, ASCIILiteral);
 
-bool NODELETE equalIgnoringASCIICase(const char*, const char*);
+bool equalIgnoringASCIICase(const char*, const char*);
 
 template<typename T>
 concept OneByteCharacterType = std::is_same_v<std::remove_const_t<T>, Latin1Character> || std::is_same_v<std::remove_const_t<T>, char8_t> || std::is_same_v<std::remove_const_t<T>, char>;
@@ -114,7 +114,7 @@ concept OneByteCharacterType = std::is_same_v<std::remove_const_t<T>, Latin1Char
 // Do comparisons 8 or 4 bytes-at-a-time on architectures where it's safe.
 #if (CPU(X86_64) || CPU(ARM64)) && !ASAN_ENABLED
 template<OneByteCharacterType CharacterType>
-SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const CharacterType> b)
+ALWAYS_INLINE bool equal(const CharacterType* a, std::span<const CharacterType> b)
 {
     ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
     unsigned length = b.size();
@@ -184,7 +184,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std:
     }
 }
 
-SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const char16_t> b)
+ALWAYS_INLINE bool equal(const char16_t* a, std::span<const char16_t> b)
 {
     ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
     unsigned length = b.size();
@@ -254,7 +254,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span
 }
 #elif CPU(X86) && !ASAN_ENABLED
 template<OneByteCharacterType CharacterType>
-ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const CharacterType> b)
+ALWAYS_INLINE bool equal(const CharacterType* a, std::span<const CharacterType> b)
 {
     ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
     unsigned length = b.size();
@@ -285,7 +285,7 @@ ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const Charac
     return true;
 }
 
-ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const char16_t> b)
+ALWAYS_INLINE bool equal(const char16_t* a, std::span<const char16_t> b)
 {
     ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
     unsigned length = b.size();
@@ -308,14 +308,14 @@ ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const char16_t> b
 }
 #else
 template<OneByteCharacterType CharacterType>
-ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const CharacterType> b)
+ALWAYS_INLINE bool equal(const CharacterType* a, std::span<const CharacterType> b)
 {
     return !memcmp(a, b.data(), b.size());
 }
-ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const char16_t> b) { return !memcmp(a, b.data(), b.size_bytes()); }
+ALWAYS_INLINE bool equal(const char16_t* a, std::span<const char16_t> b) { return !memcmp(a, b.data(), b.size_bytes()); }
 #endif
 
-SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const Latin1Character* a, std::span<const char16_t> b)
+ALWAYS_INLINE bool equal(const Latin1Character* a, std::span<const char16_t> b)
 {
 #if CPU(ARM64)
     ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
@@ -366,13 +366,13 @@ SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const Latin1Character* a, st
 #endif
 }
 
-ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const Latin1Character> b)
+ALWAYS_INLINE bool equal(const char16_t* a, std::span<const Latin1Character> b)
 {
     return equal(b.data(), { a, b.size() });
 }
 
 template<OneByteCharacterType CharacterType>
-ALWAYS_INLINE bool NODELETE equal(std::span<const CharacterType> a, std::span<const CharacterType> b)
+ALWAYS_INLINE bool equal(std::span<const CharacterType> a, std::span<const CharacterType> b)
 {
     if (a.size() != b.size())
         return false;
@@ -380,13 +380,13 @@ ALWAYS_INLINE bool NODELETE equal(std::span<const CharacterType> a, std::span<co
 }
 
 template<OneByteCharacterType CharacterType>
-ALWAYS_INLINE bool NODELETE equal(std::span<const CharacterType> a, ASCIILiteral b)
+ALWAYS_INLINE bool equal(std::span<const CharacterType> a, ASCIILiteral b)
 {
     return equal(a, byteCast<CharacterType>(b.span()));
 }
 
 template<typename StringClassA, typename StringClassB>
-ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA& a, const StringClassB& b, unsigned length)
+ALWAYS_INLINE bool equalCommon(const StringClassA& a, const StringClassB& b, unsigned length)
 {
     if (!length)
         return true;
@@ -411,7 +411,7 @@ ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA& a, const StringClass
 }
 
 template<typename StringClassA, typename StringClassB>
-ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA& a, const StringClassB& b)
+ALWAYS_INLINE bool equalCommon(const StringClassA& a, const StringClassB& b)
 {
     unsigned length = a.length();
     if (length != b.length())
@@ -421,7 +421,7 @@ ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA& a, const StringClass
 }
 
 template<typename StringClassA, typename StringClassB>
-ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA* a, const StringClassB* b)
+ALWAYS_INLINE bool equalCommon(const StringClassA* a, const StringClassB* b)
 {
     if (a == b)
         return true;
@@ -430,7 +430,7 @@ ALWAYS_INLINE bool NODELETE equalCommon(const StringClassA* a, const StringClass
     return equal(*a, *b);
 }
 
-template<typename StringClass, unsigned length> bool NODELETE equal(const StringClass& a, const char16_t (&codeUnits)[length])
+template<typename StringClass, unsigned length> bool equal(const StringClass& a, const char16_t (&codeUnits)[length])
 {
     if (a.length() != length)
         return false;
@@ -450,7 +450,7 @@ concept ContainsEncodingAwareSpans = requires(T t)
 };
 
 template<ContainsEncodingAwareSpans StringClass>
-bool NODELETE equal(const StringClass& string, std::span<const char8_t> span)
+bool equal(const StringClass& string, std::span<const char8_t> span)
 {
     if (string.is8Bit())
         return Unicode::equal(string.span8(), span);
@@ -458,7 +458,7 @@ bool NODELETE equal(const StringClass& string, std::span<const char8_t> span)
     return Unicode::equal(string.span16(), span);
 }
 
-template<typename CharacterTypeA, typename CharacterTypeB> inline bool NODELETE equalIgnoringASCIICaseWithLength(std::span<const CharacterTypeA> a, std::span<const CharacterTypeB> b, size_t lengthToCheck)
+template<typename CharacterTypeA, typename CharacterTypeB> inline bool equalIgnoringASCIICaseWithLength(std::span<const CharacterTypeA> a, std::span<const CharacterTypeB> b, size_t lengthToCheck)
 {
     ASSERT(a.size() >= lengthToCheck);
     ASSERT(b.size() >= lengthToCheck);
@@ -469,7 +469,7 @@ template<typename CharacterTypeA, typename CharacterTypeB> inline bool NODELETE 
     return true;
 }
 
-template<typename CharacterTypeA, typename CharacterTypeB> inline bool NODELETE spanHasPrefixIgnoringASCIICase(std::span<const CharacterTypeA> span, std::span<const CharacterTypeB> prefix)
+template<typename CharacterTypeA, typename CharacterTypeB> inline bool spanHasPrefixIgnoringASCIICase(std::span<const CharacterTypeA> span, std::span<const CharacterTypeB> prefix)
 {
     if (span.size() < prefix.size())
         return false;
@@ -478,19 +478,19 @@ template<typename CharacterTypeA, typename CharacterTypeB> inline bool NODELETE 
 
 template<typename CharacterTypeA, typename CharacterTypeB>
     requires(TriviallyComparableCodeUnits<CharacterTypeA, CharacterTypeB>)
-inline bool NODELETE equalIgnoringASCIICase(std::span<const CharacterTypeA> a, std::span<const CharacterTypeB> b)
+inline bool equalIgnoringASCIICase(std::span<const CharacterTypeA> a, std::span<const CharacterTypeB> b)
 {
     return a.size() == b.size() && equalIgnoringASCIICaseWithLength(a, b, a.size());
 }
 
 template<OneByteCharacterType CharacterType>
-inline bool NODELETE equalIgnoringASCIICase(std::span<const CharacterType> a, ASCIILiteral b)
+inline bool equalIgnoringASCIICase(std::span<const CharacterType> a, ASCIILiteral b)
 {
     return equalIgnoringASCIICase(a, byteCast<CharacterType>(b.span()));
 }
 
 template<typename StringClassA, typename StringClassB>
-bool NODELETE equalIgnoringASCIICaseCommon(const StringClassA& a, const StringClassB& b)
+bool equalIgnoringASCIICaseCommon(const StringClassA& a, const StringClassB& b)
 {
     if (a.length() != b.length())
         return false;
@@ -505,7 +505,7 @@ bool NODELETE equalIgnoringASCIICaseCommon(const StringClassA& a, const StringCl
     return equalIgnoringASCIICaseWithLength(a.span16(), b.span16(), b.length());
 }
 
-template<typename StringClassA> SUPPRESS_NODELETE bool NODELETE equalIgnoringASCIICaseCommon(const StringClassA& a, const char* b)
+template<typename StringClassA> bool equalIgnoringASCIICaseCommon(const StringClassA& a, const char* b)
 {
     auto bSpan = unsafeSpan(b);
     if (a.length() != bSpan.size())
@@ -517,7 +517,7 @@ template<typename StringClassA> SUPPRESS_NODELETE bool NODELETE equalIgnoringASC
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-size_t NODELETE findIgnoringASCIICase(std::span<const SearchCharacterType> source, std::span<const MatchCharacterType> matchCharacters, size_t startOffset = 0)
+size_t findIgnoringASCIICase(std::span<const SearchCharacterType> source, std::span<const MatchCharacterType> matchCharacters, size_t startOffset = 0)
 {
     for (size_t offset = startOffset; offset <= source.size() && source.size() - offset >= matchCharacters.size(); ++offset) {
         if (equalIgnoringASCIICaseWithLength(source.subspan(offset), matchCharacters, matchCharacters.size()))
@@ -527,24 +527,24 @@ size_t NODELETE findIgnoringASCIICase(std::span<const SearchCharacterType> sourc
 }
 
 template<OneByteCharacterType CharacterType>
-size_t NODELETE findIgnoringASCIICase(std::span<const CharacterType> source, ASCIILiteral matchCharacters)
+size_t findIgnoringASCIICase(std::span<const CharacterType> source, ASCIILiteral matchCharacters)
 {
     return findIgnoringASCIICase(source, byteCast<CharacterType>(matchCharacters.span()));
 }
 
 template<typename SearchCharacterType, typename MatchCharacterType>
-bool NODELETE containsIgnoringASCIICase(std::span<const SearchCharacterType> source, std::span<const MatchCharacterType> matchCharacters)
+bool containsIgnoringASCIICase(std::span<const SearchCharacterType> source, std::span<const MatchCharacterType> matchCharacters)
 {
     return findIgnoringASCIICase(source, matchCharacters) != notFound;
 }
 
 template<typename CharacterType>
-bool NODELETE containsIgnoringASCIICase(std::span<const CharacterType> source, ASCIILiteral matchCharacters)
+bool containsIgnoringASCIICase(std::span<const CharacterType> source, ASCIILiteral matchCharacters)
 {
     return containsIgnoringASCIICase(source, byteCast<CharacterType>(matchCharacters.span()));
 }
 
-SUPPRESS_NODELETE inline size_t NODELETE findIgnoringASCIICaseWithoutLength(const char* source, const char* matchCharacters)
+inline size_t findIgnoringASCIICaseWithoutLength(const char* source, const char* matchCharacters)
 {
     auto searchSpan = unsafeSpan(source);
     auto matchSpan = unsafeSpan(matchCharacters);
@@ -553,7 +553,7 @@ SUPPRESS_NODELETE inline size_t NODELETE findIgnoringASCIICaseWithoutLength(cons
 }
 
 template <typename SearchCharacterType, typename MatchCharacterType>
-ALWAYS_INLINE static size_t NODELETE findInner(std::span<const SearchCharacterType> searchCharacters, std::span<const MatchCharacterType> matchCharacters, size_t index)
+ALWAYS_INLINE static size_t findInner(std::span<const SearchCharacterType> searchCharacters, std::span<const MatchCharacterType> matchCharacters, size_t index)
 {
     // Optimization: keep a running hash of the strings,
     // only call equal() if the hashes match.
@@ -581,7 +581,7 @@ ALWAYS_INLINE static size_t NODELETE findInner(std::span<const SearchCharacterTy
     return index + i;
 }
 
-SUPPRESS_NODELETE ALWAYS_INLINE const uint8_t* NODELETE find8(const uint8_t* pointer, uint8_t character, size_t length)
+ALWAYS_INLINE const uint8_t* find8(const uint8_t* pointer, uint8_t character, size_t length)
 {
     constexpr size_t thresholdLength = 16;
 
@@ -600,7 +600,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint8_t* NODELETE find8(const uint8_t* poi
 }
 
 template<typename UnsignedType>
-SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE findImpl(const UnsignedType* pointer, UnsignedType character, size_t length)
+ALWAYS_INLINE const UnsignedType* findImpl(const UnsignedType* pointer, UnsignedType character, size_t length)
 {
     auto charactersVector = SIMD::splat<UnsignedType>(character);
     auto vectorMatch = [&](auto value) ALWAYS_INLINE_LAMBDA {
@@ -620,17 +620,17 @@ SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE findImpl(const Unsi
     return cursor;
 }
 
-ALWAYS_INLINE const uint16_t* NODELETE find16(const uint16_t* pointer, uint16_t character, size_t length)
+ALWAYS_INLINE const uint16_t* find16(const uint16_t* pointer, uint16_t character, size_t length)
 {
     return findImpl(pointer, character, length);
 }
 
-ALWAYS_INLINE const uint32_t* NODELETE find32(const uint32_t* pointer, uint32_t character, size_t length)
+ALWAYS_INLINE const uint32_t* find32(const uint32_t* pointer, uint32_t character, size_t length)
 {
     return findImpl(pointer, character, length);
 }
 
-SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE find64(const uint64_t* pointer, uint64_t character, size_t length)
+ALWAYS_INLINE const uint64_t* find64(const uint64_t* pointer, uint64_t character, size_t length)
 {
     constexpr size_t scalarThreshold = 4;
     size_t index = 0;
@@ -684,7 +684,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE find64(const uint64_t* 
     return nullptr;
 }
 
-ALWAYS_INLINE const Float16* NODELETE findFloat16(const Float16* pointer, Float16 target, size_t length)
+ALWAYS_INLINE const Float16* findFloat16(const Float16* pointer, Float16 target, size_t length)
 {
     for (size_t index = 0; index < length; ++index) {
         if (pointer[index] == target)
@@ -693,10 +693,10 @@ ALWAYS_INLINE const Float16* NODELETE findFloat16(const Float16* pointer, Float1
     return nullptr;
 }
 
-WTF_EXPORT_PRIVATE const float* NODELETE findFloatAlignedImpl(const float* pointer, float target, size_t length);
+WTF_EXPORT_PRIVATE const float* findFloatAlignedImpl(const float* pointer, float target, size_t length);
 
 #if CPU(ARM64)
-SUPPRESS_NODELETE ALWAYS_INLINE const float* NODELETE findFloat(const float* pointer, float target, size_t length)
+ALWAYS_INLINE const float* findFloat(const float* pointer, float target, size_t length)
 {
     constexpr size_t thresholdLength = 32;
     static_assert(!(thresholdLength % (16 / sizeof(float))), "length threshold should be16-byte aligned to make floatFindAlignedImpl simpler");
@@ -716,7 +716,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const float* NODELETE findFloat(const float* poi
     return findFloatAlignedImpl(pointer + index, target, length - index);
 }
 #else
-ALWAYS_INLINE const float* NODELETE findFloat(const float* pointer, float target, size_t length)
+ALWAYS_INLINE const float* findFloat(const float* pointer, float target, size_t length)
 {
     for (size_t index = 0; index < length; ++index) {
         if (pointer[index] == target)
@@ -726,10 +726,10 @@ ALWAYS_INLINE const float* NODELETE findFloat(const float* pointer, float target
 }
 #endif
 
-WTF_EXPORT_PRIVATE const double* NODELETE findDoubleAlignedImpl(const double* pointer, double target, size_t length);
+WTF_EXPORT_PRIVATE const double* findDoubleAlignedImpl(const double* pointer, double target, size_t length);
 
 #if CPU(ARM64)
-SUPPRESS_NODELETE ALWAYS_INLINE const double* NODELETE findDouble(const double* pointer, double target, size_t length)
+ALWAYS_INLINE const double* findDouble(const double* pointer, double target, size_t length)
 {
     constexpr size_t thresholdLength = 32;
     static_assert(!(thresholdLength % (16 / sizeof(double))), "length threshold should be16-byte aligned to make doubleFindAlignedImpl simpler");
@@ -749,7 +749,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const double* NODELETE findDouble(const double* 
     return findDoubleAlignedImpl(pointer + index, target, length - index);
 }
 #else
-ALWAYS_INLINE const double* NODELETE findDouble(const double* pointer, double target, size_t length)
+ALWAYS_INLINE const double* findDouble(const double* pointer, double target, size_t length)
 {
     for (size_t index = 0; index < length; ++index) {
         if (pointer[index] == target)
@@ -759,14 +759,14 @@ ALWAYS_INLINE const double* NODELETE findDouble(const double* pointer, double ta
 }
 #endif
 
-WTF_EXPORT_PRIVATE const Latin1Character* NODELETE find8NonASCIIAlignedImpl(std::span<const Latin1Character>);
-WTF_EXPORT_PRIVATE const char16_t* NODELETE find16NonASCIIAlignedImpl(std::span<const char16_t>);
+WTF_EXPORT_PRIVATE const Latin1Character* find8NonASCIIAlignedImpl(std::span<const Latin1Character>);
+WTF_EXPORT_PRIVATE const char16_t* find16NonASCIIAlignedImpl(std::span<const char16_t>);
 
-WTF_EXPORT_PRIVATE bool NODELETE isWellFormedUTF16(std::span<const char16_t>);
-WTF_EXPORT_PRIVATE void NODELETE toWellFormedUTF16(std::span<const char16_t> input, std::span<char16_t> output);
+WTF_EXPORT_PRIVATE bool isWellFormedUTF16(std::span<const char16_t>);
+WTF_EXPORT_PRIVATE void toWellFormedUTF16(std::span<const char16_t> input, std::span<char16_t> output);
 
 #if CPU(ARM64)
-SUPPRESS_NODELETE ALWAYS_INLINE const Latin1Character* NODELETE find8NonASCII(std::span<const Latin1Character> data)
+ALWAYS_INLINE const Latin1Character* find8NonASCII(std::span<const Latin1Character> data)
 {
     constexpr size_t thresholdLength = 16;
     static_assert(!(thresholdLength % (16 / sizeof(Latin1Character))), "length threshold should be 16-byte aligned to make find8NonASCIIAlignedImpl simpler");
@@ -787,7 +787,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const Latin1Character* NODELETE find8NonASCII(st
     return find8NonASCIIAlignedImpl({ pointer + index, length - index });
 }
 
-SUPPRESS_NODELETE ALWAYS_INLINE const char16_t* NODELETE find16NonASCII(std::span<const char16_t> data)
+ALWAYS_INLINE const char16_t* find16NonASCII(std::span<const char16_t> data)
 {
     constexpr size_t thresholdLength = 16;
     static_assert(!(thresholdLength % (16 / sizeof(char16_t))), "length threshold should be 16-byte aligned to make find16NonASCIIAlignedImpl simpler");
@@ -811,7 +811,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const char16_t* NODELETE find16NonASCII(std::spa
 
 template<std::integral CharacterType1, std::integral CharacterType2>
     requires (sizeof(CharacterType1) == sizeof(CharacterType2))
-inline size_t NODELETE find(std::span<const CharacterType1> characters, CharacterType2 matchCharacter, size_t index = 0)
+inline size_t find(std::span<const CharacterType1> characters, CharacterType2 matchCharacter, size_t index = 0)
 {
     if constexpr (sizeof(CharacterType1) == 1) {
         if (index >= characters.size())
@@ -872,7 +872,7 @@ inline bool contains(std::span<const CharacterType> characters, ASCIILiteral mat
 }
 
 template <typename SearchCharacterType, typename MatchCharacterType>
-SUPPRESS_NODELETE ALWAYS_INLINE static size_t NODELETE reverseFindInner(std::span<const SearchCharacterType> searchCharacters, std::span<const MatchCharacterType> matchCharacters, size_t start)
+ALWAYS_INLINE static size_t reverseFindInner(std::span<const SearchCharacterType> searchCharacters, std::span<const MatchCharacterType> matchCharacters, size_t start)
 {
     if (searchCharacters.size() < matchCharacters.size())
         return notFound;
@@ -922,7 +922,7 @@ concept SearchableStringByOneByteCharacter =
 
 template<typename CharacterType, typename OneByteCharacterType>
     requires SearchableStringByOneByteCharacter<CharacterType, OneByteCharacterType>
-inline bool NODELETE equalLettersIgnoringASCIICaseWithLength(std::span<const CharacterType> characters, std::span<const OneByteCharacterType> lowercaseLetters, size_t length)
+inline bool equalLettersIgnoringASCIICaseWithLength(std::span<const CharacterType> characters, std::span<const OneByteCharacterType> lowercaseLetters, size_t length)
 {
     ASSERT(characters.size() >= length);
     ASSERT(lowercaseLetters.size() >= length);
@@ -933,22 +933,22 @@ inline bool NODELETE equalLettersIgnoringASCIICaseWithLength(std::span<const Cha
     return true;
 }
 
-template<typename CharacterType> inline bool NODELETE equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, std::span<const Latin1Character> lowercaseLetters)
+template<typename CharacterType> inline bool equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, std::span<const Latin1Character> lowercaseLetters)
 {
     return characters.size() == lowercaseLetters.size() && equalLettersIgnoringASCIICaseWithLength(characters, lowercaseLetters, lowercaseLetters.size());
 }
 
-template<typename CharacterType> inline bool NODELETE equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, std::span<const char> lowercaseLetters)
+template<typename CharacterType> inline bool equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, std::span<const char> lowercaseLetters)
 {
     return equalLettersIgnoringASCIICase(characters, byteCast<Latin1Character>(lowercaseLetters));
 }
 
-template<typename CharacterType> inline bool NODELETE equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, ASCIILiteral lowercaseLetters)
+template<typename CharacterType> inline bool equalLettersIgnoringASCIICase(std::span<const CharacterType> characters, ASCIILiteral lowercaseLetters)
 {
     return equalLettersIgnoringASCIICase(characters, lowercaseLetters.span8());
 }
 
-template<typename StringClass> bool inline NODELETE hasPrefixWithLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> lowercaseLetters)
+template<typename StringClass> bool inline hasPrefixWithLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> lowercaseLetters)
 {
 #if ASSERT_ENABLED
     ASSERT(lowercaseLetters.front());
@@ -963,7 +963,7 @@ template<typename StringClass> bool inline NODELETE hasPrefixWithLettersIgnoring
 }
 
 // This is intentionally not marked inline because it's used often and is not speed-critical enough to want it inlined everywhere.
-template<typename StringClass> bool NODELETE equalLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> literal)
+template<typename StringClass> bool equalLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> literal)
 {
     if (string.length() != literal.size())
         return false;
@@ -972,7 +972,7 @@ template<typename StringClass> bool NODELETE equalLettersIgnoringASCIICaseCommon
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE startsWith(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
+bool startsWith(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
 {
     if (prefix.size() > string.size())
         return false;
@@ -981,14 +981,14 @@ bool NODELETE startsWith(std::span<const SearchCharacterType> string, std::span<
 }
 
 template<OneByteCharacterType CharacterType>
-bool NODELETE startsWith(std::span<const CharacterType> string, ASCIILiteral prefix)
+bool startsWith(std::span<const CharacterType> string, ASCIILiteral prefix)
 {
     return startsWith(string, byteCast<CharacterType>(prefix.span()));
 }
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE endsWith(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
+bool endsWith(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
 {
     unsigned suffixSize = suffix.size();
     unsigned referenceSize = string.size();
@@ -1001,14 +1001,14 @@ bool NODELETE endsWith(std::span<const SearchCharacterType> string, std::span<co
 }
 
 template<OneByteCharacterType CharacterType>
-bool NODELETE endsWith(std::span<const CharacterType> string, ASCIILiteral suffix)
+bool endsWith(std::span<const CharacterType> string, ASCIILiteral suffix)
 {
     return endsWith(string, byteCast<CharacterType>(suffix.span()));
 }
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE endsWithLettersIgnoringASCIICaseCommon(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
+bool endsWithLettersIgnoringASCIICaseCommon(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
 {
     unsigned suffixLength = suffix.size();
     unsigned referenceLength = string.size();
@@ -1022,20 +1022,20 @@ bool NODELETE endsWithLettersIgnoringASCIICaseCommon(std::span<const SearchChara
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE endsWithLettersIgnoringASCIICase(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
+bool endsWithLettersIgnoringASCIICase(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> suffix)
 {
     return endsWithLettersIgnoringASCIICaseCommon(string, suffix);
 }
 
 template<OneByteCharacterType CharacterType>
-bool NODELETE endsWithLettersIgnoringASCIICase(std::span<const CharacterType> string, ASCIILiteral suffix)
+bool endsWithLettersIgnoringASCIICase(std::span<const CharacterType> string, ASCIILiteral suffix)
 {
     return endsWithLettersIgnoringASCIICase(string, byteCast<CharacterType>(suffix.span()));
 }
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE startsWithLettersIgnoringASCIICaseCommon(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
+bool startsWithLettersIgnoringASCIICaseCommon(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
 {
     if (prefix.empty())
         return true;
@@ -1046,18 +1046,18 @@ bool NODELETE startsWithLettersIgnoringASCIICaseCommon(std::span<const SearchCha
 
 template<typename SearchCharacterType, typename MatchCharacterType>
     requires(TriviallyComparableCodeUnits<SearchCharacterType, MatchCharacterType>)
-bool NODELETE startsWithLettersIgnoringASCIICase(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
+bool startsWithLettersIgnoringASCIICase(std::span<const SearchCharacterType> string, std::span<const MatchCharacterType> prefix)
 {
     return startsWithLettersIgnoringASCIICaseCommon(string, prefix);
 }
 
 template<OneByteCharacterType CharacterType>
-bool NODELETE startsWithLettersIgnoringASCIICase(std::span<const CharacterType> string, ASCIILiteral prefix)
+bool startsWithLettersIgnoringASCIICase(std::span<const CharacterType> string, ASCIILiteral prefix)
 {
     return startsWithLettersIgnoringASCIICase(string, byteCast<CharacterType>(prefix.span()));
 }
 
-template<typename StringClass> bool NODELETE startsWithLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> prefix)
+template<typename StringClass> bool startsWithLettersIgnoringASCIICaseCommon(const StringClass& string, std::span<const Latin1Character> prefix)
 {
     if (prefix.empty())
         return true;
@@ -1076,7 +1076,7 @@ template<typename StringClass> inline bool startsWithLettersIgnoringASCIICaseCom
     return startsWithLettersIgnoringASCIICaseCommon(string, literal.span8());
 }
 
-SUPPRESS_NODELETE inline bool equalIgnoringASCIICase(const char* a, const char* b)
+inline bool equalIgnoringASCIICase(const char* a, const char* b)
 {
     return equalIgnoringASCIICase(unsafeSpan(a), unsafeSpan(b));
 }
