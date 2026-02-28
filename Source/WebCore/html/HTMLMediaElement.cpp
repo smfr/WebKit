@@ -8586,7 +8586,7 @@ bool HTMLMediaElement::mediaPlayerShouldUsePersistentCache() const
     return false;
 }
 
-const String& HTMLMediaElement::mediaPlayerMediaCacheDirectory() const
+String HTMLMediaElement::mediaPlayerMediaCacheDirectory() const
 {
     return mediaCacheDirectory();
 }

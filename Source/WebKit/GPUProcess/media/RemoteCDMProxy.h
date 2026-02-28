@@ -58,7 +58,7 @@ public:
     void ref() const final { RefCounted::ref(); }
     void deref() const final { RefCounted::deref(); }
 
-    const RemoteCDMConfiguration& configuration() const { return m_configuration.get(); }
+    const RemoteCDMConfiguration& configuration() const LIFETIME_BOUND { return m_configuration.get(); }
 
     RemoteCDMFactoryProxy* factory() const { return m_factory.get(); }
 

@@ -195,7 +195,7 @@ bool RemoteCDMFactoryProxy::allowsExitUnderMemoryPressure() const
     return m_instances.isEmpty();
 }
 
-const String& RemoteCDMFactoryProxy::mediaKeysStorageDirectory() const
+String RemoteCDMFactoryProxy::mediaKeysStorageDirectory() const
 {
     if (RefPtr connection = m_gpuConnectionToWebProcess.get())
         return connection->mediaKeysStorageDirectory();

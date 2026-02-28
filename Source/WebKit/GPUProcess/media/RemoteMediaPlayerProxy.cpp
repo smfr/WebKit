@@ -551,7 +551,7 @@ void RemoteMediaPlayerProxy::mediaPlayerGetRawCookies(const URL& url, WebCore::M
 }
 #endif
 
-const String& RemoteMediaPlayerProxy::mediaPlayerMediaCacheDirectory() const
+String RemoteMediaPlayerProxy::mediaPlayerMediaCacheDirectory() const
 {
     RefPtr manager = m_manager.get();
     ASSERT(manager && manager->gpuConnectionToWebProcess());

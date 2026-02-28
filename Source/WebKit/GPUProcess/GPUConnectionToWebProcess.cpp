@@ -267,7 +267,7 @@ private:
 #endif
     }
 
-    const ProcessIdentity& resourceOwner() const final
+    ProcessIdentity resourceOwner() const final
     {
         return m_process.get()->webProcessIdentity();
     }

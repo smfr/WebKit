@@ -66,7 +66,7 @@ public:
     // IPC::MessageReceiver
     void didReceiveMessage(IPC::Connection&, IPC::Decoder&) final;
 
-    const WebCore::ProcessIdentity& resourceOwner() const { return m_resourceOwner; }
+    const WebCore::ProcessIdentity& resourceOwner() const LIFETIME_BOUND { return m_resourceOwner; }
 #if HAVE(IOSURFACE)
     WebCore::IOSurfacePool& ioSurfacePool() const { return m_ioSurfacePool; }
 #endif

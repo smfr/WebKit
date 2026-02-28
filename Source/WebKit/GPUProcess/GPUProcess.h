@@ -114,16 +114,16 @@ public:
 
     GPUConnectionToWebProcess* webProcessConnection(WebCore::ProcessIdentifier) const;
 
-    const String& NODELETE mediaCacheDirectory(PAL::SessionID) const;
+    const String& NODELETE mediaCacheDirectory(PAL::SessionID) const LIFETIME_BOUND;
 #if ENABLE(LEGACY_ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA)
-    const String& NODELETE mediaKeysStorageDirectory(PAL::SessionID) const;
+    const String& NODELETE mediaKeysStorageDirectory(PAL::SessionID) const LIFETIME_BOUND;
 #endif
 
 #if ENABLE(GPU_PROCESS) && USE(AUDIO_SESSION)
     RemoteAudioSessionProxyManager& audioSessionManager() const;
 #endif
 
-    WebCore::NowPlayingManager& nowPlayingManager();
+    WebCore::NowPlayingManager& nowPlayingManager() LIFETIME_BOUND;
 
 #if ENABLE(MEDIA_STREAM) && PLATFORM(COCOA)
     WorkQueue& videoMediaStreamTrackRendererQueue();
@@ -135,12 +135,12 @@ public:
 #endif
 
 #if USE(GRAPHICS_LAYER_WC)
-    WCSharedSceneContextHolder& sharedSceneContext() { return m_sharedSceneContext; }
+    WCSharedSceneContextHolder& sharedSceneContext() LIFETIME_BOUND { return m_sharedSceneContext; }
 #endif
 
     void tryExitIfUnusedAndUnderMemoryPressure();
 
-    const String& applicationVisibleName() const { return m_applicationVisibleName; }
+    const String& applicationVisibleName() const LIFETIME_BOUND { return m_applicationVisibleName; }
 
     void webProcessConnectionCountForTesting(CompletionHandler<void(uint64_t)>&&);
 
