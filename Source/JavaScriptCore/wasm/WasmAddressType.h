@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2016-2017 Apple Inc. All rights reserved.
+/* Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,54 +24,35 @@
 
 #pragma once
 
-#include <wtf/Platform.h>
-
 #if ENABLE(WEBASSEMBLY)
 
-#include <JavaScriptCore/GPRInfo.h>
-#include <JavaScriptCore/PageCount.h>
-#include <JavaScriptCore/RegisterSet.h>
-#include <JavaScriptCore/WasmAddressType.h>
-#include <JavaScriptCore/WasmMemory.h>
-#include <JavaScriptCore/WasmOps.h>
-
-#include <wtf/Forward.h>
-#include <wtf/Ref.h>
-#include <wtf/Vector.h>
-
 namespace JSC { namespace Wasm {
+enum class TypeKind : int8_t;
 
-struct PinnedSizeRegisterInfo {
-    GPRReg boundsCheckingSizeRegister;
-    unsigned sizeOffset;
-};
-
-class MemoryInformation {
+class AddressType {
 public:
-    MemoryInformation()
-    {
-        ASSERT(!*this);
-    }
+    enum class Kind : int8_t {
+        I32,
+        I64
+    };
+    using enum Kind;
+    AddressType() = default;
+    AddressType(TypeKind);
+    AddressType(AddressType::Kind);
+    explicit AddressType(bool is64bit);
 
-    MemoryInformation(PageCount initial, PageCount maximum, bool isShared, bool isImport, bool isMemory64);
+    AddressType::Kind type() const { return m_type; }
+    TypeKind asTypeKind() const;
 
-    PageCount initial() const { return m_initial; }
-    PageCount maximum() const { return m_maximum; }
-    bool isShared() const { return m_isShared; }
-    bool isImport() const { return m_isImport; }
-    AddressType addressType() const { return m_addressType; }
-    bool isMemory64() const { return m_addressType.is64Bit(); }
-
-    explicit operator bool() const { return !!m_initial; }
+    friend bool operator==(const AddressType& lhs, const AddressType& rhs);
+    friend bool operator!=(const AddressType& lhs, const AddressType& rhs);
+    bool is64Bit() const { return m_type == AddressType::I64; }
 
 private:
-    PageCount m_initial { };
-    PageCount m_maximum { };
-    bool m_isShared { false };
-    bool m_isImport { false };
-    AddressType m_addressType;
+
+    AddressType::Kind m_type { AddressType::I32 };
 };
 
 } } // namespace JSC::Wasm
-
+    //
 #endif // ENABLE(WEBASSEMBLY)

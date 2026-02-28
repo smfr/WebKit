@@ -1423,6 +1423,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     tools/LLVMProfiling.h
     tools/SourceProfiler.h
 
+    wasm/WasmAddressType.h
     wasm/WasmBaselineData.h
     wasm/WasmBranchHints.h
     wasm/WasmCallProfile.h

@@ -1912,6 +1912,7 @@
 		CEAE7D7B889B477BA93ABA6C /* ScriptFetcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 8852151A9C3842389B3215B7 /* ScriptFetcher.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CECFAD362372DAD000291599 /* FuzzerPredictions.h in Headers */ = {isa = PBXBuildFile; fileRef = CECFAD342372DAA700291599 /* FuzzerPredictions.h */; };
 		CECFAD372372DAD400291599 /* FileBasedFuzzerAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = CECFAD322372DAA700291599 /* FileBasedFuzzerAgent.h */; };
+		D61524302F4CF1BD004C8AF6 /* WasmAddressType.h in Headers */ = {isa = PBXBuildFile; fileRef = D615242F2F4CF1AB004C8AF6 /* WasmAddressType.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		D9722752DC54459B9125B539 /* JSModuleLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 77B25CB2C3094A92A38E1DB3 /* JSModuleLoader.h */; };
 		DC00039319D8BE6F00023EB0 /* DFGPreciseLocalClobberize.h in Headers */ = {isa = PBXBuildFile; fileRef = DC00039019D8BE6F00023EB0 /* DFGPreciseLocalClobberize.h */; };
 		DC0184191D10C1890057B053 /* JITWorklist.h in Headers */ = {isa = PBXBuildFile; fileRef = DC0184181D10C1870057B053 /* JITWorklist.h */; };
@@ -5730,6 +5731,8 @@
 		CECFAD352372DAA700291599 /* FuzzerPredictions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FuzzerPredictions.cpp; sourceTree = "<group>"; };
 		D21202280AD4310C00ED79B6 /* DateConversion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DateConversion.cpp; sourceTree = "<group>"; };
 		D21202290AD4310C00ED79B6 /* DateConversion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DateConversion.h; sourceTree = "<group>"; };
+		D615242F2F4CF1AB004C8AF6 /* WasmAddressType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WasmAddressType.h; sourceTree = "<group>"; };
+		D61524352F4CF5D1004C8AF6 /* WasmAddressType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WasmAddressType.cpp; sourceTree = "<group>"; };
 		DC00039019D8BE6F00023EB0 /* DFGPreciseLocalClobberize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DFGPreciseLocalClobberize.h; path = dfg/DFGPreciseLocalClobberize.h; sourceTree = "<group>"; };
 		DC0184171D10C1870057B053 /* JITWorklist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JITWorklist.cpp; sourceTree = "<group>"; };
 		DC0184181D10C1870057B053 /* JITWorklist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JITWorklist.h; sourceTree = "<group>"; };
@@ -8158,6 +8161,8 @@
 				FFD49E662E276CA10083E383 /* debugger */,
 				AD2FCB8A1DB5840000B3E736 /* js */,
 				FED5FA3629A085BD00798A7F /* wasm.json */,
+				D61524352F4CF5D1004C8AF6 /* WasmAddressType.cpp */,
+				D615242F2F4CF1AB004C8AF6 /* WasmAddressType.h */,
 				E38416412E6FC06000591840 /* WasmBaselineData.h */,
 				E30D06B629C6C3E80014CCE7 /* WasmBBQDisassembler.cpp */,
 				E30D06B729C6C3E80014CCE7 /* WasmBBQDisassembler.h */,
@@ -12479,6 +12484,7 @@
 				FE6F56DE1E64EAD600D17801 /* VMTraps.h in Headers */,
 				FEF5B42C2628CBC80016E776 /* VMTrapsInlines.h in Headers */,
 				FF41590C28FF3C6B00F80B96 /* WaiterListManager.h in Headers */,
+				D61524302F4CF1BD004C8AF6 /* WasmAddressType.h in Headers */,
 				E38416422E6FC06000591840 /* WasmBaselineData.h in Headers */,
 				E30D06B829C6C3EE0014CCE7 /* WasmBBQDisassembler.h in Headers */,
 				FED5FA3429A0859C00798A7F /* WasmBBQJIT.h in Headers */,

@@ -43,6 +43,7 @@
 #include "JSWebAssemblyStruct.h"
 #include "MacroAssembler.h"
 #include "RegisterSet.h"
+#include "WasmAddressType.h"
 #include "WasmBBQDisassembler.h"
 #include "WasmBaselineData.h"
 #include "WasmCallProfile.h"
@@ -1101,7 +1102,7 @@ Address BBQJIT::materializePointer(Location pointerLocation, uint32_t uoffset)
 [[nodiscard]] PartialResult BBQJIT::addGrowMemory(Value delta, Value& result)
 {
     Vector<Value, 8> arguments = { instanceValue(), delta };
-    result = topValue(m_info.theOnlyMemory().addressType());
+    result = topValue(m_info.theOnlyMemory().addressType().asTypeKind());
     emitCCall(&operationGrowMemory, arguments, result);
     restoreWebAssemblyGlobalState();
 

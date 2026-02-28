@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2016-2017 Apple Inc. All rights reserved.
+/* Copyright (C) 2026 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,56 +22,57 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <wtf/Platform.h>
+#include "config.h"
+#include "WasmAddressType.h"
 
 #if ENABLE(WEBASSEMBLY)
 
-#include <JavaScriptCore/GPRInfo.h>
-#include <JavaScriptCore/PageCount.h>
-#include <JavaScriptCore/RegisterSet.h>
-#include <JavaScriptCore/WasmAddressType.h>
-#include <JavaScriptCore/WasmMemory.h>
-#include <JavaScriptCore/WasmOps.h>
-
-#include <wtf/Forward.h>
-#include <wtf/Ref.h>
-#include <wtf/Vector.h>
+#include "WasmOps.h"
 
 namespace JSC { namespace Wasm {
 
-struct PinnedSizeRegisterInfo {
-    GPRReg boundsCheckingSizeRegister;
-    unsigned sizeOffset;
-};
 
-class MemoryInformation {
-public:
-    MemoryInformation()
-    {
-        ASSERT(!*this);
+AddressType::AddressType(AddressType::Kind addressType) : m_type(addressType) { };
+
+AddressType::AddressType(bool is64Bit) : m_type(is64Bit ? AddressType::I64 : AddressType::I32) { };
+
+
+AddressType::AddressType(TypeKind typeKind)
+{
+    switch (typeKind) {
+    case TypeKind::I32:
+        m_type = AddressType::I32;
+        break;
+    case TypeKind::I64:
+        m_type = AddressType::I64;
+        break;
+    default:
+        ASSERT_NOT_REACHED("Invalid Wasm Type to AddressType conversion");
     }
+}
 
-    MemoryInformation(PageCount initial, PageCount maximum, bool isShared, bool isImport, bool isMemory64);
+TypeKind AddressType::asTypeKind() const
+{
+    switch (m_type) {
+    case AddressType::I32:
+        return TypeKind::I32;
+    case AddressType::I64:
+        return TypeKind::I64;
+    default:
+        ASSERT_NOT_REACHED("Invalid Wasm Type to AddressType conversion");
+    }
+}
 
-    PageCount initial() const { return m_initial; }
-    PageCount maximum() const { return m_maximum; }
-    bool isShared() const { return m_isShared; }
-    bool isImport() const { return m_isImport; }
-    AddressType addressType() const { return m_addressType; }
-    bool isMemory64() const { return m_addressType.is64Bit(); }
+bool operator==(const AddressType& lhs, const AddressType& rhs)
+{
+    return lhs.m_type == rhs.m_type;
+}
 
-    explicit operator bool() const { return !!m_initial; }
+bool operator!=(const AddressType& lhs, const AddressType& rhs)
+{
+    return lhs.m_type != rhs.m_type;
+}
 
-private:
-    PageCount m_initial { };
-    PageCount m_maximum { };
-    bool m_isShared { false };
-    bool m_isImport { false };
-    AddressType m_addressType;
-};
-
-} } // namespace JSC::Wasm
+} }
 
 #endif // ENABLE(WEBASSEMBLY)

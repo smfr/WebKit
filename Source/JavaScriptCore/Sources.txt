@@ -1152,6 +1152,7 @@ tools/JSDollarVM.cpp
 tools/SourceProfiler.cpp
 tools/VMInspector.cpp
 
+wasm/WasmAddressType.cpp
 wasm/WasmOMGIRGenerator.cpp
 wasm/WasmBBQDisassembler.cpp
 wasm/WasmBBQJIT.cpp @no-unify
