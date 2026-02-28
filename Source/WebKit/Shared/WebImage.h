@@ -56,11 +56,11 @@ public:
     virtual ~WebImage();
 
     WebCore::IntSize size() const;
-    const WebCore::ImageBufferParameters* NODELETE parameters() const;
+    const WebCore::ImageBufferParameters* NODELETE parameters() const LIFETIME_BOUND;
     std::optional<ParametersAndHandle> parametersAndHandle() const;
     bool isEmpty() const { return !m_buffer; }
 
-    WebCore::GraphicsContext* context() const;
+    WebCore::GraphicsContext* context() const LIFETIME_BOUND;
 
     RefPtr<WebCore::NativeImage> copyNativeImage(WebCore::BackingStoreCopy = WebCore::CopyBackingStore) const;
     RefPtr<WebCore::ShareableBitmap> bitmap() const;

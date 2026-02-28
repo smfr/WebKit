@@ -53,8 +53,8 @@ public:
     Object* at(size_t i) const { return m_elements[i].get(); }
     size_t size() const { return m_elements.size(); }
 
-    const Vector<RefPtr<Object>>& elements() const { return m_elements; }
-    Vector<RefPtr<Object>>& elements() { return m_elements; }
+    const Vector<RefPtr<Object>>& elements() const LIFETIME_BOUND { return m_elements; }
+    Vector<RefPtr<Object>>& elements() LIFETIME_BOUND { return m_elements; }
 
     template<typename T>
     decltype(auto) elementsOfType() const

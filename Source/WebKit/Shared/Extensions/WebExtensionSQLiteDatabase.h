@@ -85,7 +85,7 @@ public:
 
     int close();
 
-    sqlite3* sqlite3Handle() const { return m_db; };
+    sqlite3* sqlite3Handle() const LIFETIME_BOUND { return m_db; };
     void NODELETE assertQueue();
     WorkQueue& queue() const { return m_queue; };
 

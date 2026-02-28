@@ -56,7 +56,7 @@ public:
     RefPtr<API::Data> getData(int index);
 
 private:
-    explicit WebExtensionSQLiteRow(Ref<WebExtensionSQLiteStatement>);
+    explicit WebExtensionSQLiteRow(Ref<WebExtensionSQLiteStatement>&&);
 
     bool isNullAtIndex(int index);
 
@@ -79,7 +79,7 @@ public:
     Ref<WebExtensionSQLiteStatement> statement() { return m_statement; };
 
 private:
-    explicit WebExtensionSQLiteRowEnumerator(Ref<WebExtensionSQLiteStatement>);
+    explicit WebExtensionSQLiteRowEnumerator(Ref<WebExtensionSQLiteStatement>&&);
 
     Ref<WebExtensionSQLiteStatement> m_statement;
     RefPtr<WebExtensionSQLiteRow> m_row;

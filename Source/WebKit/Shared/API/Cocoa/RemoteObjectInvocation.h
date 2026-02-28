@@ -54,9 +54,9 @@ public:
     RemoteObjectInvocation();
     RemoteObjectInvocation(const String& interfaceIdentifier, RefPtr<API::Dictionary>&& encodedInvocation, std::unique_ptr<ReplyInfo>&&);
 
-    const String& interfaceIdentifier() const { return m_interfaceIdentifier; }
-    const RefPtr<API::Dictionary>& encodedInvocation() const { return m_encodedInvocation; }
-    const std::unique_ptr<ReplyInfo>& replyInfo() const { return m_replyInfo; }
+    const String& interfaceIdentifier() const LIFETIME_BOUND { return m_interfaceIdentifier; }
+    const RefPtr<API::Dictionary>& encodedInvocation() const LIFETIME_BOUND { return m_encodedInvocation; }
+    const std::unique_ptr<ReplyInfo>& replyInfo() const LIFETIME_BOUND { return m_replyInfo; }
 
 private:
     String m_interfaceIdentifier;

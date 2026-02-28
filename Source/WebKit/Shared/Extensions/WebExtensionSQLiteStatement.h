@@ -70,7 +70,7 @@ public:
     void invalidate();
 
     Ref<WebExtensionSQLiteDatabase> database() { return m_db; };
-    sqlite3_stmt* handle() { return m_handle; };
+    sqlite3_stmt* handle() LIFETIME_BOUND { return m_handle; };
     bool isValid() { return !!m_handle; };
 
     Vector<String> columnNames();

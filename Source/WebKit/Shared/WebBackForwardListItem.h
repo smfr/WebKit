@@ -64,12 +64,12 @@ public:
     Ref<FrameState> navigatedFrameState() const;
     Ref<FrameState> mainFrameState() const;
 
-    const String& NODELETE originalURL() const;
-    const String& NODELETE url() const;
-    const String& NODELETE title() const;
+    const String& NODELETE originalURL() const LIFETIME_BOUND;
+    const String& NODELETE url() const LIFETIME_BOUND;
+    const String& NODELETE title() const LIFETIME_BOUND;
     bool wasCreatedByJSWithoutUserInteraction() const;
 
-    const URL& resourceDirectoryURL() const { return m_resourceDirectoryURL; }
+    const URL& resourceDirectoryURL() const LIFETIME_BOUND { return m_resourceDirectoryURL; }
     void setResourceDirectoryURL(URL&& url) { m_resourceDirectoryURL = WTF::move(url); }
     RefPtr<WebsiteDataStore> dataStoreForWebArchive() const { return m_dataStoreForWebArchive; }
     void setDataStoreForWebArchive(WebsiteDataStore* dataStore) { m_dataStoreForWebArchive = dataStore; }

@@ -82,12 +82,12 @@ public:
     );
 
     Type type() const { return m_type; }
-    const WebCore::IntPoint& menuLocation() const { return m_menuLocation; }
+    const WebCore::IntPoint& menuLocation() const LIFETIME_BOUND { return m_menuLocation; }
     void setMenuLocation(WebCore::IntPoint menuLocation) { m_menuLocation = menuLocation; }
-    const Vector<WebKit::WebContextMenuItemData>& menuItems() const { return m_menuItems; }
+    const Vector<WebKit::WebContextMenuItemData>& menuItems() const LIFETIME_BOUND { return m_menuItems; }
 
-    const std::optional<WebHitTestResultData>& webHitTestResultData() const { return m_webHitTestResultData; }
-    const String& selectedText() const { return m_selectedText; }
+    const std::optional<WebHitTestResultData>& webHitTestResultData() const LIFETIME_BOUND { return m_webHitTestResultData; }
+    const String& selectedText() const LIFETIME_BOUND { return m_selectedText; }
 
     bool hasEntireImage() const { return m_hasEntireImage; }
     bool allowsFollowingLink() const { return m_allowsFollowingLink; }
@@ -118,8 +118,8 @@ public:
     WebCore::ShareableBitmap* controlledImage() const { return m_controlledImage.get(); }
     std::optional<WebCore::ShareableBitmap::Handle> createControlledImageReadOnlyHandle() const;
 
-    const WebCore::AttributedString& controlledSelection() const { return m_controlledSelection; }
-    const Vector<String>& selectedTelephoneNumbers() const { return m_selectedTelephoneNumbers; }
+    const WebCore::AttributedString& controlledSelection() const LIFETIME_BOUND { return m_controlledSelection; }
+    const Vector<String>& selectedTelephoneNumbers() const LIFETIME_BOUND { return m_selectedTelephoneNumbers; }
 
     bool selectionIsEditable() const { return m_selectionIsEditable; }
 
@@ -137,7 +137,7 @@ public:
     WebCore::ShareableBitmap* potentialQRCodeViewportSnapshotImage() const { return m_potentialQRCodeViewportSnapshotImage.get(); }
     std::optional<WebCore::ShareableBitmap::Handle> createPotentialQRCodeViewportSnapshotImageReadOnlyHandle() const;
 
-    const String& qrCodePayloadString() const { return m_qrCodePayloadString; }
+    const String& qrCodePayloadString() const LIFETIME_BOUND { return m_qrCodePayloadString; }
     void setQRCodePayloadString(const String& string) { m_qrCodePayloadString = string; }
 #endif
 

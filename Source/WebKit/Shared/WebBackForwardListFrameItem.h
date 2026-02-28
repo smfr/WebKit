@@ -50,7 +50,7 @@ public:
 
     std::optional<WebCore::FrameIdentifier> NODELETE frameID() const;
     WebCore::BackForwardFrameItemIdentifier identifier() const { return m_identifier; }
-    const String& NODELETE url() const;
+    const String& NODELETE url() const LIFETIME_BOUND;
 
     WebBackForwardListFrameItem* parent() const { return m_parent; }
     void setParent(WebBackForwardListFrameItem* parent) { m_parent = parent; }

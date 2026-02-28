@@ -47,7 +47,7 @@ public:
         return adoptRef(*new WebExtensionLocalization(std::forward<Args>(args)...));
     }
 
-    const String& uniqueIdentifier() { return m_uniqueIdentifier; };
+    const String& uniqueIdentifier() LIFETIME_BOUND { return m_uniqueIdentifier; };
     RefPtr<JSON::Object> localizationJSON() { return m_localizationJSON; };
 
     RefPtr<JSON::Object> localizedJSONforJSON(RefPtr<JSON::Object>);
