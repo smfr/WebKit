@@ -89,7 +89,8 @@
 - (NSArray<NSString *> *)notifications
 {
 #if ENABLE(CONTENT_EXTENSIONS)
-    auto& vector = protect(*_action)->notifications();
+    Ref action = *_action;
+    auto& vector = action->notifications();
     if (vector.isEmpty())
         return nil;
     return createNSArray(vector).autorelease();

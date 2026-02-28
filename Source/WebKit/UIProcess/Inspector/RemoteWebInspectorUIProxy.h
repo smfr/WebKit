@@ -112,7 +112,7 @@ public:
     NSWindow *window() const { return m_window.get(); }
     WKWebView *webView() const;
 
-    const WebCore::FloatRect& sheetRect() const { return m_sheetRect; }
+    const WebCore::FloatRect& sheetRect() const LIFETIME_BOUND { return m_sheetRect; }
 
     void didBecomeActive();
 #endif

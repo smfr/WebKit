@@ -339,7 +339,7 @@ public:
     Vector<Ref<API::Error>> errors();
 
     bool storageIsPersistent() const { return !m_storageDirectory.isEmpty(); }
-    const String& storageDirectory() const { return m_storageDirectory; }
+    const String& storageDirectory() const LIFETIME_BOUND { return m_storageDirectory; }
 
     void invalidateStorage();
 
@@ -354,14 +354,14 @@ public:
     WebExtension& extension() const { return *m_extension; }
     WebExtensionController* extensionController() const { return m_extensionController.get(); }
 
-    const URL& baseURL() const { return m_baseURL; }
+    const URL& baseURL() const LIFETIME_BOUND { return m_baseURL; }
     void setBaseURL(URL&&);
 
     bool isURLForThisExtension(const URL&) const;
 
     bool hasCustomUniqueIdentifier() const { return m_customUniqueIdentifier; }
 
-    const String& uniqueIdentifier() const { return m_uniqueIdentifier; }
+    const String& uniqueIdentifier() const LIFETIME_BOUND { return m_uniqueIdentifier; }
     void setUniqueIdentifier(String&&);
 
     RefPtr<WebExtensionLocalization> localization();
@@ -385,16 +385,16 @@ public:
     URL optionsPageURL() const;
     URL overrideNewTabPageURL() const;
 
-    const PermissionsMap& grantedPermissions();
+    const PermissionsMap& grantedPermissions() LIFETIME_BOUND;
     void setGrantedPermissions(PermissionsMap&&);
 
-    const PermissionsMap& deniedPermissions();
+    const PermissionsMap& deniedPermissions() LIFETIME_BOUND;
     void setDeniedPermissions(PermissionsMap&&);
 
-    const PermissionMatchPatternsMap& grantedPermissionMatchPatterns();
+    const PermissionMatchPatternsMap& grantedPermissionMatchPatterns() LIFETIME_BOUND;
     void setGrantedPermissionMatchPatterns(PermissionMatchPatternsMap&&, EqualityOnly = EqualityOnly::Yes);
 
-    const PermissionMatchPatternsMap& deniedPermissionMatchPatterns();
+    const PermissionMatchPatternsMap& deniedPermissionMatchPatterns() LIFETIME_BOUND;
     void setDeniedPermissionMatchPatterns(PermissionMatchPatternsMap&&, EqualityOnly = EqualityOnly::Yes);
 
     bool requestedOptionalAccessToAllHosts() const { return m_requestedOptionalAccessToAllHosts; }
@@ -541,7 +541,7 @@ public:
 
     NSArray *platformMenuItems(const WebExtensionTab&) const;
 
-    const MenuItemVector& mainMenuItems() const { return m_mainMenuItems; }
+    const MenuItemVector& mainMenuItems() const LIFETIME_BOUND { return m_mainMenuItems; }
     WebExtensionMenuItem* menuItem(const String& identifier) const;
     void performMenuItem(WebExtensionMenuItem&, const WebExtensionMenuItemContextParameters&, UserTriggered = UserTriggered::No);
 
@@ -602,7 +602,7 @@ public:
     // Returns whether or not there are any matched rules after the purge.
     bool purgeMatchedRulesFromBefore(const WallTime&);
 
-    UserStyleSheetVector& dynamicallyInjectedUserStyleSheets() { return m_dynamicallyInjectedUserStyleSheets; };
+    UserStyleSheetVector& dynamicallyInjectedUserStyleSheets() LIFETIME_BOUND { return m_dynamicallyInjectedUserStyleSheets; };
 
     std::optional<WebCore::PageIdentifier> backgroundPageIdentifier() const;
 #if ENABLE(INSPECTOR_EXTENSIONS)
@@ -644,7 +644,7 @@ public:
 
     HashSet<Ref<WebProcessProxy>> processes(EventListenerTypeSet&&, ContentWorldTypeSet&&, Function<bool(WebProcessProxy&, WebPageProxy&, WebFrameProxy&)>&& predicate = nullptr) const;
 
-    const UserContentControllerProxySet& NODELETE userContentControllers() const;
+    const UserContentControllerProxySet& NODELETE userContentControllers() const LIFETIME_BOUND;
 
     template<typename T>
     void sendToProcesses(const WebProcessProxySet&, const T& message) const;

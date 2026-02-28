@@ -219,7 +219,7 @@ public:
     inline WebProcessPool& processPool() const; // This function is implemented in WebProcessPool.h.
 
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess() const { return m_sharedPreferencesForWebProcess; }
-    const SharedPreferencesForWebProcess& sharedPreferencesForWebProcessValue() const { return m_sharedPreferencesForWebProcess; }
+    const SharedPreferencesForWebProcess& sharedPreferencesForWebProcessValue() const LIFETIME_BOUND { return m_sharedPreferencesForWebProcess; }
     std::optional<SharedPreferencesForWebProcess> updateSharedPreferences(const WebPreferencesStore&);
     void didSyncSharedPreferencesForWebProcessWithNetworkProcess(uint64_t syncedPreferencesVersion);
 #if ENABLE(GPU_PROCESS)
@@ -231,16 +231,16 @@ public:
     void waitForSharedPreferencesForWebProcessToSync(uint64_t sharedPreferencesVersion, CompletionHandler<void(bool success)>&&);
 
     enum class SiteState : uint8_t { NotYetSpecified, MultipleSites, SharedProcess };
-    const Expected<WebCore::Site, SiteState>& site() const { return m_site; }
+    const Expected<WebCore::Site, SiteState>& site() const LIFETIME_BOUND { return m_site; }
 
     bool isSharedProcess() const { return !m_site && m_site.error() == SiteState::SharedProcess; }
-    const std::optional<WebCore::Site>& sharedProcessMainFrameSite() const { return m_sharedProcessMainFrameSite; }
+    const std::optional<WebCore::Site>& sharedProcessMainFrameSite() const LIFETIME_BOUND { return m_sharedProcessMainFrameSite; }
     void addSharedProcessDomain(const WebCore::RegistrableDomain&);
-    const HashSet<WebCore::RegistrableDomain>& sharedProcessDomains() const { return m_sharedProcessDomains; }
+    const HashSet<WebCore::RegistrableDomain>& sharedProcessDomains() const LIFETIME_BOUND { return m_sharedProcessDomains; }
 
     IsolatedProcessType isolatedProcessType() const { return m_isolatedProcessType; }
     void setIsolatedProcessType(IsolatedProcessType, std::optional<WebCore::Site> mainFrameSite);
-    const std::optional<WebCore::Site>& mainFrameSite() const { return m_mainFrameSite; }
+    const std::optional<WebCore::Site>& mainFrameSite() const LIFETIME_BOUND { return m_mainFrameSite; }
 
     enum class WillShutDown : bool { No, Yes };
     void setIsInProcessCache(bool, WillShutDown = WillShutDown::No);
@@ -402,7 +402,7 @@ public:
 #endif
 
 #if HAVE(DISPLAY_LINK)
-    DisplayLink::Client& displayLinkClient() { return m_displayLinkClient; }
+    DisplayLink::Client& displayLinkClient() LIFETIME_BOUND { return m_displayLinkClient; }
     std::optional<unsigned> nominalFramesPerSecondForDisplay(WebCore::PlatformDisplayID);
 
     void startDisplayLink(DisplayLinkObserverID, WebCore::PlatformDisplayID, WebCore::FramesPerSecond);
@@ -496,7 +496,7 @@ public:
 #endif
 
 #if ENABLE(ROUTING_ARBITRATION)
-    AudioSessionRoutingArbitratorProxy* audioSessionRoutingArbitrator() { return m_routingArbitrator.get(); }
+    AudioSessionRoutingArbitratorProxy* audioSessionRoutingArbitrator() LIFETIME_BOUND { return m_routingArbitrator.get(); }
 #endif
 
 #if ENABLE(IPC_TESTING_API)
@@ -509,8 +509,8 @@ public:
 
 #if ENABLE(MEDIA_STREAM)
     static void muteCaptureInPagesExcept(WebCore::PageIdentifier);
-    SpeechRecognitionRemoteRealtimeMediaSourceManager& ensureSpeechRecognitionRemoteRealtimeMediaSourceManager();
-    SpeechRecognitionRemoteRealtimeMediaSourceManager* speechRecognitionRemoteRealtimeMediaSourceManager() const { return m_speechRecognitionRemoteRealtimeMediaSourceManager.get(); }
+    SpeechRecognitionRemoteRealtimeMediaSourceManager& ensureSpeechRecognitionRemoteRealtimeMediaSourceManager() LIFETIME_BOUND;
+    SpeechRecognitionRemoteRealtimeMediaSourceManager* speechRecognitionRemoteRealtimeMediaSourceManager() const LIFETIME_BOUND { return m_speechRecognitionRemoteRealtimeMediaSourceManager.get(); }
 #endif
     void pageMutedStateChanged(WebCore::PageIdentifier, WebCore::MediaProducerMutedStateFlags);
     void pageIsBecomingInvisible(WebCore::PageIdentifier);
@@ -551,8 +551,8 @@ public:
     void hardwareConsoleStateChanged();
 #endif
 
-    const WeakHashSet<WebProcessProxy>* NODELETE serviceWorkerClientProcesses() const;
-    const WeakHashSet<WebProcessProxy>* NODELETE sharedWorkerClientProcesses() const;
+    const WeakHashSet<WebProcessProxy>* NODELETE serviceWorkerClientProcesses() const LIFETIME_BOUND;
+    const WeakHashSet<WebProcessProxy>* NODELETE sharedWorkerClientProcesses() const LIFETIME_BOUND;
 
     static void permissionChanged(WebCore::PermissionName, const WebCore::SecurityOriginData&);
     void processPermissionChanged(WebCore::PermissionName, const WebCore::SecurityOriginData&);
@@ -567,7 +567,7 @@ public:
     Seconds totalSuspendedTime() const;
 
 #if ENABLE(WEBXR)
-    const WebCore::ProcessIdentity& processIdentity();
+    const WebCore::ProcessIdentity& processIdentity() LIFETIME_BOUND;
 #endif
 
     bool isAlwaysOnLoggingAllowed() const;

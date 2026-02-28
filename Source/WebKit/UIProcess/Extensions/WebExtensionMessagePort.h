@@ -65,7 +65,7 @@ public:
 
     bool operator==(const WebExtensionMessagePort&) const;
 
-    const String& applicationIdentifier() const { return m_applicationIdentifier; }
+    const String& applicationIdentifier() const LIFETIME_BOUND { return m_applicationIdentifier; }
     WebExtensionPortChannelIdentifier channelIdentifier() const { return m_channelIdentifier; }
     WebExtensionContext* extensionContext() const;
 

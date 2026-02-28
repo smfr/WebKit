@@ -225,7 +225,7 @@ public:
 #endif
 
 #if ENABLE(EXTENSION_CAPABILITIES)
-    ExtensionCapabilityGrantMap& extensionCapabilityGrants() { return m_extensionCapabilityGrants; }
+    ExtensionCapabilityGrantMap& extensionCapabilityGrants() LIFETIME_BOUND { return m_extensionCapabilityGrants; }
 #endif
 
 #if PLATFORM(COCOA)

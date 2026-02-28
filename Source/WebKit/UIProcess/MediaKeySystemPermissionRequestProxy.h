@@ -63,9 +63,9 @@ public:
     WebCore::SecurityOrigin& topLevelDocumentSecurityOrigin() { return m_topLevelDocumentSecurityOrigin.get(); }
     const WebCore::SecurityOrigin& topLevelDocumentSecurityOrigin() const { return m_topLevelDocumentSecurityOrigin.get(); }
 
-    const String& keySystem() const { return m_keySystem; }
+    const String& keySystem() const LIFETIME_BOUND { return m_keySystem; }
 
-    const String& mediaKeysHashSalt() const { return m_mediaKeysHashSalt; }
+    const String& mediaKeysHashSalt() const LIFETIME_BOUND { return m_mediaKeysHashSalt; }
     void setMediaKeysHashSalt(String&& salt) { m_mediaKeysHashSalt = WTF::move(salt); }
 
     void doDefaultAction();

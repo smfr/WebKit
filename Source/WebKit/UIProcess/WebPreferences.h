@@ -65,7 +65,7 @@ public:
     void addPage(WebPageProxy&);
     void removePage(WebPageProxy&);
 
-    const WebPreferencesStore& store() const { return m_store; }
+    const WebPreferencesStore& store() const LIFETIME_BOUND { return m_store; }
 
     // Implemented in generated file WebPreferencesGetterSetters.cpp.
     FOR_EACH_WEBKIT_PREFERENCE(DECLARE_PREFERENCE_GETTER_AND_SETTERS)

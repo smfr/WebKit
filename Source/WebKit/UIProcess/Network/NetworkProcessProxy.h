@@ -304,7 +304,7 @@ public:
     void updateBundleIdentifier(const String&, CompletionHandler<void()>&&);
     void clearBundleIdentifier(CompletionHandler<void()>&&);
 
-    API::CustomProtocolManagerClient& customProtocolManagerClient() { return m_customProtocolManagerClient.get(); }
+    API::CustomProtocolManagerClient& customProtocolManagerClient() LIFETIME_BOUND { return m_customProtocolManagerClient.get(); }
 
 #if PLATFORM(COCOA)
     bool sendXPCEndpointToProcess(AuxiliaryProcessProxy&);

@@ -704,10 +704,7 @@ std::optional<WebBackForwardList> ViewGestureController::backForwardListForNavig
 
 WebBackForwardList* ViewGestureController::backForwardListForNavigation() const
 {
-    if (RefPtr page = m_webPageProxy.get())
-        return &page->backForwardList();
-
-    return nullptr;
+    return m_webPageProxy ? &m_webPageProxy->backForwardList() : nullptr;
 }
 
 #endif

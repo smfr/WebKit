@@ -556,15 +556,15 @@ public:
 
     void enterAcceleratedCompositingWithRootLayer(CALayer *);
     void setAcceleratedCompositingRootLayer(CALayer *);
-    CALayer *acceleratedCompositingRootLayer() const { return m_rootLayer.get(); }
+    CALayer *acceleratedCompositingRootLayer() const LIFETIME_BOUND { return m_rootLayer.get(); }
 
     void setThumbnailView(_WKThumbnailView *);
     RetainPtr<_WKThumbnailView> thumbnailView() const { return m_thumbnailView.get(); }
 
     void setHeaderBannerLayer(CALayer *);
-    CALayer *headerBannerLayer() const { return m_headerBannerLayer.get(); }
+    CALayer *headerBannerLayer() const LIFETIME_BOUND { return m_headerBannerLayer.get(); }
     void setFooterBannerLayer(CALayer *);
-    CALayer *footerBannerLayer() const { return m_footerBannerLayer.get(); }
+    CALayer *footerBannerLayer() const LIFETIME_BOUND { return m_footerBannerLayer.get(); }
 
     void setInspectorAttachmentView(NSView *);
     RetainPtr<NSView> inspectorAttachmentView();
@@ -615,12 +615,12 @@ public:
     void insertTextPlaceholderWithSize(CGSize, void(^completionHandler)(NSTextPlaceholder *));
     void removeTextPlaceholder(NSTextPlaceholder *, bool willInsertText, void(^completionHandler)());
 
-    _WKWarningView *warningView() { return m_warningView.get(); }
+    _WKWarningView *warningView() LIFETIME_BOUND { return m_warningView.get(); }
 
     ViewGestureController* gestureController() const { return m_gestureController.get(); }
     ViewGestureController& ensureGestureController();
 #if HAVE(APPKIT_GESTURES_SUPPORT)
-    WKAppKitGestureController *appKitGestureController() const { return m_appKitGestureController.get(); }
+    WKAppKitGestureController *appKitGestureController() const LIFETIME_BOUND { return m_appKitGestureController.get(); }
 #endif
     void NODELETE setAllowsBackForwardNavigationGestures(bool);
     bool allowsBackForwardNavigationGestures() const { return m_allowsBackForwardNavigationGestures; }
@@ -744,7 +744,7 @@ public:
 #if HAVE(TOUCH_BAR)
     NSTouchBar *makeTouchBar();
     void updateTouchBar();
-    NSTouchBar *currentTouchBar() const { return m_currentTouchBar.get(); }
+    NSTouchBar *currentTouchBar() const LIFETIME_BOUND { return m_currentTouchBar.get(); }
     NSCandidateListTouchBarItem *candidateListTouchBarItem() const;
 #if ENABLE(WEB_PLAYBACK_CONTROLS_MANAGER)
     WebCore::PlatformPlaybackSessionInterface* playbackSessionInterface() const;
@@ -787,7 +787,7 @@ public:
 
     void requestDOMPasteAccess(WebCore::DOMPasteAccessCategory, WebCore::DOMPasteRequiresInteraction, const WebCore::IntRect&, const String& originIdentifier, CompletionHandler<void(WebCore::DOMPasteAccessResponse)>&&);
     void handleDOMPasteRequestForCategoryWithResult(WebCore::DOMPasteAccessCategory, WebCore::DOMPasteAccessResponse);
-    NSMenu *domPasteMenu() const { return m_domPasteMenu.get(); }
+    NSMenu *domPasteMenu() const LIFETIME_BOUND { return m_domPasteMenu.get(); }
     void hideDOMPasteMenuWithResult(WebCore::DOMPasteAccessResponse);
 
 #if HAVE(TRANSLATION_UI_SERVICES) && ENABLE(CONTEXT_MENUS)
@@ -835,7 +835,7 @@ public:
 
 #if ENABLE(CONTENT_INSET_BACKGROUND_FILL)
     void updateScrollPocket();
-    NSScrollPocket *topScrollPocket() const { return m_topScrollPocket.get(); }
+    NSScrollPocket *topScrollPocket() const LIFETIME_BOUND { return m_topScrollPocket.get(); }
     void registerViewAboveScrollPocket(NSView *);
     void unregisterViewAboveScrollPocket(NSView *);
     void updateScrollPocketVisibilityWhenScrolledToTop();
@@ -847,7 +847,7 @@ public:
 
 #if ENABLE(BANNER_VIEW_OVERLAYS)
     void setBannerView(WKBannerView *);
-    WKBannerView *bannerView() const { return m_bannerView.get(); }
+    WKBannerView *bannerView() const LIFETIME_BOUND { return m_bannerView.get(); }
 
     void applyBannerViewOverlayHeight(CGFloat, bool);
     CGFloat bannerViewHeight() const;

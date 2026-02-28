@@ -55,8 +55,8 @@ public:
     RemoteInspectorClient(String&& hostAndPort, RemoteInspectorObserver&);
     ~RemoteInspectorClient();
 
-    const String& hostAndPort() const { return m_hostAndPort; }
-    const String& backendCommandsURL() const { return m_backendCommandsURL; }
+    const String& hostAndPort() const LIFETIME_BOUND { return m_hostAndPort; }
+    const String& backendCommandsURL() const LIFETIME_BOUND { return m_backendCommandsURL; }
 
     enum class InspectorType { UI, HTTP };
     GString* buildTargetListPage(InspectorType) const;

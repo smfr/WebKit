@@ -2842,7 +2842,8 @@ void WKPageForceRepaint(WKPageRef pageRef, void* context, WKPageForceRepaintFunc
 
 WK_EXPORT WKURLRef WKPageCopyPendingAPIRequestURL(WKPageRef pageRef)
 {
-    const String& pendingAPIRequestURL = protect(toImpl(pageRef))->pageLoadState().pendingAPIRequestURL();
+    RefPtr page = toImpl(pageRef);
+    const String& pendingAPIRequestURL = page->pageLoadState().pendingAPIRequestURL();
 
     if (pendingAPIRequestURL.isNull())
         return nullptr;

@@ -105,7 +105,7 @@ public:
     void immersiveVideoMetadataChanged(const std::optional<WebCore::ImmersiveVideoMetadata>&);
 
     bool wirelessVideoPlaybackDisabled() const final { return m_wirelessVideoPlaybackDisabled; }
-    const WebCore::VideoReceiverEndpoint& videoReceiverEndpoint() { return m_videoReceiverEndpoint; }
+    const WebCore::VideoReceiverEndpoint& videoReceiverEndpoint() LIFETIME_BOUND { return m_videoReceiverEndpoint; }
 
     void invalidate();
 
@@ -146,7 +146,7 @@ private:
     void setPlayingOnSecondScreen(bool) final;
     void sendRemoteCommand(WebCore::PlatformMediaSession::RemoteControlCommandType, const WebCore::PlatformMediaSession::RemoteCommandArgument&) final;
     void NODELETE setVideoReceiverEndpoint(const WebCore::VideoReceiverEndpoint&) final;
-    const WebCore::VideoReceiverEndpoint& videoReceiverEndpoint() const { return m_videoReceiverEndpoint; }
+    const WebCore::VideoReceiverEndpoint& videoReceiverEndpoint() const LIFETIME_BOUND { return m_videoReceiverEndpoint; }
     const std::optional<WebCore::VideoReceiverEndpointIdentifier>& videoReceiverEndpointIdentifier() const { return m_videoReceiverEndpointIdentifier; }
 
 #if HAVE(SPATIAL_TRACKING_LABEL)

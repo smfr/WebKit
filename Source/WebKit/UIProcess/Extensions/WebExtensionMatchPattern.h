@@ -118,7 +118,7 @@ public:
     String string() const { return stringWithScheme(nullString()); }
     Vector<String> expandedStrings() const;
 
-    const WebCore::UserContentURLPattern& pattern() const { return m_pattern; }
+    const WebCore::UserContentURLPattern& pattern() const LIFETIME_BOUND { return m_pattern; }
 
     unsigned hash() const { return m_hash; }
 

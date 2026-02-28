@@ -78,7 +78,7 @@ public:
     bool isDebugLayerTreeHost() const { return m_isDebugLayerTreeHost; }
 
     typedef HashMap<WebCore::PlatformLayerIdentifier, RetainPtr<WKAnimationDelegate>> LayerAnimationDelegateMap;
-    LayerAnimationDelegateMap& animationDelegates() { return m_animationDelegates; }
+    LayerAnimationDelegateMap& animationDelegates() LIFETIME_BOUND { return m_animationDelegates; }
 
     void animationDidStart(std::optional<WebCore::PlatformLayerIdentifier>, CAAnimation *, MonotonicTime startTime);
     void animationDidEnd(std::optional<WebCore::PlatformLayerIdentifier>, CAAnimation *);

@@ -94,7 +94,8 @@ WK_OBJECT_DEALLOC_IMPL_ON_MAIN_THREAD(WKWebExtensionCommand, WebExtensionCommand
 
 - (NSString *)activationKey
 {
-    if (auto& activationKey = protect(*_webExtensionCommand)->activationKey(); !activationKey.isEmpty())
+    Ref command = *_webExtensionCommand;
+    if (auto& activationKey = command->activationKey(); !activationKey.isEmpty())
         return activationKey.createNSString().autorelease();
     return nil;
 }

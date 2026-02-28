@@ -137,7 +137,7 @@ public:
             didVisitDomain(WebCore::RegistrableDomain(url));
     }
 
-    const ListHashSet<WebCore::RegistrableDomain>& visitedDomains() const
+    const ListHashSet<WebCore::RegistrableDomain>& visitedDomains() const LIFETIME_BOUND
     {
         return m_visitedDomains;
     }
@@ -458,7 +458,7 @@ public:
     explicit Internals(WebPageProxy&, std::optional<WebCore::SecurityOriginData>);
 
 #if ENABLE(SPEECH_SYNTHESIS)
-    SpeechSynthesisData& speechSynthesisData();
+    SpeechSynthesisData& speechSynthesisData() LIFETIME_BOUND;
 #endif
 
     // WebPopupMenuProxy::Client

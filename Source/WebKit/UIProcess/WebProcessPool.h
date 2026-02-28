@@ -217,7 +217,7 @@ public:
     void setLegacyDownloadClient(RefPtr<API::DownloadClient>&&);
     void setAutomationClient(std::unique_ptr<API::AutomationClient>&&);
 
-    const Vector<Ref<WebProcessProxy>>& processes() const { return m_processes; }
+    const Vector<Ref<WebProcessProxy>>& processes() const LIFETIME_BOUND { return m_processes; }
 
     // WebProcessProxy object which does not have a running process which is used for convenience, to avoid
     // null checks in WebPageProxy.
@@ -270,7 +270,7 @@ public:
 #endif
 
 #if HAVE(DISPLAY_LINK)
-    DisplayLinkCollection& displayLinks() { return m_displayLinks; }
+    DisplayLinkCollection& displayLinks() LIFETIME_BOUND { return m_displayLinks; }
 #endif
 
     void NODELETE addSupportedPlugin(String&& matchingDomain, String&& name, HashSet<String>&& mimeTypes, HashSet<String> extensions);
@@ -317,8 +317,8 @@ public:
     // Downloads.
     Ref<DownloadProxy> createDownloadProxy(WebsiteDataStore&, const WebCore::ResourceRequest&, WebPageProxy* originatingPage, const std::optional<FrameInfoData>&);
 
-    API::LegacyContextHistoryClient& historyClient() { return *m_historyClient; }
-    WebContextClient& client() { return m_client; }
+    API::LegacyContextHistoryClient& historyClient() LIFETIME_BOUND { return *m_historyClient; }
+    WebContextClient& client() LIFETIME_BOUND { return m_client; }
 
     struct Statistics {
         unsigned wkViewCount;
@@ -515,11 +515,11 @@ public:
 #if PLATFORM(GTK) || PLATFORM(WPE)
     void setSandboxEnabled(bool);
     void addSandboxPath(const CString& path, SandboxPermission permission) { m_extraSandboxPaths.add(path, permission); };
-    const HashMap<CString, SandboxPermission>& sandboxPaths() const { return m_extraSandboxPaths; };
+    const HashMap<CString, SandboxPermission>& sandboxPaths() const LIFETIME_BOUND { return m_extraSandboxPaths; };
     bool sandboxEnabled() const { return m_sandboxEnabled; };
 
     void setUserMessageHandler(Function<void(UserMessage&&, CompletionHandler<void(UserMessage&&)>&&)>&& handler) { m_userMessageHandler = WTF::move(handler); }
-    const Function<void(UserMessage&&, CompletionHandler<void(UserMessage&&)>&&)>& userMessageHandler() const { return m_userMessageHandler; }
+    const Function<void(UserMessage&&, CompletionHandler<void(UserMessage&&)>&&)>& userMessageHandler() const LIFETIME_BOUND { return m_userMessageHandler; }
 
 #if USE(ATSPI)
     const String& accessibilityBusAddress() const;
@@ -538,7 +538,7 @@ public:
     void setDelaysWebProcessLaunchDefaultValue(bool delaysWebProcessLaunchDefaultValue) { m_delaysWebProcessLaunchDefaultValue = delaysWebProcessLaunchDefaultValue; }
 
     void setJavaScriptConfigurationDirectory(String&& directory) { m_javaScriptConfigurationDirectory = directory; }
-    const String& javaScriptConfigurationDirectory() const { return m_javaScriptConfigurationDirectory; }
+    const String& javaScriptConfigurationDirectory() const LIFETIME_BOUND { return m_javaScriptConfigurationDirectory; }
 
     void setOverrideLanguages(Vector<String>&&);
 

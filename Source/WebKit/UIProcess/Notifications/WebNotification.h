@@ -57,17 +57,17 @@ public:
         return adoptRef(*new WebNotification(data, std::nullopt, dataStoreIdentifier, sourceConnection));
     }
 
-    const String& title() const { return m_data.title; }
-    const String& body() const { return m_data.body; }
-    const String& iconURL() const { return m_data.iconURL; }
-    const String& tag() const { return m_data.tag; }
-    const String& lang() const { return m_data.language; }
+    const String& title() const LIFETIME_BOUND { return m_data.title; }
+    const String& body() const LIFETIME_BOUND { return m_data.body; }
+    const String& iconURL() const LIFETIME_BOUND { return m_data.iconURL; }
+    const String& tag() const LIFETIME_BOUND { return m_data.tag; }
+    const String& lang() const LIFETIME_BOUND { return m_data.language; }
     WebCore::NotificationDirection dir() const { return m_data.direction; }
-    const WTF::UUID& coreNotificationID() const { return m_data.notificationID; }
+    const WTF::UUID& coreNotificationID() const LIFETIME_BOUND { return m_data.notificationID; }
     const std::optional<WTF::UUID>& dataStoreIdentifier() const { return m_dataStoreIdentifier; }
     PAL::SessionID sessionID() const { return m_data.sourceSession; }
 
-    const WebCore::NotificationData& data() const { return m_data; }
+    const WebCore::NotificationData& data() const LIFETIME_BOUND { return m_data; }
     bool isPersistentNotification() const { return !m_data.serviceWorkerRegistrationURL.isEmpty(); }
 
     const API::SecurityOrigin* origin() const { return m_origin.get(); }

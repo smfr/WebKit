@@ -145,10 +145,10 @@ public:
 
     bool hasUncommittedLoad() const { return isLoading(m_uncommittedState); }
 
-    const String& provisionalURL() const { return m_committedState.provisionalURL; }
-    const String& url() const { return m_committedState.url; }
-    const WebCore::SecurityOriginData& origin() const { return m_committedState.origin; }
-    const String& unreachableURL() const { return m_committedState.unreachableURL; }
+    const String& provisionalURL() const LIFETIME_BOUND { return m_committedState.provisionalURL; }
+    const String& url() const LIFETIME_BOUND { return m_committedState.url; }
+    const WebCore::SecurityOriginData& origin() const LIFETIME_BOUND { return m_committedState.origin; }
+    const String& unreachableURL() const LIFETIME_BOUND { return m_committedState.unreachableURL; }
 
     String activeURL() const { return activeURL(m_committedState); }
 
@@ -162,12 +162,12 @@ public:
     double NODELETE estimatedProgress() const;
     bool networkRequestsInProgress() const { return m_committedState.networkRequestsInProgress; }
 
-    const WebCore::CertificateInfo& certificateInfo() const { return m_committedState.certificateInfo; }
+    const WebCore::CertificateInfo& certificateInfo() const LIFETIME_BOUND { return m_committedState.certificateInfo; }
 
-    const URL& resourceDirectoryURL() const { return m_committedState.resourceDirectoryURL; }
+    const URL& resourceDirectoryURL() const LIFETIME_BOUND { return m_committedState.resourceDirectoryURL; }
 
-    const String& pendingAPIRequestURL() const { return m_committedState.pendingAPIRequest.url; }
-    const PendingAPIRequest& pendingAPIRequest() const { return m_committedState.pendingAPIRequest; }
+    const String& pendingAPIRequestURL() const LIFETIME_BOUND { return m_committedState.pendingAPIRequest.url; }
+    const PendingAPIRequest& pendingAPIRequest() const LIFETIME_BOUND { return m_committedState.pendingAPIRequest; }
     void setPendingAPIRequest(const Transaction::Token&, PendingAPIRequest&& pendingAPIRequest, const URL& resourceDirectoryPath = { });
     void clearPendingAPIRequest(const Transaction::Token&);
 
@@ -185,7 +185,7 @@ public:
 
     void setUnreachableURL(const Transaction::Token&, const String&);
 
-    const String& NODELETE title() const;
+    const String& NODELETE title() const LIFETIME_BOUND;
     void setTitle(const Transaction::Token&, String&&);
     void setTitleFromBrowsingWarning(const Transaction::Token&, const String&);
 

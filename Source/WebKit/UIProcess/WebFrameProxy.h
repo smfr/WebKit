@@ -154,7 +154,7 @@ public:
 
     bool NODELETE isMainFrame() const;
 
-    FrameLoadState& frameLoadState() { return m_frameLoadState; }
+    FrameLoadState& frameLoadState() LIFETIME_BOUND { return m_frameLoadState; }
 
     void navigateServiceWorkerClient(WebCore::ScriptExecutionContextIdentifier, const URL&, CompletionHandler<void(std::optional<WebCore::PageIdentifier>, std::optional<WebCore::FrameIdentifier>)>&&);
 
@@ -162,18 +162,18 @@ public:
     // Sub frames only. For main frames, use WebPageProxy::loadData.
     void loadData(std::span<const uint8_t>, const String& MIMEType, const String& encodingName, const URL& baseURL);
 
-    const URL& url() const { return m_frameLoadState.url(); }
-    const URL& provisionalURL() const { return m_frameLoadState.provisionalURL(); }
+    const URL& url() const LIFETIME_BOUND { return m_frameLoadState.url(); }
+    const URL& provisionalURL() const LIFETIME_BOUND { return m_frameLoadState.provisionalURL(); }
 
     void setUnreachableURL(const URL&);
-    const URL& unreachableURL() const { return m_frameLoadState.unreachableURL(); }
+    const URL& unreachableURL() const LIFETIME_BOUND { return m_frameLoadState.unreachableURL(); }
 
-    const String& mimeType() const { return m_MIMEType; }
+    const String& mimeType() const LIFETIME_BOUND { return m_MIMEType; }
     bool containsPluginDocument() const { return m_containsPluginDocument; }
 
-    const String& title() const { return m_title; }
+    const String& title() const LIFETIME_BOUND { return m_title; }
 
-    const WebCore::CertificateInfo& certificateInfo() const { return m_certificateInfo; }
+    const WebCore::CertificateInfo& certificateInfo() const LIFETIME_BOUND { return m_certificateInfo; }
 
     bool canProvideSource() const;
 

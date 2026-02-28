@@ -78,9 +78,10 @@ std::optional<ScrollingNodeID> RemoteScrollingCoordinatorProxy::rootScrollingNod
 
 const RemoteLayerTreeHost* RemoteScrollingCoordinatorProxy::layerTreeHost() const
 {
-    RefPtr remoteDrawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(m_webPageProxy->drawingArea());
-    ASSERT(remoteDrawingArea);
-    return remoteDrawingArea ? &remoteDrawingArea->remoteLayerTreeHost() : nullptr;
+    if (auto* remoteDrawingArea = dynamicDowncast<RemoteLayerTreeDrawingAreaProxy>(m_webPageProxy->drawingArea()))
+        return &remoteDrawingArea->remoteLayerTreeHost();
+    ASSERT_NOT_REACHED();
+    return nullptr;
 }
 
 ScrollRequestData RemoteScrollingCoordinatorProxy::commitScrollingTreeState(IPC::Connection& connection, const RemoteScrollingCoordinatorTransaction& transaction, std::optional<LayerHostingContextIdentifier> identifier)

@@ -62,7 +62,7 @@ public:
     bool storageIsPersistent() const { return !m_storageDirectory.isEmpty(); }
     bool storageIsTemporary() const { return m_temporary; }
 
-    const String& storageDirectory() const { return m_storageDirectory; }
+    const String& storageDirectory() const LIFETIME_BOUND { return m_storageDirectory; }
     void setStorageDirectory(const String& directory) { m_storageDirectory = directory; }
 
 #if PLATFORM(COCOA)

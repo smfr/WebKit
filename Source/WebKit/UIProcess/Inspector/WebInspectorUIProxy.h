@@ -162,7 +162,7 @@ public:
     void attachmentWillMoveFromWindow(NSWindow *oldWindow);
     void attachmentDidMoveToWindow(NSWindow *newWindow);
 
-    const WebCore::FloatRect& sheetRect() const { return m_sheetRect; }
+    const WebCore::FloatRect& sheetRect() const LIFETIME_BOUND { return m_sheetRect; }
 #endif
 
 #if PLATFORM(WIN)
