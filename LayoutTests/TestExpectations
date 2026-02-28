@@ -676,6 +676,9 @@ imported/w3c/web-platform-tests/html/semantics/forms/the-select-element/select-p
 imported/w3c/web-platform-tests/html/rendering/replaced-elements/the-select-element/select-empty.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/html/rendering/replaced-elements/the-select-element/select-button-min-height-001.html [ ImageOnlyFailure ]
 
+## -- CSS Forms -- ##
+imported/w3c/web-platform-tests/css/css-forms/input-text-base-appearance-rendering.html [ ImageOnlyFailure ]
+
 # Flaky crashing test.
 media/modern-media-controls/tracks-support/no-tracks.html [ Crash Pass Failure ]
 
