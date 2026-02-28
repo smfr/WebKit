@@ -61,12 +61,19 @@ namespace WebCore {
 
 static bool initializeIndicator(TextIndicatorData&, LocalFrame&, const SimpleRange&, FloatSize margin, bool indicatesCurrentSelection);
 
+TextIndicator::TextIndicator() = default;
+
 TextIndicator::TextIndicator(const TextIndicatorData& data)
     : m_data(data)
 {
 }
 
 TextIndicator::~TextIndicator() = default;
+
+Ref<TextIndicator> TextIndicator::create()
+{
+    return adoptRef(*new TextIndicator());
+}
 
 Ref<TextIndicator> TextIndicator::create(const TextIndicatorData& data)
 {

@@ -3582,16 +3582,16 @@ RefPtr<TextIndicator> UnifiedPDFPlugin::textIndicatorForPageRect(FloatRect pageR
     if (highlightColor)
         context.fillRect({ { 0, 0 }, bufferSize }, *highlightColor, CompositeOperator::SourceOver, BlendMode::Multiply);
 
-    TextIndicatorData data;
-    data.contentImage = BitmapImage::create(ImageBuffer::sinkIntoNativeImage(WTF::move(buffer)));
-    data.contentImageScaleFactor = deviceScaleFactor;
-    data.contentImageWithoutSelection = data.contentImage;
-    data.contentImageWithoutSelectionRectInRootViewCoordinates = rectInRootViewCoordinates;
-    data.selectionRectInRootViewCoordinates = rectInRootViewCoordinates;
-    data.textBoundingRectInRootViewCoordinates = rectInRootViewCoordinates;
-    data.textRectsInBoundingRectCoordinates = { { { 0, 0, }, rectInRootViewCoordinates.size() } };
+    RefPtr textIndicator = TextIndicator::create();
+    textIndicator->setContentImage(BitmapImage::create(ImageBuffer::sinkIntoNativeImage(WTF::move(buffer))));
+    textIndicator->setContentImageScaleFactor(deviceScaleFactor);
+    textIndicator->setContentImageWithoutSelection(protect(textIndicator->contentImage()).get());
+    textIndicator->setContentImageWithoutSelectionRectInRootViewCoordinates(rectInRootViewCoordinates);
+    textIndicator->setSelectionRectInRootViewCoordinates(rectInRootViewCoordinates);
+    textIndicator->setTextBoundingRectInRootViewCoordinates(rectInRootViewCoordinates);
+    textIndicator->setTextRectsInBoundingRectCoordinates({ { { 0, 0, }, rectInRootViewCoordinates.size() } });
 
-    return TextIndicator::create(data);
+    return textIndicator;
 }
 
 Color UnifiedPDFPlugin::selectionTextIndicatorHighlightColor()
