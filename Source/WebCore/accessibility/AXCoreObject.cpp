@@ -1923,6 +1923,12 @@ std::partial_ordering AXCoreObject::partialOrder(const AXCoreObject& other)
     if (objectID() == other.objectID())
         return std::partial_ordering::equivalent;
 
+    if (treeID() != other.treeID()) {
+        // With ENABLE(ACCESSIBILITY_LOCAL_FRAME), each frame has its own accessibility tree
+        // root, so cross-frame objects will never share a common ancestor.
+        return std::partial_ordering::unordered;
+    }
+
     RefPtr current = this;
     RefPtr otherCurrent = other;
 
@@ -1978,6 +1984,9 @@ std::partial_ordering AXCoreObject::partialOrder(const AXCoreObject& other)
             current = parent.ptr();
             AX_ASSERT(!ourAncestors.contains(parent));
             ourAncestors.appendOrMoveToLast(WTF::move(parent));
+        } else {
+            // We've reached the top of this frame's accessibility tree without finding a shared ancestor.
+            current = nullptr;
         }
 
         if (RefPtr maybeParent = otherCurrent ? otherCurrent->parentObject() : nullptr) {
@@ -1999,13 +2008,15 @@ std::partial_ordering AXCoreObject::partialOrder(const AXCoreObject& other)
             otherCurrent = parent.ptr();
             AX_ASSERT(!otherAncestors.contains(parent));
             otherAncestors.appendOrMoveToLast(WTF::move(parent));
+        } else {
+            // We've reached the top of this frame's accessibility tree without finding a shared ancestor.
+            otherCurrent = nullptr;
         }
     }
 
-    // Reproducible with ITM + ENABLE_ACCESSIBILITY_LOCAL_FRAME in accessibility/mac/ordered-textmarker-crash.html.
-    AX_BROKEN_ASSERT(failsafeCounter < maxIterations);
-    // If we pass the above ASSERT but hit this one, it means we didn't loop infinitely,
-    // but also did not find a shared ancestor between the two objects, which shouldn't ever happen.
+    AX_ASSERT(failsafeCounter < maxIterations);
+    // We already early-returned for cross-tree objects above, so reaching here means
+    // same-tree objects failed to find a common ancestor, which shouldn't happen.
     AX_ASSERT_NOT_REACHED();
     return std::partial_ordering::unordered;
 }
