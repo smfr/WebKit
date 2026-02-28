@@ -318,7 +318,7 @@ public:
             return;
         }
 
-        if (onlyIncludeText()) {
+        if (usePlainTextOutput()) {
             m_lines[lineIndex] = { WTF::move(text), line };
             return;
         }
@@ -348,17 +348,17 @@ public:
 
     bool NODELETE includeRects() const
     {
-        return !onlyIncludeText() && m_options.flags.contains(TextExtractionOptionFlag::IncludeRects);
+        return !usePlainTextOutput() && m_options.flags.contains(TextExtractionOptionFlag::IncludeRects);
     }
 
     bool NODELETE includeSelectOptions() const
     {
-        return !onlyIncludeText() && m_options.flags.contains(TextExtractionOptionFlag::IncludeSelectOptions);
+        return !usePlainTextOutput() && m_options.flags.contains(TextExtractionOptionFlag::IncludeSelectOptions);
     }
 
     bool NODELETE includeURLs() const
     {
-        return !onlyIncludeText() && m_options.flags.contains(TextExtractionOptionFlag::IncludeURLs);
+        return !usePlainTextOutput() && m_options.flags.contains(TextExtractionOptionFlag::IncludeURLs);
     }
 
     bool NODELETE shortenURLs() const
@@ -366,9 +366,9 @@ public:
         return m_options.flags.contains(TextExtractionOptionFlag::ShortenURLs);
     }
 
-    bool NODELETE onlyIncludeText() const
+    bool NODELETE usePlainTextOutput() const
     {
-        return m_options.flags.contains(TextExtractionOptionFlag::OnlyIncludeText);
+        return m_options.outputFormat == TextExtractionOutputFormat::PlainText;
     }
 
     bool NODELETE useHTMLOutput() const
@@ -540,7 +540,7 @@ private:
 
     void addNativeMenuItemsIfNeeded()
     {
-        if (onlyIncludeText())
+        if (usePlainTextOutput())
             return;
 
         if (m_options.nativeMenuItems.isEmpty())
@@ -941,7 +941,7 @@ static void addPartsForText(const TextExtraction::TextItemData& textItem, Vector
             // visual data (e.g. recognized text) won't result in false positives.
             aggregator->applyReplacements(filteredText);
 
-            if (aggregator->onlyIncludeText()) {
+            if (aggregator->usePlainTextOutput()) {
                 aggregator->addResult(currentLine, { escapeString(removeZeroWidthCharacters(filteredText.trim(isASCIIWhitespace).simplifyWhiteSpace(isASCIIWhitespace))) });
                 return;
             }
@@ -1055,15 +1055,14 @@ static void addPartsForItem(const TextExtraction::Item& item, std::optional<Node
         [&](const TextExtraction::ContentEditableData& editableData) {
             if (aggregator.useHTMLOutput()) {
                 auto attributes = partsForItem(item, aggregator, includeRectForParentItem);
+                if (editableData.isPlainTextOnly)
+                    attributes.append("contenteditable='plaintext-only'"_s);
+                else
+                    attributes.append("contenteditable"_s);
                 if (attributes.isEmpty())
                     parts.append(makeString('<', item.nodeName.convertToASCIILowercase(), '>'));
                 else
                     parts.append(makeString('<', item.nodeName.convertToASCIILowercase(), ' ', makeStringByJoining(attributes, " "_s), '>'));
-
-                if (editableData.isPlainTextOnly)
-                    parts.append("contenteditable='plaintext-only'"_s);
-                else
-                    parts.append("contenteditable"_s);
             } else if (!aggregator.useMarkdownOutput()) {
                 parts.append("contentEditable"_s);
                 parts.appendVector(partsForItem(item, aggregator, includeRectForParentItem));
@@ -1358,7 +1357,7 @@ static void addTextRepresentationRecursive(const TextExtraction::Item& item, std
     if (!identifier)
         identifier = enclosingNode;
 
-    if (aggregator.onlyIncludeText()) {
+    if (aggregator.usePlainTextOutput()) {
         if (std::holds_alternative<TextExtraction::TextItemData>(item.data))
             addPartsForText(std::get<TextExtraction::TextItemData>(item.data), { }, std::optional { item.frameIdentifier }, std::optional { identifier }, { aggregator.advanceToNextLine(), depth }, aggregator);
         for (auto& child : item.children)

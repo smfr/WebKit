@@ -401,7 +401,11 @@ TEST(TextExtractionTests, VisibleTextOnly)
     }()]);
     [webView synchronouslyLoadTestPageNamed:@"debug-text-extraction"];
 
-    RetainPtr debugText = [webView synchronouslyGetDebugText:[_WKTextExtractionConfiguration configurationForVisibleTextOnly]];
+    RetainPtr debugText = [webView synchronouslyGetDebugText:^{
+        RetainPtr configuration = adoptNS([_WKTextExtractionConfiguration new]);
+        [configuration configureForMinimalOutput];
+        return configuration.autorelease();
+    }()];
 
     EXPECT_TRUE([debugText containsString:@"Test"]);
     EXPECT_TRUE([debugText containsString:@"foo"]);
@@ -416,6 +420,38 @@ TEST(TextExtractionTests, VisibleTextOnly)
     EXPECT_FALSE([debugText containsString:@"They push the human race forward"]);
     EXPECT_FALSE([debugText containsString:@"Because the people who are crazy"]);
 #endif // ENABLE(TEXT_EXTRACTION_FILTER)
+}
+
+TEST(TextExtractionTests, MinimalHTMLOutput)
+{
+    RetainPtr webView = adoptNS([[TestWKWebView alloc] initWithFrame:CGRectMake(0, 0, 800, 600) configuration:^{
+        RetainPtr configuration = adoptNS([[WKWebViewConfiguration alloc] init]);
+        [[configuration preferences] _setTextExtractionEnabled:YES];
+        return configuration.autorelease();
+    }()]);
+    [webView synchronouslyLoadHTMLString:@"<!DOCTYPE html>"
+        "<html>"
+        "    <body>"
+        "        <p>Hello <span class='asdf'>world</span></p>"
+        "        <input data-name='form' type='password' placeholder='Password field' />"
+        "        <div contenteditable>This <span id='target'>text</span> is editable</div>"
+        "    </body>"
+        "</html>"];
+
+    RetainPtr debugText = [webView synchronouslyGetDebugText:^{
+        RetainPtr configuration = adoptNS([_WKTextExtractionConfiguration new]);
+        [configuration configureForMinimalOutput];
+        [configuration setOutputFormat:_WKTextExtractionOutputFormatHTML];
+        [configuration setFilterOptions:_WKTextExtractionFilterNone];
+        return configuration.autorelease();
+    }()];
+
+    EXPECT_TRUE([debugText containsString:@"Hello world"]);
+    EXPECT_TRUE([debugText containsString:@"This text is editable"]);
+    EXPECT_FALSE([debugText containsString:@"data-name"]);
+    EXPECT_FALSE([debugText containsString:@"form"]);
+    EXPECT_FALSE([debugText containsString:@"target"]);
+    EXPECT_FALSE([debugText containsString:@"asdf"]);
 }
 
 TEST(TextExtractionTests, FilterOptions)

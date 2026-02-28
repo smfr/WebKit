@@ -6820,6 +6820,8 @@ static WebKit::TextExtractionOutputFormat textExtractionOutputFormat(_WKTextExtr
         return WebKit::TextExtractionOutputFormat::Markdown;
     case _WKTextExtractionOutputFormatJSON:
         return WebKit::TextExtractionOutputFormat::MinifiedJSON;
+    case _WKTextExtractionOutputFormatPlainText:
+        return WebKit::TextExtractionOutputFormat::PlainText;
     default:
         ASSERT_NOT_REACHED();
         return WebKit::TextExtractionOutputFormat::TextTree;
@@ -6933,7 +6935,6 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
         includeURLs = configuration.includeURLs,
         includeRects = configuration.includeRects,
         includeSelectOptions = configuration.includeSelectOptions,
-        onlyIncludeText = configuration.onlyIncludeVisibleText,
         applyDiscretionaryWordLimit = configuration.maxWordsPerParagraphPolicy == _WKTextExtractionWordLimitPolicyDiscretionary,
         shortenURLs = configuration.shortenURLs,
         maxWordsPerParagraph = WTF::move(maxWordsPerParagraph),
@@ -7060,8 +7061,6 @@ static RetainPtr<_WKTextExtractionResult> createEmptyTextExtractionResult()
             optionFlags.add(IncludeURLs);
         if (includeRects)
             optionFlags.add(IncludeRects);
-        if (onlyIncludeText)
-            optionFlags.add(OnlyIncludeText);
         if (shortenURLs)
             optionFlags.add(ShortenURLs);
         if (includeSelectOptions)

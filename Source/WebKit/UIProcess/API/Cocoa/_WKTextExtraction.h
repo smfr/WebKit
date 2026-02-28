@@ -53,6 +53,7 @@ typedef NS_ENUM(NSInteger, _WKTextExtractionOutputFormat) {
     _WKTextExtractionOutputFormatHTML,
     _WKTextExtractionOutputFormatMarkdown,
     _WKTextExtractionOutputFormatJSON,
+    _WKTextExtractionOutputFormatPlainText,
 } WK_API_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA));
 
 #define WK_TEXT_EXTRACTION_HAS_EVENT_LISTENER_CATEGORIES 1
@@ -86,7 +87,15 @@ typedef NS_ENUM(NSInteger, _WKTextExtractionWordLimitPolicy) {
 WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
 @interface _WKTextExtractionConfiguration : NSObject
 
-@property (nonatomic, class, copy, readonly) _WKTextExtractionConfiguration *configurationForVisibleTextOnly NS_SWIFT_NAME(visibleTextOnly);
+@property (nonatomic, class, copy, readonly) _WKTextExtractionConfiguration *configurationForVisibleTextOnly WK_API_DEPRECATED_WITH_REPLACEMENT("_WKTextExtractionOutputFormatPlainText", macos(WK_MAC_TBA, WK_MAC_TBA), ios(WK_IOS_TBA, WK_IOS_TBA), visionos(WK_XROS_TBA, WK_XROS_TBA)) NS_SWIFT_NAME(visibleTextOnly);
+
+/*!
+ Disables all optional metadata in the extraction output: URLs, bounding rects,
+ node identifiers, event listeners, and accessibility attributes.
+ The output format and other structural configuration (e.g. `targetRect`, `targetNode`)
+ are left unchanged. Individual flags can still be re-enabled after calling this method.
+ */
+- (void)configureForMinimalOutput;
 
 /*!
  Output format to use when collating extracted elements into the final text output.
@@ -157,7 +166,7 @@ WK_CLASS_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA), visionos(WK_XROS_TBA))
 
 /*!
  Include context around password fields, including those outside of `targetRect`.
- The default value is `false`.
+ The default value is `NO`.
  */
 @property (nonatomic) BOOL includeOffscreenPasswordFields;
 
