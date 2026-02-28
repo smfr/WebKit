@@ -130,7 +130,7 @@ RenderObject* RenderTreePosition::nextSiblingRenderer(const Node& node) const
             // by content."
             // https://drafts.csswg.org/css-forms-1/#picker-icon
             if (CheckedPtr renderer = element->renderer()) {
-                if (auto* pickerIconRenderer = renderer->pickerIconRenderer().get())
+                if (auto* pickerIconRenderer = renderer->pseudoElementRenderer(PseudoElementType::PickerIcon).get())
                     return pickerIconRenderer;
             }
         }

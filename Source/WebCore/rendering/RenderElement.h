@@ -290,11 +290,8 @@ public:
     virtual void suspendAnimations(MonotonicTime = MonotonicTime()) { }
     std::unique_ptr<RenderStyle> animatedStyle();
 
-    SingleThreadWeakPtr<RenderBlockFlow> backdropRenderer() const;
-    void setBackdropRenderer(RenderBlockFlow&);
-
-    SingleThreadWeakPtr<RenderBlockFlow> pickerIconRenderer() const;
-    void setPickerIconRenderer(RenderBlockFlow&);
+    SingleThreadWeakPtr<RenderBlockFlow> pseudoElementRenderer(PseudoElementType) const;
+    void setPseudoElementRenderer(PseudoElementType, RenderBlockFlow&);
 
     ReferencedSVGResources& ensureReferencedSVGResources();
 

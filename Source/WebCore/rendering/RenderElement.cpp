@@ -2585,24 +2585,26 @@ std::unique_ptr<RenderStyle> RenderElement::animatedStyle()
     return result;
 }
 
-SingleThreadWeakPtr<RenderBlockFlow> RenderElement::backdropRenderer() const
+static constexpr size_t pseudoElementRendererIndex(PseudoElementType type)
 {
-    return hasRareData() ? rareData().backdropRenderer : nullptr;
+    switch (type) {
+    case PseudoElementType::Backdrop:   return 0;
+    case PseudoElementType::Checkmark:  return 1;
+    case PseudoElementType::PickerIcon: return 2;
+    default: WTF_UNREACHABLE();
+    }
 }
 
-void RenderElement::setBackdropRenderer(RenderBlockFlow& renderer)
+SingleThreadWeakPtr<RenderBlockFlow> RenderElement::pseudoElementRenderer(PseudoElementType type) const
 {
-    ensureRareData().backdropRenderer = renderer;
+    if (!hasRareData())
+        return nullptr;
+    return rareData().pseudoElementRenderers[pseudoElementRendererIndex(type)];
 }
 
-SingleThreadWeakPtr<RenderBlockFlow> RenderElement::pickerIconRenderer() const
+void RenderElement::setPseudoElementRenderer(PseudoElementType type, RenderBlockFlow& renderer)
 {
-    return hasRareData() ? rareData().pickerIconRenderer : nullptr;
-}
-
-void RenderElement::setPickerIconRenderer(RenderBlockFlow& renderer)
-{
-    ensureRareData().pickerIconRenderer = renderer;
+    ensureRareData().pseudoElementRenderers[pseudoElementRendererIndex(type)] = renderer;
 }
 
 Overflow RenderElement::effectiveOverflowX() const

@@ -3331,7 +3331,7 @@ static FullScreenDescendant isDescendantOfFullScreenLayer(const RenderLayer& lay
     if (!fullScreenLayer)
         return FullScreenDescendant::NotApplicable;
 
-    auto backdropRenderer = fullScreenRenderer->backdropRenderer();
+    auto backdropRenderer = fullScreenRenderer->pseudoElementRenderer(PseudoElementType::Backdrop);
     if (backdropRenderer && backdropRenderer.get() == &layer.renderer())
         return FullScreenDescendant::Yes;
 

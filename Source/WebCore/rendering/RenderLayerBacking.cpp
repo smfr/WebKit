@@ -323,7 +323,7 @@ RenderLayerBacking::RenderLayerBacking(RenderLayer& layer)
         if (!documentFullscreen)
             return false;
         RefPtr fullscreenElement = documentFullscreen->fullscreenElement();
-        if (!fullscreenElement || !fullscreenElement->renderer() || fullscreenElement->renderer()->backdropRenderer() != &renderer)
+        if (!fullscreenElement || !fullscreenElement->renderer() || fullscreenElement->renderer()->pseudoElementRenderer(PseudoElementType::Backdrop) != &renderer)
             return false;
 
         auto rendererRect = box->frameRect();

@@ -4553,7 +4553,7 @@ Vector<RenderLayer*> RenderLayer::topLayerRenderLayers(const RenderView& renderV
         if (!renderer)
             continue;
 
-        auto backdropRenderer = renderer->backdropRenderer();
+        auto backdropRenderer = renderer->pseudoElementRenderer(PseudoElementType::Backdrop);
         if (backdropRenderer && backdropRenderer->hasLayer() && backdropRenderer->layer()->parent())
             layers.append(backdropRenderer->layer());
 

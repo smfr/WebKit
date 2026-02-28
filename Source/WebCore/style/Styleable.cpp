@@ -76,7 +76,7 @@ const std::optional<const Styleable> Styleable::fromRenderer(const RenderElement
     switch (*renderer.style().pseudoElementType()) {
     case PseudoElementType::Backdrop:
         for (auto& topLayerElement : renderer.document().topLayerElements()) {
-            if (topLayerElement->renderer() && topLayerElement->renderer()->backdropRenderer() == &renderer)
+            if (topLayerElement->renderer() && topLayerElement->renderer()->pseudoElementRenderer(PseudoElementType::Backdrop) == &renderer)
                 return Styleable(topLayerElement.get(), Style::PseudoElementIdentifier { PseudoElementType::Backdrop });
         }
         break;
@@ -93,7 +93,7 @@ const std::optional<const Styleable> Styleable::fromRenderer(const RenderElement
     case PseudoElementType::PickerIcon: {
         auto* ancestor = renderer.parent();
         while (ancestor) {
-            if (ancestor->element() && ancestor->pickerIconRenderer() == &renderer)
+            if (ancestor->element() && ancestor->pseudoElementRenderer(PseudoElementType::PickerIcon) == &renderer)
                 return Styleable(*ancestor->element(), Style::PseudoElementIdentifier { PseudoElementType::PickerIcon });
             ancestor = ancestor->parent();
         }
@@ -133,8 +133,9 @@ RenderElement* Styleable::renderer() const
             return afterPseudoElement->renderer();
         break;
     case PseudoElementType::Backdrop:
+    case PseudoElementType::PickerIcon:
         if (auto* hostRenderer = element.renderer())
-            return hostRenderer->backdropRenderer().get();
+            return hostRenderer->pseudoElementRenderer(pseudoElementIdentifier->type).get();
         break;
     case PseudoElementType::Before:
         if (auto* beforePseudoElement = element.beforePseudoElement())
@@ -145,14 +146,6 @@ RenderElement* Styleable::renderer() const
             auto* markerRenderer = renderListItem->markerRenderer();
             if (markerRenderer && !markerRenderer->style().hasUsedContentNone())
                 return markerRenderer;
-        }
-        break;
-    case PseudoElementType::PickerIcon:
-        if (!element.renderer())
-            return nullptr;
-        for (CheckedRef child : childrenOfType<RenderElement>(*element.renderer())) {
-            if (child->style().pseudoElementType() == PseudoElementType::PickerIcon)
-                return child.ptr();
         }
         break;
     case PseudoElementType::ViewTransition:

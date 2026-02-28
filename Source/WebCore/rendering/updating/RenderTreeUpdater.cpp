@@ -789,7 +789,7 @@ static std::optional<DidRepaintAndMarkContainingBlock> repaintAndMarkContainingB
     };
 
     auto repaintBackdropIfApplicable = [&](auto& renderer) {
-        if (auto backdropRenderer = renderer.backdropRenderer())
+        if (auto backdropRenderer = renderer.pseudoElementRenderer(PseudoElementType::Backdrop))
             backdropRenderer->repaint(RenderObject::ForceRepaint::Yes);
     };
 
@@ -929,7 +929,7 @@ void RenderTreeUpdater::tearDownRenderersInternal(Element& root, TeardownType te
                         parent->setNeedsPreferredWidthsUpdate();
                     }
                 }
-                if (auto backdropRenderer = renderer->backdropRenderer())
+                if (auto backdropRenderer = renderer->pseudoElementRenderer(PseudoElementType::Backdrop))
                     builder.destroyAndCleanUpAnonymousWrappers(*backdropRenderer, { });
                 builder.destroyAndCleanUpAnonymousWrappers(*renderer, root.renderer());
                 element->setRenderer(nullptr);

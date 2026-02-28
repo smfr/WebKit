@@ -1996,8 +1996,8 @@ Node* RenderBlock::nodeForHitTest() const
             for (auto& element : document().topLayerElements()) {
                 if (!element->renderer())
                     continue;
-                ASSERT(element->renderer()->backdropRenderer());
-                if (element->renderer()->backdropRenderer() == this)
+                ASSERT(element->renderer()->pseudoElementRenderer(PseudoElementType::Backdrop));
+                if (element->renderer()->pseudoElementRenderer(PseudoElementType::Backdrop) == this)
                     return element.ptr();
             }
             ASSERT_NOT_REACHED();

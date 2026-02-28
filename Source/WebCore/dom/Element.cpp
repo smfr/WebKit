@@ -4579,7 +4579,7 @@ void Element::removeFromTopLayer()
     // Document::topLayerElements(), since Styleable::fromRenderer() relies on this to
     // find the backdrop's associated element.
     if (CheckedPtr renderer = this->renderer()) {
-        if (CheckedPtr backdrop = renderer->backdropRenderer().get()) {
+        if (CheckedPtr backdrop = renderer->pseudoElementRenderer(PseudoElementType::Backdrop).get()) {
             if (auto styleable = Styleable::fromRenderer(*backdrop))
                 styleable->cancelStyleOriginatedAnimations();
         }

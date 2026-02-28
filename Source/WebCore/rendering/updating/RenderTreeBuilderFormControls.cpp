@@ -34,7 +34,6 @@
 #include "RenderBlockFlow.h"
 #include "RenderBlockInlines.h"
 #include "RenderButton.h"
-#include "RenderDescendantIterator.h"
 #include "RenderMenuList.h"
 #include "RenderTreeBuilderBlock.h"
 #include "RenderTreeUpdaterGeneratedContent.h"
@@ -111,15 +110,7 @@ void RenderTreeBuilder::FormControls::updateAfterDescendants(RenderElement& rend
 
 void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type, RenderElement& renderer, StyleAppearance usedAppearance, RenderObject* beforeChild)
 {
-    auto existingPseudoElement = [&] -> CheckedPtr<RenderElement> {
-        if (type == PseudoElementType::PickerIcon)
-            return renderer.pickerIconRenderer().get();
-        for (CheckedRef child : childrenOfType<RenderElement>(renderer)) {
-            if (child->style().pseudoElementType() == type)
-                return child;
-        }
-        return nullptr;
-    }();
+    CheckedPtr existingPseudoElement = renderer.pseudoElementRenderer(type).get();
 
     if (usedAppearance != StyleAppearance::Base && !existingPseudoElement)
         return;
@@ -159,8 +150,7 @@ void RenderTreeBuilder::FormControls::updatePseudoElement(PseudoElementType type
     if (pseudoElement->style().content().isData())
         RenderTreeUpdater::GeneratedContent::createContentRenderers(m_builder, *pseudoElement, pseudoElement->style(), type);
 
-    if (type == PseudoElementType::PickerIcon)
-        renderer.setPickerIconRenderer(*pseudoElement.get());
+    renderer.setPseudoElementRenderer(type, *pseudoElement.get());
 
     m_builder.attach(renderer, WTF::move(pseudoElement), beforeChild);
 }

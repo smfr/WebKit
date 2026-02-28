@@ -1292,8 +1292,7 @@ private:
 
         // From RenderElement
         std::unique_ptr<ReferencedSVGResources> referencedSVGResources;
-        SingleThreadWeakPtr<RenderBlockFlow> backdropRenderer;
-        SingleThreadWeakPtr<RenderBlockFlow> pickerIconRenderer;
+        std::array<SingleThreadWeakPtr<RenderBlockFlow>, 3> pseudoElementRenderers;
 
         // From RenderBox
         RefPtr<ControlPart> controlPart;
