@@ -793,9 +793,37 @@ void InlineDisplayContentBuilder::adjustVisualGeometryForDisplayBox(size_t displ
         displayBox.setHasContent();
 }
 
+bool InlineDisplayContentBuilder::processBidiLinesWithNoContent(const LineLayoutResult& lineLayoutResult, InlineDisplay::Boxes& boxes)
+{
+    if (lineLayoutResult.hasContentfulInFlowContent())
+        return false;
+
+    processNonBidiContent(lineLayoutResult, boxes);
+    if (m_displayLine.isLeftToRightInlineDirection())
+        return true;
+
+    for (auto& box : boxes) {
+        if (!box.isInlineBox()) {
+            boxes.clear();
+            ASSERT_NOT_REACHED();
+            return false;
+        }
+        if (box.isNonRootInlineBox()) {
+            m_displayLine.isHorizontal() ? box.setLeft(m_displayLine.lineBoxRight()) : box.setTop(m_displayLine.lineBoxBottom());
+
+            auto& inlineBoxGeometry = formattingContext().geometryForBox(box.layoutBox());
+            m_displayLine.isHorizontal() ? inlineBoxGeometry.setLeft(LayoutUnit { box.left() }) : inlineBoxGeometry.setTop(LayoutUnit { box.top() });
+        }
+    }
+    return true;
+}
+
 void InlineDisplayContentBuilder::processBidiContent(const LineLayoutResult& lineLayoutResult, InlineDisplay::Boxes& boxes)
 {
     ASSERT(lineLayoutResult.directionality.visualOrderList.size() <= lineLayoutResult.runs.size());
+
+    if (processBidiLinesWithNoContent(lineLayoutResult, boxes))
+        return;
 
     AncestorStack ancestorStack;
     auto displayBoxTree = DisplayBoxTree { };

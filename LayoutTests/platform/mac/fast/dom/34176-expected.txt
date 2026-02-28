@@ -252,8 +252,8 @@ layer at (0,0) size 785x1454
       RenderBlock {DIV} at (0,886) size 769x43
         RenderText {#text} at (685,0) size 59x18
           text run at (685,0) width 59: "This is a "
-        RenderInline {SPAN} at (743,0) size 26x42
-          RenderInline {EM} at (743,0) size 26x24
+        RenderInline {SPAN} at (769,0) size 26x24
+          RenderInline {EM} at (769,0) size 26x24
             RenderText {#text} at (743,0) size 26x18
               text run at (743,0) width 26: "Test"
             RenderTable {TABLE} at (755,18) size 14x24
