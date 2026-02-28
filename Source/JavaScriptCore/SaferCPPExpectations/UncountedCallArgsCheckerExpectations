@@ -134,7 +134,6 @@ runtime/JSObject.cpp
 runtime/JSObjectInlines.h
 runtime/JSRunLoopTimer.cpp
 runtime/JSSymbolTableObject.cpp
-runtime/LiteralParser.cpp
 runtime/ModuleProgramExecutable.cpp
 runtime/NativeExecutable.cpp
 runtime/ProgramExecutable.cpp
