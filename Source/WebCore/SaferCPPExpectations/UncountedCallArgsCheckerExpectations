@@ -148,7 +148,6 @@ bridge/runtime_root.cpp
 crypto/parameters/CryptoAlgorithmRsaKeyGenParams.h
 css/CSSCounterStyleDescriptors.cpp
 css/CSSCounterStyleRule.h
-css/CSSCounterValue.cpp
 css/CSSCursorImageValue.cpp
 css/CSSFontFace.cpp
 css/CSSFontFaceRule.cpp

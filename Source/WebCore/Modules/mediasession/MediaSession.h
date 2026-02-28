@@ -186,7 +186,7 @@ private:
     std::optional<MediaSessionGroupIdentifier> mediaSessionGroupIdentifier() const final;
 
     WeakPtr<Navigator> m_navigator;
-    Ref<PlatformMediaSession> m_platformSession;
+    const Ref<PlatformMediaSession> m_platformSession;
     RefPtr<MediaMetadata> m_metadata;
     RefPtr<MediaMetadata> m_defaultMetadata;
     MediaSessionPlaybackState m_playbackState { MediaSessionPlaybackState::None };
