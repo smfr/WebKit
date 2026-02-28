@@ -23,9 +23,9 @@
 #include <wtf/Assertions.h>
 #include <wtf/Compiler.h>
 #include <wtf/FastMalloc.h>
-#include <wtf/MainThread.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/SwiftBridging.h>
+#include <wtf/ThreadAssertions.h>
 
 namespace WTF {
 
@@ -43,11 +43,13 @@ public:
     WTF_EXPORT_PRIVATE static void logRefDuringDestruction(const void*);
     WTF_EXPORT_PRIVATE static void printRefDuringDestructionLogAndCrash (const void*) NO_RETURN_DUE_TO_CRASH;
 
-    RefCountDebugger()
-#if ASSERT_ENABLED
-        : m_isOwnedByMainThread(isMainThread())
-#endif
+    RefCountDebugger() = default;
+
+    void initAsThreadSafe()
     {
+#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
+        m_ownerThread = anyThreadLike;
+#endif
     }
 
     ~RefCountDebugger()
@@ -87,14 +89,15 @@ public:
     // for example by using a mutex.
     void disableThreadingChecks()
     {
-#if ASSERT_ENABLED
+#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
         m_areThreadingChecksEnabled = false;
+        m_ownerThread = anyThreadLike;
 #endif
     }
 
     static void enableThreadingChecksGlobally()
     {
-#if ASSERT_ENABLED
+#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
         areThreadingChecksEnabledGlobally = true;
 #endif
     }
@@ -113,19 +116,19 @@ public:
         UNUSED_PARAM(refCount);
         UNUSED_PARAM(isThreadSafe);
 
-#if ASSERT_ENABLED
+#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
         if (isThreadSafe == RefCountIsThreadSafe::Yes)
             return;
 
         if (refCount == 1) {
             // Likely an ownership transfer across threads that may be safe.
-            m_isOwnedByMainThread = isMainThread();
+            m_ownerThread.reset();
         } else if (areThreadingChecksEnabledGlobally && m_areThreadingChecksEnabled) {
             // If you hit this assertion, it means that the RefCounted object was ref/deref'd
-            // from both the main thread and another in a way that is likely concurrent and unsafe.
+            // from both different threads in a way that is likely concurrent and unsafe.
             // Derive from ThreadSafeRefCounted and make sure the destructor is safe on threads
-            // that call deref, or ref/deref from a single thread.
-            ASSERT_WITH_MESSAGE(m_isOwnedByMainThread == isMainThread(), "Unsafe to ref/deref from different threads");
+            // that call deref, or ref/deref from a single thread or serial work queue.
+            ASSERT_WITH_SECURITY_IMPLICATION(m_ownerThread.isCurrent()); // Unsafe to ref/deref from different threads.
         }
 #endif
     }
@@ -167,8 +170,8 @@ public:
 
 private:
 
-#if ASSERT_ENABLED
-    mutable bool m_isOwnedByMainThread;
+#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
+    mutable ThreadLikeAssertion m_ownerThread;
     bool m_areThreadingChecksEnabled { true };
 #endif
     WTF_EXPORT_PRIVATE static bool areThreadingChecksEnabledGlobally;

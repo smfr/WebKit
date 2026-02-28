@@ -2299,7 +2299,7 @@ extension WebGPU.CommandEncoder {
             // FIXME: https://bugs.webkit.org/show_bug.cgi?id=283385 - https://bugs.webkit.org/show_bug.cgi?id=283088 should be reverted when the blocking issue is resolved
             finalizeBlitCommandEncoder()
             let workaround = m_device.ptr().resolveTimestampsSharedEvent()
-            // The signal value does not matter, the event alone prevents reordering
+            // The signal value does not matter, the event alone prevents reordering.
             m_commandBuffer?.encodeSignalEvent(workaround, value: 1)
             m_commandBuffer?.encodeWaitForEvent(workaround, value: 1)
             guard ensureBlitCommandEncoder() != nil else {

@@ -56,6 +56,7 @@ public:
 protected:
     ThreadSafeRefCountedBase()
     {
+        m_refCountDebugger.initAsThreadSafe();
         // FIXME: Lots of subclasses violate our adoption requirements. Migrate
         // this call into only those subclasses that need it.
         m_refCountDebugger.relaxAdoptionRequirement();
