@@ -43,9 +43,9 @@ public:
 
 private:
     explicit CSSGridLineValue(RefPtr<CSSPrimitiveValue>&&, RefPtr<CSSPrimitiveValue>&&, RefPtr<CSSPrimitiveValue>&&);
-    RefPtr<CSSPrimitiveValue> m_spanValue;
-    RefPtr<CSSPrimitiveValue> m_numericValue;
-    RefPtr<CSSPrimitiveValue> m_gridLineName;
+    const RefPtr<CSSPrimitiveValue> m_spanValue;
+    const RefPtr<CSSPrimitiveValue> m_numericValue;
+    const RefPtr<CSSPrimitiveValue> m_gridLineName;
 };
 
 } // namespace WebCore

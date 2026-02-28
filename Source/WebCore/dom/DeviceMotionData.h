@@ -104,9 +104,9 @@ private:
     DeviceMotionData() = default;
     DeviceMotionData(RefPtr<Acceleration>&&, RefPtr<Acceleration>&& accelerationIncludingGravity, RefPtr<RotationRate>&&, std::optional<double> interval);
 
-    RefPtr<Acceleration> m_acceleration;
-    RefPtr<Acceleration> m_accelerationIncludingGravity;
-    RefPtr<RotationRate> m_rotationRate;
+    const RefPtr<Acceleration> m_acceleration;
+    const RefPtr<Acceleration> m_accelerationIncludingGravity;
+    const RefPtr<RotationRate> m_rotationRate;
     std::optional<double> m_interval;
 };
 

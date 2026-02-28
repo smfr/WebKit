@@ -152,29 +152,22 @@ css/CSSCursorImageValue.cpp
 css/CSSFontFace.cpp
 css/CSSFontFaceRule.cpp
 css/CSSFontValue.cpp
-css/CSSGridLineValue.cpp
 css/CSSGroupingRule.cpp
 css/CSSImageSetOptionValue.cpp
 css/CSSImageValue.h
 css/CSSKeyframeRule.cpp
 css/CSSKeyframesRule.cpp
 css/CSSNestedDeclarations.cpp
-css/CSSOffsetRotateValue.cpp
-css/CSSOffsetRotateValue.h
 css/CSSPageRule.cpp
 css/CSSProperty.h
 css/CSSPropertyRule.cpp
 css/CSSRuleList.h
-css/CSSScrollValue.cpp
-css/CSSScrollValue.h
 css/CSSSelector.cpp
 css/CSSStyleProperties.cpp
 css/CSSStyleRule.cpp
 css/CSSStyleSheet.cpp
 css/CSSStyleSheetObservableArray.cpp
 css/CSSValueList.cpp
-css/CSSViewValue.cpp
-css/CSSViewValue.h
 css/DOMMatrixReadOnly.cpp
 css/DeprecatedCSSOMPrimitiveValue.h
 [ macOS ] css/DeprecatedCSSOMRGBColor.h
@@ -556,7 +549,6 @@ platform/mediastream/mac/MediaStreamTrackAudioSourceProviderCocoa.cpp
 platform/mediastream/mac/RealtimeOutgoingAudioSourceCocoa.cpp
 platform/mediastream/mac/WebAudioSourceProviderCocoa.mm
 platform/mock/MockRealtimeVideoSource.cpp
-platform/mock/RTCNotifiersMock.cpp
 platform/network/mac/ResourceHandleMac.mm
 platform/network/mac/WebCoreResourceHandleAsOperationQueueDelegate.mm
 plugins/PluginData.cpp

@@ -51,7 +51,7 @@ public:
 private:
     RTCPeerConnectionIceEvent(const AtomString& type, CanBubble, IsCancelable, RefPtr<RTCIceCandidate>&&, String&& serverURL);
 
-    RefPtr<RTCIceCandidate> m_candidate;
+    const RefPtr<RTCIceCandidate> m_candidate;
     String m_url;
 };
 

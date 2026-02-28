@@ -74,8 +74,8 @@ private:
             ASSERT(m_angle->isAngle());
     }
 
-    RefPtr<CSSPrimitiveValue> m_modifier;
-    RefPtr<CSSPrimitiveValue> m_angle;
+    const RefPtr<CSSPrimitiveValue> m_modifier;
+    const RefPtr<CSSPrimitiveValue> m_angle;
 };
 
 } // namespace WebCore

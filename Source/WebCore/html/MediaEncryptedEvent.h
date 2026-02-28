@@ -58,7 +58,7 @@ private:
     MediaEncryptedEvent(const AtomString&, const MediaEncryptedEventInit&, IsTrusted);
 
     String m_initDataType;
-    RefPtr<JSC::ArrayBuffer> m_initData;
+    const RefPtr<JSC::ArrayBuffer> m_initData;
 };
 
 } // namespace WebCore
