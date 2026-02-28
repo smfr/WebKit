@@ -2703,7 +2703,8 @@ sub shouldRemoveCMakeCache(@)
                              "CFLAGS", "CXXFLAGS", "CPPFLAGS", "LDFLAGS", # Compiler and linker flags
                              "PKG_CONFIG_LIBDIR", "PKG_CONFIG_PATH", # pkg-config
                              "CPATH", "LIBRARY_PATH", # GCC/Clang include/lib helpers
-                             "CMAKE_MODULE_PATH", "CMAKE_PREFIX_PATH"); # CMake-specific
+                             "CMAKE_MODULE_PATH", "CMAKE_PREFIX_PATH", # CMake-specific
+                             "WEBKIT_USE_SCCACHE"); # sccache
     for my $envFlag (@relevantEnvFlags) {
         my $flagValue = $ENV{$envFlag} || "";
             $buildArgsEnv .= "\n" . $envFlag . "=" . $flagValue;
