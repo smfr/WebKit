@@ -629,6 +629,8 @@ void WebLocalFrameLoaderClient::dispatchDidCommitLoad(std::optional<HasInsecureC
     Ref documentLoader { *m_localFrame->loader().documentLoader() };
     RefPtr<API::Object> userData;
 
+    frame->commitProvisionalFrame();
+
     // Notify the bundle client.
     webPage->injectedBundleLoaderClient().didCommitLoadForFrame(*webPage, m_frame, userData);
 
@@ -652,8 +654,6 @@ void WebLocalFrameLoaderClient::dispatchDidCommitLoad(std::optional<HasInsecureC
     if (RefPtr extensionControllerProxy = webPage->webExtensionControllerProxy())
         extensionControllerProxy->didCommitLoadForFrame(*webPage, frame.get(), frame->url());
 #endif
-
-    frame->commitProvisionalFrame();
 
     RefPtr<Frame> coreLocalFrame = m_localFrame.ptr();
     // Notify the UIProcess.
