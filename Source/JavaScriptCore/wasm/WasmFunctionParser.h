@@ -385,7 +385,7 @@ private:
     Stack m_expressionStack;
     ControlStack m_controlStack;
     Vector<Type, 16> m_locals;
-    Ref<const TypeDefinition> m_signature;
+    const Ref<const TypeDefinition> m_signature;
     const ModuleInformation& m_info;
 
     Vector<uint32_t> m_localInitStack;

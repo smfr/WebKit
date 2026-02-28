@@ -611,8 +611,8 @@ public:
     const ClassInfo* currentlyDestructingCallbackObjectClassInfo { nullptr };
 
     AtomStringTable* m_atomStringTable;
-    UniqueRef<SymbolRegistry> m_symbolRegistry;
-    UniqueRef<SymbolRegistry> m_privateSymbolRegistry;
+    const UniqueRef<SymbolRegistry> m_symbolRegistry;
+    const UniqueRef<SymbolRegistry> m_privateSymbolRegistry;
     CommonIdentifiers* propertyNames { nullptr };
     const ArgList* emptyList;
     SmallStrings smallStrings;
