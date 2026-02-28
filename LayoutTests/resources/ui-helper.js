@@ -1299,6 +1299,40 @@ window.UIHelper = class UIHelper {
         return new Promise(resolve => testRunner.runUIScript(selectColorScript, resolve));
     }
 
+    static isShowingColorPicker()
+    {
+        return new Promise(resolve => {
+            testRunner.runUIScript(`(() => {
+                uiController.uiScriptComplete(uiController.isShowingColorPicker);
+            })()`, result => resolve(result === "true"));
+        });
+    }
+
+    static waitForColorPickerToPresent()
+    {
+        if (!this.isWebKit2())
+            return Promise.resolve();
+
+        if (this.isIOSFamily()) {
+            return new Promise(resolve => {
+                testRunner.runUIScript(`
+                    (function() {
+                        if (uiController.isShowingColorPicker)
+                            uiController.uiScriptComplete();
+                        else
+                            uiController.willPresentPopoverCallback = () => uiController.uiScriptComplete();
+                    })()`, resolve);
+            });
+        }
+
+        // macOS: poll for color picker in subview hierarchy.
+        return new Promise(async resolve => {
+            while (!await this.isShowingColorPicker())
+                continue;
+            resolve();
+        });
+    }
+
     static enterText(text)
     {
         const escapedText = text.replace(/`/g, "\\`");

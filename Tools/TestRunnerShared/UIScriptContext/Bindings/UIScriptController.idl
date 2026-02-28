@@ -273,6 +273,7 @@ interface UIScriptController {
 
     // <input type=color>
     undefined setSelectedColorForColorPicker(double red, double green, double blue);
+    readonly attribute boolean isShowingColorPicker;
 
     undefined keyboardAccessoryBarNext();
     undefined keyboardAccessoryBarPrevious();

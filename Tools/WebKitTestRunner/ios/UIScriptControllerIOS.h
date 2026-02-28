@@ -145,6 +145,7 @@ private:
     bool isShowingDataListSuggestions() const override;
     void activateDataListSuggestion(unsigned, JSValueRef) override;
     void setSelectedColorForColorPicker(double, double, double) override;
+    bool isShowingColorPicker() const override;
     void setKeyboardInputModeIdentifier(JSStringRef) override;
     void setFocusStartsInputSessionPolicy(JSStringRef) override;
     void toggleCapsLock(JSValueRef) override;

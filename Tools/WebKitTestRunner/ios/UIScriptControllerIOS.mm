@@ -1454,6 +1454,12 @@ void UIScriptControllerIOS::setSelectedColorForColorPicker(double red, double gr
     [webView() setSelectedColorForColorPicker:color];
 }
 
+bool UIScriptControllerIOS::isShowingColorPicker() const
+{
+    RetainPtr<UIViewController> presentedViewController = webView().window.rootViewController.presentedViewController;
+    return [presentedViewController.get() isKindOfClass:[UIColorPickerViewController class]];
+}
+
 void UIScriptControllerIOS::setKeyboardInputModeIdentifier(JSStringRef identifier)
 {
     TestController::singleton().setKeyboardInputModeIdentifier(toWTFString(identifier));

@@ -184,6 +184,11 @@ void UIScriptControllerMac::setSelectedColorForColorPicker(double red, double gr
     [webView() _setSelectedColorForColorPicker:color.get()];
 }
 
+bool UIScriptControllerMac::isShowingColorPicker() const
+{
+    return [findAllViewsInHierarchyOfType(webView().window.contentView, NSClassFromString(@"WKPopoverColorWell")) count];
+}
+
 NSTableView *UIScriptControllerMac::dataListSuggestionsTableView() const
 {
     for (NSWindow *childWindow in webView().window.childWindows) {
