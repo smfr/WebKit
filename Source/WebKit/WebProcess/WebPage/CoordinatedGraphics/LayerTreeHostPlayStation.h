@@ -93,7 +93,7 @@ public:
     WebPage& webPage() const { return m_webPage; }
     CoordinatedSceneState& sceneState() const { return m_sceneState.get(); }
 
-    const LayerTreeContext& layerTreeContext() const { return m_layerTreeContext; }
+    const LayerTreeContext& layerTreeContext() const LIFETIME_BOUND { return m_layerTreeContext; }
     void setLayerTreeStateIsFrozen(bool);
 
     void scheduleRenderingUpdate();

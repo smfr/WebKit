@@ -79,7 +79,7 @@ public:
     WebExtensionContextProxy& extensionContext() const { return *m_extensionContext; }
     bool hasExtensionContext() const { return !!m_extensionContext; }
 
-    const String& propertyPath() const { return m_propertyPath; }
+    const String& propertyPath() const LIFETIME_BOUND { return m_propertyPath; }
     void setPropertyPath(const String& propertyName, const WebExtensionAPIObject* parentObject = nullptr)
     {
         ASSERT(!propertyName.isEmpty());

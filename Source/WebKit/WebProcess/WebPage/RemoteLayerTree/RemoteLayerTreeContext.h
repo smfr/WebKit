@@ -93,7 +93,7 @@ public:
 
     void willStartAnimationOnLayer(PlatformCALayerRemote&);
 
-    RemoteLayerBackingStoreCollection& backingStoreCollection() { return m_backingStoreCollection; }
+    RemoteLayerBackingStoreCollection& backingStoreCollection() LIFETIME_BOUND { return m_backingStoreCollection; }
 
     void adoptLayersFromContext(RemoteLayerTreeContext&);
 

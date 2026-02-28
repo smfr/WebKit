@@ -78,7 +78,7 @@ public:
     void addSource(Ref<RemoteRealtimeVideoSource>&&);
     void removeSource(WebCore::RealtimeMediaSourceIdentifier);
 
-    RemoteCaptureSampleManager& remoteCaptureSampleManager() { return m_remoteCaptureSampleManager; }
+    RemoteCaptureSampleManager& remoteCaptureSampleManager() LIFETIME_BOUND { return m_remoteCaptureSampleManager; }
     bool shouldUseGPUProcessRemoteFrames() const { return m_shouldUseGPUProcessRemoteFrames; }
 
 private:

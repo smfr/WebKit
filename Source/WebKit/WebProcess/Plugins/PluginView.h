@@ -91,7 +91,7 @@ public:
     void layerHostingStrategyDidChange() final;
 
     WebCore::HTMLPlugInElement& pluginElement() const { return m_pluginElement; }
-    const URL& mainResourceURL() const { return m_mainResourceURL; }
+    const URL& mainResourceURL() const LIFETIME_BOUND { return m_mainResourceURL; }
 
     void didBeginMagnificationGesture();
     void didEndMagnificationGesture();

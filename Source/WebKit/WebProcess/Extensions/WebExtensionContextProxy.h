@@ -81,8 +81,8 @@ public:
 
     bool operator==(const WebExtensionContextProxy& other) const { return (this == &other); }
 
-    const URL& baseURL() const { return m_baseURL; }
-    const String& uniqueIdentifier() const { return m_uniqueIdentifier; }
+    const URL& baseURL() const LIFETIME_BOUND { return m_baseURL; }
+    const String& uniqueIdentifier() const LIFETIME_BOUND { return m_uniqueIdentifier; }
 
 #if PLATFORM(COCOA)
     NSDictionary *manifest() const { return m_manifest.get(); }

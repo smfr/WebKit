@@ -284,13 +284,13 @@ public:
     OptionSet<TextCheckerState> textCheckerState() const { return m_textCheckerState; }
     void setTextCheckerState(OptionSet<TextCheckerState>);
 
-    EventDispatcher& eventDispatcher() { return m_eventDispatcher; }
+    EventDispatcher& eventDispatcher() LIFETIME_BOUND { return m_eventDispatcher; }
 
     NetworkProcessConnection& ensureNetworkProcessConnection();
 
     void networkProcessConnectionClosed(NetworkProcessConnection*);
     NetworkProcessConnection* existingNetworkProcessConnection() { return m_networkProcessConnection.get(); }
-    WebLoaderStrategy& NODELETE webLoaderStrategy();
+    WebLoaderStrategy& NODELETE webLoaderStrategy() LIFETIME_BOUND;
     WebFileSystemStorageConnection& fileSystemStorageConnection();
 
     RefPtr<WebTransportSession> webTransportSession(WebTransportSessionIdentifier);
@@ -298,7 +298,7 @@ public:
     void removeWebTransportSession(WebTransportSessionIdentifier);
 
     std::optional<SharedPreferencesForWebProcess> sharedPreferencesForWebProcess() const { return m_sharedPreferencesForWebProcess; }
-    const SharedPreferencesForWebProcess& sharedPreferencesForWebProcessValue() const { return m_sharedPreferencesForWebProcess; }
+    const SharedPreferencesForWebProcess& sharedPreferencesForWebProcessValue() const LIFETIME_BOUND { return m_sharedPreferencesForWebProcess; }
     void updateSharedPreferencesForWebProcess(SharedPreferencesForWebProcess sharedPreferencesForWebProcess) { m_sharedPreferencesForWebProcess = WTF::move(sharedPreferencesForWebProcess); }
 
 #if USE(LIBRICE)
@@ -366,7 +366,7 @@ public:
     void releaseSystemMallocMemory();
 #endif
 
-    const String& uiProcessBundleIdentifier() const { return m_uiProcessBundleIdentifier; }
+    const String& uiProcessBundleIdentifier() const LIFETIME_BOUND { return m_uiProcessBundleIdentifier; }
 
     void updateActivePages(const String& overrideDisplayName);
     void getActivePagesOriginsForTesting(CompletionHandler<void(Vector<String>&&)>&&);
@@ -397,7 +397,7 @@ public:
 
     void prefetchDNS(const String&);
 
-    WebAutomationSessionProxy* automationSessionProxy() { return m_automationSessionProxy.get(); }
+    WebAutomationSessionProxy* automationSessionProxy() LIFETIME_BOUND { return m_automationSessionProxy.get(); }
 #if ENABLE(MODEL_PROCESS)
     ModelProcessModelPlayerManager& modelProcessModelPlayerManager() { return m_modelProcessModelPlayerManager.get(); }
 #endif
@@ -411,7 +411,7 @@ public:
 #endif
     WebBroadcastChannelRegistry& broadcastChannelRegistry() { return m_broadcastChannelRegistry.get(); }
     WebCookieJar& cookieJar() { return m_cookieJar.get(); }
-    WebSocketChannelManager& webSocketChannelManager() { return m_webSocketChannelManager; }
+    WebSocketChannelManager& webSocketChannelManager() LIFETIME_BOUND { return m_webSocketChannelManager; }
 
 #if PLATFORM(IOS_FAMILY) && !PLATFORM(MACCATALYST)
     float backlightLevel() const { return m_backlightLevel; }
@@ -512,9 +512,9 @@ public:
 #endif
 
 #if PLATFORM(GTK) || PLATFORM(WPE)
-    const OptionSet<RendererBufferTransportMode>& rendererBufferTransportMode() const { return m_rendererBufferTransportMode; }
+    const OptionSet<RendererBufferTransportMode>& rendererBufferTransportMode() const LIFETIME_BOUND { return m_rendererBufferTransportMode; }
     void initializePlatformDisplayIfNeeded() const;
-    const OptionSet<AvailableInputDevices>& availableInputDevices() const { return m_availableInputDevices; }
+    const OptionSet<AvailableInputDevices>& availableInputDevices() const LIFETIME_BOUND { return m_availableInputDevices; }
     std::optional<AvailableInputDevices> primaryPointingDevice() const;
     void setAvailableInputDevices(OptionSet<AvailableInputDevices>);
 #endif // PLATFORM(WPE)
@@ -526,7 +526,7 @@ public:
     void updateCachedCookiesEnabled();
     void enableMediaPlayback();
 #if ENABLE(ROUTING_ARBITRATION)
-    AudioSessionRoutingArbitrator* audioSessionRoutingArbitrator() const { return m_routingArbitrator.get(); }
+    AudioSessionRoutingArbitrator* audioSessionRoutingArbitrator() const LIFETIME_BOUND { return m_routingArbitrator.get(); }
 #endif
 
     bool mediaPlaybackEnabled() const { return m_mediaPlaybackEnabled; }
