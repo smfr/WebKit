@@ -85,7 +85,7 @@ void AuxiliaryProcess::initialize(AuxiliaryProcessInitializationParameters&& par
 {
     TraceScope traceScope(ProcessInitializeStart, ProcessInitializeEnd);
 
-    WTF::RefCountDebugger::enableThreadingChecksGlobally();
+    WTF::RefCountDebuggerBase::enableThreadingChecksGlobally();
 
 #if PLATFORM(COCOA)
     // On Cocoa platforms, setAuxiliaryProcessType() is called in XPCServiceInitializer().

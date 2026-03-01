@@ -37,32 +37,41 @@ namespace WTF {
 
 enum class RefCountIsThreadSafe : bool { No, Yes };
 
-// This class holds debugging code to share among refcounting classes.
-class RefCountDebugger {
+class RefCountDebuggerBase {
 public:
     WTF_EXPORT_PRIVATE static void logRefDuringDestruction(const void*);
-    WTF_EXPORT_PRIVATE static void printRefDuringDestructionLogAndCrash (const void*) NO_RETURN_DUE_TO_CRASH;
+    WTF_EXPORT_PRIVATE static void printRefDuringDestructionLogAndCrash(const void*) NO_RETURN_DUE_TO_CRASH;
 
-    RefCountDebugger() = default;
-
-    void initAsThreadSafe()
+    static void enableThreadingChecksGlobally()
     {
 #if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
-        m_ownerThread = anyThreadLike;
+        areThreadingChecksEnabledGlobally = true;
 #endif
     }
 
-    ~RefCountDebugger()
-    {
+protected:
+    WTF_EXPORT_PRIVATE static bool areThreadingChecksEnabledGlobally;
+};
+
+// This class holds debugging code to share among refcounting classes.
+template<RefCountIsThreadSafe isThreadSafe>
+class RefCountDebuggerImpl : public RefCountDebuggerBase {
+public:
+    RefCountDebuggerImpl() = default;
+
 #if CHECK_REF_COUNTED_LIFECYCLE
+    ~RefCountDebuggerImpl()
+    {
         ASSERT(m_deletionHasBegun);
         ASSERT(!m_adoptionIsRequired);
-#endif
     }
+#else
+    ~RefCountDebuggerImpl() = default;
+#endif
 
-    void willRef(unsigned refCount, RefCountIsThreadSafe isThreadSafe = RefCountIsThreadSafe::No) const
+    void willRef(unsigned refCount) const
     {
-        applyRefDerefThreadingCheck(refCount, isThreadSafe);
+        applyRefDerefThreadingCheck(refCount);
         applyRefDuringDestructionCheck();
 
 #if CHECK_REF_COUNTED_LIFECYCLE
@@ -95,13 +104,6 @@ public:
 #endif
     }
 
-    static void enableThreadingChecksGlobally()
-    {
-#if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
-        areThreadingChecksEnabledGlobally = true;
-#endif
-    }
-
     void applyRefDuringDestructionCheck() const
     {
 #if CHECK_REF_COUNTED_LIFECYCLE
@@ -111,13 +113,10 @@ public:
 #endif
     }
 
-    void applyRefDerefThreadingCheck(unsigned refCount, RefCountIsThreadSafe isThreadSafe = RefCountIsThreadSafe::No) const
+    void applyRefDerefThreadingCheck(unsigned refCount) const
     {
-        UNUSED_PARAM(refCount);
-        UNUSED_PARAM(isThreadSafe);
-
 #if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
-        if (isThreadSafe == RefCountIsThreadSafe::Yes)
+        if constexpr (isThreadSafe == RefCountIsThreadSafe::Yes)
             return;
 
         if (refCount == 1) {
@@ -130,6 +129,8 @@ public:
             // that call deref, or ref/deref from a single thread or serial work queue.
             ASSERT_WITH_SECURITY_IMPLICATION(m_ownerThread.isCurrent()); // Unsafe to ref/deref from different threads.
         }
+#else
+        UNUSED_PARAM(refCount);
 #endif
     }
 
@@ -150,9 +151,9 @@ public:
 #endif
     }
 
-    void willDeref(unsigned refCount, RefCountIsThreadSafe isThreadSafe = RefCountIsThreadSafe::No) const
+    void willDeref(unsigned refCount) const
     {
-        applyRefDerefThreadingCheck(refCount, isThreadSafe);
+        applyRefDerefThreadingCheck(refCount);
 
 #if CHECK_REF_COUNTED_LIFECYCLE
         ASSERT(!m_adoptionIsRequired);
@@ -171,14 +172,24 @@ public:
 private:
 
 #if !ASSERT_WITH_SECURITY_IMPLICATION_DISABLED
-    mutable ThreadLikeAssertion m_ownerThread;
+    static ThreadLikeAssertion initialOwnerThread()
+    {
+        if constexpr (isThreadSafe == RefCountIsThreadSafe::Yes)
+            return anyThreadLike;
+        else
+            return currentThreadLike;
+    }
+
+    mutable ThreadLikeAssertion m_ownerThread { initialOwnerThread() };
     bool m_areThreadingChecksEnabled { true };
 #endif
-    WTF_EXPORT_PRIVATE static bool areThreadingChecksEnabledGlobally;
 #if CHECK_REF_COUNTED_LIFECYCLE
     mutable std::atomic<bool> m_deletionHasBegun { false };
     mutable bool m_adoptionIsRequired { true };
 #endif
 };
+
+using RefCountDebugger = RefCountDebuggerImpl<RefCountIsThreadSafe::No>;
+using ThreadSafeRefCountDebugger = RefCountDebuggerImpl<RefCountIsThreadSafe::Yes>;
 
 } // namespace WTF

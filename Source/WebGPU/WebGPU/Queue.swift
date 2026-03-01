@@ -47,7 +47,7 @@ extension WebGPU.Queue {
 
         let count = data.count
         let noCopy = data.count >= largeBufferSize
-        // FIXME: 'bufferWithOffset' may extend the lifetime of 'data', but we drop that information here
+        // FIXME: 'bufferWithOffset' may extend the lifetime of 'data', but we drop that information here.
         let bufferWithOffset = unsafe newTemporaryBufferWithBytes(WebGPU.SpanUInt8(data), noCopy)
         let temporaryBuffer = unsafe bufferWithOffset.first
         let temporaryBufferOffset = unsafe bufferWithOffset.second

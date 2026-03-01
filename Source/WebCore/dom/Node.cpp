@@ -440,7 +440,7 @@ Node::~Node()
 
 #if ASSERT_ENABLED
     if (m_refCountAndParentBit != s_refCountIncrement)
-        WTF::RefCountDebugger::printRefDuringDestructionLogAndCrash(this);
+        WTF::RefCountDebuggerBase::printRefDuringDestructionLogAndCrash(this);
 #endif
     RELEASE_ASSERT(m_refCountAndParentBit == s_refCountIncrement);
 }
