@@ -77,7 +77,7 @@ private:
     {
     }
 
-    Ref<const DisplayList::DisplayList> m_displayList;
+    const Ref<const DisplayList::DisplayList> m_displayList;
 
     TextRun m_textRun;
     FloatSize m_scaleFactor;

@@ -60,7 +60,6 @@ editing/TextCheckingHelper.cpp
 [ iOS ] editing/ios/DictationCommandIOS.cpp
 [ iOS ] editing/ios/EditorIOS.mm
 [ iOS ] html/HTMLAnchorElement.cpp
-html/HTMLEmbedElement.cpp
 html/HTMLFormElement.cpp
 [ iOS ] html/HTMLImageElement.cpp
 [ iOS ] html/HTMLImageLoader.cpp

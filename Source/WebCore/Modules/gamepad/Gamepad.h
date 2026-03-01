@@ -76,7 +76,7 @@ private:
     Vector<double> m_axes;
     Vector<Ref<GamepadButton>> m_buttons;
 
-    RefPtr<GamepadHapticActuator> m_vibrationActuator;
+    const RefPtr<GamepadHapticActuator> m_vibrationActuator;
 };
 
 } // namespace WebCore

@@ -95,8 +95,8 @@ public:
                                                     RefPtr<HRTFKernel>& kernelL, RefPtr<HRTFKernel>& kernelR);
 
 private:
-    std::unique_ptr<HRTFKernelList> m_kernelListL;
-    std::unique_ptr<HRTFKernelList> m_kernelListR;
+    const std::unique_ptr<HRTFKernelList> m_kernelListL;
+    const std::unique_ptr<HRTFKernelList> m_kernelListR;
     double m_elevationAngle;
     float m_sampleRate;
 };

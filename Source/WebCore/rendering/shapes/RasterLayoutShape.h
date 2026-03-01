@@ -101,8 +101,8 @@ public:
 private:
     const RasterShapeIntervals& marginIntervals() const;
 
-    std::unique_ptr<RasterShapeIntervals> m_intervals;
-    mutable std::unique_ptr<RasterShapeIntervals> m_marginIntervals;
+    const std::unique_ptr<RasterShapeIntervals> m_intervals;
+    const std::unique_ptr<RasterShapeIntervals> m_marginIntervals;
     IntSize m_marginRectSize;
 };
 
