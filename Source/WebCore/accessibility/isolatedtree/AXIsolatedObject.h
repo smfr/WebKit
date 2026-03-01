@@ -57,7 +57,7 @@ public:
     ~AXIsolatedObject();
 
     // FIXME: tree()->treeID() is never optional, so this shouldn't return an optional either.
-    std::optional<AXTreeID> treeID() const final { return tree()->treeID(); }
+    std::optional<AXTreeID> treeID() const final { return tree().treeID(); }
     String debugDescriptionInternal(bool, std::optional<OptionSet<AXDebugStringOption>> = std::nullopt) const final;
 
     void updateFromData(IsolatedObjectData&&);
@@ -78,7 +78,7 @@ public:
     bool hasRowGroupTag() const final;
 
     const AccessibilityChildrenVector& children(bool updateChildrenIfNeeded = true) final;
-    AXIsolatedObject* parentObject() const final { return tree()->objectForID(parent()); }
+    AXIsolatedObject* parentObject() const final { return tree().objectForID(parent()); }
     AXIsolatedObject* parentObjectUnignored() const final { return downcast<AXIsolatedObject>(AXCoreObject::parentObjectUnignored()); }
     bool isEditableWebArea() const final { return boolAttributeValue(AXProperty::IsEditableWebArea); }
     bool canSetFocusAttribute() const final { return boolAttributeValue(AXProperty::CanSetFocusAttribute); }
@@ -113,14 +113,14 @@ public:
 #endif
 
 private:
-    constexpr ProcessID processID() const final { return tree()->processID(); }
+    constexpr ProcessID processID() const final { return tree().processID(); }
     void detachRemoteParts(AccessibilityDetachmentType) final;
     void detachPlatformWrapper(AccessibilityDetachmentType) final;
 
     std::optional<AXID> parent() const { return m_parentID; }
     void setParent(std::optional<AXID> axID) { m_parentID = axID; }
 
-    AXIsolatedTree* tree() const { return m_tree.ptr(); }
+    AXIsolatedTree& tree() const { return m_tree; }
 
     AXIsolatedObject(const Ref<AccessibilityObject>&, AXIsolatedTree*);
     AXIsolatedObject(IsolatedObjectData&&);
@@ -226,14 +226,14 @@ private:
     bool isOutput() const final { return elementName() == ElementName::HTML_output; }
 
     // Table support.
-    AccessibilityChildrenVector columns() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Columns)); }
-    AccessibilityChildrenVector rows() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Rows)); }
+    AccessibilityChildrenVector columns() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Columns)); }
+    AccessibilityChildrenVector rows() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Rows)); }
     unsigned columnCount() final { return static_cast<unsigned>(columns().size()); }
     unsigned rowCount() final { return static_cast<unsigned>(rows().size()); }
-    AccessibilityChildrenVector cells() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Cells)); }
+    AccessibilityChildrenVector cells() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::Cells)); }
     AXIsolatedObject* cellForColumnAndRow(unsigned, unsigned) final;
     AccessibilityChildrenVector rowHeaders() final;
-    AccessibilityChildrenVector visibleRows() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::VisibleRows)); }
+    AccessibilityChildrenVector visibleRows() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::VisibleRows)); }
     AXIsolatedObject* tableHeaderContainer() final;
     int axColumnCount() const final { return intAttributeValue(AXProperty::AXColumnCount); }
     int axRowCount() const final { return intAttributeValue(AXProperty::AXRowCount); }
@@ -267,7 +267,7 @@ private:
     // ARIA tree/grid row support.
     bool isARIATreeGridRow() const final { return boolAttributeValue(AXProperty::IsARIATreeGridRow); }
     bool isARIAGridRow() const final { return boolAttributeValue(AXProperty::IsARIAGridRow) || isARIATreeGridRow(); }
-    AccessibilityChildrenVector disclosedRows() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::DisclosedRows)); }
+    AccessibilityChildrenVector disclosedRows() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::DisclosedRows)); }
     AXIsolatedObject* disclosedByRow() const final { return objectAttributeValue(AXProperty::DisclosedByRow); }
 
     bool isFieldset() const final { return boolAttributeValue(AXProperty::IsFieldset); }
@@ -301,7 +301,7 @@ private:
     float maxValueForRange() const final { return floatAttributeValue(AXProperty::MaxValueForRange); }
     float minValueForRange() const final { return floatAttributeValue(AXProperty::MinValueForRange); }
     int layoutCount() const final;
-    double loadingProgress() const final { return tree()->loadingProgress(); }
+    double loadingProgress() const final { return tree().loadingProgress(); }
     bool supportsARIAOwns() const final { return boolAttributeValue(AXProperty::SupportsARIAOwns); }
     String explicitPopupValue() const final { return stringAttributeValue(AXProperty::ExplicitPopupValue); }
     bool pressedIsPresent() const final;
@@ -329,14 +329,14 @@ private:
 
     AXIsolatedObject* focusedUIElement() const final
     {
-        return tree()->focusedNode().unsafeGet();
+        return tree().focusedNode().unsafeGet();
     }
     AXIsolatedObject* focusedUIElementInAnyLocalFrame() const final
     {
-        return tree()->focusedNode().unsafeGet();
+        return tree().focusedNode().unsafeGet();
     }
     AXIsolatedObject* internalLinkElement() const final { return objectAttributeValue(AXProperty::InternalLinkElement); }
-    AccessibilityChildrenVector radioButtonGroup() const final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::RadioButtonGroupMembers)); }
+    AccessibilityChildrenVector radioButtonGroup() const final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::RadioButtonGroupMembers)); }
     AXIsolatedObject* scrollBar(AccessibilityOrientation) final;
     const String placeholderValue() const final { return stringAttributeValue(AXProperty::PlaceholderValue); }
     String abbreviation() const final { return stringAttributeValue(AXProperty::Abbreviation); }
@@ -399,7 +399,7 @@ private:
     unsigned ariaLevel() const final { return unsignedAttributeValue(AXProperty::ARIALevel); }
     String language() const final { return stringAttributeValue(AXProperty::Language); }
     void setSelectedChildren(const AccessibilityChildrenVector&) final;
-    AccessibilityChildrenVector visibleChildren() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::VisibleChildren)); }
+    AccessibilityChildrenVector visibleChildren() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::VisibleChildren)); }
     void setChildrenIDs(Vector<AXID>&&);
     const String explicitLiveRegionStatus() const final { return stringAttributeValue(AXProperty::ExplicitLiveRegionStatus); }
     const String explicitLiveRegionRelevant() const final { return stringAttributeValue(AXProperty::ExplicitLiveRegionRelevant); }
@@ -409,7 +409,7 @@ private:
     // Spin button support.
     AXIsolatedObject* incrementButton() final { return objectAttributeValue(AXProperty::IncrementButton); }
     AXIsolatedObject* decrementButton() final { return objectAttributeValue(AXProperty::DecrementButton); }
-    AccessibilityChildrenVector documentLinks() final { return tree()->objectsForIDs(vectorAttributeValue<AXID>(AXProperty::DocumentLinks)); }
+    AccessibilityChildrenVector documentLinks() final { return tree().objectsForIDs(vectorAttributeValue<AXID>(AXProperty::DocumentLinks)); }
     bool supportsCheckedState() const final { return boolAttributeValue(AXProperty::SupportsCheckedState); }
 
     String stringValue() const final;
@@ -610,7 +610,7 @@ private:
     public:
         MainThreadContext() = delete;
 
-        explicit MainThreadContext(Ref<AXIsolatedTree> tree, AXID axID)
+        explicit MainThreadContext(Ref<AXIsolatedTree>&& tree, AXID axID)
             : m_tree(WTF::move(tree))
             , m_axID(axID)
         { }
@@ -625,12 +625,12 @@ private:
 
     private:
         // Ref'ing AXIsolatedTree is OK because AXIsolatedTree is ThreadSafeRefCounted.
-        Ref<AXIsolatedTree> m_tree;
+        const Ref<AXIsolatedTree> m_tree;
         // The object ID to hydrate into an AccessibilityObject on the main-thread.
         AXID m_axID;
     }; // class MainThreadContext
 
-    MainThreadContext mainThreadContext() const { return MainThreadContext { *tree(), objectID() }; }
+    MainThreadContext mainThreadContext() const { return MainThreadContext { tree(), objectID() }; }
 
     // IDs that haven't been resolved into actual objects in m_children.
     FixedVector<AXID> m_unresolvedChildrenIDs;

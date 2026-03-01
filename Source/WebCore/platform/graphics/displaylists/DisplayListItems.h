@@ -388,8 +388,8 @@ class ClipToImageBuffer {
 public:
     static constexpr char name[] = "clip-to-image-buffer";
 
-    ClipToImageBuffer(Ref<ImageBuffer> imageBuffer, const FloatRect& destinationRect)
-        : m_imageBuffer(imageBuffer)
+    ClipToImageBuffer(Ref<ImageBuffer>&& imageBuffer, const FloatRect& destinationRect)
+        : m_imageBuffer(WTF::move(imageBuffer))
         , m_destinationRect(destinationRect)
     {
     }
