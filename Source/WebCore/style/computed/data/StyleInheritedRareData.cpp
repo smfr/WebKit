@@ -410,7 +410,6 @@ void InheritedRareData::dumpDifferences(TextStream& ts, const InheritedRareData&
     LOG_IF_DIFFERENT_WITH_CAST(NBSPMode, nbspMode);
     LOG_IF_DIFFERENT_WITH_CAST(LineBreak, lineBreak);
     LOG_IF_DIFFERENT_WITH_CAST(UserSelect, userSelect);
-    LOG_IF_DIFFERENT_WITH_CAST(ColorSpace, colorSpace);
 
     LOG_IF_DIFFERENT_WITH_FROM_RAW(SpeakAs, speakAs);
 
