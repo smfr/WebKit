@@ -44,6 +44,7 @@
 #include "WebPageProxy.h"
 
 #ifdef __OBJC__
+#include "WKSeparatedImageView.h"
 #include "WKUIDelegatePrivate.h"
 #endif
 
