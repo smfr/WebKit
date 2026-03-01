@@ -1,3 +1,8 @@
+[ macOS ] JSWebExtensionAPIDevTools.mm
+[ macOS ] JSWebExtensionAPIDevToolsExtensionPanel.mm
+[ macOS ] JSWebExtensionAPIDevToolsInspectedWindow.mm
+[ macOS ] JSWebExtensionAPIDevToolsNetwork.mm
+[ macOS ] JSWebExtensionAPIDevToolsPanels.mm
 Storage/StorageAreaImpl.cpp
 Storage/WebDatabaseProvider.cpp
 WebCoreSupport/WebResourceLoadScheduler.cpp
