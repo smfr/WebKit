@@ -447,9 +447,7 @@ void LocalFrameView::setFrameRect(const IntRect& newRect)
         return;
 
     // Every scroll that happens as the result of frame size change is programmatic.
-    auto oldScrollType = currentScrollType();
-    setCurrentScrollType(ScrollType::Programmatic);
-
+    auto scrollTypeScope = ScrollTypeScope(*this, ScrollType::Programmatic);
     ScrollView::setFrameRect(newRect);
 
     updateScrollableAreaSet();
@@ -466,7 +464,6 @@ void LocalFrameView::setFrameRect(const IntRect& newRect)
         document->didChangeViewSize();
 
     viewportContentsChanged();
-    setCurrentScrollType(oldScrollType);
 }
 
 void LocalFrameView::setCanHaveScrollbars(bool canHaveScrollbars)
@@ -1110,18 +1107,18 @@ void LocalFrameView::obscuredContentInsetsDidChange(const FloatBoxExtent& newObs
     
     renderView->setNeedsLayout();
     layoutContext().layout();
-    // Every scroll that happens as the result of content inset change is programmatic.
-    auto oldScrollType = currentScrollType();
-    setCurrentScrollType(ScrollType::Programmatic);
 
-    updateScrollbars(scrollPosition());
-    if (renderView->usesCompositing())
-        renderView->compositor().frameViewDidChangeSize();
+    {
+        // Every scroll that happens as the result of content inset change is programmatic.
+        auto scrollTypeScope = ScrollTypeScope(*this, ScrollType::Programmatic);
 
-    if (TiledBacking* tiledBacking = this->tiledBacking())
-        tiledBacking->setObscuredContentInsets(newObscuredContentInsets);
+        updateScrollbars(scrollPosition());
+        if (renderView->usesCompositing())
+            renderView->compositor().frameViewDidChangeSize();
 
-    setCurrentScrollType(oldScrollType);
+        if (CheckedPtr tiledBacking = this->tiledBacking())
+            tiledBacking->setObscuredContentInsets(newObscuredContentInsets);
+    }
 
     if (RefPtr page = m_frame->page())
         page->chrome().client().setNeedsFixedContainerEdgesUpdate();
@@ -3220,8 +3217,7 @@ void LocalFrameView::setScrollOffsetWithOptions(const ScrollOffset& scrollOffset
 {
     LOG_WITH_STREAM(Scrolling, stream << "LocalFrameView::setScrollOffset " << scrollOffset << " animated " << (options.animated == ScrollIsAnimated::Yes) << ", clearing anchor");
 
-    auto oldScrollType = currentScrollType();
-    setCurrentScrollType(options.type);
+    auto scrollTypeScope = ScrollTypeScope(*this, options.type);
 
     m_maintainScrollPositionAnchor = nullptr;
     cancelScheduledScrolls();
@@ -3237,8 +3233,6 @@ void LocalFrameView::setScrollOffsetWithOptions(const ScrollOffset& scrollOffset
         scrollToPositionWithAnimation(snappedPosition, options);
     else
         ScrollView::setScrollPosition(snappedPosition, options);
-
-    setCurrentScrollType(oldScrollType);
 }
 
 void LocalFrameView::scrollToEdgeWithOptions(RectEdges<bool> edges, const ScrollPositionChangeOptions& options)

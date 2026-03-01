@@ -845,10 +845,10 @@ void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollingNo
 
     // Overflow-scroll area.
     if (CheckedPtr scrollableArea = frameView->scrollableAreaForScrollingNodeID(nodeID)) {
-        auto previousScrollType = scrollableArea->currentScrollType();
-        scrollableArea->setCurrentScrollType(scrollType);
-        scrollableArea->notifyScrollPositionChanged(roundedIntPoint(scrollPosition));
-        scrollableArea->setCurrentScrollType(previousScrollType);
+        {
+            auto scope = ScrollTypeScope(*scrollableArea, scrollType);
+            scrollableArea->notifyScrollPositionChanged(roundedIntPoint(scrollPosition));
+        }
 
         if (updateLayerPositionAction == ScrollingLayerPositionAction::Set)
             page->editorClient().overflowScrollPositionChanged();
@@ -857,10 +857,9 @@ void AsyncScrollingCoordinator::updateScrollPositionAfterAsyncScroll(ScrollingNo
 
 void AsyncScrollingCoordinator::reconcileScrollingState(LocalFrameView& frameView, const FloatPoint& scrollPosition, const LayoutViewportOriginOrOverrideRect& layoutViewportOriginOrOverrideRect, ScrollType scrollType, ViewportRectStability viewportRectStability, ScrollingLayerPositionAction scrollingLayerPositionAction)
 {
-    auto previousScrollType = frameView.currentScrollType();
-    frameView.setCurrentScrollType(scrollType);
-
     LOG_WITH_STREAM(Scrolling, stream << getCurrentProcessID() << " AsyncScrollingCoordinator " << this << " reconcileScrollingState scrollPosition " << scrollPosition << " type " << scrollType << " stability " << viewportRectStability << " " << scrollingLayerPositionAction);
+
+    auto scrollTypeScope = ScrollTypeScope(frameView, scrollType);
 
     std::optional<FloatRect> layoutViewportRect;
 
@@ -880,7 +879,7 @@ void AsyncScrollingCoordinator::reconcileScrollingState(LocalFrameView& frameVie
     frameView.notifyScrollPositionChanged(roundedIntPoint(scrollPosition));
     frameView.setScrollClamping(ScrollClamping::Clamped);
 
-    frameView.setCurrentScrollType(previousScrollType);
+    scrollTypeScope.restore();
 
     if (scrollType == ScrollType::User && scrollingLayerPositionAction != ScrollingLayerPositionAction::Set) {
         auto scrollingNodeID = frameView.scrollingNodeID();

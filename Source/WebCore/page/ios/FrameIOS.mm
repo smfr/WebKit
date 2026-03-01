@@ -580,15 +580,15 @@ void LocalFrame::overflowScrollPositionChangedForNode(const IntPoint& position, 
     if (!renderer || !renderer->hasLayer())
         return;
 
-    auto* layer = downcast<RenderBoxModelObject>(*renderer).layer();
+    CheckedPtr layer = downcast<RenderBoxModelObject>(*renderer).layer();
     if (!layer)
         return;
-    auto* scrollableArea = layer->ensureLayerScrollableArea();
 
-    auto oldScrollType = scrollableArea->currentScrollType();
-    scrollableArea->setCurrentScrollType(isUserScroll ? ScrollType::User : ScrollType::Programmatic);
-    scrollableArea->scrollToOffsetWithoutAnimation(position);
-    scrollableArea->setCurrentScrollType(oldScrollType);
+    CheckedPtr scrollableArea = layer->ensureLayerScrollableArea();
+    {
+        auto scope = ScrollTypeScope(*scrollableArea, isUserScroll ? ScrollType::User : ScrollType::Programmatic);
+        scrollableArea->scrollToOffsetWithoutAnimation(position);
+    }
 
     scrollableArea->didEndScroll(); // FIXME: Should we always call this?
 }

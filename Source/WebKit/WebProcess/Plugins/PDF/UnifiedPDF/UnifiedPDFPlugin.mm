@@ -1722,10 +1722,8 @@ void UnifiedPDFPlugin::updateScrollingExtents()
     auto scrollPosition = this->scrollPosition();
     auto constrainedPosition = constrainedScrollPosition(scrollPosition);
     if (scrollPosition != constrainedPosition) {
-        auto oldScrollType = currentScrollType();
-        setCurrentScrollType(ScrollType::Programmatic); // It's silly that we have to do this to avoid an AsyncScrollingCoordinator assertion.
+        auto scrollTypeScope = ScrollTypeScope(*this, ScrollType::Programmatic); // It's silly that we have to do this to avoid an AsyncScrollingCoordinator assertion.
         requestScrollToPosition(constrainedPosition);
-        setCurrentScrollType(oldScrollType);
     }
 
     RefPtr scrollingCoordinator = page->scrollingCoordinator();
@@ -2323,10 +2321,9 @@ bool UnifiedPDFPlugin::scrollToPointInContentsSpace(FloatPoint pointInContentsSp
         return true;
     }
 
-    auto oldScrollType = currentScrollType();
-    setCurrentScrollType(ScrollType::Programmatic);
+    auto scrollTypeScope = ScrollTypeScope(*this, ScrollType::Programmatic);
     bool success = scrollToPositionWithoutAnimation(roundedIntPoint(pointInContentsSpace));
-    setCurrentScrollType(oldScrollType);
+
     // We assume that callers have ensured the correct page is visible,
     // so this should always return true for discrete display modes.
     return isInDiscreteDisplayMode() || success;

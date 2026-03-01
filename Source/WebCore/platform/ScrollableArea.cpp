@@ -193,8 +193,7 @@ void ScrollableArea::scrollToPositionWithAnimation(const FloatPoint& position, c
     if (position == scrollPosition())
         return;
 
-    auto previousScrollType = currentScrollType();
-    setCurrentScrollType(options.type);
+    auto scrollTypeScope = ScrollTypeScope(*this, options.type);
 
     bool startedAnimation = requestScrollToPosition(roundedIntPoint(position), { ScrollType::Programmatic, options.clamping, ScrollIsAnimated::Yes, options.snapPointSelectionMethod, options.originalScrollDelta });
     if (!startedAnimation)
@@ -202,8 +201,6 @@ void ScrollableArea::scrollToPositionWithAnimation(const FloatPoint& position, c
 
     if (startedAnimation)
         setScrollAnimationStatus(ScrollAnimationStatus::Animating);
-
-    setCurrentScrollType(previousScrollType);
 }
 
 void ScrollableArea::scrollToOffsetWithoutAnimation(const FloatPoint& offset, ScrollClamping clamping)
@@ -1097,6 +1094,30 @@ ScrollAnchoringSuppressionScope::~ScrollAnchoringSuppressionScope()
 
     if (CheckedPtr controller = scrollableArea->scrollAnchoringController())
         controller->stopSuppressingScrollAnchoring();
+}
+
+// MARK: -
+
+ScrollTypeScope::ScrollTypeScope(ScrollableArea& scrollableArea, ScrollType newType)
+    : m_scrollableArea(scrollableArea)
+    , m_oldScrollType(scrollableArea.currentScrollType())
+{
+    scrollableArea.setCurrentScrollType(newType);
+}
+
+ScrollTypeScope::~ScrollTypeScope()
+{
+    restore();
+}
+
+void ScrollTypeScope::restore()
+{
+    if (!m_oldScrollType)
+        return;
+
+    CheckedRef scrollableArea = m_scrollableArea.get();
+    scrollableArea->setCurrentScrollType(*m_oldScrollType);
+    m_oldScrollType = { };
 }
 
 } // namespace WebCore

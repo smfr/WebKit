@@ -562,6 +562,18 @@ private:
     WeakPtr<ScrollableArea> m_scrollableArea;
 };
 
+class ScrollTypeScope {
+public:
+    WEBCORE_EXPORT ScrollTypeScope(ScrollableArea&, ScrollType);
+    WEBCORE_EXPORT ~ScrollTypeScope();
+
+    void restore();
+
+private:
+    WeakRef<ScrollableArea> m_scrollableArea;
+    std::optional<ScrollType> m_oldScrollType;
+};
+
 WEBCORE_EXPORT WTF::TextStream& operator<<(WTF::TextStream&, const ScrollableArea&);
 
 } // namespace WebCore
