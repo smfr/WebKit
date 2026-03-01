@@ -123,7 +123,7 @@ public:
         });
     }
 
-    const BackingDataType& cachedListData() const { return m_cachedListData; }
+    const BackingDataType& cachedListData() const LIFETIME_BOUND { return m_cachedListData; }
 
 protected:
     friend class NeverDestroyed<DerivedType, MainRunLoopAccessTraits>;
