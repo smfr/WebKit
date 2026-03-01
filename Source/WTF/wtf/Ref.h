@@ -172,8 +172,9 @@ public:
 
     template<typename X, typename Y, typename Z> [[nodiscard]] Ref<T, PtrTraits, RefDerefTraits> replace(Ref<X, Y, Z>&&);
 
-    // The following function is deprecated.
+    // copyRef() on a r-value reference is never needed.
     Ref copyRef() && = delete;
+
     [[nodiscard]] Ref copyRef() const & { return Ref(*m_ptr); }
 
     [[nodiscard]] T& leakRef()
