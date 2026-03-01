@@ -217,7 +217,6 @@ dom/DataTransfer.cpp
 dom/Document.cpp
 dom/Element.cpp
 dom/ElementData.cpp
-dom/ElementInlines.h
 dom/ElementInternals.cpp
 dom/ElementIteratorInlines.h
 dom/ElementTraversal.h

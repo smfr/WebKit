@@ -294,12 +294,12 @@ public:
 
     // Internal methods that assume the existence of attribute storage, one should use hasAttributes()
     // before calling them.
-    inline std::span<const Attribute> attributes() const;
-    inline unsigned attributeCount() const;
-    inline const Attribute& attributeAt(unsigned index) const;
-    inline const Attribute* findAttributeByName(const QualifiedName&) const;
-    inline unsigned findAttributeIndexByName(const QualifiedName&) const;
-    inline unsigned findAttributeIndexByName(const AtomString&, bool shouldIgnoreAttributeCase) const;
+    inline std::span<const Attribute> NODELETE attributes() const;
+    inline unsigned NODELETE attributeCount() const;
+    inline const Attribute& NODELETE attributeAt(unsigned index) const;
+    inline const Attribute* NODELETE findAttributeByName(const QualifiedName&) const;
+    inline unsigned NODELETE findAttributeIndexByName(const QualifiedName&) const;
+    inline unsigned NODELETE findAttributeIndexByName(const AtomString&, bool shouldIgnoreAttributeCase) const;
 
     bool checkVisibility(const CheckVisibilityOptions&);
 
