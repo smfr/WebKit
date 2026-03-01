@@ -667,9 +667,10 @@ void ScrollableArea::resnapAfterLayout()
     if (correctedOffset != currentOffset) {
         LOG_WITH_STREAM(ScrollSnap, stream << "ScrollableArea::resnapAfterLayout - adjusting scroll position from " << currentOffset << " to " << correctedOffset << " for snap point at index " << currentVerticalSnapPointIndex());
         auto position = scrollPositionFromOffset(correctedOffset);
-        if (scrollAnimationStatus() == ScrollAnimationStatus::NotAnimating)
+        if (scrollAnimationStatus() == ScrollAnimationStatus::NotAnimating) {
+            auto scrollTypeScope = ScrollTypeScope(*this, ScrollType::Programmatic);
             scrollToOffsetWithoutAnimation(correctedOffset);
-        else
+        } else
             scrollAnimator->retargetRunningAnimation(position);
     }
 }
