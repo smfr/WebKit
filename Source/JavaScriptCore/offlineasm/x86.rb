@@ -1086,6 +1086,13 @@ class Instruction
             handleX86Op("xor#{x86Suffix(:quad)}", :quad)
         when "leap"
             emitX86Lea(operands[0], operands[1], :ptr)
+        when "pcrtoaddr"
+            labelRef = operands[0]
+            dst = operands[1]
+            if labelRef.is_a? LabelReference
+                labelRef.used
+            end
+            $asm.puts "leaq #{labelRef.asmLabel}(%rip), #{dst.x86Operand(:quad)}"
         when "loadi", "atomicloadi"
             $asm.puts "mov#{x86Suffix(:int)} #{x86LoadOperands(:int, :int)}"
         when "storei"

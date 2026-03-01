@@ -2180,9 +2180,6 @@ if C_LOOP
 else
     macro initPCRelative(kind, pcBase)
         if X86_64
-            call _%kind%_relativePCBase
-        _%kind%_relativePCBase:
-            pop pcBase
         elsif ARM64 or ARM64E
         elsif ARMv7
         _%kind%_relativePCBase:
@@ -2194,15 +2191,7 @@ else
     # The PC base is in t3, as this is what _llint_entry leaves behind through
     # initPCRelative(t3)
     macro setEntryAddressCommon(kind, index, label, map)
-        if X86_64
-            leap (label - _%kind%_relativePCBase)[t3], t4
-            move index, t5
-            storep t4, [map, t5, 8]
-        elsif ARM64 or RISCV64
-            pcrtoaddr label, t3
-            move index, t4
-            storep t3, [map, t4, PtrSize]
-        elsif ARM64E
+        if ARM64E
             pcrtoaddr label, t3
             move index, t4
             leap [map, t4, PtrSize], t4
@@ -2213,6 +2202,10 @@ else
             addp t4, t3, t4
             move index, t5
             storep t4, [map, t5, 4]
+        else # X86_64, ARM64, RISCV64
+            pcrtoaddr label, t3
+            move index, t4
+            storep t3, [map, t4, PtrSize]
         end
     end
 

@@ -51,8 +51,11 @@ end
 
 # Dispatch target bases
 
-if ARM64 or ARM64E
+if ARM64 or ARM64E or X86_64
 const ipint_dispatch_base = _ipint_unreachable
+end
+
+if ARM64 or ARM64E
 const ipint_gc_dispatch_base = _ipint_struct_new
 const ipint_conversion_dispatch_base = _ipint_i32_trunc_sat_f32_s
 const ipint_simd_dispatch_base = _ipint_simd_v128_load_mem
@@ -69,8 +72,7 @@ if ARM64 or ARM64E
     addlshiftp t7, t0, (constexpr (WTF::fastLog2(JSC::IPInt::alignIPInt))), t0
     jmp t0
 elsif X86_64
-    leap _os_script_config_storage, t1
-    loadp JSC::LLInt::OpcodeConfig::ipint_dispatch_base[t1], t1
+    pcrtoaddr ipint_dispatch_base, t1
     lshiftq (constexpr (WTF::fastLog2(JSC::IPInt::alignIPInt))), t0
     addq t1, t0
     jmp t0
@@ -198,12 +200,8 @@ macro argumINTDispatch()
     addp 1, MC
     bbgteq argumINTTmp, (constexpr IPInt::ArgumINTBytecode::NumOpcodes), _ipint_argument_dispatch_err
     lshiftp (constexpr (WTF::fastLog2(JSC::IPInt::alignArgumInt))), argumINTTmp
-if ARM64 or ARM64E
+if ARM64 or ARM64E or X86_64
     pcrtoaddr _argumINT_begin, argumINTDsp
-    addp argumINTTmp, argumINTDsp
-    jmp argumINTDsp
-elsif X86_64
-    leap (_argumINT_begin - _ipint_entry_relativePCBase)[PL], argumINTDsp
     addp argumINTTmp, argumINTDsp
     jmp argumINTDsp
 else
@@ -402,22 +400,13 @@ ipintOp(_throw_ref, macro()
 end)
 
 macro uintDispatch()
-if ARM64 or ARM64E
-    loadb [MC], sc2
-    addq 1, MC
-    bigteq sc2, (constexpr IPInt::UIntBytecode::NumOpcodes), _ipint_uint_dispatch_err
-    lshiftq (constexpr (WTF::fastLog2(JSC::IPInt::alignUInt))), sc2
-    pcrtoaddr _uint_begin, sc3
-    addq sc2, ws3
-    jmp ws3
-elsif X86_64
     loadb [MC], sc1
     addq 1, MC
     bigteq sc1, (constexpr IPInt::UIntBytecode::NumOpcodes), _ipint_uint_dispatch_err
-    lshiftq 6, sc1
-    leap (_uint_begin - _mint_entry_relativePCBase)[PC, sc1], sc1
+    lshiftq (constexpr (WTF::fastLog2(JSC::IPInt::alignUInt))), sc1
+    pcrtoaddr _uint_begin, PC
+    addq PC, sc1
     jmp sc1
-end
 end
 
 ipintOp(_end, macro()
@@ -440,8 +429,6 @@ if X86_64
 end
     loadi Wasm::IPIntCallee::m_topOfReturnStackFPOffset[ws0], sc0
     addp cfr, sc0
-
-    initPCRelative(mint_entry, PC)
 
     // We've already validateOpcodeConfig() in all the places that can jump to .ipint_end_ret.
     uintDispatch()
@@ -10114,7 +10101,8 @@ if ARM64 or ARM64E
     addq sc0, csr4
     jmp csr4
 elsif X86_64
-    leap (_mint_begin - _mint_arg_relativePCBase)[PC, sc0], sc0
+    pcrtoaddr _mint_begin, PC
+    addq PC, sc0
     jmp sc0
 end
 end
@@ -10129,7 +10117,8 @@ if ARM64 or ARM64E
     addq sc0, csr4
     jmp csr4
 elsif X86_64
-    leap (_mint_begin_return - _mint_ret_relativePCBase)[PC, sc0], sc0
+    pcrtoaddr _mint_begin_return, PC
+    addq PC, sc0
     jmp sc0
 end
 end
@@ -10343,9 +10332,6 @@ end
     #  return address, saved CFR   <- sp
 
 .ipint_mint_arg_dispatch:
-    # on x86, we'll use PC for our PC base
-    initPCRelative(mint_arg, PC)
-
     // We've already validateOpcodeConfig() in all the Wasm call opcodes.
     mintArgDispatch()
 
@@ -10602,9 +10588,6 @@ elsif X86_64
     loadp (3 * SlotSize)[sc3], mintRetDst
 end
     addp cfr, mintRetDst
-
-    # on x86, we'll use PC again for our PC base
-    initPCRelative(mint_ret, PC)
 
     // We've already validateOpcodeConfig() in all the Wasm call opcodes, and
     // that is the only way to get here.
